@@ -1,0 +1,375 @@
+.cms_images_container {
+	display: table;
+	position: fixed;
+	left: 0;
+	top: 0;
+	height: 100vh;
+	width: 100vw;
+	background-color: rgba(0,0,0,0.5);
+	opacity: 0;
+	transition: opacity 0.3s;
+	table-layout: fixed;
+	z-index: 19900;
+}
+
+.cms_images_cell {
+	display: table-cell;
+	vertical-align: middle;
+	text-align: center;
+}
+
+.cms_images_content {
+	box-sizing: border-box;
+	border: 1px solid #a0a0a0;
+	padding: 14px;
+	width: 960px;
+	box-shadow: 2px 4px 10px #a0a0a0;
+	background-color: white;
+	margin: 0 auto;
+}
+
+.cms_images_3 {
+	height: 555px;
+}
+
+.cms_images_4 {
+	height: 710px;
+}
+
+.cms_images_5 {
+	height: 865px;
+}
+
+.cms_images_container_upload {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	height: 100%;
+	width: 100%;
+	display: table;
+	background-color: rgba(255,255,255,0.7);
+}
+
+.cms_images_container_cell {
+	display: table-cell;
+	vertical-align: middle;
+	text-align: center;
+	height: 100%;
+}
+
+.cms_images_container_bar {
+	display: inline-block;
+	height: 24px;
+	width: 300px;
+	position: relative;
+	background-color: #f0f0f0;
+	border: 1px solid #909090;
+}
+
+.cms_images_container_label {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	height: 100%;
+	width: 100%;
+	z-index: 2;
+	color: #909090;
+	line-height: 24px;
+	font-size: 16px;
+}
+
+.cms_images_container_bg {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	height: 100%;
+	width: 0%;
+	z-index: 1;
+	background-color: white;
+}
+
+.cms_images_container .cms_toolbar {
+	margin-left: 5px;
+	margin-right: 5px;
+	padding-top: 5px;
+	margin-bottom: 10px;
+	text-align: left;
+}
+
+.cms_images_area {
+
+}
+
+.cms_images_image {
+	margin: 0px;
+	padding: 5px;
+	height: 155px;
+	width: 155px;
+	box-sizing: border-box;
+	float: left;
+}
+
+.cms_images_image_cell {
+	box-sizing: border-box;
+	display: table-cell;
+	text-align: center;
+	vertical-align: middle;
+	width: 145px;
+	height: 145px;
+	cursor: pointer;
+	position: relative;
+	border: 1px solid #a0a0a0;
+	background-position: center;
+}
+
+.cms_images_image_img {
+	max-width: 143px;
+    max-height: 143px;
+    display: block;
+    margin: 0px auto;
+}
+
+.cms_images_selected {
+
+}
+
+.cms_images_mark {
+	position: relative;
+	top: -115px;
+}
+
+.cms_images_image_delete {
+	box-sizing: border-box;
+	position: absolute;
+	top: 3px;
+	right: 3px;
+	width: 47px;
+	height: 25px;
+	font-size: 14px;
+	line-height: 24px;
+	text-align: center;
+	border: 1px solid #a0a0a0;
+	border-radius: 3px;
+	background-color: white;
+	opacity: 0.0;
+}
+
+.cms_images_image_edit {
+	box-sizing: border-box;
+	position: absolute;
+	top: 3px;
+	right: 52px;
+	width: 34px;
+	height: 25px;
+	font-size: 14px;
+	line-height: 24px;
+	text-align: center;
+	border: 1px solid #a0a0a0;
+	border-radius: 3px;
+	background-color: white;
+	opacity: 0.0;
+}
+
+.cms_images_image_usage {
+	box-sizing: border-box;
+	position: absolute;
+	bottom: 3px;
+	right: 3px;
+	height: 25px;
+	font-size: 14px;
+	line-height: 24px;
+	border: 1px solid #a0a0a0;
+	border-radius: 3px;
+	background-color: white;
+	opacity: 0.5;
+	display: inline;
+	padding: 0px 5px;
+}
+
+.cms_images_paging_current {
+	position: relative;
+	top: 1px;
+}
+
+.cms_images_paging_total {
+	position: relative;
+	top: 1px;
+}
+
+.cms_images_paging_disabled {
+	opacity: 0.3;
+}
+
+/* image edit popup */
+
+.cms_image_container {
+	z-index: 20100;
+	box-sizing: border-box;
+	border: 1px solid #a0a0a0;
+	padding: 14px;
+	width: 670px;
+	height: 685px;
+	left: 50%;
+	top: 50%;
+	-webkit-transform: translate(-50%,-50%);
+	-moz-transform: translate(-50%,-50%);
+	-ms-transform: translate(-50%,-50%);
+	-o-transform: translate(-50%,-50%);
+	transform: translate(-50%,-50%);
+	position: fixed;
+	background-color: white;	
+}
+
+.cms_image_overlay {
+	z-index: 20095;
+	position: fixed;
+	height: 100%;
+	width: 100%;
+	background-color: black;
+	opacity: 0.5;
+	left: 0px;
+	top: 0px;
+}
+
+.cms_image_container .cms_toolbar {
+	margin-bottom: 10px;
+	padding-bottom: 5px;
+}
+
+.cms_image_filename {
+	max-width: 450px;
+	overflow: hidden;
+	font-size: 18px;
+}
+
+.cms_image_area {
+	width: 640px;
+	height: 480px;
+	box-sizing: border-box;
+	border: 1px solid #a0a0a0;
+	display: table;
+}
+
+.cms_image_cell {
+	display: table-cell;
+	vertical-align: middle;
+	text-align: center;
+}
+
+.cms_image_image {
+	max-width: 638px;
+	max-height: 478px;
+}
+
+.cms_image_left {
+	width: 360px;
+	float: left;
+	margin-top: 10px;
+}
+
+.cms_image_right {
+	width: 260px;
+	float: right;
+	margin-top: 10px;
+}
+
+.cms_image_input {
+	position: relative;
+	margin-bottom: 5px;
+}
+
+.cms_image_input label {
+	width: 80px;
+	height: 26px;
+	line-height: 26px;
+}
+
+.cms_image_input input {
+	box-sizing: border-box;
+	margin: 0px;
+	border: 1px solid #a0a0a0;
+	height: 26px;
+	padding: 0px 3px;
+	font-family: foundrysterling;
+	line-height: 24px;
+	font-size: 15px;
+	width: 280px;
+}
+
+.cms_image_input textarea {
+	height: 55px;
+	width: 280px;
+	padding: 3px;
+	line-height: 15px;
+	font-size: 15px;
+	font-family: foundrysterling;
+	box-sizing: border-box;
+	margin-bottom: 0px;
+	vertical-align: top;
+}
+
+.cms_image_category {
+	box-sizing: border-box;
+	margin: 0px;
+	border: 1px solid #a0a0a0;
+	height: 26px;
+	padding: 0px 3px;
+	line-height: 26px;
+	width: 180px;
+	font-family: foundrysterling;
+	line-height: 24px;
+	font-size: 15px;
+}
+
+.cms_image_keywords_select {
+	box-sizing: border-box;
+	margin: 0px;
+	border: 1px solid #a0a0a0;
+	height: 26px;
+	padding: 0px 3px;
+	line-height: 26px;
+	width: 192px;
+	font-family: foundrysterling;
+	line-height: 24px;
+	font-size: 15px;
+}
+
+.cms_image_add_keyword {
+	height: 26px;
+	line-height: 23px;
+	display: inline-block;
+	vertical-align: top;
+	float: right;
+	box-sizing: border-box;
+	border: 1px solid #a0a0a0;
+	border-radius: 4px;
+	font-size: 18px;
+	padding: 1px 15px 0px 15px;
+	cursor: pointer;
+	text-align: center;
+}
+
+.cms_image_keywords_container {
+	text-align: left;
+	overflow-x: hidden;
+	overflow-y: auto;
+	padding: 5px 0px 0px 0px;
+	box-sizing: border-box;
+	max-height: 55px;
+}
+
+.cms_image_keywords_item {
+	box-sizing: border-box;
+	border: 1px solid #a0a0a0;
+	border-radius: 2px;
+	cursor: pointer;
+	height: 21px;
+	font-size: 14px;
+	line-height: 18px;
+	padding: 1px 20px 0px 5px;
+	background-position: right center;
+	background-size: 15px auto;
+	background-repeat: no-repeat;
+	display: inline-block;
+	margin: 0px 5px 5px 0px;
+}

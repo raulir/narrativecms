@@ -1,0 +1,27 @@
+.admin_input_textarea {
+	
+}
+
+.admin_input_textarea>textarea {
+	box-sizing: border-box;
+	display: block;
+	border: 1px solid #a0a0a0;
+	height: 300px;
+	line-height: 18px;
+	font-size: 14px;
+	float: right;
+	padding: 1px 5px 0px 5px;
+	width: 940px;
+}
+
+.admin_column .admin_input_textarea>textarea {
+	width: 460px;
+}
+
+.admin_column.admin_input_textarea>textarea {
+	width: 460px;
+}
+
+.admin_repeater_block .admin_input_textarea>textarea {
+	width: 440px;
+}

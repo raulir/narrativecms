@@ -1,0 +1,70 @@
+{
+	"version":"2",
+	"label":"CMS settings",
+	"item":[
+		{
+			"type":"image",
+			"name":"favicon",
+			"label":"Favicon",
+			"category":"icon"
+		},
+		{
+			"type":"image",
+			"name":"cms_background",
+			"label":"CMS Background",
+			"category":"content"
+		},
+		{
+			"type":"text",
+			"name":"cms_update_url",
+			"label":"CMS update URL",
+			"default":"http://www.bytecrackers.com/cms/cms/updater/"
+		},
+		{
+			"type":"select",
+			"name":"panel_cache",
+			"label":"Panel cache",
+			"values":{
+				"0":"No cache",
+				"180":"3 minutes",
+				"900":"15 minutes",
+				"86400":"24 hours",
+				"7776000":"3 months"
+			},
+			"default":"0"
+		},
+		{
+			"type":"select",
+			"name":"images_rows",
+			"label":"Image library rows",
+			"values":{
+				"3":"3",
+				"4":"4",
+				"5":"5"
+			},
+			"default":"4"
+		},
+		{
+			"type":"text",
+			"name":"images_lq_divider",
+			"label":"LQ size divider",
+			"default":"3"
+		},
+		{
+			"type":"text",
+			"name":"images_lq_width",
+			"label":"LQ default width",
+			"default":"200"
+		},
+		{
+			"type":"select",
+			"name":"input_link_order",
+			"label":"Link input order",
+			"values":{
+				"0":"As sorted",
+				"1":"Alphabetical"
+			},
+			"default":"0"
+		}
+	]
+}

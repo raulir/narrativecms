@@ -1,0 +1,80 @@
+{
+	"cms_menu":[
+		{
+			"id":"pages",
+			"name":"Pages",
+			"access":"cms_pages",
+			"url":"admin/pages/"
+		},
+		{
+			"id":"menus",
+			"name":"Menus",
+			"access":"cms_menus",
+			"url":"admin/menu/"
+		},
+		{
+			"id":"cms",
+			"name":"CMS"
+		},
+		{
+			"id":"cms_settings",
+			"name":"Settings",
+			"parent":"cms",
+			"access":"cms_cms",
+			"url":"admin/panel_settings/cms_settings/"
+		},
+		{
+			"id":"cms_user_settings",
+			"name":"Users",
+			"parent":"cms",
+			"access":"cms_users",
+			"url":"admin/users/"
+		},
+		{
+			"id":"cms_update",
+			"name":"Update",
+			"parent":"cms",
+			"access":"cms_cms",
+			"url":"admin/update/"
+		}
+	],
+	"layouts":[
+		{
+			"id":"default",
+			"name":"Default"
+		}
+	],
+	"access":[
+		{
+			"access":"*",
+			"name":"ALL"
+		},
+		{
+			"access":"cms_*",
+			"name":"CMS ALL"
+		},
+		{
+			"access":"cms_pages",
+			"name":"CMS pages"
+		},
+		{
+			"access":"cms_menus",
+			"name":"CMS menus"
+		},
+		{
+			"access":"cms_cms",
+			"name":"CMS CMS"
+		},
+		{
+			"access":"cms_users",
+			"name":"CMS users"
+		}
+	],
+	"panels":[
+		{
+			"id":"cms_console_log",
+			"name":"CMS console log"
+		}
+	]
+}
+			

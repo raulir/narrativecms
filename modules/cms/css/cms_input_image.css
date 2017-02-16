@@ -1,0 +1,66 @@
+.cms_input_image {
+	
+}
+
+.cms_input_image input {
+	box-sizing: border-box;
+	display: block;
+	width: 120px;
+	height: 26px;
+	float: left;
+	opacity: 0.0;
+	z-index: 10;
+	top: -25px;
+	position: relative;
+}
+
+.cms_input_image>.admin_input_button {
+	box-sizing: border-box;
+	display: block;
+	border: 1px solid #a0a0a0;
+	border-radius: 4px;
+	width: 120px;
+	height: 26px;
+	line-height: 23px;
+	font-size: 17px;
+	float: left;
+	padding: 1px 5px 0px 5px;
+	clear: left;
+	cursor: pointer;
+	text-align: center;
+	transform: translateZ(0);
+	-webkit-transform: translateZ(0);
+	margin-bottom: 7px;
+}
+
+.cms_input_image .admin_image_container {
+	box-sizing: border-box;
+	display: inline-block;
+	border: 1px solid #a0a0a0;
+	width: 330px;
+	height: 248px;
+	float: right;
+	background-position: center;
+}
+
+.cms_input_image .admin_image_content {
+	box-sizing: border-box;
+	display: table-cell;
+	width: 328px;
+	height: 246px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 0px;
+}
+
+.cms_input_image .admin_image_container img {
+	max-width: 328px;
+	max-height: 246px;
+}
+
+.cms_input_image_error {
+	line-height: 20px;
+	color: red;
+	padding: 20px;
+	font-weight: 400;
+}

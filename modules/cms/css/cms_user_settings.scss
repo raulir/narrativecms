@@ -1,0 +1,139 @@
+.cms_user_settings_superuser {
+	border-bottom: 1px solid #a0a0a0;
+	line-height: 35px;
+    padding-bottom: 20px;
+}
+
+.cms_user_settings_user {
+	
+}
+
+.cms_user_settings_user_header {
+	border-bottom: 1px solid #a0a0a0;
+	line-height: 24px;
+    font-size: 18px;
+    padding-top: 20px;
+    position: relative;
+}
+
+.cms_user_settings_button {
+	box-sizing: border-box;
+    display: block;
+    border: 1px solid #a0a0a0;
+    border-radius: 3px;
+    float: right;
+    padding: 1px 10px 0px 10px;
+    cursor: pointer;
+    text-align: center;
+    margin-left: 5px;
+    height: 20px;
+    line-height: 19px;
+    font-size: 14px;
+}
+
+.cms_user_settings_user_save {
+	
+}
+
+.cms_user_settings_user_delete {
+	
+}
+
+.cms_user_settings_user_content {
+	padding: 3px 0;
+	border-bottom: 1px solid #a0a0a0;
+	position: relative;
+}
+
+.cms_user_settings_line {
+	width: calc(50% - 10px);
+	padding: 3px 0;
+	position: relative;
+	line-height: 26px;
+}
+
+.cms_user_settings_input {
+	width: 60%;
+	border: 1px solid #a0a0a0;
+	display: block;
+	float: right;
+	box-sizing: border-box;
+    height: 26px;
+    line-height: 23px;
+    font-size: 17px;
+    padding: 1px 5px 0px 5px;
+}
+
+.cms_user_settings_user_rights {
+	width: calc(50% - 10px);
+	height: calc(100% - 12px);
+	position: absolute;
+	right: 0;
+	top: 6px;
+}
+
+.cms_user_settings_user_rights_heading {
+	padding: 3px 0;
+	border-bottom: 1px solid #a0a0a0;
+	position: relative;
+}
+
+.cms_user_settings_user_rights_content {
+	padding: 3px 0;
+    max-height: 71px;
+    overflow-y: hidden;
+    min-height: 24px;
+}
+
+.cms_user_settings_user_access_item {
+	display: inline-block;
+	box-sizing: border-box;
+    border: 1px solid #a0a0a0;
+    border-radius: 3px;
+    padding: 1px 25px 0px 10px;
+    cursor: pointer;
+    text-align: center;
+    margin: 2px 5px 2px 0;
+    height: 20px;
+    line-height: 19px;
+    font-size: 14px;
+    position: relative;
+}
+
+.cms_user_settings_user_access_item_x {
+	position: absolute;
+    height: 15px;
+    width: 17px;
+    border-left: 1px solid #c0c0c0;
+    text-align: center;
+    font-size: 14px;
+    line-height: 16px;
+    right: 0px;
+    top: 2px;
+}
+
+.cms_user_settings_user_rights_bottom {
+	padding: 3px 0;
+	border-top: 1px solid #a0a0a0;
+	position: relative;
+}
+
+.cms_user_settings_user_rights_select {
+	
+	float: right;
+	border: 1px solid #a0a0a0;
+	display: block;
+	box-sizing: border-box;
+    padding: 2px 5px 0px 5px;
+    height: 20px;
+    line-height: 20px;
+    font-size: 14px;
+    font-family: foundrysterling;
+    font-weight: 200;
+    
+    option {
+	    font-weight: 200;
+	    line-height: 24px;
+    }
+    
+}

@@ -1,0 +1,31 @@
+DirectoryIndex index.php
+Options -Indexes
+
+AddType application/vnd.ms-fontobject    .eot
+AddType application/x-font-opentype      .otf
+AddType image/svg+xml                    .svg
+AddType application/x-font-ttf           .ttf
+AddType application/font-woff            .woff
+
+RewriteEngine on
+
+# RewriteCond %{HTTP_HOST} !^(.*)\.dev
+# RewriteCond %{HTTP_HOST} !^stg\.
+# RewriteCond %{HTTP_HOST} !^www\.mysite\.co\.uk
+# RewriteRule ^(.*)$ http://www.mysite.co.uk%{REQUEST_URI} [R=302,L]
+
+RewriteCond %{HTTP_HOST} ^(.*)\.co\.uk
+RewriteRule ^(.*)\.co\.uk(.*)$ http://$1.com%{REQUEST_URI} [R=302,L]
+
+RewriteCond %{HTTP_HOST} !^(.*)\.dev
+RewriteCond %{HTTP_HOST} !^(.*)\.live
+RewriteCond %{HTTP_HOST} !^(.*)\.test
+RewriteCond %{HTTP_HOST} !^stg.(.*)
+RewriteCond %{HTTP_HOST} !^www\. [NC]
+RewriteRule ^(.*)$ http://www.%{HTTP_HOST}%{REQUEST_URI} [R=302,L]
+
+RewriteCond %{ENV:REDIRECT_STATUS} ^$
+RewriteCond $1 !^(index\.php|modules|img|css|js|robots\.txt|favicon\.ico)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ ./index.php?/$1 [L,QSA]

@@ -1,0 +1,141 @@
+.cms_page_panel_caching_container {
+	position: fixed;
+	z-index: 19995;
+	height: 100vh;
+	width: 100vw;
+	left: 0px;
+	top: 0px;
+}
+
+.cms_page_panel_caching_overlay {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	opacity: 0.4;
+	background-color: #303030;
+	z-index: 19994;
+}
+
+.cms_page_panel_caching_table {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	display: table;
+	table-layout: fixed;
+}
+
+.cms_page_panel_caching_cell {
+	display: table-cell;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.cms_page_panel_caching_content {
+	box-sizing: border-box;
+	border: 1px solid #a0a0a0;
+	padding: 14px;
+	width: 430px;
+	height: 330px;
+	box-shadow: 2px 4px 10px #a0a0a0;
+	background-color: white;
+	display: inline-block;
+	text-align: left;
+}
+
+.cms_page_panel_caching_area {
+	height: 239px;
+	width: 400px;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+.cms_page_panel_caching_container .cms_toolbar {
+	margin-left: 5px;
+	margin-right: 5px;
+	padding-top: 5px;
+	margin-bottom: 10px;
+}
+
+.cms_page_panel_caching_input {
+	padding: 5px;
+	box-sizing: border-box;
+}
+
+.cms_page_panel_caching_label {
+	
+}
+
+select.cms_page_panel_caching_select {
+	width: 245px;
+}
+
+label.cms_page_panel_caching_related_label {
+	display: block;
+	float: none;
+}
+
+.cms_page_panel_caching_values {
+	border-top: 1px solid #a0a0a0;
+	border-bottom: 1px solid #a0a0a0;
+	min-height: 30px;
+	clear: both;
+}
+
+.cms_page_panel_caching_add {
+	box-sizing: border-box;
+    display: block;
+    border: 1px solid #a0a0a0;
+    border-radius: 4px;
+	width: 55px;
+    height: 22px;
+    line-height: 19px;
+	font-size: 17px;
+    float: right;
+    padding: 1px 5px 0px 5px;
+    clear: left;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 7px;
+}
+
+.cms_page_panel_caching_lists_select {
+	box-sizing: border-box;
+    display: block;
+    border: 1px solid #a0a0a0;
+    width: 184px;
+    height: 22px;
+    line-height: 19px;
+    font-size: 15px;
+    float: right;
+    padding: 0px 5px 0px 5px;
+    margin: 7px 7px 0px 0px;
+}
+
+.cms_page_panel_caching_item {
+	display: inline-block;
+    border: 1px solid #a0a0a0;
+    border-radius: 4px;
+    height: 24px;
+    line-height: 19px;
+	font-size: 17px;
+    padding: 2px 30px 0px 10px;
+    cursor: pointer;
+    margin: 3px;
+    position: relative;
+    box-sizing: border-box;
+    vertical-align: top;
+}
+
+.cms_page_panel_caching_item_close {
+	position: absolute;
+    height: 15px;
+    width: 17px;
+    border-left: 1px solid #c0c0c0;
+    text-align: center;
+    font-size: 15px;
+    line-height: 15px;
+    right: 0px;
+    top: 4px;
+}

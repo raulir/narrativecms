@@ -1,0 +1,191 @@
+
+li.cms_main_menu_item {
+	display: block;
+	position: relative;
+	border: 1px solid #a0a0a0;
+}
+
+div.cms_main_menu_first,div.cms_main_menu_second {
+	display: block;
+	height: 24px;
+	position: relative;
+	float: none;
+}
+
+div.cms_main_menu_first {
+	margin-top: 30px;
+	margin-bottom: 4px;
+}
+
+div.cms_main_menu_label_mode {
+	float: none;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	height: 24px;
+	line-height: 24px;
+}
+
+.admin_main_menu_mode_select {
+	position: absolute;
+	left: 50px;
+	top: 0px;
+	height: 24px;
+	line-height: 24px;
+	box-sizing: border-box;
+	width: 150px;
+}
+
+div.cms_main_menu_label_target {
+	float: none;
+	position: absolute;
+	left: 220px;
+	top: 0px;
+	height: 24px;
+	line-height: 24px;
+}
+
+.admin_main_menu_target_select {
+	position: absolute;
+	left: 270px;
+	top: 0px;
+	height: 24px;
+	line-height: 24px;
+	box-sizing: border-box;
+	width: 200px;
+}
+
+.admin_main_menu_block_select {
+	position: absolute;
+	left: 480px;
+	top: 0px;
+	height: 24px;
+	line-height: 24px;
+	box-sizing: border-box;
+	width: 200px;
+}
+
+.admin_menu_new_window {
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	height: 24px;
+	line-height: 24px;
+	box-sizing: border-box;
+	width: 120px;
+}
+
+div.cms_main_menu_label_text {
+	float: none;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	height: 24px;
+	line-height: 24px;
+}
+
+.admin_menu_input_text {
+	position: absolute;
+	left: 50px;
+	top: 0px;
+	height: 24px;
+	line-height: 24px;
+	box-sizing: border-box;
+	width: 280px;
+}
+
+div.cms_main_menu_label_url {
+	float: none;
+	position: absolute;
+	left: 350px;
+	top: 0px;
+	height: 24px;
+	line-height: 24px;
+}
+
+.admin_menu_input_link {
+	position: absolute;
+	left: 400px;
+	top: 0px;
+	height: 24px;
+	line-height: 24px;
+	box-sizing: border-box;
+	width: 280px;
+}
+
+.admin_menu_hide_from_menu {
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	height: 24px;
+	line-height: 24px;
+	box-sizing: border-box;
+	width: 120px;
+}
+
+/* old styles */
+
+.menu_items_list>li {
+	height: 96px;
+	box-sizing: border-box;
+	padding: 5px 9px 2px 9px ;
+	margin-bottom: 10px;
+}
+
+.admin_main_menu_item_toolbar {
+	clear: both;
+	height: 22px;
+	border-bottom: 1px solid #a0a0a0;
+	margin: 0px -6px 12px -6px;
+	padding: 0px 0px 0px 0px;
+	width: 932px;
+}
+
+.admin_main_menu_item_toolbar div {
+	float: right;
+}
+
+.admin_main_menu_item_toolbar a {
+	float: right;
+	color: black;
+	display: block;
+}
+
+.admin_main_menu_item_delete {
+	box-sizing: border-box;
+	display: block;
+	border: 1px solid #a0a0a0;
+	border-radius: 3px;
+	height: 18px;
+	line-height: 15px;
+	font-size: 13px;
+	float: right;
+	padding: 1px 8px 0px 8px;
+	cursor: pointer;
+	text-align: center;
+	transform: translateZ(0);
+	-webkit-transform: translateZ(0);
+	margin-left: 5px;
+}
+
+.admin_main_menu_item_submenu {
+	box-sizing: border-box;
+	display: block;
+	border: 1px solid #a0a0a0;
+	border-radius: 3px;
+	height: 18px;
+	line-height: 15px;
+	font-size: 13px;
+	float: right;
+	padding: 1px 8px 0px 8px;
+	cursor: pointer;
+	text-align: center;
+	transform: translateZ(0);
+	-webkit-transform: translateZ(0);
+	text-decoration: none;
+	color: black;
+}
+
+.menu_item_template {
+	display: none;
+}

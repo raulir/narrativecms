@@ -1,0 +1,30 @@
+.cms_list_icon {
+	display: block;
+	height: 22px;
+	width: 25px;
+	float: left;
+	background-size: 17px auto;
+	background-position: 2px center;
+	background-repeat: no-repeat;
+}
+
+.cms_list_item_heading {
+	font-size: 18px;
+}
+
+div.cms_list_set {
+	height: 22px;
+	width: 50px;
+	text-align: center;
+	border: 1px solid #c0c0c0;
+	text-decoration: none;
+	box-sizing: border-box;
+	line-height: 19px;
+	border-radius: 3px;
+	font-size: 16px;
+	padding: 1px 0px 0px 0px;
+	float: right;
+	margin-right: 10px;
+	cursor: pointer;
+	color: #606060;
+}

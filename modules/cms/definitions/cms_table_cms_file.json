@@ -1,0 +1,45 @@
+[
+	{
+		"type":"repeater",
+		"name":"cms_file",
+		"label":"Files",
+		"fields":[
+			{
+				"name":"cms_file_id",
+				"type":"hidden",
+				"label":"File ID"
+			},
+			{
+				"name":"user_id",
+				"type":"fk",
+				"label":"User"
+			},
+			{
+				"name":"filename",
+				"type":"file",
+				"label":"File"
+			},
+			{
+				"name":"title",
+				"type":"text",
+				"label":"Title"
+			},
+			{
+				"name":"date_posted",
+				"type":"hidden",
+				"label":"Date posted"
+			},
+			{
+				"name":"name",
+				"type":"hidden",
+				"label":"Name"
+			},
+			{
+				"name":"icon",
+				"type":"image",
+				"label":"Icon",
+				"category":"icon"
+			}
+		]
+	}
+]

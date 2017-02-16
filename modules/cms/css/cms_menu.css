@@ -1,0 +1,69 @@
+.cms_menu_container {
+	font-size: 23px;
+  	line-height: 34px;
+	color: white;
+	height: 34px;
+	text-align: left;
+	font-weight: normal;
+	letter-spacing: 0.2px;
+}
+
+.cms_menu_item {
+	display: block;
+	height: 34px;
+	vertical-align: top;
+	float: left;
+}
+
+.cms_menu_link {
+	text-decoration: none;
+	color: white;
+	height: 100%;
+  	padding-right: 36px;
+  	display: block;
+}
+
+.cms_menu_parent {
+	position: relative;
+  	padding-right: 14px;
+}
+
+.cms_menu_triangle {
+	position: absolute;
+	height: 34px;
+	width: 40px;
+	top: 0px;
+	right: 0px;
+	background-size: 14px auto;
+	background-position: left center;
+	background-repeat: no-repeat;
+}
+
+.cms_menu_children {
+	position: absolute;
+	min-width: 100%;
+	top: 34px;
+	left: -15px;
+	overflow: hidden;
+	box-sizing: border-box;
+	background-color: white;
+	z-index: 100;
+	display: none;
+	padding: 6px 0px;
+	border: 1px solid #a0a0a0;
+	box-shadow: 1px 2px 6px #b0b0b0;
+}
+
+.cms_menu_child {
+	display: block;
+	padding-left: 15px;
+	color: #404040;
+	font-size: 20px;
+	line-height: 34px;
+	white-space: nowrap;
+	padding-right: 25px;
+}
+	
+.cms_menu_children_hover {
+	display: block;
+}
