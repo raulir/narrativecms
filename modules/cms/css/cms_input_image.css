@@ -14,7 +14,7 @@
 	position: relative;
 }
 
-.cms_input_image>.admin_input_button {
+.cms_input_image>.cms_input_button {
 	box-sizing: border-box;
 	display: block;
 	border: 1px solid #a0a0a0;

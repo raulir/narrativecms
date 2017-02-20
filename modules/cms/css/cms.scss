@@ -420,27 +420,27 @@ a.admin_tool_text:hover {
 	float: right;
 }
 
-.admin_input {
-	overflow: hidden;
+.cms_input {
 	margin-bottom: 10px;
+	position: relative;
 }
 
-.admin_input_text {
-	
-}
-
-.admin_input label {
+.cms_input label {
 	box-sizing: border-box;
-	display: block;
+	display: inline-block;
 	width: 120px;
 	line-height: 26px;
-	float: left;
+	max-height: 26px;
 	transform: translateZ(0);
 	-webkit-transform: translateZ(0);
 	letter-spacing: -0.45px;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+.admin_input_text {
+	
 }
 
 .admin_input_text>input {
@@ -648,11 +648,10 @@ a.admin_tool_text:hover {
 	margin-left: -20px;
 }
 
-.admin_block_container>.admin_input {
+.admin_block_container>.cms_input {
 	float: left;
 	width: 460px;
 	margin-left: 20px;
-	/* margin-bottom: 20px; */
 }
 
 .admin_block_container>.admin_input_wide_textarea {
@@ -662,10 +661,6 @@ a.admin_tool_text:hover {
 .admin_input_wide_textarea>textarea {
 	width: 940px;
 }
-
-
-
-
 
 .admin_input_file {
 	

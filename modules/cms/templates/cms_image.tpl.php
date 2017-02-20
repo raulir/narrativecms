@@ -19,17 +19,17 @@
 	
 	<div class="cms_image_left">
 		
-		<div class="cms_image_input admin_input">
+		<div class="cms_image_input cms_input">
 			<label for="cms_image_description">Description</label>
 			<textarea id="cms_image_description" class="cms_image_input cms_image_description"><?php print($description); ?></textarea>
 		</div>
 		
-		<div class="cms_image_input admin_input">
+		<div class="cms_image_input cms_input">
 			<label for="cms_image_author">Author</label>
 			<input id="cms_image_author" type="text" class="cms_image_input cms_image_author" value="<?php print($author); ?>">
 		</div>
 		
-		<div class="cms_image_input admin_input">
+		<div class="cms_image_input cms_input">
 			<label for="cms_image_copyright">Copyright</label>
 			<input id="cms_image_copyright" type="text" class="cms_image_input cms_image_copyright" value="<?php print($copyright); ?>">
 		</div>
@@ -38,7 +38,7 @@
 	
 	<div class="cms_image_right">
 		
-		<div class="cms_image_input admin_input">
+		<div class="cms_image_input cms_input">
 			<label for="cms_image_category">Category</label>
 			<select id="cms_image_category" class="cms_image_category">
 				<?php foreach($categories as $key => $cat): ?>
@@ -48,7 +48,7 @@
 		</div>
 		
 		<?php if(in_array('keyword', $GLOBALS['config']['modules'])): ?>
-			<div class="cms_image_input admin_input">
+			<div class="cms_image_input cms_input">
 				<select class="cms_image_keywords_select">
 					<option value="">-- select keyword --</option>
 					<?php foreach($possible_keywords as $keyword): ?>

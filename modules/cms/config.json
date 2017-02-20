@@ -41,7 +41,11 @@
 	"layouts":[
 		{
 			"id":"default",
-			"name":"Default"
+			"name":"Default fixed"
+		},
+		{
+			"id":"rem",
+			"name":"Default rems"
 		}
 	],
 	"access":[

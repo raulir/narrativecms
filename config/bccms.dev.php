@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-$config['base_path'] = str_replace("\\", "/", trim(getcwd(), " /\\")).'/';
+$config['base_path'] = rtrim(str_replace("\\", "/", trim(getcwd(), " \\")), '/').'/';
 $config['base_url']	= '/';
 $config['upload_path'] = $config['base_path'].'img/';
 $config['upload_url'] = $config['base_url'].'img/';

@@ -2,6 +2,7 @@
 <html>
 <head>
 	<meta charset="UTF-8">
+	<meta name="viewport" content="width=600,user-scalable=no">
 	<script type="text/javascript">
 		var _orientation = function(){if (typeof window.orientation != 'undefined') return (window.orientation == 0 || window.orientation == 180) ? 900 : 1024;
 				else return screen.width > 768 ? 1024 : 900;}

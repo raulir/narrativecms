@@ -93,7 +93,7 @@ function cms_input_image_load_images(params){
 					
 					// update meta fields
 					$container = $(params.container_selector).closest('.cms_input_image');
-					$container.siblings('.admin_input').each(function(){
+					$container.siblings('.cms_input').each(function(){
 						$('.cms_meta', this).each(function(){
 							var $this = $(this);
 							if ($this.data('meta_src') == $container.data('name')){

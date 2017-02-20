@@ -18,7 +18,7 @@
 		<div class="admin_block">
 			<div class="admin_column admin_column_left">
 				
-				<div class="admin_input admin_input_text">
+				<div class="cms_input admin_input_text">
 					<label for="keyword">Keyword</label> 
 					<input id="keyword" type="text" name="keyword" value="<?php print($cms_keyword_id); ?>">
 				</div>

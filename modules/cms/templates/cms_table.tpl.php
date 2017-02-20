@@ -55,7 +55,7 @@
 					
 					} elseif ($field['type'] == 'text'){
 						
-						$return .= '<div class="admin_input admin_input_text'.($prefix ? '' : ' admin_column').'">';
+						$return .= '<div class="cms_input admin_input_text'.($prefix ? '' : ' admin_column').'">';
 						$return .= '<label for="'.($prefix ? $prefix.'_' : '').$field['name'].'">'.$field['label'].'</label>';
 						$return .= '<input id="'.($prefix ? $prefix.'_' : '').$field['name'].'" type="text" class="admin_input_'.$field['name'].'" ' .
 								' name="data'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']').'" ' .

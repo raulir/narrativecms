@@ -1,0 +1,58 @@
+.cms_help {
+	
+	height: 16px;
+	width: 16px;
+	position: absolute;
+	left: 106px;
+	top: -2px;
+	box-sizing: border-box;
+	background-color: white;
+	border-radius: 8px;
+	z-index: 100;
+	
+	&:hover {
+	
+		z-index: 110;
+		
+		.cms_help_text {
+			width: 220px;
+			opacity: 1;
+			height: auto;
+			max-height: 500px;
+			top: 17px;
+			transition: max-height 0.3s, opacity 0.3s, top 0.1s;
+		}
+		
+	}
+	
+}
+
+.cms_help_icon {
+	position: absolute;
+	left: 2px;
+	top: 2px;
+	height: calc(100% - 4px);
+	width: calc(100% - 4px);
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.cms_help_text {
+	position: absolute;
+	top: 0;
+	left: 0;
+	opacity: 0;
+	height: 0px;
+	width: 10px;
+	overflow: hidden;
+	background-color: white;
+	max-height: 0px;
+	transition: max-height 0.3s, opacity 0.3s, top 0.1s 0.3s;
+	padding: 12px;
+	border: 1px solid grey;
+	box-sizing: border-box;
+	font-size: 15px;
+    line-height: 19px;
+    letter-spacing: 0.3px;
+}

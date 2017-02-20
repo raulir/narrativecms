@@ -1,4 +1,4 @@
-<div class="admin_input cms_input_page_panels">
+<div class="cms_input cms_input_page_panels">
 
 	<?php if (!empty($label)): ?>
 		<div class="admin_block_label">

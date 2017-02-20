@@ -32,8 +32,8 @@ function cms_file_upload(params){
 	    	$(params.name_selector).parent().parent().siblings('.admin_input_cms_file_id').val(data.result.cms_file_id);
 	    	$(params.name_selector).parent().parent().siblings('.admin_input_name').val(data.result.name);
 	    	$(params.name_selector).parent().parent().siblings('.admin_input_date_posted').val(data.result.date_posted);
-	    	if ($(params.name_selector).parent().parent().siblings('.admin_input').children('.admin_input_title').val() == ''){
-		    	$(params.name_selector).parent().parent().siblings('.admin_input').children('.admin_input_title').val(data.result.name);
+	    	if ($(params.name_selector).parent().parent().siblings('.cms_input').children('.admin_input_title').val() == ''){
+		    	$(params.name_selector).parent().parent().siblings('.cms_input').children('.admin_input_title').val(data.result.name);
 	    	}
 	    },
 	    xhr: function() {

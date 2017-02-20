@@ -1,7 +1,9 @@
-<div class="admin_input admin_input_textarea <?php print(!empty($extra_class) ? $extra_class : ''); ?>">
+<div class="cms_input admin_input_textarea <?php print(!empty($extra_class) ? $extra_class : ''); ?>">
 	
 	<label><?php print($label); ?></label>
-	<div style="clear: both; "></div>
+	
+	<?php _panel('cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
+	
 	<textarea name="<?php print($name); ?>" class="<?= $name ?> 
 			<?php print(!empty($tinymce) ? ' admin_tinymce ' : ''); ?>
 			<?php print(!empty($max_chars_class) ? $max_chars_class : ''); ?>

@@ -25,12 +25,12 @@
 			<div class="admin_block">
 				<div class="admin_column admin_column_left">
 				
-					<div class="admin_input admin_input_text">
+					<div class="cms_input admin_input_text">
 						<label for="block_title">Title</label> 
 						<input id="block_title" type="text" name="title" value="<?php print($block['title']); ?>">
 					</div>
 				
-					<div class="admin_input admin_input_dropdown">
+					<div class="cms_input admin_input_dropdown">
 						<label for="panel_name">Block type</label>
 						<select class="admin_block_panel_name" name="panel_name" id="panel_name">
 							<option value="">-- select block type --</option>
@@ -51,7 +51,7 @@
 					</div>
 					
 					<?php if($block['panel_name'] === '' && empty($block['parent_id'])): /* last cond == no shortcuts for panel in panel */ ?>
-						<div class="admin_input admin_input_dropdown">
+						<div class="cms_input admin_input_dropdown">
 							<label for="shortcut_to">Shortcut to</label>
 							<select class="admin_block_shortcut_to" name="shortcut_to" id="shortcut_to">
 								<option value="">-- shortcut to --</option>
@@ -65,13 +65,14 @@
 				</div>
 				<div class="admin_column admin_column_right">
 					
-					<div class="admin_input admin_input_text">
+					<div class="cms_input admin_input_text">
 						<label for="block_submenu_title">Menu title</label> 
 						<input id="block_submenu_title" type="text" name="submenu_title" value="<?php print($block['submenu_title']); ?>">
 					</div>
 	
-					<div class="admin_input admin_input_text">
-						<label for="block_submenu_anchor">Menu anchor</label> 
+					<div class="cms_input admin_input_text">
+						<label for="block_submenu_anchor">Menu anchor</label>
+						<?php _panel('cms_help', ['help' => 'Use only for in page anchors<br><br>May affect page panels flow', ]); ?>
 						<input id="block_submenu_anchor" type="text" name="submenu_anchor" value="<?php print($block['submenu_anchor']); ?>">
 					</div>
 				
@@ -173,7 +174,7 @@
 					
 					} elseif ($field['type'] == 'text'){
 						
-						$return .= '<div class="admin_input admin_input_text'.($prefix ? '' : ' admin_column ').'">';
+						$return .= '<div class="cms_input admin_input_text'.($prefix ? '' : ' admin_column ').'">';
 						$return .= '<label for="'.($prefix ? $prefix.'_' : '').$field['name'].'">'.$field['label'].'</label>';
 						$return .= '<input id="'.($prefix ? $prefix.'_' : '').$field['name'].'" type="text" ' .
 								' class="'.$max_chars_class.' '.$meta_class.'" '.$max_chars_data.' '.$meta_data.' '.
@@ -198,6 +199,7 @@
 								'meta_class' => $meta_class,
 								'tinymce' => !empty($field['html']),
 								'_return' => true,
+								'help' => !empty($field['help']) ? $field['help'] : '', 
 						));
 
 					} elseif ($field['type'] == 'image'){
@@ -211,6 +213,7 @@
 								'_return' => true, 
 								'extra_class' => ($prefix ? '' : 'admin_column'),
 								'extra_data' => ' data-name="'.$field['name'].'" ',
+								'help' => !empty($field['help']) ? $field['help'] : '', 
 						));
 						
 					} elseif ($field['type'] == 'cms_page_panels' || $field['type'] == 'panels'){
@@ -251,6 +254,7 @@
 								'name_clean' => !empty($name_clean) ? $name_clean : $name, 
 								'_return' => true, 
 								'extra_class' => ($prefix ? '' : 'admin_column'), 
+								'help' => !empty($field['help']) ? $field['help'] : '', 
 						));
 						
 					} elseif ($field['type'] == 'fk'){
@@ -273,6 +277,7 @@
 								'name_clean' => !empty($name_clean) ? $name_clean : $name, 
 								'_return' => true, 
 								'extra_class' => ($prefix ? '' : 'admin_column'), 
+								'help' => !empty($field['help']) ? $field['help'] : '', 
 						));
 						
 					} elseif ($field['type'] == 'repeater_select'){
@@ -302,6 +307,7 @@
 								'name_clean' => !empty($name_clean) ? $name_clean : $name, 
 								'_return' => true, 
 								'extra_class' => ($prefix ? '' : 'admin_column').' repeater_select',
+								'help' => !empty($field['help']) ? $field['help'] : '', 
 						));
 						
 					} elseif ($field['type'] == 'file'){
