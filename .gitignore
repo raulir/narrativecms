@@ -16,9 +16,15 @@ application/logs/*
 
 .svn
 .settings
+.buildpath
+.project
+
 _feed
 _install
-/.buildpath
-/.project
-11
-config
+
+/img/*
+!/img/2015/11/*
+/img/2015/11/_*
+
+/config/*
+!/config/bccms.dev.php
