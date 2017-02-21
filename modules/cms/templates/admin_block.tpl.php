@@ -27,11 +27,14 @@
 				
 					<div class="cms_input admin_input_text">
 						<label for="block_title">Title</label> 
+						<?php _panel('cms_help', ['help' => '[Page panel title]||Not visible in frontend. When page panel has {heading} field, this is overwritten from there', ]); ?>
 						<input id="block_title" type="text" name="title" value="<?php print($block['title']); ?>">
 					</div>
 				
 					<div class="cms_input admin_input_dropdown">
 						<label for="panel_name">Block type</label>
+						<?php _panel('cms_help', ['help' => '[Page panel type]||Select page panel type from available panel types in installed modules.||When adding a new page panel, '.
+								'one can select an existing panel from {Shortcut to} dropdown instead.||Changing this field may cause losing data already entered for this page panel', ]); ?>
 						<select class="admin_block_panel_name" name="panel_name" id="panel_name">
 							<option value="">-- select block type --</option>
 							<?php foreach ($panel_types as $panel_type => $panel_type_label): ?>
@@ -67,12 +70,13 @@
 					
 					<div class="cms_input admin_input_text">
 						<label for="block_submenu_title">Menu title</label> 
+						<?php _panel('cms_help', ['help' => '[In page menu label]||When {Menu anchor} is set, this field could be used as menu item label', ]); ?>
 						<input id="block_submenu_title" type="text" name="submenu_title" value="<?php print($block['submenu_title']); ?>">
 					</div>
 	
 					<div class="cms_input admin_input_text">
 						<label for="block_submenu_anchor">Menu anchor</label>
-						<?php _panel('cms_help', ['help' => 'Use only for in page anchors<br><br>May affect page panels flow', ]); ?>
+						<?php _panel('cms_help', ['help' => '[Page panel anchor]||Use only for in page anchors. Adding this may affect page panels flow', ]); ?>
 						<input id="block_submenu_anchor" type="text" name="submenu_anchor" value="<?php print($block['submenu_anchor']); ?>">
 					</div>
 				

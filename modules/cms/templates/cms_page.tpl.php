@@ -21,13 +21,13 @@
 				
 				<div class="cms_input admin_input_text">
 					<label for="page_title">Title</label>
-					<?php _panel('cms_help', ['help' => 'Page title<br><br>Can be seen on browser title bar, search engine results and social media shares. May be left empty for homepage. Important for SEO.', ]); ?>
+					<?php _panel('cms_help', ['help' => '[Page title]||Can be seen on browser title bar, search engine results and social media shares. May be left empty for homepage. Important for SEO', ]); ?>
 					<input  class="cms_page_title" id="page_title" type="text" name="title" value="<?php print($page['title']); ?>">
 				</div>
 				
 				<div class="cms_input admin_input_text">
 					<label for="page_slug">Slug</label> 
-					<?php _panel('cms_help', ['help' => 'Page slug<br><br>Can be seen on browser address bar following the main address part of the site. Must be left empty for homepage. Important for SEO.', ]); ?>
+					<?php _panel('cms_help', ['help' => '[Page slug]||Can be seen on browser address bar following the main address part of the site. Important for SEO.||Must be left empty for homepage', ]); ?>
 					<input class="cms_page_slug" id="page_slug" type="text" name="slug" value="<?php print($page['slug']); ?>">
 				</div>
 				
@@ -38,7 +38,7 @@
 							'values' => $layouts,
 							'name' => 'cms_page_layout',
 							'name_clean' => 'layout',
-							'help' => 'Page layout||CMS "Default fixed" is fixed pixel size layout.||CMS "Default rems" layout changes rem size with page size.||There might be more layouts available, defined in other modules.',
+							'help' => '[Page layout]||CMS "Default fixed" is fixed pixel size layout.||CMS "Default rems" layout changes rem size with page size.||There might be more layouts available, defined in other modules.',
 					));
 				?>
 				
@@ -48,7 +48,7 @@
 							'value' => (!empty($page['description']) ? $page['description'] : ''),
 							'name' => 'cms_page_description',
 							'extra_data' => ' data-lines="4" ',
-							'help' => 'Page description||Can be seen in search engine results and social media shares. Shouldn\'t be left empty and should be different for all pages. '.
+							'help' => '[Page description]||Can be seen in search engine results and social media shares. Shouldn\'t be left empty and should be different for all pages. '.
 									'Important for SEO.||This text might be replaced when page is list item page. In this case this can be left empty.',
 					));
 				?>
@@ -59,7 +59,7 @@
 							'value' => !empty($page['image']) ? $page['image'] : '', 
 							'name' => 'cms_page_image', 
 							'category' => 'content',
-							'help' => 'Page image||Can be seen in social media shares. Shouldn\'t be left empty. Important for social media sharing.||There might be additional images added when page is list item page. In this case this can be left empty.',
+							'help' => '[Page image]||Can be seen in social media shares. Shouldn\'t be left empty. Important for social media sharing.||There might be additional images added when page is list item page. In this case this can be left empty.',
 					));
 				?>
 				
