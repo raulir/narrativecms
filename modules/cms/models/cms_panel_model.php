@@ -72,18 +72,18 @@ class cms_panel_model extends CI_Model {
 			
 		}
 		
+		$return['module'] = !empty($default_module) ? $default_module : '';
+		
 		return $return;
 
 	}
 	
-	function get_cms_panel_fk_data($cms_panel){
+	function get_cms_panel_fk_data($block_structure){
 		
 		$this->load->model('cms_page_panel_model');
 		$this->load->model('cms_table_model');
 		
 		$return = [];
-		
-		$block_structure = $this->get_cms_panel_definition($cms_panel);
 		
 		// read needed fk data
 		foreach ($block_structure as $struct){

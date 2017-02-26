@@ -1,6 +1,6 @@
-<div class="cms_input admin_input_link admin_input_link_container_<?php print($name_clean); ?> <?php print(!empty($extra_class) ? $extra_class : ''); ?>">
+<div class="cms_input cms_input_link_container admin_input_link_container_<?php print($name_clean); ?> <?php print(!empty($extra_class) ? $extra_class : ''); ?>">
 	<label for="admin_input_link_<?php print($name_clean); ?>"><?php print($label); ?></label>
-	<div class="cms_input_link_container">
+	<div class="cms_input_link_content">
 
 		<select class="cms_input_link_target cms_input_link_dropdown" name="<?php print($name); ?>[target]<?php print($name_extra); ?>">
 			<?php foreach($targets as $key => $target): ?>
