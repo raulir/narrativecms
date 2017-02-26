@@ -1,11 +1,15 @@
 .cms_input_link_container {
+	overflow: hidden;
+}
+
+.cms_input_link_content {
 	width: 330px;
 	height: 54px;
 	float: right;
 	position: relative;
 }
 
-.admin_repeater_container .cms_input_link_container {
+.admin_repeater_container .cms_input_link_content {
 	width: 310px;
 }
 

@@ -103,8 +103,8 @@ class admin_block extends MY_Controller{
 		if ($return['block']['page_id'] == 999999) $return['block']['page_id'] = 0;
 
 		if (!empty($return['block']['page_id'])){
-			$page = $this->cms_page_model->get_page($return['block']['page_id']);
-			$return['cms_page_id'] = $page['cms_page_id'];
+			$return['cms_page'] = $this->cms_page_model->get_page($return['block']['page_id']);
+			$return['cms_page_id'] = $return['cms_page']['cms_page_id'];
 		} else {
 			$return['_admin_title'] = $return['block']['title'];
 			$return['independent_block'] = 1;
@@ -127,13 +127,17 @@ class admin_block extends MY_Controller{
 						// add panel type to the dropdown of panel types
 						$panel_id = $module.'/'.$panel['id'];
 						if (!in_array($panel_id, $return['panel_replaced'])){
+							
 							$return['panel_types'][$panel_id] = ucfirst($module) . ' / ' . $panel['name'];
+							
+							// if showing the panel type hides some other panel type, like when extending the panel for project
 							if (!empty($panel['hides'])){
 								if (!empty($return['panel_types'][$panel['hides']])){
 									unset($return['panel_types'][$panel['hides']]);
 								}
 								$return['panel_replaced'][$panel['hides']] = $panel['hides'];
 							}
+							
 						}
 
 						// definition for this panel comes from elsewhere
@@ -145,10 +149,23 @@ class admin_block extends MY_Controller{
 				}
 			}
 		}
+		
+		// check if panel is list item on the same named page
+		$panel_definition = $this->cms_panel_model->get_cms_panel_config($return['block']['panel_definition']);
+		
+		if (!empty($panel_definition['list']) && !empty($return['cms_page_id']) && $return['block']['panel_name'] == $panel_definition['module'].'/'.$return['cms_page']['slug']){
+			if (empty($panel_definition['settings'])){
+				$panel_structure = [];
+			} else {
+				$panel_structure = $panel_definition['settings'];
+			}
+		} else {
+			$panel_structure = $panel_definition['item'];
+		}
+		
+		$return['fk_data'] = $this->cms_panel_model->get_cms_panel_fk_data($panel_structure);
 
-		$return['fk_data'] = $this->cms_panel_model->get_cms_panel_fk_data($return['block']['panel_definition']);
-
-		$return['panel_params_structure'] = $this->cms_panel_model->get_cms_panel_definition($return['block']['panel_definition']);
+		$return['panel_params_structure'] = $panel_structure; // $this->cms_panel_model->get_cms_panel_definition($return['block']['panel_definition']);
 
 		// print_r($return);
 
