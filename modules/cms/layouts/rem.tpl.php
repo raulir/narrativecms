@@ -71,21 +71,28 @@
 </head>
 
 <body>
-	
+
 	<script type="text/javascript">
 
 		function _set_rem(){
 			var width = window.innerWidth;
 			var height = window.innerHeight;
-			if (width > 750){
-				/*
-				if (width > height * 1.5){
-					width = Math.floor(height * 1.5);
+			if (width > <?= !empty($GLOBALS['config']['rem_m_px']) ? $GLOBALS['config']['rem_m_px'] : '0' ?>){
+
+				var rem_ratio = <?= !empty($GLOBALS['config']['rem_ratio']) ? $GLOBALS['config']['rem_ratio'] : '100' ?>;
+				var rem_px = <?= !empty($GLOBALS['config']['rem_px']) ? $GLOBALS['config']['rem_px'] : '1000000' ?>;
+
+				if (width > rem_px){
+					width = rem_px;
 				}
-				*/
-				var rem = Math.round(width/100 * 10)/10;
+
+				if (width > height * rem_ratio){
+					width = Math.floor(height * rem_ratio);
+				}
+
+				var rem = Math.round(width/100 * 100)/100;
 			} else {
-				var rem = Math.round(width/50 * 10)/10;
+				var rem = Math.round(width/50 * 100)/100;
 			}
 			$('html').css('font-size', rem + 'px');
 			document.cookie = 'rem=' + encodeURIComponent(rem) + '; path=/';

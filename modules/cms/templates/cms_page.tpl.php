@@ -19,17 +19,23 @@
 		<div class="admin_block">
 			<div class="admin_column admin_column_left">
 				
-				<div class="cms_input admin_input_text">
-					<label for="page_title">Title</label>
-					<?php _panel('cms_help', ['help' => '[Page title]||Can be seen on browser title bar, search engine results and social media shares. May be left empty for homepage. Important for SEO', ]); ?>
-					<input  class="cms_page_title" id="page_title" type="text" name="title" value="<?php print($page['title']); ?>">
-				</div>
+				<?php _panel('cms_input_text', [
+						'name' => 'title',
+						'value' => $page['title'],
+						'name_clean' => 'page_title',
+						'label' => 'Title',
+						'help' => '[Page title]||Can be seen on browser title bar, search engine results and social media shares. May be left empty for homepage. Important for SEO',
+						'meta_class' => 'cms_page_title',
+				]); ?>
 				
-				<div class="cms_input admin_input_text">
-					<label for="page_slug">Slug</label> 
-					<?php _panel('cms_help', ['help' => '[Page slug]||Can be seen on browser address bar following the main address part of the site. Important for SEO.||Must be left empty for homepage', ]); ?>
-					<input class="cms_page_slug" id="page_slug" type="text" name="slug" value="<?php print($page['slug']); ?>">
-				</div>
+				<?php _panel('cms_input_text', [
+						'name' => 'slug',
+						'value' => $page['slug'],
+						'name_clean' => 'page_slug',
+						'label' => 'Slug',
+						'help' => '[Page slug]||Can be seen on browser address bar following the main address part of the site. Important for SEO.||Must be left empty for homepage',
+						'meta_class' => 'cms_page_slug',
+				]); ?>
 				
 				<?php
 					_panel('cms_input_select', array(

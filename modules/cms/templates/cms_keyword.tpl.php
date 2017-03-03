@@ -18,11 +18,13 @@
 		<div class="admin_block">
 			<div class="admin_column admin_column_left">
 				
-				<div class="cms_input admin_input_text">
-					<label for="keyword">Keyword</label> 
-					<input id="keyword" type="text" name="keyword" value="<?php print($cms_keyword_id); ?>">
-				</div>
-				
+				<?php _panel('cms_input_text', [
+						'name' => 'keyword',
+						'value' => $cms_keyword_id,
+						'name_clean' => 'keyword',
+						'label' => 'Keyword',
+				]); ?>
+
 			</div>
 			<div class="admin_column admin_column_right">
 

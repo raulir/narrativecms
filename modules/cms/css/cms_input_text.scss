@@ -1,0 +1,19 @@
+.admin_input_text {
+	
+}
+
+.admin_input_text>input {
+	box-sizing: border-box;
+	display: block;
+	border: 1px solid #a0a0a0;
+	width: 330px;
+	height: 26px;
+	line-height: 23px;
+	font-size: 17px;
+	float: right;
+	padding: 1px 5px 0px 5px;
+}
+
+.admin_repeater_block .admin_input_text>input {
+	width: 310px;
+}

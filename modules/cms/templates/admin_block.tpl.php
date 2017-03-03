@@ -25,11 +25,13 @@
 			<div class="admin_block">
 				<div class="admin_column admin_column_left">
 				
-					<div class="cms_input admin_input_text">
-						<label for="block_title">Title</label> 
-						<?php _panel('cms_help', ['help' => '[Page panel title]||Not visible in frontend. When page panel has {heading} field, this is overwritten from there', ]); ?>
-						<input id="block_title" type="text" name="title" value="<?php print($block['title']); ?>">
-					</div>
+					<?php _panel('cms_input_text', [
+							'name' => 'title',
+							'value' => $block['title'],
+							'name_clean' => 'block_title',
+							'label' => 'Title',
+							'help' => '[Page panel title]||Not visible in frontend. When page panel has {heading} field, this is overwritten from there',
+					]); ?>
 				
 					<div class="cms_input admin_input_dropdown">
 						<label for="panel_name">Block type</label>
@@ -68,17 +70,21 @@
 				</div>
 				<div class="admin_column admin_column_right">
 					
-					<div class="cms_input admin_input_text">
-						<label for="block_submenu_title">Menu title</label> 
-						<?php _panel('cms_help', ['help' => '[In page menu label]||When {Menu anchor} is set, this field could be used as menu item label', ]); ?>
-						<input id="block_submenu_title" type="text" name="submenu_title" value="<?php print($block['submenu_title']); ?>">
-					</div>
-	
-					<div class="cms_input admin_input_text">
-						<label for="block_submenu_anchor">Menu anchor</label>
-						<?php _panel('cms_help', ['help' => '[Page panel anchor]||Use only for in page anchors. Adding this may affect page panels flow', ]); ?>
-						<input id="block_submenu_anchor" type="text" name="submenu_anchor" value="<?php print($block['submenu_anchor']); ?>">
-					</div>
+					<?php _panel('cms_input_text', [
+							'name' => 'submenu_title',
+							'value' => $block['submenu_title'],
+							'name_clean' => 'block_submenu_title',
+							'label' => 'Menu title',
+							'help' => '[In page menu label]||When {Menu anchor} is set, this field could be used as menu item label',
+					]); ?>
+					
+					<?php _panel('cms_input_text', [
+							'name' => 'submenu_anchor',
+							'value' => $block['submenu_anchor'],
+							'name_clean' => 'block_submenu_anchor',
+							'label' => 'Menu anchor',
+							'help' => '[Page panel anchor]||Use only for in page anchors. Non-empty value may affect page layout',
+					]); ?>
 				
 				</div>
 				<div style="clear: both; "></div>
@@ -178,14 +184,19 @@
 					
 					} elseif ($field['type'] == 'text'){
 						
-						$return .= '<div class="cms_input admin_input_text'.($prefix ? '' : ' admin_column ').'">';
-						$return .= '<label for="'.($prefix ? $prefix.'_' : '').$field['name'].'">'.$field['label'].'</label>';
-						$return .= '<input id="'.($prefix ? $prefix.'_' : '').$field['name'].'" type="text" ' .
-								' class="'.$max_chars_class.' '.$meta_class.'" '.$max_chars_data.' '.$meta_data.' '.
-								' name="panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']').'" ' .
-								' value="'.($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) ).'">';
-						$return .= '</div>';
-						
+						$return .= _panel('cms_input_text', [
+								'label' => $field['label'],
+								'value' => ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) ),
+								'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'),
+								'name_clean' => ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']),
+								'extra_class' => ($prefix ? '' : 'admin_column'),
+								'max_chars_class' => $max_chars_class,
+								'meta_class' => $meta_class,
+								'extra_data' => $max_chars_data.' '.$meta_data.' ',
+								'_return' => true,
+								'help' => !empty($field['help']) ? $field['help'] : '',
+						]);
+												
 					} elseif ($field['type'] == 'textarea'){
 						
 						$return .= _panel('cms_input_textarea', array(

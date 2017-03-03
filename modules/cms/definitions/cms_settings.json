@@ -65,6 +65,27 @@
 				"1":"Alphabetical"
 			},
 			"default":"0"
+		},
+		{
+			"type":"text",
+			"name":"rem_px",
+			"label":"Rem max width px",
+			"default":"1400",
+			"help":"{Default rems} layout max 100 rems width.||Leave empty when not set"
+		},
+		{
+			"type":"text",
+			"name":"rem_ratio",
+			"label":"Rem max ratio",
+			"default":"2",
+			"help":"{Default rems} layout max 100 rems ratio to viewport height.||Leave empty when not set"
+		},
+		{
+			"type":"text",
+			"name":"rem_m_px",
+			"label":"Rem mobile px",
+			"default":"750",
+			"help":"{Default rems} layout breakpoint for mobile size. Rems are twice as big below this viewport width.||Leave empty when not set"
 		}
 	]
 }
