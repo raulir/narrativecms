@@ -2,7 +2,9 @@
 
 BC CMS is a full stack PHP/Javascript/SCSS framework with CMS for websites and other browser based projects.
 
-BC CMS is branched from Codeigniter 2.0 (2012) and needs PHP >= 5.6 and MySQL compatible database.
+BC CMS is branched from Codeigniter 2.0 (2013)
+
+Needs PHP >= 5.6 and MySQL compatible database.
 
 Project goals:
 

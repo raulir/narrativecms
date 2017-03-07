@@ -86,6 +86,31 @@
 			"label":"Rem mobile px",
 			"default":"750",
 			"help":"{Default rems} layout breakpoint for mobile size. Rems are twice as big below this viewport width.||Leave empty when not set"
+		},
+		{
+			"type":"select",
+			"name":"rem_switched",
+			"label":"Desktop rem switched",
+			"values":{
+				"0":"Use viewport width for rems",
+				"1":"Use viewport height for rems"
+			},
+			"default":"0",
+			"help":"{Rem switched} on desktop sizes use width or height for rem calculation"
+		},
+		{
+			"type":"text",
+			"name":"rem_k",
+			"label":"Rem divider",
+			"default":"100",
+			"help":"{Rem divider} height of 1 rem to viewport size"
+		},
+		{
+			"type":"text",
+			"name":"rem_m_k",
+			"label":"Rem mobile divider",
+			"default":"50",
+			"help":"{Rem mobile divider} height of 1 rem to mobile viewport size"
 		}
 	]
 }
