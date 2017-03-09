@@ -593,18 +593,41 @@ class cms_page_panel_model extends CI_Model {
 		$sql_arrays = array();
 		$sql_filter_str = '';
 		
-		// to support module/panel_name panel names
-		if (!empty($filter['panel_name'])){
-			if (stristr($filter['panel_name'], '/')){
-				list($module, $panel_name) = explode('/', $filter['panel_name']);
-				$sql_filter_str = " ( `panel_name` = '".str_replace(array("\\", "\"", "\'", ), array("\\\\", "\\\"", "\\\'", ), $filter['panel_name'])."' or `panel_name` = '".str_replace(array("\\", "\"", "\'", ), array("\\\\", "\\\"", "\\\'", ), $panel_name)."' ) ";
-				unset($filter['panel_name']);
-				if (count($filter)){
-					$sql_filter_str .= ' and ';
-				}
+		// to support module/panel_name panel names, DEPRECATE in future
+		if (!empty($GLOBALS['config']['deprecated']) && !empty($filter['panel_name'])){
+
+			// make this an array
+			if (!is_array($filter['panel_name'])){
+				$filter['panel_name'] = [$filter['panel_name']];
 			}
+			
+			$new_panel_name_filter = [];
+			
+			foreach($filter['panel_name'] as $key => $panel_name_original){
+				
+				$new_panel_name_filter[] = $panel_name_original;
+				
+				if (stristr($panel_name_original, '/')){
+
+					// extract name without module name
+					list($module, $panel_name) = explode('/', $panel_name_original);
+					$new_panel_name_filter[] = $panel_name;
+
+				} else {
+					
+					// combine with all possible module names
+					foreach($GLOBALS['config']['modules'] as $module){
+						$new_panel_name_filter[] = $module.'/'.$panel_name_original;
+					}
+
+				}
+			
+			}
+			
+			$filter['panel_name'] = $new_panel_name_filter;
+					
 		}
-		
+
 		foreach($filter as $key => $value){
 			$tkey = str_replace('!', '', $key);
 			if (in_array($tkey, array('block_id', 'page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title', ))){
@@ -642,8 +665,8 @@ class cms_page_panel_model extends CI_Model {
 		$sql = "select a.*, b.value as _params, b.cms_page_panel_id from `block` a left join cms_page_panel_param b on b.name = '' and b.cms_page_panel_id = a.block_id " .
 				" where ".$sql_filter_str." ".(!empty($sql_filter_str) && !empty($sql_arrays_str) ? ' and ' : '')." ".$sql_arrays_str." order by sort ".$order;
 		$sql = str_replace('!` =', '` !=', $sql); // not query
-		
-    	$query = $this->db->query($sql, $sql_filter);
+
+		$query = $this->db->query($sql, $sql_filter);
     	if ($query->num_rows()){
 	    	$return = $query->result_array();
     	} else {

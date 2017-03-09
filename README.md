@@ -6,18 +6,6 @@ BC CMS is branched from Codeigniter 2.0 (2013)
 
 Needs PHP >= 5.6 and MySQL compatible database.
 
-Project goals:
-
-* For developers - to give a clean HMVC framework to work with, by separating modules and panels in one way, 
-  and controllers, views, modules, javascript and css in other way. There is no need for compilation step (like Grunt),
-  as everything is compiled on the fly but cached for speed. Additionally the framework keeps finding different parts
-  of the application easy and has a lot of built-in website oriented helpers. The resulting application has to be highly
-  portable to different hosting environments.
-* For designers and project managers - to allow designers, dependent of experience, work with content, css or templates
-  even when website is built. This allows more flexibility and agileness in project management. Very modular structure allows
-  making changes in very late stages of the project in very big hurry and still not mess up everything.
-* For content managers - to give straightforward, glutter free and logical CMS interface (as much as project complexity allows).
-
 Setup:
 
 Blank database is in "_db" directory.
