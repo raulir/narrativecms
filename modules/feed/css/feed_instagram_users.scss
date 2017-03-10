@@ -1,0 +1,106 @@
+.feed_instagram_popup_overlay {
+	display: none;
+	position: fixed;
+	left: 0;
+	top: 0;
+	height: 100vh;
+	width: 100vw;
+	background-color: rgba(0,0,0,0.5);
+	opacity: 0;
+	transition: opacity 0.3s;
+	table-layout: fixed;
+}
+
+.feed_instagram_popup_cell {
+	display: table-cell;
+	vertical-align: middle;
+	text-align: center;
+}
+
+.feed_instagram_popup_container {
+	box-sizing: border-box;
+    border: 1px solid #a0a0a0;
+    padding: 14px;
+    width: 580px;
+    height: 445px;
+    box-shadow: 2px 4px 10px rgba(0,0,0,0.75);
+    background-color: white;
+	transition: opacity 0.3s;
+	position: relative;
+	display: inline-block;
+}
+
+.feed_instagram_popup_toolbar {
+	
+}
+
+.feed_instagram_popup_title {
+
+}
+
+.feed_instagram_popup_cancel {
+	
+}
+
+.feed_instagram_popup_confirmation {
+	max-width: 360px;
+	margin: 0 auto;
+	line-height: 1.4em;
+	padding: 25px 0 35px 0;
+}
+
+.feed_instagram_popup_ok {
+	
+}
+
+.feed_instagram_table {
+	display: table;
+	table-ayout: fixed;
+	width: 100%;
+}
+
+.feed_instagram_row {
+	display: table-row;
+	height: 100px;
+}
+
+.feed_instagram_spacer {
+	display: table-row;
+	height: 20px;
+}
+
+.feed_instagram_cell {
+	vertical-align: middle;
+	display: table-cell;
+}
+
+.feed_instagram_picture {
+	width: 120px;
+	background-size: contain;
+	background-position: left center;
+	background-repeat: no-repeat;
+}
+
+.feed_instagram_full_name {
+	
+}
+
+.feed_instagram_username {
+	
+}
+
+.feed_instagram_buttons {
+	text-align: right;
+	width: 250px;
+}
+
+.feed_instagram_test_button,.feed_instagram_remove_button {
+	width: 100px;
+	margin-left: 10px;
+	display: inline-block;
+	vertical-align: top;
+}
+
+.feed_instagram_privacy {
+	border-bottom: 1px solid #d0d0d0;
+}

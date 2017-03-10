@@ -1,0 +1,55 @@
+[
+	{
+		"type":"text",
+		"name":"twitter_api_key",
+		"label":"Tw API key"
+	},
+	{
+		"type":"text",
+		"name":"twitter_api_secret",
+		"label":"Tw API secret"
+	},
+	{
+		"type":"repeater",
+		"name":"channels",
+		"label":"Channels",
+		"fields":[
+			{
+				"type":"image",
+				"name":"icon",
+				"label":"Icon",
+				"category":"icon"
+			},
+			{
+				"type":"text",
+				"name":"heading",
+				"label":"Heading"
+			},
+			{
+				"type":"select",
+				"name":"source",
+				"label":"Source",
+				"values":{
+					"instagram":"Instagram",
+					"twitter":"Twitter"
+				},
+				"default":"instagram"
+			},
+			{
+				"type":"select",
+				"name":"feed_show",
+				"label":"By default show",
+				"values":{
+					"0":"No",
+					"1":"Yes"
+				},
+				"default":"0"
+			},
+			{
+				"type":"text",
+				"name":"username",
+				"label":"Username"
+			}
+		]
+	}
+]

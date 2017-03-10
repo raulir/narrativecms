@@ -1,0 +1,42 @@
+{
+	"cms_menu":[
+		{
+			"id":"form",
+			"name":"Forms"
+		},
+		{
+			"id":"form",
+			"name":"Data",
+			"parent":"form",
+			"url":"form/admin/",
+			"access":"form_data"
+		},
+		{
+			"id":"form_settings",
+			"name":"Settings",
+			"parent":"form",
+			"url":"admin/panel_settings/form_settings/",
+			"access":"form_settings"
+		}
+	],
+	"panels":[
+		{
+			"id":"webform",
+			"name":"Contact form"
+		}
+	],
+	"access":[
+		{
+			"access":"form_*",
+			"name":"Forms ALL"
+		},
+		{
+			"access":"form_data",
+			"name":"Forms data"
+		},
+		{
+			"access":"form_settings",
+			"name":"Forms settings"
+		}
+	]
+}
