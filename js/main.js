@@ -446,12 +446,17 @@ var get_ios_windowheight = function() {
 
     			$this.on('click.cms', function(){
     				
+    				var $this = $(this);
+    				
     				// filter out not visible cms_headers
     				var $body = $('body');
     				var $header = $('.cms_header').filter(function(){
     					
-    					var $this = $(this);
-    					var $parent = $this;
+    					var $parent = $(this);
+    					
+    					if ($parent.is($this.closest('.cms_container'))){
+    						return false;
+    					}
 
     					while ($parent.get(0) != $body.get(0)){
     						
@@ -503,6 +508,8 @@ var get_ios_windowheight = function() {
     		}
 
     	});
+
+    	return this;
     	
     };
     
