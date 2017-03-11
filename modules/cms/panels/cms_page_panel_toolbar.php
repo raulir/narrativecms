@@ -152,18 +152,10 @@ class cms_page_panel_toolbar extends MY_Controller{
 		// all page panels can be saved
 		$params['buttons'][] = 'cms_page_panel_button_save';
 
-		// delete = except not on page && list item == settings
-		if (!empty($cms_page_panel['page_id']) || !empty($panel_config['list'])){
+		// delete,caching,hide = except not on page && list item == settings
+		if (!empty($cms_page_panel['page_id']) || !empty($cms_page_panel['parent_id']) || !empty($panel_config['list'])){
 			$params['buttons'][] = 'cms_page_panel_button_delete';
-		}
-
-		// caching = except not on page && list item == settings
-		if (!empty($cms_page_panel['page_id']) || !empty($panel_config['list'])){
 			$params['buttons'][] = 'cms_page_panel_button_caching';
-		}
-
-		// hide = except not on page && list item == settings
-		if (!empty($cms_page_panel['page_id']) || !empty($panel_config['list'])){
 			$params['buttons'][] = 'cms_page_panel_button_show';
 		}
 
