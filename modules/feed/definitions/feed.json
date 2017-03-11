@@ -1,93 +1,110 @@
-[
-	{
-		"type":"image",
-		"name":"image",
-		"label":"Image",
-		"category":"feed"
+{
+	"version":"2",
+	"label":"Feed",
+	"parent":{
+		"url":"feed/dashboard/",
+		"label":"Feed dashboard"
 	},
-	{
-		"type":"image",
-		"name":"profile_image",
-		"label":"Profile image",
-		"category":"feed"
-	},
-	{
-		"type":"image",
-		"name":"icon",
-		"label":"Icon",
-		"category":"icon"
-	},
-	{
-		"type":"textarea",
-		"name":"text",
-		"label":"Text",
-		"lines":"5"
-	},
-	{
-		"type":"textarea",
-		"name":"heading",
-		"label":"Heading",
-		"lines":"2"
-	},
-	{
-		"type":"select",
-		"name":"source",
-		"label":"Source",
-		"values":{
-			"instagram":"Instagram",
-			"twitter":"Twitter"
+	"list":{
+		"list_title":"Feed",
+		"item_title":"Item",
+		"title_field":"heading",
+		"filter_fields":{
+			"show":"-- show --"
 		},
-		"default":"instagram"
+		"link_target":"0"
 	},
-	{
-		"name":"date",
-		"type":"text",
-		"label":"Date",
-		"default":":date:d/m/Y"
-	},
-	{
-		"name":"url",
-		"type":"text",
-		"label":"URL"
-	},
-	{
-		"name":"username",
-		"type":"text",
-		"label":"Username"
-	},
-	{
-		"name":"source_id",
-		"type":"text",
-		"label":"Source ID"
-	},
-	{
-		"name":"source_label",
-		"type":"text",
-		"label":"Source label"
-	},
-	{
-		"name":"likes_count",
-		"type":"text",
-		"label":"Likes count"
-	},
-	{
-		"name":"comments_count",
-		"type":"text",
-		"label":"Comments count"
-	},
-	{
-		"name":"created_time",
-		"type":"text",
-		"label":"Created time"
-	},
-	{
-		"name":"update_time",
-		"type":"text",
-		"label":"Timestamp"
-	},
-	{
-		"name":"hash",
-		"type":"text",
-		"label":"Hash"
-	}
-]
+	"item":[
+		{
+			"type":"image",
+			"name":"image",
+			"label":"Image",
+			"category":"feed"
+		},
+		{
+			"type":"image",
+			"name":"profile_image",
+			"label":"Profile image",
+			"category":"feed"
+		},
+		{
+			"type":"image",
+			"name":"icon",
+			"label":"Icon",
+			"category":"icon"
+		},
+		{
+			"type":"textarea",
+			"name":"text",
+			"label":"Text",
+			"lines":"5"
+		},
+		{
+			"type":"textarea",
+			"name":"heading",
+			"label":"Heading",
+			"lines":"2"
+		},
+		{
+			"type":"select",
+			"name":"source",
+			"label":"Source",
+			"values":{
+				"instagram":"Instagram",
+				"twitter":"Twitter"
+			},
+			"default":"instagram"
+		},
+		{
+			"name":"date",
+			"type":"text",
+			"label":"Date",
+			"default":":date:d/m/Y"
+		},
+		{
+			"name":"url",
+			"type":"text",
+			"label":"URL"
+		},
+		{
+			"name":"username",
+			"type":"text",
+			"label":"Username"
+		},
+		{
+			"name":"source_id",
+			"type":"text",
+			"label":"Source ID"
+		},
+		{
+			"name":"source_label",
+			"type":"text",
+			"label":"Source label"
+		},
+		{
+			"name":"likes_count",
+			"type":"text",
+			"label":"Likes count"
+		},
+		{
+			"name":"comments_count",
+			"type":"text",
+			"label":"Comments count"
+		},
+		{
+			"name":"created_time",
+			"type":"text",
+			"label":"Created time"
+		},
+		{
+			"name":"update_time",
+			"type":"text",
+			"label":"Timestamp"
+		},
+		{
+			"name":"hash",
+			"type":"text",
+			"label":"Hash"
+		}
+	]
+}

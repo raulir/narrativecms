@@ -115,16 +115,31 @@ class cms_page_panel_toolbar extends MY_Controller{
 				// if this is list item
 				if (!empty($panel_config['list'])){
 
-					$params['breadcrumb'] = [
-							[ // url to list root
-									'text' => $panel_config['list']['list_title'],
-									'url' => 'admin/cms_list/'.$cms_page_panel['panel_name'].'/',
-							],
-							[ // current block
-									'text' => str_limit(!empty($panel_config['list']['title_field']) ? $cms_page_panel[$panel_config['list']['title_field']] : $cms_page_panel['heading'], 40),
-									'url' => '',
-									'field' => !empty($panel_config['list']['title_field']) ? $panel_config['list']['title_field'] : 'heading', // title field
-							],
+					if (empty($panel_config['parent'])){
+						
+						$params['breadcrumb'] = [
+								[ // url to list root
+										'text' => $panel_config['list']['list_title'],
+										'url' => 'admin/cms_list/'.$cms_page_panel['panel_name'].'/',
+								],
+						];
+						
+					} else {
+						
+						$params['breadcrumb'] = [
+								[ // url to list root
+										'text' => $panel_config['parent']['label'],
+										'url' => $panel_config['parent']['url'],
+								],
+						];
+						
+					}
+					
+					// current block
+					$params['breadcrumb'][] = [
+							'text' => str_limit(!empty($panel_config['list']['title_field']) ? $cms_page_panel[$panel_config['list']['title_field']] : $cms_page_panel['heading'], 40),
+							'url' => '',
+							'field' => !empty($panel_config['list']['title_field']) ? $panel_config['list']['title_field'] : 'heading', // title field
 					];
 
 				} else { // must be global settings panel

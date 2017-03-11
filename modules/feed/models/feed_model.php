@@ -26,7 +26,7 @@ class feed_model extends CI_Model {
 
 				$stats['projects'] = 0;
 				$projects = $this->cms_page_panel_model->get_cms_page_panels_by(
-						array('_limit' => 20, 'panel_name' => $feed_setting['source'], 'page_id' => '999999', 'show' => '1', ));
+						array('_limit' => 20, 'panel_name' => $feed_setting['source'], 'page_id' => ['999999','0'], 'show' => '1', ));
 		   		
 		   		foreach($projects as $project){
 		   			
@@ -34,7 +34,7 @@ class feed_model extends CI_Model {
 					
 					// check if this item is already there?
 					$project_check_a = $this->cms_page_panel_model->get_cms_page_panels_by(
-							array('_limit' => 1, 'panel_name' => 'feed', 'page_id' => '999999', 'hash' => $hash, ));
+							array('_limit' => 1, 'panel_name' => 'feed', 'page_id' => ['999999','0'], 'hash' => $hash, ));
 							
 					if(!count($project_check_a)){
 			   			$item = $this->parse_cms_list_item($project, $feed_setting);
@@ -64,7 +64,7 @@ class feed_model extends CI_Model {
 		   			
 					// check if this item is already there?
 					$project_check_a = $this->cms_page_panel_model->get_cms_page_panels_by(
-							array('_limit' => 1, 'panel_name' => 'feed', 'page_id' => '999999', 'hash' => $hash, ));
+							array('_limit' => 1, 'panel_name' => 'feed', 'page_id' => ['999999','0'], 'hash' => $hash, ));
 							
 					if(!count($project_check_a)){
 			   			$item = $this->parse_tweet($tweet, $feed_setting);
@@ -90,7 +90,7 @@ class feed_model extends CI_Model {
 		   			
 					// check if this item is already there?
 					$item_check_a = $this->cms_page_panel_model->get_cms_page_panels_by(
-							array('_limit' => 1, 'panel_name' => 'feed', 'page_id' => '999999', 'hash' => $hash, ));
+							array('_limit' => 1, 'panel_name' => 'feed', 'page_id' => ['999999','0'], 'hash' => $hash, ));
 							
 					if(!count($item_check_a)){
 			   			$item = $this->parse_instagram($instagram, $feed_setting);
@@ -113,7 +113,7 @@ class feed_model extends CI_Model {
 		$item['hash'] = md5($feed_setting['source'].'='.$cms_list_item['block_id']);
 
 		// panel fields
-		$item['page_id'] = '999999';
+		$item['page_id'] = '0';
 		$item['sort'] = 'first';
 		$item['title'] = $cms_list_item['heading'];
 		$item['panel_name'] = 'feed';
@@ -158,7 +158,7 @@ class feed_model extends CI_Model {
 		$item['hash'] = md5('twitter='.$tweet['twitter_id']);
 
 		// panel fields
-		$item['page_id'] = '999999';
+		$item['page_id'] = '0';
 		$item['sort'] = 'first';
 		$item['title'] = $tweet['title'];
 		$item['panel_name'] = 'feed';
@@ -194,7 +194,7 @@ class feed_model extends CI_Model {
 		$item['hash'] = md5('instagram='.$instagram['id']);
 
 		// panel fields
-		$item['page_id'] = '999999';
+		$item['page_id'] = '0';
 		$item['sort'] = 'first';
 		$item['title'] = iconv('UTF-8', 'UTF-8//IGNORE', $instagram['title']);
 		$item['panel_name'] = 'feed';
@@ -475,7 +475,7 @@ class feed_model extends CI_Model {
 
    		$this->load->model('cms_page_panel_model');
    		
-   		$feed = $this->cms_page_panel_model->get_cms_page_panels_by(array('panel_name' => 'feed', 'page_id' => '999999', '_limit' => 50, ));
+   		$feed = $this->cms_page_panel_model->get_cms_page_panels_by(array('panel_name' => 'feed', 'page_id' => ['999999','0'], '_limit' => 50, ));
    		
    		foreach($feed as $item){
    			if (empty($item['source'])){

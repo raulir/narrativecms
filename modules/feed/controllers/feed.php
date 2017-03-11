@@ -42,11 +42,11 @@ class feed extends MY_Controller {
 					'panel' => 'cms_list',
    					'module' => 'cms',
 					'params' => array(
-						'title' => 'Feed',
+						'title' => 'Feed dashboard',
 						'hide_new' => 1,
 						'extra_buttons' => array('feed_dashboard_refresh', ),
-						'edit_base' => 'feed/admin_feed/',
-						'filter' => array('panel_name' => 'feed', 'page_id' => '999999', ), // what is shown in the list
+						'edit_base' => 'admin/block/',
+						'filter' => array('panel_name' => 'feed', 'page_id' => ['999999','0'], ), // what is shown in the list
 						'title_panel' => 'feed_dashboard_item',
 						'filter_fields' => array('show' => '-- show --', 'source' => '-- source --', ),
 						'extra_class' => 'feed_list_container',
@@ -85,45 +85,6 @@ class feed extends MY_Controller {
 					'params' => array(
 						'title' => 'Authorised Instagram users',
 					),
-				),
-        );
-        
-        // render panels
-        $panel_data = $this->render($page_config);
-        
-    	$this->output('admin', $panel_data);
-   	
-   	}
-   	
-   	/**
-   	 * admin social feed item
-   	 */
-   	function admin_feed($block_id = 0){
-   		
-   		// check if user
-   		if(empty($_SESSION['cms_user']['cms_user_id'])){
-   			header('Location: '.$GLOBALS['config']['base_url'].'cms_login/', true, 302);
-   			exit();
-   		}
-   		 
-        // set page config
-        $page_config = array(
-        		array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-        		array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-   				array(
-					'position' => 'main', 
-					'panel' => 'admin_block',
-   					'module' => 'cms',
-					'params' => array(
-						'type' => 'feed', 
-						'show_delete' => '1',
-						'base_url' => 'feed/dashboard/',
-						'base_title' => 'Feed',
-						'filter' => array('block_id' => $block_id, ),
-						'title_field' => 'heading',
-//	mark moderated					'on_save' => array('model' => 'cms_slug_model', 'function' => 'request_slug', 
-// 'params' => array('article=_block_id', '_heading', ), ),
-					), 
 				),
         );
         

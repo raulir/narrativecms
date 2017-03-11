@@ -35,7 +35,7 @@ class feed_instagram_users extends MY_Controller{
         	}
         	
         	$this->cms_page_panel_model->create_cms_page_panel(array_merge([
-       				'page_id' => 9999999, 'show' => 1, 'title' => $data['user']['username'], 'panel_name' => 'feed_instagram_user', ], $data['user']));
+       				'page_id' => 0, 'show' => 1, 'title' => $data['user']['username'], 'panel_name' => 'feed_instagram_user', ], $data['user']));
         	
         	header('Location: '.$GLOBALS['config']['base_url'].'feed/instagram_users/');
         	die();
