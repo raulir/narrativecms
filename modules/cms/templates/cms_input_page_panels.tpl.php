@@ -42,7 +42,7 @@
 	<?php if (isset($page_id)): ?>
 		<div class="admin_small_button admin_right cms_input_page_panels_add" data-target="<?php _l('admin/block/0/'.$page_id.'/'); ?>">Add Block</div>
 	<?php else: ?>
-		<div class="admin_small_button admin_right cms_input_page_panels_add" data-target="<?php _l('admin/block/0/0/'.$block_id.'/'.$name_clean.'/'); ?>">Add Block</div>
+		<div class="admin_small_button admin_right cms_input_page_panels_add" data-target="<?php _l('admin/block/0/0/'.$block_id.'/'.$name_clean.'/'); ?>" data-name="<?= $name_clean ?>">Add Block</div>
 	<?php endif ?>
 
 	<div style="clear: both; "><!-- --></div>

@@ -7,8 +7,10 @@ function cms_input_page_panels_init(){
 		
 		var $this = $(this);
 		var cms_page_id = $('.cms_page_id').val();
-		
+		var cms_page_panel_id = $('.cms_page_panel_id').val();
+
 		if ($('.cms_page_panel_id').length == 0 && cms_page_id == 0){
+			// if no block id field, then must be on the page admin
 			
 			// ask are you sure
 			get_ajax_panel('cms_popup_yes_no', {
@@ -33,6 +35,29 @@ function cms_input_page_panels_init(){
 				}); 
 			});
 				
+		} else if (cms_page_panel_id == 0){
+			// is on block admin, but block doesn't have id
+			
+			// ask are you sure
+			get_ajax_panel('cms_popup_yes_no', {
+				'text': 'Block is not saved. Save block?'
+			}, function(data){
+				panels_display_popup(data.result.html, {
+					'yes': function(){
+						
+						cms_page_panel_save({
+							'success':function(data){
+								
+								window.location.href = config_url + 'admin/block/0/0/' + data.result.cms_page_panel_id + '/' + $this.data('name') + '/';
+							
+							}
+						});
+
+					}
+				}); 
+			});
+			
+			
 		} else {
 				
 			window.location.href = $this.data('target');

@@ -303,7 +303,11 @@ class cms_page_panel_operations extends MY_Controller{
 			$params = array_merge($params, array('block_id' => $block_id, 'filter' => array('block_id' => $block_id, )));
 
 		}
-
+		
+		if (empty($params['cms_page_panel_id'])){
+			$params['cms_page_panel_id'] = !empty($params['block_id']) ? $params['block_id'] : 0;
+		}
+		
 		return $params;
 
 	}
