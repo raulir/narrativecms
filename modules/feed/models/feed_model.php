@@ -181,6 +181,8 @@ class feed_model extends CI_Model {
 		$item['link_url'] = $tweet['url'];
 		$item['link_text'] = ''; // $article['link_text'];
 		$item['username'] = $tweet['username'];
+		
+		$item['created_time'] = $tweet['created_time'];
 
 		return $item;
 		
@@ -324,18 +326,26 @@ class feed_model extends CI_Model {
 
 			foreach ($data as $tweet){
 				$return[] = array(
-					'text' => ( empty($tweet['retweeted_status']['full_text']) ? $tweet['full_text'] : $tweet['retweeted_status']['full_text'] ),
-					'username' => ( empty($tweet['retweeted_status']['user']['screen_name']) ? $tweet['user']['screen_name'] : 
-							$tweet['retweeted_status']['user']['screen_name'] ) ,
-					'date' => date('M d, Y', strtotime(empty($tweet['retweeted_status']['created_at']) ? $tweet['created_at'] : 
-							$tweet['retweeted_status']['created_at'])),
-					'url' => !empty($tweet['entities']['urls'][0]['expanded_url']) ? $tweet['entities']['urls'][0]['expanded_url'] :
-							(!empty($tweet['extended_entities']['media'][0]['expanded_url']) ? $tweet['extended_entities']['media'][0]['expanded_url'] : false),
-					'image' => !empty($tweet['entities']['media'][0]) && $tweet['entities']['media'][0]['type'] == 'photo' ? 
-							$tweet['entities']['media'][0]['media_url'] : '',
-					'twitter_id' => $tweet['id_str'],
 						
-					'urls' => $tweet['entities']['urls'],
+						'text' => ( empty($tweet['retweeted_status']['full_text']) ? $tweet['full_text'] : $tweet['retweeted_status']['full_text'] ),
+						
+						'username' => ( empty($tweet['retweeted_status']['user']['screen_name']) ? $tweet['user']['screen_name'] : 
+								$tweet['retweeted_status']['user']['screen_name'] ) ,
+						
+						'date' => date('M d, Y', strtotime(empty($tweet['retweeted_status']['created_at']) ? $tweet['created_at'] : 
+								$tweet['retweeted_status']['created_at'])),
+						
+						'url' => !empty($tweet['entities']['urls'][0]['expanded_url']) ? $tweet['entities']['urls'][0]['expanded_url'] :
+								(!empty($tweet['extended_entities']['media'][0]['expanded_url']) ? $tweet['extended_entities']['media'][0]['expanded_url'] : false),
+					
+						'image' => !empty($tweet['entities']['media'][0]) && $tweet['entities']['media'][0]['type'] == 'photo' ? 
+								$tweet['entities']['media'][0]['media_url'] : '',
+						
+						'twitter_id' => $tweet['id_str'],
+						
+						'urls' => $tweet['entities']['urls'],
+						
+						'created_time' => strtotime($tweet['created_at']),
 						
 				);
 			}

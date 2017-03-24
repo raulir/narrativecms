@@ -65,7 +65,14 @@ if ( !function_exists('pack_css')) {
 				} catch (Exception $e) {
 					if (!empty($GLOBALS['config']['errors_visible'])){
 						$error_str = $e->getMessage();
-						list($error, $line_no) = explode(': line: ', $error_str);
+						if (stristr($error_str, ': line: ')){
+							list($error, $line_no) = explode(': line: ', $error_str);
+						} else if (stristr($error_str, ' on line ')){
+							list($error, $line_no) = explode(' on line ', $error_str);
+						} else {
+							$error = $error_str;
+							$line_no = 0;
+						}
 						_html_error('SCSS error:<br>Message: '.$error.'<br>Filename: '.$scsss_item['script'].'<br>Line number: '.($line_no > 0 ? $line_no - $prelines_count : $line_no));
 					}
 				}

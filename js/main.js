@@ -407,7 +407,7 @@ var get_ios_windowheight = function() {
 ( function( $ ) {
 	
     $.fn.cms_scroll_top = function(params) {
-    	
+
     	params = params || {};
     	
     	$(this).each(function(){
