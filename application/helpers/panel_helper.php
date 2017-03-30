@@ -163,11 +163,13 @@ if ( !function_exists('get_position')) {
 	    	$url = ltrim($url, '/');
     	}
     	
-    	if (stristr($url, '#')){
+    	if (stristr($url, '#') && substr($url, 0, 1) != '#'){
     		list($url, $hash) = explode('#', $url);
     	}
     	
-    	if (substr($url, 0, 7) == 'mailto:'){
+    	if (substr($url, 0, 1) == '#'){
+    		$url = $url;
+    	} else if (substr($url, 0, 7) == 'mailto:'){
     		$url = $url;
     	} else if (substr($url, 0, 4) == 'tel:'){
     		$url = $url;
