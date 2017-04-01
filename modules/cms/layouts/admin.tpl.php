@@ -16,7 +16,7 @@
 				<div style="clear: both; "><!--  --></div>
 			</div>
 			
-			<div class="admin_content">
+			<div class="cms_content">
 		
 				<?php print(get_position('main', $data)); ?>
 	

@@ -186,7 +186,7 @@ i {
 	color: black;
 }
 
-.admin_content {
+.cms_content {
 	box-sizing: border-box;
 	width: 980px;
 	padding: 29px 19px;
@@ -394,27 +394,6 @@ a.admin_tool_text:hover {
 	right: 10px;
 }
 
-.admin_block_label {
-	box-sizing: border-box;
-	height: 2px;
-	border-bottom: 2px dashed #a0a0a0;
-	margin: 20px 0px;
-	padding: 0px 25px;
-}
-
-.admin_block_label .admin_block_title {
-	height: 23px;
-	line-height: 23px;
-	position: relative;
-	top: -10px;
-	background-color: white;
-	display: inline-block;
-	padding: 0px 10px;
-	font-size: 18px;
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
-}
-
 .admin_column {
 	width: 460px;
 	margin-bottom: 20px;
@@ -426,41 +405,6 @@ a.admin_tool_text:hover {
 
 .admin_column_right {
 	float: right;
-}
-
-.cms_input {
-	margin-bottom: 10px;
-	position: relative;
-}
-
-.cms_input label {
-	box-sizing: border-box;
-	display: inline-block;
-	width: 120px;
-	line-height: 26px;
-	max-height: 26px;
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
-	letter-spacing: -0.45px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
-.admin_input_dropdown {
-	
-}
-
-.admin_input_dropdown>select {
-	box-sizing: border-box;
-	display: block;
-	border: 1px solid #a0a0a0;
-	width: 330px;
-	height: 26px;
-	line-height: 23px;
-	font-size: 17px;
-	float: right;
-	padding: 1px 5px 0px 5px;
 }
 
 /* repeater fixes and other stuff */
@@ -490,25 +434,6 @@ a.admin_tool_text:hover {
 
 .admin_repeater_block .admin_column {
 	width: auto;
-}
-
-.admin_repeater_block .cms_input_image .admin_image_container {
-	width: 310px;
-	height: 233px;
-}
-
-.admin_repeater_block .cms_input_image .admin_image_content {
-	width: 308px;
-	height: 231px;
-}
-
-.admin_repeater_block .cms_input_image .admin_image_container img {
-	max-width: 308px;
-	max-height: 231px;
-}
-
-.admin_repeater_block .admin_input_dropdown>select {
-	width: 310px;
 }
 
 .admin_repeater_block_toolbar {
@@ -642,66 +567,6 @@ a.admin_tool_text:hover {
 	margin-left: 20px;
 }
 
-.admin_block_container>.admin_input_wide_textarea {
-	width: 940px;
-}
-
-.admin_input_wide_textarea>textarea {
-	width: 940px;
-}
-
-.admin_input_file {
-	
-}
-
-.admin_input_file .admin_input_button {
-	box-sizing: border-box;
-	display: block;
-	border: 1px solid #a0a0a0;
-	border-radius: 4px;
-	width: 49%;
-	height: 26px;
-	line-height: 23px;
-	font-size: 17px;
-	padding: 1px 5px 0px 5px;
-	cursor: pointer;
-	text-align: center;
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
-	margin-top: 7px;
-}
-
-.admin_input_file .admin_input_file_button {
-	float: left;
-}
-
-.admin_input_file .admin_input_file_clear {
-	float: right;
-}
-
-.admin_input_file .admin_file_container {
-	box-sizing: border-box;
-	display: inline-block;
-	width: 330px;
-	float: right;
-	position: relative;
-}
-
-.admin_input_file .admin_file_content {
-	box-sizing: border-box;
-	text-align: center;
-	vertical-align: middle;
-	height: 26px;
-	line-height: 24px;
-	clear: both;
-	border: 1px solid #a0a0a0;
-	/* background-color: #f3f3f3; */
-}
-
-.admin_repeater_block .admin_input_file .admin_file_container {
-	width: 310px;
-}
-
 .cms_paging_first {
 	width: 40px;
 	background-image: url('../img/cms_paging_first.png');
@@ -764,10 +629,6 @@ a.admin_tool_text:hover {
 	color: #606060;
 }
 
-.admin_input_error {
-	background-color: #ffeeee;
-}
-
 .admin_tool_select {
 	box-sizing: border-box;
   	display: inline-block;
@@ -794,10 +655,6 @@ a.admin_tool_text:hover {
   	padding: 0px 7px;
   	outline: none;
   	font-weight: normal;
-}
-
-.cms_input_page_panel_hidden {
-	opacity: 0.3;
 }
 
 .cms_notification_container {
@@ -839,4 +696,8 @@ a.admin_tool_text:hover {
 
 .cms_ctrl_hint_active {
 	display: inline-block;
+}
+
+.cms_item_hidden {
+	opacity: 0.3;
 }

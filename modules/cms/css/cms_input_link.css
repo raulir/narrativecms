@@ -1,10 +1,9 @@
 .cms_input_link_container {
-	overflow: hidden;
+
 }
 
 .cms_input_link_content {
 	width: 330px;
-	height: 54px;
 	float: right;
 	position: relative;
 }

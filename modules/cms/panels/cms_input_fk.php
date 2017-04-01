@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_input_textarea extends MY_Controller{
+class cms_input_fk extends MY_Controller{
 
 	function __construct(){
 
@@ -14,16 +14,6 @@ class cms_input_textarea extends MY_Controller{
 
 		$this->scss[] = ['script' => 'modules/cms/css/cms_input.scss', ];
 	
-	}
-
-	function panel_params($params){
-
-		if (!empty($params['tinymce'])){
-			$this->js[] = array('script' => 'js/tinymce/tinymce.min.js', 'no_pack' => 1, 'sync' => '', );
-		}
-		
-		return $params;
-
 	}
 
 }

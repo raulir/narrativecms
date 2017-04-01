@@ -24,3 +24,11 @@
 .admin_repeater_block .admin_input_textarea>textarea {
 	width: 440px;
 }
+
+.admin_block_container>.admin_input_wide_textarea {
+	width: 940px;
+}
+
+.admin_input_wide_textarea>textarea {
+	width: 940px;
+}

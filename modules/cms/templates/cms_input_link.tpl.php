@@ -1,5 +1,8 @@
 <div class="cms_input cms_input_link_container admin_input_link_container_<?php print($name_clean); ?> <?php print(!empty($extra_class) ? $extra_class : ''); ?>">
+	
 	<label for="admin_input_link_<?php print($name_clean); ?>"><?php print($label); ?></label>
+	<?php _panel('cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
+	
 	<div class="cms_input_link_content">
 
 		<select class="cms_input_link_target cms_input_link_dropdown" name="<?php print($name); ?>[target]<?php print($name_extra); ?>">
@@ -54,4 +57,5 @@
 				value="<?php print(!empty($value['target_id']) ? $value['target_id'] : ''); ?>">
 	
 	</div>
+	
 </div>

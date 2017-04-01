@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_file_upload extends MY_Controller{
+class cms_input_file_upload extends MY_Controller{
 
 	function __construct(){
 
@@ -19,7 +19,7 @@ class cms_file_upload extends MY_Controller{
 		$return = array();
 
 		$do = $this->input->post('do');
-		if ($do == 'cms_file_upload'){
+		if ($do == 'cms_input_file_upload'){
 			 
 			// collect data
 			$this->load->library('upload', array('allowed_types' => '*', 'upload_path' => $GLOBALS['config']['upload_path'], ));

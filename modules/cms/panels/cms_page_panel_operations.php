@@ -13,9 +13,11 @@ class cms_page_panel_operations extends MY_Controller{
 		}
 
 	}
-
+	
 	function panel_action($params){
 
+		$this->load->model('cms_page_panel_model');
+		
 		$do = $this->input->post('do');
 
 		if ($do == 'cms_page_panel_shortcut'){
@@ -23,8 +25,6 @@ class cms_page_panel_operations extends MY_Controller{
 			$cms_page_id = $this->input->post('cms_page_id');
 			$cms_page_panel_id = $this->input->post('cms_page_panel_id'); // to where the shortcut goes
 			 
-			$this->load->model('cms_page_panel_model');
-
 			// save data
 			$this->cms_page_panel_model->create_cms_page_panel(array(
 					'sort' => 'last',
@@ -39,8 +39,6 @@ class cms_page_panel_operations extends MY_Controller{
 			$lists = $this->input->post('lists');
 			$caching = $this->input->post('caching');
 
-			$this->load->model('cms_page_panel_model');
-			 
 			$params['_caching'] = 0;
 			 
 			if (!empty($lists) && is_array($lists)){
@@ -59,8 +57,6 @@ class cms_page_panel_operations extends MY_Controller{
 			 
 			$cms_page_panel_id = $this->input->post('cms_page_panel_id');
 			 
-			$this->load->model('cms_page_panel_model');
-			 
 			// get current state
 			$block = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
 			 
@@ -77,7 +73,6 @@ class cms_page_panel_operations extends MY_Controller{
 			 
 			$cms_page_panel_id = $this->input->post('cms_page_panel_id');
 			 
-			$this->load->model('cms_page_panel_model');
 			$this->load->model('cms_panel_model');
 			 
 			// get original data
@@ -132,7 +127,6 @@ class cms_page_panel_operations extends MY_Controller{
 		} elseif ($do == 'cms_page_panel_save'){
 			 
 			$this->load->model('cms_panel_model');
-			$this->load->model('cms_page_panel_model');
 
 			// collect data
 			$block_id = $this->input->post('block_id');
@@ -199,11 +193,7 @@ class cms_page_panel_operations extends MY_Controller{
 				}
 			}
 
-			// print('<pre>');
-
 			foreach ($data['panel_params'] as $key => $value){
-
-				// print_r($value);
 
 				// if repeater with something in it
 				if (is_array($value) && is_array(reset($value))){
@@ -232,12 +222,7 @@ class cms_page_panel_operations extends MY_Controller{
 					$data['panel_params'][$key] = $temp_result;
 				}
 
-				// print_r($data['panel_params'][$key]);
-				// print('------');
-
 			}
-			 
-			// die();
 
 			if (($data['page_id'] == 999999 || $data['page_id'] == 0) && !empty($data['panel_params']['heading'])){
 				$data['title'] = $data['panel_params']['heading'];
@@ -258,7 +243,16 @@ class cms_page_panel_operations extends MY_Controller{
 				}
 
 			}
-			 
+
+			// delete files
+			$old_filenames = $this->cms_page_panel_model->get_page_panel_data_filenames($panel_structure, $old_data);
+			$new_filenames = $this->cms_page_panel_model->get_page_panel_data_filenames($panel_structure, $data['panel_params']);
+				
+			$filenames_diff = array_diff($old_filenames, $new_filenames);
+			foreach($filenames_diff as $filename){
+				unlink($GLOBALS['config']['upload_path'].$filename);
+			}
+
 			// if link target, update slug
 			if (!empty($panel_config['list']['link_target'])){
 				$this->load->model('cms_slug_model');
@@ -301,6 +295,25 @@ class cms_page_panel_operations extends MY_Controller{
 			}
 			 
 			$params = array_merge($params, array('block_id' => $block_id, 'filter' => array('block_id' => $block_id, )));
+
+		} elseif ($do == 'cms_page_panel_delete'){
+			 
+			$block_id = $this->input->post('block_id');
+			
+			$this->load->model('cms_panel_model');
+			
+			// data for filenames
+			$data = $this->cms_page_panel_model->get_cms_page_panel($block_id);
+			$panel_config = $this->cms_panel_model->get_cms_panel_config($data['panel_name']);
+			$panel_structure = !empty($panel_config['item']) ? $panel_config['item'] : array();
+				
+			$this->cms_page_panel_model->delete_cms_page_panel($block_id);
+
+			// delete files
+			$filenames = $this->cms_page_panel_model->get_page_panel_data_filenames($panel_structure, $data);
+			foreach($filenames as $filename){
+				unlink($GLOBALS['config']['upload_path'].$filename);
+			}
 
 		}
 		

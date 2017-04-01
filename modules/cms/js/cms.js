@@ -12,19 +12,6 @@ function strip_tags(input, allowed) {
     });
 }
 
-function format_admin_page(){
-	
-	$('.admin_block,.admin_column').each(function(){
-		$this = $(this);
-		var label = $this.data('label')
-		if (label){
-			$this.children('.admin_block_label').remove();
-			$this.prepend('<div class="admin_block_label"><div class="admin_block_title">' + $this.data('label') + '</div></div>');
-		}
-	});
-	
-}
-
 function activate_cms_page_panel_show(){
 	$('.cms_page_panel_show').off('click.cms').on('click.cms', function(){
 		
@@ -35,10 +22,10 @@ function activate_cms_page_panel_show(){
 				'do': 'cms_page_panel_show'
 			}, function(data){
 				if (data.result.show == 1){
-					$this.closest('li').removeClass('cms_input_page_panel_hidden');
+					$this.closest('li').removeClass('cms_item_hidden');
 					$this.html('hide');
 				} else {
-					$this.closest('li').addClass('cms_input_page_panel_hidden');
+					$this.closest('li').addClass('cms_item_hidden');
 					$this.html('show');
 				}
 			});
@@ -114,8 +101,6 @@ function cms_error(text, timer){
 }
 
 $(document).ready(function() {
-		
-	format_admin_page();
 	
 	activate_cms_page_panel_show();
 	activate_cms_page_panel_copy({});

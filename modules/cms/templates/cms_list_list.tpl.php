@@ -4,7 +4,7 @@
 	<ul id="list_list" class="admin_list_sortable">
 		<?php foreach($list as $block): ?>
 			<li class="<?php print($no_sort !== 'no_sort' ? 'ui-sortable-handle block_dragable' : ''); ?>
-					<?php print($block['show'] ? '' : 'cms_input_page_panel_hidden'); ?>" 
+					<?php print($block['show'] ? '' : 'cms_item_hidden'); ?>" 
 					data-block_id="<?php print($block[$id_field]); ?>" 
 					<?php if($no_sort !== 'no_sort'): ?>
 						style="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/drag.png'); "

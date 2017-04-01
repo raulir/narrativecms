@@ -47,7 +47,7 @@
 	overflow: hidden;
 	box-sizing: border-box;
 	background-color: white;
-	z-index: 100;
+	z-index: 101;
 	display: none;
 	padding: 6px 0px;
 	border: 1px solid #a0a0a0;

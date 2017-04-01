@@ -38,7 +38,7 @@
 								<?php endif ?>
 							<?php endforeach ?>
 						</div>
-						<div class="cms_page_panel_caching_add admin_input_button">add</div>
+						<div class="cms_page_panel_caching_add cms_input_button">add</div>
 						<select class="cms_page_panel_caching_lists_select">
 							<?php foreach($lists as $list): ?>
 								<?php if(!in_array($list, $no_cache_lists)): ?>

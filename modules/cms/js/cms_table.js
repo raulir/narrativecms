@@ -25,7 +25,7 @@ $(document).ready(function() {
 		}
 		
 		// if there is a file input
-		admin_input_file_init();
+		cms_input_file_init();
 		
 	})
 	

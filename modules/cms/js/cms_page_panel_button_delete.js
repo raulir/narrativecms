@@ -5,9 +5,9 @@ function cms_page_panel_button_delete_init(){
 		get_ajax_panel('cms_popup_yes_no', {}, function(data){
 			panels_display_popup(data.result.html, {
 				'yes': function(){
-					get_ajax_panel('admin_block_delete', {
+					get_ajax_panel('cms_page_panel_operations', {
 						'block_id': $('[name="block_id"]').val(), 
-						'do': 'admin_block_delete' 
+						'do': 'cms_page_panel_delete' 
 					}, function(data){
 						
 						$('a.cms_page_panel_toolbar_text').last()[0].click();

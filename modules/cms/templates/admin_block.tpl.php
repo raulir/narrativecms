@@ -1,9 +1,13 @@
-<?php _panel('cms_page_panel_toolbar', [
-		'cms_page_panel_id' => $block['block_id'],
-		'cms_page_id' => $block['page_id'],
-		'breadcrumb' => !empty($breadcrumb) ? $breadcrumb : [],
-		'parent_id' => $block['parent_id'],
-]); ?>
+<?php
+	
+	_panel('cms_page_panel_toolbar', [
+			'cms_page_panel_id' => $block['block_id'],
+			'cms_page_id' => $block['page_id'],
+			'breadcrumb' => !empty($breadcrumb) ? $breadcrumb : [],
+			'parent_id' => $block['parent_id'],
+	]);
+
+?>
 
 <div>
 
@@ -242,6 +246,7 @@
 								'extra_class' => ($prefix ? '' : 'admin_column'),
 								'block_id' => $block_id,
 								'_return' => true, 
+								'help' => !empty($field['help']) ? $field['help'] : '',
 						));
 						
 					} elseif ($field['type'] == 'link'){
@@ -253,7 +258,8 @@
 								'name_clean' => ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']),
 								'extra_class' => ($prefix ? '' : 'admin_column'),
 								'targets' => !empty($field['targets']) ? $field['targets'] : '',
-								'_return' => true, 
+								'_return' => true,
+								'help' => !empty($field['help']) ? $field['help'] : '',
 						));
 						
 					} elseif ($field['type'] == 'select'){
@@ -284,16 +290,18 @@
 						$name = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
 						$name_clean = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
 						
-						$return .= _panel('cms_input_select', array(
-								'label' => $field['label'], 
-								'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
-								'values' => $fk_data[(!empty($field['field']) ? $field['field'] : $field['name'])],
-								'name' => $name, 
-								'name_clean' => !empty($name_clean) ? $name_clean : $name, 
-								'_return' => true, 
-								'extra_class' => ($prefix ? '' : 'admin_column'), 
-								'help' => !empty($field['help']) ? $field['help'] : '', 
-						));
+						$return .= _panel('cms_input_fk', [
+								'select_params' => [
+										'label' => $field['label'], 
+										'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
+										'values' => $fk_data[(!empty($field['field']) ? $field['field'] : $field['name'])],
+										'name' => $name, 
+										'name_clean' => !empty($name_clean) ? $name_clean : $name, 
+										'extra_class' => ($prefix ? '' : 'admin_column'), 
+										'help' => !empty($field['help']) ? $field['help'] : '', 
+								],
+								'_return' => true,
+						]);
 						
 					} elseif ($field['type'] == 'repeater_select'){
 						
@@ -314,20 +322,22 @@
 						$name = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
 						$name_clean = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
 						
-						$return .= _panel('cms_input_select', array(
-								'label' => $field['label'], 
-								'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
-								'values' => $values,
-								'name' => $name, 
-								'name_clean' => !empty($name_clean) ? $name_clean : $name, 
-								'_return' => true, 
-								'extra_class' => ($prefix ? '' : 'admin_column').' repeater_select',
-								'help' => !empty($field['help']) ? $field['help'] : '', 
-						));
+						$return .= _panel('cms_input_repeater_select', [
+								'select_params' => [
+										'label' => $field['label'], 
+										'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
+										'values' => $values,
+										'name' => $name, 
+										'name_clean' => !empty($name_clean) ? $name_clean : $name, 
+										'extra_class' => ($prefix ? '' : 'admin_column').' repeater_select',
+										'help' => !empty($field['help']) ? $field['help'] : '', 
+								],
+								'_return' => true,
+						]);
 						
 					} elseif ($field['type'] == 'file'){
 						
-						$return .= _panel('admin_input_file', array(
+						$return .= _panel('cms_input_file', array(
 								'label' => $field['label'], 
 								'value' => ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) ), 
 								'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'), 
@@ -335,6 +345,7 @@
 								'_return' => true, 
 								'extra_class' => ($prefix ? '' : 'admin_column'),
 								'accept' => !empty($field['accept']) ? $field['accept'] : '',
+								'help' => !empty($field['help']) ? $field['help'] : '',
 						));
 						
 					}

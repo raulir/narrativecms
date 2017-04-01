@@ -762,6 +762,36 @@ class cms_page_panel_model extends CI_Model {
 		return $return;
 	}
 	
+	function get_page_panel_data_filenames($structure, $data){
+	
+		$return = [];
+	
+		foreach ($structure as $field){
+	
+			if ($field['type'] == 'file' && !empty($data[$field['name']])){
+	
+				$return[] = $data[$field['name']];
+	
+			} else if ($field['type'] == 'repeater' && !empty($data[$field['name']])){
+					
+				foreach($field['fields'] as $r_field){
+					if ($r_field['type'] == 'file'){
+						foreach($data[$field['name']] as $r_value){
+							if (!empty($r_value[$r_field['name']])){
+								$return[] = $r_value[$r_field['name']];
+							}
+						}
+					}
+				}
+					
+			}
+	
+		}
+	
+		return $return;
+	
+	}
+	
 	/* deprecated */
 	function get_blocks_by($filter){
 		return $this->get_cms_page_panels_by($filter);

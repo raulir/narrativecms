@@ -1,0 +1,1 @@
+<?php _panel('cms_input_select', $select_params) ?>

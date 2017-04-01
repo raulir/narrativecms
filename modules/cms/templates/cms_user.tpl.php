@@ -2,7 +2,7 @@
 <?php if(empty($_SESSION['cms_user'])): ?>
 
 	<div class="admin_container login_container">
-		<div class="admin_content login_content">
+		<div class="cms_content login_content">
 	
 			<form method="post" style="display: inline; ">
 				<input type="hidden" name="do" value="admin_login">

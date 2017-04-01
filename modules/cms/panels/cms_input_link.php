@@ -12,6 +12,8 @@ class cms_input_link extends MY_Controller{
 			exit();
 		}
 
+		$this->scss[] = ['script' => 'modules/cms/css/cms_input.scss', ];
+		
 	}
 
 	function panel_params($params){

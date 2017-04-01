@@ -3,13 +3,14 @@
 	<?php if (!empty($label)): ?>
 		<div class="admin_block_label">
 			<div class="admin_block_title"><?php print($label); ?></div>
+			<?php _panel('cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
 		</div>
 	<?php endif ?>
 	
 	<ul class="admin_list_sortable <?php print( empty($sortable_class) ? ' cms_list_sortable ' : $sortable_class ); ?>">
 		<?php foreach($cms_page_panels as $block): ?>
 		
-			<li class="<?php print(empty($block['show']) ? 'cms_input_page_panel_hidden' : ''); ?>" 
+			<li class="<?php print(empty($block['show']) ? 'cms_item_hidden' : ''); ?>" 
 					style="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/drag.png'); ">
 			
 				<?php if(empty($name)): ?>

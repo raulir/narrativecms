@@ -107,7 +107,7 @@
 						
 					} elseif ($field['type'] == 'file'){
 						
-						$return .= _panel('admin_input_file', array(
+						$return .= _panel('cms_input_file', array(
 								'label' => $field['label'], 
 								'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
 								'name' => 'data'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'), 

@@ -4,15 +4,56 @@ use Leafo\ScssPhp\Compiler;
 
 if ( !function_exists('pack_css')) {
 	
+	function pack_get_scss_path($scss_filename){
+		
+		$return = [];
+		
+		if (stristr($scss_filename, 'modules/')){
+				
+			list($m_start, $m_path) = explode('modules/', $scss_filename);
+			list($m_module, $m_rest) = explode('/', $m_path, 2);
+				
+			$module_scss = $m_start.'modules/'.$m_module.'/'.$m_module.'.scss';
+			if (file_exists($module_scss)){
+				$return['module_scss'] = $module_scss;
+			}
+			
+			$return['css_cache'] = 'cache/'.$m_module.'__'.pathinfo($scss_filename, PATHINFO_FILENAME).'.css';
+				
+		}
+		
+		return $return;
+		
+	}
+	
 	function pack_css($csss, $scsss = array(), $return_array = false){
 
 		// compile scss
 		foreach($scsss as $scsss_item){
 	
 			// put together related scss files
-			$scss_set = array_merge($scsss_item['related'], array($scsss_item['script']));
-	
-			// check if needed to compile
+			if (!empty($scsss_item['related'])){
+				$scss_set = array_merge($scsss_item['related'], array($scsss_item['script']));
+			} else {
+				
+				$scsss_item['related'] = [];
+				$scss_set = [$scsss_item['script']];
+				
+				// get module name and check if module scss exists
+				$m_path = pack_get_scss_path($scsss_item['script']);
+				if (!empty($m_path['module_scss'])){
+					$scsss_item['related'][] = $m_path['module_scss'];
+					$scss_set[] = $m_path['module_scss'];
+				}
+				
+			}
+			
+			if (empty($scsss_item['css'])){
+				$m_path = pack_get_scss_path($scsss_item['script']);
+				$scsss_item['css'] = $m_path['css_cache'];
+			}
+				
+			// check if needed to compile, happens when any of files in set is newer than cache
 			$css_file_update_needed = false;
 			foreach($scss_set as $scss_file){
 				$css_file = $GLOBALS['config']['base_path'].$scsss_item['css'];
