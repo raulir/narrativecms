@@ -129,4 +129,60 @@ class form_model extends CI_Model {
     	
     }
 
+    function create_cm_subscriber($data, $params){
+    	
+        $postdata = array(
+            'EmailAddress' => $data['email'],
+            'Name' => '',
+            'Resubscribe' => true,
+            'RestartSubscriptionBasedAutoresponders' => true,
+        );
+
+        $context = stream_context_create(array (
+            'http' => array (
+                'method'  => 'POST',
+                'header'  =>
+                    'Content-Type: application/json'."\r\n".
+                    'Accept: application/json'."\r\n".
+                    'Authorization: Basic ' . base64_encode($params['cm_api_key']) . "\r\n",
+                    'content' => json_encode($postdata),
+            ),
+        ));
+
+        $result = @file_get_contents($params['cm_api_url'].'subscribers/'.$params['cm_list_id'].'.json', false, $context);
+        
+        return $result;
+    
+    }
+    
+    function create_mailchimp_subscriber($data, $params){
+    	
+    	$district = '';
+    	
+    	if(stristr($params['mailchimp_api_key'], '-')){
+    		list($rest, $district) = explode('-', $params['mailchimp_api_key']);
+    	}
+    	
+        $postdata = array(
+            'email_address' => $data['email'],
+            'status' => 'subscribed',
+        );
+
+        $context = stream_context_create(array (
+            'http' => array (
+                'method'  => 'POST',
+                'header'  =>
+                    'Content-Type: application/json'."\r\n".
+                    'Accept: application/json'."\r\n".
+                    'Authorization: Basic ' . base64_encode('anystring:'.$params['mailchimp_api_key']) . "\r\n",
+                    'content' => json_encode($postdata),
+            ),
+        ));
+
+        $result = @file_get_contents('https://'.$district.'.api.mailchimp.com/3.0/lists/'.$params['mailchimp_list_id'].'/members/', false, $context);
+        
+        return $result;
+    
+    }
+    
 }

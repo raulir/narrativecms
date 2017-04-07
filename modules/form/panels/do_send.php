@@ -51,7 +51,24 @@ class do_send extends MY_Controller{
 			
 			$this->form_model->create_webform_data($cms_page_panel_id, !empty($data['email']) ? $data['email'] : '', $data);
 			
-			return array('message' => 'ok', );
+			$return = [];
+
+			// add to cm or mailchimp
+        	if (!empty($params['add_mailchimp']) && !empty($data['email']) && !empty($params['mailchimp_api_key']) && !empty($params['mailchimp_list_id'])){
+				$result = $this->form_model->create_mailchimp_subscriber($data, $params);
+			}
+			
+			if (!empty($params['add_cm']) && !empty($data['email']) && !empty($params['cm_api_key']) && !empty($params['cm_api_url']) && !empty($params['cm_list_id'])){
+				$result = $this->form_model->create_cm_subscriber($data, $params);
+			}
+				
+			$return['message'] = 'ok';
+			
+			if (!empty($GLOBALS['config']['errors_visible'])){
+				$return['result'] = $result;
+			}
+			
+			return $return;
         
         }
         

@@ -2,9 +2,13 @@
 	<div class="webform_content">
 		<div class="webform_area">
 	
-			<div class="webform_title">
-				<?php print($heading); ?>
-			</div>
+			<?php if(!empty($heading)): ?>
+			
+				<div class="webform_title">
+					<?php print($heading); ?>
+				</div>
+			
+			<?php endif ?>
 			
 			<div class="webform_form">
 				<form style="display: inline; " method="post">

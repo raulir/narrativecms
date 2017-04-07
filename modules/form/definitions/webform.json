@@ -8,6 +8,12 @@
 	},
 	{
 		"type":"text",
+		"name":"heading",
+		"label":"Heading",
+		"default":"Contact form"
+	},
+	{
+		"type":"text",
 		"name":"submit_text",
 		"label":"Submit text",
 		"default":"SUBMIT"
@@ -51,6 +57,59 @@
 		"name":"autoreply_name",
 		"label":"Reply name",
 		"default":"Automatic reply"
+	},
+	{
+		"type":"select",
+		"name":"add_mailchimp",
+		"label":"Add to Mailchimp",
+		"values":{
+			"0":"No",
+			"1":"Yes"
+		},
+		"default":"0"
+	},
+	{
+		"type":"text",
+		"name":"mailchimp_api_key",
+		"label":"Mailchimp API key",
+		"default":"",
+		"help":"Mailchimp API key.||Get this in MC:||{<profile picture>} -> {Account} -> {Extras} -> {API Keys} -> {Create A Key}"
+	},
+	{
+		"type":"text",
+		"name":"mailchimp_list_id",
+		"label":"Mailchimp list ID",
+		"default":"",
+		"help":"Mailchimp list ID||Get this in MC:||{Lists} -> {Settings} -> {<list name>} -> {List ID}"
+	},
+	{
+		"type":"select",
+		"name":"add_cm",
+		"label":"Add to CM list",
+		"values":{
+			"0":"No",
+			"1":"Yes"
+		},
+		"default":"0",
+		"help":"CM = Campaign Monitor"
+	},
+	{
+		"type":"text",
+		"name":"cms_api_key",
+		"label":"CM API key",
+		"default":""
+	},
+	{
+		"type":"text",
+		"name":"cm_api_url",
+		"label":"CM API URL",
+		"default":""
+	},
+	{
+		"type":"text",
+		"name":"cm_list_id",
+		"label":"CM list ID",
+		"default":""
 	},
 	{
 		"type":"repeater",
