@@ -20,12 +20,14 @@ class cms_update_model extends CI_Model {
 			'php',
 			'png',
 			'ttf',
+			'otf',
 			'eot',
 			'woff',
 			'svg',
 			'html',
 			'htaccess',
 			'md',
+			'bin',
 		);
 		
 		$hashes = array();

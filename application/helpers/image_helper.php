@@ -149,13 +149,40 @@ if ( !function_exists('_i')) {
 
 						if ($extension == 'jpg'){
 
-							imagejpeg($tmp, $GLOBALS['config']['upload_path'].$new_image, 95);
+							imagejpeg($tmp, $GLOBALS['config']['upload_path'].$new_image, !empty($GLOBALS['config']['images_quality']) ? $GLOBALS['config']['images_quality'] : 85);
 
 						} else if ($extension == 'png'){
 								
 							imagesavealpha($tmp, true);
 							imagepng($tmp, $GLOBALS['config']['upload_path'].$new_image);
+							
+							// optimise on linux
+							if(!empty($GLOBALS['config']['images_pngquant'])){
+								
+								$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($new_image).'.png';
+								
+								rename($GLOBALS['config']['upload_path'].$new_image, $temp_name);
+								
+								$cmd = (empty($GLOBALS['config']['images_pngquant_executable']) ? $GLOBALS['config']['base_path'].'application/libraries/pngquant/bin/pngquant.bin' : $GLOBALS['config']['images_pngquant_executable'])
+										.' '.$temp_name.' --strip --speed 1 --quality=0-'.(!empty($GLOBALS['config']['images_quality']) ? $GLOBALS['config']['images_quality'] : 85).' -o '.$GLOBALS['config']['upload_path'].$new_image;
 
+								shell_exec($cmd);
+								
+							}
+
+							if(!empty($GLOBALS['config']['images_zopflipng'])){
+								
+								$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($new_image).'.png';
+								
+								rename($GLOBALS['config']['upload_path'].$new_image, $temp_name);
+								
+								$cmd = (empty($GLOBALS['config']['images_zopflipng_executable']) ? $GLOBALS['config']['base_path'].'application/libraries/zopflipng/bin/zopflipng.bin' : $GLOBALS['config']['images_zopflipng_executable'])
+										.' -y '.$temp_name.' '.$GLOBALS['config']['upload_path'].$new_image;
+
+								shell_exec($cmd);
+								
+							}
+						
 						} else if ($extension == 'ico'){
 								
 							// bmp data part
@@ -337,8 +364,28 @@ if ( !function_exists('_i')) {
 					$GLOBALS['_images_hq'] = true;
 					
 				}
-				 
-				print('style="background-image:  url('.$image_filename.'); '.$params['css'].'"'.((!empty($GLOBALS['config']['aria']) && !empty($image_data['alt'])) ? ' aria-label="image: '.$image_data['alt'].'"' : '')).$hq_str;
+					
+				// make 1x image
+				if (!empty($params['width']) || !empty($params['height'])){
+				
+					if (empty($params['width'])) $params['width'] = 0;
+					if (empty($params['height'])) $params['height'] = 0;
+						
+					$onex_image = _iw($image, array_merge($params, ['width' => round($params['width']/2), 'height' => round($params['height']/2)]));
+				
+					print(
+							'style="background-image: url('.$image_filename.'); '.
+							'background-image: -webkit-image-set( url('.$GLOBALS['config']['upload_url'].$onex_image['image'].') 1x, url('.$image_filename.') 2x ); '.
+							'background-image: image-set( url('.$GLOBALS['config']['upload_url'].$onex_image['image'].') 1x, url('.$image_filename.') 2x ); '.
+							$params['css'].'"'.
+							((!empty($GLOBALS['config']['aria']) && !empty($image_data['alt'])) ? ' aria-label="image: '.$image_data['alt'].'"' : '')).$hq_str;
+				
+				} else {
+					
+					print('style="background-image: url('.$image_filename.'); '.$params['css'].'"'.
+							((!empty($GLOBALS['config']['aria']) && !empty($image_data['alt'])) ? ' aria-label="image: '.$image_data['alt'].'"' : '')).$hq_str;
+					
+				}
 
 			} else if (substr($image, 0, 4) == 'http'){
 

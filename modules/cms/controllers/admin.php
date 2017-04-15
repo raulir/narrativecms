@@ -14,7 +14,7 @@ class admin extends MY_Controller {
 
 		$this->css[] = array('script' => 'modules/cms/css/cms.css', 'no_pack' => 1, );
 
-		$this->js[] = array('script' => 'js/jquery-3.1.0.min.js', 'no_pack' => 1, 'sync' => '', );
+		// $this->js[] = array('script' => 'js/jquery-3.1.0.min.js', 'no_pack' => 1, 'sync' => '', );
 		$this->js[] = array('script' => 'js/jquery-ui.min.js', );
 
 		$this->js[] = 'js/preloader.js';

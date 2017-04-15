@@ -36,9 +36,9 @@ if (file_exists($config['config_file'])){
 // what css and js to load on all pages
 $config['js'] = array(
 		array(
-				'script' => 'js/jquery-3.1.0.min.js', 
+				'script' => 'js/jquery-3.2.1.min.js', 
 				'no_pack' => 1,
-				'sync' => '',		// may be needed on page while loading
+				'sync' => 'defer',		// removed - may be needed on page while loading
 		),
 		array(
 				'script' => 'js/md5.js', // for caching in panels.js
