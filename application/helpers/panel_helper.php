@@ -158,16 +158,12 @@ if ( !function_exists('get_position')) {
     			$url = '';
     		}
     	}
-
-    	if (substr($url, 0, 2) != '//'){
-	    	$url = ltrim($url, '/');
-    	}
-    	
+    	 
     	if (stristr($url, '#') && substr($url, 0, 1) != '#'){
     		list($url, $hash) = explode('#', $url);
     	}
-    	
-    	if (substr($url, 0, 1) == '#'){
+
+		if (substr($url, 0, 1) == '#'){
     		$url = $url;
     	} else if (substr($url, 0, 7) == 'mailto:'){
     		$url = $url;
@@ -185,7 +181,7 @@ if ( !function_exists('get_position')) {
     			}
     		}
 
-    		$url = $GLOBALS['config']['base_url'].$url;
+    		$url = $GLOBALS['config']['base_url'].ltrim($url, '/');
     	}
     	
     	if (!empty($hash)){
