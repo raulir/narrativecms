@@ -103,8 +103,10 @@
 			} else {
 				var rem = Math.round(real_width/<?= !empty($GLOBALS['config']['rem_m_k']) ? $GLOBALS['config']['rem_m_k'] : '50' ?> * 100)/100;
 			}
-			$('html').css('font-size', rem + 'px');
+
+			document.body.parentNode.style.fontSize = rem + 'px';
 			document.cookie = 'rem=' + encodeURIComponent(rem) + '; path=/';
+
 		}
 
 		_set_rem();
