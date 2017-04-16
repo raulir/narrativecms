@@ -258,14 +258,36 @@ class admin extends MY_Controller {
 	}
 
 	function panel_settings($panel_name, $title = ''){
+		
+		$this->load->model('cms_page_panel_model');
+		
+		// with module name
+		if (stristr($panel_name, '__')){
+			
+			$panel_name = str_replace('__', '/', $panel_name);
+			
+		}
+		
+		// check if exists
+		$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => $panel_name, 'page_id' => 0, ]);
+		if (!count($settings_a)){
+			$this->cms_page_panel_model->create_cms_page_panel(['panel_name' => $panel_name, ]);
+		}
+		
+		// standardise panel name and module
+		if (stristr($panel_name, '/')){
+			list($p_module, $p_name) = explode('/', $panel_name);
+		} else {
+			$p_module = 'cms';
+			$p_name = $panel_name;
+		}
 
 		// set page config
 		$page_config = array(
 				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
 				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'admin_block', 'module' => 'cms', 'params' => array(
+				array('position' => 'main', 'panel' => 'admin_block', 'module' => $p_module, 'params' => array(
 						'filter' => array('panel_name' => $panel_name, ),
-						'title' => $title,
 				), ),
 		);
 

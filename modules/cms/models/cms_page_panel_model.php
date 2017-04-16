@@ -370,6 +370,10 @@ class cms_page_panel_model extends CI_Model {
 	 */
 	function create_cms_page_panel($data){
 		
+		if (empty($data['page_id'])){
+			$data['page_id'] = 0;
+		}
+		
 		$search_params = array();
 		if (!empty($data['search_params'])){
 			$search_params = $data['search_params'];
@@ -407,7 +411,7 @@ class cms_page_panel_model extends CI_Model {
 			$data['sort'] = 1;
 		} elseif (empty($data['sort']) && ($data['page_id'] == '999999' || $data['page_id'] == 0)) {
 			$sort_stats = $this->get_sort_stats($data['panel_name']);
-			$data['sort'] = $sort_stats['max_sort'] + 1;
+			$data['sort'] = !empty($sort_stats['max_sort']) ? $sort_stats['max_sort'] + 1 : 0;
 		} elseif (!empty($data['sort']) && $data['sort'] == 'last'){
 			$sort_stats = $this->get_page_panel_sort_stats($data['page_id']);
 			$data['sort'] = $sort_stats['max_sort'] + 1;

@@ -1,0 +1,31 @@
+{
+	"panels":[
+		{
+			"id":"analytics",
+			"name":"Analytics"
+		}
+	],
+	"cms_menu":[
+		{
+			"id":"cms",
+			"name":"CMS"
+		},
+		{
+			"id":"analytics",
+			"name":"Analytics settings",
+			"url":"admin/panel_settings/basic__analytics/",
+			"parent":"cms",
+			"access":"basic_analytics"
+		}
+	],
+	"access":[
+		{
+			"access":"basic_*",
+			"name":"Basic ALL"
+		},
+		{
+			"access":"basic_analytics",
+			"name":"Basic analytics"
+		}
+	]
+}

@@ -1,0 +1,12 @@
+{
+	"version":"2",
+	"label":"Analytics settings",
+	"item":[
+		{
+			"type":"text",
+			"name":"analytics_id",
+			"label":"Google Analytics ID",
+			"help":"[Google Analytics ID]||Eg: UA-12345678-1"
+		}
+	]
+}
