@@ -10,7 +10,7 @@
 	<ul class="admin_list_sortable <?php print( empty($sortable_class) ? ' cms_list_sortable ' : $sortable_class ); ?>">
 		<?php foreach($cms_page_panels as $block): ?>
 		
-			<li class="<?php print(empty($block['show']) ? 'cms_item_hidden' : ''); ?>" 
+			<li class="cms_list_sortable_item <?php print(empty($block['show']) ? 'cms_item_hidden' : ''); ?>" 
 					style="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/drag.png'); ">
 			
 				<?php if(empty($name)): ?>
@@ -19,9 +19,9 @@
 					<input type="hidden" name="<?php print($name); ?>[]" value="<?php print($block['block_id']); ?>">
 				<?php endif ?>
 			
-				<div class="admin_text"><?php print(!empty($block['title']) ? $block['title'] : '[ no title ]'); ?></div>
+				<div class="admin_list_sortable_div admin_text"><?php print(!empty($block['title']) ? $block['title'] : '[ no title ]'); ?></div>
 				<?php if (!empty($block['_delete'])): ?>
-					<div class="cms_list_item_button cms_page_panel_delete" data-cms_page_panel_id="<?php print($block['block_id']); ?>">
+					<div class="admin_list_sortable_div cms_list_item_button cms_page_panel_delete" data-cms_page_panel_id="<?php print($block['block_id']); ?>">
 						delete
 					</div>
 				<?php endif ?>
@@ -29,7 +29,7 @@
 					<a class="cms_list_item_button" <?php _lh('admin/block/'.$block['block_id'].'/'); ?>>edit</a>
 				<?php endif ?>
 				
-				<div class="cms_list_item_button cms_page_panel_show" data-cms_page_panel_id="<?php print($block['block_id']); ?>">
+				<div class="admin_list_sortable_div cms_list_item_button cms_page_panel_show" data-cms_page_panel_id="<?php print($block['block_id']); ?>">
 					<?php print($block['show'] ? 'hide' : 'show'); ?>
 				</div>
 				

@@ -54,13 +54,6 @@ $config['js'] = array(
 		),
 );
 
-$config['css'] = array(
-		array(
-				'script' => 'css/main.css',
-				'no_pack' => 1, 	// simpler to keep font urls working
-		),
-);
-
 $GLOBALS['config'] = $config;
 
 /*

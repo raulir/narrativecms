@@ -1,0 +1,60 @@
+.cms_cssjs_settings_header {
+	border-bottom: 1px solid #a0a0a0;
+	line-height: 24px;
+    font-size: 18px;
+    padding-top: 10px;
+    position: relative;
+}
+
+.cms_cssjs_settings_csss {
+	min-height: 100px;
+	position: relative;
+	padding-top: 8px;
+}
+
+.cms_cssjs_settings_css_operations {
+	padding: 6px 0;
+	border-top: 1px solid #a0a0a0;
+	position: relative;
+	overflow: hidden;
+}
+
+.cms_cssjs_settings_csss_item_delete {
+	min-width: 67px;
+}
+
+.cms_cssjs_settings_css_add {
+	box-sizing: border-box;
+    display: block;
+    border: 1px solid #a0a0a0;
+    border-radius: 3px;
+    float: right;
+    padding: 1px 10px 0px 10px;
+    cursor: pointer;
+    text-align: center;
+    margin-left: 5px;
+    height: 24px;
+    line-height: 22px;
+    font-size: 14px;
+    width: 47px;
+}
+
+.cms_cssjs_settings_css_select {
+	
+	float: right;
+	border: 1px solid #a0a0a0;
+	display: block;
+	box-sizing: border-box;
+    padding: 2px 5px 0px 5px;
+    height: 24px;
+    line-height: 24px;
+    font-size: 14px;
+    font-family: foundrysterling;
+    font-weight: 200;
+    
+    option {
+	    font-weight: 200;
+	    line-height: 24px;
+    }
+    
+}

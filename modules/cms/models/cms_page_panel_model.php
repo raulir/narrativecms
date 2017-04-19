@@ -286,8 +286,6 @@ class cms_page_panel_model extends CI_Model {
 	}
 	
 	function update_cms_page_panel($cms_page_panel_id, $data, $no_purge = false){
-		
-		// $data['panel_params'] = json_encode($data['panel_params']);
 
 		if (isset($data['search_params'])){
 			$search_params = $data['search_params'];
@@ -309,7 +307,7 @@ class cms_page_panel_model extends CI_Model {
 				unset($data[$key]);
 			}
 		}
-		
+
 		if (!empty($params)){
 			
 			// detailed data
@@ -666,7 +664,7 @@ class cms_page_panel_model extends CI_Model {
 			$sql_arrays_str = '';
 		}
 		
-		$sql = "select a.*, b.value as _params, b.cms_page_panel_id from `block` a left join cms_page_panel_param b on b.name = '' and b.cms_page_panel_id = a.block_id " .
+		$sql = "select a.*, b.value as _params, a.block_id as cms_page_panel_id from `block` a left join cms_page_panel_param b on b.name = '' and b.cms_page_panel_id = a.block_id " .
 				" where ".$sql_filter_str." ".(!empty($sql_filter_str) && !empty($sql_arrays_str) ? ' and ' : '')." ".$sql_arrays_str." order by sort ".$order;
 		$sql = str_replace('!` =', '` !=', $sql); // not query
 

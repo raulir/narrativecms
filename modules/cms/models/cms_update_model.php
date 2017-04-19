@@ -6,7 +6,6 @@ class cms_update_model extends CI_Model {
 
 		$folders = array(
 			'application/',
-			'css/',
 			'js/',
 			'system/',
 			'modules/cms/',

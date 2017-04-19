@@ -128,48 +128,51 @@ if ( !function_exists('pack_css')) {
 			}
 			$csss[] = array(
 					'script' => $scsss_item['css'],
-					'no_pack' => !empty($scsss_item['no_pack']) ? 1 : 0,
+					'top' => !empty($scsss_item['top']) ? $scsss_item['top'] : 0,
 			);
 	
 		}
 		 
 		$css_arr = array();
-		$csss_no_pack = array();
 	
 		// normalise css array
 		foreach($csss as $key => $value){
-			if (!is_array($value)){
+			if (!is_array($value)){ // if just name, no properties
 				$csss[$key] = array(
 						'script' => $value,
-						'no_pack' => 0,
+						'top' => 0,
 				);
-			} else {
-				if (empty($value['no_pack'])){
-					$csss[$key]['no_pack'] = 0;
-				} else {
-					if (!in_array($csss[$key], $csss_no_pack)){
-						$csss_no_pack[] = $csss[$key];
-					}
-					unset($csss[$key]);
-				}
+			}
+		}
+		
+		foreach($csss as $key => $value){
+			if (empty($value['top'])){
+				$csss[$key]['top'] = 0;
 			}
 		}
 	
 		// get unique
 		$csss = array_intersect_key($csss, array_unique(array_map('serialize', $csss)));
-		$css_arr = array_merge($csss_no_pack, $csss);
 	
 		$css_string = '';
 	
-		if (!empty($csss_no_pack)){
-			foreach($csss_no_pack as $css){
-				$css_string .= '<link rel="stylesheet" type="text/css" href="'.$GLOBALS['config']['base_url'].$css['script'].
-				(!empty($GLOBALS['config']['cache']['force_download']) ? '?v='.time() : '').'"/>'."\n";
+		// sort by top
+		function to_top($a, $b){
+			
+			if ($a['top'] > $b['top']){
+				return -1;
+			} elseif ($a['top'] < $b['top']){
+				return 1;
+			} else {
+				return 0;
 			}
+
 		}
-	
+		
 		if (!empty($csss)){
 				
+			usort($csss, 'to_top');
+			
 			if ($GLOBALS['config']['cache']['pack_css']){
 	
 				$hash = substr(md5(serialize($csss)), 0, 8);
@@ -224,7 +227,7 @@ if ( !function_exists('pack_css')) {
 		}
 
 		if ($return_array){
-			return $css_arr;
+			return $csss; // as array
 		} else {
 			return $css_string;
 		}

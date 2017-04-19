@@ -31,6 +31,13 @@
 			"url":"admin/users/"
 		},
 		{
+			"id":"cms_cssjs_settings",
+			"name":"Global css",
+			"parent":"cms",
+			"access":"cms_cssjs",
+			"url":"admin/cssjs/"
+		},
+		{
 			"id":"cms_update",
 			"name":"Update",
 			"parent":"cms",
@@ -72,12 +79,20 @@
 		{
 			"access":"cms_users",
 			"name":"CMS users"
+		},
+		{
+			"access":"cms_cssjs",
+			"name":"CMS cssjs"
 		}
 	],
 	"panels":[
 		{
 			"id":"cms_console_log",
 			"name":"CMS console log"
+		},
+		{
+			"id":"cms_normalise",
+			"name":"CMS normalise css"
 		}
 	]
 }

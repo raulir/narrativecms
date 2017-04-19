@@ -62,7 +62,7 @@
 			
 		<?php else: ?>
 			<ul class="admin_list_sortable ui-sortable menu_items_list">
-				<div class="admin_text">No menu items found</div>
+				<div class="admin_list_sortable_div admin_text">No menu items found</div>
 			</ul>
 		<?php endif ?>
 	

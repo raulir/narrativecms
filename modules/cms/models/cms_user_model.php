@@ -90,17 +90,14 @@ class cms_user_model extends CI_Model {
 
 	function get_cms_user_all_access_keys(){
 
+		$this->load->model('cms_module_model');
+		
 		$return = [];
 
 		foreach($GLOBALS['config']['modules'] as $module){
-
-			$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/config.json';
-			if (file_exists($filename)){
-				$json_data = file_get_contents($filename);
-				$module_settings = json_decode($json_data, true);
-				if (!empty($module_settings['access']) && is_array($module_settings['access'])){
-					$return = array_merge($return, $module_settings['access']);
-				}
+			$config = $this->cms_module_model->get_module_config($module);
+			if (!empty($config['access']) && is_array($config['access'])){
+				$return = array_merge($return, $config['access']);
 			}
 		}
 

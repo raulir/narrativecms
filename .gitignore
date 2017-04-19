@@ -22,9 +22,21 @@ application/logs/*
 _feed
 _install
 
-/img/*
-!/img/2015/11/*
-/img/2015/11/_*
+img/*
+
+!img/2017
+img/2017/*
+!img/2017/04
+img/2017/04/*
+!img/2017/04/bytecrackers_logo_black.png
+
+!img/2015
+img/2015/*
+!img/2015/11
+img/2015/11/*
+!img/2015/11/background.jpg
+
+
 
 /config/*
 !/config/bccms.dev.php

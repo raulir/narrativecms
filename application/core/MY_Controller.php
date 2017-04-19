@@ -296,25 +296,8 @@ class MY_Controller extends CI_Controller{
 
     	$page = $this->load->view($filename, array('data' => $panel_data, ), true);
     	
- 		// put together mandatory config css and panel/controller loaded css
-		if (!empty($GLOBALS['config']['css'])){
-			$csss = array_merge($GLOBALS['config']['css'], $this->css);
-		} else {
-			$csss = $this->css;
-		}
-		$csss = array_merge($csss, $GLOBALS['_panel_css']);
+		$css_str = $this->get_page_css();
 
-		// scss
-		if (!empty($GLOBALS['config']['scss'])){
-			$scsss = array_merge($GLOBALS['config']['scss'], $this->scss);
-		} else {
-			$scsss = $this->scss;
-		}
-		$scsss = array_merge($scsss, $GLOBALS['_panel_scss']);
-
-		// compile files together
-		$css_str = pack_css($csss, $scsss);
-		
 		// put together mandatory config js and panel/controller loaded js
 		if (!empty($GLOBALS['config']['js'])){
 			$jss = array_merge($GLOBALS['config']['js'], $this->js);
@@ -383,6 +366,49 @@ class MY_Controller extends CI_Controller{
 				
 		));
     	 
+    }
+    
+    function get_page_css(){
+    	
+    	// get global css
+    	$global_css = [];
+    	if (file_exists($GLOBALS['config']['base_path'].'cache/cms_sccjs_settings.json')){
+    		
+    		$global_css = json_decode(file_get_contents($GLOBALS['config']['base_path'].'cache/cms_sccjs_settings.json'), true);
+    	
+    	} else {
+    		
+    		$this->load->model('cms_page_panel_model');
+    	
+    		$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'cms_cssjs_settings', 'page_id' => 0, ]);
+    		if (!empty($settings_a[0]['css'])){
+    			$global_css = $settings_a[0]['css'];
+    		}
+    		file_put_contents($GLOBALS['config']['base_path'].'cache/cms_sccjs_settings.json', json_encode($global_css));
+    	
+    	}
+    	$global_css = array_reverse($global_css);
+    	foreach($global_css as $css_item){
+    		
+    		if (substr($css_item, -4) === '.css'){
+    			array_unshift($this->css, ['script' => $css_item, 'top' => 2, ]);
+    		} else {
+    			array_unshift($this->scss, ['script' => $css_item, 'top' => 2, ]);
+    		}
+    		
+    	}
+
+    	// merge config css and panel/controller loaded css
+    	$csss = array_merge($this->css, $GLOBALS['_panel_css']);
+    	
+    	// scss
+    	$scsss = array_merge($this->scss, $GLOBALS['_panel_scss']);
+    	
+    	// compile files together
+    	$css_str = pack_css($csss, $scsss);
+    	
+    	return $css_str;
+    	
     }
 
     /**
@@ -680,7 +706,7 @@ class MY_Controller extends CI_Controller{
     		$return['css'] = $extends_files['css'];	
     	}
     	if (file_exists($GLOBALS['config']['base_path'].'modules/'.$return['module'].'/css/'.$return['module'].'.css')) {
-    		$return['css'][] = array('script' => 'modules/'.$return['module'].'/css/'.$return['module'].'.css', 'no_pack' => 1, );
+    		$return['css'][] = array('script' => 'modules/'.$return['module'].'/css/'.$return['module'].'.css', 'top' => 1, );
     	}
     	if (file_exists($GLOBALS['config']['base_path'].'modules/'.$return['module'].'/css/'.$return['name'].'.css')) {
     		$return['css'][] = array('script' => 'modules/'.$return['module'].'/css/'.$return['name'].'.css', );
@@ -694,7 +720,7 @@ class MY_Controller extends CI_Controller{
     	if (file_exists($GLOBALS['config']['base_path'].'modules/'.$return['module'].'/css/'.$return['module'].'.scss')) {
     		$return['scss'][] = array(
     				'script' => 'modules/'.$return['module'].'/css/'.$return['module'].'.scss',
-    				'no_pack' => 1,
+    				'top' => 1,
     				'related' => array(),
     				'css' => 'cache/'.$return['module'].'__'.$return['module'].'.css',
     				'module_path' => 'modules/'.$return['module'].'/',

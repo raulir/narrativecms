@@ -15,19 +15,18 @@ class cms_menu extends MY_Controller{
 	}
 
 	function panel_params($params){
+		
+		$this->load->model('cms_module_model');
 
 		$menu_items = array();
 		foreach($GLOBALS['config']['modules'] as $module){
-			$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/config.json';
-			if (file_exists($filename)){
-				$json_data = file_get_contents($filename);
-				$structure = json_decode($json_data, true);
-				if (!empty($structure['cms_menu'])){
-						
-					$menu_items = array_merge($menu_items, $structure['cms_menu']);
+			
+			$config = $this->cms_module_model->get_module_config($module);
 
-				}
+			if (!empty($config['cms_menu'])){
+				$menu_items = array_merge($menu_items, $config['cms_menu']);
 			}
+
 		}
 
 		$return['menu_items'] = array();

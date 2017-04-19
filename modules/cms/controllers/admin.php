@@ -12,9 +12,6 @@ class admin extends MY_Controller {
 			exit();
 		}
 
-		$this->css[] = array('script' => 'modules/cms/css/cms.css', 'no_pack' => 1, );
-
-		// $this->js[] = array('script' => 'js/jquery-3.1.0.min.js', 'no_pack' => 1, 'sync' => '', );
 		$this->js[] = array('script' => 'js/jquery-ui.min.js', );
 
 		$this->js[] = 'js/preloader.js';
@@ -332,7 +329,24 @@ class admin extends MY_Controller {
 		$this->output('admin', $panel_data);
 		 
 	}
-
+	
+	function cssjs($param = ''){
+	
+		// set page config
+		$page_config = array(
+				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
+				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
+				array('position' => 'main', 'panel' => 'cms/cms_cssjs_settings', ),
+		);
+	
+		// render panels
+		$panel_data = $this->render($page_config);
+	
+		// output to layout
+		$this->output('admin', $panel_data);
+			
+	}
+	
 	// deprecated
 	function cms_panel_in_panel($cms_page_panel_id, $parent_id = 0, $parent_name = ''){
 

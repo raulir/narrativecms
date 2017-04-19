@@ -171,17 +171,14 @@ class cms_page_model extends CI_Model {
 	
 	function get_layouts(){
 		
+		$this->load->model('cms_module_model');
+		
 		$return = array();
 	
 		foreach($GLOBALS['config']['modules'] as $module){
-			
-			$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/config.json';
-			if (file_exists($filename)){
-				$json_data = file_get_contents($filename);
-				$module_settings = json_decode($json_data, true);
-				if (!empty($module_settings['layouts']) && is_array($module_settings['layouts'])){
-					$return = array_merge($return, $module_settings['layouts']);
-				}
+			$config = $this->cms_module_model->get_module_config($module);
+			if (!empty($config['layouts']) && is_array($config['layouts'])){
+				$return = array_merge($return, $config['layouts']);
 			}
 		}
 

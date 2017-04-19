@@ -19,7 +19,8 @@ class admin_block extends MY_Controller{
 		$this->load->model('cms_page_panel_model');
 		$this->load->model('cms_page_model');
 		$this->load->model('cms_panel_model');
-
+		$this->load->model('cms_module_model');
+		
 		$return = array();
 
 		if (!empty($params['breadcrumb'])){
@@ -117,35 +118,33 @@ class admin_block extends MY_Controller{
 		$return['panel_replaced'] = [];
 
 		foreach($GLOBALS['config']['modules'] as $module){
-			$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/config.json';
-			if (file_exists($filename)){
-				$json_data = file_get_contents($filename);
-				$structure = json_decode($json_data, true);
-				if (!empty($structure['panels'])){
-					foreach($structure['panels'] as $panel){
+			
+			$config = $this->cms_module_model->get_module_config($module);
 
-						// add panel type to the dropdown of panel types
-						$panel_id = $module.'/'.$panel['id'];
-						if (!in_array($panel_id, $return['panel_replaced'])){
-							
-							$return['panel_types'][$panel_id] = ucfirst($module) . ' / ' . $panel['name'];
-							
-							// if showing the panel type hides some other panel type, like when extending the panel for project
-							if (!empty($panel['hides'])){
-								if (!empty($return['panel_types'][$panel['hides']])){
-									unset($return['panel_types'][$panel['hides']]);
-								}
-								$return['panel_replaced'][$panel['hides']] = $panel['hides'];
+			if (!empty($config['panels'])){
+				foreach($config['panels'] as $panel){
+
+					// add panel type to the dropdown of panel types
+					$panel_id = $module.'/'.$panel['id'];
+					if (!in_array($panel_id, $return['panel_replaced'])){
+						
+						$return['panel_types'][$panel_id] = ucfirst($module) . ' / ' . $panel['name'];
+						
+						// if showing the panel type hides some other panel type, like when extending the panel for project
+						if (!empty($panel['hides'])){
+							if (!empty($return['panel_types'][$panel['hides']])){
+								unset($return['panel_types'][$panel['hides']]);
 							}
-							
+							$return['panel_replaced'][$panel['hides']] = $panel['hides'];
 						}
-
-						// definition for this panel comes from elsewhere
-						if (($panel_id == $return['block']['panel_name'] || $panel_id == $module . '/' . $return['block']['panel_name']) && empty($return['independent_block']) && !empty($panel['definition'])){
-							$return['block']['panel_definition'] = stristr($panel['definition'], '/') ? $panel['definition'] : $module.'/'.$panel['definition'];
-						}
-
+						
 					}
+
+					// definition for this panel comes from elsewhere
+					if (($panel_id == $return['block']['panel_name'] || $panel_id == $module . '/' . $return['block']['panel_name']) && empty($return['independent_block']) && !empty($panel['definition'])){
+						$return['block']['panel_definition'] = stristr($panel['definition'], '/') ? $panel['definition'] : $module.'/'.$panel['definition'];
+					}
+
 				}
 			}
 		}

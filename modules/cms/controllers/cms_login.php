@@ -5,15 +5,14 @@ class cms_login extends MY_Controller {
     public function __construct() {
     	
         parent::__construct();        
-        $this->css[] = array('script' => 'modules/cms/css/cms.css', 'no_pack' => 1, );
-        
-       	// $this->js[] = array('script' => 'js/jquery-3.1.0.min.js', 'no_pack' => 1, 'sync' => '', );
+
         $this->js[] = array('script' => 'js/jquery-ui.min.js', );
 
         $this->js[] = 'js/panels.js';
         $this->js[] = 'modules/cms/js/cms.js';
   
         $GLOBALS['_panel_titles'][] = 'ADMIN - '.$GLOBALS['config']['title'];
+        
    	}
    	
    	function index(){

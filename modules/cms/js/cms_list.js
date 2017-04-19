@@ -100,7 +100,7 @@ function cms_list_load(start, limit, after){
 					if (!$('.admin_list_sortable').hasClass('admin_list_sortable_cancelled')){
 						// save order
 						var list_order = {};
-						$('.admin_list_sortable li').each(function(index, value){
+						$('.cms_list_sortable_item').each(function(index, value){
 							list_order[index] = $(this).data('block_id');
 						});
 						get_ajax('cms_list_save_order', {'do': 'cms_list_save_order', list_order: list_order});
@@ -189,7 +189,7 @@ $(document).ready(function() {
 	    			}
 	    		});
 				var list_order = {};
-				$('.admin_list_sortable li').each(function(index, value){
+				$('.cms_list_sortable_item').each(function(index, value){
 					list_order[index] = $(this).data('block_id');
 				});
 				get_ajax('cms_list_move', {
@@ -220,7 +220,7 @@ $(document).ready(function() {
 	    			}
 	    		});
 				var list_order = {};
-				$('.admin_list_sortable li').each(function(index, value){
+				$('.cms_list_sortable_item').each(function(index, value){
 					list_order[index] = $(this).data('block_id');
 				});
 				get_ajax('cms_list_move', {
