@@ -27,6 +27,7 @@ class cms_update_model extends CI_Model {
 			'htaccess',
 			'md',
 			'bin',
+			'htc',
 		);
 		
 		$hashes = array();
@@ -39,25 +40,29 @@ class cms_update_model extends CI_Model {
 			// go over all files recursively
 			$full_folder = str_replace("\\", '/', $GLOBALS['config']['base_path'].$folder);
 			
-			$it = new RecursiveDirectoryIterator($full_folder);
-			foreach (new RecursiveIteratorIterator($it) as $filename => $file) {
-				
-    			$cms_filename = $folder.str_replace($full_folder, '', str_replace("\\", '/', $filename));
- 				
- 				if(in_array(pathinfo($cms_filename, PATHINFO_EXTENSION), $extensions)){
-
-					// if matches, get hash
-					$cms_md5 = md5_file($filename);
+			if (file_exists($full_folder)){
 			
-					// add to hashes
-					$hashes[] = array(
-						'filename' => $cms_filename,
-						'hash' => $cms_md5,
-						'size' => filesize($filename),
-					);
+				$it = new RecursiveDirectoryIterator($full_folder);
+				foreach (new RecursiveIteratorIterator($it) as $filename => $file) {
 					
-					$version_hashes[] = $cms_md5;
-    				
+	    			$cms_filename = $folder.str_replace($full_folder, '', str_replace("\\", '/', $filename));
+	 				
+	 				if(in_array(pathinfo($cms_filename, PATHINFO_EXTENSION), $extensions)){
+	
+						// if matches, get hash
+						$cms_md5 = md5_file($filename);
+				
+						// add to hashes
+						$hashes[] = array(
+							'filename' => $cms_filename,
+							'hash' => $cms_md5,
+							'size' => filesize($filename),
+						);
+						
+						$version_hashes[] = $cms_md5;
+	    				
+					}
+					
 				}
 				
 			}
