@@ -27,6 +27,7 @@ class cms_update_model extends CI_Model {
 			'htaccess',
 			'md',
 			'bin',
+			'htc',
 		);
 		
 		$hashes = array();

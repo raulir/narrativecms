@@ -35,6 +35,10 @@ class cms_module_model extends CI_Model {
 			$return = json_decode($json_data, true);
 		}
 		
+		if (empty($return['panels'])){
+			$return['panels'] = [];
+		}
+		
 		return $return;
 		
 	}
