@@ -1,6 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 use Leafo\ScssPhp\Compiler;
+use MatthiasMullie\Minify;
 
 if ( !function_exists('pack_css')) {
 	
@@ -227,9 +228,21 @@ if ( !function_exists('pack_css')) {
 		}
 
 		if ($return_array){
+			
+			if ($GLOBALS['config']['cache']['pack_css']){
+				$csss = ['0' => ['script' => $fileurl.(!empty($GLOBALS['config']['cache']['force_download']) ? '?v='.time() : ''), ]];
+			} else {
+				foreach($csss as $key => $css){
+					$csss[$key]['script'] = $GLOBALS['config']['base_url'].$css['script'].(!empty($GLOBALS['config']['cache']['force_download']) ? '?v='.time() : '');
+				}
+			}
+		
 			return $csss; // as array
+		
 		} else {
+			
 			return $css_string;
+		
 		}
 		 
 	}
@@ -312,12 +325,32 @@ if ( !function_exists('pack_css')) {
 					$js_string .= $js_file_content."\n";
 				}
 	
-				// TODO: needs minifier
+				/*
 				$js_string = trim(preg_replace('/[ \t]+/', ' ', $js_string));
 				$js_string = trim(preg_replace('/\r/', '', $js_string));
 				$js_string = trim(preg_replace('/\n /', "\n", $js_string));
 				$js_string = trim(preg_replace('/[\n]+/', "\n", $js_string));
-				file_put_contents($filename, $js_string);
+				*/
+				
+				// js (css) minifier
+				require_once($GLOBALS['config']['base_path'].'application/libraries/minify/src/Minify.php');
+				require_once($GLOBALS['config']['base_path'].'application/libraries/minify/src/JS.php');
+				
+				$minifier = new Minify\JS($js_string);
+				 
+				try {
+					
+					$minifier->minify($filename);
+				
+				} catch (Exception $e) {
+					
+					if (!empty($GLOBALS['config']['errors_visible'])){
+						_html_error('JS Minifier error:<br>Message: Error minifying JavaScript!');
+					}
+					
+					file_put_contents($filename, $js_string);
+					
+				}
 	
 			}
 				

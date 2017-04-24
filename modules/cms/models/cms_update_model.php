@@ -28,6 +28,7 @@ class cms_update_model extends CI_Model {
 			'md',
 			'bin',
 			'htc',
+			'txt',
 		);
 		
 		$hashes = array();

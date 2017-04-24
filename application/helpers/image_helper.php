@@ -353,18 +353,23 @@ if ( !function_exists('_i')) {
 					$hq_str = ' data-cms_hq_background="'.$image_filename.'" ';
 					$image_filename = $GLOBALS['config']['upload_url'].$lq_image['image'];
 					
-					$GLOBALS['_images_hq'] = true;
-				
 				} else 	if (!empty($params['hq_width']) && (int)$params['hq_width'] > 0){
 					
 					// deprecated
 					$hq_image = _iw($image, ['width' => $params['hq_width'], ]);
 					$hq_str = ' data-cms_hq_background="'.$GLOBALS['config']['upload_url'].$hq_image['image'].'" ';
 					
-					$GLOBALS['_images_hq'] = true;
-					
 				}
-					
+				
+				$GLOBALS['_panel_js'][] = [
+						'script' => 'js/preloader.js',
+						'sync' => 'defer',
+				];
+				$GLOBALS['_panel_js'][] = [
+						'script' => 'modules/cms/js/cms_images_hq.js',
+						'sync' => 'defer',
+				];
+
 				// make 1x image
 				if (!empty($params['width']) || !empty($params['height'])){
 				

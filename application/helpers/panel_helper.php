@@ -253,8 +253,12 @@ if ( !function_exists('get_position')) {
     function _vh($height, $minwidth = 0){
     	
     	print(' data-cms_window_height="'.$height.'" data-cms_window_height_minwidth="'.$minwidth.'"');
-    	$GLOBALS['_window_height'] = true;
     	
+    	$GLOBALS['_panel_js'][] = [
+    			'script' => 'modules/cms/js/cms_window_height.js',
+    			'sync' => 'defer',
+    	];
+
     }
    
 }

@@ -264,26 +264,6 @@ class MY_Controller extends CI_Controller{
     
     function output($layout_name, $panel_data = array()){
     	
-    	// if hq images
-    	if (!empty($GLOBALS['_images_hq'])){
-			$GLOBALS['_panel_js'][] = [
-					'script' => 'js/preloader.js',
-					'sync' => 'defer', 
-			];
-    		$GLOBALS['_panel_js'][] = [
-					'script' => 'modules/cms/js/cms_images_hq.js',
-					'sync' => 'defer', 
-			];
-    	}
-    	
-    	// if fixed window height elements
-    	if (!empty($GLOBALS['_window_height'])){
-    		$GLOBALS['_panel_js'][] = [
-    				'script' => 'modules/cms/js/cms_window_height.js',
-    				'sync' => 'defer',
-    		];
-    	}
-    	 
     	$filename = $GLOBALS['config']['base_path'].'application/views/layout/'.$layout_name.'.tpl.php';
 		if (!file_exists($filename)){
 			foreach($GLOBALS['config']['modules'] as $module){
@@ -296,7 +276,31 @@ class MY_Controller extends CI_Controller{
 
     	$page = $this->load->view($filename, array('data' => $panel_data, ), true);
     	
-		$css_str = $this->get_page_css();
+		$css_arr = $this->get_page_css(true);
+		
+//		$css_arr = explode("\n", $css_str);
+		$css_str = '';
+		$preload_str = '';
+//		$noscript_str = '';
+		if (!empty($css_arr)){
+// print_r($css_arr);			
+			foreach($css_arr as $css_line){
+//				$css_str .= "cms_load_style('".$css_line['script']."');\n";
+				$preload_str .= '<link rel="preload" as="style" href="'.$css_line['script'].'">'."\n";
+				$css_str .= '<link rel="stylesheet" type="text/css" href="'.$css_line['script'].'" />';
+			}
+			/*
+    		$css_str = 	$preload_str.
+      					"<script type=\"text/javascript\">\n".
+    					"function cms_load_style(f){var s = document.createElement('link');\n".
+    					"s.rel = 'stylesheet';s.type = 'text/css';s.href = f;document.getElementsByTagName('head')[0].appendChild(s);}\n".
+//    					"window.addEventListener('load', function(){\n".$css_str."});".
+    					"setTimeout(function(){\n".$css_str."}, 0);".
+    		"</script>\n";
+//    		"";
+ 			*/
+		}
+    	
 
 		// put together mandatory config js and panel/controller loaded js
 		if (!empty($GLOBALS['config']['js'])){
@@ -310,7 +314,7 @@ class MY_Controller extends CI_Controller{
 		// images, descriptions and titles from panels
 		$image_str = '';
 		if (!empty($GLOBALS['_panel_images'])){
-			$GLOBALS['_panel_images'] = array_slice($GLOBALS['_panel_images'], 0, 3);
+			$GLOBALS['_panel_images'] = array_slice($GLOBALS['_panel_images'], 0, 3); // maximum 3 images
 			$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
 			foreach($GLOBALS['_panel_images'] as $image){
 				if (!empty($image)){
@@ -351,8 +355,8 @@ class MY_Controller extends CI_Controller{
 				
 				'<title>'.$_title.'</title>'."\n".
 				'<meta name="description" content="'.strip_tags($_description).'" />'."\n".
-				$js_str."\n".
 				$css_str."\n".
+    			$js_str."\n".
 				'<meta property="og:url" content="'.
 						((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) 
 								? 'https://' : 'http://' ).$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].'" />'."\n".
@@ -368,7 +372,7 @@ class MY_Controller extends CI_Controller{
     	 
     }
     
-    function get_page_css(){
+    function get_page_css($return_array = false){
     	
     	// get global css
     	$global_css = [];
@@ -405,7 +409,7 @@ class MY_Controller extends CI_Controller{
     	$scsss = array_merge($this->scss, $GLOBALS['_panel_scss']);
     	
     	// compile files together
-    	$css_str = pack_css($csss, $scsss);
+    	$css_str = pack_css($csss, $scsss, $return_array);
     	
     	return $css_str;
     	
@@ -485,15 +489,10 @@ class MY_Controller extends CI_Controller{
     		$css_arr = pack_css($this->css, $this->scss, true);
 
 			if (count($css_arr)){
-	    		
-	    		$css_inc_arr = array();
-		    	foreach($css_arr as $css){
-		    		$css_inc_arr[] = $GLOBALS['config']['base_url'].$css['script'];
-		    	}
 
 		    	$css_str = '<script type="text/javascript">'."\n";
-		    	foreach ($css_inc_arr as $css_inc){
-		    		$css_str .=	'cms_load_css(\''.$css_inc.'\', '.(!empty($GLOBALS['config']['cache']['force_download']) ? 'true' : 'false').');'."\n";
+		    	foreach ($css_arr as $css_inc){
+		    		$css_str .=	'cms_load_css(\''.$css_inc['script'].'\', '.(!empty($GLOBALS['config']['cache']['force_download']) ? 'true' : 'false').');'."\n";
 		    	}
 		    	$css_str .= '</script>'."\n";
 	    	
