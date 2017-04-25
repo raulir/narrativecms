@@ -100,30 +100,44 @@ class MY_Controller extends CI_Controller{
     		$files = $this->get_panel_filenames($name);
     	}
 
-    	// temporarily create new ci sandbox for panel
-    	$this->panel_ci =& get_instance();
-    	 
     	// if extended, run extended controller first
     	if (!empty($files['extends_controller'])){
     			
+    		// temporarily create new ci sandbox for panel
+    		$this->panel_ci =& get_instance();
+    	 
     		$extends_panel_name = $files['extends_module'].'_'.$files['extends_name'].'_panel';
-    		$this->panel_ci->load->library($files['extends_controller'], '', $extends_panel_name);
+    		$this->panel_ci->load->library(
+    				$files['extends_controller'], 
+    				['module' => $files['extends_module'], 'name' => $files['extends_name'], ], 
+    				$extends_panel_name
+    		);
     		
     		if (method_exists($this->panel_ci->{$extends_panel_name}, 'panel_action')){
     			$this->panel_ci->{$extends_panel_name}->init_panel(array('name' => $files['extends_name'], 'controller' => $files['extends_controller'], ));
     			$params = $this->panel_ci->{$extends_panel_name}->panel_action($params);
 	    	}
+	    	
+	    	// clear temporary resource
+	    	unset($this->panel_ci);
     		
     	}
     	
     	// if there is a normal controller, do this
     	if (!empty($files['controller'])){
+
+    		// temporarily create new ci sandbox for panel
+    		$this->panel_ci =& get_instance();
     		
-	    	// load panel stuff into this sandbox - it will be the same as sandbox is singleton for itself
+    		// load panel stuff into this sandbox - it will be the same as sandbox is singleton for itself
 	    	$panel_name = $files['module'].'_'.$files['name'].'_panel';
-	    	$this->panel_ci->load->library($files['controller'], '', $panel_name);
-	    
-    		if (method_exists($this->panel_ci->{$panel_name}, 'panel_action')){
+	    	$this->panel_ci->load->library(
+	    			$files['controller'], 
+	    			['module' => $files['module'], 'name' => $files['name'], ], 
+	    			$panel_name
+	    	);
+
+			if (method_exists($this->panel_ci->$panel_name, 'panel_action')){
 
 	    		// define this controller as panel
 	    		$this->panel_ci->{$panel_name}->init_panel(array('name' => $files['name'], 'controller' => $files['controller'], ));
@@ -132,12 +146,12 @@ class MY_Controller extends CI_Controller{
 	    		$params = $this->panel_ci->{$panel_name}->panel_action($params);
 	    		
     		}
+    		
+    		// clear temporary resource
+    		unset($this->panel_ci);
 
     	}
-    	
-    	// clear temporary resource
-    	unset($this->panel_ci);
-    	
+    	    	
     	return $params;
 
     }
@@ -164,27 +178,42 @@ class MY_Controller extends CI_Controller{
     		$controller_timer_start = round(microtime(true) * 1000);
     		
     		$params['module'] = $files['module'];
-    		
-    		// temporarily create new ci sandbox for panel
-    		$this->panel_ci =& get_instance();
-    		
+    		    		
     		// if extended, run extended controller first
     		if (!empty($files['extends_controller'])){
     			
+    			// temporarily create new ci sandbox for panel
+    			$this->panel_ci =& get_instance();
+    			
     			$extends_panel_name = $files['extends_module'].'_'.$files['extends_name'].'_panel';
-    			$this->panel_ci->load->library($files['extends_controller'], '', $extends_panel_name);
+    			$this->panel_ci->load->library(
+    					$files['extends_controller'], 
+    					['module' => $files['extends_module'], 'name' => $files['extends_name'], ], 
+    					$extends_panel_name
+    			);
     			$this->panel_ci->{$extends_panel_name}->init_panel(array('name' => $files['extends_name'], 'controller' => $files['extends_controller'], ));
     			$params = $this->panel_ci->{$extends_panel_name}->panel_params($params);
     		
+    			// clear temporary resource
+    			unset($this->panel_ci);
+    			
     		}
     		
     		// if there is a normal controller, do this
     		if (!empty($files['controller'])){
     		
-	    		// load panel stuff into this sandbox - it will be the same as sandbox is singleton for itself
+    			// temporarily create new ci sandbox for panel
+    			$this->panel_ci =& get_instance();
+    			
+    			// load panel stuff into this sandbox - it will be the same as sandbox is singleton for itself
 	    		$panel_name = $files['module'].'_'.$files['name'].'_panel';
-	    		$this->panel_ci->load->library($files['controller'], '', $panel_name);
-	    
+
+	    		$this->panel_ci->load->library(
+	    				$files['controller'], 
+	    				['module' => $files['module'], 'name' => $files['name'], ], 
+	    				$panel_name
+	    		);
+	    		
 	    		// define this controller as panel
 	    		$this->panel_ci->{$panel_name}->init_panel(array('name' => $files['name'], 'controller' => $files['controller'], ));
 	    		
@@ -196,11 +225,11 @@ class MY_Controller extends CI_Controller{
 	    		$panel_css = array_merge($panel_css, $this->panel_ci->{$panel_name}->css);
 	    		$panel_scss = array_merge($panel_scss, $this->panel_ci->{$panel_name}->scss);
 	    		
+    			// clear temporary resource
+    			unset($this->panel_ci);
+    		
     		}
 
-    		// clear temporary resource
-    		unset($this->panel_ci);
-    		
     		$controller_timer_end = round(microtime(true) * 1000);
     		
     	}
@@ -220,7 +249,7 @@ class MY_Controller extends CI_Controller{
     		$template_timer_end = round(microtime(true) * 1000);
     		
     	} else if (empty($params['panel_id'])){
-    		$return = html_error('Missing panel: '.$name);
+    		$return = html_error('Missing panel template: '.$name);
     	} else {
     		$return = '';
     	}

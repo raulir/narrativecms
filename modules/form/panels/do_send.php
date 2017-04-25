@@ -64,7 +64,7 @@ class do_send extends MY_Controller{
 				
 			$return['message'] = 'ok';
 			
-			if (!empty($GLOBALS['config']['errors_visible'])){
+			if (!empty($GLOBALS['config']['errors_visible']) && !empty($result)){
 				$return['result'] = $result;
 			}
 			

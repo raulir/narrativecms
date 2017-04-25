@@ -153,7 +153,7 @@ class Index extends MY_Controller {
 		//
 		$_ajax = $this->input->post('_ajax');
 		if (empty($_ajax)){
-		
+				
 			// render panels
 			$panel_data = $this->render($page_config);
 			//  output to the template
@@ -162,7 +162,7 @@ class Index extends MY_Controller {
 		} else {
 		
 			$return = '';
-				
+
 			$_positions = $this->input->post('_positions');
 			foreach($page_config as $key => $panel_config){
 				if (in_array($panel_config['position'], $_positions)) {

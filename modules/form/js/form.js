@@ -1,26 +1,33 @@
-function webform_init(){
+function form_init(){
 	
-	$('.webform_submit').on('click.crl', function(){
+	$('.form_form>form').on('submit.cms', function(){
+		$('.form_submit').click();
+		return false;
+	});
+	
+	$('.form_submit').on('click.crl', function(){
 		
 		var $form = $(this).closest('form');
 		
 		var missing = 0;
-		$('.webform_mandatory', $form).each(function(){
+		$('.form_mandatory', $form).each(function(){
 			var $this = $(this);
 			if ($this.val() == '' || ($this.attr('name') == 'email' && !($this.val().indexOf('@') >= 0) )){
 				missing = missing + 1;
-				$this.parent().addClass('webform_error');
+				$this.parent().addClass('form_error');
 				setTimeout(function(){
-					$this.parent().removeClass('webform_error');
+					$this.parent().removeClass('form_error');
 				}, 5000);
 			}
 		});
 		
 		if (missing == 0){
 			
-			$('.webform_message').addClass('webform_message_active');
+			$('.form_input_input').blur();
+			
+			$('.form_message').addClass('form_message_active');
 			setTimeout(function(){
-				$('.webform_message').addClass('webform_message_status_sending');
+				$('.form_message').addClass('form_message_status_sending');
 			}, 50);
 			
 			var fa = $form.serializeArray();
@@ -39,13 +46,13 @@ function webform_init(){
 
 				setTimeout(function(){
 					setTimeout(function(){
-						$('.webform_message').removeClass('webform_message_status_sending').addClass('webform_message_status_active');
+						$('.form_message').removeClass('form_message_status_sending').addClass('form_message_status_active');
 					}, 50);
 					
 				}, 500);
     		
 				setTimeout(function(){
-					$('.webform_message').removeClass('webform_message_status_active').removeClass('webform_message_active');
+					$('.form_message').removeClass('form_message_status_active').removeClass('form_message_active');
 				}, 30000);
 				
 			}}, fo));
@@ -54,7 +61,7 @@ function webform_init(){
 
 	});
 	
-	$('.webform_input_input').each(function(){
+	$('.form_input_input').each(function(){
 		var $this = $(this);
 		if (parseInt($this.data('limit'))){
 			$this.on('change.crl keyup.crl', function(){
@@ -67,18 +74,18 @@ function webform_init(){
 	
 }
 
-function webform_resize(){
+function form_resize(){
 
 }
 
 $(document).ready(function() {
 	
 	$(window).on('resize.r', function(){
-		webform_resize();
+		form_resize();
 	});
 
-	webform_resize();
+	form_resize();
 	
-	webform_init();
+	form_init();
 	
 });

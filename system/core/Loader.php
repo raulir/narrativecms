@@ -882,8 +882,20 @@ class CI_Loader {
 	protected function _ci_load_class($class, $params = NULL, $object_name = NULL) {
 
 		// load from anywhere if file exists
-		if (stristr($class, 'modules/') && file_exists($class)){
+		if (!empty($params['module']) && !empty($params['name'])){
+
+			if (!in_array($class, $this->_ci_loaded_files)){
+				
+				$filepath = $GLOBALS['config']['base_path'].'modules/'.$params['module'].'/panels/'.$params['name'].'.php';
+				include_once($filepath);
+				$this->_ci_loaded_files[] = $filepath;
+
+				return $this->_ci_init_class($params['name'], '', NULL, $object_name, $params);
+				
+			}
 			
+		} else if (stristr($class, 'modules/') && file_exists($class)){
+				
 			$filepath = $class;
 			
 			$last_slash = strrpos($class, '/');
@@ -906,7 +918,9 @@ class CI_Loader {
 				return;
 			}
 		} else {
+
 			$class = str_replace($GLOBALS['config']['base_path'].'application/controllers/panels/', '../controllers/panels/', $class);
+		
 		}
 		
 		// Get the class name, and while we're at it trim any slashes.
@@ -1035,8 +1049,14 @@ class CI_Loader {
 	 * @param	string	an optional object name
 	 * @return	null
 	 */
-	protected function _ci_init_class($class, $prefix = '', $config = FALSE, $object_name = NULL)
+	protected function _ci_init_class($class, $prefix = '', $config = FALSE, $object_name = NULL, $params = [])
 	{
+
+		// check if class has namespace
+		if (class_exists($params['module'].'\\'.$params['name'])){
+			$class = $params['module'].'\\'.$params['name'];
+		}
+		
 		// Is there an associated config file for this class?  Note: these should always be lowercase
 		if ($config === NULL)
 		{
@@ -1045,6 +1065,7 @@ class CI_Loader {
 
 			if (is_array($config_component->_config_paths))
 			{
+
 				// Break on the first found file, thus package files
 				// are not overridden by default paths
 				foreach ($config_component->_config_paths as $path)
@@ -1129,6 +1150,7 @@ class CI_Loader {
 		{
 			$CI->$classvar = new $name;
 		}
+
 	}
 
 	// --------------------------------------------------------------------

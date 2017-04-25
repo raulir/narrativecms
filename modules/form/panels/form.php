@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class webform extends MY_Controller{
+class form extends MY_Controller{
 	
 	function panel_params($params){
 		
