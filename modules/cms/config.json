@@ -88,10 +88,6 @@
 	],
 	"panels":[
 		{
-			"id":"cms_console_log",
-			"name":"CMS console log"
-		},
-		{
 			"id":"cms_normalise",
 			"name":"CMS normalise css"
 		}

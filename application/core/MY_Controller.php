@@ -248,7 +248,7 @@ class MY_Controller extends CI_Controller{
 
     		$template_timer_end = round(microtime(true) * 1000);
     		
-    	} else if (empty($params['panel_id'])){
+    	} else if (empty($params['panel_id']) && !empty($GLOBALS['config']['errors_visible'])){
     		$return = html_error('Missing panel template: '.$name);
     	} else {
     		$return = '';
@@ -651,7 +651,7 @@ class MY_Controller extends CI_Controller{
     	$return = [];
 
     	if (!empty($extends['panel'])){
-    		if (!stristr($extends['panel'], '/')){
+    		if (!stristr($extends['panel'], '/') && !empty($GLOBALS['config']['errors_visible'])){
     			_html_error('Bad panel extension panel name (definition has to be "module/panel", save page panel in CMS after fixing)');
     		} else {
     			$extends_files = $this->get_panel_filenames($extends['panel']);

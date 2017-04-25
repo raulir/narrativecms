@@ -3,6 +3,10 @@
 		{
 			"id":"analytics",
 			"name":"Analytics"
+		},
+		{
+			"id":"console_log",
+			"name":"Console log"
 		}
 	],
 	"cms_menu":[

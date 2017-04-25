@@ -40,7 +40,7 @@ if ( !function_exists('get_position')) {
      */
     function _panel_id($block_id, $_params = array()){
     	
-    	if (empty($block_id)){
+    	if (empty($block_id) && !empty($GLOBALS['config']['errors_visible'])){
     		
     		_html_error('Embed panel by id called with empty id.');
     		return;
