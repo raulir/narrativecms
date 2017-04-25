@@ -47,6 +47,11 @@ class cms_menu extends MY_Controller{
 				}
 
 			}
+
+			// check if not deprecated
+			if (!empty($menu_item['deprecated']) && empty($GLOBALS['config']['deprecated'])){
+				$found = false;
+			}
 				
 			if ($found){
 

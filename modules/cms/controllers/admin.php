@@ -346,12 +346,5 @@ class admin extends MY_Controller {
 		$this->output('admin', $panel_data);
 			
 	}
-	
-	// deprecated
-	function cms_panel_in_panel($cms_page_panel_id, $parent_id = 0, $parent_name = ''){
-
-		$this->block($cms_page_panel_id);
-
-	}
 
 }
