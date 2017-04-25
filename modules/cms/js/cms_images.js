@@ -166,7 +166,7 @@ function cms_images_upload(){
 	var label = '0%';
 	setTimeout(function(){
 		if (load_in_progress){
-			$('.cms_images_container').append('<div class="cms_images_container_upload"><div class="cms_images_container_cell"><div class="cms_images_container_bar">' +
+			$('.cms_images_content').append('<div class="cms_images_container_upload"><div class="cms_images_container_cell"><div class="cms_images_container_bar">' +
 					'<div class="cms_images_container_bg"></div><div class="cms_images_container_label">' + label + '</div></div></div></div>');
 		}
 	}, 300);
