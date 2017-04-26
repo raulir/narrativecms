@@ -229,7 +229,7 @@ if ( !function_exists('pack_css')) {
 
 		if ($return_array){
 			
-			if ($GLOBALS['config']['cache']['pack_css']){
+			if ($GLOBALS['config']['cache']['pack_css'] && !empty($fileurl)){
 				$csss = ['0' => ['script' => $fileurl.(!empty($GLOBALS['config']['cache']['force_download']) ? '?v='.time() : ''), ]];
 			} else {
 				foreach($csss as $key => $css){

@@ -373,46 +373,50 @@ class cms_update_model extends CI_Model {
 		
 		// go over all cache files recursively
 		$folder = $GLOBALS['config']['base_path']. 'cache/update/';
-			
-		$it = new RecursiveDirectoryIterator($folder);
-		foreach (new RecursiveIteratorIterator($it) as $filename => $file) {
 		
-			$from_filename = $folder . str_replace($folder, '', str_replace("\\", '/', $filename));
+		if (file_exists($folder)){
 			
-			if (!is_dir($from_filename)){
+			$it = new RecursiveDirectoryIterator($folder);
+			foreach (new RecursiveIteratorIterator($it) as $filename => $file) {
 			
-				$to_filename = $GLOBALS['config']['base_path'] . str_replace($folder, '', str_replace("\\", '/', $filename));
-					
-				// check whats inside
-				$contents = file_get_contents($from_filename);
-				if ($contents == '_DELETE_'){
-					unlink($to_filename);
-				} else {
-					copy($from_filename, $to_filename);
-				}
+				$from_filename = $folder . str_replace($folder, '', str_replace("\\", '/', $filename));
 				
-				unlink($from_filename);
-			
-			}
-
-		}
-		
-		// delete directory in cache
-		function rrmdir($dir) {
-			if (is_dir($dir)) {
-				$objects = scandir($dir);
-				foreach ($objects as $object) {
-					if ($object != "." && $object != "..") {
-						if (is_dir($dir."/".$object))
-							rrmdir($dir."/".$object);
-							else
-								unlink($dir."/".$object);
+				if (!is_dir($from_filename)){
+				
+					$to_filename = $GLOBALS['config']['base_path'] . str_replace($folder, '', str_replace("\\", '/', $filename));
+						
+					// check whats inside
+					$contents = file_get_contents($from_filename);
+					if ($contents == '_DELETE_'){
+						unlink($to_filename);
+					} else {
+						copy($from_filename, $to_filename);
 					}
+					
+					unlink($from_filename);
+				
 				}
-				rmdir($dir);
+	
 			}
+			
+			// delete directory in cache
+			function rrmdir($dir) {
+				if (is_dir($dir)) {
+					$objects = scandir($dir);
+					foreach ($objects as $object) {
+						if ($object != "." && $object != "..") {
+							if (is_dir($dir."/".$object))
+								rrmdir($dir."/".$object);
+								else
+									unlink($dir."/".$object);
+						}
+					}
+					rmdir($dir);
+				}
+			}
+			rrmdir($folder);
+		
 		}
-		rrmdir($folder);
 
 	}
 	
