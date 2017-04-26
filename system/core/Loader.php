@@ -1053,7 +1053,7 @@ class CI_Loader {
 	{
 
 		// check if class has namespace
-		if (class_exists($params['module'].'\\'.$params['name'])){
+		if (!empty($params['module']) && !empty($params['name']) && class_exists($params['module'].'\\'.$params['name'])){
 			$class = $params['module'].'\\'.$params['name'];
 		}
 		
