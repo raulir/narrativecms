@@ -530,6 +530,10 @@ function is_touch_event(e){
  */
 function cms_video_resize(params){
 	
+	if (typeof params.after != 'function'){
+		params.after = function(){};
+	}
+	
 	var $this = params.$this;
 	
 	$this.css({
@@ -544,7 +548,7 @@ function cms_video_resize(params){
 		
 		setTimeout(function(){
 			cms_video_resize(params);
-		}, 800);
+		}, 500);
 		
 		return;
 	

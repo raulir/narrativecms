@@ -257,6 +257,7 @@ class admin extends MY_Controller {
 	function panel_settings($panel_name, $title = ''){
 		
 		$this->load->model('cms_page_panel_model');
+		$this->load->model('cms_panel_model');
 		
 		// with module name
 		if (stristr($panel_name, '__')){
@@ -268,7 +269,16 @@ class admin extends MY_Controller {
 		// check if exists
 		$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => $panel_name, 'page_id' => 0, ]);
 		if (!count($settings_a)){
-			$this->cms_page_panel_model->create_cms_page_panel(['panel_name' => $panel_name, ]);
+			
+			$params = ['panel_name' => $panel_name, ];
+			
+			// load definition
+			$panel_config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+			
+			$params['title'] = (!empty($panel_config['label']) ? $panel_config['label'] : $panel_name).' settings';
+			
+			$this->cms_page_panel_model->create_cms_page_panel($params);
+			
 		}
 		
 		// standardise panel name and module

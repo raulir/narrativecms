@@ -151,7 +151,7 @@ class admin_block extends MY_Controller{
 		
 		// check if panel is list item on the same named page
 		$panel_definition = $this->cms_panel_model->get_cms_panel_config($return['block']['panel_definition']);
-		
+
 		if (!empty($panel_definition['list']) && !empty($return['cms_page_id']) && $return['block']['panel_name'] == $panel_definition['module'].'/'.$return['cms_page']['slug']){
 			if (empty($panel_definition['settings'])){
 				$panel_structure = [];
@@ -159,7 +159,17 @@ class admin_block extends MY_Controller{
 				$panel_structure = $panel_definition['settings'];
 			}
 		} else {
-			$panel_structure = $panel_definition['item'];
+			if (!empty($return['cms_page_id'])){
+				$panel_structure = $panel_definition['item'];
+			} else {
+				if (!empty($panel_definition['settings'])){
+					$panel_structure = $panel_definition['settings'];
+				} else if (!empty($panel_definition['item'])){
+					$panel_structure = $panel_definition['item'];
+				} else {
+					$panel_structure = [];
+				}
+			}
 		}
 		
 		$return['fk_data'] = $this->cms_panel_model->get_cms_panel_fk_data($panel_structure);

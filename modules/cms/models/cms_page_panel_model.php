@@ -571,7 +571,11 @@ class cms_page_panel_model extends CI_Model {
 			unset($filter['cms_page_panel_id']);
 		}
 		
-
+		if (isset($filter['cms_page_id'])){
+			$filter['page_id'] = $filter['cms_page_id'];
+			unset($filter['cms_page_id']);
+		}
+		
 		if (isset($filter['_limit'])){
 			$limit = (int)$filter['_limit'];
 			unset($filter['_limit']);
@@ -727,9 +731,42 @@ class cms_page_panel_model extends CI_Model {
     	} else {
     		$return = array_values($return);
     	}
-		
+    	
+    	foreach($return as $key => $cms_page_panel){
+    		if (!isset($cms_page_panel['cms_page_id'])){
+    			$return[$key]['cms_page_id'] = $cms_page_panel['page_id'];
+    		}
+    	}
+    	
+    	// check for page panel settings
+    	foreach($return as $key => $cms_page_panel){
+    		
+    		if ($cms_page_panel['page_id']){
+//    			print("\n".$cms_page_panel['panel_name']."\n");
+   				$return[$key] = array_merge($this->get_cms_page_panel_settings($cms_page_panel['panel_name']), $cms_page_panel);
+
+    		}
+    		
+    	}
+// print_r($return);
     	return $return;
     
+	}
+	
+	/**
+	 * 
+	 * @param unknown $cms_panel_name - module/panel_name
+	 */
+	function get_cms_page_panel_settings($cms_panel_name){
+		
+		$settings_a = $this->get_cms_page_panels_by(['panel_name' => $cms_panel_name, 'cms_page_id' => 0, ]);
+		 
+		if (!empty($settings_a[0])){
+			return $settings_a[0];
+		}
+		
+		return [];
+		
 	}
 	
 	function shift_sort($panel_name, $start, $shift){ // panel name, start, amount

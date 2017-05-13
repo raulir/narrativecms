@@ -445,7 +445,7 @@ class MY_Controller extends CI_Controller{
     }
 
     /**
-     * @return panel source which can be inserted to the page with jquery
+     * @return panel source which can be inserted to the page with jquery or _panel helper
      * 
      * @param no_html 	returns only array returned from panel view
      * @param embed 	returns only html part and adds js and css to ci (this) object
@@ -477,6 +477,9 @@ class MY_Controller extends CI_Controller{
     	if (!is_array($params)){
     		$params = array('data' => $params, );
     	}
+    	
+    	// get page panel settings
+    	$params = array_merge($this->cms_page_panel_model->get_cms_page_panel_settings($name), $params);
     	
     	// do panel action
     	$action_result = $this->run_action($name, $params);
