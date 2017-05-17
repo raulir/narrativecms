@@ -505,10 +505,16 @@ class cms_page_panel_model extends CI_Model {
 					$parent_config = $this->cms_panel_model->get_cms_panel_config($parent['panel_name']);
 					foreach($parent_config['item'] as $item){
 						if ($item['type'] == 'cms_page_panels'){
-							$children = explode(',', $parent[$item['name']]);
+							
+							if (!is_array($parent[$item['name']])){
+								$children = explode(',', $parent[$item['name']]);
+							} else {
+								$children = $parent[$item['name']];
+							}
+							
 							if(($key = array_search($cms_page_panel_id, $children)) !== false) {
     							unset($children[$key]);
-    							$this->update_cms_page_panel($cms_page_panel['parent_id'], array($item['name'] => implode(',', $children), ), true);
+    							$this->update_cms_page_panel($cms_page_panel['parent_id'], array($item['name'] => $children, ), true);
 							}
 						}
 					}

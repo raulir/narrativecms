@@ -91,24 +91,29 @@ class cms_page_panel_operations extends MY_Controller{
 			foreach($panel_structure as $struct){
 				if ($struct['type'] == 'cms_page_panels' && !empty($data[$struct['name']])){
 
-					$children = explode(',', $data[$struct['name']]);
+					if (!is_array($data[$struct['name']])){
+						$children = explode(',', $data[$struct['name']]);
+					} else {
+						$children = $data[$struct['name']];
+					}
 					$new_children = array();
 	     
 					// copy children
 					foreach($children as $child_id){
 						$child_data = $this->cms_page_panel_model->get_cms_page_panel($child_id);
 						unset($child_data['block_id']);
+						unset($child_data['cms_page_panel_id']);
 						$new_children[] = $this->cms_page_panel_model->create_cms_page_panel($child_data); // returns id
 					}
 	     
 					// update data with new children data
-					$data[$struct['name']] = implode(',', $new_children);
+					$data[$struct['name']] = $new_children;
 	     
 					$all_children = $all_children + $new_children;
 
 				}
 			}
-			 
+
 			// set new block sort to old + 1 and move other blocks out of the way
 			if ($data['page_id'] == 999999 || $data['page_id'] == 0){
 				$data['sort'] = $data['sort'] + 1;
@@ -117,6 +122,8 @@ class cms_page_panel_operations extends MY_Controller{
 			 
 			// insert new block
 			unset($data['block_id']);
+			unset($data['cms_page_panel_id']);
+				
 			$new_block_id = $this->cms_page_panel_model->create_cms_page_panel($data);
 			 
 			// update children with parent id
@@ -183,19 +190,9 @@ class cms_page_panel_operations extends MY_Controller{
 				}
 			}
 			 
-			// if it contains cms_page_panels (panel_in_panel) fields
-			foreach($panel_structure as $struct){
-				if ($struct['type'] == 'cms_page_panels' && !empty($data['panel_params'][$struct['name']]) &&
-						is_array($data['panel_params'][$struct['name']])){
-							 
-							$data['panel_params'][$struct['name']] = implode(',', $data['panel_params'][$struct['name']]);
-
-				}
-			}
-
 			foreach ($data['panel_params'] as $key => $value){
 
-				// if repeater with something in it
+				// if repeater with something in it - collect values to records
 				if (is_array($value) && is_array(reset($value))){
 					$temp_result = array();
 					foreach($value as $skey => $kvalues){
@@ -226,6 +223,23 @@ class cms_page_panel_operations extends MY_Controller{
 
 			if (($data['page_id'] == 999999 || $data['page_id'] == 0) && !empty($data['panel_params']['heading'])){
 				$data['title'] = $data['panel_params']['heading'];
+			}
+
+			// if it contains cms_page_panels (panel_in_panel) fields which are empty
+			foreach($panel_structure as $struct){
+				
+				if ($struct['type'] == 'cms_page_panels' && empty($data['panel_params'][$struct['name']])){
+							 
+					$data['panel_params'][$struct['name']] = [];
+
+				}
+				
+				if ($struct['type'] == 'repeater' && empty($data['panel_params'][$struct['name']])){
+							 
+					$data['panel_params'][$struct['name']] = [];
+
+				}
+				
 			}
 
 			// save data
