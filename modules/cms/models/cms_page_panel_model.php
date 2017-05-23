@@ -534,7 +534,11 @@ class cms_page_panel_model extends CI_Model {
 	    // shortcuts
 	    $sql = "delete from block where panel_name = ? ";
 	    $this->db->query($sql, array($cms_page_panel_id, ));
-	    	    
+	    
+	    // delete slug pointing to this panel
+	    $this->load->model('cms_slug_model');
+	    $this->cms_slug_model->delete_slug($cms_page_panel['panel_name'].'='.$cms_page_panel_id);
+	    
 		$this->invalidate_html_cache($cms_page_panel_id);
 	
 	}

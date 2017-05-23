@@ -166,6 +166,10 @@ class cms_page_model extends CI_Model {
 		    }
 	    
 	    }
+	    
+	    // delete slug
+	    $this->load->model('cms_slug_model');
+	    $this->cms_slug_model->delete_slug($page_id);
 
 	}
 	
