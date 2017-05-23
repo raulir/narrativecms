@@ -112,15 +112,15 @@ class cms_slug_model extends CI_Model {
 	}
 	
 	function delete_slug($target){
-		
-		$sql = "delete cms_slug where target = ? ";
+
+		$sql = "delete from cms_slug where target = ? ";
     	$query = $this->db->query($sql, [$target, ]);
     	
     	if (stristr($target, '/')){
     		
     		list($module, $panel) = explode('/', $target);
     		
-			$sql = "delete cms_slug where target = ? ";
+			$sql = "delete from cms_slug where target = ? ";
     		$query = $this->db->query($sql, [$panel, ]);
     	
     	}
