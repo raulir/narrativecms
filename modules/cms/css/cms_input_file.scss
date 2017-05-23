@@ -2,47 +2,67 @@
 	
 }
 
-.cms_input_file .cms_input_button {
-	box-sizing: border-box;
-	display: block;
-	border: 1px solid #a0a0a0;
-	border-radius: 4px;
-	width: 49%;
-	height: 26px;
-	line-height: 23px;
-	font-size: 17px;
-	padding: 1px 5px 0px 5px;
-	cursor: pointer;
-	text-align: center;
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
-	margin-top: 7px;
+.cms_input_file_buttons {
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
+	padding: 7px 0 0 0;
 }
 
-.cms_input_file .cms_input_file_button {
-	float: left;
-}
-
-.cms_input_file .cms_input_file_clear {
-	float: right;
-}
-
-.cms_input_file .cms_file_container {
-	box-sizing: border-box;
-	display: inline-block;
-	width: 330px;
-	float: right;
-	position: relative;
-}
-
-.cms_input_file .cms_file_content {
-	box-sizing: border-box;
-	text-align: center;
-	vertical-align: middle;
-	height: 26px;
-	line-height: 24px;
-	clear: both;
-	border: 1px solid #a0a0a0;
+.cms_input_file {
+	
+	.cms_input_button {
+		
+		box-sizing: border-box;
+		display: inline-block;
+		vertical-align: top;
+		border: 1px solid #a0a0a0;
+		border-radius: 4px;
+		width: 32.5%;
+		height: 26px;
+		line-height: 23px;
+		font-size: 17px;
+		padding: 1px 5px 0px 5px;
+		cursor: pointer;
+		text-align: center;
+		margin-right: 1.2%;
+		
+		&:last-child {
+			margin-right: 0;
+		}
+		
+	}
+	
+	.cms_input_file_button {
+	
+	}
+	
+	.cms_input_file_clear {
+	
+	}
+	
+	.cms_input_file_clear {
+	
+	}
+	
+	.cms_file_container {
+		box-sizing: border-box;
+		display: inline-block;
+		width: 330px;
+		float: right;
+		position: relative;
+	}
+	
+	.cms_file_content {
+		box-sizing: border-box;
+		text-align: center;
+		vertical-align: middle;
+		height: 26px;
+		line-height: 24px;
+		clear: both;
+		border: 1px solid #a0a0a0;
+	}
+	
 }
 
 .admin_repeater_block .cms_input_file .cms_file_container {

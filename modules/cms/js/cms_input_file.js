@@ -34,6 +34,11 @@ function cms_input_file_upload(params){
 	    	if ($(params.name_selector).parent().parent().siblings('.cms_input').children('.cms_input_title').val() == ''){
 		    	$(params.name_selector).parent().parent().siblings('.cms_input').children('.cms_input_title').val(data.result.name);
 	    	}
+	    	
+	    	// update download button
+	    	$(params.name_selector).siblings('.cms_input_file_buttons').children('.cms_input_file_download').attr('href', config_url + 'files/get/' + data.result.filename.replace(/\//g, '__'));	    	
+	    	
+	    	
 	    },
 	    xhr: function() {
 	        var xhr = new window.XMLHttpRequest();

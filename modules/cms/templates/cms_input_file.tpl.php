@@ -18,13 +18,21 @@
 				-- no file --
 			<?php endif ?>
 		</div>
-		<div class="cms_input_file_button cms_input_button" data-name="<?php print($name_clean); ?>" <?= !empty($accept) ? ' data-accept="'.$accept.'" ' : '' ?>>
-			Upload
+		
+		<div class="cms_input_file_buttons">
+		
+			<div class="cms_input_file_button cms_input_button" data-name="<?php print($name_clean); ?>" <?= !empty($accept) ? ' data-accept="'.$accept.'" ' : '' ?>>
+				Upload
+			</div>
+			
+			<div class="cms_input_file_clear cms_input_button" data-name="<?php print($name_clean); ?>">
+				Clear
+			</div>
+					
+			<a class="cms_input_file_download cms_input_button" <?php _lf($value) ?>>Download</a>
+
 		</div>
-		<div class="cms_input_file_clear cms_input_button" data-name="<?php print($name_clean); ?>">
-			Clear
-		</div>
-				
+
 	</div>
 		
 	<input type="hidden" class="cms_file_input_<?php print($name_clean); ?>" name="<?php print($name); ?>" value="<?php print($value); ?>">
