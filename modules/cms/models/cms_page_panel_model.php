@@ -256,6 +256,9 @@ class cms_page_panel_model extends CI_Model {
 		} else {
 			$return = $row;
 		}
+		
+		// add settings if present
+		$return = array_merge($this->cms_page_panel_model->get_cms_page_panel_settings($return['panel_name']), $return);
 	
 		if (empty($return['cms_page_panel_id'])){
 			$return['cms_page_panel_id'] = $return['block_id'];
