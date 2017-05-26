@@ -37,7 +37,7 @@ class do_send extends MY_Controller{
         	$this->load->model('form_model');
         	
         	// get global contact form params
-        	$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(array('panel_name' => 'webform_settings', ));
+        	$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(array('panel_name' => 'form_settings', ));
         	$params['settings'] = !empty($settings_a[0]) ? $settings_a[0] : array();
 
 			if(count($params['emails'])){
@@ -49,7 +49,7 @@ class do_send extends MY_Controller{
 						$params['autoreply_email'], $params['autoreply_name'], $params['autoreply_subject']);
 			}
 			
-			$this->form_model->create_webform_data($cms_page_panel_id, !empty($data['email']) ? $data['email'] : '', $data);
+			$this->form_model->create_form_data($cms_page_panel_id, !empty($data['email']) ? $data['email'] : '', $data);
 			
 			$return = [];
 

@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class webform_admin extends MY_Controller{
+class form_admin extends MY_Controller{
 	
 	function panel_action($params){
 	
@@ -21,7 +21,7 @@ class webform_admin extends MY_Controller{
 			$filename = substr(preg_replace('/[ ]+/', '-', trim($filename)), 0, 40);
         	
 			$this->load->model('form_model');
-			$this->form_model->file_webform_data($params['cms_page_panel_id'], $filename);
+			$this->form_model->file_form_data($params['cms_page_panel_id'], $filename);
         
         }
 	
@@ -30,7 +30,7 @@ class webform_admin extends MY_Controller{
 	function panel_params($params){
 		
 		$this->load->model('form_model');
-		$params['webforms'] = $this->form_model->get_webforms();
+		$params['forms'] = $this->form_model->get_forms();
 		
 		return $params;
 		

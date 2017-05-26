@@ -85,55 +85,59 @@ class cms_panel_model extends CI_Model {
 		
 		$return = [];
 		
-		// read needed fk data
-		foreach ($block_structure as $struct){
-			if ($struct['type'] == 'fk'){
-				if (empty($return['fk_data'][$struct['name']])){
-					$struct_table = str_replace('_id', '', (!empty($struct['field']) ? $struct['field'] : $struct['name']));
-					$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])][0] = '-- not specified --';
-					if ($struct['target'] == 'block'){
-		
-						if (empty($struct['filter'])){
-							$struct['filter'] = array();
+		if (!empty($block_structure) && is_array($block_structure)){
+			
+			// read needed fk data
+			foreach ($block_structure as $struct){
+				if ($struct['type'] == 'fk'){
+					if (empty($return['fk_data'][$struct['name']])){
+						$struct_table = str_replace('_id', '', (!empty($struct['field']) ? $struct['field'] : $struct['name']));
+						$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])][0] = '-- not specified --';
+						if ($struct['target'] == 'block'){
+			
+							if (empty($struct['filter'])){
+								$struct['filter'] = array();
+							}
+			
+							$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] =
+							$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] +
+							$this->cms_page_panel_model->get_fk_data($struct_table, $struct['filter'], (!empty($struct['label_field']) ? $struct['label_field'] : 'title'));
+								
+						} else {
+								
+							$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] =
+							$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] +
+							$this->cms_table_model->get_fk_data($struct_table);
+								
 						}
-		
-						$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] =
-						$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] +
-						$this->cms_page_panel_model->get_fk_data($struct_table, $struct['filter'], (!empty($struct['label_field']) ? $struct['label_field'] : 'title'));
-							
-					} else {
-							
-						$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] =
-						$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] +
-						$this->cms_table_model->get_fk_data($struct_table);
-							
 					}
-				}
-			} elseif ($struct['type'] == 'repeater'){
-				foreach ($struct['fields'] as $r_struct){
-					if ($r_struct['type'] == 'fk'){
-						if (empty($return[$r_struct['name']])){
-							$struct_table = str_replace('_id', '', $r_struct['name']);
-							$return[$r_struct['name']][0] = '-- not specified --';
-							if ($r_struct['target'] == 'block'){
-									
-								if (empty($r_struct['filter'])){
-									$r_struct['filter'] = array();
+				} elseif ($struct['type'] == 'repeater'){
+					foreach ($struct['fields'] as $r_struct){
+						if ($r_struct['type'] == 'fk'){
+							if (empty($return[$r_struct['name']])){
+								$struct_table = str_replace('_id', '', $r_struct['name']);
+								$return[$r_struct['name']][0] = '-- not specified --';
+								if ($r_struct['target'] == 'block'){
+										
+									if (empty($r_struct['filter'])){
+										$r_struct['filter'] = array();
+									}
+			
+									$return[$r_struct['name']] = $return[$r_struct['name']] +
+									$this->cms_page_panel_model->get_fk_data($struct_table, $r_struct['filter'], (!empty($r_struct['label_field']) ? $r_struct['label_field'] : 'title'));
+										
+								} else {
+										
+									$return[$r_struct['name']] = $return[$r_struct['name']] +
+									$this->cms_table_model->get_fk_data($struct_table);
+										
 								}
-		
-								$return[$r_struct['name']] = $return[$r_struct['name']] +
-								$this->cms_page_panel_model->get_fk_data($struct_table, $r_struct['filter'], (!empty($r_struct['label_field']) ? $r_struct['label_field'] : 'title'));
-									
-							} else {
-									
-								$return[$r_struct['name']] = $return[$r_struct['name']] +
-								$this->cms_table_model->get_fk_data($struct_table);
-									
 							}
 						}
 					}
 				}
 			}
+		
 		}
 		
 		return $return;

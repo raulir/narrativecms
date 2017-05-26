@@ -160,7 +160,7 @@ class admin_block extends MY_Controller{
 			}
 		} else {
 			if (!empty($return['cms_page_id'])){
-				$panel_structure = $panel_definition['item'];
+				$panel_structure = !empty($panel_definition['item']) ? $panel_definition['item'] : [];
 			} else {
 				if (!empty($panel_definition['settings'])){
 					$panel_structure = $panel_definition['settings'];

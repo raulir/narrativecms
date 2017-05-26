@@ -2,14 +2,14 @@
 
 class form_model extends CI_Model {
 	
-	function create_webform_data($cms_page_panel_id, $email, $data){
+	function create_form_data($cms_page_panel_id, $email, $data){
 
     	// check if table exists
-		$this->create_table_webform_data();
+		$this->create_table_form_data();
 		
 		$data['time'] = time();
 	
-		$sql = "insert into webform_data set cms_page_panel_id = ? , email = ? , data = ? ";
+		$sql = "insert into form_data set cms_page_panel_id = ? , email = ? , data = ? ";
 		$this->db->query($sql, array($cms_page_panel_id, $email, json_encode($data), ));
 		$return = $this->db->insert_id();
 		
@@ -35,39 +35,39 @@ class form_model extends CI_Model {
     	
     }
     
-    function create_table_webform_data(){
+    function create_table_form_data(){
     	
     	$db_debug = $this->db->db_debug; //save setting
     	$this->db->db_debug = false; //disable debugging for queries
     	
-		$sql = "select cms_page_panel_id from webform_data limit 1 ";
+		$sql = "select cms_page_panel_id from form_data limit 1 ";
 		$query = $this->db->query($sql);
 
 		$this->db->db_debug = $db_debug; //restore setting
 		
 		if($this->db->_error_number() == 1146){
     	
-    		$sql = "CREATE TABLE `webform_data` (
-    					`webform_data_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    		$sql = "CREATE TABLE `form_data` (
+    					`form_data_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     					`cms_page_panel_id` int(10) UNSIGNED NOT NULL,
     					`email` varchar(100) NOT NULL, `data` text NOT NULL,
-    					PRIMARY KEY (`webform_data_id`)
+    					PRIMARY KEY (`form_data_id`)
     				) ENGINE=InnoDB DEFAULT CHARSET=utf8";
     		$this->db->query($sql);
     	
-    		$sql = "ALTER TABLE `webform_data` ADD KEY `cms_page_panel_idx` (`cms_page_panel_id`)";
+    		$sql = "ALTER TABLE `form_data` ADD KEY `cms_page_panel_idx` (`cms_page_panel_id`)";
     		$this->db->query($sql);
     	
     	}
 
     }
     
-    function get_webforms(){
+    function get_forms(){
     	
     	// check if table exists
-		$this->create_table_webform_data();
+		$this->create_table_form_data();
     		
-		$sql = "select a.cms_page_panel_id, b.title from webform_data a join block b on a.cms_page_panel_id = b.block_id group by a.cms_page_panel_id ";
+		$sql = "select a.cms_page_panel_id, b.title from form_data a join block b on a.cms_page_panel_id = b.block_id group by a.cms_page_panel_id ";
 		$query = $this->db->query($sql);
      		
      	$return = $query->result_array();
@@ -76,9 +76,9 @@ class form_model extends CI_Model {
     	
     }
     
-    function file_webform_data($cms_page_panel_id, $filename){
+    function file_form_data($cms_page_panel_id, $filename){
     	
-    	$sql = "select * from webform_data where cms_page_panel_id = ? ";
+    	$sql = "select * from form_data where cms_page_panel_id = ? ";
      	$query = $this->db->query($sql, array($cms_page_panel_id, ));
     	$data = $query->result_array();
     	

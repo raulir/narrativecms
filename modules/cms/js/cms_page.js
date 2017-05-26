@@ -38,7 +38,7 @@ function cms_page_save(params){
 			change_url(config_url + 'admin/page/' + $('.cms_page_id').val() + '/');
 			
 			// update new page panel target
-			$('.cms_input_page_panels_add').data('target', '/admin/block/0/' + $('.cms_page_id').val() + '/'); 
+			$('.cms_input_page_panels_add').data('target', config_url + 'admin/block/0/' + $('.cms_page_id').val() + '/');
 			
 			params.success();
 			
