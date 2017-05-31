@@ -241,14 +241,14 @@ class cms_page_panel_model extends CI_Model {
 
 	function get_cms_page_panel($cms_page_panel_id){
 	
-		$sql = "select * from block where block_id = ? ";
+		$sql = "select *, block_id as cms_page_panel_id from block where block_id = ? ";
 		$query = $this->db->query($sql, array($cms_page_panel_id));
 		$row = $query->row_array();
 		 
 		if (empty($row['block_id'])) {
 			return false;
 		}
-		 
+
 		$panel_params = $this->get_cms_page_panel_params($row['block_id']);
 	    
 		if (is_array($panel_params)){
@@ -259,10 +259,6 @@ class cms_page_panel_model extends CI_Model {
 		
 		// add settings if present
 		$return = array_merge($this->cms_page_panel_model->get_cms_page_panel_settings($return['panel_name']), $return);
-	
-		if (empty($return['cms_page_panel_id'])){
-			$return['cms_page_panel_id'] = $return['block_id'];
-		}
 	
 		return $return;
 	
