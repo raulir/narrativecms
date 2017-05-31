@@ -375,16 +375,23 @@ if ( !function_exists('_i')) {
 				
 					if (empty($params['width'])) $params['width'] = 0;
 					if (empty($params['height'])) $params['height'] = 0;
+					
+					if (empty($GLOBALS['config']['images_no_imageset'])){
+						$onex_image = _iw($image, array_merge($params, ['width' => round($params['width']/2), 'height' => round($params['height']/2)]));
+					}
 						
-					$onex_image = _iw($image, array_merge($params, ['width' => round($params['width']/2), 'height' => round($params['height']/2)]));
-				
 					print(
 							'style="background-image: url('.$image_filename.'); '.
-							'background-image: -webkit-image-set( url('.$GLOBALS['config']['upload_url'].$onex_image['image'].') 1x, url('.$image_filename.') 2x ); '.
-							'background-image: image-set( url('.$GLOBALS['config']['upload_url'].$onex_image['image'].') 1x, url('.$image_filename.') 2x ); '.
+							(
+									empty($GLOBALS['config']['images_no_imageset'])
+									?
+										'background-image: -webkit-image-set( url('.$GLOBALS['config']['upload_url'].$onex_image['image'].') 1x, url('.$image_filename.') 2x ); '.
+										'background-image: image-set( url('.$GLOBALS['config']['upload_url'].$onex_image['image'].') 1x, url('.$image_filename.') 2x ); '
+									:	''
+							).
 							$params['css'].'"'.
 							((!empty($GLOBALS['config']['aria']) && !empty($image_data['alt'])) ? ' aria-label="image: '.$image_data['alt'].'"' : '')).$hq_str;
-				
+
 				} else {
 					
 					print('style="background-image: url('.$image_filename.'); '.$params['css'].'"'.

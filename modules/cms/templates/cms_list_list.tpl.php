@@ -15,7 +15,7 @@
 				<input type="hidden" class="block_id" value="<?php print($block[$id_field]); ?>">
 				
 				<?php if(!empty($title_field)): ?>
-					<div class="admin_list_sortable_div admin_text"><?php print($block[$title_field]); ?></div>
+					<div class="admin_list_sortable_div admin_text cms_list_list_item_heading"><?= preg_replace('#<[^>]+>#', ' ', $block[$title_field]) ?></div>
 				<?php else: ?>
 					<?php _panel($title_panel, array('id' => $block[$id_field], 'edit_base' => $edit_base, 'list_block' => $block['list_block'], '_no_css' => 1, )); ?>
 				<?php endif ?>

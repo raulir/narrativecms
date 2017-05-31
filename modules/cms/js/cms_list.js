@@ -62,8 +62,8 @@ function cms_list_load(start, limit, after){
 		title_field: $('.admin_list_container').data('title_field'),
 		title_panel: $('.admin_list_container').data('title_panel'),
 		id_field: $('.admin_list_container').data('id_field'),
-		no_sort: $('.admin_list_container').data('no_sort'),
-		_no_css: true
+		no_sort: $('.admin_list_container').data('no_sort') //,
+		// _no_css: true
 	}, function(data){
 		
 		$('.admin_list_container').html(data.result.html).data({start: start, limit: limit, total: data.result.total });

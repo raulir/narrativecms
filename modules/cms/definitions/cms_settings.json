@@ -165,6 +165,17 @@
 			},
 			"default":"0",
 			"help":"[Use deprecated features]||Switch on some deprecated features to enable backwards compatibility."
+		},
+		{
+			"type":"select",
+			"name":"images_no_imageset",
+			"label":"Image as image-set",
+			"values":{
+				"0":"Use image-set backgrounds",
+				"1":"Don't use image-set backgrounds"
+			},
+			"default":"0",
+			"help":"[Image as image-set]||Generate background image css as image-set for high resolution (retina) screens.||{_ib()} widths and heights have to be given as screen physical pixels.||For non-high resolution images divider 2 is used."
 		}
 	]
 }

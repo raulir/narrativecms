@@ -34,6 +34,11 @@ function cms_input_textarea_init(){
 					valid_elements = valid_elements + ',b/strong';
 				}
 				
+				if (buttons.indexOf('I') > -1){
+					toolbar = toolbar + 'italic ';
+					valid_elements = valid_elements + ',i';
+				}
+				
 				if (buttons.indexOf('U') > -1){
 					toolbar = toolbar + 'underline ';
 					valid_elements = valid_elements + ',u/underline';
@@ -78,6 +83,11 @@ function cms_input_textarea_init(){
 					})
 				}
 				
+				if (buttons.indexOf('Q') > -1){
+					toolbar = toolbar + 'blockquote ';
+					valid_elements = valid_elements + ',q';
+				}
+
 				if (buttons.indexOf('P') > -1){
 					valid_elements = valid_elements + ',p';
 					extra_init.force_br_newlines = false;

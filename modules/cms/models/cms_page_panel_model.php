@@ -612,7 +612,7 @@ class cms_page_panel_model extends CI_Model {
 		$sql_arrays = array();
 		$sql_filter_str = '';
 		
-		// to support module/panel_name panel names, DEPRECATE in future
+		// to support module/panel_name panel names, DEPRECATE in future - all panel names should have module name
 		if (!empty($GLOBALS['config']['deprecated']) && !empty($filter['panel_name'])){
 
 			// make this an array
@@ -753,13 +753,9 @@ class cms_page_panel_model extends CI_Model {
     	
     	// check for page panel settings
     	foreach($return as $key => $cms_page_panel){
-    		
     		if ($cms_page_panel['page_id']){
-//    			print("\n".$cms_page_panel['panel_name']."\n");
-   				$return[$key] = array_merge($this->get_cms_page_panel_settings($cms_page_panel['panel_name']), $cms_page_panel);
-
-    		}
-    		
+    			$return[$key] = array_merge($this->get_cms_page_panel_settings($cms_page_panel['panel_name']), $cms_page_panel);
+   			}
     	}
 // print_r($return);
     	return $return;
@@ -772,7 +768,7 @@ class cms_page_panel_model extends CI_Model {
 	 */
 	function get_cms_page_panel_settings($cms_panel_name){
 		
-		$settings_a = $this->get_cms_page_panels_by(['panel_name' => $cms_panel_name, 'cms_page_id' => 0, ]);
+		$settings_a = $this->get_cms_page_panels_by(['panel_name' => $cms_panel_name, 'cms_page_id' => 0, 'parent_id' => 0, ]);
 		 
 		if (!empty($settings_a[0])){
 			return $settings_a[0];
