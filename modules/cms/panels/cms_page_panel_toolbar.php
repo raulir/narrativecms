@@ -31,6 +31,9 @@ class cms_page_panel_toolbar extends MY_Controller{
 			$cms_page_panel['parent_id'] = $params['parent_id'];
 		}
 
+		// load panel config
+		$panel_config = $this->cms_panel_model->get_cms_panel_config($cms_page_panel['panel_name']);
+
 		// breadcrumb
 		if (empty($params['breadcrumb']) || count($params['breadcrumb']) == 0){
 
@@ -63,9 +66,6 @@ class cms_page_panel_toolbar extends MY_Controller{
 					];
 
 				} else { // list item
-
-					// check if list item
-					$panel_config = $this->cms_panel_model->get_cms_panel_config($parent['panel_name']);
 
 					// if this is list item
 					if (!empty($panel_config['list'])){
@@ -108,9 +108,6 @@ class cms_page_panel_toolbar extends MY_Controller{
 				];
 
 			} else {
-
-				// check if list item
-				$panel_config = $this->cms_panel_model->get_cms_panel_config($cms_page_panel['panel_name']);
 
 				// if this is list item
 				if (!empty($panel_config['list'])){
@@ -172,6 +169,13 @@ class cms_page_panel_toolbar extends MY_Controller{
 			$params['buttons'][] = 'cms_page_panel_button_delete';
 			$params['buttons'][] = 'cms_page_panel_button_caching';
 			$params['buttons'][] = 'cms_page_panel_button_show';
+		}
+		
+		// if panel has global settings
+		if (!empty($panel_config['settings']) && (!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']) || !empty($cms_page_panel['sort']))){
+			
+			$params['buttons'][] = 'cms_page_panel_button_settings';
+			
 		}
 
 		return $params;

@@ -34,6 +34,6 @@
 	
 <?php else: ?>
 	
-	<div class="admin_text">Nothing to show</div>
+	<div class="admin_text cms_list_list_message">Nothing to show</div>
 
 <?php endif ?>

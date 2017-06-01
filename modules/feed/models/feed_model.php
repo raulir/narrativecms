@@ -17,90 +17,94 @@ class feed_model extends CI_Model {
    		
    		$stats = array();
    		
-   		// check for panels
-   		foreach($feed_settings['channels'] as $feed_setting){
-   			
-   			/* TODO: change articles and projects etc to list */
-   			
-   			if (in_array($feed_setting['source'], array('project', 'article', ))){
-
-				$stats['projects'] = 0;
-				$projects = $this->cms_page_panel_model->get_cms_page_panels_by(
-						array('_limit' => 20, 'panel_name' => $feed_setting['source'], 'page_id' => ['999999','0'], 'show' => '1', ));
-		   		
-		   		foreach($projects as $project){
-		   			
-					$hash = md5($feed_setting['source'].'='.$project['block_id']);
-					
-					// check if this item is already there?
-					$project_check_a = $this->cms_page_panel_model->get_cms_page_panels_by(
-							array('_limit' => 1, 'panel_name' => 'feed', 'page_id' => ['999999','0'], 'hash' => $hash, ));
-							
-					if(!count($project_check_a)){
-			   			$item = $this->parse_cms_list_item($project, $feed_setting);
-						$item_id = $this->cms_page_panel_model->create_cms_page_panel($item);
-						$stats['projects']++;
-					}
-					
+   		if (!empty($feed_settings['channels'])){
+   		
+	   		// check for panels
+	   		foreach($feed_settings['channels'] as $feed_setting){
+	   			
+	   			/* TODO: change articles and projects etc to list */
+	   			
+	   			if (in_array($feed_setting['source'], array('project', 'article', ))){
+	
+					$stats['projects'] = 0;
+					$projects = $this->cms_page_panel_model->get_cms_page_panels_by(
+							array('_limit' => 20, 'panel_name' => $feed_setting['source'], 'page_id' => ['999999','0'], 'show' => '1', ));
+			   		
+			   		foreach($projects as $project){
+			   			
+						$hash = md5($feed_setting['source'].'='.$project['block_id']);
+						
+						// check if this item is already there?
+						$project_check_a = $this->cms_page_panel_model->get_cms_page_panels_by(
+								array('_limit' => 1, 'panel_name' => 'feed', 'page_id' => ['999999','0'], 'hash' => $hash, ));
+								
+						if(!count($project_check_a)){
+				   			$item = $this->parse_cms_list_item($project, $feed_setting);
+							$item_id = $this->cms_page_panel_model->create_cms_page_panel($item);
+							$stats['projects']++;
+						}
+						
+			   		}
 		   		}
 	   		}
-   		}
-   		
-   		// check for twitter
-   		foreach($feed_settings['channels'] as $feed_setting){
-   			if ($feed_setting['source'] == 'twitter'){
-
-				$stats['tweets'] = 0;
-
-				$tweets = $this->get_twitter_by_username(
-						$feed_setting['username'], 
-						$feed_settings['twitter_api_key'], 
-						$feed_settings['twitter_api_secret']
-				);
-
-		   		foreach($tweets as $tweet){
-		   			
-		   			$hash = md5('twitter='.$tweet['twitter_id']);
-		   			
-					// check if this item is already there?
-					$project_check_a = $this->cms_page_panel_model->get_cms_page_panels_by(
-							array('_limit' => 1, 'panel_name' => 'feed', 'page_id' => ['999999','0'], 'hash' => $hash, ));
-							
-					if(!count($project_check_a)){
-			   			$item = $this->parse_tweet($tweet, $feed_setting);
-						$item_id = $this->cms_page_panel_model->create_cms_page_panel($item);
-						$stats['tweets']++;
-					}
-
-		   		}
-   			}
-   		}
-   		
-   		// check for instagram
-   		foreach($feed_settings['channels'] as $feed_setting){
-   			if ($feed_setting['source'] == 'instagram'){
-
-				$stats['instagrams'] = 0;
-				
-				$instagrams = $this->get_instagram_by_username($feed_setting['username']);
-
-		   		foreach($instagrams as $instagram){
-		   			
-		   			$hash = md5('instagram='.$instagram['id']);
-		   			
-					// check if this item is already there?
-					$item_check_a = $this->cms_page_panel_model->get_cms_page_panels_by(
-							array('_limit' => 1, 'panel_name' => 'feed', 'page_id' => ['999999','0'], 'hash' => $hash, ));
-							
-					if(!count($item_check_a)){
-			   			$item = $this->parse_instagram($instagram, $feed_setting);
-						$item_id = $this->cms_page_panel_model->create_cms_page_panel($item);
-						$stats['instagrams']++;
-					}
-
-		   		}
-				
-   			}
+	   		
+	   		// check for twitter
+	   		foreach($feed_settings['channels'] as $feed_setting){
+	   			if ($feed_setting['source'] == 'twitter'){
+	
+					$stats['tweets'] = 0;
+	
+					$tweets = $this->get_twitter_by_username(
+							$feed_setting['username'], 
+							$feed_settings['twitter_api_key'], 
+							$feed_settings['twitter_api_secret']
+					);
+	
+			   		foreach($tweets as $tweet){
+			   			
+			   			$hash = md5('twitter='.$tweet['twitter_id']);
+			   			
+						// check if this item is already there?
+						$project_check_a = $this->cms_page_panel_model->get_cms_page_panels_by(
+								array('_limit' => 1, 'panel_name' => 'feed', 'page_id' => ['999999','0'], 'hash' => $hash, ));
+								
+						if(!count($project_check_a)){
+				   			$item = $this->parse_tweet($tweet, $feed_setting);
+							$item_id = $this->cms_page_panel_model->create_cms_page_panel($item);
+							$stats['tweets']++;
+						}
+	
+			   		}
+	   			}
+	   		}
+	   		
+	   		// check for instagram
+	   		foreach($feed_settings['channels'] as $feed_setting){
+	   			if ($feed_setting['source'] == 'instagram'){
+	
+					$stats['instagrams'] = 0;
+					
+					$instagrams = $this->get_instagram_by_username($feed_setting['username']);
+	
+			   		foreach($instagrams as $instagram){
+			   			
+			   			$hash = md5('instagram='.$instagram['id']);
+			   			
+						// check if this item is already there?
+						$item_check_a = $this->cms_page_panel_model->get_cms_page_panels_by(
+								array('_limit' => 1, 'panel_name' => 'feed', 'page_id' => ['999999','0'], 'hash' => $hash, ));
+								
+						if(!count($item_check_a)){
+				   			$item = $this->parse_instagram($instagram, $feed_setting);
+							$item_id = $this->cms_page_panel_model->create_cms_page_panel($item);
+							$stats['instagrams']++;
+						}
+	
+			   		}
+					
+	   			}
+	   		}
+	   		
    		}
 
    		return $stats;
