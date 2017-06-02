@@ -3,7 +3,7 @@
 	<div class="admin_tool_text"><?php print($title); ?></div>
 	
 	<?php if(empty($hide_new)): ?>
-		<a class="admin_tool_button admin_right" href="<?php print($GLOBALS['config']['base_url'].$edit_base); ?>">New</a>
+		<a class="admin_tool_button admin_right" href="<?php print($GLOBALS['config']['base_url'].$edit_base.$filter['panel_name'].'/'); ?>">New</a>
 	<?php endif ?>
 
 	<?php if(!empty($extra_buttons)): ?>

@@ -23,7 +23,7 @@ function cms_input_page_panels_init(){
 							'success':function(){
 								
 								if ($('.cms_page_id').val()){
-									window.location.href = config_url + 'admin/block/0/' + $('.cms_page_id').val() + '/'
+									window.location.href = config_url + 'admin/cms_page_panel/0/' + $('.cms_page_id').val() + '/'
 								} else {
 									window.location.href = $this.data('target');
 								}
@@ -48,7 +48,7 @@ function cms_input_page_panels_init(){
 						cms_page_panel_save({
 							'success':function(data){
 								
-								window.location.href = config_url + 'admin/block/0/0/' + data.result.cms_page_panel_id + '/' + $this.data('name') + '/';
+								window.location.href = config_url + 'admin/cms_page_panel/0/0/' + data.result.cms_page_panel_id + '/' + $this.data('name') + '/';
 							
 							}
 						});

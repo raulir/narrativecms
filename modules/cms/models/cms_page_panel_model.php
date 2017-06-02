@@ -406,7 +406,7 @@ class cms_page_panel_model extends CI_Model {
 		if (!empty($data['sort']) && $data['sort'] == 'first'){
 			$this->shift_sort($data['panel_name'], 0, 1);
 			$data['sort'] = 1;
-		} elseif (empty($data['sort']) && ($data['page_id'] == '999999' || $data['page_id'] == 0)) {
+		} elseif (!isset($data['sort']) && ($data['page_id'] == '999999' || $data['page_id'] == 0)) {
 			$sort_stats = $this->get_sort_stats($data['panel_name']);
 			$data['sort'] = !empty($sort_stats['max_sort']) ? $sort_stats['max_sort'] + 1 : 0;
 		} elseif (!empty($data['sort']) && $data['sort'] == 'last'){
@@ -782,7 +782,7 @@ class cms_page_panel_model extends CI_Model {
 	function move_first($cms_page_panel_id){
 		
 		// get panel name
-		$block = $this->get_block($cms_page_panel_id);
+		$block = $this->get_cms_page_panel($cms_page_panel_id);
 		
 		// move first
 		$this->shift_sort($block['panel_name'], 0, 1); // panel name, start, amount
@@ -839,10 +839,6 @@ class cms_page_panel_model extends CI_Model {
 	/* deprecated */
 	function get_blocks_by($filter){
 		return $this->get_cms_page_panels_by($filter);
-	}
-	
-	function get_block($cms_page_panel_id){
-		return $this->get_cms_page_panel($cms_page_panel_id);
 	}
 	
 	function get_fk_data($panel_name, $filter = array(), $label_field = 'title'){

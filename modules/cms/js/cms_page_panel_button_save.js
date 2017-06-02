@@ -48,7 +48,7 @@ function cms_page_panel_save(params){
 					if ($('.admin_block_shortcut_to').length){
 						
 						cms_notification('Panel created', 3);
-						window.location.href = config_url + 'admin/block/' + data.result.block_id + '/';
+						window.location.href = config_url + 'admin/cms_page_panel/' + data.result.block_id + '/';
 						
 					} else {
 						
@@ -65,14 +65,14 @@ function cms_page_panel_save(params){
 						
 							// adding child
 							cms_notification('Panel created', 3);
-							window.location.href = config_url + 'admin/block/' + data.result.block_id + '/' + data.result.parent_id + 
+							window.location.href = config_url + 'admin/cms_page_panel/' + data.result.block_id + '/' + data.result.parent_id + 
 									'/' + $('.cms_page_panel_parent_name').val() + '/';
 						
 						} else if ($('#block_id').val() == '0' && (parseInt(data.result.block_id) > 0)){
 							
 							// adding list item
 							cms_notification('New ' + data.result.panel_name + ' created', 3);
-							window.location.href = config_url + 'admin/cms_list_item/' + data.result.panel_name + '/' + data.result.block_id + '/';
+							window.location.href = config_url + 'admin/cms_page_panel/' + data.result.block_id + '/';
 							
 						} else {
 						

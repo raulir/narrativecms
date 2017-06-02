@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class admin_block extends MY_Controller{
+class cms_page_panel extends MY_Controller{
 
 	function __construct(){
 
@@ -20,6 +20,13 @@ class admin_block extends MY_Controller{
 		$this->load->model('cms_page_model');
 		$this->load->model('cms_panel_model');
 		$this->load->model('cms_module_model');
+		
+		// if preset panel name (panel type) for new panel
+		if (!is_numeric($params['cms_page_panel_id'])){
+			$params['panel_name'] = str_replace('__', '/', trim($params['cms_page_panel_id']));
+			$params['cms_page_panel_id'] = 0;
+			$params['page_id'] = 0;
+		}
 		
 		$return = array();
 
@@ -49,34 +56,38 @@ class admin_block extends MY_Controller{
 
 		// if filter, then get by filter
 		if (isset($params['filter'])){
-
+			
 			$blocks = $this->cms_page_panel_model->get_cms_page_panels_by($params['filter']);
-
+			
 			if (!empty($blocks[0])){
+			
 				$return['block'] = $blocks[0];
 				$return['block']['panel_params'] = $blocks[0];
-			} else {
-
-				// new block of type
-				$return['block'] = $this->cms_page_panel_model->new_block();
-				$return['block']['panel_params'] = array();
-				$return['block']['page_id'] = 0;
-				if (!empty($params['type'])){
-					$return['block']['panel_name'] = $params['type'];
-					$return['block']['title'] = 'New ' . $params['type'];
-				} else if(!empty($params['filter']['panel_name'])){
-					$return['block']['panel_name'] = $params['filter']['panel_name'];
-					$return['block']['title'] = !empty($params['title']) ? $params['title'] : $params['filter']['panel_name'];
-				}
-
+					
 			}
+			
+		}
+		
+		// if no filtered block returned but has panel name
+		if (empty($return['block']['cms_page_panel_id']) && isset($params['panel_name'])){
+			
+			// new block of type
+			$return['block'] = $this->cms_page_panel_model->new_block();
+			$return['block']['panel_params'] = array();
+			$return['block']['page_id'] = $params['page_id'];
+			
+			$return['block']['panel_name'] = $params['panel_name'];
+			$return['block']['title'] = 'New ' . $params['panel_name'];
+			
+			// get new sort too as this is should be real block
+			$return['block']['sort'] = $this->cms_page_panel_model->get_max_cms_page_panel_id($params['panel_name']) + 1;
 
 		}
 
 		// if block id, get by this
-		if (empty($return['block']) && !empty($params['block_id'])){
+		if (empty($return['block']) && !empty($params['cms_page_panel_id'])){
 
-			$return['block'] = $this->cms_page_panel_model->get_block($params['block_id']);
+			$return['block'] = $this->cms_page_panel_model->get_cms_page_panel($params['cms_page_panel_id']);
 
 		}
 
@@ -94,7 +105,7 @@ class admin_block extends MY_Controller{
 					
 				$return['block'] = $this->cms_page_panel_model->new_block();
 				$return['block']['panel_params'] = array();
-				$return['block']['page_id'] = $params['page_id'];
+				$return['block']['page_id'] = $params['cms_page_id'];
 
 			}
 
@@ -151,7 +162,7 @@ class admin_block extends MY_Controller{
 		
 		// check if panel is list item on the same named page
 		$panel_definition = $this->cms_panel_model->get_cms_panel_config($return['block']['panel_definition']);
-
+// print_r($panel_definition);
 		if (!empty($panel_definition['list']) && !empty($return['cms_page_id']) && $return['block']['panel_name'] == $panel_definition['module'].'/'.$return['cms_page']['slug']){
 			if (empty($panel_definition['settings'])){
 				$panel_structure = [];
@@ -159,8 +170,12 @@ class admin_block extends MY_Controller{
 				$panel_structure = $panel_definition['settings'];
 			}
 		} else {
-			if (!empty($return['cms_page_id'])){
+			
+			
+			if (!empty($return['cms_page_id']) || !empty($return['block']['page_id']) || !empty($return['block']['sort']) || !empty($return['block']['parent_id'])){
+
 				$panel_structure = !empty($panel_definition['item']) ? $panel_definition['item'] : [];
+			
 			} else {
 				if (!empty($panel_definition['settings'])){
 					$panel_structure = $panel_definition['settings'];

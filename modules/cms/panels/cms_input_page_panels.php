@@ -18,7 +18,7 @@ class cms_input_page_panels extends MY_Controller{
 
 	function panel_params($params){
 
-		$params['cms_page_panels'] = array();
+		$params['cms_page_panels'] = [];
 
 		$this->load->model('cms_page_panel_model');
 		$this->load->model('cms_page_model');

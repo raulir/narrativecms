@@ -32,8 +32,12 @@ class cms_page_panel_toolbar extends MY_Controller{
 		}
 
 		// load panel config
-		$panel_config = $this->cms_panel_model->get_cms_panel_config($cms_page_panel['panel_name']);
-
+		if (!empty($cms_page_panel['panel_name'])){
+			$panel_config = $this->cms_panel_model->get_cms_panel_config($cms_page_panel['panel_name']);
+		} else {
+			$panel_config = [];
+		}
+		
 		// breadcrumb
 		if (empty($params['breadcrumb']) || count($params['breadcrumb']) == 0){
 
@@ -81,7 +85,7 @@ class cms_page_panel_toolbar extends MY_Controller{
 
 				$params['breadcrumb'][] = [ // parent block
 						'text' => str_limit($parent['title'], 30),
-						'url' => 'admin/block/'.$parent['cms_page_panel_id'].'/',
+						'url' => 'admin/cms_page_panel/'.$parent['cms_page_panel_id'].'/',
 				];
 				$params['breadcrumb'][] = [ // current block
 						'text' => $params['cms_page_panel_id'] ? str_limit($cms_page_panel['title'], 40) : 'New panel',
@@ -172,7 +176,7 @@ class cms_page_panel_toolbar extends MY_Controller{
 		}
 		
 		// if panel has global settings
-		if (!empty($panel_config['settings']) && (!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']) || !empty($cms_page_panel['sort']))){
+		if (!empty($panel_config['settings']) && (empty($panel_config['list'])) && (!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']) || !empty($cms_page_panel['sort']))){
 			
 			$params['buttons'][] = 'cms_page_panel_button_settings';
 			
