@@ -21,11 +21,13 @@
 					<?php endif ?>
 				
 					<div class="admin_list_sortable_div admin_text"><?php print(!empty($block['title']) ? $block['title'] : '[ no title ]'); ?></div>
+					
 					<?php if (!empty($block['_delete'])): ?>
 						<div class="admin_list_sortable_div cms_list_item_button cms_page_panel_delete" data-cms_page_panel_id="<?php print($block['block_id']); ?>">
-							delete
+							remove
 						</div>
 					<?php endif ?>
+					
 					<?php if (!empty($block['_edit'])): ?>
 						<a class="cms_list_item_button" <?php _lh('admin/cms_page_panel/'.$block['block_id'].'/'); ?>>edit</a>
 					<?php endif ?>
@@ -33,6 +35,10 @@
 					<div class="admin_list_sortable_div cms_list_item_button cms_page_panel_show" data-cms_page_panel_id="<?php print($block['block_id']); ?>">
 						<?php print($block['show'] ? 'hide' : 'show'); ?>
 					</div>
+					
+					<?php if (!empty($block['_goto'])): ?>
+						<a class="cms_list_item_button" <?php _lh('admin/cms_page_panel/'.$block['goto_id'].'/'); ?>>goto</a>
+					<?php endif ?>
 					
 				</li>
 				

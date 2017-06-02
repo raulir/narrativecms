@@ -43,11 +43,16 @@ class cms_input_page_panels extends MY_Controller{
 		// check for shortcuts
 		foreach($params['cms_page_panels'] as $key => $block){
 			if (is_numeric($block['panel_name']) && (int)$block['panel_name'] == $block['panel_name']){
+				
 				$target_page_panel = $this->cms_page_panel_model->get_cms_page_panel($block['panel_name']);
 				$target_page = $this->cms_page_model->get_page($target_page_panel['page_id']);
 				$params['cms_page_panels'][$key]['title'] = '> ' . ( !empty($target_page['title']) ? $target_page['title'] : '[ no title ]')
 				. ' > ' . $target_page_panel['title'];
 				$params['cms_page_panels'][$key]['_delete'] = 1;
+				
+				$params['cms_page_panels'][$key]['_goto'] = 1;
+				$params['cms_page_panels'][$key]['goto_id'] = $block['panel_name'];
+				
 			} else {
 				$params['cms_page_panels'][$key]['_edit'] = 1;
 			}
