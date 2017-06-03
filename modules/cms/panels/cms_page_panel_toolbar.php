@@ -174,6 +174,7 @@ class cms_page_panel_toolbar extends MY_Controller{
 			$params['buttons'][] = ['name' => 'cms_page_panel_button_delete', 'position' => 'hidden', ];
 			$params['buttons'][] = ['name' => 'cms_page_panel_button_caching', 'position' => 'hidden', ];
 			$params['buttons'][] = ['name' => 'cms_page_panel_button_show', 'position' => 'visible', ];
+			$params['buttons'][] = ['name' => 'cms_page_panel_button_export', 'position' => 'hidden', ];
 			$params['hidden_section'] = 1;
 		
 		}

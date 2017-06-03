@@ -1,0 +1,44 @@
+.cms_popup_container {
+	display: none;
+	position: fixed;
+	left: 0;
+	top: 0;
+	height: 100vh;
+	width: 100vw;
+	background-color: rgba(0,0,0,0.5);
+	opacity: 0;
+	transition: opacity 0.3s;
+	table-layout: fixed;
+	z-index: 1000;
+}
+
+.cms_popup_cell {
+	display: table-cell;
+	vertical-align: middle;
+	text-align: center;
+}
+
+.cms_popup_content {
+	box-sizing: border-box;
+    border: 1px solid #a0a0a0;
+    padding: 14px;
+    width: 580px;
+    height: 445px;
+    box-shadow: 2px 4px 10px rgba(0,0,0,0.75);
+    background-color: white;
+	transition: opacity 0.3s;
+	position: relative;
+	display: inline-block;
+}
+
+.cms_popup_toolbar {
+	
+}
+
+.cms_popup_title {
+
+}
+
+.cms_popup_cancel {
+	
+}

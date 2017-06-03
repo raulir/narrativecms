@@ -325,5 +325,29 @@ class admin extends MY_Controller {
 		$this->output('admin', $panel_data);
 			
 	}
+	
+	function export($filename){
+		 
+		if ($filename && file_exists($GLOBALS['config']['base_path'].'cache/'.$filename.'.zip')){
+	
+			header('Content-Disposition: attachment; filename="'.$filename.'.zip"');
+			header('Content-Type: application/zip');
+			header('Content-Length: ' . filesize($GLOBALS['config']['base_path'].'cache/'.$filename.'.zip'));
+	
+			readfile($GLOBALS['config']['base_path'].'cache/'.$filename.'.zip');
+
+			exit();
+	
+		} else {
+
+			print('Problem accessing file!');
+			
+//			print($filename);
+//			print($GLOBALS['config']['base_path'].$filename.'.zip');
+//			var_dump(file_exists($GLOBALS['config']['base_path'].$filename.'.zip'));
+		
+		}
+
+	}
 
 }

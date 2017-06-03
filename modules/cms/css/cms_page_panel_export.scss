@@ -1,0 +1,61 @@
+.cms_page_panel_export_container {
+	height: 100%;
+}
+
+.cms_page_panel_export_content {
+	height: 100%;
+	position: relative;
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
+	padding: 0 46px;
+}
+
+.cms_page_panel_export_message {
+	font-size: 20px;
+	line-height: 30px;
+	margin-bottom: 18px;
+    margin-top: 25px;
+}
+
+.cms_page_panel_export_line {
+	height: 0.8px;
+	background-color: #cccccc;
+	width: 75%;
+	margin: 10px auto;
+}
+
+.cms_page_panel_export_col1,.cms_page_panel_export_col2,.cms_page_panel_export_col3 {
+	display: inline-block;
+	font-size: 15px;
+	line-height: 22px;
+}
+
+.cms_page_panel_export_col1 {
+	width: 31%;
+	text-align: left;
+}
+
+.cms_page_panel_export_col2 {
+	width: 20%;
+	text-align: right;
+}
+
+.cms_page_panel_export_col3 {
+	width: 24%;
+	text-align: right;
+}
+
+.cms_page_panel_export_buttons {
+	padding-top: 23px;
+}
+
+.cms_page_panel_export_download {
+	width: 110px;
+	margin: 0 2px;
+}
+
+.cms_page_panel_export_close {
+	width: 110px;
+	margin: 0 2px;
+}

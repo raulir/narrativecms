@@ -124,5 +124,24 @@ class cms_file_model extends CI_Model {
     	}
     	return $row;
 	}
+	
+	function update_cms_file($filename, $data){
+		
+		// check if cms_file table has hash field - deprecated
+		$sql = "SHOW COLUMNS FROM cms_file LIKE 'hash'";
+		$query = $this->db->query($sql);
+		$result = $query->result_array();
+		
+		if (empty($result) || !count($result)){
+			$sql = "ALTER TABLE cms_file ADD hash VARCHAR( 40 ) after name";
+			$query = $this->db->query($sql);
+		}
 
+		foreach($data as $field => $value){
+			$sql = "update cms_file set ".$field." = ? where filename = ? ";
+			$query = $this->db->query($sql, array($value, $filename, ));
+		}
+	
+	}
+	
 }

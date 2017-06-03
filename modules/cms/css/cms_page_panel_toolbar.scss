@@ -12,10 +12,10 @@
 
 .cms_toolbar_buttons_hidden {
 	
-	width: 46px;
+	width: 52px;
     background-size: 18px auto;
     background-repeat: no-repeat;
-    background-position: 18% 44%;
+    background-position: 23% 44%;
     position: relative;
     
     &:hover {
@@ -31,9 +31,9 @@
 .cms_toolbar_buttons_hidden_arrow {
 	background-size: 6.5px 7.3px;
     background-repeat: no-repeat;
-    background-position: 36% center;
+    background-position: 45% center;
     position: absolute;
-    right: 0px;
+    right: 1px;
     top: 5px;
     height: 18px;
     width: 15px;
