@@ -166,20 +166,24 @@ class cms_page_panel_toolbar extends MY_Controller{
 		}
 
 		// all page panels can be saved
-		$params['buttons'][] = 'cms_page_panel_button_save';
+		$params['buttons'][] = ['name' => 'cms_page_panel_button_save', 'position' => 'visible', ];
 
 		// delete,caching,hide = except not on page && list item == settings
 		if (!empty($cms_page_panel['page_id']) || !empty($cms_page_panel['parent_id']) || !empty($panel_config['list'])){
-			$params['buttons'][] = 'cms_page_panel_button_delete';
-			$params['buttons'][] = 'cms_page_panel_button_caching';
-			$params['buttons'][] = 'cms_page_panel_button_show';
+			
+			$params['buttons'][] = ['name' => 'cms_page_panel_button_delete', 'position' => 'hidden', ];
+			$params['buttons'][] = ['name' => 'cms_page_panel_button_caching', 'position' => 'hidden', ];
+			$params['buttons'][] = ['name' => 'cms_page_panel_button_show', 'position' => 'visible', ];
+			$params['hidden_section'] = 1;
+		
 		}
 		
 		// if panel has global settings
 		if (!empty($panel_config['settings']) && (empty($panel_config['list'])) && (!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']) || !empty($cms_page_panel['sort']))){
 			
-			$params['buttons'][] = 'cms_page_panel_button_settings';
-			
+			$params['buttons'][] = ['name' => 'cms_page_panel_button_settings', 'position' => 'hidden', ];
+			$params['hidden_section'] = 1;
+		
 		}
 
 		return $params;

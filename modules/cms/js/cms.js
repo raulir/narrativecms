@@ -50,27 +50,6 @@ function activate_cms_page_panel_show(){
 	});
 }
 
-function activate_cms_page_panel_copy(params){
-	
-	if (typeof params.after !== 'function'){
-		params = {
-			after: function(){}
-		}
-	}
-
-	$('.cms_page_panel_copy').off('click.cms').on('click.cms', function(){
-		var $this = $(this);
-		var cms_page_panel_id = $this.data('cms_page_panel_id');
-		get_ajax_panel('cms_page_panel_operations', {
-			'cms_page_panel_id': cms_page_panel_id,
-			'do': 'cms_page_panel_copy' 
-		}, function(data){
-			params.after();
-		})
-	});
-
-}
-
 function cms_notification(text, timer, type){
 	
 	if (!type){
@@ -103,6 +82,5 @@ function cms_error(text, timer){
 $(document).ready(function() {
 	
 	activate_cms_page_panel_show();
-	activate_cms_page_panel_copy({});
 	
 });

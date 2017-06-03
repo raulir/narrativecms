@@ -1,5 +1,5 @@
 .cms_page_panel_toolbar {
-	
+	overflow: visible;
 }
 
 .cms_page_panel_toolbar_breadcrumb {
@@ -8,4 +8,65 @@
 
 .cms_page_panel_toolbar_gt:last-of-type {
 	display: none;
+}
+
+.cms_toolbar_buttons_hidden {
+	
+	width: 46px;
+    background-size: 18px auto;
+    background-repeat: no-repeat;
+    background-position: 18% 44%;
+    position: relative;
+    
+    &:hover {
+    	.cms_toolbar_buttons_hidden_container {
+    		opacity: 1;
+    		max-height: 1000px;
+    		transition: opacity 0.2s, max-height 0.2s 0s;
+    	}
+    }
+    
+}
+
+.cms_toolbar_buttons_hidden_arrow {
+	background-size: 6.5px 7.3px;
+    background-repeat: no-repeat;
+    background-position: 36% center;
+    position: absolute;
+    right: 0px;
+    top: 5px;
+    height: 18px;
+    width: 15px;
+    opacity: 0.5;
+    border-left: 1px solid #808080;
+}
+
+.cms_toolbar_buttons_hidden_container {
+	opacity: 0;
+	max-height: 0;
+	transition: opacity 0.2s, max-height 0s;
+	position: absolute;
+	top: 29px;
+    right: -4px;
+    z-index: 10;
+    padding: 6px 3px 1px 5px;
+	background-color: white;
+	border-radius: 7px;
+	overflow: hidden;
+	
+	.admin_tool_button {
+		float: none;
+		display: block;
+		margin-left: 0;
+		background-color: white;
+		margin-bottom: 5px;
+		text-align: center;
+		white-space: nowrap;
+		height: 26px;
+    	line-height: 23px;
+    	font-size: 16px;
+    	padding: 1px 14px 0 14px;
+    	text-transform: lowercase;
+	}
+	
 }
