@@ -2,86 +2,53 @@
 
 class cms_slug_model extends CI_Model {
 	
-	/**
-	 * 
-	 * accepts targets: 
-	 * number => page_id 
-	 * string=number => page type with this id ( "article=22" ) 
-	 * 
-	 */
-	function request_slug($target, $heading = false){
+	function generate_page_slug($page_id, $slug_string){
 		
 		// page id 1 always has empty slug
-		if ($target === 1 || $target === '1'){
+		if ($page_id == 1 ){
 			return '';
 		}
-		
-		if ($heading !== false && $heading[0] === '_'){
-			$heading_field = substr($heading, 1);
-			$heading = false;
-		} else {
-			$heading_field = 'heading';
-		}
-		
-		if ($heading === false){
 
-			// get panel anchor
-			list($panel_name, $cms_page_panel_id) = explode('=', $target);
-			
-			// if new panel with no header information
-			$sql = "select value from cms_page_panel_param where cms_page_panel_id = ? and name = ? ";
-			$query = $this->db->query($sql, array($cms_page_panel_id, $heading_field, ));
-			$param_a = $query->row_array();
-
-			$heading = !empty($param_a['value']) ? $param_a['value'] : '';
-			
-			if(empty($heading)){
-				$sql = "select * from block where block_id = ? limit 1 ";
-				$query = $this->db->query($sql, array($cms_page_panel_id, ));
-				$row = $query->row_array();
-				if (!empty($row['submenu_anchor'])){
-					$heading = $row['submenu_anchor'];
-				} else if(!empty($row['title'])){
-					$heading = $row['title'];
-				}
-			}
-			
-		}
+		$this->delete_slug($page_id);
 		
-		// normalise target
-		$target = trim(str_replace('index/index/', '', $target), '/');
+		$slug = $this->slugify_slug($slug_string);
 		
-		// check if slug already exists for the target
-		$sql = "select * from cms_slug where target = ? limit 1 ";
-		$query = $this->db->query($sql, array($target, ));
-    	
-    	if ($query->num_rows() && $heading === false){
-	    	$row = $query->row_array();
-	    	return $row['cms_slug_id'];
-    	} else {
-    		$sql = "delete from cms_slug where target = ? limit 1 ";
-    		$this->db->query($sql, array($target, ));
-    	}
-    	
-    	// if no slug for the url
-   		// diacritics
-   		if (strpos($string = htmlentities($heading, ENT_QUOTES, 'UTF-8'), '&') !== false) {
-        	$heading = html_entity_decode(preg_replace('~&([a-z]{1,2})(?:acute|cedil|circ|grave|lig|orn|ring|slash|tilde|uml);~i', 
+		return $slug;
+		
+	}
+	
+	function generate_list_item_slug($target, $slug_string){
+		
+		$this->delete_slug($target);
+		
+		$slug = $this->slugify_slug($slug_string);
+		
+		return $slug;
+		
+	}
+	
+	function slugify_slug($slug_string){
+		
+		// diacritics
+		if (strpos($string = htmlentities($slug_string, ENT_QUOTES, 'UTF-8'), '&') !== false) {
+			$slug_string = html_entity_decode(preg_replace('~&([a-z]{1,2})(?:acute|cedil|circ|grave|lig|orn|ring|slash|tilde|uml);~i',
 					'$1', $string), ENT_QUOTES, 'UTF-8');
-    	}
-    	// non alphanumeric
-    	$heading = ' '.preg_replace('/[^a-z0-9]/', '  ', strtolower($heading)).' ';
-    	// common words
-		$heading = str_replace(array(' a ', ' an ', ' the ', ), '', $heading);
+		}
+		
+		// non alphanumeric
+		$slug_string = ' '.preg_replace('/[^a-z0-9]/', '  ', strtolower($slug_string)).' ';
+		
+		// common words
+		$slug_string = str_replace(array(' a ', ' an ', ' the ', ), '  ', $slug_string);
 		// add dashes
-		$heading = preg_replace('/[ ]+/', '-', trim($heading));
+		$slug_string = preg_replace('/[ ]+/', '-', trim($slug_string));
 		// cut shorter
-		if (strlen($heading) > 50){
-			$slug = substr($heading, 0, 50);
+		if (strlen($slug_string) > 50){
+			$slug = substr($slug_string, 0, 50);
 			$last_pos = strrpos($slug, '-');
 			$slug = substr($slug, 0, $last_pos);
 		} else {
-			$slug = !empty($heading) ? $heading : substr(str_shuffle('abcdefghijklmnopqrstuvwxyz'), 0, 4);
+			$slug = !empty($slug_string) ? $slug_string : substr(str_shuffle('abcdefghijklmnopqrstuvwxyz'), 0, 4);
 		}
 		
 		$final_slug = $slug;
@@ -94,21 +61,49 @@ class cms_slug_model extends CI_Model {
 			if ($query->num_rows() /* || in_array($final_slug, $GLOBALS['config']['modules']) */){
 				$final_slug = $slug.'-'.$i;
 				$i = $i + 1;
-    		} else {
-    			$ok = true;
-    		}	
+			} else {
+				$ok = true;
+			}
 		}
-
+		
+		return $final_slug;
+		
+	}
+	
+	/**
+	 * 
+	 * works with page_panels too
+	 * 
+	 * @param unknown $page_id
+	 * @param unknown $slug
+	 * @param int $status 0 = visible, 1 = not visible
+	 * @return unknown
+	 * 
+	 */
+	function set_page_slug($target, $slug, $status){
+		
+		// check if table doesnt have status field - deprecated
+		$sql = "SHOW COLUMNS FROM cms_slug LIKE 'status'";
+		$query = $this->db->query($sql);
+		$result = $query->result_array();
+		
+		if (empty($result) || !count($result)){
+			$sql = "ALTER TABLE cms_slug ADD `status` INT(10) UNSIGNED NOT NULL AFTER target";
+			$query = $this->db->query($sql);
+		}
+		
+		$this->delete_slug($target);
+		
 		// add it to table
-		$sql = "insert into cms_slug set cms_slug_id = ? , target = ? ";
-    	$query = $this->db->query($sql, array($final_slug, $target, ));
-    	
-    	// regenerate slug cache
-    	$this->_regenerate_cache();
-    	$this->_regenerate_sitemap();
-    	 
-    	return $final_slug;
+		$sql = "insert into cms_slug set cms_slug_id = ? , target = ? , status = ? ";
+		$query = $this->db->query($sql, [$slug, $target, $status, ]);
 
+		// regenerate slug cache
+		$this->_regenerate_cache();
+		$this->_regenerate_sitemap();
+		
+		return $slug;
+		
 	}
 	
 	function delete_slug($target){
@@ -146,7 +141,7 @@ class cms_slug_model extends CI_Model {
         if (!empty($routes )) {
 
             foreach ($routes as $route) {
-            	if ($route['cms_slug_id']){
+            	if ($route['cms_slug_id'] && $route['status'] == 0){
                 	$data[] = '$route[\'' . $route['cms_slug_id'] . '\'] = \'index/index/' . $route['target'] . '/\';';
             	}
             }
@@ -172,7 +167,7 @@ class cms_slug_model extends CI_Model {
         
         if (!empty($routes )) {
             foreach ($routes as $route) {
-            	if ($route['cms_slug_id']){
+            	if ($route['cms_slug_id'] && $route['status'] == 0){
 
             		$data[] = '<url><loc>http://' . $_SERVER['HTTP_HOST'] . '/' . $route['cms_slug_id'] . '/</loc></url>';
 
@@ -201,4 +196,14 @@ class cms_slug_model extends CI_Model {
     	}
 	}
 	
+	function update_slug_status($target, $status){
+		
+		$sql = "update cms_slug set status = ? where target = ? ";
+		$query = $this->db->query($sql, [$status, $target, ]);
+		
+		$this->_regenerate_cache();
+		$this->_regenerate_sitemap();
+	
+	}
+
 }

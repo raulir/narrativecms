@@ -36,7 +36,7 @@ function cms_input_textarea_init(){
 				
 				if (buttons.indexOf('I') > -1){
 					toolbar = toolbar + 'italic ';
-					valid_elements = valid_elements + ',i';
+					valid_elements = valid_elements + ',i/em';
 				}
 				
 				if (buttons.indexOf('U') > -1){
@@ -85,7 +85,7 @@ function cms_input_textarea_init(){
 				
 				if (buttons.indexOf('Q') > -1){
 					toolbar = toolbar + 'blockquote ';
-					valid_elements = valid_elements + ',q';
+					valid_elements = valid_elements + ',q/blockquote';
 				}
 
 				if (buttons.indexOf('P') > -1){

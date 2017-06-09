@@ -24,6 +24,7 @@ function cms_page_save(params){
 		'sort': $('.cms_page_sort').val(),
 		'title': $('.cms_page_title').val(),
 		'slug': $('.cms_page_slug').val(),
+		'status': $('.cms_page_status').val(),
 		'description': $('.cms_page_description').val(),
 		'image': $('.cms_page_image').val(),
 		'layout': $('.cms_page_layout').val(),

@@ -17,6 +17,8 @@ class cms_page_panel_operations extends MY_Controller{
 	function panel_action($params){
 
 		$this->load->model('cms_page_panel_model');
+		$this->load->model('cms_panel_model');
+		$this->load->model('cms_slug_model');
 		
 		$do = $this->input->post('do');
 
@@ -56,7 +58,7 @@ class cms_page_panel_operations extends MY_Controller{
 		} elseif ($do == 'cms_page_panel_show'){
 			 
 			$cms_page_panel_id = $this->input->post('cms_page_panel_id');
-			 
+
 			// get current state
 			$block = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
 			 
@@ -68,12 +70,13 @@ class cms_page_panel_operations extends MY_Controller{
 				$this->cms_page_panel_model->update_cms_page_panel($cms_page_panel_id, array('show' => 1, ));
 				$params['show'] = 1;
 			}
+			
+			// slug hiding
+			$this->cms_slug_model->update_slug_status($block['panel_name'].'='.$cms_page_panel_id, empty($params['show']) ? 1 : 0);
 			 
 		} elseif ($do == 'cms_page_panel_copy'){
 			 
 			$cms_page_panel_id = $this->input->post('cms_page_panel_id');
-			 
-			$this->load->model('cms_panel_model');
 			 
 			// get original data
 			$data = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
@@ -133,8 +136,6 @@ class cms_page_panel_operations extends MY_Controller{
 			 
 		} elseif ($do == 'cms_page_panel_save'){
 			 
-			$this->load->model('cms_panel_model');
-
 			// collect data
 			$block_id = $this->input->post('block_id');
 			$data['page_id'] = $this->input->post('page_id');
@@ -269,8 +270,19 @@ class cms_page_panel_operations extends MY_Controller{
 
 			// if link target, update slug
 			if (!empty($panel_config['list']['link_target'])){
-				$this->load->model('cms_slug_model');
-				$this->cms_slug_model->request_slug($data['panel_name'].'='.$block_id);
+				
+				if (!empty($panel_config['list']['title_field']) && !empty($data['panel_params'][$panel_config['list']['title_field']])){
+					$slug_string = $data['panel_params'][$panel_config['list']['title_field']];
+				} else if (!empty($data['panel_params']['heading'])){
+					$slug_string = $data['panel_params']['heading'];
+				} else {
+					$slug_string = $data['panel_name'].' '.$block_id;
+				}
+				
+				$slug = $this->cms_slug_model->generate_list_item_slug($data['panel_name'].'='.$block_id, $slug_string);
+				
+				$this->cms_slug_model->set_page_slug($data['panel_name'].'='.$block_id, $slug, empty($old_data['show']) ? '1' : '0');
+			
 			}
 
 			// save to parents children list
@@ -314,8 +326,6 @@ class cms_page_panel_operations extends MY_Controller{
 			 
 			$block_id = $this->input->post('block_id');
 			
-			$this->load->model('cms_panel_model');
-			
 			// data for filenames
 			$data = $this->cms_page_panel_model->get_cms_page_panel($block_id);
 			$panel_config = $this->cms_panel_model->get_cms_panel_config($data['panel_name']);
@@ -328,6 +338,8 @@ class cms_page_panel_operations extends MY_Controller{
 			foreach($filenames as $filename){
 				unlink($GLOBALS['config']['upload_path'].$filename);
 			}
+			
+			$this->slug_model->delete_slug($data['panel_name'].'='.$block_id);
 
 		}
 		

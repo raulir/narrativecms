@@ -44,7 +44,7 @@ class cms_page_panel_caching extends MY_Controller{
 		);
 
 		// get available lists
-		$params['lists'] = $this->cms_page_panel_model->get_lists();
+		$params['lists'] = $this->cms_page_panel_model->get_old_lists(); // TODO: old because deprecated function - refactor
 
 		$params['params'] = $params;
 		return $params; // array('params' => $params);

@@ -45,7 +45,7 @@ class cms_page_panel_model extends CI_Model {
 	/**
 	 * get available lists based on json files, SLOW!
 	 */
-	function get_lists(){
+	function get_old_lists(){
 		
 		$this->load->model('cms_panel_model');
 		
@@ -63,6 +63,26 @@ class cms_page_panel_model extends CI_Model {
 		
 		return $return;
 
+	}
+	
+	function get_lists(){
+	
+		$this->load->model('cms_panel_model');
+	
+		$return = [];
+	
+		foreach ($GLOBALS['config']['modules'] as $module){
+			foreach(glob($GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/*.json') as $filename){
+				$list_name = basename($filename, '.json');
+				$block_config = $this->cms_panel_model->get_cms_panel_config($list_name);
+				if (!empty($block_config['list'])){
+					$return[$module.'/'.$list_name] = $module.'/'.$list_name;
+				}
+			}
+		}
+	
+		return $return;
+	
 	}
 	
 	/**
@@ -578,6 +598,11 @@ class cms_page_panel_model extends CI_Model {
 		if (isset($filter['cms_page_panel_id'])){
 			$filter['block_id'] = $filter['cms_page_panel_id'];
 			unset($filter['cms_page_panel_id']);
+		}
+		
+		if (isset($filter['cms_page_panel_id!'])){
+			$filter['block_id!'] = $filter['cms_page_panel_id!'];
+			unset($filter['cms_page_panel_id!']);
 		}
 		
 		if (isset($filter['cms_page_id'])){

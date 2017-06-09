@@ -46,6 +46,16 @@ class cms_page extends MY_Controller{
 		if (empty($return['page']['layout'])){
 			$return['page']['layout'] = 'default';
 		}
+		
+		// is page a list item page?
+		$lists = $this->cms_page_panel_model->get_lists();
+		$lists_clean = array_map(function($list_item){
+			list($m, $b) = explode('/', $list_item);
+			return $b;
+		}, $lists);
+		
+		$return['is_list_item'] = in_array($return['page']['slug'], $lists_clean) ? 1 : 0;
+		
 
 		return $return;
 

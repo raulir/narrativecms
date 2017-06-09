@@ -37,6 +37,23 @@
 						'meta_class' => 'cms_page_slug',
 				]); ?>
 				
+				<?php if($page['page_id'] != 1 && !$is_list_item): // Can't hide homepage ?>
+						
+						<?php _panel('cms_input_select', array(
+								'label' => 'Published status', 
+								'value' => (!empty($page['status']) ? $page['status'] : 0), 
+								'values' => ['0' => 'Automatic', '1' => 'Hidden', ],
+								'name' => 'cms_page_status',
+								'name_clean' => 'status',
+								'help' => '[Page published status]||"{Automatic}" - hidden when page doesn\'t have any panels added, otherwise visible.||"{Hidden}" - visible only while logged into CMS admin.',
+						)); ?>
+						
+				<?php else: ?>
+					
+					<input type="hidden" name="cms_page_status" class="cms_page_status" value="0">
+					
+				<?php endif ?>
+
 				<?php
 					_panel('cms_input_select', array(
 							'label' => 'Layout', 

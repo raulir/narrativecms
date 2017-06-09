@@ -128,15 +128,15 @@ class CI_Router {
 			}
 		}
 
-		// Load the routes.php file.
-		if (defined('ENVIRONMENT') AND is_file(APPPATH.'config/'.ENVIRONMENT.'/routes.php'))
-		{
-			include(APPPATH.'config/'.ENVIRONMENT.'/routes.php');
+		// load the routes.php file.
+		if (file_exists($GLOBALS['config']['base_path'] . 'cache/routes.php')){
+			include_once $GLOBALS['config']['base_path'] . 'cache/routes.php';
+		} else {
+			$route['(:any)'] = 'cms_operations/update_routes/';
 		}
-		elseif (is_file(APPPATH.'config/routes.php'))
-		{
-			include(APPPATH.'config/routes.php');
-		}
+
+		$route['default_controller'] = 'index';
+		$route['404_override'] = '';
 
 		$this->routes = ( ! isset($route) OR ! is_array($route)) ? array() : $route;
 		unset($route);
