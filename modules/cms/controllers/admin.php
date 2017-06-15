@@ -25,7 +25,7 @@ class admin extends MY_Controller {
 	}
 
 	function index(){
-		 
+
 		// set page config
 		$page_config = array(
 				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),

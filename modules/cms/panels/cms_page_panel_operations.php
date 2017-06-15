@@ -339,7 +339,7 @@ class cms_page_panel_operations extends MY_Controller{
 				unlink($GLOBALS['config']['upload_path'].$filename);
 			}
 			
-			$this->slug_model->delete_slug($data['panel_name'].'='.$block_id);
+			$this->cms_slug_model->delete_slug($data['panel_name'].'='.$block_id);
 
 		}
 		
