@@ -24,7 +24,18 @@ function cms_images_activate() {
 			var $that = $(this);
 			$('.cms_images_image_delete', this).css({'opacity':'1.0'}).on('click.r', function(e){
 				e.stopPropagation();
-				get_ajax_panel('cms_popup_yes_no', {}, function(data){
+				
+				var text = 'Are you sure?';
+				var usage = $('.cms_images_image_usage', $that).html();
+				if (usage == '1'){
+					text = text + '<div class="cms_images_warning">This image is in use!</div>' +
+							'<div class="cms_images_warning_extra">Deleting this image may cause missing images in the front end.</div>';
+				} else if (usage != '0'){
+					text = text + '<div class="cms_images_warning">This image is in use at ' + usage + ' places!</div>' +
+							'<div class="cms_images_warning_extra">Deleting this image may cause missing images in the front end.</div>';
+				}
+				
+				get_ajax_panel('cms_popup_yes_no', {'text':text}, function(data){
 					panels_display_popup(data.result.html, {
 						'yes': function(){
 							$('.cms_images_image_cell', $that).animate({'opacity':'0'}, 100);
@@ -36,7 +47,7 @@ function cms_images_activate() {
 								if ($('.cms_images_image').length == 1 && page > 0){
 									page = page - 1;
 								}
-								load_images(
+								cms_images_load_images(
 										page, 
 										$('.cms_images_area').data('limit'), 
 										$('.cms_images_area').data('filename')
@@ -95,7 +106,7 @@ function cms_images_activate() {
 							$('.cms_image_overlay,.cms_image_container').remove();
 							
 							// refresh area
-							load_images(
+							cms_images_load_images(
 									page, 
 									$('.cms_images_area').data('limit'), 
 									$('.cms_images_area').data('filename')
@@ -189,7 +200,7 @@ function cms_images_upload(){
 	    	$('.cms_images_search_input').val('');
 	    	
 	    	// reload images from zero
-	    	load_images('0', $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
+	    	cms_images_load_images('0', $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
 
 	    	// reinit file upload form input
 	    	$('.cms_images_new_image').on('change.r', function(){
@@ -228,7 +239,7 @@ function cms_images_upload(){
 
 }
 
-function load_images(page, limit, filename){
+function cms_images_load_images(page, limit, filename){
 	
 	cms_images_load_parameters = {
 		'page': page,
@@ -277,7 +288,7 @@ function load_images(page, limit, filename){
 		$('.cms_images_paging_total').html(parseInt(data.result.cms_images_max_page) + 1);
 		
 		$('.cms_images_paging_enabled').off('click.cms').on('click.cms', function(){
-			load_images($(this).data('page'), $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
+			cms_images_load_images($(this).data('page'), $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
 		});
 		
 		// activate functionality
@@ -289,7 +300,7 @@ function load_images(page, limit, filename){
 		if (current_page != cms_images_load_parameters.page || $('.cms_images_category').val() != cms_images_load_parameters.category 
 				|| $('.cms_images_search_input').val() != cms_images_load_parameters.search){
 			
-			load_images(cms_images_load_parameters.page, limit, filename);
+			cms_images_load_images(cms_images_load_parameters.page, limit, filename);
 			
 		}
 		
@@ -319,16 +330,16 @@ $(document).ready(function() {
 	
 	// category select
 	$('.cms_images_category').on('change.cms', function(){
-		load_images('0', $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
+		cms_images_load_images('0', $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
 	});
 	
 	// load first page
-	load_images($('.cms_images_area').data('page'), $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
+	cms_images_load_images($('.cms_images_area').data('page'), $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
 	
 	// init search input
 	$('.cms_images_search_input').on('keyup.cms', function(e){
 		if (e.which != 37 && e.which != 38 && e.which != 39)
-		load_images('0', $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
+			cms_images_load_images('0', $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
 	});
 	
 	// init keys
@@ -344,7 +355,7 @@ $(document).ready(function() {
 
 	        case 38: // up
 	        	$('.cms_images_search_input').val('');
-	        	load_images('0', $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
+	        	cms_images_load_images('0', $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
 	    		e.preventDefault();
 	        	return false;
 	        break;

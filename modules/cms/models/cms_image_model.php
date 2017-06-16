@@ -31,6 +31,8 @@ class cms_image_model extends CI_Model {
 	}
 
 	function get_cms_images($page, $limit, $category, $search){
+		
+		$this->load->model('cms_page_model');
 
 		if (function_exists('mysql_set_charset')){
 			@mysql_set_charset('utf8mb4');
@@ -60,9 +62,22 @@ class cms_image_model extends CI_Model {
 		$query = $this->db->query($sql, $params);
 
 		$return['result'] = $query->result_array();
-
+		
+		// add page images to count
+		$pages = $this->cms_page_model->get_cms_pages();
+		
+		foreach($return['result'] as $key => $image){
+			foreach($pages as $page){
+					
+				if ($image['filename'] == $page['image']){
+					$return['result'][$key]['number'] += 1;
+				}
+			
+			}
+		}
+		
+		// get total number of images in filter
 		$sql_count = "select count(*) as number from cms_image a where ".$where." ";
-
 		$query = $this->db->query($sql_count, $params);
 		$number_a = $query->row_array();
 		$return['count'] = !empty($number_a['number']) ? $number_a['number'] : 0;

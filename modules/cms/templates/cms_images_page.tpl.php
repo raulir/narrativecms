@@ -5,7 +5,7 @@
 		<div class="cms_images_image_cell" 
 				style="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/opacity.png'); ">
 			
-			<img class="cms_images_image_img" src="<?php _i($cms_image['filename'], array('width' => 143, )); ?>">
+			<img class="cms_images_image_img" src="<?php _i($cms_image['filename'], 143); ?>">
 			<div class="cms_images_image_delete">Delete</div>
 			<div class="cms_images_image_edit">Edit</div>
 			<div class="cms_images_image_usage"><?php print($cms_image['number']); ?></div>
