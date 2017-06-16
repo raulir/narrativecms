@@ -1,5 +1,5 @@
 function cms_popup_init(){
-
+	
 	$('.cms_popup_yes').on('click.r', function(){
 		$('.cms_popup_container').remove();
 	});

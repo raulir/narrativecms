@@ -13,7 +13,7 @@
 
 	<div class="cms_image_area">
 		<div class="cms_image_cell" style="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/opacity.png'); ">
-			<img class="cms_image_image" src="<?php print($GLOBALS['config']['upload_url'].$filename); ?>">
+			<img class="cms_image_image" src="<?php print($GLOBALS['config']['upload_url'].$filename); ?>?v=<?= time() ?>">
 		</div>
 	</div>
 	

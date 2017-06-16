@@ -480,11 +480,16 @@ class MY_Controller extends CI_Controller{
 
 			if (count($css_arr)){
 
-		    	$css_str = '<script type="text/javascript">'."\n";
+				$css_arr_prep = [];
 		    	foreach ($css_arr as $css_inc){
-		    		$css_str .=	'cms_load_css(\''.$css_inc['script'].'\', '.(!empty($GLOBALS['config']['cache']['force_download']) ? 'true' : 'false').');'."\n";
+		    		$css_arr_prep[] = $css_inc['script'];
 		    	}
-		    	$css_str .= '</script>'."\n";
+		    	$css_arr_str = implode('\', \'', $css_arr_prep);
+		    		
+	    		$css_str .= '<script class="cms_load_css cms_load_css_'.md5($css_arr_str).'" type="text/javascript">'."\n";
+		    	$css_str .= 'cms_load_css([\'';
+		    	$css_str .=	$css_arr_str;
+		    	$css_str .= '\'], '. (!empty($GLOBALS['config']['cache']['force_download']) ? 'true' : 'false') .', \'cms_load_css_'. md5($css_arr_str) .'\');'."\n".'</script>'."\n";
 	    	
 	    	}
 	    	    	

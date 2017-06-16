@@ -11,9 +11,15 @@
 				<a class="cms_images_cancel admin_tool_button admin_right popup_cancel">Cancel</a>
 				
 				<a class="cms_images_upload admin_tool_button admin_right">Upload</a>
+				
 				<form id="new_image_form" class="cms_images_new_image_form" method="post" enctype="multipart/form-data" style="display: inline; ">
 					<input type="hidden" name="do" value="cms_images_upload">
 					<input type="file" name="new_image[]" class="cms_images_new_image" style="display: none; " multiple>
+				</form>
+				
+				<form id="replace_image_form" class="cms_images_replace_image_form" method="post" enctype="multipart/form-data" style="display: inline; ">
+					<input type="hidden" name="do" value="cms_images_replace">
+					<input type="file" name="replace_image" class="cms_images_replace_image" style="display: none; ">
 				</form>
 				
 				<div class="admin_tool_button admin_right cms_paging_last cms_images_paging_last cms_images_paging_disabled"></div>

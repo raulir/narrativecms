@@ -22,7 +22,7 @@ function cms_images_activate() {
 		})
 		.on('mouseenter.r', function(){
 			var $that = $(this);
-			$('.cms_images_image_delete', this).css({'opacity':'1.0'}).on('click.r', function(e){
+			$('.cms_images_image_delete', this).on('click.r', function(e){
 				e.stopPropagation();
 				
 				var text = 'Are you sure?';
@@ -58,7 +58,7 @@ function cms_images_activate() {
 				});
 			});
 			
-			$('.cms_images_image_edit', this).css({'opacity':'1.0'}).on('click.r', function(e){
+			$('.cms_images_image_edit', this).on('click.r', function(e){
 				e.stopPropagation();
 				get_ajax_panel('cms_image', {'filename': $that.data('filename')}, function(data){
 					// display image edit popup
@@ -142,15 +142,69 @@ function cms_images_activate() {
 				});
 			});
 			
-			$('.cms_images_image_usage', this).css({'opacity':'1.0'});
+			$('.cms_images_image_replace', this).on('click.r', function(e){
+				
+				e.stopPropagation();
+				
+				cms_image_replace($that);
+				
+			});
+			
 		})
 		.on('mouseleave.r', function(){
-			$('.cms_images_image_delete,.cms_images_image_usage,.cms_images_image_edit', this).css({'opacity':''}).off('click.r');
+			$('.cms_images_image_delete,.cms_images_image_usage,.cms_images_image_edit', this).off('click.r');
 		});
 	
 	cms_images_mark();
 	
 	$('.cms_images_search_input').focus();
+
+}
+
+function cms_image_replace($image){
+	
+	// are you sure
+	var text = 'Replace image?';
+	var usage = $('.cms_images_image_usage', $image).html();
+	if (usage != '0'){
+		text = text + '<br><div class="cms_images_warning_extra">Front end placements updated: <b>' + usage + '</b></div>';
+	}
+	text = text + '<div class="cms_images_warning_extra">The old version of image will be permanently deleted.</div>';
+	
+	get_ajax_panel('cms_popup_yes_no', {'text':text}, function(data){
+		panels_display_popup(data.result.html, {
+			'yes': function(){
+				
+				// activate file input change event
+				$('.cms_images_replace_image').on('change.cms', function(){
+					
+					$('.cms_images_replace_image').off('change.cms');
+					
+					// do upload
+					var data = new FormData( $('.cms_images_replace_image_form').get(0) );
+					data.append('panel_id', 'cms_images_upload');
+					data.append('filename', $image.data('filename'));
+					
+					cms_images_transfer(data, function(data){
+						
+						// update screen with new image
+						$('.cms_images_image_img', $image).attr('src', data.result.filename);
+						
+						
+						
+						console.log('upload successful: ');
+						console.log(data);
+					
+					});
+
+				});
+				
+				// run file input
+				$('.cms_images_replace_image').click();
+				
+			}
+		}); 
+	});
 
 }
 
@@ -171,6 +225,23 @@ function cms_image_init_keywords(){
 
 function cms_images_upload(){
 	
+	var data = new FormData( $('.cms_images_new_image_form').get(0) );
+	data.append('panel_id', 'cms_images_upload');
+	data.append('category', $('.cms_images_category').val());
+	
+	cms_images_transfer(data, function(data){
+    	
+    	$('.cms_images_search_input').val('');
+
+    	// reload images from zero
+    	cms_images_load_images('0', $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
+		
+	});
+
+}
+
+function cms_images_transfer(data, success){
+	
 	// show overlay
 	var load_in_progress = true;
 	var percentage = 0;
@@ -181,10 +252,6 @@ function cms_images_upload(){
 					'<div class="cms_images_container_bg"></div><div class="cms_images_container_label">' + label + '</div></div></div></div>');
 		}
 	}, 300);
-	
-	var data = new FormData( $('.cms_images_new_image_form').get(0) );
-	data.append('panel_id', 'cms_images_upload');
-	data.append('category', $('.cms_images_category').val());
 	
 	$.ajax( {
 		url: config_url + 'ajax_api/get_panel',
@@ -197,11 +264,6 @@ function cms_images_upload(){
 	    	
 	    	$('.cms_images_container_upload').remove();
 	    	
-	    	$('.cms_images_search_input').val('');
-	    	
-	    	// reload images from zero
-	    	cms_images_load_images('0', $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
-
 	    	// reinit file upload form input
 	    	$('.cms_images_new_image').on('change.r', function(){
 	    		$('.cms_images_new_image').off('change.r');
@@ -209,7 +271,9 @@ function cms_images_upload(){
 	    	});
 	    	
 	    	load_in_progress = false;
-	    	
+
+	    	success(data);
+
 	    },
 	    xhr: function() {
 	        var xhr = new window.XMLHttpRequest();
@@ -235,8 +299,8 @@ function cms_images_upload(){
 	
 	        return xhr;
 	    }
-	} );
-
+	});
+	
 }
 
 function cms_images_load_images(page, limit, filename){

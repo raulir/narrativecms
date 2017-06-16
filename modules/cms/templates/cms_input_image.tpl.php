@@ -11,7 +11,7 @@
 			<?php if(!empty($error)): ?>
 				<div class="cms_input_image_error"><?= $error ?></div>
 			<?php elseif(!empty($value)): ?>
-				<img src="<?php _i($value, array('width' => 328, )); ?>">
+				<img src="<?php _i($value, 600); ?>?v=<?= time() ?>">
 			<?php else: ?>
 				-- no image --
 			<?php endif ?>

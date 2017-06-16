@@ -148,7 +148,7 @@ function panels_display_popup(html, params){
 			console.log('clean_up');
 			$('.popup_container,.popup_overlay').css({'opacity':'0'});
 			setTimeout(function(){
-				$('.popup_container,.popup_overlay').remove();
+				$('.popup_container,.popup_overlay,.cms_popup_container,.cms_popup_overlay').remove();
 			}, 300);
 		}
 	}, params);
@@ -194,30 +194,36 @@ function panels_display_popup(html, params){
 	
 }
 
-function cms_load_css(filename, force_download){
+function cms_load_css(filenames, force_download, class_to_remove){
 	
-	if (filename.indexOf('?') !== -1){
-		var clean_filename = filename.substr(0, filename.indexOf('?'));
-	} else {
-		var clean_filename = filename;
-	}
-	
-	var found = false;
-	
-	$('link[type="text/css"]').each(function(){
-		if (this.href.indexOf(clean_filename) !== -1){
-			found = true;
+	$(filenames).each(function(key, filename){
+
+		if (filename.indexOf('?') !== -1){
+			var clean_filename = filename.substr(0, filename.indexOf('?'));
+		} else {
+			var clean_filename = filename;
 		}
+		
+		var found = false;
+		
+		$('link[type="text/css"]').each(function(){
+			if (this.href.indexOf(clean_filename) !== -1){
+				found = true;
+			}
+		});
+
+		if(!found){
+			
+			if (force_download){
+				filename = clean_filename + '?v=' + Math.round(Math.random() * 10000000);
+			}
+			
+			$('head').append('<link rel="stylesheet" type="text/css" href="' + filename + '"/>');
+
+		}
+		
 	});
 
-	if(!found){
-		
-		if (force_download){
-			filename = clean_filename + '?v=' + Math.round(Math.random() * 10000000);
-		}
-		
-		$('head').append('<link rel="stylesheet" type="text/css" href="' + filename + '"/>');
-	
-	}
+	$('.' + class_to_remove).remove();
 	
 }

@@ -7,7 +7,9 @@ function cms_popup_init(){
 		$container.css({'opacity':''});
 		
 		setTimeout(function(){
-			$container.css({'display':'none'});
+			
+			$container.remove(); // css({'display':'none'});
+			
 		}, 300);
 
 	});
@@ -21,7 +23,7 @@ function cms_popup_resize(){
 function cms_popup_run(name, after){
 	
 	var $container = $('.cms_popup_' + name);
-	
+
 	// move element to top level
 	$(document.body).append( $container.detach() );
 	

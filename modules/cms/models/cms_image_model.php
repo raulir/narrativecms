@@ -148,6 +148,7 @@ class cms_image_model extends CI_Model {
 		}
 		 
 		$name_a = pathinfo($filename);
+
 		$image_names = $GLOBALS['config']['upload_path'].$name_a['dirname'].'/_'.$name_a['filename'].'.*.'.$name_a['extension'];
 		foreach(glob($image_names) as $_filename) {
 			unlink($_filename);
@@ -209,6 +210,15 @@ class cms_image_model extends CI_Model {
 
 		return $return;
 
+	}
+	
+	function refresh_cms_image_hash($filename){
+		
+		$hash = sha1_file($GLOBALS['config']['upload_path'].$filename);
+		$this->update_cms_image($filename, array('hash' => $hash, ));
+		
+		return $hash;
+		
 	}
 
 	function get_cms_image_categories(){

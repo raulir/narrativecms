@@ -1,1 +1,1 @@
-<img src="<?php _i($filename, 328); ?>">
+<img src="<?php _i($filename, 600); ?>?v=<?= time() ?>">
