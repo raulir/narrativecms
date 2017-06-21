@@ -74,6 +74,8 @@
 
 	<script type="text/javascript">
 
+		var _cms_rem = 10;
+
 		function _set_rem(){
 
 			<?php if(empty($GLOBALS['config']['rem_switched'])): ?>
@@ -106,6 +108,8 @@
 
 			document.body.parentNode.style.fontSize = rem + 'px';
 			document.cookie = 'rem=' + encodeURIComponent(rem) + '; path=/';
+
+			_cms_rem = rem;
 
 		}
 

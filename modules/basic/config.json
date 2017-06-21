@@ -7,6 +7,10 @@
 		{
 			"id":"console_log",
 			"name":"Console log"
+		},
+		{
+			"id":"spacer",
+			"name":"Spacer"
 		}
 	],
 	"cms_menu":[
