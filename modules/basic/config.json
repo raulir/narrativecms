@@ -9,6 +9,10 @@
 			"name":"Console log"
 		},
 		{
+			"id":"menu",
+			"name":"Menu"
+		},
+		{
 			"id":"spacer",
 			"name":"Spacer"
 		},

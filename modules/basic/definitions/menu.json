@@ -1,0 +1,48 @@
+{
+	"version":"2",
+	"item":[
+		{
+			"type":"repeater",
+			"name":"links",
+			"label":"Links",
+			"fields":[
+				{
+					"type":"select",
+					"name":"align",
+					"label":"Alignment",
+					"values": {
+						"left":"Left",
+						"center":"Center",
+						"right":"Right"
+					},
+					"default":"center"
+				},
+				{
+					"type":"select",
+					"name":"mobile_hidden",
+					"label":"Mobile",
+					"values": {
+						"0":"Visible",
+						"1":"Hidden"
+					},
+					"default":"0"
+				},
+				{
+					"type":"text",
+					"name":"text",
+					"label":"Text"
+				},
+				{
+					"type":"link",
+					"name":"link",
+					"label":"Page"
+				},
+				{
+					"type":"text",
+					"name":"hash",
+					"label":"Hash (#hash)"
+				}
+			]
+		}
+	]
+}

@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=<?= !empty($_COOKIE['width']) ? $_COOKIE['width'] : '600' ?>,user-scalable=no">
 	<script type="text/javascript">
 
-		var _old_orientation = <?= !empty($_COOKIE['orientation']) ? $_COOKIE['orientation'] : -1 ?>;
+		var _old_orientation = <?= isset($_COOKIE['orientation']) ? $_COOKIE['orientation'] : -1 ?>;
 
 		var _orientation = function(){
 
@@ -22,16 +22,20 @@
     	var _orientationchange = function(){
 
     		var orientation = _orientation();
-
         	var viewport = document.querySelector('meta[name=viewport]');
-// console.log(_old_orientation + ' ' + orientation);        	
-        	if (orientation != _old_orientation || _old_orientation == -1){
-// console.log(_old_orientation + ' != ' + orientation);        	
+        	var changed = (orientation != _old_orientation);
+
+        	if (changed || _old_orientation == -1){
+
+            	var exp = new Date();
+            	exp.setDate(exp.getDate() + 365);
+            	exp = exp.toUTCString();
 
 				_old_orientation = orientation;
-				document.cookie = 'orientation=' + encodeURIComponent(orientation) + '; path=/';
+				document.cookie = 'orientation=' + encodeURIComponent(orientation) + '; path=/; expires=' + exp;
 
-        	   	document.body.style.display='none';
+				if (changed) document.body.style.display='none';
+				
         		viewport.setAttribute('content', '');
 				setTimeout(function(){
 
@@ -42,18 +46,18 @@
 										
 					viewport.setAttribute('content', 'width=' + width + ',user-scalable=no');
 					
-					document.cookie = 'width=' + width + '; path=/';
+			    	document.body.offsetHeight;
+			    	window.dispatchEvent(new Event('resize'));
+
+			    	document.cookie = 'width=' + width + '; path=/; expires=' + exp;
 					
 					setTimeout(function(){
 						
-				    	document.body.offsetHeight;
-
-				    	window.dispatchEvent(new Event('resize'));
-				    	document.body.style.removeProperty('display');
+				    	if (changed) document.body.style.removeProperty('display');
 				    	
-					}, 20);
+					}, 100);
 					
-				}, 250);
+				}, 100);
 
         	}
 
