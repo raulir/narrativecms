@@ -11,6 +11,10 @@
 		{
 			"id":"spacer",
 			"name":"Spacer"
+		},
+		{
+			"id":"parallax",
+			"name":"Parallax"
 		}
 	],
 	"cms_menu":[
