@@ -1,0 +1,60 @@
+.menucross_container {
+	position: absolute;
+	right: 0;
+	top: 10%;
+	width: 100%;
+	height: 80%;
+	cursor: pointer;
+	z-index: 210;
+}
+
+.menucross_line {
+	position: absolute;
+	left: 0;
+	height: 0.24rem;
+	width: 100%;
+	background-color: $colour_white;
+	transition: all 0.5s;
+}
+
+.menucross_line_a {
+	top: 0;
+}
+
+.menucross_line_b {
+	top: calc(50% - 0.24rem/2);
+}
+
+.menucross_line_b2 {
+	top: calc(50% - 0.24rem/2);
+}
+
+.menucross_line_c {
+	bottom: 0;
+}
+
+/* button as cross */
+
+.menucross_active {
+	
+	.menucross_line_a {
+		top: calc(50% - 0.24rem/2);
+		transform: scale(0.1, 1);
+	}
+	
+	.menucross_line_c {
+		top: calc(50% - 0.24rem/2);
+		transform: scale(0.1, 1);
+	}
+	
+	.menucross_line_b {
+		transform: rotate(45deg);
+		transform-origin: 50% 50%;
+	}
+	
+	.menucross_line_b2 {
+		transform: rotate(-45deg);
+		transform-origin: 50% 50%;
+	}
+	
+}

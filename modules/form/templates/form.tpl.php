@@ -53,7 +53,7 @@
 						</div>
 					<?php endforeach ?>
 	
-					<div class="form_submit" <?php if(!empty($settings['arrow'])) _ib($settings['arrow'], 100); ?>>
+					<div class="form_submit" <?php if(!empty($arrow)) _ib($arrow, 100); ?>>
 						<div class="form_submit_label"><?php print($submit_text); ?></div>
 					</div>
 					

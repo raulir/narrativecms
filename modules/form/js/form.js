@@ -1,12 +1,12 @@
 function form_init(){
-	
+
 	$('.form_form>form').on('submit.cms', function(){
 		$('.form_submit').click();
 		return false;
 	});
 	
 	$('.form_submit').on('click.crl', function(){
-		
+
 		var $form = $(this).closest('form');
 		
 		var missing = 0;

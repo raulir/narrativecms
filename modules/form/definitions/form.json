@@ -8,6 +8,12 @@
 		"help":"Email content, which is sent to the visitor after submitting the form"
 	},
 	{
+		"type":"image",
+		"name":"arrow",
+		"label":"Arrow",
+		"category":"icon"
+	},
+	{
 		"type":"textarea",
 		"name":"heading",
 		"label":"Heading",
