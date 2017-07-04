@@ -9,12 +9,25 @@
 }
 
 .menucross_line {
+	
 	position: absolute;
 	left: 0;
 	height: 0.24rem;
 	width: 100%;
-	background-color: $colour_white;
+//	background-color: $colour_white;
 	transition: all 0.5s;
+
+	&::after {
+		content: ' ';
+		height: 0;
+		width: 100%;
+		position: absolute;
+		left: 0;
+		top: 0;
+		border-bottom: 0.24rem solid $colour_white;
+		transition: all 0.5s;
+	}
+
 }
 
 .menucross_line_a {

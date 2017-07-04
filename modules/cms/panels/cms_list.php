@@ -46,23 +46,22 @@ class cms_list extends MY_Controller{
 					}
 						
 					// if fk
-					if (!empty($panel_field['name']) && $panel_field['type'] == 'fk' &&
-							$panel_field['name'] == $filter_field && $panel_field['target'] == 'block'){
+					if (!empty($panel_field['name']) && $panel_field['type'] == 'fk' && 	$panel_field['name'] == $filter_field && $panel_field['target'] == 'block'){
 
-								$panel_name = str_replace('_id', '', $panel_field['name']);
+						$panel_name = str_replace('_id', '', $panel_field['name']);
 
-								$target_a = $this->cms_page_panel_model->get_list($panel_name, ['show' => [0,1]]);
-								if (!empty($target_a[0])){
-										
-									$params['filter_fields_values'][$filter_field] = array();
-									foreach($target_a as $row){
+						$target_a = $this->cms_page_panel_model->get_list($panel_name, ['show' => [0,1]]);
 
-										$params['filter_fields_values'][$filter_field][$row['block_id']] =
-										!empty($row['heading']) ? $row['heading'] : $row['block_id'];
-											
-									}
-										
-								}
+						if (count($target_a)){
+								
+							$params['filter_fields_values'][$filter_field] = array();
+							foreach($target_a as $row){
+
+								$params['filter_fields_values'][$filter_field][$row['block_id']] = !empty($row['heading']) ? $row['heading'] : $row['block_id'];
+									
+							}
+								
+						}
 
 					}
 						

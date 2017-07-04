@@ -390,12 +390,14 @@ if ( !function_exists('_i')) {
 									:	''
 							).
 							$params['css'].'"'.
-							((!empty($GLOBALS['config']['aria']) && !empty($image_data['alt'])) ? ' aria-label="image: '.$image_data['alt'].'"' : '')).$hq_str;
+							((!empty($GLOBALS['config']['aria']) && !empty($image_data['alt'])) ? ' aria-label="image: '.$image_data['alt'].'"' : '')).
+							(!empty($params['dataprops']) ? ' data-width="'.$image_data['width'].'" data-height="'.$image_data['height'].'"' : '').$hq_str;
 
 				} else {
 					
 					print('style="background-image: url('.$image_filename.'); '.$params['css'].'"'.
-							((!empty($GLOBALS['config']['aria']) && !empty($image_data['alt'])) ? ' aria-label="image: '.$image_data['alt'].'"' : '')).$hq_str;
+							((!empty($GLOBALS['config']['aria']) && !empty($image_data['alt'])) ? ' aria-label="image: '.$image_data['alt'].'"' : '')).
+							(!empty($params['dataprops']) ? ' data-width="'.$image_data['width'].'" data-height="'.$image_data['height'].'"' : '').$hq_str;
 					
 				}
 

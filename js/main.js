@@ -432,6 +432,7 @@ var get_ios_windowheight = function() {
     
 }( jQuery ));
 
+// deprecated
 ( function( $ ) {
 	
     $.fn.cms_scroll_down = function(params) {
