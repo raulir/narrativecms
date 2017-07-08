@@ -33,15 +33,15 @@ body {
 	font-weight: 200;
 	font-smoothing: antialiased;
 	-webkit-font-smoothing: antialiased;
-	background-color: #bbbbbb;
 	min-height: 100%;
-	background-position: left top;
     margin: 0px;
     padding: 0px;
     display: table;
     width: 100%;
     overflow-x: hidden;
     color: black;
+    background-position: center;
+    background-size: cover;
 }
 
 html {

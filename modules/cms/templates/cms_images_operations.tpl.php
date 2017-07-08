@@ -1,1 +1,1 @@
-<img src="<?php _i($filename, 600); ?>?v=<?= time() ?>">
+<div class="cms_input_image_image" <?php $i = _ib($filename, ['width' => 600, 'maxwidth' => true, ]); ?>></div>

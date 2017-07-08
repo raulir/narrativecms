@@ -1,1 +1,1 @@
-<img src="<?php _i($filename, 300); ?>?v=<?= time() ?>">
+<div class="cms_images_image_img" <?php _ib($filename, ['width' => 300, 'maxwidth' => true, ]); ?>></div>

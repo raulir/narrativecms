@@ -4,7 +4,8 @@
 		
 		<div class="cms_images_image_cell" style="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/opacity.png'); ">
 			
-			<img class="cms_images_image_img" src="<?php _i($cms_image['filename'], 300); ?>?v=<?= time() ?>">
+			<div class="cms_images_image_img" <?php _ib($cms_image['filename'], ['width' => 600, 'maxwidth' => true, ]); ?>></div>
+			
 			<div class="cms_images_hover cms_images_image_delete">Delete</div>
 			<div class="cms_images_hover cms_images_image_edit" style="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/cms_edit.png'); "></div>
 			<div class="cms_images_hover cms_images_image_replace" style="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/cms_replace.png'); "></div>

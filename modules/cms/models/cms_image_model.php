@@ -19,11 +19,25 @@ class cms_image_model extends CI_Model {
 					$result[$key] = $value;
 				}
 			}
+		} else {
+			$meta = [];
 		}
-
+		
+		// if no hash
+		if (empty($result['hash'])){
+			$this->refresh_cms_image_hash($filename);
+		}
+		
 		// if no height and width information
 		if (empty($result['original_width']) && file_exists($GLOBALS['config']['upload_path'].$filename) && !is_dir($GLOBALS['config']['upload_path'].$filename)){
+			
 			list($result['original_width'], $result['original_height']) = getimagesize($GLOBALS['config']['upload_path'].$filename);
+			
+			$meta['original_width'] = $result['original_width'];
+			$meta['original_height'] = $result['original_height'];
+			
+			$this->update_cms_image($filename,['meta' => json_encode($meta, JSON_PRETTY_PRINT) , ]);
+			
 		}
 
 		return $result;
@@ -279,5 +293,5 @@ class cms_image_model extends CI_Model {
 		return $result;
 
 	}
-
+	
 }

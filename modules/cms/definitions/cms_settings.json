@@ -46,18 +46,6 @@
 		},
 		{
 			"type":"text",
-			"name":"images_lq_divider",
-			"label":"LQ size divider",
-			"default":"3"
-		},
-		{
-			"type":"text",
-			"name":"images_lq_width",
-			"label":"LQ default width",
-			"default":"200"
-		},
-		{
-			"type":"text",
 			"name":"images_quality",
 			"label":"Image packing quality",
 			"default":"85",

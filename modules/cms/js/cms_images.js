@@ -188,12 +188,8 @@ function cms_image_replace($image){
 					cms_images_transfer(data, function(data){
 						
 						// update screen with new image
-						$('.cms_images_image_img', $image).attr('src', data.result.filename);
-						
-						
-						
-						console.log('upload successful: ');
-						console.log(data);
+						$('.cms_images_image_img', $image).remove();
+						$('.cms_images_image_cell', $image).append(data.result.html);
 					
 					});
 
