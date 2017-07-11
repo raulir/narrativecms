@@ -131,7 +131,17 @@ class cms_slug_model extends CI_Model {
 	 */
 	function _regenerate_cache(){
 		
-    	$sql = "select * from cms_slug";
+		// check if table doesnt have status field - deprecated
+		$sql = "SHOW COLUMNS FROM cms_slug LIKE 'status'";
+		$query = $this->db->query($sql);
+		$result = $query->result_array();
+		
+		if (empty($result) || !count($result)){
+			$sql = "ALTER TABLE cms_slug ADD `status` INT(10) UNSIGNED NOT NULL AFTER target";
+			$query = $this->db->query($sql);
+		}
+		
+		$sql = "select * from cms_slug";
     	$query = $this->db->query($sql);
     	$routes = $query->result_array();
 

@@ -357,12 +357,10 @@ if ( !function_exists('_i')) {
 			$fileurl_lq = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.round($params['width']/2).'.'.$params['output'];
 				
 			if (!file_exists($filename)){
-//				$image_data = _iw($image, $params);
 				$needs_lazy_loading = true;
 			}
 			
 			if (!file_exists($filename_lq) && empty($GLOBALS['config']['images_no_imageset'])){
-//				$image_data = _iw($image, array_merge($params, ['width' => round($params['width']/2)]));
 				$needs_lazy_loading = true;
 			}
 		
@@ -374,7 +372,7 @@ if ( !function_exists('_i')) {
 		}
 		
 		if (!empty($needs_lazy_loading)){
-			
+
 			$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_images_lazy.js';
 			
 			print(' style="background-image: url('.$GLOBALS['config']['base_url'].'modules/cms/img/cms_image_loading.png); '.$params['css'].

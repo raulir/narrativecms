@@ -7,36 +7,84 @@ class cms_image_model extends CI_Model {
 		if (function_exists('mysql_set_charset')){
 			@mysql_set_charset('utf8mb4');
 		}
-
-		$sql = "select * from cms_image where filename = ? ";
-		$query = $this->db->query($sql, array($filename));
-		$result = $query->row_array();
-
-		if (!empty($result['meta'])){
-			$meta = json_decode($result['meta'], true);
-			foreach($meta as $key => $value){
-				if (empty($result[$key])){
-					$result[$key] = $value;
-				}
-			}
-		} else {
-			$meta = [];
-		}
 		
+		// check if cached image data exists
+		if (empty($GLOBALS['cache']['images_by_filename'])){
+			
+			$GLOBALS['cache']['images_by_filename'] = [];
+			
+			// first 50
+			$sql = "select * from cms_image order by cms_image_id limit 50";
+			$query = $this->db->query($sql);
+			$result = $query->result_array();
+			
+			foreach($result as $row){
+				$GLOBALS['cache']['images_by_filename'][$row['filename']] = $row;
+			}
+
+			// last 50, only when at least 50 was found
+			if (count($GLOBALS['cache']['images_by_filename']) > 49){
+			
+				$sql = "select * from cms_image order by cms_image_id desc limit 50";
+				$query = $this->db->query($sql);
+				$result = $query->result_array();
+					
+				foreach($result as $row){
+					$GLOBALS['cache']['images_by_filename'][$row['filename']] = $row;
+				}
+			
+			}
+				
+			foreach($GLOBALS['cache']['images_by_filename'] as $fkey => $data){
+			
+				if (!empty($data['meta'])){
+					$GLOBALS['cache']['images_by_filename'][$fkey] = array_merge($data, json_decode($data['meta'], true));
+				}
+			
+			}
+
+		}
+
+		// check from cache
+		if (!empty($GLOBALS['cache']['images_by_filename'][$filename])){
+			
+			$result = $GLOBALS['cache']['images_by_filename'][$filename];
+			
+		} else {
+
+			$sql = "select * from cms_image where filename = ? ";
+			$query = $this->db->query($sql, array($filename));
+			$result = $query->row_array();
+	
+			if (!empty($result['meta'])){
+				$result = array_merge($result, $meta);
+			}
+		
+		}
+
 		// if no hash
 		if (empty($result['hash'])){
-			$this->refresh_cms_image_hash($filename);
+			
+			$result['hash'] = $this->refresh_cms_image_hash($filename);
+			$GLOBALS['cache']['images_by_filename'][$filename] = $result;
+		
 		}
 		
 		// if no height and width information
 		if (empty($result['original_width']) && file_exists($GLOBALS['config']['upload_path'].$filename) && !is_dir($GLOBALS['config']['upload_path'].$filename)){
 			
-			list($result['original_width'], $result['original_height']) = getimagesize($GLOBALS['config']['upload_path'].$filename);
+			if (!empty($result['meta'])){
+				$meta = json_decode($result['meta'], true);
+			} else {
+				$meta = [];
+			}
 			
-			$meta['original_width'] = $result['original_width'];
-			$meta['original_height'] = $result['original_height'];
+			list($meta['original_width'], $meta['original_height']) = getimagesize($GLOBALS['config']['upload_path'].$filename);
 			
 			$this->update_cms_image($filename,['meta' => json_encode($meta, JSON_PRETTY_PRINT) , ]);
+			
+			$result = array_merge($result, $meta);
+			$GLOBALS['cache']['images_by_filename'][$filename] = $result;
 			
 		}
 
