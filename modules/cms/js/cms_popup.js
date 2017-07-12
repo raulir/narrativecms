@@ -8,7 +8,7 @@ function cms_popup_init(){
 		
 		setTimeout(function(){
 			
-			$container.remove(); // css({'display':'none'});
+			$container.css({'display':'none'});
 			
 		}, 300);
 

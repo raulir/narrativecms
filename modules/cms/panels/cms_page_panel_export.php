@@ -107,6 +107,81 @@ class cms_page_panel_export extends MY_Controller{
 		
 	}
 	
+	function traverse_page_panel($cms_page_panel_id){
+		
+		// get data
+		$this->data['_panels'][$cms_page_panel_id] = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
+		
+		$data =& $this->data['_panels'][$cms_page_panel_id];
+		
+		if (empty($data)){
+			return;
+		}
+		
+		$this->stats['panels']['count'] += 1;
+
+		$panel_structure = $this->cms_panel_model->get_cms_panel_definition($data['panel_name']);
+		
+		// set changes
+		$data['show'] = 0;
+		
+		if ($data['page_id'] == 999999) $data['page_id'] = 0;
+					
+		// add images and files
+		foreach($panel_structure as $struct){
+
+			if ($struct['type'] == 'image' && !empty($data[$struct['name']])){
+					
+				$filesize = $this->add_image($data[$struct['name']], $this->folder);
+				$this->stats['images']['count'] += 1;
+				$this->stats['images']['size'] += $filesize;
+
+			} else if ($struct['type'] == 'file' && !empty($data[$struct['name']])){
+					
+				$filesize = $this->add_file($data[$struct['name']], $this->folder);
+				$this->stats['files']['count'] += 1;
+				$this->stats['files']['size'] += $filesize;
+
+			} else if ($struct['type'] == 'repeater' && !empty($data[$struct['name']])) {
+
+				foreach($data[$struct['name']] as $rdata){
+
+					foreach($struct['fields'] as $rstruct){
+							
+						if ($rstruct['type'] == 'image' && !empty($rdata[$rstruct['name']])){
+								
+							$filesize = $this->add_image($rdata[$rstruct['name']], $this->folder);
+							$this->stats['images']['count'] += 1;
+							$this->stats['images']['size'] += $filesize;
+
+						} else if ($rstruct['type'] == 'file' && !empty($rdata[$rstruct['name']])){
+								
+							$filesize = $this->add_file($rdata[$rstruct['name']], $this->folder);
+							$this->stats['files']['count'] += 1;
+							$this->stats['files']['size'] += $filesize;
+
+						}
+							
+					}
+
+				}
+					
+			} else if ($struct['type'] == 'panels' && !empty($data[$struct['name']])) {
+				
+				
+				// print_r($data[$struct['name']]);
+				
+				// recursively export child panels
+				foreach($data[$struct['name']] as $pp_id){
+					$this->traverse_page_panel($pp_id);
+				}
+					
+			}
+
+		}
+					
+	}
+	
 	function panel_action($params){
 
 		$this->load->model('cms_page_panel_model');
@@ -118,88 +193,45 @@ class cms_page_panel_export extends MY_Controller{
 
 		if ($do == 'cms_page_panel_export'){
 			
+			$this->stats['images']['count'] = 0;
+			$this->stats['images']['size'] = 0;
+			$this->stats['files']['count'] = 0;
+			$this->stats['files']['size'] = 0;
+			$this->stats['panels']['count'] = 0;
+
 			$start_time = microtime(true);
 			 
 			$cms_page_panel_id = $this->input->post('export_id');
 			
-			// get original data
-			$this->data = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
-			$panel_structure = $this->cms_panel_model->get_cms_panel_definition($this->data['panel_name']);
-			 
-			// set changes
-			$this->data['show'] = 0;
-			if ($this->data['page_id'] == 999999) $this->data['page_id'] = 0;
+			$this->data['_main'] = $cms_page_panel_id;
 			
 			// create folder
-			$folder = $GLOBALS['config']['base_path'] . 'cache/'.date('ymd').'__'.str_replace('/', '_', $this->data['panel_name']).'__'.$cms_page_panel_id.'__'.
-					trim(substr(preg_replace('/[ _]+/', '_', preg_replace('/[^0-9a-zA-Z ]/', '', $this->data['title'])), 0, 24), '_');
-			
-			$this->rrmdir($folder);
-			mkdir($folder);
-			
-			$params['stats']['images']['count'] = 0;
-			$params['stats']['images']['size'] = 0;
-			$params['stats']['files']['count'] = 0;
-			$params['stats']['files']['size'] = 0;
+			$meta = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
+			$this->folder = $GLOBALS['config']['base_path'] . 'cache/'.date('ymd').'__'.str_replace('/', '_', $meta['panel_name']).'__'.$cms_page_panel_id.'__'.
+					trim(substr(preg_replace('/[ _]+/', '_', preg_replace('/[^0-9a-zA-Z ]/', '', $meta['title'])), 0, 24), '_');
 						
-			// add images and files
-			foreach($panel_structure as $struct){
-				if ($struct['type'] == 'image' && !empty($this->data[$struct['name']])){
-					
-					$filesize = $this->add_image($this->data[$struct['name']], $folder);
-					$params['stats']['images']['count'] += 1;
-					$params['stats']['images']['size'] += $filesize;
-										
-				} else if ($struct['type'] == 'file' && !empty($this->data[$struct['name']])){
-					
-					$filesize = $this->add_file($this->data[$struct['name']], $folder);
-					$params['stats']['files']['count'] += 1;
-					$params['stats']['files']['size'] += $filesize;
-						
-				} else if ($struct['type'] == 'repeater' && !empty($this->data[$struct['name']])) {
-
-					foreach($this->data[$struct['name']] as $rdata){
-						
-						foreach($struct['fields'] as $rstruct){
-							
-							if ($rstruct['type'] == 'image' && !empty($rdata[$rstruct['name']])){
-									
-								$filesize = $this->add_image($rdata[$rstruct['name']], $folder);
-								$params['stats']['images']['count'] += 1;
-								$params['stats']['images']['size'] += $filesize;
-								
-							} else if ($rstruct['type'] == 'file' && !empty($rdata[$rstruct['name']])){
-									
-								$filesize = $this->add_file($rdata[$rstruct['name']], $folder);
-								$params['stats']['files']['count'] += 1;
-								$params['stats']['files']['size'] += $filesize;
-								
-							}
-							
-						}
-						
-					}
-					
-				}
-			}
+			$this->rrmdir($this->folder);
+			mkdir($this->folder);
+				
+			$this->traverse_page_panel($cms_page_panel_id);
 			
 			// put data to folder
 			$data_json = json_encode($this->data, JSON_PRETTY_PRINT);
-			file_put_contents($folder.'/data.json', $data_json);
-			
-			$params['stats']['time']['data'] = microtime(true) - $start_time;
+			file_put_contents($this->folder.'/data.json', $data_json);
+
+			$this->stats['time']['data'] = microtime(true) - $start_time;
 				
 			// compress
-			if (file_exists($folder.'.zip')){
-				unlink($folder.'.zip');
+			if (file_exists($this->folder.'.zip')){
+				unlink($this->folder.'.zip');
 			}
 			$zip = new ZipArchive();
 			
-			if ($zip->open($folder.'.zip', ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) !== TRUE) {
+			if ($zip->open($this->folder.'.zip', ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) !== TRUE) {
 				print('An error occurred');
 			}
 			
-			$iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder.'/'));
+			$iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->folder.'/'));
     		$files = array_keys(iterator_to_array($iterator, true));
 
     		foreach ($files as $file) {
@@ -210,23 +242,24 @@ class cms_page_panel_export extends MY_Controller{
 
     		$zip->close();
     		
-    		$params['stats']['time']['compress'] = round((microtime(true) - $params['stats']['time']['data'] - $start_time) * 1000);
-    		$params['stats']['time']['data'] = round($params['stats']['time']['data'] * 1000);
+    		$this->stats['time']['compress'] = round((microtime(true) - $this->stats['time']['data'] - $start_time) * 1000);
+    		$this->stats['time']['data'] = round($this->stats['time']['data'] * 1000);
     		
     		// stats
-    		$params['stats']['panels']['count'] = 1;
-    		$params['stats']['panels']['size'] = filesize($folder.'/data.json');
+    		$this->stats['panels']['size'] = filesize($this->folder.'/data.json');
     		
-    		$params['stats']['total']['size'] = $this->makesize($params['stats']['panels']['size'] + $params['stats']['images']['size'] + $params['stats']['files']['size']);
-    		$params['stats']['total']['compressed'] = $this->makesize(filesize($folder.'.zip'));
+    		$this->stats['total']['size'] = $this->makesize($this->stats['panels']['size'] + $this->stats['images']['size'] + $this->stats['files']['size']);
+    		$this->stats['total']['compressed'] = $this->makesize(filesize($this->folder.'.zip'));
     		
-    		$params['stats']['panels']['size'] = $this->makesize($params['stats']['panels']['size']);
-    		$params['stats']['images']['size'] = $this->makesize($params['stats']['images']['size']);
-    		$params['stats']['files']['size'] = $this->makesize($params['stats']['files']['size']);
+    		$this->stats['panels']['size'] = $this->makesize($this->stats['panels']['size']);
+    		$this->stats['images']['size'] = $this->makesize($this->stats['images']['size']);
+    		$this->stats['files']['size'] = $this->makesize($this->stats['files']['size']);
      		
-    		$this->rrmdir($folder);
+    		$this->rrmdir($this->folder);
     		
-    		$params['filename'] = pathinfo($folder.'.zip', PATHINFO_FILENAME);
+    		$params['filename'] = pathinfo($this->folder.'.zip', PATHINFO_FILENAME);
+    		
+    		$params['stats'] = $this->stats;
 			
 			return $params;
 			
