@@ -22,7 +22,7 @@ class cms_images_lazy extends MY_Controller{
 			$image_name = pathinfo($params['image'], PATHINFO_FILENAME);
 			
 			$params['src'] = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_name.'.'.$params['width'].'.'.$params['output'];
-			 
+
 		}
 
 		return $params;

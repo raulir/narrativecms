@@ -70,6 +70,7 @@
 }
 
 .cms_input_image_image {
+	
 	position: relative;
 	width: 100%;
 	height: 100%;
@@ -80,4 +81,11 @@
 	background-repeat: no-repeat;
 	background-size: contain;
 	z-index: 10;
+	filter: grayscale(0%);
+	transition: filter 0.5s;
+
+	&.cms_images_lazy_waiting, &.cms_images_lazy_loading {
+		filter: grayscale(100%);
+	}
+
 }

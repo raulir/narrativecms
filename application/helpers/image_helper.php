@@ -1,5 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+require_once 'image_optimiser_helper.php';
+
 if ( !function_exists('_i')) {
 
 	/**
@@ -60,224 +62,6 @@ if ( !function_exists('_i')) {
 	}
 	
 	/**
-	 * returns link to resized image
-	 */
-	function _iw($image, $params){
-
-		$width = !empty($params['width']) ? $params['width'] : 0;
-		$height = !empty($params['height']) ? $params['height'] : 0;
-
-		if (file_exists($GLOBALS['config']['upload_path'].$image)){
-				
-			$name_a = pathinfo($image);
-				
-			// create resized image
-			if ($name_a['extension'] == 'jpg' || $name_a['extension'] == 'png' || $name_a['extension'] == 'ico'){
-
-				list($original_width, $original_height) = getimagesize($GLOBALS['config']['upload_path'].$image);
-
-				if (!$width && $height){
-					$width = round($original_width * $height / $original_height);
-				} else if ($width && !$height){
-					$height = round($original_height * $width / $original_width);
-				} else {
-					$width = $original_width;
-					$height = $original_height;
-				}
-
-				// do not stretch image bigger
-				if ($width > $original_width || $height > $original_height){
-					$width = $original_width;
-					$height = $original_height;
-				}
-
-				if (!empty($params['output']) && in_array($params['output'], array('jpg', 'png', 'ico', ))){
-					$extension = $params['output'];
-				} else {
-					$extension = $name_a['extension'];
-				}
-
-				$new_image = $name_a['dirname'].'/_'.$name_a['filename'].'.'.$width.'.'.$extension;
-
-				if (file_exists($GLOBALS['config']['upload_path'].$new_image)){
-						
-					$image = $new_image;
-
-				} else {
-
-					/* input */
-					$needed = (4 * $original_width * $original_height + 4 * $width * $height) * 3.5 + 10000000;
-						
-					$limit = str_replace(array('G', 'M', 'K', ), array('000000000', '000000', '000', ), ini_get('memory_limit'));
-					if($limit > 0 && $limit < $needed) ini_set('memory_limit', $needed);
-						
-					// check again for memory limit and give up if not enough
-					$limit = str_replace(array('G', 'M', 'K', ), array('000000000', '000000', '000', ), ini_get('memory_limit'));
-						
-					if ($needed > $limit){
-
-						trigger_error('Not enough memory to compress image: needed='.$needed.' memory_limit='.$limit, E_USER_NOTICE);
-
-					} else {
-
-						if ($name_a['extension'] == 'jpg'){
-								
-							$src = imagecreatefromjpeg($GLOBALS['config']['upload_path'].$image);
-								
-							$tmp = imagecreatetruecolor($width, $height);
-							imagecopyresampled($tmp, $src, 0, 0, 0, 0, $width, $height, $original_width, $original_height);
-								
-						} else if ($name_a['extension'] == 'png'){
-
-							$src = imagecreatefrompng($GLOBALS['config']['upload_path'].$image);
-								
-							$tmp = imagecreatetruecolor($width, $height);
-							imagesavealpha($tmp, true);
-							imagealphablending($tmp, false);
-								
-							$background = imagecolorallocatealpha($tmp , 0, 0, 0, 127);
-							imagefill($tmp , 0, 0, $background);
-								
-							imagealphablending($tmp, false); // to preserve transparencies
-							imagecopyresampled($tmp, $src, 0, 0, 0, 0, $width, $height, $original_width, $original_height);
-								
-						}
-
-						/* output */
-
-						imageinterlace($tmp, true);
-
-						if ($extension == 'jpg'){
-
-							imagejpeg($tmp, $GLOBALS['config']['upload_path'].$new_image, !empty($GLOBALS['config']['images_quality']) ? $GLOBALS['config']['images_quality'] : 85);
-
-						} else if ($extension == 'png'){
-								
-							imagesavealpha($tmp, true);
-							imagepng($tmp, $GLOBALS['config']['upload_path'].$new_image);
-							
-							// optimise on linux
-							if(!empty($GLOBALS['config']['images_pngquant'])){
-								
-								$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($new_image).'.png';
-								
-								rename($GLOBALS['config']['upload_path'].$new_image, $temp_name);
-								
-								$cmd = (empty($GLOBALS['config']['images_pngquant_executable']) ? $GLOBALS['config']['base_path'].'application/libraries/pngquant/bin/pngquant.bin' : $GLOBALS['config']['images_pngquant_executable'])
-										.' '.$temp_name.' --strip --speed 1 --quality=0-'.(!empty($GLOBALS['config']['images_quality']) ? $GLOBALS['config']['images_quality'] : 85).' -o '.$GLOBALS['config']['upload_path'].$new_image;
-
-								shell_exec($cmd);
-								
-							}
-
-							if(!empty($GLOBALS['config']['images_zopflipng'])){
-								
-								$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($new_image).'.png';
-								
-								rename($GLOBALS['config']['upload_path'].$new_image, $temp_name);
-								
-								$cmd = (empty($GLOBALS['config']['images_zopflipng_executable']) ? $GLOBALS['config']['base_path'].'application/libraries/zopflipng/bin/zopflipng.bin' : $GLOBALS['config']['images_zopflipng_executable'])
-										.' -y '.$temp_name.' '.$GLOBALS['config']['upload_path'].$new_image;
-
-								shell_exec($cmd);
-								
-							}
-						
-						} else if ($extension == 'ico'){
-								
-							// bmp data part
-							$pixel_data = array();
-								
-							$opacity_data = array();
-							$current_opacity_val = 0;
-								
-							for ( $y = $height - 1; $y >= 0; $y-- ) {
-								for ( $x = 0; $x < $width; $x++ ) {
-									$color = imagecolorat( $tmp, $x, $y );
-										
-									$alpha = ( $color & 0x7F000000 ) >> 24;
-									$alpha = ( 1 - ( $alpha / 127 ) ) * 255;
-										
-									$color &= 0xFFFFFF;
-									$color |= 0xFF000000 & ( $alpha << 24 );
-										
-									$pixel_data[] = $color;
-										
-										
-									$opacity = ( $alpha <= 127 ) ? 1 : 0;
-										
-									$current_opacity_val = ( $current_opacity_val << 1 ) | $opacity;
-										
-									if ( ( ( $x + 1 ) % 32 ) == 0 ) {
-										$opacity_data[] = $current_opacity_val;
-										$current_opacity_val = 0;
-									}
-								}
-
-								if ( ( $x % 32 ) > 0 ) {
-									while ( ( $x++ % 32 ) > 0 )
-										$current_opacity_val = $current_opacity_val << 1;
-											
-										$opacity_data[] = $current_opacity_val;
-										$current_opacity_val = 0;
-								}
-							}
-								
-							$image_header_size = 40;
-							$color_mask_size = $width * $height * 4;
-							$opacity_mask_size = ( ceil( $width / 32 ) * 4 ) * $height;
-								
-							$data = pack( 'VVVvvVVVVVV', 40, $width, ( $height * 2 ), 1, 32, 0, 0, 0, 0, 0, 0 );
-								
-							foreach ( $pixel_data as $color )
-								$data .= pack( 'V', $color );
-									
-								foreach ( $opacity_data as $opacity )
-									$data .= pack( 'N', $opacity );
-										
-										
-									$image = array(
-											'width'                => $width,
-											'height'               => $height,
-											'color_palette_colors' => 0,
-											'bits_per_pixel'       => 32,
-											'size'                 => $image_header_size + $color_mask_size + $opacity_mask_size,
-											'data'                 => $data,
-									);
-										
-									// saving part
-									$data = pack( 'vvv', 0, 1, 1 );
-									$pixel_data = '';
-
-									$data .= pack( 'CCCCvvVV', $width, $height, 0, 0, 1, 32, $image_header_size + $color_mask_size + $opacity_mask_size, 22 );
-									$pixel_data .= $image['data'];
-
-									$data .= $pixel_data;
-									unset( $pixel_data );
-
-									file_put_contents($GLOBALS['config']['upload_path'].$new_image, $data);
-
-						}
-
-						imagedestroy($tmp);
-						imagedestroy($src);
-
-						$image = $new_image;
-
-					}
-
-				}
-
-			}
-				
-		}
-			
-		return array('image' => $image, 'width' => $width, 'height' => $height, );
-		 
-	}
-
-
-	/**
 	 * prints out bg image style parameter with image
 	 */
 	function _ib($image, $params = array()){
@@ -332,18 +116,31 @@ if ( !function_exists('_i')) {
 			$fileurl = $GLOBALS['config']['upload_url'].$image;
 			$image_data['width'] = $image_db_data['original_width'];
 			$image_data['height'] = $image_db_data['original_height'];
+			
+			$fileurl_hq = $fileurl;
+			$fileurl_lq = $fileurl;
 				
 		} else {
  		
 			// get image target width (mainly for filename)
 			if (empty($params['width']) && !empty($params['height'])){
-				$params['width'] = round($image_db_data['original_width'] * $params['height'] / $image_db_data['original_height']);
+				$params['width'] = $image_db_data['original_width'] * $params['height'] / $image_db_data['original_height'];
 			} 
 			
 			if ($params['width'] > $image_db_data['original_width']){
 				$params['width'] = $image_db_data['original_width'];
 			}
-		
+			
+			$params['width_hq'] = round((!empty($GLOBALS['config']['images_2x']) ? $GLOBALS['config']['images_2x'] : 1.5 ) * $params['width']);
+			if ($params['width_hq'] > $image_db_data['original_width']){
+				$params['width_hq'] = $image_db_data['original_width'];
+			}
+			
+			$params['width_lq'] = round((!empty($GLOBALS['config']['images_1x']) ? $GLOBALS['config']['images_1x'] : 0.75 ) * $params['width']);
+			if ($params['width_lq'] > $image_db_data['original_width']){
+				$params['width_lq'] = $image_db_data['original_width'];
+			}
+				
 			// get image target output format
 			if (empty($params['output'])){
 				$params['output'] = pathinfo($image, PATHINFO_EXTENSION);
@@ -351,22 +148,24 @@ if ( !function_exists('_i')) {
 			
 			// if file exists
 			$image_dir = pathinfo($image, PATHINFO_DIRNAME);
-			$filename = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width'].'.'.$params['output'];
-			$filename_lq = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.round($params['width']/2).'.'.$params['output'];
-			$fileurl = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width'].'.'.$params['output'];
-			$fileurl_lq = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.round($params['width']/2).'.'.$params['output'];
+			$filename_hq = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_hq'].'.'.$params['output'];
+			$filename_lq = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_lq'].'.'.$params['output'];
+			$fileurl_hq = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_hq'].'.'.$params['output'];
+			$fileurl_lq = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_lq'].'.'.$params['output'];
 				
-			if (!file_exists($filename)){
+			if (!file_exists($filename_hq)){
 				$needs_lazy_loading = true;
 			}
 			
-			if (!file_exists($filename_lq) && empty($GLOBALS['config']['images_no_imageset'])){
+			if (!file_exists($filename_lq)){
 				$needs_lazy_loading = true;
 			}
 		
 			if (empty($image_data)){
-				$image_data['width'] = $params['width'];
-				$image_data['height'] = !empty($params['height']) ? $params['height'] : round($image_db_data['original_height'] * $params['width'] / $image_db_data['original_width']);
+				$image_data['width'] = $params['width_hq'];
+				$image_data['height'] = !empty($params['height'])
+						? (round((!empty($GLOBALS['config']['images_2x']) ? $GLOBALS['config']['images_2x'] : 1.5 ) * $params['height']))
+						: round($image_db_data['original_height'] * $params['width_hq'] / $image_db_data['original_width']);
 			}
 			
 		}
@@ -375,26 +174,21 @@ if ( !function_exists('_i')) {
 
 			$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_images_lazy.js';
 			
-			print(' style="background-image: url('.$GLOBALS['config']['base_url'].'modules/cms/img/cms_image_loading.png); '.$params['css'].
+			print(' style="background-image: url('.$GLOBALS['config']['upload_url'].$image.'); '.$params['css'].
 					(!empty($params['maxwidth']) && !empty($image_db_data['original_width']) ? ' max-width: '.$image_db_data['original_width'].'px; ' : '').
-					'" data-cms_images_lazy="'.$image.'" data-width="'.$image_data['width'].'" data-width_lq="'.round($image_data['width']/2).'"
+					'" data-cms_images_lazy="'.$image.'" data-width="'.$params['width_hq'].'" data-width_lq="'.$params['width_lq'].'"
 					data-output="'.$params['output'].'" data-height="'.$image_data['height'].'" ');
 		
-		} else if (!empty($GLOBALS['config']['images_no_imageset']) || empty($filename_lq)){
-			
-			print(' style="background-image: url('.$fileurl.'); '.$params['css'].
-					(!empty($params['maxwidth']) && !empty($image_db_data['original_width']) ? ' max-width: '.$image_db_data['original_width'].'px; ' : '').' " '.
-					(!empty($params['dataprops']) ? ' data-width="'.$image_data['width'].'" data-height="'.$image_data['height'].'" ' : ''));
-			
 		} else {
 			
 			print(
-					' style="background-image: url('.$fileurl.'); '.
-					'background-image: -webkit-image-set( url('.$fileurl_lq.') 1x, url('.$fileurl.') 2x ); '.
-					'background-image: image-set( url('.$fileurl_lq.') 1x, url('.$fileurl.') 2x ); '.
+					' style="background-image: url('.$fileurl_hq.'); '.
+					( $fileurl_lq != $fileurl_hq ?
+							'background-image: -webkit-image-set( url('.$fileurl_lq.') 1x, url('.$fileurl_hq.') 2x ); background-image: image-set( url('.$fileurl_lq.') 1x, url('.$fileurl_hq.') 2x ); '
+							: '').
 					$params['css'].
 					(!empty($params['maxwidth']) && !empty($image_db_data['original_width']) ? ' max-width: '.$image_db_data['original_width'].'px; ' : '').' " '.
-					(!empty($params['dataprops']) ? 'data-width="'.$image_data['width'].'" data-height="'.$image_data['height'].'" ' : ''));
+					(!empty($params['dataprops']) ? ' data-width="'.$image_data['width'].'" data-height="'.$image_data['height'].'" ' : ''));
 			
 		}
 

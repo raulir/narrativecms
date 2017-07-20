@@ -52,6 +52,20 @@
 			"help":"[Image packing quality]||When jpgs are resized or pngs compressed, they are saved in this quality.||If you want to make {Google Page Insights} happy, set it to 85||Otherwise, when there is no problems with page speed, set this to 95."
 		},
 		{
+			"type":"text",
+			"name":"images_1x",
+			"label":"Image 1x size modifier",
+			"default":"0.75",
+			"help":"[Image 1x size modifier]||Modifier to template suggested image size for natural pixel size screens"
+		},
+		{
+			"type":"text",
+			"name":"images_2x",
+			"label":"Image 2x size modifier",
+			"default":"1.5",
+			"help":"[Image 2x size modifier]||Modifier to template suggested image size for high density (retina) screens"
+		},
+		{
 			"type":"select",
 			"name":"input_link_order",
 			"label":"Link input order",
@@ -117,17 +131,6 @@
 			},
 			"default":"0",
 			"help":"[Use deprecated features]||Switch on some deprecated features to enable backwards compatibility."
-		},
-		{
-			"type":"select",
-			"name":"images_no_imageset",
-			"label":"Image as image-set",
-			"values":{
-				"0":"Use image-set backgrounds",
-				"1":"Don't use image-set backgrounds"
-			},
-			"default":"0",
-			"help":"[Image as image-set]||Generate background image css as image-set for high resolution (retina) screens.||{_ib()} widths and heights have to be given as screen physical pixels.||For non-high resolution images divider 2 is used."
 		}
 	]
 }
