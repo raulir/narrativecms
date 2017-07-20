@@ -70,6 +70,15 @@ class cms_update_model extends CI_Model {
 			
 		}
 		
+		// index.php
+		$cms_md5 = md5_file(str_replace("\\", '/', $GLOBALS['config']['base_path']).'index.php');
+		$hashes[] = array(
+				'filename' => 'index.php',
+				'hash' => $cms_md5,
+				'size' => filesize(str_replace("\\", '/', $GLOBALS['config']['base_path']).'index.php'),
+		);
+		$version_hashes[] = $cms_md5;
+		
 		sort($version_hashes);
 		
 		$version_hash = md5(implode($version_hashes));

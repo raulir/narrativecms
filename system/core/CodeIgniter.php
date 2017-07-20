@@ -27,6 +27,8 @@
  * @link		http://codeigniter.com/user_guide/
  */
 
+define('ENVIRONMENT', 'development');
+
 /**
  * CodeIgniter Version
  *

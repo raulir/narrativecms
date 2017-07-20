@@ -1180,25 +1180,6 @@ class CI_Loader {
 			return FALSE;
 		}
 
-		// Autoload packages
-		if (isset($autoload['packages']))
-		{
-			foreach ($autoload['packages'] as $package_path)
-			{
-				$this->add_package_path($package_path);
-			}
-		}
-
-		// Load any custom config file
-		if (count($autoload['config']) > 0)
-		{
-			$CI =& get_instance();
-			foreach ($autoload['config'] as $key => $val)
-			{
-				$CI->config->load($val);
-			}
-		}
-
 		// Autoload helpers and languages
 		foreach (array('helper', 'language') as $type)
 		{

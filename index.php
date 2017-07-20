@@ -2,52 +2,6 @@
 
 /*
  *---------------------------------------------------------------
- * APPLICATION ENVIRONMENT
- *---------------------------------------------------------------
- *
- * You can load different configurations depending on your
- * current environment. Setting the environment also influences
- * things like logging and error reporting.
- *
- * This can be set to anything, but default usage is:
- *
- *     development
- *     testing
- *     production
- *
- * NOTE: If you change these, also change the error_reporting() code below
- *
- */
-	define('ENVIRONMENT', 'development');
-/*
- *---------------------------------------------------------------
- * ERROR REPORTING
- *---------------------------------------------------------------
- *
- * Different environments will require different levels of error reporting.
- * By default development will show errors but testing and live will hide them.
- */
-
-if (defined('ENVIRONMENT'))
-{
-	switch (ENVIRONMENT)
-	{
-		case 'development':
-			error_reporting(E_ALL);
-		break;
-	
-		case 'testing':
-		case 'production':
-			error_reporting(0);
-		break;
-
-		default:
-			exit('The application environment is not set correctly.');
-	}
-}
-
-/*
- *---------------------------------------------------------------
  * SYSTEM FOLDER NAME
  *---------------------------------------------------------------
  *
@@ -57,22 +11,6 @@ if (defined('ENVIRONMENT'))
  *
  */
 	$system_path = 'system';
-
-/*
- *---------------------------------------------------------------
- * APPLICATION FOLDER NAME
- *---------------------------------------------------------------
- *
- * If you want this front controller to use a different "application"
- * folder then the default one you can set its name here. The folder
- * can also be renamed or relocated anywhere on your server.  If
- * you do, use a full server path. For more info please see the user guide:
- * http://codeigniter.com/user_guide/general/managing_apps.html
- *
- * NO TRAILING SLASH!
- *
- */
-	$application_folder = 'application';
 
 /*
  * --------------------------------------------------------------------
@@ -177,18 +115,18 @@ if (defined('ENVIRONMENT'))
 
 
 	// The path to the "application" folder
-	if (is_dir($application_folder))
+	if (is_dir('application'))
 	{
-		define('APPPATH', $application_folder.'/');
+		define('APPPATH', 'application/');
 	}
 	else
 	{
-		if ( ! is_dir(BASEPATH.$application_folder.'/'))
+		if ( ! is_dir(BASEPATH.'application/'))
 		{
 			exit("Your application folder path does not appear to be set correctly. Please open the following file and correct this: ".SELF);
 		}
 
-		define('APPPATH', BASEPATH.$application_folder.'/');
+		define('APPPATH', BASEPATH.'application/');
 	}
 
 /*
@@ -199,7 +137,7 @@ if (defined('ENVIRONMENT'))
  * And away we go...
  *
  */
-require_once BASEPATH.'core/CodeIgniter.php';
+require_once BASEPATH.'cms.php';
 
 /* End of file index.php */
 /* Location: ./index.php */
