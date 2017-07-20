@@ -277,5 +277,94 @@ $(document).ready(function() {
 	    });
 	
 	}
+	
+	$('.cms_list_import').on('click.cms', function(){
+		
+		// create import popup for this list type
+		get_ajax_panel('cms_page_panel_import', {}, function(data){
+			
+			$('.cms_popup_area', '.cms_popup_import').html(data.result.html);
+			
+			cms_popup_run('import', function(){
+				
+				$('.cms_page_panel_import_input').on('change.cms', function(){
+					
+					var data = new FormData( $('.cms_page_panel_import_form').get(0) );
+					data.append('panel_id', 'cms_page_panel_import');
+					data.append('do', 'cms_page_panel_import');
+					
+					$.ajax( {
+						url: config_url + 'ajax_api/get_panel',
+					    type: 'POST',
+					    data: data,
+					    processData: false,
+					    contentType: false,
+					    dataType: 'json',
+					    success: function(data){
+					    	
+					    	$('.cms_page_panel_import_time').html(data.result.time);
+					    	$('.cms_page_panel_import_panels').html(data.result.panels);
+					    	$('.cms_page_panel_import_images').html(data.result.images);
+					    	$('.cms_page_panel_import_files').html(data.result.files);
+					    	$('.cms_page_panel_import_new_images_size').html(data.result.new_images_size);
+					    	$('.cms_page_panel_import_new_images_count').html(data.result.new_images_count);
+					    	
+					    	$('.cms_page_panel_import_upload').html('Importing...');
+					    	
+					    	
+					    },
+					    xhr: function() {
+					        var xhr = new window.XMLHttpRequest();
+
+					        xhr.upload.addEventListener('progress', function(evt) {
+					        	if (evt.lengthComputable) {
+					        	  
+					        		var percentComplete = evt.loaded / evt.total;
+					        		percentComplete = parseInt(percentComplete * 100);
+
+					        		$('.cms_page_panel_import_upload').html(percentComplete + '%');
+
+					        	}
+					        }, false);
+
+					        return xhr;
+					    }
+					} );
+					
+				});
+				
+
+
+				
+				
+			});
+			
+		});
+		
+		/*
+		var $this = $(this);
+		var cms_page_panel_id = $this.data('cms_page_panel_id');
+		
+		cms_popup_run('export', function(){
+			
+			$('.cms_popup_area', '.cms_popup_export').html('Exporting ... ');
+			
+			get_ajax_panel('cms_page_panel_export', {
+				'export_id': cms_page_panel_id,
+				'do': 'cms_page_panel_export'
+			}, function(data){
+				
+				$('.cms_popup_area', '.cms_popup_export').html(data.result.html);
+				
+				$('.cms_page_panel_export_close').on('click.cms', function(){
+					$('.cms_popup_cancel').click();
+				});
+				
+			});
+			
+		});
+		*/
+		
+	});
 		
 });

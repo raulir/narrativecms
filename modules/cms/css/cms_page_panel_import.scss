@@ -1,0 +1,69 @@
+.cms_page_panel_import_container {
+	height: 100%;
+}
+
+.cms_page_panel_import_content {
+	height: 100%;
+	position: relative;
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
+	padding: 0 46px;
+}
+
+.cms_page_panel_import_table {
+	
+}
+
+.cms_page_panel_import_first {
+	opacity: 1;
+	z-index: 20;
+	transition: opacity 0.3s;
+}
+
+.cms_page_panel_import_message {
+	font-size: 20px;
+	line-height: 30px;
+	margin-bottom: 18px;
+    margin-top: 25px;
+}
+
+.cms_page_panel_import_col1,.cms_page_panel_import_col2,.cms_page_panel_import_col3 {
+	display: inline-block;
+	font-size: 15px;
+	line-height: 22px;
+}
+
+.cms_page_panel_import_col1 {
+	width: 31%;
+	text-align: left;
+}
+
+.cms_page_panel_import_col2 {
+	width: 20%;
+	text-align: right;
+}
+
+.cms_page_panel_import_col3 {
+	width: 24%;
+	text-align: right;
+}
+
+.cms_page_panel_import_buttons {
+	padding-top: 23px;
+}
+
+.cms_page_panel_import_upload {
+	width: 110px;
+	margin: 0 2px;
+}
+
+.cms_page_panel_import_close {
+	width: 110px;
+	margin: 0 2px;
+}
+
+.cms_page_panel_import_hidden {
+	opacity: 0;
+	z-index: 10;
+}

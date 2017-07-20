@@ -57,7 +57,7 @@ class cms_image_model extends CI_Model {
 			$result = $query->row_array();
 	
 			if (!empty($result['meta'])){
-				$result = array_merge($result, $meta);
+				$result = array_merge($result, json_decode($result['meta'], true));
 			}
 		
 		}

@@ -166,7 +166,7 @@ class cms_page_panel_export extends MY_Controller{
 
 				}
 					
-			} else if ($struct['type'] == 'panels' && !empty($data[$struct['name']])) {
+			} else if (($struct['type'] == 'panels' || $struct['type'] == 'cms_page_panels') && !empty($data[$struct['name']])) {
 				
 				
 				// print_r($data[$struct['name']]);
@@ -263,7 +263,6 @@ class cms_page_panel_export extends MY_Controller{
 			
 			return $params;
 			
-			 
 		}
 		
 		return $params;

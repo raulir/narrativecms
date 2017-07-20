@@ -109,42 +109,6 @@
 		},
 		{
 			"type":"select",
-			"name":"images_pngquant",
-			"label":"PNG: pngquant",
-			"values":{
-				"0":"No",
-				"1":"Yes"
-			},
-			"default":"0",
-			"help":"[Optimise PNG images using pngquant]||Pngquant uses lossy compression and may affect image quality||May not be available in shared hosting"
-		},
-		{
-			"type":"text",
-			"name":"images_pngquant_executable",
-			"label":"pngquant executable",
-			"default":"",
-			"help":"[pngquant executable full path]||If empty, uses application/libraries/pngquant/bin/pngquant.bin||[This file must be set to be executable!]||Hint: chmod ug+x application/libraries/pngquant/bin/pngquant.bin"
-		},
-		{
-			"type":"select",
-			"name":"images_zopflipng",
-			"label":"PNG: zopflipng",
-			"values":{
-				"0":"No",
-				"1":"Yes"
-			},
-			"default":"0",
-			"help":"[Optimise PNG images using zopflipng]||Zopflipng losslessly optimizes palette and structure of png. Additionally this removes all metadata and extra headers||May not be available in shared hosting"
-		},
-		{
-			"type":"text",
-			"name":"images_zopflipng_executable",
-			"label":"zopflipng executable",
-			"default":"",
-			"help":"[zopflipng executable full path]||If empty, uses application/libraries/zopflipng/bin/zopflipng.bin||[This file must be set to be executable!]||Hint: chmod ug+x application/libraries/zopflipng/bin/zopflipng.bin"
-		},
-		{
-			"type":"select",
 			"name":"deprecated",
 			"label":"Use deprecated features",
 			"values":{

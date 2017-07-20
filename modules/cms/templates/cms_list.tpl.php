@@ -3,7 +3,16 @@
 	<div class="admin_tool_text"><?php print($title); ?></div>
 	
 	<?php if(empty($hide_new)): ?>
+		
 		<a class="admin_tool_button admin_right" href="<?php print($GLOBALS['config']['base_url'].$edit_base.$filter['panel_name'].'/'); ?>">New</a>
+		
+		<?php if($GLOBALS['config']['environment'] == 'DEV'): ?>
+		
+			<div class="admin_tool_button admin_right cms_list_import">Import</div>
+			<?php _panel('cms_popup', ['heading' => 'Import', 'name' => 'import', ]) ?>
+			
+		<?php endif ?>
+		
 	<?php endif ?>
 
 	<?php if(!empty($extra_buttons)): ?>
