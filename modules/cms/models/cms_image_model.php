@@ -219,6 +219,9 @@ class cms_image_model extends CI_Model {
 		if ($delete){
 			$sql = "delete from cms_image where filename = ? ";
 			$this->db->query($sql, array($filename, ));
+		} else {
+			$sql = "update cms_image where filename = ? set meta = '' limit 1";
+			$this->db->query($sql, array($filename, ));
 		}
 
 	}
@@ -275,6 +278,10 @@ class cms_image_model extends CI_Model {
 	}
 	
 	function refresh_cms_image_hash($filename){
+		
+		if (empty($filename) || !file_exists($GLOBALS['config']['upload_path'].$filename)){
+			return '';
+		}
 		
 		$hash = sha1_file($GLOBALS['config']['upload_path'].$filename);
 		$this->update_cms_image($filename, array('hash' => $hash, ));

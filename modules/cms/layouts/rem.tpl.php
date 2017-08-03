@@ -118,6 +118,9 @@
 		}
 
 		_set_rem();
+		
+		setTimeout(_set_rem, 500);
+		setTimeout(_set_rem, 1500);
 
 		window.addEventListener('resize', _set_rem);
 		

@@ -84,12 +84,23 @@ class cms_images_upload extends MY_Controller{
 				// remove old image files
 				$this->cms_image_model->delete_cms_image_by_filename($filename, false);
 				
+				// check, if there is a place to copy
+				list($year, $month, $rest) = explode('/', $filename);
+				
+				if (!file_exists($GLOBALS['config']['upload_path'].$year)){
+					mkdir($GLOBALS['config']['upload_path'].$year);
+				}
+
+				if (!file_exists($GLOBALS['config']['upload_path'].$year.'/'.$month)){
+					mkdir($GLOBALS['config']['upload_path'].$year.'/'.$month);
+				}
+				
 				// copy new image to place
 				rename($GLOBALS['config']['upload_path'].$new_image, $GLOBALS['config']['upload_path'].$filename);
 				
 				// update image hash
 				$this->cms_image_model->refresh_cms_image_hash($filename);
-			
+				
 			}
 			
 			return ['filename' => $GLOBALS['config']['upload_url'].$filename.'?v='.time(), ];

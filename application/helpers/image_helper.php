@@ -105,67 +105,80 @@ if ( !function_exists('_i')) {
 			
 		}
 		
-		// get data about image from db
-		$ci =& get_instance();
-		$ci->load->model('cms_image_model');
-		$image_db_data = $ci->cms_image_model->get_cms_image_by_filename($image);
-		
-		// if no resizing
-		if(empty($params['width']) && empty($params['height'])){
+		if (!(file_exists($GLOBALS['config']['upload_path'].$image) && !is_dir($GLOBALS['config']['upload_path'].$image))){
 			
-			$fileurl = $GLOBALS['config']['upload_url'].$image;
-			$image_data['width'] = $image_db_data['original_width'];
-			$image_data['height'] = $image_db_data['original_height'];
+			$fileurl = $GLOBALS['config']['base_url'].'modules/cms/img/cms_no_image.png';
+			$image_data['width'] = 2800;
+			$image_data['height'] = 2800;
 			
 			$fileurl_hq = $fileurl;
 			$fileurl_lq = $fileurl;
 				
 		} else {
- 		
-			// get image target width (mainly for filename)
-			if (empty($params['width']) && !empty($params['height'])){
-				$params['width'] = $image_db_data['original_width'] * $params['height'] / $image_db_data['original_height'];
-			} 
-			
-			if ($params['width'] > $image_db_data['original_width']){
-				$params['width'] = $image_db_data['original_width'];
-			}
-			
-			$params['width_hq'] = round((!empty($GLOBALS['config']['images_2x']) ? $GLOBALS['config']['images_2x'] : 1.5 ) * $params['width']);
-			if ($params['width_hq'] > $image_db_data['original_width']){
-				$params['width_hq'] = $image_db_data['original_width'];
-			}
-			
-			$params['width_lq'] = round((!empty($GLOBALS['config']['images_1x']) ? $GLOBALS['config']['images_1x'] : 0.75 ) * $params['width']);
-			if ($params['width_lq'] > $image_db_data['original_width']){
-				$params['width_lq'] = $image_db_data['original_width'];
-			}
-				
-			// get image target output format
-			if (empty($params['output'])){
-				$params['output'] = pathinfo($image, PATHINFO_EXTENSION);
-			}
-			
-			// if file exists
-			$image_dir = pathinfo($image, PATHINFO_DIRNAME);
-			$filename_hq = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_hq'].'.'.$params['output'];
-			$filename_lq = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_lq'].'.'.$params['output'];
-			$fileurl_hq = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_hq'].'.'.$params['output'];
-			$fileurl_lq = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_lq'].'.'.$params['output'];
-				
-			if (!file_exists($filename_hq)){
-				$needs_lazy_loading = true;
-			}
-			
-			if (!file_exists($filename_lq)){
-				$needs_lazy_loading = true;
-			}
 		
-			if (empty($image_data)){
-				$image_data['width'] = $params['width_hq'];
-				$image_data['height'] = !empty($params['height'])
-						? (round((!empty($GLOBALS['config']['images_2x']) ? $GLOBALS['config']['images_2x'] : 1.5 ) * $params['height']))
-						: round($image_db_data['original_height'] * $params['width_hq'] / $image_db_data['original_width']);
+			// get data about image from db
+			$ci =& get_instance();
+			$ci->load->model('cms_image_model');
+			$image_db_data = $ci->cms_image_model->get_cms_image_by_filename($image);
+	
+			// if no resizing
+			if(empty($params['width']) && empty($params['height'])){
+				
+				$fileurl = $GLOBALS['config']['upload_url'].$image;
+				$image_data['width'] = $image_db_data['original_width'];
+				$image_data['height'] = $image_db_data['original_height'];
+				
+				$fileurl_hq = $fileurl;
+				$fileurl_lq = $fileurl;
+					
+			} else {
+	 		
+				// get image target width (mainly for filename)
+				if (empty($params['width']) && !empty($params['height'])){
+					$params['width'] = $image_db_data['original_width'] * $params['height'] / $image_db_data['original_height'];
+				} 
+				
+				if ($params['width'] > $image_db_data['original_width']){
+					$params['width'] = $image_db_data['original_width'];
+				}
+				
+				$params['width_hq'] = round((!empty($GLOBALS['config']['images_2x']) ? $GLOBALS['config']['images_2x'] : 1.5 ) * $params['width']);
+				if ($params['width_hq'] > $image_db_data['original_width']){
+					$params['width_hq'] = $image_db_data['original_width'];
+				}
+				
+				$params['width_lq'] = round((!empty($GLOBALS['config']['images_1x']) ? $GLOBALS['config']['images_1x'] : 0.75 ) * $params['width']);
+				if ($params['width_lq'] > $image_db_data['original_width']){
+					$params['width_lq'] = $image_db_data['original_width'];
+				}
+					
+				// get image target output format
+				if (empty($params['output'])){
+					$params['output'] = pathinfo($image, PATHINFO_EXTENSION);
+				}
+				
+				// if file exists
+				$image_dir = pathinfo($image, PATHINFO_DIRNAME);
+				$filename_hq = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_hq'].'.'.$params['output'];
+				$filename_lq = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_lq'].'.'.$params['output'];
+				$fileurl_hq = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_hq'].'.'.$params['output'];
+				$fileurl_lq = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_lq'].'.'.$params['output'];
+					
+				if (!file_exists($filename_hq)){
+					$needs_lazy_loading = true;
+				}
+				
+				if (!file_exists($filename_lq)){
+					$needs_lazy_loading = true;
+				}
+			
+				if (empty($image_data)){
+					$image_data['width'] = $params['width_hq'];
+					$image_data['height'] = !empty($params['height'])
+							? (round((!empty($GLOBALS['config']['images_2x']) ? $GLOBALS['config']['images_2x'] : 1.5 ) * $params['height']))
+							: round($image_db_data['original_height'] * $params['width_hq'] / $image_db_data['original_width']);
+				}
+				
 			}
 			
 		}
