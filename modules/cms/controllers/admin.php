@@ -349,5 +349,22 @@ class admin extends MY_Controller {
 		}
 
 	}
+	
+	function dump($param = ''){
+		
+		// set page config
+		$page_config = array(
+				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
+				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
+				array('position' => 'main', 'panel' => 'cms/cms_dump', 'params' => ['do' => $param, ]),
+		);
+		
+		// render panels
+		$panel_data = $this->render($page_config);
+		
+		// output to layout
+		$this->output('admin', $panel_data);
+		
+	}
 
 }

@@ -39,6 +39,13 @@
 			"url":"admin/cssjs/"
 		},
 		{
+			"id":"cms_dump",
+			"name":"Data dumps",
+			"parent":"cms",
+			"access":"cms_dump",
+			"url":"admin/dump/"
+		},
+		{
 			"id":"cms_update",
 			"name":"Update",
 			"parent":"cms",
