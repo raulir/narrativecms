@@ -114,7 +114,7 @@
 	},
 	{
 		"type":"text",
-		"name":"cms_api_key",
+		"name":"cm_api_key",
 		"label":"CM API key",
 		"default":""
 	},
