@@ -53,7 +53,8 @@ function form_init(){
     		
 				setTimeout(function(){
 					$('.form_message').removeClass('form_message_status_active').removeClass('form_message_active');
-				}, 30000);
+					$('.form_input_input', $form).val('');
+				}, 10000);
 				
 			}}, fo));
 			

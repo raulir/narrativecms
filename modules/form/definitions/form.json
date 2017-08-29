@@ -37,7 +37,7 @@
 		"type":"text",
 		"name":"success_message",
 		"label":"Success message",
-		"default":"Thank you! You will be contacted shortly.",
+		"default":"Message sent! You will be contacted shortly, thank you!",
 		"help":"Message covering the form area after successful sending"
 	},
 	{
