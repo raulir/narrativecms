@@ -333,7 +333,9 @@ class admin extends MY_Controller {
 			header('Content-Disposition: attachment; filename="'.$filename.'.zip"');
 			header('Content-Type: application/zip');
 			header('Content-Length: ' . filesize($GLOBALS['config']['base_path'].'cache/'.$filename.'.zip'));
-	
+			
+			ini_set('memory_limit','1G');
+			
 			readfile($GLOBALS['config']['base_path'].'cache/'.$filename.'.zip');
 
 			exit();
@@ -351,6 +353,10 @@ class admin extends MY_Controller {
 	}
 	
 	function dump($param = ''){
+		
+		if (isset($_POST['do'])){
+			$param = $_POST['do'];
+		}
 		
 		// set page config
 		$page_config = array(

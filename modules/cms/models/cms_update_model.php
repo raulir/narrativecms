@@ -518,5 +518,19 @@ class cms_update_model extends CI_Model {
 		return $return;
 	
 	}
+	
+	function run_sql($sql){
+		
+		$query = $this->db->query($sql);
+		
+		if ($query === false || $query === true){
+			return [$query];
+		}
+
+		$result = $query->result_array();
+		
+		return $result;
+		
+	}
 
 }
