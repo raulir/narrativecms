@@ -134,7 +134,7 @@ function cookie_read(name) {
 }
 
 function cookie_erase(name) {
-    createCookie(name, "", -1);
+	cookie_create(name, "", -1);
 }
 
 function cms_hover_init(){
