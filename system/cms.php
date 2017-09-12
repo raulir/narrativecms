@@ -43,7 +43,7 @@ $config['js'] = array(
 		array(
 				'script' => 'js/jquery-3.2.1.min.js',
 				'no_pack' => 1,
-				'sync' => 'defer',		// removed - may be needed on page while loading
+				'sync' => (!empty($config['jquery_blocks']) ? '' : 'defer'),
 		),
 		array(
 				'script' => 'js/md5.js', // for caching in panels.js
