@@ -3,7 +3,7 @@
 }
 
 .cms_input_page_panels_message {
-	font-size: 16px;
+    font-size: 16px;
     line-height: 25px;
     text-align: left;
     border-bottom: 1px solid #c0c0c0;
@@ -11,7 +11,7 @@
 }
 
 .cms_input_page_panels_item {
-	position: relative;
+    position: relative;
 }
 
 .cms_input_page_panels_item_heading {
@@ -27,13 +27,12 @@
 }
 
 .cms_input_page_panels_item_buttons {
-	position: absolute;
+    position: absolute;
     z-index: 20;
     top: 1px;
     right: 1px;
     height: calc(100% - 2px);
     box-sizing: border-box;
-    background-color: white;
     padding: 1px 2px 0 0;
     font-size: 0;
     line-height: 0;

@@ -359,6 +359,7 @@ a.admin_tool_text:hover {
 	background-repeat: no-repeat;
 	background-position: 6px 6px;
 	background-size: 14px 14px;
+	transition:200ms;
 
 	&:last-of-type {
 		margin-bottom: 0;
@@ -386,6 +387,7 @@ a.admin_tool_text:hover {
 	min-width: 52px;
 	text-align: center;
 	color: #606060;
+	background-color:#ffffff;
 }
 
 .admin_list_sortable a {
