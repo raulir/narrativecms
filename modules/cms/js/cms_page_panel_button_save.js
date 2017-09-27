@@ -1,5 +1,7 @@
 function cms_page_panel_save(params){
 	
+	params = $.extend({'no_mandatory_check':false}, params);
+	
 	// if shortcut, go back to page page
 	if ($('.admin_block_shortcut_to').length && $('.admin_block_shortcut_to').val() != ''){
 		get_ajax('cms_page_panel_operations', {
@@ -17,6 +19,15 @@ function cms_page_panel_save(params){
 			tinyMCE.triggerSave();
 		}
 		
+		// check if all mandatory data exists
+		var mandatory_extra = '';
+		if (!params.no_mandatory_check){
+			var mandatory_result = cms_page_panel_check_mandatory('orange');
+			if (mandatory_result.length){
+				var mandatory_extra = cms_page_panel_format_mandatory(mandatory_result, 'orange');
+			}
+		}
+
 		var data = $('.admin_form').serializeArray();
 		var data_to_submit = {};
 		$.each(data, function(key, value){
@@ -55,7 +66,7 @@ function cms_page_panel_save(params){
 						if ($('.cms_page_panel_mode').val() == 'panel_settings'){
 							
 							// panel settings
-							cms_notification('Settings saved', 3);
+							cms_notification('Settings saved' + mandatory_extra, 3);
 							
 							if ($('#block_id').val() == '0'){
 								location.reload();
@@ -64,7 +75,7 @@ function cms_page_panel_save(params){
 						} else if ($('#block_id').val() == '0' && (parseInt(data.result.parent_id) > 0)){
 						
 							// adding child
-							cms_notification('Panel created', 3);
+							cms_notification('Panel created' + mandatory_extra, 3);
 							window.location.href = config_url + 'admin/cms_page_panel/' + data.result.block_id + '/' + data.result.parent_id + 
 									'/' + $('.cms_page_panel_parent_name').val() + '/';
 						
@@ -76,7 +87,7 @@ function cms_page_panel_save(params){
 							
 						} else {
 						
-							cms_notification('Panel saved', 3);
+							cms_notification('Panel saved' + mandatory_extra, 3);
 						
 						}
 						

@@ -1,4 +1,75 @@
 
+function cms_page_panel_check_mandatory(colour){
+	
+	var $mandatory = $('.cms_input_mandatory');
+	
+	var ret = [];
+	
+	$mandatory.each(function(){
+		
+		var $this = $(this);
+		var label_extra = '';
+		$('label', $this).css({'color':''});
+		
+		// check if inside repeater
+		if ($this.closest('.admin_repeater_container').length){
+			
+			label_extra = $this.closest('.admin_repeater_container').data('label') + ' &gt; ' + ($this.closest('.admin_repeater_block').prevAll('.admin_repeater_block').length + 1) + ': ';
+			
+		}
+		
+		if ($this.hasClass('cms_input_text')){
+			
+			if (!$('input', $this).val()){
+				ret.push(label_extra + $('label', $this).html());
+				$('label', $this).css({'color':colour});
+			}
+			
+		} else if ($this.hasClass('cms_input_textarea')){
+			
+			if (!$('textarea', $this).val()){
+				ret.push(label_extra + $('label', $this).html());
+				$('label', $this).css({'color':colour});
+			}
+			
+		} else if ($this.hasClass('cms_input_image')){
+			
+			if (!$('.cms_input_image_input', $this).val()){
+				ret.push(label_extra + $('label', $this).html());
+				$('label', $this).css({'color':colour});
+			}
+			
+		} else if ($this.hasClass('cms_input_select')){
+			
+			if (!$('select', $this).val()){
+				ret.push(label_extra + $('label', $this).html());
+				$('label', $this).css({'color':colour});
+			}
+			
+		}
+		
+	})
+	
+	return ret;
+	
+}
+
+function cms_page_panel_format_mandatory(mandatory_result, colour){
+	
+	var mandatory_extra = '';
+	
+	if (mandatory_result.length){
+		mandatory_extra = '<br><div style="display: inline-block; color: ' + colour + '; font-size: 14px; padding-top: 10px; ">Missing mandatory values:';
+		$.each(mandatory_result, function(key, value){
+			mandatory_extra = mandatory_extra + '<br>- ' + value;
+		});
+		mandatory_extra = mandatory_extra + '</div>';
+	}
+	
+	return mandatory_extra;
+
+}
+
 function init_admin_repeater_block_delete(){
 	$('.admin_repeater_block_delete').off('click.r').on('click.r', function(){
 		$(this).closest('.admin_repeater_block_toolbar').parent().remove();

@@ -17,22 +17,6 @@
 	text-overflow: ellipsis;
 }
 
-.admin_input_dropdown {
-	
-}
-
-.admin_input_dropdown > select {
-	box-sizing: border-box;
-	display: block;
-	border: 1px solid #a0a0a0;
-	width: 330px;
-	height: 26px;
-	line-height: 23px;
-	font-size: 17px;
-	float: right;
-	padding: 1px 5px 0px 5px;
-}
-
 .admin_repeater_block .cms_input_image .admin_image_container {
 	width: 310px;
 	height: 233px;
@@ -48,7 +32,7 @@
 	max-height: 231px;
 }
 
-.admin_repeater_block .admin_input_dropdown > select {
+.admin_repeater_block .cms_input_select > select {
 	width: 310px;
 }
 

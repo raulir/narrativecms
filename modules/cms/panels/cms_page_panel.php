@@ -11,7 +11,9 @@ class cms_page_panel extends MY_Controller{
 			header('Location: '.$GLOBALS['config']['base_url'].'cms_login/', true, 302);
 			exit();
 		}
-
+		
+		$this->scss[] = ['script' => 'modules/cms/css/cms_input_select.scss', ];
+		
 	}
 
 	function panel_params($params){

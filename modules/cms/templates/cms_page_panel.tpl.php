@@ -37,7 +37,7 @@
 							'help' => '[Page panel title]||Not visible in frontend. When page panel has {heading} field, this is overwritten from there',
 					]); ?>
 				
-					<div class="cms_input admin_input_dropdown">
+					<div class="cms_input cms_input_select">
 						<label for="panel_name">Block type</label>
 						<?php _panel('cms_help', ['help' => '[Page panel type]||Select page panel type from available panel types in installed modules.||When adding a new page panel, '.
 								'one can select an existing panel from {Shortcut to} dropdown instead.||Changing this field may cause losing data already entered for this page panel', ]); ?>
@@ -60,7 +60,7 @@
 					</div>
 					
 					<?php if($block['panel_name'] === '' && empty($block['parent_id'])): /* last cond == no shortcuts for panel in panel */ ?>
-						<div class="cms_input admin_input_dropdown">
+						<div class="cms_input cms_input_select">
 							<label for="shortcut_to">Shortcut to</label>
 							<select class="admin_block_shortcut_to" name="shortcut_to" id="shortcut_to">
 								<option value="">-- shortcut to --</option>
@@ -115,7 +115,7 @@
 					
 					$field_empty = !isset($data[$field['name']]);
 					$field_data = !empty($data[$field['name']]) ? $data[$field['name']] : '';
- 					
+					
 					if (!empty($field['default']) && substr($field['default'],0,6) == ':date:'){
 						$defparams = explode(':',$field['default']);
 						if (empty($defparams[3])){
@@ -152,6 +152,12 @@
 					} else {
 						$max_chars_class = '';
 						$max_chars_data = '';
+					}
+					
+					if (!empty($field['mandatory'])){
+						$mandatory_class = ' cms_input_mandatory ';
+					} else {
+						$mandatory_class = '';
 					}
 					
 					if ($field['type'] == 'repeater' && $prefix == ''){ // only one sublevel
@@ -196,6 +202,7 @@
 								'extra_class' => ($prefix ? '' : 'admin_column'),
 								'max_chars_class' => $max_chars_class,
 								'meta_class' => $meta_class,
+								'mandatory_class' => $mandatory_class,
 								'extra_data' => $max_chars_data.' '.$meta_data.' ',
 								'_return' => true,
 								'help' => !empty($field['help']) ? $field['help'] : '',
@@ -208,7 +215,7 @@
 								'value' => ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) ),
 								'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'),
 								'extra_class' => (($prefix || empty($field['width'])) ? ' admin_column ' : '')
-										.((!empty($field['width']) && $field['width'] == 'wide') ? ' admin_input_wide_textarea ' : ''),
+										.((!empty($field['width']) && $field['width'] == 'wide') ? ' cms_input_wide_textarea ' : ''),
 								'extra_data' => $max_chars_data.' '.$meta_data.' '
 										.'data-lines="'.(!empty($field['lines']) ? $field['lines'] : '3' ).'" '
 										.' data-html="'.(!empty($field['html']) ? $field['html'] : '').'" '
@@ -216,6 +223,7 @@
 										.' data-html_css="'.(!empty($field['html_css']) ? $field['html_css'] : '').'" ',
 								'max_chars_class' => $max_chars_class,
 								'meta_class' => $meta_class,
+								'mandatory_class' => $mandatory_class,
 								'tinymce' => !empty($field['html']),
 								'_return' => true,
 								'help' => !empty($field['help']) ? $field['help'] : '', 
@@ -231,6 +239,7 @@
 								'category' => !empty($field['category']) ? $field['category'] : '',
 								'_return' => true, 
 								'extra_class' => ($prefix ? '' : 'admin_column'),
+								'mandatory_class' => $mandatory_class,
 								'extra_data' => ' data-name="'.$field['name'].'" ',
 								'help' => !empty($field['help']) ? $field['help'] : '', 
 						));
@@ -257,6 +266,7 @@
 								'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'), 
 								'name_clean' => ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']),
 								'extra_class' => ($prefix ? '' : 'admin_column'),
+								'mandatory_class' => $mandatory_class,
 								'targets' => !empty($field['targets']) ? $field['targets'] : '',
 								'_return' => true,
 								'help' => !empty($field['help']) ? $field['help'] : '',
@@ -275,6 +285,7 @@
 								'name_clean' => !empty($name_clean) ? $name_clean : $name, 
 								'_return' => true, 
 								'extra_class' => ($prefix ? '' : 'admin_column'), 
+								'mandatory_class' => $mandatory_class,
 								'help' => !empty($field['help']) ? $field['help'] : '', 
 						));
 						
@@ -298,6 +309,7 @@
 										'name' => $name, 
 										'name_clean' => !empty($name_clean) ? $name_clean : $name, 
 										'extra_class' => ($prefix ? '' : 'admin_column'), 
+										'mandatory_class' => $mandatory_class,
 										'help' => !empty($field['help']) ? $field['help'] : '', 
 								],
 								'_return' => true,
@@ -330,6 +342,7 @@
 										'name' => $name, 
 										'name_clean' => !empty($name_clean) ? $name_clean : $name, 
 										'extra_class' => ($prefix ? '' : 'admin_column').' repeater_select',
+										'mandatory_class' => $mandatory_class,
 										'help' => !empty($field['help']) ? $field['help'] : '', 
 								],
 								'_return' => true,
@@ -344,6 +357,7 @@
 								'name_clean' => ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']), 
 								'_return' => true, 
 								'extra_class' => ($prefix ? '' : 'admin_column'),
+								'mandatory_class' => $mandatory_class,
 								'accept' => !empty($field['accept']) ? $field['accept'] : '',
 								'help' => !empty($field['help']) ? $field['help'] : '',
 						));

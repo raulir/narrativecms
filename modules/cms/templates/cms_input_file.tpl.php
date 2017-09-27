@@ -3,7 +3,7 @@
 	if (empty($name_clean)) $name_clean = $name;
 ?>
 
-<div class="cms_input cms_input_file cms_input_file_container_<?php print($name_clean); ?> <?php print(!empty($extra_class) ? $extra_class : ''); ?>">
+<div class="cms_input cms_input_file cms_input_file_container_<?php print($name_clean); ?> <?php print(!empty($extra_class) ? $extra_class : ''); ?> <?= !empty($mandatory_class) ? $mandatory_class : '' ?>">
 	
 	<label for="cms_input_file_<?php print($name_clean); ?>"><?php print($label); ?></label>
 

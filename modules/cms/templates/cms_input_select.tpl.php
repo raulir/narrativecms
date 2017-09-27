@@ -1,4 +1,4 @@
-<div class="cms_input admin_input_dropdown <?php print(!empty($extra_class) ? $extra_class : ''); ?>" style="display: block;">
+<div class="cms_input cms_input_select <?php print(!empty($extra_class) ? $extra_class : ''); ?> <?= !empty($mandatory_class) ? $mandatory_class : '' ?>">
 
 	<label for="select_<?php print($name_clean); ?>"><?php print($label); ?></label> 
 

@@ -6,11 +6,11 @@
 		
 		<a class="admin_tool_button admin_right" href="<?php print($GLOBALS['config']['base_url'].$edit_base.$filter['panel_name'].'/'); ?>">New</a>
 		
-		<?php if($GLOBALS['config']['environment'] == 'DEV'): ?>
+		<?php if($GLOBALS['config']['environment'] == 'NOP'): ?>
 		
 			<div class="admin_tool_button admin_right cms_list_import">Import</div>
 			<?php _panel('cms_popup', ['heading' => 'Import', 'name' => 'import', ]) ?>
-			
+			 
 		<?php endif ?>
 		
 	<?php endif ?>

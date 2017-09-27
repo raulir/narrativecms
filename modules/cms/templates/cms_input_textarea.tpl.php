@@ -1,4 +1,4 @@
-<div class="cms_input admin_input_textarea <?php print(!empty($extra_class) ? $extra_class : ''); ?>">
+<div class="cms_input cms_input_textarea <?php print(!empty($extra_class) ? $extra_class : ''); ?> <?= !empty($mandatory_class) ? $mandatory_class : '' ?>">
 	
 	<label><?php print($label); ?></label>
 	

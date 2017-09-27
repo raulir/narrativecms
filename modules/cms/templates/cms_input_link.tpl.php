@@ -1,4 +1,4 @@
-<div class="cms_input cms_input_link_container admin_input_link_container_<?php print($name_clean); ?> <?php print(!empty($extra_class) ? $extra_class : ''); ?>">
+<div class="cms_input cms_input_link_container admin_input_link_container_<?php print($name_clean); ?> <?php print(!empty($extra_class) ? $extra_class : ''); ?> <?= !empty($mandatory_class) ? $mandatory_class : '' ?>">
 	
 	<label for="admin_input_link_<?php print($name_clean); ?>"><?php print($label); ?></label>
 	<?php _panel('cms_help', ['help' => !empty($help) ? $help : '', ]); ?>

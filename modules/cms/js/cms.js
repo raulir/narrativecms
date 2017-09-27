@@ -33,16 +33,50 @@ function activate_cms_page_panel_show(){
 		}
 		
 		var $this = $(this);
-		
-		if ($this.html() == 'show'){
-			// ask are you sure
-			get_ajax_panel('cms_popup_yes_no', {}, function(data){
-				panels_display_popup(data.result.html, {
-					'yes': function(){
-						action($this)
-					}
-				}); 
-			});
+
+		if ($this.html().trim() == 'show'){
+			
+			// check if all mandatory is filled in
+			if (typeof cms_page_panel_check_mandatory == 'function'){
+				var mandatory_result = cms_page_panel_check_mandatory('red');
+			} else {
+				var mandatory_result = [];
+			}
+			
+			if (mandatory_result.length){
+
+				var mandatory_extra = cms_page_panel_format_mandatory(mandatory_result, 'red');
+				cms_notification('Error showing panel' + mandatory_extra, 3, 'error')
+
+			} else {
+
+				// ask are you sure
+				get_ajax_panel('cms_popup_yes_no', {}, function(data){
+					panels_display_popup(data.result.html, {
+						'yes': function(){
+							
+							// if save button, save 
+							if ($('.cms_page_panel_save').length){
+								
+								cms_page_panel_save({
+									'no_mandatory_check': true,
+									'success':function(data){
+										action($this);
+									}
+								})
+							
+							} else {
+							
+								action($this)
+							
+							}
+							
+						}
+					}); 
+				});
+
+			}
+			
 		} else {
 			action($this);
 		}

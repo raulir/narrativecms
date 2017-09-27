@@ -1,4 +1,4 @@
-<div class="cms_input cms_input_text <?= !empty($extra_class) ? $extra_class : '' ?>">
+<div class="cms_input cms_input_text <?= !empty($extra_class) ? $extra_class : '' ?> <?= !empty($mandatory_class) ? $mandatory_class : '' ?>">
 
 	<label for="<?= $name_clean ?>"><?= $label ?></label>
 	<?php if (!empty($help)) _panel('cms_help', ['help' => $help, ]); ?>

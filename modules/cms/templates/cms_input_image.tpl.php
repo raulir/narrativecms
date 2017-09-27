@@ -1,6 +1,6 @@
 
-<div class="cms_input cms_input_image cms_input_image_container_<?php print($name_clean); ?> 
-		<?php print(!empty($extra_class) ? $extra_class : ''); ?>" <?php print(!empty($extra_data) ? $extra_data : ''); ?>>
+<div class="cms_input cms_input_image cms_input_image_container_<?php print($name_clean); ?> <?php print(!empty($extra_class) ? $extra_class : ''); ?> <?= !empty($mandatory_class) ? $mandatory_class : '' ?>"
+		<?php print(!empty($extra_data) ? $extra_data : ''); ?>>
 
 	<label for="cms_input_image_<?php print($name_clean); ?>"><?php print($label); ?></label>
 	
@@ -26,7 +26,7 @@
 		Clear
 	</div>
 	
-	<input type="hidden" class="cms_image_input_<?php print($name_clean); ?> <?= $name ?>" name="<?php print($name); ?>" value="<?php print($value); ?>">
+	<input type="hidden" class="cms_input_image_input cms_image_input_<?php print($name_clean); ?> <?= $name ?>" name="<?php print($name); ?>" value="<?php print($value); ?>">
 	
 	<div style="clear: both; "></div>
 

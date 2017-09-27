@@ -1,6 +1,6 @@
 function cms_input_textarea_init(){
 
-	$('.admin_input_textarea textarea').each(function(){
+	$('.cms_input_textarea textarea').each(function(){
 		$this = $(this);
 		$this.css({'height':parseInt($this.css('line-height')) * parseInt($this.data('lines')) + 3 + 'px'});
 	});

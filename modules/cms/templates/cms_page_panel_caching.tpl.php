@@ -17,7 +17,7 @@
 				
 				<div class="cms_page_panel_caching_area">
 				
-					<div class="cms_page_panel_caching_input cms_input admin_input_dropdown">
+					<div class="cms_page_panel_caching_input cms_input cms_input_select">
 						<label class="cms_page_panel_caching_label">Time</label>
 						<select class="cms_page_panel_caching_select">
 							<?php foreach($caching_options as $option_value => $option_name): ?>
