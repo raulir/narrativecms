@@ -8,7 +8,7 @@
     	
     	var basic_parallax_scroll = function($this){
     		
-    		var page_centre = document.body.scrollTop + (window.innerHeight/2)
+    		var page_centre = document.documentElement.scrollTop + (window.innerHeight/2)
 			
 			var delta = ($this.data('_basic_parallax_object_centre') - page_centre)/_cms_rem;
 

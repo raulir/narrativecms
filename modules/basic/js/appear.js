@@ -8,7 +8,7 @@
     	
     	var basic_appear = function($this){
     		
-    		var page_bottom = document.body.scrollTop + window.innerHeight;
+    		var page_bottom = document.documentElement.scrollTop + window.innerHeight;
 
 			if (page_bottom > $this.data('_basic_appear_centre')){
 				$this.removeClass('basic_hidden');
