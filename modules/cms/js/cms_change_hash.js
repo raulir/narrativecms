@@ -7,11 +7,11 @@ function cms_change_hash(new_hash){
         history.replaceState({}, '', new_hash);
     } else { 
         // fallback
-        scrollV = document.body.scrollTop;
-        scrollH = document.body.scrollLeft;
+        scrollV = document.documentElement.scrollTop;
+        scrollH = document.documentElement.scrollLeft;
         location.hash = new_hash;
-        document.body.scrollTop = scrollV;
-        document.body.scrollLeft = scrollH;
+        document.documentElement.scrollTop = scrollV;
+        document.documentElement.scrollLeft = scrollH;
     }
 	setTimeout(function(){
 		cms_change_hash_popstate_disabled = false;
