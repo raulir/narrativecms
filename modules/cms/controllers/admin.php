@@ -358,11 +358,16 @@ class admin extends MY_Controller {
 			$param = $_POST['do'];
 		}
 		
+		$what = '';
+		if (isset($_POST['what'])){
+			$what = $_POST['what'];
+		}
+		
 		// set page config
 		$page_config = array(
 				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
 				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms/cms_dump', 'params' => ['do' => $param, ]),
+				array('position' => 'main', 'panel' => 'cms/cms_dump', 'params' => ['do' => $param, 'what' => $what, ]),
 		);
 		
 		// render panels

@@ -29,196 +29,308 @@ class cms_dump extends MY_Controller{
 		}
 	}
 	
-	function panel_params($params){
+	function makesize($size){
+	
+		if ($size < 512){
+	
+			return $size.' B';
+	
+		}
+			
+		$size = $size / 1024;
+	
+		if ($size < 100){
+			return round($size, 1).' kB';
+		} else if ($size < 512){
+			return round($size).' kB';
+		}
+	
+		$size = $size / 1024;
+	
+		if ($size < 100){
+			return round($size, 1).' MB';
+		} else if ($size < 512){
+			return round($size).' MB';
+		}
+	
+		$size = $size / 1024;
+	
+		return round($size, 1).' GB';
+	
+	}
+	
+	function add_month_to_zip($zip, $month_string){
+		
+		$imagesdir = $GLOBALS['config']['upload_path'].'/'.$month_string;
+		
+		$iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($imagesdir));
+		$files = array_keys(iterator_to_array($iterator, true));
+			
+		foreach ($files as $file) {
+			if (is_file($file)){
+					
+				$new_name = $month_string.'/'.str_replace('\\', '/', trim(str_replace(trim($imagesdir, '/\\'), '', $file), '/\\'));
+				$zip->addFile($file, $new_name);
+		
+			}
+		}
+
+	}
+	
+	function panel_action($params){
+		
+		$this->load->model('cms_update_model');
 		
 		$tables = ['block', 'cms_file', 'cms_image', 'cms_keyword', 'cms_page', 'cms_page_panel_param', 'cms_search_cache', 'cms_slug', 'cms_text', 'cms_user', 'menu_item', ];
 		
-		$outfile = $GLOBALS['config']['base_path'].'cache/_resources.zip';
-		$outfile2 = $GLOBALS['config']['base_path'].'cache/_database.sql';
-		$outfile2z = $GLOBALS['config']['base_path'].'cache/_database.zip';
-		
 		if (!empty($params['do'])){
-			
+				
 			ini_set('memory_limit','1G');
-			
+				
 			if ($params['do'] == 'generate'){
+				
+				include_once($GLOBALS['config']['base_path'].'application/libraries/mysqldump/mysqldump.php');
 				
 				// images
 				$imagesdir = $GLOBALS['config']['upload_path'];
-		
-				// compress
-				if (file_exists($outfile)){
-					unlink($outfile);
+				$sql_temp = $GLOBALS['config']['base_path'].'cache/_database.sql';
+				if (file_exists($sql_temp)){
+					unlink($sql_temp);
 				}
 				
-				$zip = new ZipArchive();
+				if (empty($params['what'])){
 					
-				if ($zip->open($outfile, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) !== TRUE) {
-					print('An error occurred');
+					// generate all
+					$outfile = $GLOBALS['config']['base_path'].'cache/_dump.zip';
+					
+					// compress
+					if (file_exists($outfile)){
+						unlink($outfile);
+					}
+					
+					$zip = new ZipArchive();
+						
+					if ($zip->open($outfile, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) !== TRUE) {
+						print('An error occurred');
+					}
+					
+					$iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($imagesdir));
+					$files = array_keys(iterator_to_array($iterator, true));
+					
+					foreach ($files as $file) {
+						if (is_file($file)){
+					
+							$new_name = str_replace('\\', '/', trim(str_replace(trim($imagesdir, '/\\'), '', $file), '/\\'));
+							$zip->addFile($file, $new_name);
+
+						}
+					}
+					
+					// database
+					Export_Database($GLOBALS['config']['database']['hostname'],$GLOBALS['config']['database']['username'],$GLOBALS['config']['database']['password'],$GLOBALS['config']['database']['database'],
+							$tables, $sql_temp);
+						
+					if (is_file($sql_temp)){
+						$zip->addFile($sql_temp, 'db.sql');
+					}
+					
+					$zip->close();
+						
+					unlink($sql_temp);
+						
+					header('Location: '.$GLOBALS['config']['base_url'].'admin/dump/', true, 302);
+					die();
+					
+				} else if ($params['what'] == '2month'){
+					
+					// 2 months + sql
+					
+					$outfile = $GLOBALS['config']['base_path'].'cache/_dump_2.zip';
+					
+					if (file_exists($outfile)){
+						unlink($outfile);
+					}
+					
+					$zip = new ZipArchive();
+						
+					if ($zip->open($outfile, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) !== TRUE) {
+						print('An error occurred');
+					}
+					
+					// add images
+					$this->add_month_to_zip($zip, date('Y').'/'.date('m'));
+					$this->add_month_to_zip($zip, date('Y', strtotime('first day of last month')).'/'.date('m', strtotime('first day of last month')));
+					
+					// add sql file
+					Export_Database($GLOBALS['config']['database']['hostname'], $GLOBALS['config']['database']['username'], $GLOBALS['config']['database']['password'],
+							$GLOBALS['config']['database']['database'],	$tables, $sql_temp);
+						
+					if (is_file($sql_temp)){
+						$zip->addFile($sql_temp, 'db.sql');
+					}
+						
+					$zip->close();
+						
+					unlink($sql_temp);
+						
+					header('Location: '.$GLOBALS['config']['base_url'].'admin/dump/', true, 302);
+					die();
+					
+				} else if ($params['what'] == 'database'){
+					
+					// 2 months + sql
+					
+					$outfile = $GLOBALS['config']['base_path'].'cache/_dump_db.zip';
+					
+					if (file_exists($outfile)){
+						unlink($outfile);
+					}
+					
+					$zip = new ZipArchive();
+						
+					if ($zip->open($outfile, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) !== TRUE) {
+						print('An error occurred');
+					}
+					
+					// add sql file
+					Export_Database($GLOBALS['config']['database']['hostname'], $GLOBALS['config']['database']['username'], $GLOBALS['config']['database']['password'],
+							$GLOBALS['config']['database']['database'],	$tables, $sql_temp);
+						
+					if (is_file($sql_temp)){
+						$zip->addFile($sql_temp, 'db.sql');
+					}
+						
+					$zip->close();
+						
+					unlink($sql_temp);
+						
+					header('Location: '.$GLOBALS['config']['base_url'].'admin/dump/', true, 302);
+					die();
+					
 				}
-					
-				$iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($imagesdir));
-		    	$files = array_keys(iterator_to_array($iterator, true));
-		
-		    	foreach ($files as $file) {
-		    		if (is_file($file)){
-		    			$zip->addFile($file, trim(str_replace(trim($imagesdir, '/\\'), '', $file), '/\\'));
-		    		}
-		    	}
-		
-		    	$zip->close();
-		    	
-		    	// database
-		    	include_once($GLOBALS['config']['base_path'].'application/libraries/mysqldump/mysqldump.php');
-		    	Export_Database($GLOBALS['config']['database']['hostname'],$GLOBALS['config']['database']['username'],$GLOBALS['config']['database']['password'],$GLOBALS['config']['database']['database'],
-		    			$tables, $outfile2);
-		    	
-		    	$zip = new ZipArchive();
-		    	
-		    	if ($zip->open($outfile2z, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) !== TRUE) {
-		    		print('An error occurred');
-		    	}
-		    	
-	    		if (is_file($outfile2)){
-	    			$zip->addFile($outfile2, 'db.sql');
-	    		}
-	
-		    	$zip->close();
-		    	
-		    	unlink($outfile2);
-		    	
-		    	header('Location: '.$GLOBALS['config']['base_url'].'admin/dump/', true, 302);
-		    	die();
-			
+				
 			}
-			
-			if ($params['do'] == 'cms_dump_resources'){
+				
+			if ($params['do'] == 'cms_dump_upload'){
+		
+				$sqlfile = $GLOBALS['config']['upload_path'].'db.sql';
+				if (file_exists($sqlfile)){
+					unlink($sqlfile);
+				}
 				
 				// uploading resources
 				if (!file_exists($GLOBALS['config']['base_path'].'cache/dump')){
 					mkdir($GLOBALS['config']['base_path'].'cache/dump');
 				}
-				
+		
 				// collect data
 				$this->load->library('upload', array('allowed_types' => 'zip', 'upload_path' => $GLOBALS['config']['base_path'].'cache/dump/', ));
-
+		
 				if ( ! $this->upload->do_upload('file')) {
 					print('Problem with file upload. Upload path = '.$this->upload_path);
 					print_r($this->upload->display_errors());
 					print_r($_FILES);
 					die();
 				}
-
+		
 				$upload_data = $this->upload->data();
-
+		
 				$filename = $GLOBALS['config']['base_path'].'cache/dump/'.$upload_data['file_name'];
-				
- 				$zip = new ZipArchive();
+		
+				$zip = new ZipArchive();
 					
 				$zip->open($filename);
 				$zip->extractTo($GLOBALS['config']['upload_path']);
 				$zip->close();
-				
+		
 				$this->rrmdir($GLOBALS['config']['base_path'].'cache/dump');
-
-		    	header('Location: '.$GLOBALS['config']['base_url'].'admin/dump/', true, 302);
-		    	die();
-			
-			}
-	    	
-			if ($params['do'] == 'cms_dump_database'){
 				
-				$this->load->model('cms_update_model');
-				$this->load->model('cms_slug_model');
-				
-				// uploading resources
-				if (!file_exists($GLOBALS['config']['base_path'].'cache/dump')){
-					mkdir($GLOBALS['config']['base_path'].'cache/dump');
-				}
-				
-				// collect data
-				$this->load->library('upload', array('allowed_types' => 'zip', 'upload_path' => $GLOBALS['config']['base_path'].'cache/dump/', ));
-
-				if ( ! $this->upload->do_upload('file')) {
-					print('Problem with file upload. Upload path = '.$this->upload_path);
-					print_r($this->upload->display_errors());
-					print_r($_FILES);
-					die();
-				}
-
-				$upload_data = $this->upload->data();
-
-				$filename = $GLOBALS['config']['base_path'].'cache/dump/'.$upload_data['file_name'];
-				
- 				$zip = new ZipArchive();
+				// check if there is db.sql in upload directory
+				if (file_exists($sqlfile)){
 					
-				$zip->open($filename);
-				$zip->extractTo($GLOBALS['config']['base_path'].'cache/dump/');
-				$zip->close();
-				
-				$sqlfile = $GLOBALS['config']['base_path'].'cache/dump/db.sql';
-				
-				// rename old tables
-				foreach($tables as $table){
-					
-					$sql = 'drop table if exists '.$table.'_bu';
-					$this->cms_update_model->run_sql($sql);
-					
-					$sql = 'RENAME TABLE `'.$table.'` TO `'.$table.'_bu`';
-					$this->cms_update_model->run_sql($sql);
-					
-				}
-					
-				// import sql
-				
-				// Temporary variable, used to store current query
-				$templine = '';
-				
-				// Read in entire file
-				$lines = file ( $sqlfile );
-				// Loop through each line
-				foreach ( $lines as $line ) {
-					
-					// Skip it if it's a comment
-					if (substr ( $line, 0, 2 ) == '--' || $line == '')
-						continue;
+					// rename old tables
+					foreach($tables as $table){
+							
+						$sql = 'drop table if exists '.$table.'_bu';
+						$this->cms_update_model->run_sql($sql);
+							
+						$sql = 'RENAME TABLE `'.$table.'` TO `'.$table.'_bu`';
+						$this->cms_update_model->run_sql($sql);
+							
+					}
 						
-					// Add this line to the current segment
-					$templine .= $line;
-					// If it has a semicolon at the end, it's the end of the query
-					if (substr ( trim ( $line ), - 1, 1 ) == ';') {
-
-						$this->cms_update_model->run_sql($templine);
-						$templine = '';
-
+					// import sql
+			
+					// Temporary variable, used to store current query
+					$templine = '';
+			
+					// Read in entire file
+					$lines = file ( $sqlfile );
+					// Loop through each line
+					foreach ( $lines as $line ) {
+							
+						// Skip it if it's a comment
+						if (substr ( $line, 0, 2 ) == '--' || $line == '')
+							continue;
+			
+							// Add this line to the current segment
+							$templine .= $line;
+							// If it has a semicolon at the end, it's the end of the query
+							if (substr ( trim ( $line ), - 1, 1 ) == ';') {
+			
+								$this->cms_update_model->run_sql($templine);
+								$templine = '';
+			
+							}
+								
 					}
 					
+					unlink($sqlfile);
+				
 				}
 
-				$this->rrmdir($GLOBALS['config']['base_path'].'cache/dump');
-				
-				// update slugs
-				$this->cms_slug_model->_regenerate_cache();
-				$this->cms_slug_model->_regenerate_sitemap();
-				
-
-		    	header('Location: '.$GLOBALS['config']['base_url'].'admin/dump/', true, 302);
-		    	die();
-			
+				header('Location: '.$GLOBALS['config']['base_url'].'admin/dump/', true, 302);
+				die();
+					
 			}
-	    	
+		
 		}
 		
-		if (file_exists($outfile)){
-			$params['filemdate'] = date('jS \of F Y H:i', filemtime($outfile));
-		} else {
-			$params['filemdate'] = '';
-		}
+		return $params;
 		
-		if (file_exists($outfile)){
-			$params['filemdate2'] = date('jS \of F Y H:i', filemtime($outfile2z));
-		} else {
-			$params['filemdate2'] = '';
+	}
+	
+	function panel_params($params){
+		
+		$params['files'] = [
+				[
+						'filename' => '_dump_2.zip',
+						'heading' => 'Database and 2 months of files',
+						'trigger' => '2month',
+				],
+				[
+						'filename' => '_dump_db.zip',
+						'heading' => 'Database only',
+						'trigger' => 'database',
+				],
+				[
+						'filename' => '_dump.zip',
+						'heading' => 'Database and all files',
+						'trigger' => '',
+				],
+		];
+		
+		foreach($params['files'] as $key => $file){
+			
+			$filename = $GLOBALS['config']['base_path'].'cache/'.$file['filename'];
+			if (file_exists($filename)){
+				$params['files'][$key]['filemtime'] = date('j M Y H:i', filemtime($filename));
+				$params['files'][$key]['size'] = $this->makesize(filesize($filename));
+			} else {
+				$params['files'][$key]['filemtime'] = '';
+				$params['files'][$key]['size'] = '';
+			}
+			
 		}
 		
 		return $params;

@@ -1,42 +1,58 @@
-GENERATE AND DOWNLOAD DUMPS:<br>
-<br>
-<?php if (!empty($filemdate)): ?>
+<div class="cms_toolbar">
 
-	<a style="text-decoration: underline; " <?php _lh('admin/export/_resources/'); ?>>Download resources (images, videos etc) dump<br><?= $filemdate ?></a><br><br>
+	<div class="admin_tool_text">Download and upload site dumps</div>
+	
+	<!-- div class="cms_toolbar_buttons">
+		<div class="cms_cssjs_settings_save admin_tool_button admin_right">
+			Update all
+			<div class="cms_ctrl_hint">S</div>
+		</div>
+	</div -->
 
-<?php endif ?>
-
-<?php if (!empty($filemdate2)): ?>
-
-	<a style="text-decoration: underline; " <?php _lh('admin/export/_database/'); ?>>Download database (texts, links etc) sql dump<br><?= $filemdate2 ?></a><br><br>
-
-<?php endif ?>
-
-<a <?php _lh('admin/dump/generate/') ?>>[ Regenerate dumps ]</a><br>
-<br>
-<br>
-<br>
-UPLOAD DUMPS:<br>
-<br>
-
-<div>
-	Upload resources dump (_resources.zip):<br>
-	<form class="cms_dump_resources_form" method="post" enctype="multipart/form-data" >
-		<input type="file" name="file"><br>
-		<input type="hidden" name="do" value="cms_dump_resources"><br>
-		<input type="submit" value="upload"> 
-	</form>
 </div>
 
+<div class="cms_dump_item">
+	<div class="cms_dump_item_heading">Description</div>
+	<div class="cms_dump_item_filemtime">Generated</div>
+	<div class="cms_dump_item_size">Size</div>
+</div>
+
+<?php foreach($files as $file): ?>
+
+	<div class="cms_dump_item">
+
+		<div class="cms_dump_item_heading"><?= $file['heading'] ?></div>
+		<div class="cms_dump_item_filemtime"><?= $file['filemtime'] ?></div>
+		<div class="cms_dump_item_size"><?= $file['size'] ?></div>
+
+		<div class="cms_dump_item_generate">
+			<form style="display: inline; " method="post" enctype="multipart/form-data" >
+				<input type="hidden" name="what" value="<?= $file['trigger'] ?>">
+				<input type="hidden" name="do" value="generate">
+				<input type="submit" value="update"> 
+			</form>
+		</div>
+
+		<?php if (!empty($file['size'])): ?>
+			<div style="text-decoration: underline; " class="cms_dump_item_download">
+				<a <?php _lh('admin/export/'.str_replace('.zip', '', $file['filename']).'/') ?>>download</a>
+			</div>
+		<?php endif ?>
+
+	</div>
+
+<?php endforeach ?>
+
 <br>
 <br>
+UPLOAD DUMP:<br>
 <br>
 
 <div>
-	Upload database dump (_database.zip):<br>
+	Upload dump (.zip):<br>
 	<form class="cms_dump_resources_form" method="post" enctype="multipart/form-data" >
 		<input type="file" name="file"><br>
-		<input type="hidden" name="do" value="cms_dump_database"><br>
+		<input type="hidden" name="do" value="cms_dump_upload"><br>
 		<input type="submit" value="upload"> 
 	</form>
 </div>
