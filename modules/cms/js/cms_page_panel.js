@@ -18,31 +18,33 @@ function cms_page_panel_check_mandatory(colour){
 			
 		}
 		
+		var label = (label_extra + $('label', $this).html()).replace(/ \*$/, '');
+		
 		if ($this.hasClass('cms_input_text')){
 			
 			if (!$('input', $this).val()){
-				ret.push(label_extra + $('label', $this).html());
+				ret.push(label);
 				$('label', $this).css({'color':colour});
 			}
 			
 		} else if ($this.hasClass('cms_input_textarea')){
 			
 			if (!$('textarea', $this).val()){
-				ret.push(label_extra + $('label', $this).html());
+				ret.push(label);
 				$('label', $this).css({'color':colour});
 			}
 			
 		} else if ($this.hasClass('cms_input_image')){
 			
 			if (!$('.cms_input_image_input', $this).val()){
-				ret.push(label_extra + $('label', $this).html());
+				ret.push(label);
 				$('label', $this).css({'color':colour});
 			}
 			
-		} else if ($this.hasClass('cms_input_select')){
+		} else if ($this.hasClass('cms_input_select')){ // includes fk and repeater_select
 			
 			if (!$('select', $this).val()){
-				ret.push(label_extra + $('label', $this).html());
+				ret.push(label);
 				$('label', $this).css({'color':colour});
 			}
 			

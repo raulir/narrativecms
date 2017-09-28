@@ -156,8 +156,10 @@
 					
 					if (!empty($field['mandatory'])){
 						$mandatory_class = ' cms_input_mandatory ';
+						$mandatory_label = ' *';
 					} else {
 						$mandatory_class = '';
+						$mandatory_label = '';
 					}
 					
 					if ($field['type'] == 'repeater' && $prefix == ''){ // only one sublevel
@@ -195,7 +197,7 @@
 					} elseif ($field['type'] == 'text'){
 						
 						$return .= _panel('cms_input_text', [
-								'label' => $field['label'],
+								'label' => $field['label'].$mandatory_label,
 								'value' => ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) ),
 								'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'),
 								'name_clean' => ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']),
@@ -211,7 +213,7 @@
 					} elseif ($field['type'] == 'textarea'){
 						
 						$return .= _panel('cms_input_textarea', array(
-								'label' => $field['label'],
+								'label' => $field['label'].$mandatory_label,
 								'value' => ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) ),
 								'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'),
 								'extra_class' => (($prefix || empty($field['width'])) ? ' admin_column ' : '')
@@ -232,7 +234,7 @@
 					} elseif ($field['type'] == 'image'){
 						
 						$return .= _panel('cms_input_image', array(
-								'label' => $field['label'], 
+								'label' => $field['label'].$mandatory_label, 
 								'value' => ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) ), 
 								'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'), 
 								'name_clean' => ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']), 
@@ -278,7 +280,7 @@
 						$name_clean = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
 						
 						$return .= _panel('cms_input_select', array(
-								'label' => $field['label'], 
+								'label' => $field['label'].$mandatory_label, 
 								'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
 								'values' => $field['values'],
 								'name' => $name, 
@@ -303,7 +305,7 @@
 						
 						$return .= _panel('cms_input_fk', [
 								'select_params' => [
-										'label' => $field['label'], 
+										'label' => $field['label'].$mandatory_label, 
 										'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
 										'values' => $fk_data[(!empty($field['field']) ? $field['field'] : $field['name'])],
 										'name' => $name, 
@@ -336,7 +338,7 @@
 						
 						$return .= _panel('cms_input_repeater_select', [
 								'select_params' => [
-										'label' => $field['label'], 
+										'label' => $field['label'].$mandatory_label, 
 										'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
 										'values' => $values,
 										'name' => $name, 
@@ -351,7 +353,7 @@
 					} elseif ($field['type'] == 'file'){
 						
 						$return .= _panel('cms_input_file', array(
-								'label' => $field['label'], 
+								'label' => $field['label'].$mandatory_label, 
 								'value' => ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) ), 
 								'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'), 
 								'name_clean' => ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']), 
