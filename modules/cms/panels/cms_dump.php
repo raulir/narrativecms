@@ -63,16 +63,20 @@ class cms_dump extends MY_Controller{
 		
 		$imagesdir = $GLOBALS['config']['upload_path'].'/'.$month_string;
 		
-		$iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($imagesdir));
-		$files = array_keys(iterator_to_array($iterator, true));
-			
-		foreach ($files as $file) {
-			if (is_file($file)){
-					
-				$new_name = $month_string.'/'.str_replace('\\', '/', trim(str_replace(trim($imagesdir, '/\\'), '', $file), '/\\'));
-				$zip->addFile($file, $new_name);
+		if (is_dir($imagesdir)){
 		
+			$iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($imagesdir));
+			$files = array_keys(iterator_to_array($iterator, true));
+				
+			foreach ($files as $file) {
+				if (is_file($file)){
+						
+					$new_name = $month_string.'/'.str_replace('\\', '/', trim(str_replace(trim($imagesdir, '/\\'), '', $file), '/\\'));
+					$zip->addFile($file, $new_name);
+			
+				}
 			}
+		
 		}
 
 	}
