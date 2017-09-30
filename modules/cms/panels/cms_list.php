@@ -27,6 +27,11 @@ class cms_list extends MY_Controller{
 				
 			// load definition
 			$panel_definition = $this->cms_panel_model->get_cms_panel_definition($params['filter']['panel_name']);
+			
+			// filter has to support both \ and non-\ panel names
+			if (is_array($params['filter']['panel_name'])){
+				$params['filter']['panel_name'] = implode('|', $params['filter']['panel_name']);
+			}
 
 			// for show
 			$panel_definition[] = array(

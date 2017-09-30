@@ -46,7 +46,7 @@ class feed extends MY_Controller {
 						'hide_new' => 1,
 						'extra_buttons' => array('feed_dashboard_refresh', ),
 						'edit_base' => 'admin/cms_page_panel/',
-						'filter' => array('panel_name' => 'feed', 'page_id' => ['999999','0'], ), // what is shown in the list
+						'filter' => array('panel_name' => ['feed','feed/feed'], 'page_id' => ['999999','0'], ), // what is shown in the list
 						'title_panel' => 'feed_dashboard_item',
 						'filter_fields' => array('show' => '-- show --', 'source' => '-- source --', ),
 						'extra_class' => 'feed_list_container',

@@ -40,7 +40,7 @@ class feed_save_push extends MY_Controller{
 	  		$original_a = $this->cms_page_panel_model->get_cms_page_panels_by(array('block_id' => $params['cms_page_panel_id'], ));
 	   		
 	   		$old_a = $this->cms_page_panel_model->get_cms_page_panels_by(array(
-					'panel_name' => 'feed', 
+					'panel_name' => ['feed/feed', 'feed'], 
 					'source' => $original_a[0]['panel_name'],
 					'source_id' => $params['cms_page_panel_id'],
 			));

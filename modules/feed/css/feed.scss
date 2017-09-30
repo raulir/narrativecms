@@ -1,45 +1,55 @@
 .feed_list_container {
+	
 	margin-left: -3px;
 	margin-right: -3px;
 	font-size: 0px;
-}
+	
+	.cms_list_set {
+		background-color: white;
+	}
+	
+	.cms_list_item_link {
+		background-color: white;
+	}
+		
+	.admin_list_sortable > li {
+		width: 32.7%;
+		display: inline-block;
+		height: 130px;
+		padding: 2px 5px 2px 5px;
+		margin: 0px 3px 6px 3px;
+		position: relative;
+	}
+	
+	.cms_list_item_link {
+		height: 22px;
+		border: 1px solid #c0c0c0;
+		text-decoration: none;
+		box-sizing: border-box;
+		line-height: 19px;
+		border-radius: 3px;
+		font-size: 16px;
+		padding: 1px 6px 0px 6px;
+		position: absolute;
+		top: 3px;
+		right: 5px;
+	}
+	
+	.cms_list_set {
+		position: absolute;
+		top: 3px;
+		right: 37px;
+		padding-left: 6px;
+		padding-right: 6px;
+	}
+	
+	.cms_list_icon {
+		position: absolute;
+		top: 3px;
+		left: 23px;
+		background-size: 17px auto;
+	}
 
-.feed_list_container .admin_list_sortable > li {
-	width: 32.7%;
-	display: inline-block;
-	height: 130px;
-	padding: 2px 5px 2px 5px;
-	margin: 0px 3px 6px 3px;
-	position: relative;
-}
-
-.feed_list_container .cms_list_item_link {
-	height: 22px;
-	border: 1px solid #c0c0c0;
-	text-decoration: none;
-	box-sizing: border-box;
-	line-height: 19px;
-	border-radius: 3px;
-	font-size: 16px;
-	padding: 1px 6px 0px 6px;
-	position: absolute;
-	top: 3px;
-	right: 5px;
-}
-
-.feed_list_container .cms_list_set {
-	position: absolute;
-	top: 3px;
-	right: 37px;
-	padding-left: 6px;
-	padding-right: 6px;
-}
-
-.feed_list_container .cms_list_icon {
-	position: absolute;
-	top: 3px;
-	left: 23px;
-	background-size: 17px auto;
 }
 
 .feed_list_container .cms_page_panel_show, .feed_list_container .cms_page_panel_copy, .feed_list_container a.cms_list_item_button {

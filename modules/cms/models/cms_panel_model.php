@@ -15,6 +15,16 @@ class cms_panel_model extends CI_Model {
 	
 	function get_cms_panel_config($cms_panel){
 		
+		// if array, get first with /
+		if (is_array($cms_panel)){
+			foreach($cms_panel as $_cms_panel){
+				if (stristr($_cms_panel, '/')){
+					$cms_panel = $_cms_panel;
+					break;
+				}
+			}
+		}
+		
 		$filename = '';
 		if (!stristr($cms_panel, '/')){
 			

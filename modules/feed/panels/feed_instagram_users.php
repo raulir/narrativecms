@@ -28,14 +28,14 @@ class feed_instagram_users extends MY_Controller{
         	$this->load->model('cms_page_panel_model');
         	
         	// check if exists
-        	$existing = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'feed_instagram_user', 'username' => $data['user']['username'], ]);
+        	$existing = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => ['feed/feed_instagram_user', 'feed_instagram_user'], 'username' => $data['user']['username'], ]);
 
         	if (count($existing)){
         		$this->cms_page_panel_model->delete_cms_page_panel($existing[0]['cms_page_panel_id']);
         	}
         	
         	$this->cms_page_panel_model->create_cms_page_panel(array_merge([
-       				'page_id' => 0, 'show' => 1, 'title' => $data['user']['username'], 'panel_name' => 'feed_instagram_user', ], $data['user']));
+       				'page_id' => 0, 'show' => 1, 'title' => $data['user']['username'], 'panel_name' => 'feed/feed_instagram_user', ], $data['user']));
         	
         	header('Location: '.$GLOBALS['config']['base_url'].'feed/instagram_users/');
         	die();
@@ -64,7 +64,7 @@ class feed_instagram_users extends MY_Controller{
 
 		$this->load->model('cms_page_panel_model');
 		
-  		$params['users'] = $this->cms_page_panel_model->get_cms_page_panels_by(array('panel_name' => 'feed_instagram_user', ));
+  		$params['users'] = $this->cms_page_panel_model->get_cms_page_panels_by(array('panel_name' => ['feed/feed_instagram_user', 'feed_instagram_user'], ));
 
   		return $params;
 	
