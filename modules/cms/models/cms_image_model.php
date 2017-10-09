@@ -349,4 +349,12 @@ class cms_image_model extends CI_Model {
 
 	}
 	
+	function get_image_url($image, $params){
+		
+		include_once $GLOBALS['config']['base_path'].'application/helpers/image_optimiser_helper.php';
+
+		return $GLOBALS['config']['upload_url']._iw($image, $params)['image'];
+
+	}
+	
 }
