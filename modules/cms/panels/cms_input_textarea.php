@@ -19,7 +19,7 @@ class cms_input_textarea extends MY_Controller{
 	function panel_params($params){
 
 		if (!empty($params['tinymce'])){
-			$this->js[] = array('script' => 'js/tinymce/tinymce.min.js', 'no_pack' => 1, 'sync' => '', );
+			$this->js[] = array('script' => 'modules/cms/js/tinymce/tinymce.min.js', 'no_pack' => 1, 'sync' => '', );
 		}
 		
 		return $params;
