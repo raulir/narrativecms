@@ -7,6 +7,13 @@
             "label": "Height",
             "help": "Rems",
             "default":"3"
+        },
+        {
+            "type": "text",
+            "name": "background_colour",
+            "label": "Background colour",
+            "help": "Html colour",
+            "default":"transparent"
         }
     ]
 }
