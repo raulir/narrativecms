@@ -1,6 +1,7 @@
 function basic_parallax_scroll($this, params){
 	
-	var top = basic_parallax_get_top(document.documentElement.scrollTop, $this);
+	var scrolltop = self.pageYOffset || document.documentElement.scrollTop  || document.body.scrollTop;
+	var top = basic_parallax_get_top(scrolltop, $this);
 	
 	if (!$this.hasClass('_basic_parallax_disabled')){
 		$this.css('top', top + 'rem').data('_basic_parallax_top', top);

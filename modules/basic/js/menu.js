@@ -10,7 +10,9 @@ function menu_resize(){
 
 function menu_scroll(){
 	
-	if ($(window).scrollTop() >= $('.menu_container').offset().top){
+	var scrolltop = self.pageYOffset || document.documentElement.scrollTop  || document.body.scrollTop;
+
+	if (scrolltop >= $('.menu_container').offset().top){
 		$('.menu_container').addClass('menu_fixed');
 	} else {
 		$('.menu_container').removeClass('menu_fixed');
