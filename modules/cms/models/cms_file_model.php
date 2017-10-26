@@ -32,7 +32,8 @@ class cms_file_model extends CI_Model {
 	
 	}
 	
-	function create_cms_file($dir, $name_data){
+	// without date folders in fron of the filename
+	function sanitize_filename($name_data){
 		
 		$name_data = strtolower($name_data);
 		
@@ -62,6 +63,14 @@ class cms_file_model extends CI_Model {
 				$name_data = $str;
 			}
 		}
+		
+		return $name_data;
+		
+	}
+	
+	function create_cms_file($dir, $name_data){
+		
+		$name_data = $this->sanitize_filename($name_data);
 		
 		// make dir
 		$year =  date('Y');
@@ -126,7 +135,7 @@ class cms_file_model extends CI_Model {
 	}
 	
 	function update_cms_file($filename, $data){
-		
+
 		// check if cms_file table has hash field - deprecated
 		$sql = "SHOW COLUMNS FROM cms_file LIKE 'hash'";
 		$query = $this->db->query($sql);
@@ -142,6 +151,30 @@ class cms_file_model extends CI_Model {
 			$query = $this->db->query($sql, array($value, $filename, ));
 		}
 	
+	}
+	
+	function rename_file($old_name, $new_filename, $new_short_name){
+		
+		$this->load->model('cms_page_panel_model');
+		
+		$this->update_cms_file($old_name, ['filename' => $new_filename]);
+		$this->update_cms_file($new_filename, ['name' => $new_short_name]);
+		
+		$sql = "select * from cms_page_panel_param where value = ? ";
+		$query = $this->db->query($sql, [$old_name]);
+		
+		$result = $query->result_array();
+		
+		$sql = "update cms_page_panel_param set value = ? where cms_page_panel_param_id = ? ";
+		foreach($result as $row){
+			
+			$query = $this->db->query($sql, [$new_filename, $row['cms_page_panel_param_id']]);
+			
+			$this->cms_page_panel_model->_update_cached_params($row['cms_page_panel_id']);
+			$this->cms_page_panel_model->invalidate_html_cache($row['cms_page_panel_id']);
+			
+		}
+		
 	}
 	
 }

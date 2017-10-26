@@ -265,7 +265,9 @@ class cms_page_panel_operations extends MY_Controller{
 				
 			$filenames_diff = array_diff($old_filenames, $new_filenames);
 			foreach($filenames_diff as $filename){
-				unlink($GLOBALS['config']['upload_path'].$filename);
+				if (file_exists($GLOBALS['config']['upload_path'].$filename)){
+					unlink($GLOBALS['config']['upload_path'].$filename);
+				}
 			}
 
 			// if link target, update slug
