@@ -7,8 +7,7 @@ class Index extends MY_Controller {
         parent::__construct();
              
         $this->params = $this->input->post();
-        $GLOBALS['_panel_titles'][] = $GLOBALS['config']['title'];
-                
+                 
    	}
    	
    	/**

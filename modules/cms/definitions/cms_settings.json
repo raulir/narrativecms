@@ -3,6 +3,19 @@
 	"label":"CMS settings",
 	"item":[
 		{
+			"type":"text",
+			"name":"site_title",
+			"label":"Site title",
+			"default":"New website",
+			"help":"Use #page# where page title etc has to appear"
+		},
+		{
+			"type":"text",
+			"name":"site_title_delimiter",
+			"label":"Site title delimiter",
+			"default":"-"
+		},
+		{
 			"type":"image",
 			"name":"favicon",
 			"label":"Favicon",

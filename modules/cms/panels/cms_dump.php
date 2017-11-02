@@ -90,6 +90,7 @@ class cms_dump extends MY_Controller{
 		if (!empty($params['do'])){
 				
 			ini_set('memory_limit','1G');
+			set_time_limit(300);
 				
 			if ($params['do'] == 'generate'){
 				

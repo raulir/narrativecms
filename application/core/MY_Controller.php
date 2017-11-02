@@ -331,12 +331,14 @@ class MY_Controller extends CI_Controller{
 		}
 		
 		if (!empty($GLOBALS['_panel_titles'])){
-			$_title = trim(implode(' - ', $GLOBALS['_panel_titles']), ' -');
+			$_title = trim(implode(' '.(!empty($GLOBALS['config']['site_title_delimiter']) ? $GLOBALS['config']['site_title_delimiter'] : '-').' ', $GLOBALS['_panel_titles']), ' -');
 		} else {
 			$_title = '';
 		}
-		
-    	print(str_replace(
+		$_title = (!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '') . 
+				str_replace('#page#', $_title, (!empty($GLOBALS['config']['site_title']) ? $GLOBALS['config']['site_title'] : 'New website - #page#'));
+
+		print(str_replace(
 				
 				'</head>',
 				
