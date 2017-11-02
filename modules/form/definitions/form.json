@@ -8,12 +8,6 @@
 		"help":"Email content, which is sent to the visitor after submitting the form"
 	},
 	{
-		"type":"image",
-		"name":"arrow",
-		"label":"Arrow",
-		"category":"icon"
-	},
-	{
 		"type":"textarea",
 		"name":"heading",
 		"label":"Heading",
@@ -155,7 +149,8 @@
 			{
 				"type":"text",
 				"name":"name",
-				"label":"Name"
+				"label":"Name",
+				"mandatory":"1"
 			},
 			{
 				"type":"select",
@@ -164,9 +159,10 @@
 				"values":{
 					"text":"Text",
 					"textarea":"Textarea",
-					"select":"Select"
+					"select":"Select",
+					"spacer":"Spacer"
 				},
-				"default":"no"
+				"default":"text"
 			},
 			{
 				"type":"select",

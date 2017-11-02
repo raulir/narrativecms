@@ -79,6 +79,7 @@
 	<script type="text/javascript">
 
 		var _cms_rem = 10;
+		var _cms_mobile = false;
 
 		function _set_rem(){
 
@@ -106,8 +107,13 @@
 				}
 
 				var rem = Math.round(width/<?= !empty($GLOBALS['config']['rem_k']) ? $GLOBALS['config']['rem_k'] : '100' ?> * 100)/100;
+				_cms_mobile = false;
+				
 			} else {
+				
 				var rem = Math.round(real_width/<?= !empty($GLOBALS['config']['rem_m_k']) ? $GLOBALS['config']['rem_m_k'] : '50' ?> * 100)/100;
+				_cms_mobile = true;
+
 			}
 
 			document.body.parentNode.style.fontSize = rem + 'px';
