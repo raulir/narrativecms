@@ -13,16 +13,17 @@ class form extends MY_Controller {
 		}
         
         $this->js[] = array('script' => 'js/jquery-ui.min.js', );
-        $this->js[] = array('script' => 'js/tinymce/tinymce.min.js', 'sync' => '', );
-
+        $this->js[] = array('script' => 'modules/cms/js/tinymce/tinymce.min.js', 'sync' => '', );
+        
         $this->js[] = 'js/preloader.js';
         $this->js[] = 'js/md5.js';
         $this->js[] = 'js/panels.js';
 
         $this->js[] = 'modules/cms/js/cms.js';
   
-        $GLOBALS['_panel_titles'][] = 'ADMIN - '.$GLOBALS['config']['title'];
-   		
+        $GLOBALS['_panel_titles'][] = 'ADMIN';
+        $GLOBALS['_panel_titles'][] = 'FORM';
+        
    	}
    	
    	function admin($cms_page_panel_id = ''){

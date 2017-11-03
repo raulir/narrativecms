@@ -14,7 +14,7 @@ class cms_operations extends MY_Controller {
 
         $this->js[] = 'modules/cms/js/cms.js';
   
-        $GLOBALS['_panel_titles'][] = 'ADMIN - '.$GLOBALS['config']['title'];
+        $GLOBALS['_panel_titles'][] = 'ADMIN';
    	}
 	
    	// recreate routes

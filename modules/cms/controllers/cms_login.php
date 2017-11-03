@@ -11,7 +11,7 @@ class cms_login extends MY_Controller {
         $this->js[] = 'js/panels.js';
         $this->js[] = 'modules/cms/js/cms.js';
   
-        $GLOBALS['_panel_titles'][] = 'ADMIN - '.$GLOBALS['config']['title'];
+        $GLOBALS['_panel_titles'][] = 'ADMIN';
         
    	}
    	
