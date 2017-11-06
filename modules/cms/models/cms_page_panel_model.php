@@ -127,7 +127,9 @@ class cms_page_panel_model extends CI_Model {
 		
 		}
 		
-		return array_values($return);
+		$return = array_merge($return, array_values($return));
+		
+		return $return;
 		
 	}
 	
