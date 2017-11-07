@@ -470,7 +470,7 @@ a.admin_tool_text:hover {
 	margin-left: 20px;
 }
 
-.admin_repeater_block {
+.cms_repeater_block {
 	box-sizing: border-box;
 	float: left;
 	margin-left: 20px;
@@ -484,18 +484,18 @@ a.admin_tool_text:hover {
 	width: 460px;	
 }
 
-.admin_repeater_block .admin_column {
+.cms_repeater_block .admin_column {
 	width: auto;
 }
 
-.admin_repeater_block_toolbar {
+.cms_repeater_block_toolbar {
 	clear: both;
 	height: 22px;
 	border-bottom: 1px solid #a0a0a0;
 	margin: 0px -6px 12px -6px;
 }
 
-.admin_repeater_block_delete {
+.cms_repeater_block_delete {
 	box-sizing: border-box;
 	display: block;
 	border: 1px solid #a0a0a0;

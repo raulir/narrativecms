@@ -89,6 +89,23 @@
 			"default":"0"
 		},
 		{
+			"type":"select",
+			"name":"deprecated",
+			"label":"Use deprecated features",
+			"values":{
+				"0":"No",
+				"1":"Yes"
+			},
+			"default":"0",
+			"help":"[Use deprecated features]||Switch on some deprecated features to enable backwards compatibility."
+		},
+		{
+			"type":"subtitle",
+			"label":"Sizing",
+			"width":"wide",
+			"help":"Settings related content size on screen"
+		},
+		{
 			"type":"text",
 			"name":"rem_px",
 			"label":"Rem max width px",
@@ -133,17 +150,6 @@
 			"label":"Rem mobile divider",
 			"default":"50",
 			"help":"{Rem mobile divider} height of 1 rem to mobile viewport size"
-		},
-		{
-			"type":"select",
-			"name":"deprecated",
-			"label":"Use deprecated features",
-			"values":{
-				"0":"No",
-				"1":"Yes"
-			},
-			"default":"0",
-			"help":"[Use deprecated features]||Switch on some deprecated features to enable backwards compatibility."
 		}
 	]
 }

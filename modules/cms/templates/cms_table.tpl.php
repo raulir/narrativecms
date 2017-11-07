@@ -32,9 +32,9 @@
 						// print fields for existing data
 						if (!empty($data[$field['name']])){
 							foreach($data[$field['name']] as $repeater_key => $repeater_data){
-								$return .= '<div class="admin_repeater_block ui-sortable-handle" ' .
+								$return .= '<div class="cms_repeater_block ui-sortable-handle" ' .
 										'style="background-image: url(\'' . $GLOBALS['config']['base_url'] . 'modules/cms/img/drag.png\'); ">'.
-										'<div class="admin_repeater_block_toolbar"><div class="admin_repeater_block_delete">Remove</div></div>'.
+										'<div class="cms_repeater_block_toolbar"><div class="cms_repeater_block_delete">Remove</div></div>'.
 										print_fields($field['fields'], $repeater_data, $fk_data, $field['name'], $repeater_key).
 										'</div>';
 							}
@@ -44,9 +44,9 @@
 						$return .= '<div style="clear: both; " class="admin_repeater_line"></div>';
 						$return .= '<div class="admin_small_button admin_right admin_repeater_button" ';
 						$return .= ' data-html="'.
-								str_replace('"', '#', '<div class="admin_repeater_block" ' .
+								str_replace('"', '#', '<div class="cms_repeater_block" ' .
 										'style="background-image: url(\'' . $GLOBALS['config']['base_url'] . 'modules/cms/img/drag.png\'); ">'.
-										'<div class="admin_repeater_block_toolbar"><div class="admin_repeater_block_delete">Remove</div></div>'.
+										'<div class="cms_repeater_block_toolbar"><div class="cms_repeater_block_delete">Remove</div></div>'.
 										print_fields($field['fields'], array(), $fk_data, $field['name'], '###random###').
 										'</div>').
 								'" data-name="'.$field['name'].'">Add element</div><div style="clear: both; "></div>';
