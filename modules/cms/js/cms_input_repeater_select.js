@@ -60,7 +60,7 @@ function cms_input_repeater_select_init(){
 			}
 			
 			// create contents
-			$('.admin_repeater_container_' + target + ' .admin_repeater_block').each(function(){
+			$('.admin_repeater_container_' + target + ' .cms_repeater_block').each(function(){
 				
 				// find label
 				var label = '';

@@ -14,7 +14,7 @@ function cms_page_panel_check_mandatory(colour){
 		// check if inside repeater
 		if ($this.closest('.admin_repeater_container').length){
 			
-			label_extra = $this.closest('.admin_repeater_container').data('label') + ' &gt; ' + ($this.closest('.admin_repeater_block').prevAll('.admin_repeater_block').length + 1) + ': ';
+			label_extra = $this.closest('.admin_repeater_container').data('label') + ' &gt; ' + ($this.closest('.cms_repeater_block').prevAll('.cms_repeater_block').length + 1) + ': ';
 			
 		}
 		
@@ -72,9 +72,9 @@ function cms_page_panel_format_mandatory(mandatory_result, colour){
 
 }
 
-function init_admin_repeater_block_delete(){
-	$('.admin_repeater_block_delete').off('click.r').on('click.r', function(){
-		$(this).closest('.admin_repeater_block_toolbar').parent().remove();
+function init_cms_repeater_block_delete(){
+	$('.cms_repeater_block_delete').off('click.r').on('click.r', function(){
+		$(this).closest('.cms_repeater_block_toolbar').parent().remove();
 	});
 }
 
@@ -113,7 +113,7 @@ $(document).ready(function() {
 			cms_input_textarea_init();
 		}
 
-		init_admin_repeater_block_delete();
+		init_cms_repeater_block_delete();
 		if (typeof cms_input_image_rename == 'function'){
 			cms_input_image_rename($(this).data('name') + '_image_');
 		}
@@ -137,7 +137,7 @@ $(document).ready(function() {
 		
 	})
 	
-	init_admin_repeater_block_delete();
+	init_cms_repeater_block_delete();
 	
 	$('.admin_repeater_container').sortable().disableSelection();
 	
