@@ -31,7 +31,6 @@
     			setTimeout(function(){
     				cms_video_resize_helper($target, after);
     			}, 500);
-    			
     			return;
     		
     		}
@@ -59,7 +58,7 @@
     			'left': - (video_width - parent_width)/(2*parent_width)*100 + '%'
     		});
 
-    		after();
+    		after($target);
 
     	}
 

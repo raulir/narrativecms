@@ -581,8 +581,8 @@ function cms_video_resize(params){
 	});
 	
 //	$this.data('state', 'pause');
-	
-	params.after();
+
+	params.after($this);
 
 }
 
