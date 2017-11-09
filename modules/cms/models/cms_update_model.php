@@ -443,7 +443,7 @@ class cms_update_model extends CI_Model {
 		$data['version_hash'] = $params['version_hash'];
 		
 		// write cache file
-		file_put_contents($filename, json_encode($json, JSON_PRETTY_PRINT));
+		file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
 
 	}
 	
