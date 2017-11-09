@@ -51,6 +51,19 @@ class cms_update extends MY_Controller{
 
 			$this->load->model('cms_update_model');
 			$this->cms_update_model->update_copy();
+			
+			// check and update version information
+			$master_data = $this->cms_update_model->get_master_version();
+			$this->cms_update_model->rebuild();
+			$local_data = $this->cms_update_model->get_version();
+			
+			if ($version_data['current_hash'] == $master_data['version_hash']){
+				// update local json
+				$this->cms_update_model->update_version_cache([
+						'version' => $master_data['version'],
+						'version_hash' => $master_data['version_hash'],
+				]);
+			}
 
 		}
 
@@ -74,8 +87,9 @@ class cms_update extends MY_Controller{
 		// get local version
 		$version_data = $this->cms_update_model->get_version();
 		$params['local_version'] = $version_data['version'];
-		$params['local_hash'] = $version_data['hash'];
-
+		$params['local_hash'] = $version_data['version_hash'];
+		$params['current_hash'] = $version_data['current_hash'];
+		
 		// get master version
 		if (empty($GLOBALS['config']['update']['is_master'])){
 			$version_data = $this->cms_update_model->get_master_version();
@@ -83,12 +97,24 @@ class cms_update extends MY_Controller{
 			$params['master_hash'] = $version_data['hash'];
 			if ($params['master_version'] != $params['local_version']){
 				$params['can_update'] = true;
-			} else if ($params['master_hash'] != $params['local_hash']){
-				$params['can_update'] = true;
-				$params['local_changes'] = true;
 			}
 		} else {
 			$params['master_version'] = 'This is master';
+		}
+		
+		// if master and local hash are the same, then has to be the same version
+		if (empty($params['local_version']) && $params['local_hash'] == $params['master_hash']){
+			$params['local_version'] = $params['master_version'];
+		}
+		
+		if ($params['local_version'] == $params['master_version'] && $params['local_hash'] == $params['master_hash']){
+			$params['current_version'] = 'up to date';
+		} else {
+			$params['current_version'] = 'needs update';
+		}
+		
+		if ($params['master_hash'] != $params['local_hash']){
+			$params['local_changes'] = true;
 		}
 
 		return $params;

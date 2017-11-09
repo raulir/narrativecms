@@ -34,7 +34,7 @@ class cms_update_model extends CI_Model {
 		
 		$hashes = array();
 		$version_hashes = array();
-		$version_hash = '';
+		$current_hash = '';
 		
 		// go over all folders
 		foreach($folders as $folder){
@@ -82,7 +82,7 @@ class cms_update_model extends CI_Model {
 		
 		sort($version_hashes);
 		
-		$version_hash = md5(implode($version_hashes));
+		$current_hash = md5(implode($version_hashes));
 		$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
 		
 		// load current version data, if exists
@@ -92,7 +92,7 @@ class cms_update_model extends CI_Model {
 			$old_data = array();
 		}
 		
-		if (empty($old_data['version_hash']) || $version_hash !== $old_data['version_hash']){
+		if (empty($old_data['version_hash']) || $current_hash !== $old_data['version_hash']){
 		
 			// if master, increase version number
 			if (!empty($GLOBALS['config']['update']['is_master'])){
@@ -100,18 +100,17 @@ class cms_update_model extends CI_Model {
 				$version_minor = !empty($GLOBALS['config']['update']['version_minor']) ? $GLOBALS['config']['update']['version_minor'] : '0';
 				$version_number = isset($old_data['version_number']) ? ($old_data['version_number'] + 1).'' : '0';
 				$version = $version_major.'.'.$version_minor.'.'.$version_number;
-				$version_last = $version;
 			} else {
 				if (!empty($params['version'])){
 					list($old_data['version_major'], $old_data['version_minor'], $old_data['version_number']) = explode('.', $params['version']);
-					$old_data['version_last'] = $params['version'];
-					$version_hash = $params['hash'];
+					$current_hash = $params['hash'];
+				} else {
+					list($old_data['version_major'], $old_data['version_minor'], $old_data['version_number']) = explode('.', $old_data['version']);
 				}
 				$version_major = !empty($old_data['version_major']) ? $old_data['version_major'] : '0';
 				$version_minor = !empty($old_data['version_minor']) ? $old_data['version_minor'] : '0';
 				$version_number = !empty($old_data['version_number']) ? $old_data['version_number'] : '0';
 				$version = 'custom';
-				$version_last = !empty($old_data['version_last']) ? $old_data['version_last'] : '0';
 			}
 			
 			// write hashes to hash cache
@@ -121,8 +120,8 @@ class cms_update_model extends CI_Model {
 				'version_major' => $version_major,
 				'version_minor' => $version_minor,
 				'version_number' => $version_number,
-				'version_last' => $version_last,
-				'version_hash' => $version_hash,
+				'version_hash' => !empty($old_data['version_hash']) ? $old_data['version_hash'] : '[unknown]',
+				'current_hash' => $current_hash,
 				'files' => $hashes,
 			)));
 		
@@ -138,15 +137,16 @@ class cms_update_model extends CI_Model {
 		if (file_exists($filename)){
 			$old_data = json_decode(file_get_contents($filename), true);
 			$return = array(
-				'hash' => $old_data['version_hash'],
+				'version_hash' => $old_data['version_hash'],
+				'current_hash' => $old_data['current_hash'],
 				'version' => $old_data['version'],
 			);
 		} else {
-			$return = array(
-				'hash' => '',
-				'version' => '',
-				'error' => 'No version information, rebuild master first',
-			);
+			$return = [
+				'version_hash' => '[unknown]',
+				'current_hash' => '[unknown]',
+				'version' => '[unknown]',
+			];
 		}
 		
 		return $return;
@@ -430,6 +430,21 @@ class cms_update_model extends CI_Model {
 
 	}
 	
+	function update_version_cache($params){
+		
+		// load cache file
+		$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
+		$data = json_decode(file_get_contents($filename), true);
+		
+		// change values
+		$data['version'] = $params['version'];
+		$data['version_hash'] = $params['version_hash'];
+		
+		// write cache file
+		file_put_contents($filename, json_encode($json, JSON_PRETTY_PRINT));
+
+	}
+	
 	// deprecated !!!
 	function update(){ 
 
@@ -440,10 +455,8 @@ class cms_update_model extends CI_Model {
 			return array('error' => 'Update failed, check settings', );
 		}
 		
-// print_r($master_files);		
 		// get local list
 		$local_files = $this->get_files();
-// print_r($local_files);		
 
 		$return = array();
 		
