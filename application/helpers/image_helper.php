@@ -105,8 +105,8 @@ if ( !function_exists('_i')) {
 			
 		}
 		
-		// if gif
-		if (pathinfo($image, PATHINFO_EXTENSION) == 'gif' && file_exists($GLOBALS['config']['upload_path'].$image) && !is_dir($GLOBALS['config']['upload_path'].$image)){
+		// if gif or svg
+		if ((pathinfo($image, PATHINFO_EXTENSION) == 'gif' || pathinfo($image, PATHINFO_EXTENSION) == 'svg') && file_exists($GLOBALS['config']['upload_path'].$image) && !is_dir($GLOBALS['config']['upload_path'].$image)){
 			print('style="background-image:  url('.$GLOBALS['config']['upload_url'].trim($image, '/').'); '.$params['css'].'"');
 			return ['image' => $image, 'height' => 0, 'width' => 0, ];
 		}
