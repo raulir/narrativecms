@@ -107,13 +107,13 @@ class cms_update extends MY_Controller{
 			$params['local_version'] = $params['master_version'];
 		}
 		
-		if ($params['local_version'] == $params['master_version'] && $params['local_hash'] == $params['master_hash']){
+		if ($params['local_version'] == $params['master_version'] && $params['current_hash'] == $params['master_hash']){
 			$params['current_version'] = 'up to date';
 		} else {
 			$params['current_version'] = 'needs update';
 		}
 		
-		if (empty($GLOBALS['config']['update']['is_master']) && $params['master_hash'] != $params['local_hash']){
+		if (empty($GLOBALS['config']['update']['is_master']) && $params['master_hash'] != $params['current_hash']){
 			$params['local_changes'] = true;
 		}
 
