@@ -111,10 +111,12 @@ class cms_update extends MY_Controller{
 			$params['current_version'] = 'up to date';
 		} else {
 			$params['current_version'] = 'needs update';
+			$params['can_update'] = true;
 		}
 		
 		if (empty($GLOBALS['config']['update']['is_master']) && $params['master_hash'] != $params['current_hash']){
 			$params['local_changes'] = true;
+			$params['can_update'] = true;
 		}
 
 		return $params;
