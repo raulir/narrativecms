@@ -96,10 +96,13 @@ class cms_update_model extends CI_Model {
 		
 			// if master, increase version number
 			if (!empty($GLOBALS['config']['update']['is_master'])){
+				
 				$version_major = !empty($GLOBALS['config']['update']['version_major']) ? $GLOBALS['config']['update']['version_major'] : '0';
 				$version_minor = !empty($GLOBALS['config']['update']['version_minor']) ? $GLOBALS['config']['update']['version_minor'] : '0';
 				$version_number = isset($old_data['version_number']) ? ($old_data['version_number'] + 1).'' : '0';
-				$version = $version_major.'.'.$version_minor.'.'.$version_number;
+				
+				$old_data['version_hash'] = $current_hash;
+				
 			} else {
 				if (!empty($params['version'])){
 					list($old_data['version_major'], $old_data['version_minor'], $old_data['version_number']) = explode('.', $params['version']);
@@ -110,7 +113,6 @@ class cms_update_model extends CI_Model {
 				$version_major = !empty($old_data['version_major']) ? $old_data['version_major'] : '0';
 				$version_minor = !empty($old_data['version_minor']) ? $old_data['version_minor'] : '0';
 				$version_number = !empty($old_data['version_number']) ? $old_data['version_number'] : '0';
-				$version = 'custom';
 			}
 			
 			// write hashes to hash cache
