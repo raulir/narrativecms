@@ -57,7 +57,7 @@ class cms_update extends MY_Controller{
 			$this->cms_update_model->rebuild();
 			$local_data = $this->cms_update_model->get_version();
 			
-			if ($version_data['current_hash'] == $master_data['version_hash']){
+			if ($local_data['current_hash'] == $master_data['version_hash']){
 				// update local json
 				$this->cms_update_model->update_version_cache([
 						'version' => $master_data['version'],
