@@ -99,6 +99,14 @@ class cms_update extends MY_Controller{
 				$params['can_update'] = true;
 			}
 		} else {
+			// check if to increment master version
+			if ($params['current_hash'] !== $params['local_hash']){
+				$this->cms_update_model->increment_master_version();
+				$version_data = $this->cms_update_model->get_version();
+				$params['local_version'] = $version_data['version'];
+				$params['local_hash'] = $version_data['version_hash'];
+				$params['current_hash'] = $version_data['current_hash'];
+			}				 	
 			$params['master_version'] = 'This is master';
 		}
 		

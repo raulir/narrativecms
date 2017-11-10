@@ -2,7 +2,7 @@
 
 class cms_update_model extends CI_Model {
 	
-	function rebuild($params = array()){
+	function rebuild(){
 
 		$folders = array(
 			'application/',
@@ -92,8 +92,9 @@ class cms_update_model extends CI_Model {
 			$old_data = array();
 		}
 		
-		if (empty($old_data['version_hash']) || $current_hash !== $old_data['version_hash']){
+		if (empty($old_data['current_hash']) || $current_hash !== $old_data['current_hash']){
 		
+			/*
 			// if master, increase version number
 			if (!empty($GLOBALS['config']['update']['is_master'])){
 				
@@ -104,16 +105,14 @@ class cms_update_model extends CI_Model {
 				$old_data['version_hash'] = $current_hash;
 				
 			} else {
-				if (!empty($params['version'])){
-					list($old_data['version_major'], $old_data['version_minor'], $old_data['version_number']) = explode('.', $params['version']);
-					$current_hash = $params['hash'];
-				} else {
-					list($old_data['version_major'], $old_data['version_minor'], $old_data['version_number']) = explode('.', $old_data['version']);
-				}
-				$version_major = !empty($old_data['version_major']) ? $old_data['version_major'] : '0';
-				$version_minor = !empty($old_data['version_minor']) ? $old_data['version_minor'] : '0';
-				$version_number = !empty($old_data['version_number']) ? $old_data['version_number'] : '0';
-			}
+			*/
+			
+			list($old_data['version_major'], $old_data['version_minor'], $old_data['version_number']) = explode('.', $old_data['version']);
+			$version_major = !empty($old_data['version_major']) ? $old_data['version_major'] : '0';
+			$version_minor = !empty($old_data['version_minor']) ? $old_data['version_minor'] : '0';
+			$version_number = !empty($old_data['version_number']) ? $old_data['version_number'] : '0';
+			
+			// }
 			
 			// write hashes to hash cache
 			$this->load->model('cms_helper_model');
@@ -129,6 +128,32 @@ class cms_update_model extends CI_Model {
 		
 		}
 
+	}
+	
+	function increment_master_version(){
+
+		// load cache file
+		$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
+		$data = json_decode(file_get_contents($filename), true);
+		
+		// change values
+		if ($data['version_major'] != (!empty($GLOBALS['config']['update']['version_major']) ? $GLOBALS['config']['update']['version_major'] : '0')){
+			$data['version_number'] = 0;
+		}
+		
+		if ($data['version_minor'] != (!empty($GLOBALS['config']['update']['version_minor']) ? $GLOBALS['config']['update']['version_minor'] : '0')){
+			$data['version_number'] = 0;
+		}
+		
+		$data['version_major'] = !empty($GLOBALS['config']['update']['version_major']) ? $GLOBALS['config']['update']['version_major'] : '0';
+		$data['version_minor'] = !empty($GLOBALS['config']['update']['version_minor']) ? $GLOBALS['config']['update']['version_minor'] : '0';
+		$data['version_number'] = $data['version_number'] + 1;
+		$data['version'] = $data['version_major'].'.'.$data['version_minor'].'.'.$data['version_number'];
+		$data['version_hash'] = $data['current_hash'];
+		
+		// write cache file
+		file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
+		
 	}
 	
 	function get_version(){
@@ -446,95 +471,7 @@ class cms_update_model extends CI_Model {
 		file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
 
 	}
-	
-	// deprecated !!!
-	function update(){ 
 
-		// get master list
-		$master_files = $this->get_master_files();
-		
-		if (empty($master_files)){
-			return array('error' => 'Update failed, check settings', );
-		}
-		
-		// get local list
-		$local_files = $this->get_files();
-
-		$return = array();
-		
-		foreach($master_files['files'] as $master_key => $master_file){
-			
-			$needs_update = false;
-			$local_file_found = false;
-			
-			$master_hash = $master_file['hash'];
-			
-			// find the same local file
-			foreach($local_files['files'] as $local_key => $local_file){
-				
-				if ($local_file['filename'] == $master_file['filename']){
-					$local_file_found = true;
-					$local_key_to_delete = $local_key;
-					if ($local_file['hash'] != $master_file['hash']){
-						$needs_update = true;
-						$local_hash = $local_file['hash'];
-						$letter = 'U';
-					}
-				}
-				
-			}
-			
-			if ($local_file_found){
-				$local_hash = $local_files['files'][$local_key_to_delete]['hash'];
-				unset($local_files['files'][$local_key_to_delete]);
-			} else {
-				$local_hash = 'no local file';
-//				print('x ');
-				$needs_update = true;
-				$letter = 'A';
-			}
-			
-			if ($needs_update){
-				// get remote file
-				$master_file_data = $this->get_master_file($master_file['filename']);
-
-// print($local_hash.' '.$master_hash.' '.$master_file['filename'].'<br>');
-
-				// create folder if not exists
-				$pathinfo = pathinfo($GLOBALS['config']['base_path'] . $master_file['filename']);
-				if (!file_exists($pathinfo['dirname'])) {
-					mkdir($pathinfo['dirname'], 0777, true);
-				}
-				
-				// replace local file
-				$file_content = base64_decode($master_file_data['file']);
-				file_put_contents($GLOBALS['config']['base_path'] . $master_file['filename'], $file_content);
-				
-				$return[] = $letter . ' ' . $master_file['filename'];
-				
-			}
-			
-		}
-		
-		// delete local files not in master list
-		foreach($local_files['files'] as $local_file){
-			
-			unlink($GLOBALS['config']['base_path'] . $local_file['filename']);
-			$return[] = 'D ' . $local_file['filename'];
-			
-		}
-		
-		// update local file list
-		$master_version = $this->get_master_version();
-		
-		if (!empty($master_version)){
-			$this->rebuild(array('version' => $master_version['version'], 'hash' => $master_version['hash'], ));
-		}
-		
-		return $return;
-	
-	}
-	
 	function run_sql($sql){
 		
 		$query = $this->db->query($sql);
