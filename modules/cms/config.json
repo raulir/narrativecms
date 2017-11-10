@@ -98,6 +98,11 @@
 			"id":"cms_normalise",
 			"name":"CMS normalise css"
 		}
+	],
+	"api":[
+		{
+			"id":"api_image_resize"
+		}
 	]
 }
 			

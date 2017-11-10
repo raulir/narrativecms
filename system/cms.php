@@ -69,4 +69,44 @@ if ($config['database']['dbdriver'] = 'mysqli') {
 	$GLOBALS['dbconnections'][$conn_hash] = @mysqli_connect($config['database']['hostname'], $config['database']['username'], $config['database']['password'], $config['database']['database']);
 }
 
+// check if api call
+
+if (substr($_SERVER['REQUEST_URI'], 0, strlen($GLOBALS['config']['base_url'])) == $GLOBALS['config']['base_url']) {
+	$string = substr($_SERVER['REQUEST_URI'], strlen($GLOBALS['config']['base_url']));
+} else {
+	$string = $_SERVER['REQUEST_URI'];
+}
+
+$request_uri = trim($string, '/');
+
+if (stristr($request_uri, '/')){
+	
+	list($module, $api) = explode('/', $request_uri, 2);
+	
+	if (in_array($module, $config['modules'])){
+		
+		$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/config.json';
+		if (file_exists($filename)){
+			$module_config = json_decode(file_get_contents($filename), true);
+			
+			if (isset($module_config['api'])){
+				
+				foreach($module_config['api'] as $capi){
+					if ($capi['id'] == $api){
+						
+						include($GLOBALS['config']['base_path'].'modules/'.$module.'/panels/'.$api.'.php');
+						
+						die();
+						
+					}
+				}
+				
+			}
+			
+		}
+		
+	}
+	
+}
+
 require_once BASEPATH.'core/CodeIgniter.php';

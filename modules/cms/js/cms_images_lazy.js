@@ -42,18 +42,30 @@
 
 function cms_images_lazy_next($this){
 	
-	get_ajax('cms_images_lazy', {
+	get_api('cms/api_image_resize', {
 		'do':'resize',
-		'width_lq': $this.data('width_lq'),
 		'width': $this.data('width'),
 		'output': $this.data('output'),
-		'image': $this.data('cms_images_lazy'),
+		'name': $this.data('cms_images_lazy'),
 		'success': function(data){
 			
-			$this.css({'background-image': 'url(' + data.result.src + '?v=' + Math.floor(Date.now() / 1000) + ')'});
-			$this.addClass('cms_images_lazy_done');
-			$this.removeClass('cms_images_lazy_loading');
-		
+			var hq_src = data.result.src;
+
+			// lq width
+			get_api('cms/api_image_resize', {
+				'do':'resize',
+				'width': $this.data('width_lq'),
+				'output': $this.data('output'),
+				'name': $this.data('cms_images_lazy'),
+				'success': function(data){
+					
+					$this.css({'background-image': 'url(' + hq_src + '?v=' + Math.floor(Date.now() / 1000) + ')'});
+					$this.addClass('cms_images_lazy_done');
+					$this.removeClass('cms_images_lazy_loading');
+				
+				}
+			})
+			
 		}
 	})
 	

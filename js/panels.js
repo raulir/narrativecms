@@ -227,3 +227,22 @@ function cms_load_css(filenames, force_download, class_to_remove){
 	$('.' + class_to_remove).remove();
 	
 }
+
+function get_api(name, params){
+
+	var ext_params = $.extend({'success': function(){} }, params)
+	var action_on_success = ext_params.success;
+	delete ext_params.success;
+
+	$.ajax({
+		type: 'POST',
+	  	url: config_url + name,
+	  	data: ext_params,
+	  	dataType: 'json',
+	  	context: this,
+	  	success: function( returned_data ) {
+	  		action_on_success(returned_data);
+	  	}
+	});
+	
+}
