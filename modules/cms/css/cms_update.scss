@@ -4,10 +4,18 @@
 
 .cms_update_table {
 	display: table;
+	width: 100%;	
 }
 
 .cms_update_row {
 	display: table-row;
+	&:first-child {
+		font-weight: bold;
+	}	
+	div {
+		padding:5px 0;
+		border-bottom:1px solid #efefef;
+	}
 }
 
 .cms_update_label {
@@ -20,4 +28,11 @@
 
 .cms_update_hash {
 	display: table-cell;
+}
+
+.local_changes_warning {
+	text-align: center;
+	display: block;
+	margin-top: 2rem;
+	color: #ff0000; 
 }
