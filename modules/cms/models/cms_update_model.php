@@ -94,25 +94,10 @@ class cms_update_model extends CI_Model {
 		
 		if (empty($old_data['current_hash']) || $current_hash !== $old_data['current_hash']){
 		
-			/*
-			// if master, increase version number
-			if (!empty($GLOBALS['config']['update']['is_master'])){
-				
-				$version_major = !empty($GLOBALS['config']['update']['version_major']) ? $GLOBALS['config']['update']['version_major'] : '0';
-				$version_minor = !empty($GLOBALS['config']['update']['version_minor']) ? $GLOBALS['config']['update']['version_minor'] : '0';
-				$version_number = isset($old_data['version_number']) ? ($old_data['version_number'] + 1).'' : '0';
-				
-				$old_data['version_hash'] = $current_hash;
-				
-			} else {
-			*/
-			
 			list($old_data['version_major'], $old_data['version_minor'], $old_data['version_number']) = explode('.', $old_data['version']);
 			$version_major = !empty($old_data['version_major']) ? $old_data['version_major'] : '0';
 			$version_minor = !empty($old_data['version_minor']) ? $old_data['version_minor'] : '0';
 			$version_number = !empty($old_data['version_number']) ? $old_data['version_number'] : '0';
-			
-			// }
 			
 			// write hashes to hash cache
 			$this->load->model('cms_helper_model');
@@ -151,6 +136,9 @@ class cms_update_model extends CI_Model {
 		$data['version'] = $data['version_major'].'.'.$data['version_minor'].'.'.$data['version_number'];
 		$data['version_hash'] = $data['current_hash'];
 		
+		$data['version_time'] = time();
+		$data['update_time'] = time();
+		
 		// write cache file
 		file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
 		
@@ -166,12 +154,14 @@ class cms_update_model extends CI_Model {
 			$return = array(
 				'version_hash' => $old_data['version_hash'],
 				'current_hash' => $old_data['current_hash'],
+				'version_time' => !empty($old_data['version_time']) ? $old_data['version_time'] : 0,
 				'version' => $old_data['version'],
 			);
 		} else {
 			$return = [
 				'version_hash' => '[unknown]',
 				'current_hash' => '[unknown]',
+				'version_time' => '0',
 				'version' => '[unknown]',
 			];
 		}

@@ -62,6 +62,8 @@ class cms_update extends MY_Controller{
 				$this->cms_update_model->update_version_cache([
 						'version' => $master_data['version'],
 						'version_hash' => $master_data['version_hash'],
+						'version_time' => $master_data['version_time'],
+						'update_time' => time(),
 				]);
 			}
 
@@ -89,12 +91,15 @@ class cms_update extends MY_Controller{
 		$params['local_version'] = $version_data['version'];
 		$params['local_hash'] = $version_data['version_hash'];
 		$params['current_hash'] = $version_data['current_hash'];
+		$params['version_time'] = !empty($version_data['version_time']) ? $version_data['version_time'] : 0;
+		$params['update_time'] = !empty($version_data['update_time']) ? $version_data['update_time'] : 0;
 		
 		// get master version
 		if (empty($GLOBALS['config']['update']['is_master'])){
 			$version_data = $this->cms_update_model->get_master_version();
 			$params['master_version'] = $version_data['version'];
 			$params['master_hash'] = $version_data['version_hash'];
+			$params['master_time'] = !empty($version_data['version_time']) ? $version_data['version_time'] : 0;
 			if ($params['master_version'] != $params['local_version']){
 				$params['can_update'] = true;
 			}
