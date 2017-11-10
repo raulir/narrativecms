@@ -107,6 +107,8 @@ class cms_update_model extends CI_Model {
 				'version_minor' => $version_minor,
 				'version_number' => $version_number,
 				'version_hash' => !empty($old_data['version_hash']) ? $old_data['version_hash'] : '[unknown]',
+				'version_time' => !empty($old_data['version_time']) ? $old_data['version_time'] : '0',
+				'update_time' => !empty($old_data['update_time']) ? $old_data['update_time'] : '0',
 				'current_hash' => $current_hash,
 				'files' => $hashes,
 			)));
@@ -155,6 +157,7 @@ class cms_update_model extends CI_Model {
 				'version_hash' => $old_data['version_hash'],
 				'current_hash' => $old_data['current_hash'],
 				'version_time' => !empty($old_data['version_time']) ? $old_data['version_time'] : 0,
+				'update_time' => !empty($old_data['update_time']) ? $old_data['update_time'] : 0,
 				'version' => $old_data['version'],
 			);
 		} else {
@@ -162,6 +165,7 @@ class cms_update_model extends CI_Model {
 				'version_hash' => '[unknown]',
 				'current_hash' => '[unknown]',
 				'version_time' => '0',
+				'update_time' => '0',
 				'version' => '[unknown]',
 			];
 		}
