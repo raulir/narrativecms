@@ -159,6 +159,7 @@ class cms_update_model extends CI_Model {
 				'version_time' => !empty($old_data['version_time']) ? $old_data['version_time'] : 0,
 				'update_time' => !empty($old_data['update_time']) ? $old_data['update_time'] : 0,
 				'version' => $old_data['version'],
+				'hash' => $old_data['version_hash'],
 			);
 		} else {
 			$return = [
@@ -167,6 +168,7 @@ class cms_update_model extends CI_Model {
 				'version_time' => '0',
 				'update_time' => '0',
 				'version' => '[unknown]',
+				'hash' => '0',
 			];
 		}
 		
