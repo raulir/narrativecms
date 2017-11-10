@@ -94,6 +94,10 @@ class cms_update_model extends CI_Model {
 		
 		if (empty($old_data['current_hash']) || $current_hash !== $old_data['current_hash']){
 		
+			if (empty($old_data['version'])){
+				$old_data['version'] = '0.0.0';
+			}
+			
 			list($old_data['version_major'], $old_data['version_minor'], $old_data['version_number']) = explode('.', $old_data['version']);
 			$version_major = !empty($old_data['version_major']) ? $old_data['version_major'] : '0';
 			$version_minor = !empty($old_data['version_minor']) ? $old_data['version_minor'] : '0';
