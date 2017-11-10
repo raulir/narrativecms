@@ -456,6 +456,8 @@ class cms_update_model extends CI_Model {
 		// change values
 		$data['version'] = $params['version'];
 		$data['version_hash'] = $params['version_hash'];
+		$data['version_time'] = $params['version_time'];
+		$data['update_time'] = $params['update_time'];
 		
 		// write cache file
 		file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
