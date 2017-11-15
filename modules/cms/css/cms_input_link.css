@@ -2,6 +2,8 @@
 	width: 330px;
 	float: right;
 	position: relative;
+	padding-bottom: 8px;
+    overflow: hidden;
 }
 
 .admin_repeater_container .cms_input_link_content {
