@@ -67,6 +67,7 @@ function cms_input_textarea_init(){
 				if (buttons.indexOf('L') > -1){
 					toolbar = toolbar + 'bullist ';
 					valid_elements = valid_elements + ',ul,li';
+					plugins = plugins + ' lists';
 				}
 	
 				if (buttons.indexOf('H') > -1){
