@@ -13,7 +13,7 @@ $(document).ready(function() {
 		return false;
 	});
 	
-	$('.admin_repeater_button').on('click.r', function(event){
+	$('.cms_repeater_button').on('click.r', function(event){
 		var block_html = String($(this).data('html'));
 		block_html = block_html.replace(/###random###/g, ('0000000'+Math.random().toString(36).replace('.', '')).substr(-8));
 		block_html = block_html.replace(/#/g, '"');

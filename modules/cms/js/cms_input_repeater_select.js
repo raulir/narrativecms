@@ -1,63 +1,43 @@
+function cms_input_repeater_select_reinit(){
+	
+	$('.cms_input_repeater_select_ok').removeClass('cms_input_repeater_select_ok');
+	
+	cms_input_repeater_select_init();
+	
+}
+
 function cms_input_repeater_select_init(){
 	
 	setTimeout(function(){
-		$('.repeater_select').each( function(){
-			
-			// on change update data to selected value to restore it in future
-			
-			/*
-			if ($('select', $this).data('html')){
-				$('select', $this).html($('select', $this).data('html'));
-			}
-			*/
-			
+		
+		$('.cms_input_repeater_select').each( function(){
+						
 			var $this = $(this);
 			
-			if ($this.data('repeater_select_init') == 'ok'){
+			if ($this.hasClass('cms_input_repeater_select_ok')){
 				return;
 			}
 			
-			$this.data('repeater_select_init', 'ok')
+			$this.addClass('cms_input_repeater_select_ok')
 			
-			var selected = '';
-			var target = '';
-			var field = '';
-			var labels = '';
-			var add_empty = 0;
-			$('select option', $this).each(function(){
+			var selected = $this.data('selected');
+			var target = $this.data('target');
+			var field = $this.data('field');
+			var labels = $this.data('labels');
+			var add_empty = parseInt($this.data('add_empty'));
 
-				if( $(this).html() == 'selected' ){
-					selected = $(this).attr('value');
-				}
-				
-				if( $(this).html() == 'target' ){
-					target = $(this).attr('value');
-				}
-				
-				if( $(this).html() == 'field' ){
-					field = $(this).attr('value');
-				}
-				
-				if( $(this).html() == 'labels' ){
-					labels = $(this).attr('value');
-				}
-				
-				if( $(this).html() == 'add_empty' ){
-					add_empty = 1;
-				}
-
-			});
-
-			if (labels == ''){
-				labels = field;
+			if ($this.data('labels') == ''){
+				labels = $this.data('field');
 			}
 			
 			var $select = $('select', $this);
-			$select.data('html', $select.html()).html('');
-			
+
+			$select.html('');
 			if (add_empty == 1){
 				$select.append('<option value="">-- not specified --</option>');
 			}
+			
+			$('.admin_repeater_container_' + target).addClass('cms_repeater_target');
 			
 			// create contents
 			$('.admin_repeater_container_' + target + ' .cms_repeater_block').each(function(){
@@ -72,15 +52,40 @@ function cms_input_repeater_select_init(){
 				
 				// find value and add to select
 				$('input,textarea', $(this)).each(function(){
+					
+					// if called from content change, check if needed to update old selected value to new
+					var $cms_input = $(this).closest('.cms_input_text,.cms_input_textarea');
+
+					if ($cms_input.length && $cms_input.data('old_value') && $cms_input.data('old_value') == selected){
+						$this.data('selected', $(this).val());
+						selected = $(this).val();
+					}
+					
 					if ($(this).attr('name') == 'panel_params[' + target + '][' + field + '][]'){
-						$select.append('<option value="' + $(this).val() + '" ' + (selected == $(this).val() ? ' selected="selected"' : '') + 
-								'>' + label + '</option>');
+						$select.append('<option value="' + $(this).val() + '" ' + (selected == $(this).val() ? ' selected="selected"' : '') + '>' + label + '</option>');
 					}
 				});
 
 			});
 			
+			// update selected value data for repeater select, as html content gets reset when rebuilding
+			if (!$select.hasClass('cms_repeater_select_select_change_ok')){
+				$select.addClass('cms_repeater_select_select_change_ok');
+				$select.on('change.cms', function(){
+					$(this).closest('.cms_input_repeater_select').data('selected', $(this).val());
+				})
+			}
+			
 		});
+		
+		if (typeof cms_input_text_init !== 'undefined'){
+			cms_input_text_init();
+		}
+		
+		if (typeof cms_input_textarea_init !== 'undefined'){
+			cms_input_textarea_init();
+		}
+		
 	}, 300);
 	
 }

@@ -73,9 +73,19 @@ function cms_page_panel_format_mandatory(mandatory_result, colour){
 }
 
 function init_cms_repeater_block_delete(){
-	$('.cms_repeater_block_delete').off('click.r').on('click.r', function(){
+	
+	$('.cms_repeater_block_delete').off('click.cms').on('click.cms', function(){
+
+		// if repeater is target for repeater selects, repopulate repeater selects
+		if ($(this).closest('.cms_repeater_target').length){
+			cms_input_repeater_select_reinit();
+		}
+
+		// remove repeater block
 		$(this).closest('.cms_repeater_block_toolbar').parent().remove();
+		
 	});
+	
 }
 
 function admin_block_init(){
@@ -103,7 +113,8 @@ $(document).ready(function() {
 		$('.admin_block_shortcut_to').val('');
 	})
 
-	$('.admin_repeater_button').on('click.r', function(event){
+	$('.cms_repeater_button').on('click.r', function(){
+		
 		var block_html = String($(this).data('html'));
 		block_html = block_html.replace(/###random###/g, ('0000000'+Math.random().toString(36).replace('.', '')).substr(-8));
 		block_html = block_html.replace(/#/g, '"');
@@ -131,6 +142,11 @@ $(document).ready(function() {
 		// init repeater selects
 		if (block_html.indexOf('repeater_select') > -1){
 			cms_input_repeater_select_init();
+		}
+		
+		// if repeater is target for repeater selects, repopulate repeater selects
+		if ($(this).closest('.cms_repeater_target').length){
+			cms_input_repeater_select_reinit();
 		}
 		
 		$('body').height('auto');

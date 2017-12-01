@@ -1,4 +1,10 @@
-<div class="cms_input cms_input_select <?php print(!empty($extra_class) ? $extra_class : ''); ?> <?= !empty($mandatory_class) ? $mandatory_class : '' ?>">
+<div class="cms_input cms_input_select <?php print(!empty($extra_class) ? $extra_class : ''); ?> <?= !empty($mandatory_class) ? $mandatory_class : '' ?>"
+		<?php if(!empty($extra_data)): ?>
+			<?php foreach($extra_data as $data_key => $data_data): ?>
+				data-<?= $data_key ?>="<?= $data_data ?>"
+			<?php endforeach ?>
+		<?php endif ?>
+		>
 
 	<label for="select_<?php print($name_clean); ?>"><?php print($label); ?></label> 
 

@@ -42,7 +42,7 @@
 						
 						// print add another button
 						$return .= '<div style="clear: both; " class="admin_repeater_line"></div>';
-						$return .= '<div class="admin_small_button admin_right admin_repeater_button" ';
+						$return .= '<div class="admin_small_button admin_right cms_repeater_button" ';
 						$return .= ' data-html="'.
 								str_replace('"', '#', '<div class="cms_repeater_block" ' .
 										'style="background-image: url(\'' . $GLOBALS['config']['base_url'] . 'modules/cms/img/drag.png\'); ">'.

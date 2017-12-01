@@ -187,7 +187,7 @@
 						
 						// print add another button
 						$return .= '<div style="clear: both; " class="admin_repeater_line"></div>';
-						$return .= '<div class="admin_small_button admin_right admin_repeater_button" ';
+						$return .= '<div class="admin_small_button admin_right cms_repeater_button" ';
 						$return .= ' data-html="'.
 								str_replace('"', '#', '<div class="cms_repeater_block" ' .
 										'style="background-image: url(\'' . $GLOBALS['config']['base_url'] . 'modules/cms/img/drag.png\'); ">'.
@@ -323,19 +323,14 @@
 						
 					} elseif ($field['type'] == 'repeater_select'){
 						
-						$values = array(
-								($field_empty && isset($field['default']) ? $field['default'] : $field_data ) => 'selected',
-								$field['target'] => 'target',
-								$field['field'] => 'field',
-						);
-
-						if (!empty($field['add_empty'])){
-							$values['add_empty'] = 'add_empty';
-						}
+						$repeater_select_data = [
+								'selected' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ),
+								'target' => $field['target'],
+								'field' => $field['field'],
+								'add_empty' => !empty($field['add_empty']) ? '1' : '0',
+								'labels' => !empty($field['labels']) ? $field['labels'] : '',
+						];
 						
-						if (!empty($field['labels'])){
-							$values[$field['labels']] = 'labels';
-						}
 						
 						$name = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
 						$name_clean = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
@@ -344,12 +339,13 @@
 								'select_params' => [
 										'label' => $field['label'].$mandatory_label, 
 										'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
-										'values' => $values,
+										'values' => [],
 										'name' => $name, 
 										'name_clean' => !empty($name_clean) ? $name_clean : $name, 
-										'extra_class' => ($prefix ? '' : 'admin_column').' repeater_select',
+										'extra_class' => ($prefix ? '' : 'admin_column').' cms_input_repeater_select',
 										'mandatory_class' => $mandatory_class,
-										'help' => !empty($field['help']) ? $field['help'] : '', 
+										'help' => !empty($field['help']) ? $field['help'] : '',
+										'extra_data' => $repeater_select_data,
 								],
 								'_return' => true,
 						]);

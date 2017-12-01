@@ -129,6 +129,31 @@ function cms_input_textarea_init(){
 		});
 		
 	}, 200);
+	
+	
+	$('.cms_input_textarea').each(function(){
+		
+		var $this = $(this);
+		
+		if ($this.hasClass('cms_input_textarea_ok')){
+			return;
+		}
+		
+		if ($this.closest('.cms_repeater_target').length){
+
+			$this.addClass('cms_input_textarea_ok');
+			
+			$('textarea', $this).on('focus.cms', function(){
+				$this.data('old_value', $(this).val());
+			});
+			
+			$('textarea', $this).on('change.cms', function(){
+				cms_input_repeater_select_reinit();
+			});
+			
+		}
+		
+	});
 
 }
 
