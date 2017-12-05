@@ -34,23 +34,14 @@ RewriteCond %{REQUEST_URI} !\.(css|js|xml)$ [NC]
 RewriteRule .* - [F,L]
 
 # Everything, what is not set domain goes to set domain
-# RewriteCond %{HTTP_HOST} !^(.*)\.dev
-# RewriteCond %{HTTP_HOST} !^stg\.
-# RewriteCond %{HTTP_HOST} !^www\.mysite\.co\.uk
-# RewriteRule ^(.*)$ http://www.mysite.co.uk%{REQUEST_URI} [R=302,L]
+RewriteCond %{HTTP_HOST} !^(.*)\.dev
+RewriteCond %{HTTP_HOST} !^stg\.
+RewriteCond %{HTTP_HOST} !^cms\.bytecrackers\.com
+RewriteRule ^(.*)$ http://cms.bytecrackers.com%{REQUEST_URI} [R=302,L]
 
 # Redirect from .co.uk to .com
 RewriteCond %{HTTP_HOST} ^(.*)\.co\.uk
 RewriteRule ^(.*)\.co\.uk(.*)$ http://$1.com%{REQUEST_URI} [R=302,L]
-
-RewriteCond %{HTTP_HOST} !^(.*)\.dev
-RewriteCond %{HTTP_HOST} !^(.*)\.live
-RewriteCond %{HTTP_HOST} !^(.*)\.test
-RewriteCond %{HTTP_HOST} !^stg.(.*)
-
-# Add www
-RewriteCond %{HTTP_HOST} !^www\. [NC]
-RewriteRule ^(.*)$ http://www.%{HTTP_HOST}%{REQUEST_URI} [R=302,L]
 
 RewriteCond %{ENV:REDIRECT_STATUS} ^$
 RewriteCond $1 !^(index\.php|modules|img|css|js|robots\.txt|favicon\.ico)
