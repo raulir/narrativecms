@@ -31,7 +31,7 @@
 			"type":"text",
 			"name":"cms_update_url",
 			"label":"CMS update URL",
-			"default":"http://www.bytecrackers.com/cms/cms/updater/"
+			"default":"http://cms.bytecrackers.com/cms/updater/"
 		},
 		{
 			"type":"select",
