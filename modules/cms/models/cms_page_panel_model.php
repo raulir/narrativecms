@@ -263,7 +263,7 @@ class cms_page_panel_model extends CI_Model {
 
 	function get_cms_page_panel($cms_page_panel_id){
 	
-		$sql = "select *, block_id as cms_page_panel_id from block where block_id = ? ";
+		$sql = "select *, block_id as cms_page_panel_id, page_id as cms_page_id from block where block_id = ? ";
 		$query = $this->db->query($sql, array($cms_page_panel_id));
 		$row = $query->row_array();
 		 

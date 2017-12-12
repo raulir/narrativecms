@@ -17,19 +17,18 @@ class form_model extends CI_Model {
 	
 	}
 	
-    function send_contact_request($emails, $data, $title){
+    function send_contact_request($emails, $data, $title, $from){
 
 		foreach($emails as $email){    	
 
- 			$content = 'New form "'.$title.'" submission on website "'.$GLOBALS['config']['title'].'":'."\n\n";
+ 			$content = $title.':'."\n\n";
 
 			foreach($data as $key => $value){
 				$content .= $key . ': ' . $value . "\n";
  			}
  
 	   		// send email
-	    	@mail($email['email'], 'New form "'.$title.'" submission on website "'.$GLOBALS['config']['title'].'"', 
-	    			$content, 'From: noreply@bytecrackers.com' . "\r\n");
+	    	@mail($email['email'], $title, $content, 'From: '.$from."\r\n".'Auto-Submitted: auto-generated'."\r\n");
     		
 		}
     	

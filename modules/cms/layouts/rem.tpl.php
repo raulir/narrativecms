@@ -129,6 +129,22 @@
 		setTimeout(_set_rem, 1500);
 
 		window.addEventListener('resize', _set_rem);
+
+		// disable apple zoom
+		var cms_disable_zoom = function () {
+
+			if (!(/iPad|iPhone|iPod/.test(navigator.userAgent))) return;
+
+ 			$(document.head).append('<style>*{cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,0)}</style>');
+	  			
+  			$(window).on('gesturestart touchmove', function (evt) {
+    			if (evt.originalEvent.scale !== 1) {
+      				evt.originalEvent.preventDefault();
+      				document.body.style.transform = 'scale(1)';
+    			}
+  			});
+	  			
+		}
 		
 	</script>
 

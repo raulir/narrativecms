@@ -34,7 +34,7 @@ RewriteCond %{REQUEST_URI} !\.(css|js|xml)$ [NC]
 RewriteRule .* - [F,L]
 
 # Everything, what is not set domain goes to set domain
-RewriteCond %{HTTP_HOST} !^(.*)\.dev
+RewriteCond %{HTTP_HOST} !^(.*)\.localhost
 RewriteCond %{HTTP_HOST} !^stg\.
 RewriteCond %{HTTP_HOST} !^cms\.bytecrackers\.com
 RewriteRule ^(.*)$ http://cms.bytecrackers.com%{REQUEST_URI} [R=302,L]

@@ -7,18 +7,16 @@ class do_send extends MY_Controller{
 		$do = $this->input->post('do');
         if ($do == 'send_form'){
 
+			$this->load->model('cms/cms_page_panel_model');
+			$this->load->model('cms/cms_page_model');
+        	$this->load->model('form/form_model');
+        	
         	$cms_page_panel_id = $this->input->post('id');
         	
         	// collect data
         	$data = $this->input->post();
-        	
-			$this->load->model('cms_page_panel_model');
-        	
-        	if (empty($params['block_id'])){
-        		$this->load->model('cms_page_panel_model');
-        		$params_a = $this->cms_page_panel_model->get_cms_page_panels_by(array('block_id' => $cms_page_panel_id, ));
-        		$params = array_merge($params, $params_a[0]);
-        	}
+        	        	
+			$params = array_merge($params, $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id));
         	
         	unset($data['do']);
         	if (isset($data['id'])){
@@ -34,19 +32,29 @@ class do_send extends MY_Controller{
         		unset($data['cache']);
         	}
         	
-        	$this->load->model('form_model');
+        	$page = $this->cms_page_model->get_page($params['cms_page_id']);
         	
-        	// get global contact form params
-        	$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(array('panel_name' => 'form_settings', ));
-        	$params['settings'] = !empty($settings_a[0]) ? $settings_a[0] : array();
+        	$title = 'New form "'.$params['title'].'" submission on "'.implode(' - ', [trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), $GLOBALS['config']['site_title_delimiter'].' '), $page['title']]).'"';
 
-			if(count($params['emails'])){
-				$this->form_model->send_contact_request($params['emails'], $data, $params['title']);
+        	// send notification
+			if(!empty($params['emails']) && count($params['emails'])){
+				
+				if (!empty($params['noreply_notification'])){
+					$from = 'noreply@bytecrackers.com';
+				} else {
+					if (!empty($data['email']) && stristr($data['email'], '@') && stristr($data['email'], '.')){
+						$from = $data['email'];
+					} else {
+						$from = 'noreply@bytecrackers.com';
+					}
+				}
+				
+				$this->form_model->send_contact_request($params['emails'], $data, $title, $from);
+			
 			}
 			
 			if(!empty($params['autoreply'])){
-				$this->form_model->send_autoreply($data, $params['autoreply_text'], 
-						$params['autoreply_email'], $params['autoreply_name'], $params['autoreply_subject']);
+				$this->form_model->send_autoreply($data, $params['autoreply_text'], $params['autoreply_email'], $params['autoreply_name'], $params['autoreply_subject']);
 			}
 			
 			$this->form_model->create_form_data($cms_page_panel_id, !empty($data['email']) ? $data['email'] : '', $data);

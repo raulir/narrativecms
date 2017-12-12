@@ -29,10 +29,10 @@ class cms_page_model extends CI_Model {
     	return $result;
 	}
 	
-	function get_page($page_id){
+	function get_page($cms_page_id){
 		
 		$sql = "select * from cms_page where cms_page_id = ? ";
-    	$query = $this->db->query($sql, array($page_id));
+    	$query = $this->db->query($sql, array($cms_page_id));
     	
     	if ($query->num_rows()){
     	

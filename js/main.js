@@ -547,4 +547,8 @@ $(document).ready(function() {
 	
 	cms_hover_init();
 	
+	if (typeof cms_disable_zoom == 'function'){
+		cms_disable_zoom();
+	}
+	
 });
