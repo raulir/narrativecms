@@ -47,15 +47,33 @@ class MY_Controller extends CI_Controller{
         
     }
     
+    function panel_heading($params){
+    	
+    	$return = !empty($params['heading']) ? $params['heading'] : '';
+    	
+    	if (empty($params['heading']) && !empty($params['cms_page_panel_id'])){
+    		$return = $params['panel_name'].'='.$params['cms_page_panel_id'];
+    	}
+    	
+    	return $return;
+    	
+    }
+    
+    function run_action($name, $params){
+    	
+    	return $this->run_panel_method($name, 'panel_action', $params); 
+    	
+    }
+    
     /**
      * run controller panel_action part for a panel
      */
-    function run_action($name, $params){
+    function run_panel_method($panel_name, $panel_method, $params){
 
         if (!empty($params['_extends'])){
-    		$files = $this->get_panel_filenames($name, $params['_extends']);
+    		$files = $this->get_panel_filenames($panel_name, $params['_extends']);
     	} else {
-    		$files = $this->get_panel_filenames($name);
+    		$files = $this->get_panel_filenames($panel_name);
     	}
 
     	// if extended, run extended controller first
@@ -71,9 +89,9 @@ class MY_Controller extends CI_Controller{
     				$extends_panel_name
     		);
     		
-    		if (method_exists($this->panel_ci->{$extends_panel_name}, 'panel_action')){
+    		if (method_exists($this->panel_ci->{$extends_panel_name}, $panel_method)){
     			$this->panel_ci->{$extends_panel_name}->init_panel(array('name' => $files['extends_name'], 'controller' => $files['extends_controller'], ));
-    			$params = $this->panel_ci->{$extends_panel_name}->panel_action($params);
+    			$params = $this->panel_ci->{$extends_panel_name}->{$panel_method}($params);
 	    	}
 	    	
 	    	// clear temporary resource
@@ -95,13 +113,13 @@ class MY_Controller extends CI_Controller{
 	    			$panel_name
 	    	);
 
-			if (method_exists($this->panel_ci->$panel_name, 'panel_action')){
+			if (method_exists($this->panel_ci->$panel_name, $panel_method)){
 
 	    		// define this controller as panel
 	    		$this->panel_ci->{$panel_name}->init_panel(array('name' => $files['name'], 'controller' => $files['controller'], ));
 	    		
 	    		// get params through panel controller
-	    		$params = $this->panel_ci->{$panel_name}->panel_action($params);
+	    		$params = $this->panel_ci->{$panel_name}->{$panel_method}($params);
 	    		
     		}
     		

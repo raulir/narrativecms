@@ -57,7 +57,9 @@ class cms_list_list extends MY_Controller{
 			$return['list'] = $this->cms_page_panel_model->get_cms_page_panels_by($filter);
 
 		} else {
-				
+			
+			// deprecated stuff
+			
 			$filter = array();
 			if (!empty($params['filters'])){
 				$filter = $params['filters'];
@@ -84,6 +86,17 @@ class cms_list_list extends MY_Controller{
 				$return['list'][$key]['list_block'] = $this->cms_page_panel_model->get_cms_page_panel($block[$params['id_field']]);
 			}
 				
+		}
+
+		if (empty($return['title_field']) && empty($return['title_panel'])){
+	
+			// get page panel titles
+			foreach($return['list'] as $key => $block){
+			
+				$return['list'][$key]['title'] = $this->run_panel_method($block['panel_name'], 'panel_heading', $block);
+			
+			}
+			
 		}
 
 		return $return;

@@ -138,7 +138,7 @@ class cms_page_panel_toolbar extends MY_Controller{
 					
 					// current block
 					$params['breadcrumb'][] = [
-							'text' => str_limit(!empty($panel_config['list']['title_field']) ? $cms_page_panel[$panel_config['list']['title_field']] : $cms_page_panel['heading'], 40),
+							'text' => str_limit(!empty($panel_config['list']['title_field']) ? $cms_page_panel[$panel_config['list']['title_field']] : $this->run_panel_method($cms_page_panel['panel_name'], 'panel_heading', $cms_page_panel), 50),
 							'url' => '',
 							'field' => !empty($panel_config['list']['title_field']) ? $panel_config['list']['title_field'] : 'heading', // title field
 					];

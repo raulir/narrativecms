@@ -49,11 +49,13 @@
 		<?php else: ?>
 			data-source="<?php print($source['model'].'|'.$source['method']); ?>" 
 		<?php endif ?>
+		
 		<?php if(!empty($title_field)): ?>
 			data-title_field="<?php print($title_field); ?>"
-		<?php else: ?>
+		<?php elseif (!empty($title_panel)): ?>
 			data-title_panel="<?php print($title_panel); ?>" 
 		<?php endif ?>
+		
 		<?php if(!empty($id_field)): ?>
 			data-id_field="<?php print($id_field); ?>"	
 		<?php else: ?>

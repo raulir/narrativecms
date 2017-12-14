@@ -194,7 +194,7 @@ class admin extends MY_Controller {
 				
 			if (!empty($item_config['list']['title_panel'])){
 				$params['title_panel'] = $item_config['list']['title_panel'];
-			} else {
+			} else if (!empty($item_config['list']['title_field'])){
 				$params['title_field'] = $item_config['list']['title_field'];
 			}
 

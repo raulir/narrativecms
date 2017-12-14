@@ -16,8 +16,10 @@
 				
 				<?php if(!empty($title_field)): ?>
 					<div class="admin_list_sortable_div admin_text cms_list_list_item_heading"><?= preg_replace('#<[^>]+>#', ' ', $block[$title_field]) ?></div>
-				<?php else: ?>
+				<?php elseif(!empty($title_panel)): ?>
 					<?php _panel($title_panel, array('id' => $block[$id_field], 'edit_base' => $edit_base, 'list_block' => $block['list_block'], '_no_css' => 1, )); ?>
+				<?php else: ?>
+					<div class="admin_list_sortable_div admin_text cms_list_list_item_heading"><?= $block['title'] ?></div>
 				<?php endif ?>
 				
 				<a class="cms_list_item_button" href="<?php print($edit_base.$block[$id_field]); ?>/">edit</a>
