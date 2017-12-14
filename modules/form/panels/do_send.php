@@ -34,7 +34,12 @@ class do_send extends MY_Controller{
         	
         	$page = $this->cms_page_model->get_page($params['cms_page_id']);
         	
-        	$title = 'New form "'.$params['title'].'" submission on "'.implode(' - ', [trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), $GLOBALS['config']['site_title_delimiter'].' '), $page['title']]).'"';
+        	$title_parts = [trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), $GLOBALS['config']['site_title_delimiter'].' ')];
+        	if (!empty($page['title'])){
+        		$title_parts[] = $page['title'];
+        	}
+        	
+        	$title = (!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '') . 'New form "'.$params['title'].'" submission on "'.implode(' - ', $title_parts).'"';
 
         	// send notification
 			if(!empty($params['emails']) && count($params['emails'])){
@@ -43,9 +48,17 @@ class do_send extends MY_Controller{
 					$from = 'noreply@bytecrackers.com';
 				} else {
 					if (!empty($data['email']) && stristr($data['email'], '@') && stristr($data['email'], '.')){
+						
 						$from = $data['email'];
+						
+						if (!empty($data['name'])){
+							$from = $data['name'].' <'.$from.'>';
+						}
+					
 					} else {
+					
 						$from = 'noreply@bytecrackers.com';
+					
 					}
 				}
 				
