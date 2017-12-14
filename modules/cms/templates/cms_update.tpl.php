@@ -5,7 +5,7 @@
 			<?php print('System update'); ?>
 		</div>
 		
-		<?php if($can_update && !empty($GLOBALS['config']['update']['allow_updates'])): ?>
+		<?php if($can_update && !empty($GLOBALS['config']['update']['allow_updates']) && !empty($master_version)): ?>
 			<div class="cms_update_button admin_tool_button admin_right">Update</div>
 		<?php endif ?>
 	
@@ -37,8 +37,9 @@
 				</div>
 			</div>
 		
-
-			<?php if(!empty($local_changes)): ?>
+			<?php if(empty($master_version)): ?>
+				<span class="local_changes_warning">Can't connect to update server. Please check CMS settings.</span><br>
+			<?php elseif(!empty($local_changes)): ?>
 				<span class="local_changes_warning">There are local changes, update will revert these!</span><br>
 			<?php endif ?>
 			<div class="cms_update_result"></div>

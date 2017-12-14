@@ -193,7 +193,11 @@ class cms_update_model extends CI_Model {
     		return false;
     	}
 
-		$master_data = file_get_contents($GLOBALS['config']['cms_update_url'], false, $context);
+		$master_data = @file_get_contents($GLOBALS['config']['cms_update_url'], false, $context);
+		
+		if ($master_data === false){
+			return [];
+		}
 		
 		return json_decode($master_data, true);
 		
