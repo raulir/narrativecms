@@ -121,7 +121,7 @@ class cms_page_panel_toolbar extends MY_Controller{
 						$params['breadcrumb'] = [
 								[ // url to list root
 										'text' => $panel_config['list']['list_title'],
-										'url' => 'admin/cms_list/'.$cms_page_panel['panel_name'].'/',
+										'url' => 'admin/cms_list/'.str_replace('/', '__', $cms_page_panel['panel_name']).'/',
 								],
 						];
 						
@@ -137,8 +137,10 @@ class cms_page_panel_toolbar extends MY_Controller{
 					}
 					
 					// current block
+					$heading = $this->run_panel_method($cms_page_panel['panel_name'], 'panel_heading', $cms_page_panel);
+					
 					$params['breadcrumb'][] = [
-							'text' => str_limit(!empty($panel_config['list']['title_field']) ? $cms_page_panel[$panel_config['list']['title_field']] : $this->run_panel_method($cms_page_panel['panel_name'], 'panel_heading', $cms_page_panel), 50),
+							'text' => str_limit(!empty($panel_config['list']['title_field']) ? $cms_page_panel[$panel_config['list']['title_field']] : $heading, 40),
 							'url' => '',
 							'field' => !empty($panel_config['list']['title_field']) ? $panel_config['list']['title_field'] : 'heading', // title field
 					];

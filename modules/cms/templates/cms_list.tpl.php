@@ -3,8 +3,8 @@
 	<div class="admin_tool_text"><?php print($title); ?></div>
 	
 	<?php if(empty($hide_new)): ?>
-		
-		<a class="admin_tool_button admin_right" href="<?php print($GLOBALS['config']['base_url'].$edit_base.$filter['panel_name'].'/'); ?>">New</a>
+
+		<a class="admin_tool_button admin_right" href="<?php print($GLOBALS['config']['base_url'].$edit_base.str_replace('/', '__', $new_panel_name).'/'); ?>">New</a>
 		
 		<?php if($GLOBALS['config']['environment'] == 'NOP'): ?>
 		

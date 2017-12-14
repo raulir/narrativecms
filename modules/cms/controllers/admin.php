@@ -174,48 +174,61 @@ class admin extends MY_Controller {
 
 	}
 
-	function cms_list($list_item){
+	function cms_list($list_item = ''){
+
+		if (empty($list_item)){
+			_html_error('Missing list item name');
+			return;
+		}
+		
+		$list_item = str_replace('__', '/', $list_item);
 
 		// get list item params
 		$this->load->model('cms_panel_model');
 		$item_config = $this->cms_panel_model->get_cms_panel_config($list_item);
 
-		if (!empty($item_config['list'])){
-
-			$params = array(
-					'title' => $item_config['list']['list_title'],
-					'edit_base' => 'admin/cms_page_panel/',
-					'filter' => array('panel_name' => $list_item, 'page_id' => [999999,0], ),
-			);
-				
-			if (!empty($item_config['list']['filter_fields'])){
-				$params['filter_fields'] = $item_config['list']['filter_fields'];
-			}
-				
-			if (!empty($item_config['list']['title_panel'])){
-				$params['title_panel'] = $item_config['list']['title_panel'];
-			} else if (!empty($item_config['list']['title_field'])){
-				$params['title_field'] = $item_config['list']['title_field'];
-			}
-
-			// set page config
-			$page_config = array(
-					array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-					array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-					array(
-							'position' => 'main',
-							'panel' => 'cms_list',
-							'module' => 'cms',
-							'params' => $params,
-					),
-			);
-			 
-			// render panels
-			$panel_data = $this->render($page_config);
-			 
-			$this->output('admin', $panel_data);
-			 
+		if (empty($item_config['list'])){
+			_html_error('Bad list item: '.$list_item);
+			return;
 		}
+		
+		if (stristr($list_item, '/')){
+			list($module, $item) = explode('/', $list_item);
+			$list_item = [$list_item, $item];
+		}
+
+		$params = array(
+				'title' => $item_config['list']['list_title'],
+				'edit_base' => 'admin/cms_page_panel/',
+				'filter' => array('panel_name' => $list_item, 'page_id' => [999999,0], ),
+		);
+			
+		if (!empty($item_config['list']['filter_fields'])){
+			$params['filter_fields'] = $item_config['list']['filter_fields'];
+		}
+			
+		if (!empty($item_config['list']['title_panel'])){
+			$params['title_panel'] = $item_config['list']['title_panel'];
+		} else if (!empty($item_config['list']['title_field'])){
+			$params['title_field'] = $item_config['list']['title_field'];
+		}
+
+		// set page config
+		$page_config = array(
+				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
+				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
+				array(
+						'position' => 'main',
+						'panel' => 'cms_list',
+						'module' => 'cms',
+						'params' => $params,
+				),
+		);
+		 
+		// render panels
+		$panel_data = $this->render($page_config);
+		 
+		$this->output('admin', $panel_data);
 
 	}
 

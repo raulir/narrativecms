@@ -54,7 +54,7 @@ class MY_Controller extends CI_Controller{
     	if (empty($params['heading']) && !empty($params['cms_page_panel_id'])){
     		$return = $params['panel_name'].'='.$params['cms_page_panel_id'];
     	}
-    	
+
     	return $return;
     	
     }
@@ -126,6 +126,8 @@ class MY_Controller extends CI_Controller{
     		// clear temporary resource
     		unset($this->panel_ci);
 
+    	} else if ($panel_method != 'panel_action' && method_exists($this, $panel_method)){
+    		$params = $this->{$panel_method}($params);
     	}
     	    	
     	return $params;

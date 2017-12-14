@@ -75,6 +75,23 @@ class cms_list extends MY_Controller{
 
 		}
 
+		$params['new_panel_name'] = $params['filter']['panel_name'];
+		if (stristr($params['filter']['panel_name'], '|')){
+			
+			$panel_names = explode('|', $params['filter']['panel_name']);
+			
+			$params['new_panel_name'] = $panel_names[0];
+			
+			// if array, get first with /
+			foreach($panel_names as $_cms_panel){
+				if (stristr($_cms_panel, '/')){
+					$params['new_panel_name'] = $_cms_panel;
+					break;
+				}
+			}
+				
+		}
+
 		return $params;
 
 	}
