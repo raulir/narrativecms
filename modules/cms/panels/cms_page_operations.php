@@ -35,6 +35,7 @@ class cms_page_operations extends MY_Controller{
 			$data['title'] = $this->input->post('title');
 			$data['slug'] = $this->input->post('slug');
 			$data['status'] = $this->input->post('status');
+			$data['seo_title'] = $this->input->post('seo_title');
 			$data['description'] = $this->input->post('description');
 			$data['image'] = $this->input->post('image');
 			$data['layout'] = $this->input->post('layout');

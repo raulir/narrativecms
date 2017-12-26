@@ -61,8 +61,11 @@ class Index extends MY_Controller {
     	if (!stristr($page_id, '=')){ // direct page id
 
 			$page = $this->cms_page_model->get_page($page_id);
-			if (!empty($page['title'])){
-    			$GLOBALS['_panel_titles'][] = $page['title'];
+
+			if (!empty($page['seo_title'])){
+    			$GLOBALS['_panel_titles'][] = $page['seo_title'];
+			} else if (!empty($page['title'])){
+				$GLOBALS['_panel_titles'][] = $page['title'];
 			}
 			$GLOBALS['_panel_descriptions'][] = !empty($page['description']) ? $page['description'] : '';
 			$GLOBALS['_panel_images'][] = !empty($page['image']) ? $page['image'] : '';

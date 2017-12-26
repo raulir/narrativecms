@@ -2,7 +2,7 @@
 	
     $.fn.basic_appear = function(params) {
     	
-    	var params = $.extend({'trigger': 50 }, params)
+    	params = $.extend({'trigger': 50 }, params)
 
     	var $set = $(this);
     	

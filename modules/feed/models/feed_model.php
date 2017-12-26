@@ -144,11 +144,14 @@ class feed_model extends CI_Model {
 		$item['image'] = $cms_list_item['image'];
 		$item['icon'] = $feed_setting['icon'];
 		$item['heading'] = $cms_list_item['heading'];
-		$item['text'] = !empty($cms_list_item['text']) ? $cms_list_item['text'] : '';
+		$item['text'] = !empty($cms_list_item['lead']) ? $cms_list_item['lead'] : '';
+		if (empty($item['text'])){
+			$item['text'] = !empty($cms_list_item['text']) ? $cms_list_item['text'] : '';
+		}
 		$item['date'] = !empty($cms_list_item['date']) ? $cms_list_item['date'] : date('d/m/Y');
 		$item['link_url'] = '';
 		$item['link_text'] = '';
-		$item['username'] = '';
+		$item['username'] = !empty($cms_list_item['author']) ? $cms_list_item['author'] : '';
 
 		return $item;
 		

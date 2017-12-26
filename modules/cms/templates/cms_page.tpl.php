@@ -23,30 +23,21 @@
 						'name' => 'title',
 						'value' => $page['title'],
 						'name_clean' => 'page_title',
-						'label' => 'Title',
-						'help' => '[Page title]||Can be seen on browser title bar, search engine results and social media shares. May be left empty for homepage. Important for SEO',
+						'label' => 'Name',
+						'help' => '[Page name]||CMS page name. If {SEO title} is empty, this can be seen as page title in the frontend.',
 						'meta_class' => 'cms_page_title',
-				]); ?>
-				
-				<?php _panel('cms_input_text', [
-						'name' => 'slug',
-						'value' => $page['slug'],
-						'name_clean' => 'page_slug',
-						'label' => 'Slug',
-						'help' => '[Page slug]||Can be seen on browser address bar following the main address part of the site. Important for SEO.||Must be left empty for homepage',
-						'meta_class' => 'cms_page_slug',
 				]); ?>
 				
 				<?php if($page['page_id'] != 1 && !$is_list_item): // Can't hide homepage ?>
 						
-						<?php _panel('cms_input_select', array(
-								'label' => 'Published status', 
-								'value' => (!empty($page['status']) ? $page['status'] : 0), 
-								'values' => ['0' => 'Automatic', '1' => 'Hidden', ],
-								'name' => 'cms_page_status',
-								'name_clean' => 'status',
-								'help' => '[Page published status]||"{Automatic}" - hidden when page doesn\'t have any panels added, otherwise visible.||"{Hidden}" - visible only while logged into CMS admin.',
-						)); ?>
+					<?php _panel('cms_input_select', array(
+							'label' => 'Published status', 
+							'value' => (!empty($page['status']) ? $page['status'] : 0), 
+							'values' => ['0' => 'Automatic', '1' => 'Hidden', ],
+							'name' => 'cms_page_status',
+							'name_clean' => 'status',
+							'help' => '[Page published status]||"{Automatic}" - hidden when page doesn\'t have any panels added, otherwise visible.||"{Hidden}" - visible only while logged into CMS admin.',
+					)); ?>
 						
 				<?php else: ?>
 					
@@ -65,9 +56,29 @@
 					));
 				?>
 				
+				<?php _panel('cms_input_subtitle', ['label' => 'SEO', 'width' => 'narrow', 'help' => '[SEO]||These fields are very important for search engines, page sharing in social media etc']) ?>
+				
+				<?php _panel('cms_input_text', [
+						'name' => 'slug',
+						'value' => $page['slug'],
+						'name_clean' => 'page_slug',
+						'label' => 'Slug',
+						'help' => '[Page slug]||Can be seen on browser address bar following the main address part of the site. Important for SEO.||Must be left empty for homepage||Can contain only letters, numbers and underscore (_).',
+						'meta_class' => 'cms_page_slug',
+				]); ?>
+				
+				<?php _panel('cms_input_text', [
+						'name' => 'seo_title',
+						'value' => (!empty($page['seo_title']) ? $page['seo_title'] : ''),
+						'name_clean' => 'cms_page_seo_title',
+						'label' => 'Title',
+						'help' => '[SEO title]||Can be seen on browser title bar, search engine results and social media shares. Important for SEO',
+						'meta_class' => 'cms_page_seo_title',
+				]); ?>
+
 				<?php 
 					_panel('cms_input_textarea', array(
-							'label' => 'SEO description',
+							'label' => 'Description',
 							'value' => (!empty($page['description']) ? $page['description'] : ''),
 							'name' => 'cms_page_description',
 							'extra_data' => ' data-lines="4" ',
@@ -78,7 +89,7 @@
 
 				<?php 
 					_panel('cms_input_image', array(
-							'label' => 'SEO image', 
+							'label' => 'Image', 
 							'value' => !empty($page['image']) ? $page['image'] : '', 
 							'name' => 'cms_page_image', 
 							'category' => 'content',
