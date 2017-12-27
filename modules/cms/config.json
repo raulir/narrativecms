@@ -101,7 +101,7 @@
 	],
 	"api":[
 		{
-			"id":"api_image_resize"
+			"id":"image_resize"
 		}
 	]
 }

@@ -42,7 +42,7 @@
 
 function cms_images_lazy_next($this){
 	
-	get_api('cms/api_image_resize', {
+	get_api('cms/image_resize', {
 		'do':'resize',
 		'width': $this.data('width'),
 		'output': $this.data('output'),
@@ -52,7 +52,7 @@ function cms_images_lazy_next($this){
 			var hq_src = data.result.src;
 
 			// lq width
-			get_api('cms/api_image_resize', {
+			get_api('cms/image_resize', {
 				'do':'resize',
 				'width': $this.data('width_lq'),
 				'output': $this.data('output'),

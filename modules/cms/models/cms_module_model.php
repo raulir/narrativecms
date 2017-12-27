@@ -26,20 +26,8 @@ class cms_module_model extends CI_Model {
 	
 	
 	function get_module_config($module){
-		
-		$return = [];
-		
-		$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/config.json';
-		if (file_exists($filename)){
-			$json_data = file_get_contents($filename);
-			$return = json_decode($json_data, true);
-		}
-		
-		if (empty($return['panels'])){
-			$return['panels'] = [];
-		}
-		
-		return $return;
+				
+		return $GLOBALS['config']['module'][$module];
 		
 	}
 	

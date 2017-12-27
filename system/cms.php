@@ -33,6 +33,12 @@ if (file_exists($config['config_file'])){
 
 }
 
+// check if base_path is set correctly
+if (!file_exists($config['base_path'].'config/'.strtolower($_SERVER['SERVER_NAME']).'.php')){
+	print('Bad config base path: "'.$config['base_path'].'"');
+	die();
+}
+
 /*
  * common config for all project environments:
  */
@@ -64,13 +70,34 @@ $config['protocol'] = (empty($_SERVER['HTTPS']) OR strtolower($_SERVER['HTTPS'])
 $GLOBALS['config'] = $config;
 
 // connect to db (if mysqli)
-if ($config['database']['dbdriver'] = 'mysqli') {
-	$conn_hash = md5($config['database']['hostname'].$config['database']['username'].$config['database']['password'].$config['database']['database']);
-	$GLOBALS['dbconnections'][$conn_hash] = @mysqli_connect($config['database']['hostname'], $config['database']['username'], $config['database']['password'], $config['database']['database']);
+if ($GLOBALS['config']['database']['dbdriver'] = 'mysqli') {
+	$conn_hash = md5($GLOBALS['config']['database']['hostname'].$GLOBALS['config']['database']['username'].$GLOBALS['config']['database']['password'].$GLOBALS['config']['database']['database']);
+	$GLOBALS['dbconnections'][$conn_hash] = @mysqli_connect($GLOBALS['config']['database']['hostname'], $GLOBALS['config']['database']['username'], $GLOBALS['config']['database']['password'], $GLOBALS['config']['database']['database']);
+}
+
+// load module configs
+if (!is_array($GLOBALS['config']['modules'])){
+	$GLOBALS['config']['modules'] = ['cms'];
+} elseif (!in_array('cms', $GLOBALS['config']['modules'])){
+	array_unshift($GLOBALS['config']['modules'], 'cms');
+}
+
+foreach($GLOBALS['config']['modules'] as $module_name){
+	
+	$filename = $GLOBALS['config']['base_path'].'modules/'.$module_name.'/config.json';
+	if (file_exists($filename)){
+		$GLOBALS['config']['module'][$module_name] = json_decode(file_get_contents($filename), true);
+	} else {
+		$GLOBALS['config']['module'][$module_name] = [];
+	}
+	
+	if (empty($GLOBALS['config']['module'][$module_name]['panels'])){
+		$GLOBALS['config']['module'][$module_name]['panels'] = [];
+	}
+	
 }
 
 // check if api call
-
 if (substr($_SERVER['REQUEST_URI'], 0, strlen($GLOBALS['config']['base_url'])) == $GLOBALS['config']['base_url']) {
 	$string = substr($_SERVER['REQUEST_URI'], strlen($GLOBALS['config']['base_url']));
 } else {
@@ -83,28 +110,17 @@ if (stristr($request_uri, '/')){
 	
 	list($module, $api) = explode('/', $request_uri, 2);
 	
-	if (in_array($module, $config['modules'])){
-		
-		$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/config.json';
-		if (file_exists($filename)){
-			$module_config = json_decode(file_get_contents($filename), true);
-			
-			if (isset($module_config['api'])){
+	if (!empty($GLOBALS['config']['module'][$module]['api'])){
+	
+		foreach($GLOBALS['config']['module'][$module]['api'] as $capi){
+			if ($capi['id'] == $api){
 				
-				foreach($module_config['api'] as $capi){
-					if ($capi['id'] == $api){
-						
-						include($GLOBALS['config']['base_path'].'modules/'.$module.'/panels/'.$api.'.php');
-						
-						die();
-						
-					}
-				}
+				include($GLOBALS['config']['base_path'].'modules/'.$module.'/api/'.$api.'.php');
+				die();
 				
 			}
-			
 		}
-		
+	
 	}
 	
 }
