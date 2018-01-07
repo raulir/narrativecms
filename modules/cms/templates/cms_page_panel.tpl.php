@@ -311,7 +311,7 @@
 								'select_params' => [
 										'label' => $field['label'].$mandatory_label, 
 										'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
-										'values' => $fk_data[(!empty($field['field']) ? $field['field'] : $field['name'])],
+										'values' => !empty($fk_data[$field['target']]) ? $fk_data[$field['target']] : $fk_data[(!empty($field['field']) ? $field['field'] : $field['name'])],
 										'name' => $name, 
 										'name_clean' => !empty($name_clean) ? $name_clean : $name, 
 										'extra_class' => ($prefix ? '' : 'admin_column'), 

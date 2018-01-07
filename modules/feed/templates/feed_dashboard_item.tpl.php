@@ -14,9 +14,11 @@
 	</div>
 	
 	<div class="feed_dashboard_item_image_container" <?php _ib('/modules/cms/img/opacity.png'); ?>>
-		<div class="feed_dashboard_item_image_content">
-			<img class="feed_dashboard_item_image" src="<?php _i($block['image'], 95); ?>">
-		</div>
+		<?php if(!empty($block['image'])): ?>
+			<div class="feed_dashboard_item_image_content">
+				<img class="feed_dashboard_item_image" src="<?php _i($block['image'], 95); ?>">
+			</div>
+		<?php endif ?>
 	</div>
 	
 	<div class="feed_dashboard_item_content">

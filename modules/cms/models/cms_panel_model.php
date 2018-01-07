@@ -101,25 +101,32 @@ class cms_panel_model extends CI_Model {
 			foreach ($block_structure as $struct){
 				if ($struct['type'] == 'fk'){
 					if (empty($return['fk_data'][$struct['name']])){
+						
 						$struct_table = str_replace('_id', '', (!empty($struct['field']) ? $struct['field'] : $struct['name']));
 						$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])][0] = '-- not specified --';
+						
+						if (empty($struct['filter'])){
+							$struct['filter'] = array();
+						}
+						
 						if ($struct['target'] == 'block'){
-			
-							if (empty($struct['filter'])){
-								$struct['filter'] = array();
-							}
-			
+						
 							$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] =
-							$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] +
-							$this->cms_page_panel_model->get_fk_data($struct_table, $struct['filter'], (!empty($struct['label_field']) ? $struct['label_field'] : 'title'));
+									$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] +
+									$this->cms_page_panel_model->get_fk_data($struct_table, $struct['filter'], (!empty($struct['label_field']) ? $struct['label_field'] : 'title'));
+								
+						} else if ($struct['target'] == 'table') {
+								
+							$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] =
+									$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] +
+									$this->cms_table_model->get_fk_data($struct_table);
 								
 						} else {
-								
-							$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] =
-							$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] +
-							$this->cms_table_model->get_fk_data($struct_table);
-								
+							
+							$return[$struct['target']] = $this->cms_page_panel_model->get_fk_data($struct['target'], $struct['filter'], (!empty($struct['label_field']) ? $struct['label_field'] : 'heading'));
+
 						}
+					
 					}
 				} elseif ($struct['type'] == 'repeater'){
 					foreach ($struct['fields'] as $r_struct){
