@@ -30,7 +30,7 @@ class cms_list_list extends MY_Controller{
 				$params['panel_name'] = explode('|', $params['panel_name']);
 			}
 				
-			$filter = array('panel_name' => $params['panel_name'], 'page_id' => [999999,0], );
+			$filter = ['panel_name' => $params['panel_name'], 'page_id' => [999999,0], 'sort!' => '0', ];
 				
 			if (!empty($params['filters'])){
 				$filter = array_merge($filter, $params['filters']);

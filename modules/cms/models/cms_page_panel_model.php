@@ -14,7 +14,7 @@ class cms_page_panel_model extends CI_Model {
 
 		$return = [];
 		
-		$list = $this->get_cms_page_panels_by(array_merge(array('panel_name' => $panel_name, 'page_id' => [999999,0], 'show' => '1', ), $filter));
+		$list = $this->get_cms_page_panels_by(array_merge(['panel_name' => $panel_name, 'page_id' => [999999,0], 'show' => '1', 'sort!' => 0, ], $filter));
 		
 		foreach($list as $item){
 			$return[$item['cms_page_panel_id']] = $item;

@@ -137,7 +137,12 @@ class cms_page_panel_toolbar extends MY_Controller{
 					}
 					
 					// current block
-					$heading = $this->run_panel_method($cms_page_panel['panel_name'], 'panel_heading', $cms_page_panel);
+					if ($cms_page_panel['sort']){
+						// not settings
+						$heading = $this->run_panel_method($cms_page_panel['panel_name'], 'panel_heading', $cms_page_panel);
+					} else {
+						$heading = (!empty($panel_config['label']) ? $panel_config['label'] : $cms_page_panel['panel_name']) . ' settings';
+					}
 					
 					$params['breadcrumb'][] = [
 							'text' => str_limit(!empty($panel_config['list']['title_field']) ? $cms_page_panel[$panel_config['list']['title_field']] : $heading, 40),
