@@ -150,7 +150,7 @@ INSERT INTO `cms_page_panel_param` (`cms_page_panel_param_id`, `cms_page_panel_i
 (43, 2, '', '{"css":{"000":"modules\\/cms\\/css\\/cms_normalise.scss"}}', 0),
 (86, 1, 'favicon', '2017/04/bytecrackers_logo_black.png', 0),
 (87, 1, 'cms_background', '2015/11/background.jpg', 0),
-(88, 1, 'cms_update_url', 'http://www.bytecrackers.com/cms/cms/updater/', 0),
+(88, 1, 'cms_update_url', 'http://cms.bytecrackers.com/cms/updater/', 0),
 (89, 1, 'panel_cache', '0', 0),
 (90, 1, 'images_rows', '4', 0),
 (91, 1, 'images_lq_divider', '3', 0),
