@@ -30,7 +30,7 @@ class Index extends MY_Controller {
 	
    	}
 
-    function index($page_id = 1){
+    function index($page_id = 1, $extra = ''){
     	
 	    $this->load->model('cms_page_panel_model');
     	$this->load->model('cms_page_model');
@@ -55,6 +55,11 @@ class Index extends MY_Controller {
 	    			$page_config[] = array('position' => $position, 'panel' => $pn, 'params' => $params, );
     			}
     		}
+    	}
+    	
+    	// if module list item module/item=XX then / causes second parameter
+    	if (!empty($extra)){
+    		$page_id = $page_id . '/' . $extra;
     	}
 
     	// get panels on page

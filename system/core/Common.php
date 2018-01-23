@@ -202,9 +202,6 @@ if ( ! function_exists('is_loaded'))
 /**
 * Loads the main config.php file
 *
-* This function lets us grab the config file even if the Config class
-* hasn't been instantiated yet
-*
 * @access	private
 * @return	array
 */
@@ -218,20 +215,8 @@ if ( ! function_exists('get_config'))
 		{
 			return $_config[0];
 		}
-
-		// Is the config file in the environment folder?
-		if ( ! defined('ENVIRONMENT') OR ! file_exists($file_path = APPPATH.'config/'.ENVIRONMENT.'/config.php'))
-		{
-			$file_path = APPPATH.'config/config.php';
-		}
-
-		// Fetch the config file
-		if ( ! file_exists($file_path))
-		{
-			exit('The configuration file does not exist.');
-		}
-
-		require($file_path);
+		
+		require(APPPATH.'config/config.php');
 
 		// Does the $config array exist in the file?
 		if ( ! isset($config) OR ! is_array($config))

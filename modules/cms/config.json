@@ -51,6 +51,13 @@
 			"parent":"cms",
 			"access":"cms_cms",
 			"url":"admin/update/"
+		},
+		{
+			"id":"cms_search",
+			"name":"Search",
+			"parent":"cms",
+			"access":"cms_search",
+			"url":"admin/search/"
 		}
 	],
 	"layouts":[
@@ -91,6 +98,10 @@
 		{
 			"access":"cms_cssjs",
 			"name":"CMS cssjs"
+		},
+		{
+			"access":"cms_search",
+			"name":"CMS search"
 		}
 	],
 	"panels":[

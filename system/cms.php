@@ -52,14 +52,6 @@ $config['js'] = array(
 				'sync' => (!empty($config['jquery_blocks']) ? '' : 'defer'),
 		),
 		array(
-				'script' => 'js/md5.js', // for caching in panels.js
-				'sync' => 'defer',
-		),
-		array(
-				'script' => 'js/panels.js',
-				'sync' => 'defer',
-		),
-		array(
 				'script' => 'js/main.js',
 				'sync' => 'defer',
 		),
@@ -73,6 +65,16 @@ $GLOBALS['config'] = $config;
 if ($GLOBALS['config']['database']['dbdriver'] = 'mysqli') {
 	$conn_hash = md5($GLOBALS['config']['database']['hostname'].$GLOBALS['config']['database']['username'].$GLOBALS['config']['database']['password'].$GLOBALS['config']['database']['database']);
 	$GLOBALS['dbconnections'][$conn_hash] = @mysqli_connect($GLOBALS['config']['database']['hostname'], $GLOBALS['config']['database']['username'], $GLOBALS['config']['database']['password'], $GLOBALS['config']['database']['database']);
+}
+
+// load config from db
+$db = $GLOBALS['dbconnections'][md5($GLOBALS['config']['database']['hostname'].$GLOBALS['config']['database']['username'].$GLOBALS['config']['database']['password'].$config['database']['database'])];
+
+$sql = "select b.name, b.value from block a join cms_page_panel_param b on a.block_id = b.cms_page_panel_id where (a.panel_name = 'cms_settings' or a.panel_name = 'cms/cms_settings') and b.name != ''";
+$query = mysqli_query($db, $sql);
+
+while($result = mysqli_fetch_array($query)){
+	$GLOBALS['config'][$result['name']] = $result['value'];
 }
 
 // load module configs

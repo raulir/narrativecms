@@ -15,8 +15,6 @@ class admin extends MY_Controller {
 		$this->js[] = array('script' => 'js/jquery-ui.min.js', );
 
 		$this->js[] = 'js/preloader.js';
-		$this->js[] = 'js/md5.js';
-		$this->js[] = 'js/panels.js';
 
 		$this->js[] = 'modules/cms/js/cms.js';
 
@@ -329,6 +327,23 @@ class admin extends MY_Controller {
 				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
 				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
 				array('position' => 'main', 'panel' => 'cms/cms_cssjs_settings', ),
+		);
+	
+		// render panels
+		$panel_data = $this->render($page_config);
+	
+		// output to layout
+		$this->output('admin', $panel_data);
+			
+	}
+	
+	function search($param = ''){
+	
+		// set page config
+		$page_config = array(
+				array('position' => 'header', 'panel' => 'cms/cms_user', ),
+				array('position' => 'header', 'panel' => 'cms/cms_menu', ),
+				array('position' => 'main', 'panel' => 'cms/cms_search', ),
 		);
 	
 		// render panels

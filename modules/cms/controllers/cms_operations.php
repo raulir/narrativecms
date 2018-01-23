@@ -9,8 +9,6 @@ class cms_operations extends MY_Controller {
         $this->js[] = array('script' => 'js/jquery-ui.min.js', );
 
         $this->js[] = 'js/preloader.js';
-        $this->js[] = 'js/md5.js';
-        $this->js[] = 'js/panels.js';
 
         $this->js[] = 'modules/cms/js/cms.js';
   

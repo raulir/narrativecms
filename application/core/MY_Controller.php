@@ -37,14 +37,6 @@ class MY_Controller extends CI_Controller{
         	$GLOBALS['_panel_js'] = array();
         }
         
-        if (empty($GLOBALS['config']['favicon'])){ // favicon is in cms settings panel
-        	$this->load->model('cms_page_panel_model');
-        	$cms_settings = $this->cms_page_panel_model->get_cms_page_panels_by(array('panel_name' => ['cms_settings', 'cms/cms_settings'], ));
-        	if (!empty($cms_settings[0])){
-        		$GLOBALS['config'] = array_merge($cms_settings[0], $GLOBALS['config']);
-        	}
-        }
-        
     }
     
     function panel_heading($params){

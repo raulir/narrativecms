@@ -1043,46 +1043,6 @@ class CI_Loader {
 		if (!empty($params['module']) && !empty($params['name']) && class_exists($params['module'].'\\'.$params['name'])){
 			$class = $params['module'].'\\'.$params['name'];
 		}
-		
-		// Is there an associated config file for this class?  Note: these should always be lowercase
-		if ($config === NULL)
-		{
-			// Fetch the config paths containing any package paths
-			$config_component = $this->_ci_get_component('config');
-
-			if (is_array($config_component->_config_paths))
-			{
-
-				// Break on the first found file, thus package files
-				// are not overridden by default paths
-				foreach ($config_component->_config_paths as $path)
-				{
-					// We test for both uppercase and lowercase, for servers that
-					// are case-sensitive with regard to file names. Check for environment
-					// first, global next
-					if (defined('ENVIRONMENT') AND file_exists($path .'config/'.ENVIRONMENT.'/'.strtolower($class).'.php'))
-					{
-						include($path .'config/'.ENVIRONMENT.'/'.strtolower($class).'.php');
-						break;
-					}
-					elseif (defined('ENVIRONMENT') AND file_exists($path .'config/'.ENVIRONMENT.'/'.ucfirst(strtolower($class)).'.php'))
-					{
-						include($path .'config/'.ENVIRONMENT.'/'.ucfirst(strtolower($class)).'.php');
-						break;
-					}
-					elseif (file_exists($path .'config/'.strtolower($class).'.php'))
-					{
-						include($path .'config/'.strtolower($class).'.php');
-						break;
-					}
-					elseif (file_exists($path .'config/'.ucfirst(strtolower($class)).'.php'))
-					{
-						include($path .'config/'.ucfirst(strtolower($class)).'.php');
-						break;
-					}
-				}
-			}
-		}
 
 		if ($prefix == '')
 		{
