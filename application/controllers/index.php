@@ -96,6 +96,12 @@ class Index extends MY_Controller {
     		// this is when there is page parameter
     		// check if template page exists
     		$page = $this->cms_page_model->get_page_by_slug(str_replace('_', '-', $panel_name));
+    		
+    		// try without model
+    		if (empty($page['page_id']) && stristr($panel_name, '/')){
+    			list($m_module, $m_panel_name) = explode('/', $panel_name);
+    			$page = $this->cms_page_model->get_page_by_slug(str_replace('_', '-', $m_panel_name));
+    		}
 
     		if (!empty($page['page_id'])){
     			
