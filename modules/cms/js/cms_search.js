@@ -12,16 +12,54 @@ function cms_search_init(){
 				'term': term,
 				'success': function(data){
 					
-					$('.cms_search_result_pages').html('<div>PAGES</div>');
-					$.each(data.result.result.pages, function(key, value){
-						$('.cms_search_result_pages').append('<div>' + value.title + ' | ' + value.page_id + ' | ' + value.score + ' | <a href="' + config_url + 'admin/' + value.edit_url + '">edit</a>' + 
-								(value.slug || value.page_id == 1 ? ' | <a target="_blank" href="' + config_url + (value.slug != '' ? (value.slug + '/') : '') + '">view</a>' : '') + '</div>');
-					});
+					$('.cms_search_result_pages').html('');
 					
-					$('.cms_search_result_panels').html('<div>PANELS</div>');
-					$.each(data.result.result.page_panels, function(key, value){
-						$('.cms_search_result_panels').append('<div>' + value.title + ' | ' + value.cms_page_panel_id + ' | ' + value.score + ' | <a href="' + config_url + 'admin/' + value.edit_url + '">edit</a></div>');
-					});
+					// real defined pages
+					if (data.result.result.pages.real){
+						$('.cms_search_result_pages').append('<div class="cms_column_header">Static pages</div>');
+						$.each(data.result.result.pages.real, function(key, value){
+							$('.cms_search_result_pages').append('<div class="cms_search_item cms_search_' + value.show + '"><div class="cms_search_title">' + value.title + '</div><a class="cms_search_edit" href="' + config_url + 'admin/' + value.edit_url + '">edit</a>' + 
+									(value.slug || value.page_id == 1 ? '<a target="_blank" class="cms_search_view" href="' + config_url + (value.slug != '' ? (value.slug + '/') : '') + '">view</a>' : '') + '</div>');
+						});
+					}
+					
+					// list item pages
+					if (data.result.result.pages.lists){
+						$('.cms_search_result_pages').append('<div class="cms_column_header">List pages</div>');
+						$.each(data.result.result.pages.lists, function(key, value){
+							$('.cms_search_result_pages').append('<div class="cms_search_item cms_search_' + value.show + '"><div class="cms_search_title">' + value.title + '</div><a class="cms_search_edit" href="' + config_url + 'admin/' + value.edit_url + '">edit</a>' + 
+									(value.slug || value.page_id == 1 ? '<a target="_blank" class="cms_search_view" href="' + config_url + (value.slug != '' ? (value.slug + '/') : '') + '">view</a>' : '') + '</div>');
+						});
+					}
+					
+					$('.cms_search_result_panels').html('');
+					
+					// page panels
+					if (data.result.result.page_panels.pages){
+						$('.cms_search_result_panels').append('<div class="cms_column_header">Static page panels</div>');
+						$.each(data.result.result.page_panels.pages, function(key, value){
+							$('.cms_search_result_panels').append('<div class="cms_search_item cms_search_' + value.show + '"><div class="cms_search_title">' + value.title + '</div>' +
+									'<a class="cms_search_edit" href="' + config_url + 'admin/' + value.edit_url + '">edit</a></div>');
+						});
+					}
+					
+					// list panels
+					if (data.result.result.page_panels.lists){
+						$('.cms_search_result_panels').append('<div class="cms_column_header">List panels</div>');
+						$.each(data.result.result.page_panels.lists, function(key, value){
+							$('.cms_search_result_panels').append('<div class="cms_search_item cms_search_' + value.show + '"><div class="cms_search_title">' + value.title + '</div>' +
+									'<a class="cms_search_edit" href="' + config_url + 'admin/' + value.edit_url + '">edit</a></div>');
+						});
+					}
+					
+					// settings panels
+					if (data.result.result.page_panels.settings){
+						$('.cms_search_result_panels').append('<div class="cms_column_header">Other panels</div>');
+						$.each(data.result.result.page_panels.settings, function(key, value){
+							$('.cms_search_result_panels').append('<div class="cms_search_item cms_search_' + value.show + '"><div class="cms_search_title">' + value.title + '</div>' +
+									'<a class="cms_search_edit" href="' + config_url + 'admin/' + value.edit_url + '">edit</a></div>');
+						});
+					}
 					
 				}
 			});

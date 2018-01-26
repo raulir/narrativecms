@@ -11,11 +11,12 @@ class cms_search_model extends CI_Model {
 		
 		$this->load->model('cms_page_panel_model');
 		$this->load->model('cms_slug_model');
+		$this->load->model('cms_module_model');
 		
 		if (!empty($params['all'])){
 			$sql = "select * from cms_page_panel_param where value like ? ";
 		} else {
-			$sql = "select * from cms_page_panel_param where search > 0 and value like ? ";
+			$sql = "select a.*, b.show from cms_page_panel_param a join block b on a.cms_page_panel_id = b.block_id where b.show = 1 and a.search > 0 and a.value like ? ";
 		}
 		
 		$query = $this->db->query($sql, array('%'.$term.'%', ));
@@ -45,14 +46,54 @@ class cms_search_model extends CI_Model {
 			
 		}
 		
-		// TODO: add child panels score to main panel before adding them to page
+		// add child panels score to main panel before adding them to page
+		$block_scores_page = [];
+		foreach($block_scores as $cms_page_panel_id => $block_score){
+			
+			if (empty($block_scores_page[$cms_page_panel_id])){
+				$block_scores_page[$cms_page_panel_id] = 0;
+			}
+			
+			// if has parent id -> means child block
+			if ($cms_page_panels[$cms_page_panel_id]['parent_id']){
+			
+				if (empty($block_scores_page[$cms_page_panels[$cms_page_panel_id]['parent_id']])){
+					$block_scores_page[$cms_page_panels[$cms_page_panel_id]['parent_id']] = 0;
+				}
+				
+				$block_scores_page[$cms_page_panels[$cms_page_panel_id]['parent_id']] += $block_score;
+			
+			} else {
+				
+				$block_scores_page[$cms_page_panel_id] += $block_score;
+				
+			}
+			
+		}
 		
 		// get page scores
 		$lists = $this->cms_page_panel_model->get_lists();
+		// DEPRECATED: add lists without module names
+		foreach($lists as $list){
+			if (stristr($list, '/')){
+				list($module, $listname) = explode('/', $list);
+				$lists[$listname] = $listname;
+			}
+		}
+
+		$modules = $this->cms_module_model->get_modules();
+
 		$page_scores = array();
-		foreach($block_scores as $block_id => $block_score){
+		foreach($block_scores_page as $block_id => $block_score){
+			
+			// if child panel page, then not present in this array
+			if (empty($cms_page_panels[$block_id])){
+				$sql = "select * from block where block_id = ? ";
+				$query = $this->db->query($sql, array($cms_page_panel_id, ));
+				$cms_page_panels[$block_id] = $query->row_array();
+			}
 		
-			$page_id = $cms_page_panels[$block_id]['page_id'] != 0 ? $cms_page_panels[$block_id]['page_id'] : $cms_page_panels[$block_id]['panel_name'].'='.$cms_page_panels[$block_id]['block_id'];
+			$page_id = !in_array($cms_page_panels[$block_id]['page_id'], [0, 999999]) ? $cms_page_panels[$block_id]['page_id'] : $cms_page_panels[$block_id]['panel_name'].'='.$cms_page_panels[$block_id]['block_id'];
 			
 			// settings block is not page and should be excluded?
 			if (stristr($page_id, '=') && !in_array($cms_page_panels[$block_id]['panel_name'], $lists)){
@@ -78,8 +119,10 @@ class cms_search_model extends CI_Model {
 		}
 		
 		asort($block_scores);
-		asort($page_scores);
 		
+		asort($page_scores);
+		$page_scores = array_reverse($page_scores, true);
+
 		return [
 				'cms_page_panels' => $block_scores,
 				'cms_pages' => $page_scores,

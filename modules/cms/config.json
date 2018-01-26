@@ -18,6 +18,13 @@
 			"name":"CMS"
 		},
 		{
+			"id":"cms_search",
+			"name":"Search",
+			"parent":"cms",
+			"access":"cms_search",
+			"url":"admin/search/"
+		},
+		{
 			"id":"cms_settings",
 			"name":"Settings",
 			"parent":"cms",
@@ -51,13 +58,6 @@
 			"parent":"cms",
 			"access":"cms_cms",
 			"url":"admin/update/"
-		},
-		{
-			"id":"cms_search",
-			"name":"Search",
-			"parent":"cms",
-			"access":"cms_search",
-			"url":"admin/search/"
 		}
 	],
 	"layouts":[

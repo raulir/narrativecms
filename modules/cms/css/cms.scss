@@ -112,6 +112,9 @@ i {
 	font-size: 0;
 	letter-spacing: 0;
 	text-align: left;
+	position: relative;
+	left: -10px;
+	width: calc(100% + 20px);
 }
 
 .cms_column {
@@ -119,8 +122,16 @@ i {
 	vertical-align: top;
 	font-size: 1rem;
 	line-height: 1rem;
-	letter-spacing: 0;
 	width: 50%;
+	padding: 10px;
+	box-sizing: border-box;
+}
+
+.cms_column_header {
+	border-bottom: 1px solid $colour_border;
+    line-height: 24px;
+    font-size: 18px;
+    padding-top: 35px;
 }
 
 /* old column structure */

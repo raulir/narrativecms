@@ -61,8 +61,8 @@ class MY_Controller extends CI_Controller{
      * run controller panel_action part for a panel
      */
     function run_panel_method($panel_name, $panel_method, $params){
-
-        if (!empty($params['_extends'])){
+    	 
+    	if (!empty($params['_extends'])){
     		$files = $this->get_panel_filenames($panel_name, $params['_extends']);
     	} else {
     		$files = $this->get_panel_filenames($panel_name);
@@ -88,9 +88,9 @@ class MY_Controller extends CI_Controller{
 	    	
 	    	// clear temporary resource
 	    	unset($this->panel_ci);
-    		
+
     	}
-    	
+
     	// if there is a normal controller, do this
     	if (!empty($files['controller'])){
 
@@ -99,6 +99,7 @@ class MY_Controller extends CI_Controller{
     		
     		// load panel stuff into this sandbox - it will be the same as sandbox is singleton for itself
 	    	$panel_name = $files['module'].'_'.$files['name'].'_panel';
+
 	    	$this->panel_ci->load->library(
 	    			$files['controller'], 
 	    			['module' => $files['module'], 'name' => $files['name'], ], 
@@ -106,14 +107,14 @@ class MY_Controller extends CI_Controller{
 	    	);
 
 			if (method_exists($this->panel_ci->$panel_name, $panel_method)){
-
+				
 	    		// define this controller as panel
 	    		$this->panel_ci->{$panel_name}->init_panel(array('name' => $files['name'], 'controller' => $files['controller'], ));
-	    		
+
 	    		// get params through panel controller
 	    		$params = $this->panel_ci->{$panel_name}->{$panel_method}($params);
-	    		
-    		}
+
+			}
     		
     		// clear temporary resource
     		unset($this->panel_ci);
@@ -121,7 +122,7 @@ class MY_Controller extends CI_Controller{
     	} else if ($panel_method != 'panel_action' && method_exists($this, $panel_method)){
     		$params = $this->{$panel_method}($params);
     	}
-    	    	
+    	 
     	return $params;
 
     }
