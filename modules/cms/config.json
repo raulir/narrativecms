@@ -18,6 +18,13 @@
 			"name":"CMS"
 		},
 		{
+			"id":"cms_search",
+			"name":"Search",
+			"parent":"cms",
+			"access":"cms_search",
+			"url":"admin/search/"
+		},
+		{
 			"id":"cms_settings",
 			"name":"Settings",
 			"parent":"cms",
@@ -91,6 +98,10 @@
 		{
 			"access":"cms_cssjs",
 			"name":"CMS cssjs"
+		},
+		{
+			"access":"cms_search",
+			"name":"CMS search"
 		}
 	],
 	"panels":[

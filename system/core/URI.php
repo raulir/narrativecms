@@ -69,7 +69,6 @@ class CI_URI {
 	 */
 	function __construct()
 	{
-		$this->config =& load_class('Config', 'core');
 		log_message('debug', "URI Class Initialized");
 	}
 
@@ -84,66 +83,49 @@ class CI_URI {
 	 */
 	function _fetch_uri_string()
 	{
-		if (strtoupper($this->config->item('uri_protocol')) == 'AUTO')
-		{
-			// Is the request coming from the command line?
-			if (php_sapi_name() == 'cli' or defined('STDIN'))
-			{
-				$this->_set_uri_string($this->_parse_cli_args());
-				return;
-			}
 
-			// Let's try the REQUEST_URI first, this will work in most situations
-			if ($uri = $this->_detect_uri())
-			{
-				$this->_set_uri_string($uri);
-				return;
-			}
-
-			// Is there a PATH_INFO variable?
-			// Note: some servers seem to have trouble with getenv() so we'll test it two ways
-			$path = (isset($_SERVER['PATH_INFO'])) ? $_SERVER['PATH_INFO'] : @getenv('PATH_INFO');
-			if (trim($path, '/') != '' && $path != "/".SELF)
-			{
-				$this->_set_uri_string($path);
-				return;
-			}
-
-			// No PATH_INFO?... What about QUERY_STRING?
-			$path =  (isset($_SERVER['QUERY_STRING'])) ? $_SERVER['QUERY_STRING'] : @getenv('QUERY_STRING');
-			if (trim($path, '/') != '')
-			{
-				$this->_set_uri_string($path);
-				return;
-			}
-
-			// As a last ditch effort lets try using the $_GET array
-			if (is_array($_GET) && count($_GET) == 1 && trim(key($_GET), '/') != '')
-			{
-				$this->_set_uri_string(key($_GET));
-				return;
-			}
-
-			// We've exhausted all our options...
-			$this->uri_string = '';
-			return;
-		}
-
-		$uri = strtoupper($this->config->item('uri_protocol'));
-
-		if ($uri == 'REQUEST_URI')
-		{
-			$this->_set_uri_string($this->_detect_uri());
-			return;
-		}
-		elseif ($uri == 'CLI')
+		// Is the request coming from the command line?
+		if (php_sapi_name() == 'cli' or defined('STDIN'))
 		{
 			$this->_set_uri_string($this->_parse_cli_args());
 			return;
 		}
 
-		$path = (isset($_SERVER[$uri])) ? $_SERVER[$uri] : @getenv($uri);
-		$this->_set_uri_string($path);
+		// Let's try the REQUEST_URI first, this will work in most situations
+		if ($uri = $this->_detect_uri())
+		{
+			$this->_set_uri_string($uri);
+			return;
+		}
+
+		// Is there a PATH_INFO variable?
+		// Note: some servers seem to have trouble with getenv() so we'll test it two ways
+		$path = (isset($_SERVER['PATH_INFO'])) ? $_SERVER['PATH_INFO'] : @getenv('PATH_INFO');
+		if (trim($path, '/') != '' && $path != "/".SELF)
+		{
+			$this->_set_uri_string($path);
+			return;
+		}
+
+		// No PATH_INFO?... What about QUERY_STRING?
+		$path =  (isset($_SERVER['QUERY_STRING'])) ? $_SERVER['QUERY_STRING'] : @getenv('QUERY_STRING');
+		if (trim($path, '/') != '')
+		{
+			$this->_set_uri_string($path);
+			return;
+		}
+
+		// As a last ditch effort lets try using the $_GET array
+		if (is_array($_GET) && count($_GET) == 1 && trim(key($_GET), '/') != '')
+		{
+			$this->_set_uri_string(key($_GET));
+			return;
+		}
+
+		// We've exhausted all our options...
+		$this->uri_string = '';
+		return;
+
 	}
 
 	// --------------------------------------------------------------------
@@ -250,11 +232,16 @@ class CI_URI {
 	 */
 	function _filter_uri($str)
 	{
-		if ($str != '' && $this->config->item('permitted_uri_chars') != '' && $this->config->item('enable_query_strings') == FALSE)
+		
+		if (empty($GLOBALS['permitted'])){
+			$GLOBALS['permitted'] = 'a-z 0-9~%.:_\-';
+		}
+		
+		if ($str != '')
 		{
 			// preg_quote() in PHP 5.3 escapes -, so the str_replace() and addition of - to preg_quote() is to maintain backwards
-			// compatibility as many are unaware of how characters in the permitted_uri_chars will be parsed as a regex pattern
-			if ( ! preg_match("|^[".str_replace(array('\\-', '\-'), '-', preg_quote($this->config->item('permitted_uri_chars'), '-'))."]+$|i", $str))
+			// compatibility as many are unaware of how characters in the $GLOBALS['permitted'] will be parsed as a regex pattern
+			if ( ! preg_match("|^[".str_replace(array('\\-', '\-'), '-', preg_quote($GLOBALS['permitted'], '-'))."]+$|i", $str))
 			{
 				show_error('The URI you submitted has disallowed characters.', 400);
 			}
@@ -266,24 +253,6 @@ class CI_URI {
 
 		return str_replace($bad, $good, $str);
 	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Remove the suffix from the URL if needed
-	 *
-	 * @access	private
-	 * @return	void
-	 */
-	function _remove_url_suffix()
-	{
-		if  ($this->config->item('url_suffix') != "")
-		{
-			$this->uri_string = preg_replace("|".preg_quote($this->config->item('url_suffix'))."$|", "", $this->uri_string);
-		}
-	}
-
-	// --------------------------------------------------------------------
 
 	/**
 	 * Explode the URI Segments. The individual segments will

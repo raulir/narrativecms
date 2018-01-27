@@ -105,14 +105,7 @@ if (!session_id()){
  *  Load the framework constants
  * ------------------------------------------------------
  */
-	if (defined('ENVIRONMENT') AND file_exists(APPPATH.'config/'.ENVIRONMENT.'/constants.php'))
-	{
-		require(APPPATH.'config/'.ENVIRONMENT.'/constants.php');
-	}
-	else
-	{
-		require(APPPATH.'config/constants.php');
-	}
+	require(APPPATH.'config/constants.php');
 
 /*
  * ------------------------------------------------------
@@ -158,40 +151,13 @@ if (!session_id()){
 
 /*
  * ------------------------------------------------------
- *  Instantiate the hooks class
- * ------------------------------------------------------
- */
-	$EXT =& load_class('Hooks', 'core');
-
-/*
- * ------------------------------------------------------
- *  Is there a "pre_system" hook?
- * ------------------------------------------------------
- */
-	$EXT->_call_hook('pre_system');
-
-/*
- * ------------------------------------------------------
- *  Instantiate the config class
- * ------------------------------------------------------
- */
-	$CFG =& load_class('Config', 'core');
-
-	// Do we have any manually set config items in the index.php file?
-	if (isset($assign_to_config))
-	{
-		$CFG->_assign_to_config($assign_to_config);
-	}
-
-/*
- * ------------------------------------------------------
  *  Instantiate the UTF-8 class
  * ------------------------------------------------------
  *
  * Note: Order here is rather important as the UTF-8
  * class needs to be used very early on, but it cannot
  * properly determine if UTf-8 can be supported until
- * after the Config class is instantiated.
+ * after the  class is instantiated.
  *
  */
 
@@ -230,13 +196,11 @@ if (!session_id()){
  *	Is there a valid cache file?  If so, we're done...
  * ------------------------------------------------------
  */
-	if ($EXT->_call_hook('cache_override') === FALSE)
-	{
-		if ($OUT->_display_cache($CFG, $URI) == TRUE)
+
+	if ($OUT->_display_cache($CFG, $URI) == TRUE)
 		{
 			exit;
 		}
-	}
 
 /*
  * -----------------------------------------------------
@@ -274,9 +238,8 @@ if (!session_id()){
 	}
 
 
-	if (file_exists(APPPATH.'core/'.$CFG->config['subclass_prefix'].'Controller.php'))
-	{
-		require APPPATH.'core/'.$CFG->config['subclass_prefix'].'Controller.php';
+	if (file_exists(APPPATH.'core/MY_Controller.php')) {
+		require APPPATH.'core/MY_Controller.php';
 	}
 
 	// Load the local application controller
@@ -351,13 +314,6 @@ if (!session_id()){
 
 /*
  * ------------------------------------------------------
- *  Is there a "pre_controller" hook?
- * ------------------------------------------------------
- */
-	$EXT->_call_hook('pre_controller');
-
-/*
- * ------------------------------------------------------
  *  Instantiate the requested controller
  * ------------------------------------------------------
  */
@@ -365,13 +321,6 @@ if (!session_id()){
 	$BM->mark('controller_execution_time_( '.$class.' / '.$method.' )_start');
 
 	$CI = new $class();
-
-/*
- * ------------------------------------------------------
- *  Is there a "post_controller_constructor" hook?
- * ------------------------------------------------------
- */
-	$EXT->_call_hook('post_controller_constructor');
 
 /*
  * ------------------------------------------------------
@@ -422,29 +371,14 @@ if (!session_id()){
 	// Mark a benchmark end point
 	$BM->mark('controller_execution_time_( '.$class.' / '.$method.' )_end');
 
-/*
- * ------------------------------------------------------
- *  Is there a "post_controller" hook?
- * ------------------------------------------------------
- */
-	$EXT->_call_hook('post_controller');
 
 /*
  * ------------------------------------------------------
  *  Send the final rendered output to the browser
  * ------------------------------------------------------
  */
-	if ($EXT->_call_hook('display_override') === FALSE)
-	{
-		$OUT->_display();
-	}
 
-/*
- * ------------------------------------------------------
- *  Is there a "post_system" hook?
- * ------------------------------------------------------
- */
-	$EXT->_call_hook('post_system');
+	$OUT->_display();
 
 /*
  * ------------------------------------------------------

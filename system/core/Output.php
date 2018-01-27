@@ -369,20 +369,6 @@ class CI_Output {
 
 		// --------------------------------------------------------------------
 
-		// Is compression requested?
-		if ($CFG->item('compress_output') === TRUE && $this->_zlib_oc == FALSE)
-		{
-			if (extension_loaded('zlib'))
-			{
-				if (isset($_SERVER['HTTP_ACCEPT_ENCODING']) AND strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== FALSE)
-				{
-					ob_start('ob_gzhandler');
-				}
-			}
-		}
-
-		// --------------------------------------------------------------------
-
 		// Are there any server headers to send?
 		if (count($this->headers) > 0)
 		{
@@ -510,60 +496,14 @@ class CI_Output {
 	 * @param 	object	config class
 	 * @param 	object	uri class
 	 * @return	void
+	 * 
+	 * deprecated!
+	 * 
 	 */
-	function _display_cache(&$CFG, &$URI)
-	{
-		$cache_path = ($CFG->item('cache_path') == '') ? APPPATH.'cache/' : $CFG->item('cache_path');
+	function _display_cache(&$CFG, &$URI) {
+		
+		return false;
 
-		// Build the file path.  The file name is an MD5 hash of the full URI
-		$uri =	$CFG->item('base_url').
-				$CFG->item('index_page').
-				$URI->uri_string;
-
-		$filepath = $cache_path.md5($uri);
-
-		if ( ! @file_exists($filepath))
-		{
-			return FALSE;
-		}
-
-		if ( ! $fp = @fopen($filepath, FOPEN_READ))
-		{
-			return FALSE;
-		}
-
-		flock($fp, LOCK_SH);
-
-		$cache = '';
-		if (filesize($filepath) > 0)
-		{
-			$cache = fread($fp, filesize($filepath));
-		}
-
-		flock($fp, LOCK_UN);
-		fclose($fp);
-
-		// Strip out the embedded timestamp
-		if ( ! preg_match("/(\d+TS--->)/", $cache, $match))
-		{
-			return FALSE;
-		}
-
-		// Has the file expired? If so we'll delete it.
-		if (time() >= trim(str_replace('TS--->', '', $match['1'])))
-		{
-			if (is_really_writable($cache_path))
-			{
-				@unlink($filepath);
-				log_message('debug', "Cache file has expired. File deleted");
-				return FALSE;
-			}
-		}
-
-		// Display the cache
-		$this->_display(str_replace($match['0'], '', $cache));
-		log_message('debug', "Cache file is current. Sending it to browser.");
-		return TRUE;
 	}
 
 

@@ -36,8 +36,9 @@ class cms_panel_model extends CI_Model {
 					$filename = $hfilename;
 					$default_module = $module;
 				}
+
 			}
-			
+				
 		} else {
 			
 			$hfilename = $GLOBALS['config']['base_path'].'modules/'.str_replace('/', '/definitions/',$cms_panel).'.json';
@@ -55,6 +56,12 @@ class cms_panel_model extends CI_Model {
 
 			$json_data = file_get_contents($filename);
 			$panel_params_structure = json_decode($json_data, true);
+			
+			if( json_last_error() ){
+				
+				_html_error('Problem loading json: '.json_last_error_msg().' in '.str_replace($GLOBALS['config']['base_path'], '', $filename));
+				
+			}
 
 			if (empty($panel_params_structure['version']) || $panel_params_structure['version'] < 2){
 				$return['item'] = $panel_params_structure;

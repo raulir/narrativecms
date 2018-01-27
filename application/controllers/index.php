@@ -30,7 +30,7 @@ class Index extends MY_Controller {
 	
    	}
 
-    function index($page_id = 1){
+    function index($page_id = 1, $extra = ''){
     	
 	    $this->load->model('cms_page_panel_model');
     	$this->load->model('cms_page_model');
@@ -55,6 +55,11 @@ class Index extends MY_Controller {
 	    			$page_config[] = array('position' => $position, 'panel' => $pn, 'params' => $params, );
     			}
     		}
+    	}
+    	
+    	// if module list item module/item=XX then / causes second parameter
+    	if (!empty($extra)){
+    		$page_id = $page_id . '/' . $extra;
     	}
 
     	// get panels on page
@@ -91,6 +96,12 @@ class Index extends MY_Controller {
     		// this is when there is page parameter
     		// check if template page exists
     		$page = $this->cms_page_model->get_page_by_slug(str_replace('_', '-', $panel_name));
+    		
+    		// try without model
+    		if (empty($page['page_id']) && stristr($panel_name, '/')){
+    			list($m_module, $m_panel_name) = explode('/', $panel_name);
+    			$page = $this->cms_page_model->get_page_by_slug(str_replace('_', '-', $m_panel_name));
+    		}
 
     		if (!empty($page['page_id'])){
     			

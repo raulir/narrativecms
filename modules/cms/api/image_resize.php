@@ -6,16 +6,6 @@
 
 	if ($_POST['do'] == 'resize'){
 		
-		// needs config from database
-		$db = $GLOBALS['dbconnections'][md5($GLOBALS['config']['database']['hostname'].$GLOBALS['config']['database']['username'].$GLOBALS['config']['database']['password'].$config['database']['database'])];
-
-		$sql = "select b.name, b.value from block a join cms_page_panel_param b on a.block_id = b.cms_page_panel_id where a.panel_name = 'cms_settings' and b.name != ''";
-		$query = mysqli_query($db, $sql);
-
-		while($result = mysqli_fetch_array($query)){
-			$GLOBALS['config'][$result['name']] = $result['value'];
-		}	
-		
 		$name = $_POST['name'];
 		
 		$output = $_POST['output'];

@@ -2,6 +2,136 @@
 
 class cms_search_model extends CI_Model {
 	
+	/*
+	 * 
+	 * params['all'] means to ignore scores and show list pages
+	 * 
+	 */
+	function get_search($term, $params = []){
+		
+		$this->load->model('cms_page_panel_model');
+		$this->load->model('cms_slug_model');
+		$this->load->model('cms_module_model');
+		
+		if (!empty($params['all'])){
+			$sql = "select * from cms_page_panel_param where value like ? ";
+		} else {
+			$sql = "select a.*, b.show from cms_page_panel_param a join block b on a.cms_page_panel_id = b.block_id where b.show = 1 and a.search > 0 and a.value like ? ";
+		}
+		
+		$query = $this->db->query($sql, array('%'.$term.'%', ));
+		$result = $query->result_array();
+
+		// summarise block scores
+		$block_scores = array();
+		$cms_page_panels = array();
+		
+		foreach($result as $row){
+			
+			if (empty($block_scores[$row['cms_page_panel_id']])){
+				$block_scores[$row['cms_page_panel_id']] = 0;
+			}
+			
+			$block_scores[$row['cms_page_panel_id']] += !empty($params['all']) ? 1 : $row['search'];
+			$cms_page_panels[$row['cms_page_panel_id']] = $row['cms_page_panel_id'];
+			
+		}
+		
+		// cms page panel data
+		foreach($cms_page_panels as $cms_page_panel_id => $data){
+			
+			$sql = "select * from block where block_id = ? ";
+			$query = $this->db->query($sql, array($cms_page_panel_id, ));
+			$cms_page_panels[$cms_page_panel_id] = $query->row_array();
+			
+		}
+		
+		// add child panels score to main panel before adding them to page
+		$block_scores_page = [];
+		foreach($block_scores as $cms_page_panel_id => $block_score){
+			
+			if (empty($block_scores_page[$cms_page_panel_id])){
+				$block_scores_page[$cms_page_panel_id] = 0;
+			}
+			
+			// if has parent id -> means child block
+			if ($cms_page_panels[$cms_page_panel_id]['parent_id']){
+			
+				if (empty($block_scores_page[$cms_page_panels[$cms_page_panel_id]['parent_id']])){
+					$block_scores_page[$cms_page_panels[$cms_page_panel_id]['parent_id']] = 0;
+				}
+				
+				$block_scores_page[$cms_page_panels[$cms_page_panel_id]['parent_id']] += $block_score;
+			
+			} else {
+				
+				$block_scores_page[$cms_page_panel_id] += $block_score;
+				
+			}
+			
+		}
+		
+		// get page scores
+		$lists = $this->cms_page_panel_model->get_lists();
+		// DEPRECATED: add lists without module names
+		foreach($lists as $list){
+			if (stristr($list, '/')){
+				list($module, $listname) = explode('/', $list);
+				$lists[$listname] = $listname;
+			}
+		}
+
+		$modules = $this->cms_module_model->get_modules();
+
+		$page_scores = array();
+		foreach($block_scores_page as $block_id => $block_score){
+			
+			// if child panel page, then not present in this array
+			if (empty($cms_page_panels[$block_id])){
+				$sql = "select * from block where block_id = ? ";
+				$query = $this->db->query($sql, array($cms_page_panel_id, ));
+				$cms_page_panels[$block_id] = $query->row_array();
+			}
+		
+			$page_id = !in_array($cms_page_panels[$block_id]['page_id'], [0, 999999]) ? $cms_page_panels[$block_id]['page_id'] : $cms_page_panels[$block_id]['panel_name'].'='.$cms_page_panels[$block_id]['block_id'];
+			
+			// settings block is not page and should be excluded?
+			if (stristr($page_id, '=') && !in_array($cms_page_panels[$block_id]['panel_name'], $lists)){
+				continue;
+			}
+			
+			// if do not show list main pages
+			if (empty($params['all']) && $cms_page_panels[$block_id]['page_id'] != 0 && in_array($cms_page_panels[$block_id]['panel_name'], $lists)){
+				continue;
+			}
+			
+			// don't show pages without slug
+			if (empty($params['all']) && empty($this->cms_slug_model->get_cms_slug_by_target($page_id))){
+				continue;
+			}
+			
+			if (empty($page_scores[$page_id])){
+				$page_scores[$page_id] = $block_score;
+			} else {
+				$page_scores[$page_id] += $block_score;
+			}
+			
+		}
+		
+		asort($block_scores);
+		
+		asort($page_scores);
+		$page_scores = array_reverse($page_scores, true);
+
+		return [
+				'cms_page_panels' => $block_scores,
+				'cms_pages' => $page_scores,
+				'panel_data' => $cms_page_panels,
+		];
+		 
+		
+	}
+	
 	function get_result($term){
 		
 		// TODO: support for parent/child
