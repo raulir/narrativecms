@@ -1,0 +1,36 @@
+{
+	"cms_menu":[
+		{
+			"id":"users",
+			"name":"Users"
+		},
+		{
+			"id":"users",
+			"name":"Users",
+			"parent":"users",
+			"url":"admin/cms_list/user__user/",
+			"access":"user_users"
+		}
+	],
+	"access":[
+		{
+			"access":"*",
+			"name":"ALL"
+		},
+		{
+			"access":"user_*",
+			"name":"User ALL"
+		},
+		{
+			"access":"user_users",
+			"name":"User users"
+		}
+	],
+	"panels":[
+		{
+			"id":"login",
+			"name":"Login"
+		}
+	]
+}
+			

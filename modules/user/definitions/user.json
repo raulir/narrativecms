@@ -1,0 +1,28 @@
+{
+	"version":"2",
+	"list":{
+		"list_title":"Site users",
+		"item_title":"Site user",
+		"filter_fields":{
+			"show":"-- show --"
+		},
+		"link_target":"0"
+	},
+	"item":[ 
+		{
+			"type":"text",
+			"name":"email",
+			"label":"Email"
+		},
+		{
+			"type":"text",
+			"name":"name",
+			"label":"Full name"
+		},
+		{
+			"type":"text",
+			"name":"password",
+			"label":"Password hash"
+		}
+	]
+}
