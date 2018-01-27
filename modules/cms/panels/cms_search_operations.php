@@ -26,6 +26,7 @@ class cms_search_operations extends MY_Controller{
 			$this->load->model('cms_page_model');
 			$this->load->model('cms_slug_model');
 			$this->load->model('cms_page_panel_model');
+			$this->load->model('cms_panel_model');
 			
 			$lists = $this->cms_page_panel_model->get_lists();
 			// DEPRECATED: add lists without module names
@@ -117,10 +118,11 @@ class cms_search_operations extends MY_Controller{
 							$parent_title = mb_substr($parent_title, 0, 22).'..';
 						}
 						$parent_title .= ' &gt; ';
-						$title = $parent_title.$data['title'];
+						$title = $parent_data['panel_name'] . ' - ' . $parent_title.$data['title'];
 					} else {
 						$this->load->model('cms_page_panel_model'); // TODO: bug here - on second round this model disappears
 						$title = $this->run_panel_method($result['panel_data'][$cms_page_panel_id]['panel_name'], 'panel_heading', $data);
+						$title = $result['panel_data'][$cms_page_panel_id]['panel_name'] . ' - ' . $title;
 					}
 					
 								
@@ -133,11 +135,22 @@ class cms_search_operations extends MY_Controller{
 					];
 				
 				} else {
+					
+					// check if editable
+					$panel_data = $this->cms_panel_model->get_cms_panel_config($result['panel_data'][$cms_page_panel_id]['panel_name']);
+					
+					if (empty($panel_data['filename'])){
+						$edit_url = '';
+						$title = $result['panel_data'][$cms_page_panel_id]['panel_name'] . ' - ' . $result['panel_data'][$cms_page_panel_id]['title'];
+					} else {
+						$edit_url = 'cms_page_panel/'.$cms_page_panel_id.'/';
+						$title = $result['panel_data'][$cms_page_panel_id]['title'];
+					}
 				
 					$return['result']['page_panels']['settings'][$cms_page_panel_id] = [
-							'title' => $result['panel_data'][$cms_page_panel_id]['title'],
+							'title' => $title,
 							'cms_page_panel_id' => $cms_page_panel_id,
-							'edit_url' => 'cms_page_panel/'.$cms_page_panel_id.'/',
+							'edit_url' => $edit_url,
 							'score' => $score,
 							'show' => 'show', // always show 
 					];

@@ -90,6 +90,7 @@ class cms_panel_model extends CI_Model {
 		}
 		
 		$return['module'] = !empty($default_module) ? $default_module : '';
+		$return['filename'] = $filename;
 		
 		return $return;
 
