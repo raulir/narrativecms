@@ -47,9 +47,13 @@ if (!file_exists($config['base_path'].'config/'.strtolower($_SERVER['SERVER_NAME
 // TODO: to be refactored like css to cms cssjs settings
 $config['js'] = array(
 		array(
-				'script' => 'js/jquery-3.2.1.min.js',
+				'script' => 'modules/cms/js/jquery/jquery-3.3.1.min.js',
 				'no_pack' => 1,
 				'sync' => (!empty($config['jquery_blocks']) ? '' : 'defer'),
+		),
+		array(
+				'script' => 'modules/cms/js/jquery/jquery-ui.min.js',
+				'sync' => 'defer',
 		),
 		array(
 				'script' => 'js/main.js',
