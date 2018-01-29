@@ -6,7 +6,7 @@ class cms_login extends MY_Controller {
     	
         parent::__construct();        
 
-        $this->js[] = array('script' => 'js/jquery-ui.min.js', );
+        $this->js[] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
 
         $this->js[] = 'js/panels.js';
         $this->js[] = 'modules/cms/js/cms.js';

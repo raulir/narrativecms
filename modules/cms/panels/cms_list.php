@@ -12,7 +12,7 @@ class cms_list extends MY_Controller{
 			exit();
 		}
 
-		$this->js[] = array('script' => 'js/jquery-ui.min.js', );
+		$this->js[] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
 
 	}
 
