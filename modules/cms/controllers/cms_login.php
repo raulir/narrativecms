@@ -8,7 +8,7 @@ class cms_login extends MY_Controller {
 
         $this->js[] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
 
-        $this->js[] = 'js/panels.js';
+        $this->js[] = 'js/main.js';
         $this->js[] = 'modules/cms/js/cms.js';
   
         $GLOBALS['_panel_titles'][] = 'ADMIN';
