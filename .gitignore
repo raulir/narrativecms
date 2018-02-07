@@ -7,6 +7,7 @@ application/cache/*
 
 /cache/*
 !/cache/index.html
+!/system/libraries/Cache/
 
 _db/*
 !_db/cms.sql
