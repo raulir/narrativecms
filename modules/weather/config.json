@@ -1,0 +1,16 @@
+{
+	"panels":[
+		{
+			"id":"weather",
+			"name":"Weather"
+		}
+	],
+	"cms_menu":[
+		{
+			"id":"weather_settings",
+			"name":"Weather settings",
+			"parent":"content",
+			"url":"admin/panel_settings/weather__weather/"
+		}
+	]
+}

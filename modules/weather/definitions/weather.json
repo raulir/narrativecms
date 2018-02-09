@@ -1,0 +1,30 @@
+{
+	"version":"2",
+	"label":"Weather",
+	"item":[
+		{
+			"type":"image",
+			"name":"image",
+			"label":"Image",
+			"category":"content"
+		},
+		{
+			"type":"text",
+			"name":"location",
+			"label":"Location text"
+		}
+	],
+	"settings":[
+		{
+			"type":"text",
+			"name":"coordinates",
+			"label":"Coordinates"
+		},
+		{
+			"type":"text",
+			"name":"weather_api_key",
+			"label":"Weather API key",
+			"help":"For OpenWeatherMap API"
+		}
+	]
+}

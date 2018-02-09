@@ -1,0 +1,27 @@
+.weather_container {
+	padding: 0 0 0 5.2rem;
+}
+
+.weather_content {
+	min-height:	calc(100vh - 5.2rem);
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+	background-position: center;
+	line-height: 7.1rem;
+	font-size: 6.98rem;
+	letter-spacing: 0.5rem;
+	padding: 3.4rem 3.0rem;
+	box-sizing: border-box;
+}
+
+.weather_time {
+	
+}
+
+.weather_location {
+	
+}
+
+.weather_weather {
+	text-transform: capitalize;
+}
