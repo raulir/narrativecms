@@ -385,7 +385,7 @@ class MY_Controller extends CI_Controller{
     	} else {
     		
     		$this->load->model('cms_page_panel_model');
-    	
+
     		$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'cms_cssjs_settings', 'page_id' => 0, ]);
     		if (!empty($settings_a[0]['css'])){
     			$global_css = $settings_a[0]['css'];
@@ -547,6 +547,13 @@ class MY_Controller extends CI_Controller{
      * for main controller to generate panels output as texts
      */
     function render($page_config){
+    	
+    	foreach($page_config as $key => $panel_config){
+    		if (stristr($panel_config['panel'], '/')){
+    			list($module, $panel_name) = explode('/', $panel_config['panel']);
+    			$page_config[$key]['module'] = $module;
+    		}
+    	}
 
     	// do panel actions
     	foreach($page_config as $key => $panel_config){
@@ -566,7 +573,7 @@ class MY_Controller extends CI_Controller{
     		if (empty($params['cms_page_panel_id'])) $params['cms_page_panel_id'] = 0;
 
     		// cache file name
-    		$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.$panel_config['panel'].'_'.md5($panel_config['panel'].serialize($params)).'.txt';
+    		$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.str_replace('/', '__', $panel_config['panel']).'_'.md5($panel_config['panel'].serialize($params)).'.txt';
 
     		// check for cache
     		if (empty($action_result) && !(!empty($panel_config['module']) && $panel_config['module'] == 'cms') 
@@ -598,6 +605,7 @@ class MY_Controller extends CI_Controller{
  
     		}
     		
+    		// if no data from cache
     		if (empty($panel_data)){
     			
     			$params['module'] = !empty($panel_config['module']) ? $panel_config['module'] : '';
