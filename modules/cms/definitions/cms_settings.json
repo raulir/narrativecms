@@ -100,6 +100,23 @@
 			"help":"[Use deprecated features]||Switch on some deprecated features to enable backwards compatibility."
 		},
 		{
+			"type":"select",
+			"name":"cron_trigger",
+			"label":"Repeating tasks trigger",
+			"values":{
+				"cron":"Cron",
+				"visits":"Visits"
+			},
+			"default":"visits",
+			"help":"[visits] - need to run regularly repeating tasks is checked when users visit||[cron] - when server crontab calls /cms_operations/cron/ (preferred, but not always available)"
+		},
+		{
+			"type":"text",
+			"name":"email",
+			"label":"Admin email",
+			"help":"Email to send notifications"
+		},
+		{
 			"type":"subtitle",
 			"label":"Sizing",
 			"width":"wide",

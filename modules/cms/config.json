@@ -53,6 +53,13 @@
 			"url":"admin/dump/"
 		},
 		{
+			"id":"cms_cron",
+			"name":"Repeating tasks",
+			"parent":"cms",
+			"access":"cms_cron",
+			"url":"admin/panel_settings/cms__cms_cron/"
+		},
+		{
 			"id":"cms_update",
 			"name":"Update",
 			"parent":"cms",
@@ -102,6 +109,10 @@
 		{
 			"access":"cms_search",
 			"name":"CMS search"
+		},
+		{
+			"access":"cms_cron",
+			"name":"CMS cron"
 		}
 	],
 	"panels":[

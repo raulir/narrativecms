@@ -1,0 +1,36 @@
+{
+	"version":"2",
+	"label":"CMS repeating tasks",
+	"item":[
+		{
+			"type":"repeater",
+			"name":"items",
+			"label":"Items",
+			"fields":[
+				{
+					"type":"text",
+					"name":"panel",
+					"label":"Panel name",
+					"help":"Calls panel_action() after every x timeunits||Minimum is 5 minutes"
+				},
+				{
+					"type":"select",
+					"name":"timeunit",
+					"label":"Time unit",
+					"values":{
+						"minute":"Minute",
+						"hour":"Hour",
+						"day":"Day"
+					},
+					"default":"day"
+				},
+				{
+					"type":"text",
+					"name":"count",
+					"label":"Count",
+					"default":"1"
+				}
+			]
+		}
+ 	]
+}

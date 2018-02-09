@@ -60,12 +60,12 @@ class MY_Controller extends CI_Controller{
     /**
      * run controller panel_action part for a panel
      */
-    function run_panel_method($panel_name, $panel_method, $params){
+    function run_panel_method($panel_name_param, $panel_method, $params = []){
     	 
     	if (!empty($params['_extends'])){
-    		$files = $this->get_panel_filenames($panel_name, $params['_extends']);
+    		$files = $this->get_panel_filenames($panel_name_param, $params['_extends']);
     	} else {
-    		$files = $this->get_panel_filenames($panel_name);
+    		$files = $this->get_panel_filenames($panel_name_param);
     	}
 
     	// if extended, run extended controller first

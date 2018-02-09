@@ -24,5 +24,13 @@ class cms_operations extends MY_Controller {
    		header('Location: '.$_SERVER['REQUEST_URI']);
    		
    	}
+   	
+   	function cron(){
+   		
+   		$this->load->model('cms/cms_helper_model');
+   		
+   		$this->cms_helper_model->run_cron();
+   		
+   	}
 
 }
