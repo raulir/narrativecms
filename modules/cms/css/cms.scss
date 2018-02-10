@@ -28,6 +28,11 @@ $colour_border: #a0a0a0;
     font-style: normal;
 }
 
+html {
+    min-height: 100%;
+    font-size: 10px;
+}
+
 body {
 	font-family: foundrysterling;
 	font-weight: 200;
@@ -42,10 +47,7 @@ body {
     color: black;
     background-position: center;
     background-size: cover;
-}
-
-html {
-    min-height: 100%;
+    font-size: 1.6rem;
 }
 
 input {

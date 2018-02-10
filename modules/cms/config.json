@@ -118,7 +118,18 @@
 	"panels":[
 		{
 			"id":"cms_normalise",
-			"name":"CMS normalise css"
+			"name":"CMS normalise css",
+			"flags":[
+				"hidden"
+			]
+		},
+		{
+			"id":"cms_log_rotate",
+			"name":"CMS log rotate",
+			"flags":[
+				"hidden",
+				"cron"
+			]
 		}
 	],
 	"api":[

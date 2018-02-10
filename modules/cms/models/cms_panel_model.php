@@ -168,5 +168,48 @@ class cms_panel_model extends CI_Model {
 		return $return;
 		
 	}
+	
+	/**
+	 * 
+	 * get panels defined over all active modules
+	 * 
+	 * filter by flag
+	 * 
+	 * @param string $flag
+	 * if set, returns all panels with this flag
+	 * if empty, returns all non-hidden panels 
+	 * 
+	 * @return unknown[]
+	 * 
+	 */
+	function get_cms_panels($flag = ''){
+		
+		// this is already present in config
+		
+		$return = [];
+		
+		foreach($GLOBALS['config']['module'] as $module => $data){
+			
+			foreach($data['panels'] as $panel){
+				
+				if (empty($flag)){
+					
+					if (empty($panel['flags']) || !in_array('hidden', $panel['flags'])){
+						$return[$module.'/'.$panel['id']] = $panel['name'];
+					}
+					
+				} elseif (!empty($panel['flags']) && in_array($flag, $panel['flags'])) {
+					
+					$return[$module.'/'.$panel['id']] = $panel['name'];
+					
+				}
+				
+			}
+			
+		}
+		
+		return $return;
+		
+	}
 
 }

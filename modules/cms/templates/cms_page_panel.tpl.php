@@ -364,15 +364,13 @@
 								'help' => !empty($field['help']) ? $field['help'] : '',
 						));
 						
-					} elseif ($field['type'] == 'subtitle'){
+					} else {
 						
-						$return .= _panel('cms/cms_input_subtitle', array(
-								'label' => $field['label'],
-								'width' => !empty($field['width']) ? $field['width'] : 'wide',
-								'_return' => true, 
-								'extra_class' => ($prefix ? '' : 'admin_column'),
-								'help' => !empty($field['help']) ? $field['help'] : '',
-						));
+						$field['_return'] = true;
+						$field['value'] = ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) );
+						
+						// add field
+						$return .= _panel('cms/cms_input', $field);
 						
 					}
 

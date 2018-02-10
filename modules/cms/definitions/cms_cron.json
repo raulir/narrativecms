@@ -8,9 +8,10 @@
 			"label":"Items",
 			"fields":[
 				{
-					"type":"text",
+					"type":"cms_panel",
 					"name":"panel",
-					"label":"Panel name",
+					"flag":"cron",
+					"label":"Task name",
 					"help":"Calls panel_action() after every x timeunits||Minimum is 5 minutes"
 				},
 				{

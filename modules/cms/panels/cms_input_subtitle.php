@@ -2,18 +2,12 @@
 
 class cms_input_subtitle extends MY_Controller{
 
-	function __construct(){
+	function panel_params($params){
+		
+		$params['width'] = !empty($params['width']) ? $params['width'] : 'wide';
 
-		parent::__construct();
-
-		// check if user
-		if(empty($_SESSION['cms_user']['cms_user_id'])){
-			header('Location: '.$GLOBALS['config']['base_url'].'cms_login/', true, 302);
-			exit();
-		}
-
-		$this->scss[] = ['script' => 'modules/cms/css/cms_input.scss', ];
-	
+		return $params;
+		
 	}
 
 }

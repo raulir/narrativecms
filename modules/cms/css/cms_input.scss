@@ -60,3 +60,30 @@
 	transform: translateZ(0);
 	-webkit-transform: translateZ(0);
 }
+
+/* newer styles */
+
+.cms_input_container {
+	padding: 0 0 1rem 0;
+	position: relative;
+}
+
+.cms_input_subtitle_content {
+	position: relative;
+	box-sizing: border-box;
+}
+
+.cms_input_label {
+	position: relative;
+	z-index: 20;
+	box-sizing: border-box;
+    font-size: 1.6rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    width: 12.0rem;
+    line-height: 2.6rem;
+    max-height: 2.6rem;
+    letter-spacing: -0.045rem;
+}
