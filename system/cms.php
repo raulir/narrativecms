@@ -131,4 +131,14 @@ if (stristr($request_uri, '/')){
 	
 }
 
+// check if cron needs to run
+if (!empty($GLOBALS['config']['cron_trigger']) && $GLOBALS['config']['cron_trigger'] == 'visits'){
+	
+	$cron_data_filename = $GLOBALS['config']['base_path'].'cache/cron.json';
+	if (!file_exists($cron_data_filename) || (time() - filemtime($cron_data_filename)) >= 240){
+		$GLOBALS['config']['js'][] = ['script' => 'modules/cms/js/cms_cron_run.js', 'sync' => 'defer', ];
+	}
+
+}
+
 require_once BASEPATH.'core/CodeIgniter.php';

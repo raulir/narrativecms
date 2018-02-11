@@ -24,7 +24,7 @@ class cms_helper_model extends CI_Model {
 		// get cron tasks
 		$this->load->model('cms/cms_page_panel_model');
 		$cron_settings = $this->cms_page_panel_model->get_cms_page_panel_settings('cms/cms_cron');
-		
+
 		foreach($cron_settings['items'] as $task){
 			
 			$period_length = ($task['timeunit'] == 'minute' ? 60 : ($task['timeunit'] == 'hour' ? 3600 : 86400)) * $task['count'];

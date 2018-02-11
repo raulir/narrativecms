@@ -368,6 +368,7 @@
 						
 						$field['_return'] = true;
 						$field['value'] = ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) );
+						$field['name'] = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
 						
 						// add field
 						$return .= _panel('cms/cms_input', $field);
