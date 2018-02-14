@@ -105,7 +105,7 @@ class cms_update_model extends CI_Model {
 			
 			// write hashes to hash cache
 			$this->load->model('cms_helper_model');
-			file_put_contents($filename, $this->cms_helper_model->json_format(array(
+			file_put_contents($filename, json_encode(array(
 				'version' => $version_major.'.'.$version_minor.'.'.$version_number,
 				'version_major' => $version_major,
 				'version_minor' => $version_minor,
@@ -115,7 +115,7 @@ class cms_update_model extends CI_Model {
 				'update_time' => !empty($old_data['update_time']) ? $old_data['update_time'] : '0',
 				'current_hash' => $current_hash,
 				'files' => $hashes,
-			)));
+			)), JSON_PRETTY_PRINT);
 		
 		}
 

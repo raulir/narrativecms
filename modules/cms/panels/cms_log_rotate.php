@@ -4,8 +4,9 @@ class cms_log_rotate extends MY_Controller{
 
 	function panel_action(){
 		
-		// get log settings
-		
+		if (empty($GLOBALS['config']['errors_log'])){
+			return;
+		}
 		
 		$explode_str = '] ';
 		$trim_str = '[';
