@@ -1,5 +1,5 @@
 
-<div class="cms_input_container">
+<div class="cms_input_area">
 	
 	<div class="cms_input_content cms_input_select">
 

@@ -6,7 +6,7 @@ class cms_input_panel extends MY_Controller{
 		
 		$this->load->model('cms/cms_panel_model');
 		
-		$params['values'] = $this->cms_panel_model->get_cms_panels('cron');
+		$params['values'] = $this->cms_panel_model->get_cms_panels($params['flag']);
 		
 		return $params;
 		

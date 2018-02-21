@@ -158,57 +158,6 @@ i {
 	-webkit-transform: translateZ(0);
 }
 
-.cms_input_grid {
-	
-}
-
-.cms_input_grid tr {
-	height: 24px;
-	line-height: 24px;
-	vertical-align: middle;
-}
-
-.cms_input_grid td, .cms_input_grid th {
-	vertical-align: middle;
-	text-align: left;
-	padding: 0px 3px;
-	border: 1px solid #a0a0a0;
-}
-
-.cms_input_grid th {
-	font-weight: normal;
-}
-
-.cms_input_grid .cms_input_grid_centered {
-	text-align: center;
-}
-
-.cms_input_grid .cms_input_grid_centered select {
-	border: 1px solid white;
-	color: #a0a0a0;
-}
-
-.cms_input_grid .cms_input_grid_small {
-	font-size: 14px;
-}
-
-.cms_input_grid input {
-	box-sizing: border-box;
-	margin: 0px;
-	padding: 0px;
-	line-height: 24px;
-	font-size: 15px;
-	font-family: foundrysterling;
-	border: 0px;
-	width: 80px;
-	text-align: center;
-	font-weight: 200;
-}
-
-.cms_input_grid input:focus {
-    outline: none;
-}
-
 .admin_container {
 	display: table-cell;
 	vertical-align: top;
@@ -475,26 +424,38 @@ a.admin_tool_text:hover {
 /* repeater fixes and other stuff */
 
 .admin_repeater_container {
-	/* margin-left: -20px; */
-	clear: both;
+	width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    left: 10px;
+    clear: both;
+    text-align: left;
+    font-size: 0;
+    letter-spacing: 0;
+    line-height: 0;
 }
 
 .admin_repeater_container .admin_block_label {
-	margin-left: 20px;
+	margin-left: 10px;
+    width: calc(100% - 20px);
+    text-align: left;
 }
 
 .cms_repeater_block {
 	box-sizing: border-box;
-	float: left;
-	margin-left: 20px;
-	margin-bottom: 20px;
-	border: 1px solid #c0c0c0;
+	display: inline-block;
+	margin: 0 10px 20px 10px;
+	vertical-align: top;
+	border: 1px solid #909090;
 	padding: 5px 9px 2px 9px ;
 	background-color: white;
 	background-repeat: no-repeat;
 	background-position: 6px 6px;
 	background-size: 14px 14px;
-	width: 460px;	
+	width: 460px;
+	font-size: 1.6rem;
+	line-height: 1.6rem;
+	text-align: left;
 }
 
 .cms_repeater_block .admin_column {
@@ -626,7 +587,7 @@ a.admin_tool_text:hover {
 	margin-left: -20px;
 }
 
-.admin_block_container>.cms_input {
+.admin_block_container>.cms_input, .admin_block_container>.cms_input_container>.cms_input {
 	float: left;
 	width: 460px;
 	margin-left: 20px;

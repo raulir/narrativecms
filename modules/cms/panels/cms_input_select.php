@@ -15,5 +15,5 @@ class cms_input_select extends MY_Controller{
 		$this->scss[] = ['script' => 'modules/cms/css/cms_input.scss', ];
 	
 	}
-
+	
 }

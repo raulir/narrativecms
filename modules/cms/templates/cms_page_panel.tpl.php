@@ -212,6 +212,7 @@
 								'extra_data' => $max_chars_data.' '.$meta_data.' ',
 								'_return' => true,
 								'help' => !empty($field['help']) ? $field['help'] : '',
+								'params' => $field,
 						]);
 												
 					} elseif ($field['type'] == 'textarea'){
@@ -232,7 +233,8 @@
 								'mandatory_class' => $mandatory_class,
 								'tinymce' => !empty($field['html']),
 								'_return' => true,
-								'help' => !empty($field['help']) ? $field['help'] : '', 
+								'help' => !empty($field['help']) ? $field['help'] : '',
+								'params' => $field,
 						));
 
 					} elseif ($field['type'] == 'image'){
@@ -247,7 +249,8 @@
 								'extra_class' => ($prefix ? '' : 'admin_column'),
 								'mandatory_class' => $mandatory_class,
 								'extra_data' => ' data-name="'.$field['name'].'" ',
-								'help' => !empty($field['help']) ? $field['help'] : '', 
+								'help' => !empty($field['help']) ? $field['help'] : '',
+								'params' => $field,
 						));
 						
 					} elseif ($field['type'] == 'cms_page_panels' || $field['type'] == 'panels'){
@@ -293,6 +296,7 @@
 								'extra_class' => ($prefix ? '' : 'admin_column'), 
 								'mandatory_class' => $mandatory_class,
 								'help' => !empty($field['help']) ? $field['help'] : '', 
+								'params' => $field,
 						));
 						
 					} elseif ($field['type'] == 'fk'){
@@ -316,7 +320,8 @@
 										'name_clean' => !empty($name_clean) ? $name_clean : $name, 
 										'extra_class' => ($prefix ? '' : 'admin_column'), 
 										'mandatory_class' => $mandatory_class,
-										'help' => !empty($field['help']) ? $field['help'] : '', 
+										'help' => !empty($field['help']) ? $field['help'] : '',
+										'params' => $field,
 								],
 								'_return' => true,
 						]);

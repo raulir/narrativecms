@@ -139,6 +139,11 @@ $(document).ready(function() {
 			cms_input_file_init();
 		}
 		
+		// init groups
+		if (typeof cms_input_groups_init == 'function'){
+			cms_input_groups_init();
+		}
+		
 		// init repeater selects
 		if (block_html.indexOf('repeater_select') > -1){
 			cms_input_repeater_select_init();
