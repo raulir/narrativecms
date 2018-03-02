@@ -34,21 +34,25 @@ class Files extends MY_Controller {
 	    	
 	    	if (pathinfo($file['name'], PATHINFO_EXTENSION) == 'pdf'){
 				header('Content-Type: application/pdf');
+	    	} else if (pathinfo($file['name'], PATHINFO_EXTENSION) == 'png'){
+				header('Content-Type: image/png');
+	    	} else if (pathinfo($file['name'], PATHINFO_EXTENSION) == 'gif'){
+				header('Content-Type: image/gif');
+	    	} else {
+	    		header('Content-Type: application/x-download');
 	    	}
+	    	
+	    	header('Cache-Control: private, max-age=0, must-revalidate');
+	    	header('Pragma: public');
 	    	
 	    	readfile($GLOBALS['config']['upload_path'].$file['filename']);
     		
     		exit();
     		
     	} else {
+
     		print('Problem accessing file!');
-/*
-    		print($filename);
-    		
-    		print_r($file);
-    		
-    		var_dump(file_exists($GLOBALS['config']['upload_path'].$file['filename']));
-*/
+
 		}
 
     }
