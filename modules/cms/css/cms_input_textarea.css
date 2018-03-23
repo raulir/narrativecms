@@ -25,7 +25,7 @@
 	width: 440px;
 }
 
-.admin_block_container>.cms_input_wide_textarea {
+.cms_input_container>.cms_input.cms_input_wide_textarea {
 	width: 940px;
 }
 

@@ -6,7 +6,11 @@ class cms_input_panel extends MY_Controller{
 		
 		$this->load->model('cms/cms_panel_model');
 		
-		$params['values'] = $this->cms_panel_model->get_cms_panels($params['flag']);
+		if (!empty($params['flag'])){
+			$params['values'] = $this->cms_panel_model->get_cms_panels($params['flag']);
+		} else {
+			$params['values'] = $this->cms_panel_model->get_cms_panels();
+		}
 		
 		return $params;
 		
