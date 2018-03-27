@@ -1,0 +1,43 @@
+{
+	"version":"2",
+	"label":"Export",
+	"item":[
+		{
+			"type":"text",
+			"name":"target_folder",
+			"label":"Theme folder"
+		},
+		{
+			"type":"repeater",
+			"name":"panels",
+			"label":"Panels",
+			"fields":[
+				{
+					"type":"cms_panel",
+					"name":"panel",
+					"label":"Panel",
+					"help":"Panel structure to be exported as ACF group",
+					"flag":"eg"
+				}
+			]
+		},
+		{
+			"type":"repeater",
+			"name":"pages",
+			"label":"Pages",
+			"fields":[
+				{
+					"type":"page",
+					"name":"page",
+					"label":"Page",
+					"help":"Page structure to be exported as ACF group"
+				}
+			]
+		},
+		{
+			"type":"acfsync/export_button",
+			"name":"export_button",
+			"label":"Export"
+		}
+	]
+}

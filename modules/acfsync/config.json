@@ -1,0 +1,15 @@
+{
+	"cms_menu":[
+		{
+			"id":"content",
+			"name":"Content"
+		},
+		{
+			"id":"acfsync",
+			"name":"ACF structure export",
+			"parent":"content",
+			"url":"admin/panel_settings/acfsync__export/",
+			"access":"acfsync_export"
+		}
+	]
+}
