@@ -22,16 +22,16 @@
 
 /* widths */
 
-.cms_input_subtitle_wide {
-
-	.admin_block_container > & {
-		width: 940px;
-	}
-
+.admin_block_container > .cms_input_container > .cms_input.cms_input_subtitle_wide {
+	width: 940px;
 }
 
 .cms_input_subtitle_narrow {
 	
+	.admin_block_container > & {
+		width: 460px;
+	}
+
 }
 
 .cms_repeater_block {
