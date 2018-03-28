@@ -2,6 +2,24 @@
 
 class export extends MY_Controller{
 	
+	function recurse_copy($src,$dst) {
+		
+		$dir = opendir($src);
+		@mkdir($dst);
+		while(false !== ( $file = readdir($dir)) ) {
+			if (( $file != '.' ) && ( $file != '..' )) {
+				if ( is_dir($src . '/' . $file) ) {
+					recurse_copy($src . '/' . $file,$dst . '/' . $file);
+				}
+				else {
+					copy($src . '/' . $file,$dst . '/' . $file);
+				}
+			}
+		}
+		closedir($dir);
+	
+	}
+	
 	function parse_fields($fields_data, $panel_name, $append_to = [], $prefix = ''){
 			
 		foreach($fields_data as $field){
@@ -75,6 +93,14 @@ class export extends MY_Controller{
 						
 					}
 				
+				} elseif ($field['type'] == 'link'){
+				
+					$append_to[$target_field_key]['key'] = $target_field_key;
+					$append_to[$target_field_key]['label'] = $field['label'];
+					$append_to[$target_field_key]['name'] = $prefix.$field['name'];
+					$append_to[$target_field_key]['type'] = $field['type'];
+					$append_to[$target_field_key]['instructions'] = !empty($field['help']) ? $field['help'] : '';
+
 				}
 	
 			}
@@ -204,6 +230,52 @@ class export extends MY_Controller{
 							
 				}
 				
+				// css
+				$css_target_folder = $GLOBALS['config']['base_path'].$settings['target_folder'].'panels/css/';
+				
+				if (!file_exists($GLOBALS['config']['base_path'].$settings['target_folder'].'panels/css/')){
+					mkdir($GLOBALS['config']['base_path'].$settings['target_folder'].'panels/css/');
+				}
+				
+				if (!file_exists($css_target_folder.$panel_name.'.css') || 
+						filemtime($css_target_folder.$panel_name.'.css') < filemtime($GLOBALS['config']['base_path'].'cache/'.$module_name.'__'.$panel_name.'.css')){
+					
+					copy($GLOBALS['config']['base_path'].'cache/'.$module_name.'__'.$panel_name.'.css', $css_target_folder.$panel_name.'.css');
+							
+				}
+				
+				// js
+				$js_target_folder = $GLOBALS['config']['base_path'].$settings['target_folder'].'panels/js/';
+				
+				if (!file_exists($GLOBALS['config']['base_path'].$settings['target_folder'].'panels/js/')){
+					mkdir($GLOBALS['config']['base_path'].$settings['target_folder'].'panels/js/');
+				}
+				
+				if (file_exists($GLOBALS['config']['base_path'].'modules/'.$module_name.'/js/'.$panel_name.'.js') && (!file_exists($css_target_folder.$panel_name.'.js') || 
+						filemtime($css_target_folder.$panel_name.'.js') < filemtime($GLOBALS['config']['base_path'].'modules/'.$module_name.'/js/'.$panel_name.'.js'))){
+								
+							copy($GLOBALS['config']['base_path'].'modules/'.$module_name.'/js/'.$panel_name.'.js', $js_target_folder.$panel_name.'.js');
+								
+				}
+				
+			}
+			
+			// base css
+			if (!file_exists($css_target_folder.$module_name.'.css') ||
+					filemtime($css_target_folder.$module_name.'.css') < filemtime($GLOBALS['config']['base_path'].'cache/'.$module_name.'__'.$module_name.'.css')){
+				
+				$base_css = file_get_contents($GLOBALS['config']['base_path'].'cache/'.$module_name.'__'.$module_name.'.css');
+				
+				$base_css = str_replace('../modules/'.$module_name, '/panels', $base_css);
+
+				file_put_contents($css_target_folder.'base.css', $base_css);
+
+			}
+			
+			// copy over fonts etc
+			$dirs = glob($GLOBALS['config']['base_path'].'modules/'.$module_name.'/css/*', GLOB_ONLYDIR);
+			foreach($dirs as $dir){
+				$this->recurse_copy($dir, $css_target_folder.basename($dir));
 			}
 			
 			// go over pages
