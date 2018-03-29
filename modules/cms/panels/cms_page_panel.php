@@ -189,8 +189,6 @@ class cms_page_panel extends MY_Controller{
 			}
 		}
 		
-		$return['fk_data'] = $this->cms_panel_model->get_cms_panel_fk_data($panel_structure);
-
 		$return['panel_params_structure'] = $panel_structure; // $this->cms_panel_model->get_cms_panel_definition($return['block']['panel_definition']);
 
 		// print_r($return);

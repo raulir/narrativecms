@@ -80,6 +80,17 @@ class cms_update_model extends CI_Model {
 		);
 		$version_hashes[] = $cms_md5;
 		
+		// LICENCE
+		if (file_exists(str_replace("\\", '/', $GLOBALS['config']['base_path']).'LICENCE')){
+			$cms_md5 = md5_file(str_replace("\\", '/', $GLOBALS['config']['base_path']).'LICENCE');
+			$hashes[] = array(
+					'filename' => 'LICENCE',
+					'hash' => $cms_md5,
+					'size' => filesize(str_replace("\\", '/', $GLOBALS['config']['base_path']).'LICENCE'),
+			);
+			$version_hashes[] = $cms_md5;
+		}
+		
 		sort($version_hashes);
 		
 		$current_hash = md5(implode($version_hashes));

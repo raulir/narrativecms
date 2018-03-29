@@ -105,7 +105,7 @@
 		
 			// TODO: move this php to some better place
 		
-			function print_fields($structure, $data = array(), $fk_data = array(), $prefix = '', $key = ''){
+			function print_fields($structure, $data = array(), $prefix = '', $key = ''){
 				
 				$block_id = !empty($data['block_id']) ? $data['block_id'] : 0;
 
@@ -180,7 +180,7 @@
 								$return .= '<div class="cms_repeater_block ui-sortable-handle" ' .
 										'style="background-image: url(\'' . $GLOBALS['config']['base_url'] . 'modules/cms/img/drag.png\'); ">'.
 										'<div class="cms_repeater_block_toolbar"><div class="cms_repeater_block_delete">Remove</div></div>'.
-										print_fields($field['fields'], $repeater_data, $fk_data, $field['name'], $repeater_key).
+										print_fields($field['fields'], $repeater_data, $field['name'], $repeater_key).
 										'</div>';
 							}
 						}
@@ -192,7 +192,7 @@
 								str_replace('"', '#', '<div class="cms_repeater_block" ' .
 										'style="background-image: url(\'' . $GLOBALS['config']['base_url'] . 'modules/cms/img/drag.png\'); ">'.
 										'<div class="cms_repeater_block_toolbar"><div class="cms_repeater_block_delete">Remove</div></div>'.
-										print_fields($field['fields'], array(), $fk_data, $field['name'], '###random###').
+										print_fields($field['fields'], array(), $field['name'], '###random###').
 										'</div>').
 								'" data-name="'.$field['name'].'">Add element</div><div style="clear: both; "></div>';
 						
@@ -299,33 +299,6 @@
 								'params' => $field,
 						));
 						
-					} elseif ($field['type'] == 'fk'){
-						
-						if (empty($field['add_empty'])){
-							$field_name = (!empty($field['field']) ? $field['field'] : $field['name']);
-							if (isset($fk_data[$field_name][0]) && $fk_data[$field_name][0] == '-- not specified --'){
-								unset($fk_data[$field_name][0]);
-							}
-						}
-
-						$name = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
-						$name_clean = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
-						
-						$return .= _panel('cms_input_fk', [
-								'select_params' => [
-										'label' => $field['label'].$mandatory_label, 
-										'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
-										'values' => !empty($fk_data[$field['target']]) ? $fk_data[$field['target']] : $fk_data[(!empty($field['field']) ? $field['field'] : $field['name'])],
-										'name' => $name, 
-										'name_clean' => !empty($name_clean) ? $name_clean : $name, 
-										'extra_class' => ($prefix ? '' : 'admin_column'), 
-										'mandatory_class' => $mandatory_class,
-										'help' => !empty($field['help']) ? $field['help'] : '',
-										'params' => $field,
-								],
-								'_return' => true,
-						]);
-						
 					} elseif ($field['type'] == 'repeater_select'){
 						
 						$repeater_select_data = [
@@ -373,7 +346,10 @@
 						
 						$field['_return'] = true;
 						$field['value'] = ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) );
+						$field['name_clean'] = $field['name'];
 						$field['name'] = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
+						$field['label'] = $field['label'].$mandatory_label;
+						$field['panel_structure'] = $structure;
 						
 						// add field
 						$return .= _panel('cms/cms_input', $field);
@@ -386,7 +362,7 @@
 				
 			}
 
-			print('<div class="admin_block_container">'.print_fields($panel_params_structure, $block, $fk_data).'</div>');
+			print('<div class="admin_block_container">'.print_fields($panel_params_structure, $block).'</div>');
 			
 		?>
 		
