@@ -101,6 +101,17 @@ class export extends MY_Controller{
 					$append_to[$target_field_key]['type'] = $field['type'];
 					$append_to[$target_field_key]['instructions'] = !empty($field['help']) ? $field['help'] : '';
 
+				} elseif ($field['type'] == 'fk'){
+					
+					list($module_name, $list_name) = explode('/', $field['list']);
+				
+					$append_to[$target_field_key]['key'] = $target_field_key;
+					$append_to[$target_field_key]['label'] = $field['label'];
+					$append_to[$target_field_key]['name'] = $prefix.$field['name'];
+					$append_to[$target_field_key]['type'] = 'post_object';
+					$append_to[$target_field_key]['instructions'] = !empty($field['help']) ? $field['help'] : '';
+					$append_to[$target_field_key]['post_type'] = [$list_name];
+						
 				}
 	
 			}
