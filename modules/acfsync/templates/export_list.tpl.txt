@@ -1,0 +1,22 @@
+<?php
+
+function register_post_type_#name#(){
+
+	register_post_type( '#name#',
+		    [
+		        'labels' => array(
+		            'name' => __( '#plural#' ),
+		            'singular_name' => __( '#singular#' ),
+		            'menu_name' => __( '#plural#' ),
+		        ),
+		        'public' => true,
+		        'has_archive' => true,
+		        'capability_type'    => 'post',
+		        'rewrite' => array('slug' => '#name#'),
+		        'supports' => array( 'title', 'revisions', 'custom-fields', ),
+		    ]
+	);
+
+};
+
+add_action('init', 'register_post_type_#name#');

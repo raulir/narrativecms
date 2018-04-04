@@ -4,8 +4,15 @@
 	"item":[
 		{
 			"type":"text",
+			"name":"main_module",
+			"label":"Main module",
+			"help":"Lists are exported only from this module"
+		},
+		{
+			"type":"text",
 			"name":"target_folder",
-			"label":"Theme folder"
+			"label":"Target folder",
+			"help":"Full path to target theme folder in WP"
 		},
 		{
 			"type":"repeater",

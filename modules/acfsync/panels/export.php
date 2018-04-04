@@ -111,6 +111,15 @@ class export extends MY_Controller{
 					$append_to[$target_field_key]['type'] = 'post_object';
 					$append_to[$target_field_key]['instructions'] = !empty($field['help']) ? $field['help'] : '';
 					$append_to[$target_field_key]['post_type'] = [$list_name];
+					$append_to[$target_field_key]['return_format'] = 'id';
+						
+				} elseif ($field['type'] == 'file'){
+					
+					$append_to[$target_field_key]['key'] = $target_field_key;
+					$append_to[$target_field_key]['label'] = $field['label'];
+					$append_to[$target_field_key]['name'] = $prefix.$field['name'];
+					$append_to[$target_field_key]['type'] = $field['type'];
+					$append_to[$target_field_key]['instructions'] = !empty($field['help']) ? $field['help'] : '';
 						
 				}
 	
@@ -139,7 +148,64 @@ class export extends MY_Controller{
 				print('bad folder');
 				die();
 			}
+			
+			// go over lists
+			$list_target_folder = $GLOBALS['config']['base_path'].$settings['target_folder'].'panels/cpts/';
+			if (!file_exists($list_target_folder)){
+				mkdir($list_target_folder);
+			}
+				
+			$lists_all = $this->cms_page_panel_model->get_lists();
+			$lists = [];
+			$lists_to_export = [];
+				
+			foreach($lists_all as $list){
+					
+				list($module_name, $list_name) = explode('/', $list);
+			
+				if ($module_name == $settings['main_module']) {
+						
+					$list_definition = $this->cms_panel_model->get_cms_panel_config($list);
+						
+					$lists[] = [
+							'name' => $list_name,
+							'singular' => $list_definition['list']['item_title'],
+							'plural' => $list_definition['list']['list_title'],
+					];
 
+					// add list to panels to be exported
+					$lists_to_export[$list] = $list;
+						
+				}
+					
+			}
+				
+			$list_template = file_get_contents(__DIR__.'/../templates/export_list.tpl.txt');
+				
+			foreach ($lists as $list){
+				
+				$list_code = str_replace(['#singular#', '#plural#', '#name#', ], [$list['singular'], $list['plural'], $list['name'], ], $list_template);
+				file_put_contents($list_target_folder.$list['name'].'.php', $list_code);
+				
+			}
+			
+			foreach($lists_to_export as $list_panel_name){
+				
+				$found = false;
+				foreach($settings['panels'] as $panel){
+					if ($panel['panel'] == $list_panel_name){
+						$found = true;
+					}
+				}
+				
+				if (!$found){
+					$settings['panels'][] = ['panel' => $list_panel_name];
+				}
+				
+			}
+			
+			// target folder for acf json
+			
 			if (!file_exists($GLOBALS['config']['base_path'].$settings['target_folder'].'acf-json/')){
 				mkdir($GLOBALS['config']['base_path'].$settings['target_folder'].'acf-json/');
 			}
@@ -194,6 +260,17 @@ class export extends MY_Controller{
 				
 				$target_data['fields'] = array_values($target_fields);
 					
+				// add list panel fields to custom post type 
+				if (in_array($panel['panel'], $lists_to_export)){
+					
+					$target_data['location'] = [[[
+							'param' => 'post_type',
+							'operator' => '==',
+							'value' => $panel_name,
+					]]];
+					
+				}
+				
 				file_put_contents($filename, json_encode($target_data, JSON_PRETTY_PRINT));
 				
 				// export settings too
@@ -234,8 +311,8 @@ class export extends MY_Controller{
 					mkdir($GLOBALS['config']['base_path'].$settings['target_folder'].'panels/templates/');
 				}
 								
-				if (!file_exists($templates_target_folder.$panel_name.'.tpl.php') || 
-						filemtime($templates_target_folder.$panel_name.'.tpl.php') < filemtime($GLOBALS['config']['base_path'].'modules/'.$module_name.'/templates/'.$panel_name.'.tpl.php')){
+				if (file_exists($GLOBALS['config']['base_path'].'modules/'.$module_name.'/templates/'.$panel_name.'.tpl.php') && (!file_exists($templates_target_folder.$panel_name.'.tpl.php') || 
+						filemtime($templates_target_folder.$panel_name.'.tpl.php') < filemtime($GLOBALS['config']['base_path'].'modules/'.$module_name.'/templates/'.$panel_name.'.tpl.php'))){
 					
 					copy($GLOBALS['config']['base_path'].'modules/'.$module_name.'/templates/'.$panel_name.'.tpl.php', $templates_target_folder.$panel_name.'.tpl.php');
 							
@@ -248,8 +325,8 @@ class export extends MY_Controller{
 					mkdir($GLOBALS['config']['base_path'].$settings['target_folder'].'panels/css/');
 				}
 				
-				if (!file_exists($css_target_folder.$panel_name.'.css') || 
-						filemtime($css_target_folder.$panel_name.'.css') < filemtime($GLOBALS['config']['base_path'].'cache/'.$module_name.'__'.$panel_name.'.css')){
+				if (file_exists($GLOBALS['config']['base_path'].'cache/'.$module_name.'__'.$panel_name.'.css') && (!file_exists($css_target_folder.$panel_name.'.css') || 
+						filemtime($css_target_folder.$panel_name.'.css') < filemtime($GLOBALS['config']['base_path'].'cache/'.$module_name.'__'.$panel_name.'.css'))){
 					
 					copy($GLOBALS['config']['base_path'].'cache/'.$module_name.'__'.$panel_name.'.css', $css_target_folder.$panel_name.'.css');
 							
@@ -267,6 +344,20 @@ class export extends MY_Controller{
 								
 							copy($GLOBALS['config']['base_path'].'modules/'.$module_name.'/js/'.$panel_name.'.js', $js_target_folder.$panel_name.'.js');
 								
+				}
+				
+				// panel controller
+				$panel_target_folder = $GLOBALS['config']['base_path'].$settings['target_folder'].'panels/panels/';
+				
+				if (!file_exists($GLOBALS['config']['base_path'].$settings['target_folder'].'panels/panels/')){
+					mkdir($GLOBALS['config']['base_path'].$settings['target_folder'].'panels/panels/');
+				}
+				
+				if (file_exists($GLOBALS['config']['base_path'].'modules/'.$module_name.'/panels/'.$panel_name.'.php') && (!file_exists($panel_target_folder.$panel_name.'.php') ||
+						filemtime($panel_target_folder.$panel_name.'.php') < filemtime($GLOBALS['config']['base_path'].'modules/'.$module_name.'/panels/'.$panel_name.'.php'))){
+				
+							copy($GLOBALS['config']['base_path'].'modules/'.$module_name.'/panels/'.$panel_name.'.php', $panel_target_folder.$panel_name.'.php');
+				
 				}
 				
 			}
