@@ -20,6 +20,11 @@ class export extends MY_Controller{
 	
 	}
 	
+	/**
+	 * 
+	 * parses fields to acf format
+	 * 
+	 */
 	function parse_fields($fields_data, $panel_name, $append_to = [], $prefix = ''){
 			
 		foreach($fields_data as $field){
@@ -204,6 +209,18 @@ class export extends MY_Controller{
 				
 			}
 			
+			// add header and footer panels
+			$headers_to_export = [];
+			foreach($settings['header_panels'] as $hpanel){
+				$settings['panels'][] = $hpanel;
+				$headers_to_export[] = $hpanel['panel'];
+			}
+			$footers_to_export = [];
+			foreach($settings['footer_panels'] as $fpanel){
+				$settings['panels'][] = $fpanel;
+				$footers_to_export[] = $fpanel['panel'];
+			}
+				
 			// target folder for acf json
 			
 			if (!file_exists($GLOBALS['config']['base_path'].$settings['target_folder'].'acf-json/')){
@@ -231,7 +248,7 @@ class export extends MY_Controller{
 				}
 				
 				// to debug
-				$settings['panels'][$key]['target_data'] = $target_data;
+//				$settings['panels'][$key]['target_data'] = $target_data;
 				
 				$target_data['key'] = $groupname;
 				$target_data['title'] = 'Panel '.str_replace('/', ' ', $panel['panel']);
@@ -244,7 +261,7 @@ class export extends MY_Controller{
 				$panel_config = $this->cms_panel_model->get_cms_panel_config($panel['panel']);
 				
 				// debug
-				$settings['panels'][$key]['panel_config'] = $panel_config;
+//				$settings['panels'][$key]['panel_config'] = $panel_config;
 				
 				$target_fields = [];
 				
@@ -256,22 +273,52 @@ class export extends MY_Controller{
 				}
 
 				// add new data
-				$target_fields = $this->parse_fields($panel_config['item'], $panel['panel'], $target_fields);
+				if (!in_array($panel['panel'], $headers_to_export) && !in_array($panel['panel'], $footers_to_export)){
+					$target_fields = $this->parse_fields($panel_config['item'], $panel['panel'], $target_fields);
+				} else {
+					// if goes to settings, then prefix with panel name as otherwise they clash
+					$target_fields = $this->parse_fields($panel_config['item'], $panel['panel'], [], $panel_name.'__');
+				}
 				
 				$target_data['fields'] = array_values($target_fields);
 					
 				// add list panel fields to custom post type 
 				if (in_array($panel['panel'], $lists_to_export)){
-					
 					$target_data['location'] = [[[
 							'param' => 'post_type',
 							'operator' => '==',
 							'value' => $panel_name,
 					]]];
-					
+				}
+								
+				// header panels
+				if (in_array($panel['panel'], $headers_to_export)){
+					$target_data['location'] = [[[
+							'param' => 'options_page',
+							'operator' => '==',
+							'value' => 'header-settings',
+					]]];
 				}
 				
-				file_put_contents($filename, json_encode($target_data, JSON_PRETTY_PRINT));
+				// footer panels
+				if (in_array($panel['panel'], $footers_to_export)){
+					$target_data['location'] = [[[
+							'param' => 'options_page',
+							'operator' => '==',
+							'value' => 'footer-settings',
+					]]];
+				}
+				
+				$json_string = json_encode($target_data, JSON_PRETTY_PRINT);
+				
+				if (in_array($panel['panel'], $headers_to_export)){
+					$json_string = str_replace('_zzz', '_zhz', $json_string);
+				}
+				if (in_array($panel['panel'], $footers_to_export)){
+					$json_string = str_replace('_zzz', '_zfz', $json_string);
+				}
+				
+				file_put_contents($filename, $json_string);
 				
 				// export settings too
 				if (!empty($panel_config['settings'])){
@@ -425,9 +472,9 @@ class export extends MY_Controller{
 				
 				$already_on_page = [];
 				foreach($page_panels as $panel){
-					
+
 					// add to page group
-					if (in_array($panel['panel_name'], $exported_panels) && !in_array($panel['panel_name'], $already_on_page)){
+					if (in_array($panel['panel_name'], $exported_panels) && !in_array($panel['panel_name'], $already_on_page) && !in_array($panel['panel_name'], $headers_to_export) && !in_array($panel['panel_name'], $footers_to_export)){
 						
 						$already_on_page[] = $panel['panel_name'];
 						

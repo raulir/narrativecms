@@ -1,5 +1,18 @@
 .cms_input_select {
 	
+	float: left;
+	margin-left: 20px;
+	
+	.cms_repeater_block & {
+    	margin-left: 0;
+    	width: 100%;
+    }
+    
+    .admin_column & {
+    	margin-left: 0;
+    	width: 100%;
+    }
+	
 }
 
 .cms_input_select > select {

@@ -31,7 +31,7 @@ class cms_input_fk extends MY_Controller{
 			$definition = $this->cms_panel_model->get_cms_panel_config($params['list']);
 			$list = $this->cms_page_panel_model->get_list($params['list'], ['show' => [0,1]]);
 			
-			if (!empty($definition['list']['title_field'])){
+			if (empty($definition['list']['title_field'])){
 				$title_field = 'heading';
 			} else {
 				$title_field = $definition['list']['title_field'];

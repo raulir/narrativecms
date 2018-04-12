@@ -42,6 +42,34 @@
 			]
 		},
 		{
+			"type":"repeater",
+			"name":"header_panels",
+			"label":"Header panels",
+			"fields":[
+				{
+					"type":"cms_panel",
+					"name":"panel",
+					"label":"Panel",
+					"help":"Panel structure to be exported as ACF settings to use as available header panel",
+					"flag":"eg"
+				}
+			]
+		},
+		{
+			"type":"repeater",
+			"name":"footer_panels",
+			"label":"Footer panels",
+			"fields":[
+				{
+					"type":"cms_panel",
+					"name":"panel",
+					"label":"Panel",
+					"help":"Panel structure to be exported as ACF settings to use as available footer panel",
+					"flag":"eg"
+				}
+			]
+		},
+		{
 			"type":"acfsync/export_button",
 			"name":"export_button",
 			"label":"Export"
