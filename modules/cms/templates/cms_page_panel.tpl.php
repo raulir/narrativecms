@@ -99,6 +99,22 @@
 			<input type="hidden" name="title" value="<?php print($block['title']); ?>">
 			<input type="hidden" name="submenu_title" value="<?php print($block['submenu_title']); ?>">
 			<input type="hidden" name="submenu_anchor" value="<?php print($block['submenu_anchor']); ?>">
+			
+			<?php // if list item, allow to select template ?>
+			<?php if(!empty($list_templates)): ?>
+				<div class="cms_page_panel_template">
+					
+					<?php _panel('cms_input_select', [
+							'name' => '_template_page_id',
+							'name_clean' => '_template_page_id',
+							'values' => $list_templates,
+							'label' => 'Template',
+							'value' => !empty($block['_template_page_id']) ? $block['_template_page_id'] : '',
+					]) ?>
+					
+				</div>
+			<?php endif ?>
+			
 		<?php endif ?>
 
 		<?php

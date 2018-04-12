@@ -93,19 +93,31 @@ class Index extends MY_Controller {
  			$extra_params = array($panel_name => $cms_page_panel_id, '_panel_name' => $panel_name, '_cms_page_panel_id' => $cms_page_panel_id, '_page_id' => $page_id, );
  			$GLOBALS['_page_params'] = $extra_params;
     	
-    		// this is when there is page parameter
-    		// check if template page exists
-    		$page = $this->cms_page_model->get_page_by_slug(str_replace('_', '-', $panel_name));
+   			// list item panel data, for example article
+    		$list_item_data = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
+ 			
+    		if (empty($list_item_data['_template_page_id'])){
+ 			
+	 			// this is when there is page parameter
+	    		// check if template page exists
+	    		$page = $this->cms_page_model->get_page_by_slug(str_replace('_', '-', $panel_name));
+	    		
+	    		// try without model
+	    		if (empty($page['page_id']) && stristr($panel_name, '/')){
+	    			list($m_module, $m_panel_name) = explode('/', $panel_name);
+	    			$page = $this->cms_page_model->get_page_by_slug(str_replace('_', '-', $m_panel_name));
+	    		}
     		
-    		// try without model
-    		if (empty($page['page_id']) && stristr($panel_name, '/')){
-    			list($m_module, $m_panel_name) = explode('/', $panel_name);
-    			$page = $this->cms_page_model->get_page_by_slug(str_replace('_', '-', $m_panel_name));
-    		}
-
-    		if (!empty($page['page_id'])){
+    		} else {
     			
-	    		// if page exists, overload this
+    			// special template
+    			$page = $this->cms_page_model->get_page($list_item_data['_template_page_id']);
+    			
+    		}
+    		
+    		if (!empty($page['page_id'])){
+
+    			// if page exists, overload this
 	    		$blocks = $this->_get_cms_page_panels($page['page_id']);
 	    		 
 				foreach($blocks as $block){
@@ -117,8 +129,8 @@ class Index extends MY_Controller {
 						$block_panel_name = $block['panel_name'];
 					}
 
-					if ($panel_name === $block_panel_name){
-						$extra_params_2 = array_merge($this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id), $extra_params);
+					if ($panel_name === $block_panel_name || stristr($panel_name.'|', '/'.$block_panel_name.'|')){
+						$extra_params_2 = array_merge($list_item_data, $extra_params);
 					} else {
 						$extra_params_2 = $extra_params;
 					}
@@ -133,15 +145,15 @@ class Index extends MY_Controller {
 				}
 
     		} else {
-	    		// else create new with one block
-	    		$block = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
-	    		if ($block['show'] == 1){
+    			
+	    		if ($list_item_data['show'] == 1){
 					$page_config[] = array(
 							'position' => 'main',
 							'panel' => $panel_name,
-							'params' => array_merge($block, $extra_params),
+							'params' => array_merge($list_item_data, $extra_params),
 					);
 	    		}
+	    		
     		}
     		
     	}

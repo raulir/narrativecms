@@ -907,10 +907,4 @@ class cms_page_panel_model extends CI_Model {
 	
 	}
 	
-	function update_block($cms_page_panel_id, $data, $no_purge = false){
-	
-		$this->update_cms_page_panel($cms_page_panel_id, $data, $no_purge);
-	
-	}
-	
 }

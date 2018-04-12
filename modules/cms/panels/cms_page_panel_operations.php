@@ -170,7 +170,12 @@ class cms_page_panel_operations extends MY_Controller{
 			}
 			 
 			$panel_structure = !empty($panel_config['item']) ? $panel_config['item'] : array();
-			 
+			
+			// save if special template
+			if (!empty($panel_config['list']['templates'])){
+				$data['_template_page_id'] = $this->input->post('_template_page_id');
+			}
+			
 			// search time bonus points
 			if (!empty($panel_config['list']['search_time_extra']) && is_array($panel_config['list']['search_time_extra']) && !empty($data['panel_params']['date'])){
 				$data['panel_params']['_search_time_extra'] = serialize($panel_config['list']['search_time_extra']);
