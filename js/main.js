@@ -378,6 +378,23 @@ function bit_rol(num, cnt)
   return (num << cnt) | (num >>> (32 - cnt));
 }
 
+function str_replace(str, findArray, replaceArray) {
+	var i, regex = [], map = {};
+	for (i = 0; i < findArray.length; i++) {
+		regex.push(findArray[i].replace(/([-[\]{}()*+?.\\^$|#,])/g, '\\$1'));
+		map[findArray[i]] = replaceArray[i];
+	}
+	regex = regex.join('|');
+	str = str.replace(new RegExp(regex, 'g'), function(matched) {
+		return map[matched];
+	});
+	return str;
+}
+
+String.prototype.to_title_case = function () {
+    return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+};
+
 /*
  * 
  * 

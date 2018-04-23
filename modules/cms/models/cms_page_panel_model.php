@@ -29,6 +29,12 @@ class cms_page_panel_model extends CI_Model {
 		
 	}
 	
+	function get_list_stats($panel_name){
+		$sql = "select count(*) as count from `block` where panel_name = ? and (page_id = ? or page_id = ?) and `show` = 1 group by panel_name ";
+		$query = $this->db->query($sql, array($panel_name, 999999, 0, ));
+		return $query->row_array();
+	}
+	
 	function _list_sort($a, $b){
 			
 		$al = strtolower($a[$GLOBALS['_sort']]);
