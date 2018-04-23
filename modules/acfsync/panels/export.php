@@ -260,8 +260,18 @@ class export extends MY_Controller{
 				// load panel definition
 				$panel_config = $this->cms_panel_model->get_cms_panel_config($panel['panel']);
 				
-				// debug
-//				$settings['panels'][$key]['panel_config'] = $panel_config;
+				// add templates
+				if (!empty($panel_config['list']['link_target'])){
+
+					array_unshift($panel_config['item'], [
+							'type' => 'select',
+							'name' => '_template',
+							'label' => 'Post page template',
+							'values' => !empty($panel_config['list']['templates']) ? $panel_config['list']['templates'] : [$panel_name => $panel_name, ],
+							'default' => $panel_name,
+					]);
+
+				}
 				
 				$target_fields = [];
 				
