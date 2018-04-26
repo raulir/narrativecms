@@ -55,7 +55,7 @@ class cms_search_model extends CI_Model {
 			}
 			
 			// if has parent id -> means child block
-			if ($cms_page_panels[$cms_page_panel_id]['parent_id']){
+			if (!empty($cms_page_panels[$cms_page_panel_id]['parent_id'])){
 			
 				if (empty($block_scores_page[$cms_page_panels[$cms_page_panel_id]['parent_id']])){
 					$block_scores_page[$cms_page_panels[$cms_page_panel_id]['parent_id']] = 0;

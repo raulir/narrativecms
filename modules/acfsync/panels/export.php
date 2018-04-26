@@ -186,7 +186,7 @@ class export extends MY_Controller{
 			}
 				
 			$list_template = file_get_contents(__DIR__.'/../templates/export_list.tpl.txt');
-				
+			
 			foreach ($lists as $list){
 				
 				$list_code = str_replace(['#singular#', '#plural#', '#name#', ], [$list['singular'], $list['plural'], $list['name'], ], $list_template);
@@ -479,6 +479,15 @@ class export extends MY_Controller{
 				// add new data
 				$target_fields = [];
 				$page_panels = $this->cms_page_panel_model->get_cms_page_panels_by(['cms_page_id' => $page['page'], ]);
+				
+				// replace shortcuts with the real panel data
+				foreach($page_panels as $key => $panel){
+					if (is_numeric($panel['panel_name']) && ((int)$panel['panel_name'] == $panel['panel_name'])){
+						
+						$page_panels[$key] = $this->cms_page_panel_model->get_cms_page_panel($panel['panel_name']);
+						
+					}
+				}
 				
 				$already_on_page = [];
 				foreach($page_panels as $panel){
