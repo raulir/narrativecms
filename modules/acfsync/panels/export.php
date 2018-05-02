@@ -26,7 +26,10 @@ class export extends MY_Controller{
 	 * 
 	 */
 	function parse_fields($fields_data, $panel_name, $append_to = [], $prefix = ''){
-			
+	    
+	    // load settings
+	    $settings = $this->cms_page_panel_model->get_cms_page_panel_settings('acfsync/export');
+	    
 		foreach($fields_data as $field){
 				
 			if (!empty($field['name'])){
@@ -126,6 +129,117 @@ class export extends MY_Controller{
 					$append_to[$target_field_key]['type'] = $field['type'];
 					$append_to[$target_field_key]['instructions'] = !empty($field['help']) ? $field['help'] : '';
 						
+				} elseif ($field['type'] == 'cms_page_panels'){
+					
+					// "panels":"articletext,articlecolsimage,articleimage,downloads"
+				
+					$append_to[$target_field_key]['key'] = $target_field_key;
+					$append_to[$target_field_key]['label'] = $field['label'];
+					$append_to[$target_field_key]['name'] = $prefix.$field['name'];
+					$append_to[$target_field_key]['type'] = 'flexible_content';
+					$append_to[$target_field_key]['instructions'] = !empty($field['help']) ? $field['help'] : '';
+					$append_to[$target_field_key]['layouts'] = [];
+					
+					// add new data
+					$target_fields = [];
+					$page_panels = explode(',', $field['panels']);
+					
+					foreach($page_panels as $panel_id){
+					
+					    $field_key = $target_field_key.'_sub_'.$panel_id;
+					    
+				        $target_fields[$field_key] = [
+				            'key' => $field_key,
+				            'name' => $panel_id,
+				            'label' => ucfirst($panel_id),
+				            'display' => 'block',
+				        ];
+					        
+					    // load array from correct file, this is where _zzz is replaced
+					    
+					    $groupname_sub = 'group_panel_eg__'.$panel_id;
+					    $filename_sub = $GLOBALS['config']['base_path'].$settings['target_folder'].'acf-json/'.$groupname_sub.'.json';
+					    
+					    $subfield_data = json_decode(str_replace('_zzz', '_'.$field_key, file_get_contents($filename_sub)), true);
+					    
+					    // print_r($subfield_data);
+					    $target_fields[$field_key]['sub_fields'] = $subfield_data['fields'];
+
+					}
+					
+					$append_to[$target_field_key]['layouts'] = $target_fields;
+					/*
+					
+					        {
+            "key": "field_5ae9c3e19123f",
+            "label": "here come article panels",
+            "name": "panels",
+            "type": "flexible_content",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layouts": {
+                "5ae9c3fe2b43a": {
+                    "key": "5ae9c3fe2b43a",
+                    "name": "subpanel_one",
+                    "label": "subpanel one label",
+                    "display": "block",
+                    "sub_fields": [
+                        {
+                            "key": "field_5ae9c42991240",
+                            "label": "testfield1",
+                            "name": "testfield1",
+                            "type": "text",
+                            "instructions": "",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "default_value": "",
+                            "placeholder": "",
+                            "prepend": "",
+                            "append": "",
+                            "maxlength": ""
+                        },
+                        {
+                            "key": "field_5ae9c47991242",
+                            "label": "testfield2",
+                            "name": "testfield2",
+                            "type": "text",
+                            "instructions": "",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "default_value": "",
+                            "placeholder": "",
+                            "prepend": "",
+                            "append": "",
+                            "maxlength": ""
+                        }
+                    ],
+                    "min": "",
+                    "max": ""
+                }
+            },
+            "button_label": "Add Row",
+            "min": "",
+            "max": ""
+        }
+					
+					*/
+					
 				}
 	
 			}
