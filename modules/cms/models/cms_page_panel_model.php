@@ -465,7 +465,9 @@ class cms_page_panel_model extends CI_Model {
 	 */
 	function create_block($data){
 		
-		// $data['panel_params'] = json_encode($data['panel_params']);
+		if (!isset($data['show'])){
+			$data['show'] = 0;
+		}
 		
 		$panel_params = $data['panel_params'];
 		unset($data['panel_params']);
