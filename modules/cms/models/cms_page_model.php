@@ -134,13 +134,15 @@ class cms_page_model extends CI_Model {
 	}
 	
 	function create_page($data){
-		$sql = "insert into cms_page set slug = '' ";
+		
+		$sql = "insert into cms_page set slug = '', sort = 0, meta = '' ";
 		$this->db->query($sql);
 		$cms_page_id = $this->db->insert_id();
 		
 		$this->update_page($cms_page_id, $data);
 		
 		return $cms_page_id;
+	
 	}
 	
 	function save_orders($orders){
