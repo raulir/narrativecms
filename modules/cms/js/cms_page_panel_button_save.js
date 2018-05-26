@@ -13,7 +13,7 @@ function cms_page_panel_save(params){
 				window.location.href = config_url + 'admin/page/' + $('[name="page_id"]').val() + '/';
 			}
 		});
-	} else if ($('.admin_block_panel_name').val() != ''){
+	} else if ($('.cms_page_panel_panel_name').val() != ''){
 		
 		if (typeof tinyMCE !== 'undefined'){
 			tinyMCE.triggerSave();

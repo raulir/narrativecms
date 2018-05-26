@@ -35,13 +35,14 @@
 							'name_clean' => 'block_title',
 							'label' => 'Title',
 							'help' => '[Page panel title]||Not visible in frontend. When page panel has {heading} field, this is overwritten from there',
+							'extra_class' => 'cms_page_panel_title',
 					]); ?>
 				
 					<div class="cms_input cms_input_select">
 						<label for="panel_name">Block type</label>
 						<?php _panel('cms_help', ['help' => '[Page panel type]||Select page panel type from available panel types in installed modules.||When adding a new page panel, '.
 								'one can select an existing panel from {Shortcut to} dropdown instead.||Changing this field may cause losing data already entered for this page panel', ]); ?>
-						<select class="admin_block_panel_name" name="panel_name" id="panel_name">
+						<select class="cms_page_panel_panel_name" name="panel_name" id="panel_name">
 							<option value="">-- select block type --</option>
 							<?php foreach ($panel_types as $panel_type => $panel_type_label): ?>
 							

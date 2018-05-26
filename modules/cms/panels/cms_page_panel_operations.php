@@ -348,6 +348,32 @@ class cms_page_panel_operations extends MY_Controller{
 			
 			$this->cms_slug_model->delete_slug($data['panel_name'].'='.$block_id);
 
+		} elseif ($do == 'cms_page_panel_title'){
+			
+			$title = trim($this->input->post('title'));
+			
+			$title_needed = true;
+			$i = 0;
+			
+			while ($title_needed){
+				
+				if ($i == 0){
+					$new_title = $title;
+				} else {
+					$new_title = $title . ' (' . $i . ')';
+				}
+				
+				$i++;
+
+				$page_panels = $this->cms_page_panel_model->get_cms_page_panels_by(['title' => $new_title, ]);
+				
+				if (!count($page_panels)){
+					$title_needed = false;
+				}
+			
+			}
+			
+			$params['title'] = $new_title;
 		}
 		
 		if (empty($params['cms_page_panel_id'])){
