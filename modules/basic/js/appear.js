@@ -2,19 +2,31 @@
 	
     $.fn.basic_appear = function(params) {
     	
-    	var params = $.extend({'trigger': 50 }, params)
+    	var params = $.extend({'trigger': 50, 'delay': 0, 'no_hide': 0 }, params)
 
     	var $set = $(this);
     	
     	var basic_appear = function($this){
     		
     		var scrolltop = self.pageYOffset || document.documentElement.scrollTop  || document.body.scrollTop;
-    		var page_bottom = scrollTop + window.innerHeight;
+    		var page_bottom = scrolltop + window.innerHeight;
 
 			if (page_bottom > $this.data('_basic_appear_centre')){
-				$this.removeClass('basic_hidden');
+				
+				setTimeout(() => {
+					$this.removeClass('basic_hidden'); 
+				}, $this.data('delay'));
+				
 			} else {
-				$this.addClass('basic_hidden');
+				
+				if (!$this.data('no_hide')){
+					
+					setTimeout(() => {
+						$this.addClass('basic_hidden');
+					}, $this.data('delay'));
+				
+				}
+				
 			}
     	
     	}
@@ -23,6 +35,8 @@
 
 			var $this = $(this);
 			$this.data('trigger', params.trigger);
+			$this.data('delay', params.delay);
+			$this.data('no_hide', params.no_hide);
 			
 			var basic_appear_centre = function($this){
 				$this.data('_basic_appear_centre', $this.offset().top + ($this.height() * ($this.data('trigger')/100) ));
