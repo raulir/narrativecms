@@ -93,7 +93,7 @@ class export extends MY_Controller{
 						$append_to[$target_field_key]['name'] = $prefix.$field['name'];
 						$append_to[$target_field_key]['type'] = 'wysiwyg';
 						$append_to[$target_field_key]['instructions'] = (!empty($field['help']) ? $field['help'] : '');
-						$append_to[$target_field_key]['toolbar'] = 'basic';
+						$append_to[$target_field_key]['toolbar'] = 'full';
 						
 						if (!stristr($field['html'], 'M')){
 							$append_to[$target_field_key]['media_upload'] = 0;
@@ -441,9 +441,11 @@ class export extends MY_Controller{
 				if (in_array($panel['panel'], $footers_to_export)){
 					$json_string = str_replace('_zzz', '_zfz', $json_string);
 				}
-				
-				file_put_contents($filename, $json_string);
-				
+
+				if($this->should_output_file($json_string, $filename)){
+				    file_put_contents($filename, $json_string);
+				}
+
 				// export settings too
 				if (!empty($panel_config['settings'])){
 					
@@ -467,8 +469,13 @@ class export extends MY_Controller{
 					$target_data['fields'] = $this->parse_fields($panel_config['settings'], $panel['panel'], [], $panel_name.'__');
 					
 					$filename = $GLOBALS['config']['base_path'].$settings['target_folder'].'acf-json/'.$groupname.'_settings.json';
-					file_put_contents($filename, json_encode($target_data, JSON_PRETTY_PRINT));
-					
+
+					$json_string = json_encode($target_data, JSON_PRETTY_PRINT);
+
+					if($this->should_output_file($json_string, $filename)){
+					    file_put_contents($filename, $json_string);
+					}
+
 				}
 
 				// move template
@@ -636,9 +643,12 @@ class export extends MY_Controller{
 				}
 				
 				$target_data['fields'][0]['layouts'] = $target_fields;
-// print_r($target_data);				
-				file_put_contents($filename, json_encode($target_data, JSON_PRETTY_PRINT));
-				
+// print_r($target_data);
+
+				if($this->should_output_file($target_data, $filename)){
+					file_put_contents($filename, json_encode($target_data, JSON_PRETTY_PRINT));
+				}
+
 			}
 
 			print(json_encode(['result' => 'ok', 'settings' => $settings, ]));
@@ -651,4 +661,41 @@ class export extends MY_Controller{
 
 	}
 
+	/**
+	 * Check if we should update the file contents
+	 *
+	 * @param $data
+	 * @param string $filename
+	 *
+	 * @return bool
+	 */
+	function should_output_file($data, $filename){
+	    
+	    if ( ! file_exists($filename)){
+	        return true;
+	    }
+	    
+	    if ( !is_array($data) && strpos($data, '{') !== false ){
+	        $data = json_decode($data, true);
+	    }
+	    
+	    $data_to_compare = $data;
+	    
+	    $raw_data = file_get_contents($filename);
+	    $existing_data = !empty($raw_data) ? json_decode($raw_data, true) : '';
+	    
+	    if( empty($existing_data) ){
+	        return true;
+	    }
+	    
+	    unset($data_to_compare['modified'], $existing_data['modified']);
+	    
+	    if (serialize($data_to_compare) === serialize($existing_data) ){
+	        return false;
+	    }
+	    
+	    return true;
+	    
+	}
+	
 }
