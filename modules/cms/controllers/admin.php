@@ -14,8 +14,7 @@ class admin extends MY_Controller {
 
 		$this->js[] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
 
-		$this->js[] = 'js/preloader.js';
-
+		$this->js[] = 'modules/cms/js/cms_preloader.js';
 		$this->js[] = 'modules/cms/js/cms.js';
 
 		$GLOBALS['_panel_titles'][] = 'ADMIN';

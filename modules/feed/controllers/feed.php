@@ -8,13 +8,9 @@ class feed extends MY_Controller {
 	
 		$this->css[] = array('script' => 'modules/cms/css/cms.css', 'no_pack' => 1, );
 	
-		// $this->js[] = array('script' => 'js/jquery-3.1.0.min.js', 'no_pack' => 1, 'sync' => '', );
-		$this->js[] = array('script' => 'js/jquery-ui.min.js', );
-	
-		$this->js[] = 'js/preloader.js';
-		$this->js[] = 'js/md5.js';
-		$this->js[] = 'js/panels.js';
-	
+		$this->js[] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
+		
+		$this->js[] = 'modules/cms/js/cms_preloader.js';
 		$this->js[] = 'modules/cms/js/cms.js';
 	
 		$GLOBALS['_panel_titles'][] = 'ADMIN';

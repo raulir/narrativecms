@@ -12,13 +12,10 @@ class form extends MY_Controller {
 			exit();
 		}
         
-        $this->js[] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
-        $this->js[] = array('script' => 'modules/cms/js/tinymce/tinymce.min.js', 'sync' => '', );
+		$this->js[] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
+		$this->js[] = array('script' => 'modules/cms/js/tinymce/tinymce.min.js', 'sync' => '', );
         
-        $this->js[] = 'js/preloader.js';
-        $this->js[] = 'js/md5.js';
-        $this->js[] = 'js/panels.js';
-
+		$this->js[] = 'modules/cms/js/cms_preloader.js';
         $this->js[] = 'modules/cms/js/cms.js';
   
         $GLOBALS['_panel_titles'][] = 'ADMIN';

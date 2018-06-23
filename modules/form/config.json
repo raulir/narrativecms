@@ -1,13 +1,13 @@
 {
 	"cms_menu":[
 		{
-			"id":"cms",
-			"name":"CMS"
+			"id":"forms",
+			"name":"Forms"
 		},
 		{
 			"id":"form",
 			"name":"Forms data",
-			"parent":"cms",
+			"parent":"forms",
 			"url":"form/admin/",
 			"access":"form_data"
 		}
