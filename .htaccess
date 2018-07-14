@@ -30,6 +30,7 @@ ExpiresDefault "access 1 day"
 RewriteEngine on
 
 RewriteCond %{REQUEST_URI} ^/cache [NC]
+RewriteCond %{REQUEST_URI} ^/_ [NC]
 RewriteCond %{REQUEST_URI} !\.(css|js|xml)$ [NC]
 RewriteRule .* - [F,L]
 

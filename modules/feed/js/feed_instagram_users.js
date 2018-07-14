@@ -18,7 +18,7 @@ function feed_instagram_users_init(){
 	});
 	
 	$('.feed_instagram_popup_ok').on('click.cms', function(){
-		window.location = 'http://www.bytecrackers.com/cms/_feed/instagram.php?src=' + encodeURIComponent(window.location);
+		window.location = 'http://cms.bytecrackers.com/_feed/instagram.php?src=' + encodeURIComponent(window.location);
 	});
 	
 	$('.feed_instagram_remove_button').on('click.cms', function(){
