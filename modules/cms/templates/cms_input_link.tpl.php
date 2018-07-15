@@ -7,7 +7,7 @@
 
 		<select class="cms_input_link_target cms_input_link_dropdown" name="<?php print($name); ?>[target]<?php print($name_extra); ?>">
 			<?php foreach($targets as $key => $target): ?>
-				<option value="<?php print($key); ?>" <?php print($key == $value['target'] ? ' selected="selected"' : ''); ?>><?php print($target); ?></option>
+				<option value="<?= str_replace('/', '__', $key) ?>" <?php print(str_replace('/', '__', $key) == $value['target'] ? ' selected="selected"' : ''); ?>><?= $target ?></option>
 			<?php endforeach ?>
 		</select>
 		
@@ -25,7 +25,7 @@
 		
 		<?php if (!empty($lists)) foreach($lists as $list_name => $list): ?>
 		
-			<select class="cms_input_link_select cms_input_link_select_<?php print($list_name); ?> cms_input_link_dropdown" 
+			<select class="cms_input_link_select cms_input_link_select_<?= str_replace('/', '__', $list_name) ?> cms_input_link_dropdown" 
 					name="<?php print($name); ?>[<?php print($list_name); ?>_id]<?php print($name_extra); ?>">
 				
 				<?php foreach($list as $item_id => $item_title): ?>

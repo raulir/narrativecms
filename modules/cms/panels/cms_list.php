@@ -74,7 +74,11 @@ class cms_list extends MY_Controller{
 			}
 
 		}
-
+		
+		if (is_array($params['filter']['panel_name'])){
+			$params['filter']['panel_name'] = $params['filter']['panel_name'][0];
+		}
+		
 		$params['new_panel_name'] = $params['filter']['panel_name'];
 		if (stristr($params['filter']['panel_name'], '|')){
 			
