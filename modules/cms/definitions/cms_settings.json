@@ -117,6 +117,17 @@
 			"help":"Email to send notifications"
 		},
 		{
+			"type":"select",
+			"name":"targets_enabled",
+			"label":"Visitor target groups",
+			"values":{
+				"0":"Disabled",
+				"1":"Enabled"
+			},
+			"default":"0",
+			"help":"Enable visitor target groups for AB testing, logged in panels etc"
+		},
+		{
 			"type":"subtitle",
 			"label":"Sizing",
 			"width":"wide",

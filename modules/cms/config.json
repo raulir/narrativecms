@@ -60,6 +60,13 @@
 			"url":"admin/panel_settings/cms__cms_cron/"
 		},
 		{
+			"id":"cms_targets",
+			"name":"Target groups",
+			"parent":"cms",
+			"access":"cms_targets",
+			"url":"admin/panel_settings/cms__cms_targets/"
+		},
+		{
 			"id":"cms_update",
 			"name":"Update",
 			"parent":"cms",
@@ -113,6 +120,10 @@
 		{
 			"access":"cms_cron",
 			"name":"CMS cron"
+		},
+		{
+			"access":"cms_targets",
+			"name":"CMS target groups"
 		}
 	],
 	"panels":[

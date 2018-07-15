@@ -77,7 +77,7 @@ $db = $GLOBALS['dbconnections'][md5($GLOBALS['config']['database']['hostname'].$
 $sql = "select b.name, b.value from block a join cms_page_panel_param b on a.block_id = b.cms_page_panel_id where (a.panel_name = 'cms_settings' or a.panel_name = 'cms/cms_settings') and b.name != ''";
 $query = mysqli_query($db, $sql);
 
-while($result = mysqli_fetch_array($query)){
+while($result = mysqli_fetch_assoc($query)){
 	$GLOBALS['config'][$result['name']] = $result['value'];
 }
 
@@ -139,6 +139,16 @@ if (!empty($GLOBALS['config']['cron_trigger']) && $GLOBALS['config']['cron_trigg
 		$GLOBALS['config']['js'][] = ['script' => 'modules/cms/js/cms_cron_run.js', 'sync' => 'defer', ];
 	}
 
+}
+
+// start session
+include($GLOBALS['config']['base_path'].'system/core/session.php');
+
+// check for visitor target groups
+if (!empty($GLOBALS['config']['targets_enabled'])){
+	
+	include($GLOBALS['config']['base_path'].'system/core/targets.php');
+	
 }
 
 require_once BASEPATH.'core/CodeIgniter.php';

@@ -954,21 +954,12 @@ class CI_Upload {
 
 		if (count($this->mimes) == 0)
 		{
-			if (defined('ENVIRONMENT') AND is_file(APPPATH.'config/'.ENVIRONMENT.'/mimes.php'))
-			{
-				include(APPPATH.'config/'.ENVIRONMENT.'/mimes.php');
-			}
-			elseif (is_file(APPPATH.'config/mimes.php'))
-			{
-				include(APPPATH.'config//mimes.php');
-			}
-			else
-			{
-				return FALSE;
-			}
+
+			include(APPPATH.'config//mimes.php');
 
 			$this->mimes = $mimes;
 			unset($mimes);
+			
 		}
 
 		return ( ! isset($this->mimes[$mime])) ? FALSE : $this->mimes[$mime];

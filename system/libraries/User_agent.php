@@ -84,18 +84,8 @@ class CI_User_agent {
 	 */
 	private function _load_agent_file()
 	{
-		if (defined('ENVIRONMENT') AND is_file(APPPATH.'config/'.ENVIRONMENT.'/user_agents.php'))
-		{
-			include(APPPATH.'config/'.ENVIRONMENT.'/user_agents.php');
-		}
-		elseif (is_file(APPPATH.'config/user_agents.php'))
-		{
-			include(APPPATH.'config/user_agents.php');
-		}
-		else
-		{
-			return FALSE;
-		}
+
+		include(APPPATH.'config/user_agents.php');
 
 		$return = FALSE;
 

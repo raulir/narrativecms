@@ -1,0 +1,84 @@
+.cms_page_panel_targets_container {
+	height: 355px;
+}
+
+.cms_page_panel_targets_content {
+	height: 100%;
+	position: relative;
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
+	padding: 0 46px;
+}
+
+.cms_page_panel_targets_message {
+	position: absolute;
+	left: 0;
+	width: 100%;
+	top: 20px;
+	font-size: 20px;
+	line-height: 30px;
+}
+
+.cms_page_panel_targets_table {
+	display: table;
+	table-layout: fixed;
+	width: 100%;
+	height: calc(100% - 50px);	
+}
+
+.cms_page_panel_targets_cell {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+.cms_page_panel_targets_line {
+	height: 0.8px;
+	background-color: #cccccc;
+	width: 75%;
+	margin: 10px auto;
+}
+
+.cms_page_panel_targets_col1,.cms_page_panel_targets_col2,.cms_page_panel_targets_col3 {
+	display: inline-block;
+	font-size: 17px;
+	line-height: 22px;
+}
+
+.cms_page_panel_targets_col1 {
+	width: 50%;
+	text-align: left;
+}
+
+.cms_page_panel_targets_col2 {
+	width: 50%;
+	text-align: right;
+}
+
+.cms_page_panel_targets_select {
+	
+	width: 200px;
+	font-size: 17px;
+	line-height: 30px;
+	height: 32px;
+	border: 1px solid gray;
+	padding: 0 5px;
+	box-sizing: border-box;
+	
+	option {
+		border: 1px solid gray;
+	}
+
+}
+
+.cms_page_panel_targets_buttons {
+	position: absolute;
+	bottom: 20px;
+	left: 0;
+	width: 100%;
+}
+
+.cms_page_panel_targets_close {
+	width: 110px;
+	margin: 0 2px;
+}

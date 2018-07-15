@@ -187,13 +187,21 @@ class cms_page_panel_toolbar extends MY_Controller{
 		}
 		
 		// if panel has global settings
-		if (!empty($panel_config['settings']) && (empty($panel_config['list'])) && (!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']) || !empty($cms_page_panel['sort']))){
+		if (!empty($panel_config['settings']) && empty($panel_config['list']) && (!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']) || !empty($cms_page_panel['sort']))){
 			
 			$params['buttons'][] = ['name' => 'cms_page_panel_button_settings', 'position' => 'hidden', ];
 			$params['hidden_section'] = 1;
 		
 		}
 
+		// if panel can have target groups assigned
+		if (!empty($_SESSION['config']['targets']) && empty($panel_config['list']) && (!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']))){
+				
+			$params['buttons'][] = ['name' => 'cms_page_panel_button_targets', 'position' => 'hidden', ];
+			$params['hidden_section'] = 1;
+		
+		}
+		
 		return $params;
 
 	}
