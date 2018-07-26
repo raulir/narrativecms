@@ -60,7 +60,7 @@ function cms_input_textarea_init(){
 				
 				if (buttons.indexOf('A') > -1){
 					toolbar = toolbar + 'link unlink ';
-					valid_elements = valid_elements + ',a[href|target]';
+					valid_elements = valid_elements + ',a[href|target|class]';
 					plugins = plugins + ' link';
 				}
 				
@@ -109,6 +109,8 @@ function cms_input_textarea_init(){
 				    plugins: 'code paste' + plugins,
 			    	paste_text_sticky : true,
 			    	remove_linebreaks : false,
+			    	convert_urls : false,
+			    	relative_urls : false,
 			    	setup : function(ed) {
 			    		ed.on('init', function(ed) {
 			    			ed.pasteAsPlainText = true;
