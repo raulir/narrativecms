@@ -1,0 +1,47 @@
+{
+    "version": "2",
+    "item": [
+		{
+            "type": "textarea",
+            "lines":"4",
+            "name": "text",
+            "label": "Text",
+            "default": "Please follow the links for more information about this website."
+        },
+        {
+            "type": "text",
+            "name": "heading",
+            "label": "Heading",
+            "default": "Website information"
+        },
+        {
+            "type": "text",
+            "name": "read_more",
+            "label": "Read more label",
+            "default": "Read more"
+        },
+        {
+            "type": "text",
+            "name": "close",
+            "label": "Close label",
+            "default": "Accept"
+        },
+        {
+            "type": "repeater",
+            "name": "links",
+            "label": "Links",
+            "fields": [
+                {
+                    "type": "text",
+                    "name": "text",
+                    "label": "Text"
+                },
+                {
+                    "type": "link",
+                    "name": "link",
+                    "label": "Link"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,148 @@
+.popup_container {
+	position: fixed;
+	width: 25.0rem;
+	height: 0;
+	z-index: 100;
+	color: $colour_white;
+	bottom: 0.4rem;
+    right: 1.0rem;
+}
+
+.popup_content {
+	position: absolute;
+	width: 100%;
+	box-sizing: border-box;
+	background-color: $popup_background;
+	line-height: 1.5rem;
+    font-size: 1.1rem;
+    bottom: 1.0rem;
+    left: 0;
+    padding: 0.5rem;
+}
+
+.popup_upper {
+    text-align: left;
+    position: relative;
+    transition: border 0.5s, height 0.5s;
+    border-bottom: 0.12rem solid transparent;
+    height: 1.4rem;
+	cursor: pointer;
+}
+
+.popup_heading {
+	width: 13.5rem;
+	position: absolute;
+	left: 0.1rem;
+	top: 0;
+}
+
+.popup_cta {
+	position: absolute;
+	border-bottom: 0.12rem solid $colour_white;
+	right: 4.2rem;
+    top: 0.2rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    line-height: 1.0rem;
+}
+
+.popup_close {
+	
+	position: absolute;
+	right: 0;
+	top: 0.2rem;
+	width: 1.2rem;
+	height: 1.2rem;
+	z-index: 20;
+	cursor: pointer;
+	
+	&::before {
+		content: '';
+		width: 100%;
+		height: 0.12rem;
+		position: absolute;
+		left: 0;
+		top: calc(50% - 0.06rem);
+		background-color: $colour_white;
+		transform: rotate(45deg);
+		display: none;
+	}
+
+	&::after {
+		content: '';
+		width: 100%;
+		height: 0.12rem;
+		position: absolute;
+		left: 0;
+		top: calc(50% - 0.06rem);
+		background-color: $colour_white;
+		transform: rotate(-45deg);
+		display: none;
+	}
+	
+}
+
+.popup_close_text {
+	position: absolute;
+	border-bottom: 0.12rem solid $colour_white;
+	right: 0.4rem;
+    top: 0rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    line-height: 1.0rem;
+}
+
+.popup_lower {
+	text-align: center;
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 0.5s;
+}
+
+.popup_text {
+	padding: 1.0rem 0;
+	font-size: 1.1rem;
+	line-height: 1.2rem;
+}
+
+.popup_link {
+	font-size: 1.1rem;
+	line-height: 1.2rem;
+	display: block;
+	padding-bottom: 0.2rem;
+}
+
+.popup_link_inner {
+	
+	display: inline-block;
+	border-bottom: 0.12rem solid transparent;
+	transition: border 0.2s;
+	
+	&:hover {
+		border-bottom: 0.12rem solid $colour_white;
+	}
+	
+}
+
+.popup_active {
+	
+	.popup_upper {
+		border-bottom: 0.12rem solid transparent; // $colour_white;
+		height: 2.0rem;
+	}
+	
+	.popup_lower {
+		max-height: 10rem;
+	}
+	
+}
+
+@media only screen and (max-width: 750px) {
+
+	.popup_container {
+		bottom: -0.1rem;
+    	right: 7.3rem;
+    	transform: scale(1.5);
+    }
+
+}
