@@ -38,7 +38,7 @@ body {
 	font-weight: 200;
 	font-smoothing: antialiased;
 	-webkit-font-smoothing: antialiased;
-	min-height: 100%;
+	min-height: 100vh;
     margin: 0px;
     padding: 0px;
     display: table;
@@ -164,6 +164,7 @@ i {
 	overflow: hidden;
 	width: 100%;
 	color: black;
+	height: 100%;
 }
 
 .cms_content {

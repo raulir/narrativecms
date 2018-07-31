@@ -26,7 +26,7 @@ class cms_module_model extends CI_Model {
 	
 	
 	function get_module_config($module){
-				
+		
 		return $GLOBALS['config']['module'][$module];
 		
 	}
