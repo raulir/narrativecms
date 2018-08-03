@@ -277,30 +277,63 @@ class MY_Controller extends CI_Controller{
     	$page = $this->load->view($filename, array('data' => $panel_data, ), true);
     	
 		$css_arr = $this->get_page_css(true);
-		
-//		$css_arr = explode("\n", $css_str);
-		$css_str = '';
-		$preload_str = '';
-//		$noscript_str = '';
-		if (!empty($css_arr)){
-// print_r($css_arr);			
-			foreach($css_arr as $css_line){
-//				$css_str .= "cms_load_style('".$css_line['script']."');\n";
-				$preload_str .= '<link rel="preload" as="style" href="'.$css_line['script'].'">'."\n";
-				$css_str .= '<link rel="stylesheet" type="text/css" href="'.$css_line['script'].'" />';
+
+		if (empty($GLOBALS['config']['inline_css'])){
+			
+			if (!empty($css_arr)){
+				foreach($css_arr as $css_line){
+					$css_str = '<link rel="stylesheet" type="text/css" href="'.$css_line['script'].'" />';
+				}
 			}
-			/*
-    		$css_str = 	$preload_str.
-      					"<script type=\"text/javascript\">\n".
-    					"function cms_load_style(f){var s = document.createElement('link');\n".
-    					"s.rel = 'stylesheet';s.type = 'text/css';s.href = f;document.getElementsByTagName('head')[0].appendChild(s);}\n".
-//    					"window.addEventListener('load', function(){\n".$css_str."});".
-    					"setTimeout(function(){\n".$css_str."}, 0);".
-    		"</script>\n";
-//    		"";
- 			*/
+			
+		} else {
+			
+			if (!empty($css_arr)){
+				
+				// check for cache
+				$hash = substr(md5('inline_'.serialize($css_arr).'_'.(!empty($GLOBALS['config']['inline_limit']) ? $GLOBALS['config']['inline_limit'] : 0)), 0, 8);
+				$css_filename = $GLOBALS['config']['base_path'].'cache/'.$hash.'.css';
+				$css2_filename = $GLOBALS['config']['base_path'].'cache/'.$hash.'_2.css';
+				$css2_url = $GLOBALS['config']['base_url'].'cache/'.$hash.'_2.css';
+				
+				if (file_exists($css_filename) && file_exists($css2_filename)){
+					
+					$css_str = file_get_contents($css_filename);
+					$css2_str = file_get_contents($css2_filename);
+						
+				} else {
+					
+					$css_str = '';
+					$css2_str = '';
+				
+					foreach($css_arr as $css_line){
+						
+						$css_tmp = str_replace("url('../", "url('".$GLOBALS['config']['base_url'], file_get_contents($css_line['filename']))."\n";
+						$css_tmp = str_replace(' {', '{', $css_tmp);
+						$css_tmp = preg_replace('!([;}{,:])\s+!s', '$1', $css_tmp);
+						$css_tmp = preg_replace('!/\*.*?\*/!s', ' ', $css_tmp);
+
+						if (empty($GLOBALS['config']['inline_limit']) || strlen($css_str) < $GLOBALS['config']['inline_limit']){
+							$css_str .= $css_tmp;
+						} else {
+							$css2_str .= $css_tmp;
+						}
+						
+					}
+					
+					file_put_contents($css_filename, $css_str);
+					file_put_contents($css2_filename, $css2_str);
+						
+				}
+				
+			}
+			
+			$css_str = '<style type="text/css">'."\n".$css_str."\n".'</style>'."\n";
+			if (!empty($css2_str)){
+				$css_str .= '<link rel="preload" href="'.$css2_url.(!empty($GLOBALS['config']['cache']['force_download']) ? '?v='.time() : '').'" as="style" onload="this.rel=\'stylesheet\'">'."\n";
+			}
+			
 		}
-    	
 
 		// put together mandatory config js and panel/controller loaded js
 		if (!empty($GLOBALS['config']['js'])){
@@ -384,7 +417,7 @@ class MY_Controller extends CI_Controller{
     	
     	} else {
     		
-    		$this->load->model('cms_page_panel_model');
+    		$this->load->model('cms/cms_page_panel_model');
 
     		$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'cms_cssjs_settings', 'page_id' => 0, ]);
     		if (!empty($settings_a[0]['css'])){
@@ -429,7 +462,7 @@ class MY_Controller extends CI_Controller{
     	// new method for w/o html
     	if (!empty($params['no_html']) && stristr($name, '/')){
     		
-    		$this->load->model('cms_panel_model');
+    		$this->load->model('cms/cms_panel_model');
     		
     		// get config if exists
     		$panel_config = $this->cms_panel_model->get_cms_panel_config($name);
@@ -443,7 +476,7 @@ class MY_Controller extends CI_Controller{
     		
     	}
 
-    	$this->load->model('cms_page_panel_model');
+    	$this->load->model('cms/cms_page_panel_model');
     	
     	$return = array();
     	
@@ -547,7 +580,7 @@ class MY_Controller extends CI_Controller{
      * for main controller to generate panels output as texts
      */
     function render($page_config){
-    	
+
     	foreach($page_config as $key => $panel_config){
     		if (stristr($panel_config['panel'], '/')){
     			list($module, $panel_name) = explode('/', $panel_config['panel']);

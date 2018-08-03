@@ -135,6 +135,13 @@
 			]
 		},
 		{
+			"id":"cms_mini_normalise",
+			"name":"CMS mini normalise css",
+			"flags":[
+				"hidden"
+			]
+		},
+		{
 			"id":"cms_log_rotate",
 			"name":"CMS log rotate",
 			"flags":[
