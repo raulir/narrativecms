@@ -277,12 +277,13 @@ class MY_Controller extends CI_Controller{
     	$page = $this->load->view($filename, array('data' => $panel_data, ), true);
     	
 		$css_arr = $this->get_page_css(true);
-
+	
 		if (empty($GLOBALS['config']['inline_css'])){
 			
+			$css_str = '';
 			if (!empty($css_arr)){
 				foreach($css_arr as $css_line){
-					$css_str = '<link rel="stylesheet" type="text/css" href="'.$css_line['script'].'" />';
+					$css_str .= '<link rel="stylesheet" type="text/css" href="'.$css_line['script'].'" />';
 				}
 			}
 			

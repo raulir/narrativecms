@@ -52,17 +52,17 @@
 			"label":"Css inlining limit",
 			"values":{
 				"0":"All",
-				"5000":"5000",
-				"6000":"6000",
-				"7000":"7000",
-				"8000":"8000",
-				"9000":"9000",
-				"10000":"10000",
-				"11000":"11000",
-				"12000":"12000"
+				"5000":"5k",
+				"8000":"8k",
+				"10000":"10k",
+				"11000":"11k",
+				"12000":"12k",
+				"20000":"20k",
+				"50000":"50k",
+				"100000":"100k"
 			},
-			"default":"8000",
-			"help":"[css inlining limit]||Google likes when first pageful is inside first 12kB||How much of this to allow inlined css to take.||Must have {inline_css} settings to be set in config file. Must have {pack_css} not set in config file."
+			"default":"100000",
+			"help":"[css inlining limit]||Google likes when first pageful is inside first 14kB||Approximate amount of css to inline. Use lower numbers for fine tuning and higher for sanity checks||Must have {inline_css} be set and {pack_css} not set in config file"
 		},
 		{
 			"type":"select",
