@@ -56,7 +56,7 @@
 					<?php endforeach ?>
 	
 					<div class="form_submit">
-						<div class="form_submit_label"><?php print($submit_text); ?></div>
+						<div class="form_submit_label" <?php _ib($submit_icon, 20) ?>><?php print($submit_text); ?></div>
 					</div>
 					
 					<div class="form_message">

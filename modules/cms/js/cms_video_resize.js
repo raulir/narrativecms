@@ -12,9 +12,11 @@
     	 * resizing function itself
     	 * 
     	 */
-    	var cms_video_resize_helper = function($target, after){
+    	var cms_video_resize_helper = function($target, params){
     		
-    		if (typeof after != 'function'){
+    		if (typeof params == 'function'){
+    			params.after = params;
+    		} else if (typeof params.after != 'function'){
     			params.after = function(){};
     		}
     		
@@ -29,7 +31,7 @@
     		if ($target[0].readyState !== 4 || video_width == 0 || video_height == 0){
     			
     			setTimeout(function(){
-    				cms_video_resize_helper($target, after);
+    				cms_video_resize_helper($target, params);
     			}, 500);
     			return;
     		
@@ -58,7 +60,7 @@
     			'left': - (video_width - parent_width)/(2*parent_width)*100 + '%'
     		});
 
-    		after($target);
+    		params.after.apply($target);
 
     	}
 
@@ -66,7 +68,7 @@
 		
 		$set.each(function(){
 
-			cms_video_resize_helper($(this), params.after);
+			cms_video_resize_helper($(this), params);
 		    
 		});
 		

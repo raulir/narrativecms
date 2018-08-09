@@ -4,8 +4,8 @@
 <div>
 
 	<?php foreach($forms as $form ): ?>
-		<div class="admin_small_button admin_form_data" data-id="<?php print($form['cms_page_panel_id']); ?>">
-			<?php _p(substr($form['title'], 0, 40)); ?>
+		<div class="admin_small_button admin_form_data" data-id="<?= $form['cms_page_panel_id'] ?>">
+			<?php _p(substr(!empty($form['title']) ? $form['title'] : '[no name]', 0, 40)); ?>
 		</div>
 	<?php endforeach ?>
 

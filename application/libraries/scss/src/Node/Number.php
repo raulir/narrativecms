@@ -290,7 +290,7 @@ class Number extends Node implements \ArrayAccess
         }
 
         reset($units);
-        list($unit, ) = each($units);
+        list($unit, ) = @each($units);
 
         return (string) $dimension . $unit;
     }

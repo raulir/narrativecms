@@ -4,7 +4,7 @@ class form_admin extends MY_Controller{
 	
 	function panel_action($params){
 	
-        if (!empty($params['cms_page_panel_id'])){
+        if ($params['cms_page_panel_id'] !== ''){
         	
         	// get page panel data 
         	$this->load->model('cms_page_panel_model');
@@ -12,7 +12,7 @@ class form_admin extends MY_Controller{
 
         	// diacritics
    			$filename = html_entity_decode(preg_replace('~&([a-z]{1,2})(?:acute|cedil|circ|grave|lig|orn|ring|slash|tilde|uml);~i', 
-					'$1', $page_panel['title']), ENT_QUOTES, 'UTF-8');
+					'$1', !empty($page_panel['title']) ? $page_panel['title'] : 'no name'), ENT_QUOTES, 'UTF-8');
 	    	// non alphanumeric
 	    	$filename = ' '.preg_replace('/[^a-z0-9]/', '  ', strtolower($filename)).' ';
 	    	// common words
