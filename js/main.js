@@ -1088,67 +1088,6 @@ function is_touch_event(e){
 	}
 }
 
-/* 
- * params after(), $this
- * 
- */
-function cms_video_resize(params){
-	
-	if (typeof params.after != 'function'){
-		params.after = function(){};
-	}
-	
-	var $this = params.$this;
-	
-	$this.css({
-		'width': '',
-		'height': ''
-	});
-	
-	var video_width = $this.width();
-	var video_height = $this.height();
-	
-	if ($this[0].readyState !== 4 || video_width == 0 || video_height == 0){
-		
-		setTimeout(function(){
-			cms_video_resize(params);
-		}, 500);
-		
-		return;
-	
-	}
-
-	var $parent = $this.parent();
-		
-	var parent_width = $parent.width();
-	var parent_height = $parent.height();
-	
-	var video_ratio = video_width/video_height;
-	var parent_ratio = parent_width/parent_height;
-	
-	if (video_ratio > parent_ratio){
-		video_height = parent_height;
-		video_width = video_height * video_ratio;
-	} else {
-		video_width = parent_width;
-		video_height = video_width / video_ratio;
-	}
-
-// console.log('new width: ' + video_width + ' new height: ' + video_height);
-	
-	$this.css({
-		'width': (video_width/parent_width)*100 + '%',
-		'height': (video_height/parent_height)*100 + '%',
-		'top': - (video_height - parent_height)/(2*parent_height)*100 + '%',
-		'left': - (video_width - parent_width)/(2*parent_width)*100 + '%'
-	});
-	
-//	$this.data('state', 'pause');
-
-	params.after($this);
-
-}
-
 $(document).ready(function() {
 	
 	cms_hover_init();
