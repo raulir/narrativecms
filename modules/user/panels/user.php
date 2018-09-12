@@ -4,7 +4,7 @@ class user extends MY_Controller{
 	
 	function panel_heading($params){
 
-		return $params['name'] . ' &lt;' . $params['email'] . '&gt;';
+		return $params['username'] . ' (' . $params['fullname'] . ') &lt;' . $params['email'] . '&gt;';
 	
 	}
 	

@@ -30,6 +30,10 @@
 		{
 			"id":"login",
 			"name":"Login"
+		},
+		{
+			"id":"user_settings",
+			"name":"User settings"
 		}
 	]
 }

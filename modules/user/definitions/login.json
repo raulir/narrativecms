@@ -1,0 +1,110 @@
+{
+    "version": "2",
+	"label": "Landing",
+    "item": [
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Heading",
+			"default":"user login"
+		},
+		{
+			"type":"text",
+			"name":"email_label",
+			"label":"Email label",
+			"default":"email"
+		},
+		{
+			"type":"text",
+			"name":"password_label",
+			"label":"Password label",
+			"default":"password"
+		},
+		{
+			"type":"text",
+			"name":"button_label",
+			"label":"Button label",
+			"default":"log in"
+		},
+		{
+			"type":"text",
+			"name":"bad_username",
+			"label":"Bad login message",
+			"default": "Your email or password was incorrect"
+		},
+		{
+			"type":"subtitle",
+			"label":"Forgot password"
+		},
+		{
+			"type":"text",
+			"name":"forgotten_text",
+			"label":"Forgotten text",
+			"default":"forgotten your login details?"
+		},
+		{
+			"type":"text",
+			"name":"link_text",
+			"label":"Link text",
+			"default":"contact us"
+		},
+		{
+			"type":"link",
+			"name":"link_url",
+			"label":"Link URL"
+		},
+		{
+			"type":"text",
+			"name":"extra_text",
+			"label":"Extra text",
+			"default": "and we'll provide you with new details"
+		},
+		{
+			"type":"subtitle",
+			"label":"Registration"
+		},
+		{
+			"type":"text",
+			"name":"register_heading",
+			"label":"Register heading",
+			"default": "register here"
+		},
+		{
+			"type":"text",
+			"name":"register_username",
+			"label":"Username label",
+			"default": "visible name"
+		},
+		{
+			"type":"text",
+			"name":"register_fullname",
+			"label":"Full name label",
+			"default": "full name"
+		},
+		{
+			"type":"text",
+			"name":"register_email",
+			"label":"Email label",
+			"default": "email"
+		},
+		{
+			"type":"text",
+			"name":"register_password",
+			"label":"Password label",
+			"default": "new password"
+		},
+		{
+			"type":"text",
+			"name":"register_password2",
+			"label":"Password x2 label",
+			"default": "new password again"
+		},
+		{
+			"type":"text",
+			"name":"register_submit",
+			"label":"Submit label",
+			"default": "register"
+		}
+	]
+}
+	

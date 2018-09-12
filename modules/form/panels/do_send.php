@@ -34,49 +34,49 @@ class do_send extends MY_Controller{
         		unset($data['cache']);
         	}
         	
+        	// page title for email
+	        $title_parts = [trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), $GLOBALS['config']['site_title_delimiter'].' ')];
         	// if settings
         	if(!empty($params['cms_page_id'])){
         	
 	        	$page = $this->cms_page_model->get_page($params['cms_page_id']);
 	        	
-	        	$title_parts = [trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), $GLOBALS['config']['site_title_delimiter'].' ')];
 	        	if (!empty($page['title'])){
 	        		$title_parts[] = $page['title'];
 	        	}
 	        	
-	        	$title = (!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '') . 'New form "'.$params['title'].'" submission on "'.implode(' - ', $title_parts).'"';
-	
-	        	// send notification
-				if(!empty($params['emails']) && count($params['emails'])){
-					
-					if (!empty($params['noreply_notification'])){
-						$from = 'noreply@bytecrackers.com';
-					} else {
-						if (!empty($data['email']) && stristr($data['email'], '@') && stristr($data['email'], '.')){
-							
-							$from = $data['email'];
-							
-							if (!empty($data['name'])){
-								$from = $data['name'].' <'.$from.'>';
-							}
-						
-						} else {
-						
-							$from = 'noreply@bytecrackers.com';
-						
-						}
-					}
-					
-					$this->form_model->send_contact_request($params['emails'], $data, $title, $from);
-				
-				}
-				
-				if(!empty($params['autoreply'])){
-					$this->form_model->send_autoreply($data, $params['autoreply_text'], $params['autoreply_email'], $params['autoreply_name'], $params['autoreply_subject']);
-				}
-				
         	}
+        	$title = (!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '') . 'New form "'.$params['title'].'" submission on "'.implode(' - ', $title_parts).'"';
+
+        	// send notification
+			if(!empty($params['emails']) && count($params['emails'])){
+				
+				if (!empty($params['noreply_notification'])){
+					$from = 'noreply@bytecrackers.com';
+				} else {
+					if (!empty($data['email']) && stristr($data['email'], '@') && stristr($data['email'], '.')){
+						
+						$from = $data['email'];
+						
+						if (!empty($data['name'])){
+							$from = $data['name'].' <'.$from.'>';
+						}
+					
+					} else {
+					
+						$from = 'noreply@bytecrackers.com';
+					
+					}
+				}
+				
+				$this->form_model->send_contact_request($params['emails'], $data, $title, $from);
 			
+			}
+			
+			if(!empty($params['autoreply'])){
+				$this->form_model->send_autoreply($data, $params['autoreply_text'], $params['autoreply_email'], $params['autoreply_name'], $params['autoreply_subject']);
+			}
+
 			$this->form_model->create_form_data($cms_page_panel_id, !empty($data['email']) ? $data['email'] : '', $data);
 			
 			$return = [];

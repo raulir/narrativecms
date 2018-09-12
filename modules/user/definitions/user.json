@@ -11,13 +11,18 @@
 	"item":[ 
 		{
 			"type":"text",
-			"name":"email",
-			"label":"Email"
+			"name":"username",
+			"label":"Username"
 		},
 		{
 			"type":"text",
-			"name":"name",
+			"name":"fullname",
 			"label":"Full name"
+		},
+		{
+			"type":"text",
+			"name":"email",
+			"label":"Email"
 		},
 		{
 			"type":"text",
