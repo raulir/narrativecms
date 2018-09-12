@@ -49,7 +49,7 @@
 		file_put_contents($lockfile, json_encode($locked, JSON_PRETTY_PRINT));
 		
 		// load helper
-		include($GLOBALS['config']['base_path'].'application/helpers/image_optimiser_helper.php');
+		include($GLOBALS['config']['base_path'].'system/helpers/image_optimiser_helper.php');
 		
 		_iw($name, ['width' => $width, 'output' => $output, ]);
 

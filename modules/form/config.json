@@ -14,8 +14,8 @@
 	],
 	"panels":[
 		{
-			"id":"form",
-			"name":"Contact form"
+			"id":"basic",
+			"name":"Basic form"
 		}
 	],
 	"access":[
@@ -26,10 +26,6 @@
 		{
 			"access":"form_data",
 			"name":"Forms data"
-		},
-		{
-			"access":"form_settings",
-			"name":"Forms settings"
 		}
 	]
 }

@@ -32,6 +32,7 @@ AddOutputFilterByType DEFLATE text/plain
 AddOutputFilterByType DEFLATE text/html
 AddOutputFilterByType DEFLATE text/xml
 AddOutputFilterByType DEFLATE text/css
+AddOutputFilterByType DEFLATE text/javascript
 AddOutputFilterByType DEFLATE application/xml
 AddOutputFilterByType DEFLATE application/xhtml+xml
 AddOutputFilterByType DEFLATE application/rss+xml
@@ -39,7 +40,17 @@ AddOutputFilterByType DEFLATE application/javascript
 AddOutputFilterByType DEFLATE application/x-javascript
 AddOutputFilterByType DEFLATE application/x-httpd-php
 AddOutputFilterByType DEFLATE application/x-httpd-fastphp
+AddOutputFilterByType DEFLATE application/x-font
+AddOutputFilterByType DEFLATE application/x-font-truetype
+AddOutputFilterByType DEFLATE application/x-font-ttf
+AddOutputFilterByType DEFLATE application/x-font-otf
+AddOutputFilterByType DEFLATE application/x-font-opentype
+AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
 AddOutputFilterByType DEFLATE image/svg+xml
+AddOutputFilterByType DEFLATE image/x-icon
+AddOutputFilterByType DEFLATE font/ttf
+AddOutputFilterByType DEFLATE font/otf
+AddOutputFilterByType DEFLATE font/opentype
 </IfModule>
 
 RewriteEngine on

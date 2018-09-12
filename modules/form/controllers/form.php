@@ -33,7 +33,7 @@ class form extends MY_Controller {
 					'position' => 'main', 
 					'panel' => 'form_admin',
    					'module' => 'form',
-					'params' => array('cms_page_panel_id' => $cms_page_panel_id, ),
+					'params' => ['cms_page_panel_id' => $cms_page_panel_id, ],
 				),
         );
         

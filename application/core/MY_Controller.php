@@ -691,12 +691,6 @@ class MY_Controller extends CI_Controller{
     		$controller_filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/panels/'.$name.'.php';
     		$template_filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/templates/'.$name.'.tpl.php';
 
-    	} else if (file_exists($GLOBALS['config']['base_path'].'application/controllers/panels/'.$panel_name.'.php')){
-    
-    		// deprecated - panel is in main application folder
-    		$controller_filename = $GLOBALS['config']['base_path'].'application/controllers/panels/'.$panel_name.'.php';
-    		$template_filename = $GLOBALS['config']['base_path'].'application/views/panels/'.$panel_name.'.php';
-    
     	} else {
     
     		// check if any of modules has panel with this name
@@ -712,7 +706,7 @@ class MY_Controller extends CI_Controller{
     		}
     		 
     	}
-        	 
+
     	if (!empty($controller_filename) && file_exists($controller_filename)){
     		$return['controller'] = $controller_filename;
     	} else {
@@ -794,7 +788,7 @@ class MY_Controller extends CI_Controller{
 
     	// cache this
     	$GLOBALS['_panel_files'][$panel_name] = $return;
-    
+
     	return $return;
     
     }

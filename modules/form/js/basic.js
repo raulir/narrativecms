@@ -1,33 +1,33 @@
-function form_init(){
+function form_basic_init(){
 
-	$('.form_form>form').on('submit.cms', function(){
-		$('.form_submit').click();
+	$('.form_basic_form>form').on('submit.cms', function(){
+		$('.form_basic_submit').click();
 		return false;
 	});
 	
-	$('.form_submit').on('click.crl', function(){
+	$('.form_basic_submit').on('click.crl', function(){
 
 		var $form = $(this).closest('form');
 		
 		var missing = 0;
-		$('.form_mandatory', $form).each(function(){
+		$('.form_basic_mandatory', $form).each(function(){
 			var $this = $(this);
 			if ($this.val() == '' || ($this.attr('name') == 'email' && !($this.val().indexOf('@') >= 0) )){
 				missing = missing + 1;
-				$this.parent().addClass('form_error');
+				$this.parent().addClass('form_basic_error');
 				setTimeout(function(){
-					$this.parent().removeClass('form_error');
+					$this.parent().removeClass('form_basic_error');
 				}, 5000);
 			}
 		});
 		
 		if (missing == 0){
 			
-			$('.form_input_input').blur();
+			$('.form_basic_input_input').blur();
 			
-			$('.form_message').addClass('form_message_active');
+			$('.form_basic_message').addClass('form_basic_message_active');
 			setTimeout(function(){
-				$('.form_message').addClass('form_message_status_sending');
+				$('.form_basic_message').addClass('form_basic_message_status_sending');
 			}, 50);
 			
 			var fa = $form.serializeArray();
@@ -46,14 +46,14 @@ function form_init(){
 
 				setTimeout(function(){
 					setTimeout(function(){
-						$('.form_message').removeClass('form_message_status_sending').addClass('form_message_status_active');
+						$('.form_basic_message').removeClass('form_basic_message_status_sending').addClass('form_basic_message_status_active');
 					}, 50);
 					
 				}, 500);
     		
 				setTimeout(function(){
-					$('.form_message').removeClass('form_message_status_active').removeClass('form_message_active');
-					$('.form_input_input', $form).val('');
+					$('.form_basic_message').removeClass('form_basic_message_status_active').removeClass('form_basic_message_active');
+					$('.form_basic_input_input', $form).val('');
 				}, 10000);
 				
 			}}, fo));
@@ -62,7 +62,7 @@ function form_init(){
 
 	});
 	
-	$('.form_input_input').each(function(){
+	$('.form_basic_input_input').each(function(){
 		var $this = $(this);
 		if (parseInt($this.data('limit'))){
 			$this.on('change.crl keyup.crl', function(){
@@ -75,18 +75,18 @@ function form_init(){
 	
 }
 
-function form_resize(){
+function form_basic_resize(){
 
 }
 
 $(document).ready(function() {
 	
 	$(window).on('resize.r', function(){
-		form_resize();
+		form_basic_resize();
 	});
 
-	form_resize();
+	form_basic_resize();
 	
-	form_init();
+	form_basic_init();
 	
 });
