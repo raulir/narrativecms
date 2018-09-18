@@ -108,4 +108,20 @@ class cms_menu_model extends CI_Model {
 		
 	}
 	
+	function get_cms_page_panels(){
+	
+		$sql = "select * from block order by sort asc";
+		$query = $this->db->query($sql);
+		$result = $query->result_array();
+			
+		foreach ($result as $name => $row){
+	
+			$result[$name]['panel_params'] = $this->get_cms_page_panel_params($row['block_id']);
+	
+		}
+			
+		return $result;
+	
+	}
+	
 }

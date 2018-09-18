@@ -122,7 +122,7 @@ class cms_main_menu extends MY_Controller{
 		$return['pages'] = $this->cms_page_model->get_cms_pages();
 
 		$this->load->model('cms_page_panel_model');
-		$return['cms_page_panels'] = $this->cms_page_panel_model->get_cms_page_panels();
+		$return['cms_page_panels'] = $this->cms_menu_model->get_cms_page_panels();
 		foreach($return['cms_page_panels'] as $key => $value){
 			if ($value['submenu_anchor'] == ''){
 				unset($return['cms_page_panels'][$key]);

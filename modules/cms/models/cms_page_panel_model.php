@@ -250,23 +250,6 @@ class cms_page_panel_model extends CI_Model {
 		
 	}
 	
-	// deprecated, used only in cms_main_menu.php
-	function get_cms_page_panels(){
-		
-		$sql = "select * from block order by sort asc";
-    	$query = $this->db->query($sql);
-    	$result = $query->result_array();
-    	
-    	foreach ($result as $name => $row){
-    		
-    		$result[$name]['panel_params'] = $this->get_cms_page_panel_params($row['block_id']);
-    		
-    	}
-    	
-    	return $result;
-	
-	}
-
 	function get_cms_page_panel($cms_page_panel_id){
 	
 		$sql = "select *, block_id as cms_page_panel_id, page_id as cms_page_id from block where block_id = ? ";
@@ -643,41 +626,6 @@ class cms_page_panel_model extends CI_Model {
 		$sql_arrays = array();
 		$sql_filter_str = '';
 		
-		// to support module/panel_name panel names, DEPRECATE in future - all panel names should have module name
-		if (!empty($GLOBALS['config']['deprecated']) && !empty($filter['panel_name'])){
-
-			// make this an array
-			if (!is_array($filter['panel_name'])){
-				$filter['panel_name'] = [$filter['panel_name']];
-			}
-			
-			$new_panel_name_filter = [];
-			
-			foreach($filter['panel_name'] as $key => $panel_name_original){
-				
-				$new_panel_name_filter[] = $panel_name_original;
-				
-				if (stristr($panel_name_original, '/')){
-
-					// extract name without module name
-					list($module, $panel_name) = explode('/', $panel_name_original);
-					$new_panel_name_filter[] = $panel_name;
-
-				} else {
-					
-					// combine with all possible module names
-					foreach($GLOBALS['config']['modules'] as $module){
-						$new_panel_name_filter[] = $module.'/'.$panel_name_original;
-					}
-
-				}
-			
-			}
-			
-			$filter['panel_name'] = $new_panel_name_filter;
-					
-		}
-
 		foreach($filter as $key => $value){
 			$tkey = str_replace('!', '', $key);
 			if (in_array($tkey, array('block_id', 'page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title', ))){
@@ -869,11 +817,6 @@ class cms_page_panel_model extends CI_Model {
 	
 		return $return;
 	
-	}
-	
-	/* deprecated */
-	function get_blocks_by($filter){
-		return $this->get_cms_page_panels_by($filter);
 	}
 	
 	function get_fk_data($panel_name, $filter = array(), $label_field = 'title'){

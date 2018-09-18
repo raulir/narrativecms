@@ -29,13 +29,6 @@ class cms_search_operations extends MY_Controller{
 			$this->load->model('cms_panel_model');
 			
 			$lists = $this->cms_page_panel_model->get_lists();
-			// DEPRECATED: add lists without module names
-			foreach($lists as $list){
-				if (stristr($list, '/')){
-					list($module, $listname) = explode('/', $list);
-					$lists[$listname] = $listname;
-				}
-			}
 			
 			$return = ['result' => ['pages' => [], 'page_panels' => [], ], ];
 				

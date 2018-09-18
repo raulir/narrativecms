@@ -7,13 +7,6 @@
 			"url":"admin/pages/"
 		},
 		{
-			"id":"menus",
-			"name":"Menus",
-			"access":"cms_menus",
-			"url":"admin/menu/",
-			"deprecated":"1"
-		},
-		{
 			"id":"cms",
 			"name":"CMS"
 		},
