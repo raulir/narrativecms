@@ -8,13 +8,25 @@
 		
 		$name = $_POST['name'];
 		
-		$output = $_POST['output'];
-		$width = $_POST['width'];
+		$output = !empty($_POST['output']) ? $_POST['output'] : '';
+		$width = !empty($_POST['width']) ? $_POST['width'] : '';
 		
 		$image_dir = pathinfo($name, PATHINFO_DIRNAME);
 		$image_name = pathinfo($name, PATHINFO_FILENAME);
 		
-		$target_url = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_name.'.'.$width.'.'.$output;
+		if (empty($output)){
+			$output = pathinfo($name, PATHINFO_EXTENSION);
+		}
+		
+		if (empty($width)){
+			$width = round($GLOBALS['config']['rem_px'] * (!empty($GLOBALS['config']['images_textarea']) ? $GLOBALS['config']['images_textarea'] : 0.5));
+			if (empty($width) || $width > 1000) {
+				$width = 1000;
+			}
+		}
+		
+		$target_name = $image_dir.'/_'.$image_name.'.'.$width.'.'.$output;
+		$target_url = $GLOBALS['config']['upload_url'].$target_name;
 		
 		// lock the file
 		$lockfile = $GLOBALS['config']['base_path'].'cache/image_resize_lock.json';
@@ -36,7 +48,10 @@
 				
 			} else {
 				
-				print(json_encode(['result' => ['src' => $GLOBALS['config']['upload_url'].$name, ]], JSON_PRETTY_PRINT));
+				print(json_encode(['result' => [
+						'src' => $GLOBALS['config']['upload_url'].$name, 
+						'filename' => $target_name, 
+				]], JSON_PRETTY_PRINT));
 				die();
 			
 			}
@@ -51,9 +66,12 @@
 		// load helper
 		include($GLOBALS['config']['base_path'].'system/helpers/image_optimiser_helper.php');
 		
-		_iw($name, ['width' => $width, 'output' => $output, ]);
-
-		print(json_encode(['result' => ['src' => $target_url, ]], JSON_PRETTY_PRINT));
+		$image_data = _iw($name, ['width' => $width, 'output' => $output, ]);
+		
+		print(json_encode(['result' => [
+				'src' => $GLOBALS['config']['upload_url'] . $image_data['image'], 
+				'filename' => $image_data['image'], 
+		]], JSON_PRETTY_PRINT));
 		
 		// unlock
 		unset($locked[$time.'|'.$target_url]);

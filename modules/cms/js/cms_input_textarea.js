@@ -1,3 +1,19 @@
+function cms_input_textarea_srcconverter(url, node, on_save, name) {
+
+    if (name === 'src'){
+    	
+    	if (!url.startsWith('img/')){
+    	
+    		url = 'img/' + url;
+        
+    	}
+    	
+    }
+
+    return url;
+	
+}
+
 function cms_input_textarea_init(){
 
 	$('.cms_input_textarea textarea').each(function(){
@@ -95,6 +111,39 @@ function cms_input_textarea_init(){
 					extra_init.force_p_newlines = true;
 				}
 				
+				// media selector
+				if (buttons.indexOf('M') > -1){
+					
+					toolbar = toolbar + '| image ';
+					valid_elements = valid_elements + ',img[style|align|src]';
+					plugins = plugins + ' image';
+					extra_init.urlconverter_callback = 'cms_input_textarea_srcconverter';
+					
+					toolbar = toolbar + 'styleselect ';
+					if ($this.data('styles')){
+						
+						extra_init.style_formats = [];
+						
+						var style_data = JSON.parse($this.data('styles').replace(/~/g, '"'));
+						 
+						console.log(style_data);
+						
+						style_data.forEach(function(value){
+							
+							extra_init.style_formats.push({
+						    	title: value.name,
+							    selector: 'img',
+							    styles: value.style
+						    });
+
+						});
+
+					}
+
+					extra_init.file_browser_callback = cms_input_textarea_media_browser;
+
+				}
+				
 				tinymce.init($.extend({
 					selector: '.admin_tinymce_' + i, 
 					valid_elements: valid_elements, 
@@ -109,8 +158,9 @@ function cms_input_textarea_init(){
 				    plugins: 'code paste' + plugins,
 			    	paste_text_sticky : true,
 			    	remove_linebreaks : false,
-			    	convert_urls : false,
+			    	convert_urls : true,
 			    	relative_urls : false,
+			    	document_base_url: config_url,
 			    	setup : function(ed) {
 			    		ed.on('init', function(ed) {
 			    			ed.pasteAsPlainText = true;
@@ -163,15 +213,29 @@ function cms_input_textarea_resize(){
 		
 }
 
-function cms_tinymce_img(field_name, url, type, win){
+function cms_input_textarea_media_browser(field_name, url, type, win){
 	
-	// alert("Field_Name: " + field_name + "nURL: " + url + "nType: " + type + "nWin: " + win);
-	$('.mce-widget,.mce-container,.mce-reset').hide();
+	// console.log("Field_Name: " + field_name + "nURL: " + url + "nType: " + type + "nWin: " + win);
+	
+	$('.mce-widget,.mce-floatpanel,.mce-reset').hide();
 	cms_input_image_load_images({
 		'input_selector': '#' + field_name,
 		'path_type': 'root',
-		'after': function(){
-			$('.mce-widget,.mce-container,.mce-reset').show();
+		'after': function(params){
+			
+			$('.mce-widget,.mce-floatpanel,.mce-reset').show();
+			
+			// resize image
+			get_api('cms/image_resize', {
+				'do':'resize',
+				'name': params.name,
+				'success': function(data){
+					
+					$('#' + field_name).val('img/' + data.result.filename);
+					
+				}
+			})
+
 		}
 	});
 

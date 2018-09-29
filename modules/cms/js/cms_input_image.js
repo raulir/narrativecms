@@ -66,7 +66,7 @@ function cms_input_image_load_images(params){
 	var path = '';
 	// as cms image system works on img/ path ...
 	if (params.path_type == 'root'){
-		path = config_url + 'img/';
+		path = 'img/';
 		original_filename = original_filename.replace(path, '');
 	}
 
@@ -82,7 +82,7 @@ function cms_input_image_load_images(params){
 
 					// select process from here
 					$(params.input_selector).val(path + data.result.filename);
-					
+
 					if (typeof params.container_selector != 'undefined'){
 						if (data.result.filename == ''){
 							$(params.container_selector).html('-- no image --');
@@ -105,9 +105,9 @@ function cms_input_image_load_images(params){
 					});
 					
 					
-					$(params.container_selector).data('name')
+					$(params.container_selector).data('name');
 				
-					params.after();
+					params.after({'name':data.result.filename});
 					after();
 					
 				});

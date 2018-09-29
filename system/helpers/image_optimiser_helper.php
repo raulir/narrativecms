@@ -62,7 +62,7 @@ if ( !function_exists('_iw')) {
 			return ['image' => $image, 'width' => !empty($params['width']) ? $params['width'] : 0, 'height' => !empty($params['height']) ? $params['height'] : 0, ];
 		
 		}
-
+		
 		// get needed size
 		list($width, $height, $original_width, $original_height) = _get_iw_size($image, $params);
 		
@@ -73,7 +73,7 @@ if ( !function_exists('_iw')) {
 		if (file_exists($GLOBALS['config']['upload_path'].$new_image)) {
 			return ['image' => $new_image, 'width' => $width, 'height' => $height, ];
 		}
-
+		
 		// really needs resizing:
 		
 		// check memory availability
@@ -84,7 +84,7 @@ if ( !function_exists('_iw')) {
 			
 		// check again for memory limit and give up if not enough
 		$limit = str_replace(array('G', 'M', 'K', ), array('000000000', '000000', '000', ), ini_get('memory_limit'));
-			
+
 		if ($needed > $limit) {
 
 			trigger_error('Not enough memory to compress image: needed='.$needed.' memory_limit='.$limit, E_USER_NOTICE);

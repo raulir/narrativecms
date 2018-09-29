@@ -76,27 +76,6 @@
 			"default":"4"
 		},
 		{
-			"type":"text",
-			"name":"images_quality",
-			"label":"Image packing quality",
-			"default":"85",
-			"help":"[Image packing quality]||When jpgs are resized or pngs compressed, they are saved in this quality.||If you want to make {Google Page Insights} happy, set it to 85||Otherwise, when there is no problems with page speed, set this to 95."
-		},
-		{
-			"type":"text",
-			"name":"images_1x",
-			"label":"Image 1x size modifier",
-			"default":"0.75",
-			"help":"[Image 1x size modifier]||Modifier to template suggested image size for natural pixel size screens"
-		},
-		{
-			"type":"text",
-			"name":"images_2x",
-			"label":"Image 2x size modifier",
-			"default":"1.5",
-			"help":"[Image 2x size modifier]||Modifier to template suggested image size for high density (retina) screens"
-		},
-		{
 			"type":"select",
 			"name":"input_link_order",
 			"label":"Link input order",
@@ -185,6 +164,40 @@
 			"label":"Rem mobile divider",
 			"default":"50",
 			"help":"{Rem mobile divider} height of 1 rem to mobile viewport size"
+		},
+		{
+			"type":"subtitle",
+			"label":"Image optimisation",
+			"width":"wide",
+			"help":"Settings related to image optimisation"
+		},
+		{
+			"type":"text",
+			"name":"images_quality",
+			"label":"Image packing quality",
+			"default":"85",
+			"help":"[Image packing quality]||When jpgs are resized or pngs compressed, they are saved in this quality.||If you want to make {Google Page Insights} happy, set it to 85||Otherwise, when there is no problems with page speed, set this to 95."
+		},
+		{
+			"type":"text",
+			"name":"images_1x",
+			"label":"Image 1x size modifier",
+			"default":"0.75",
+			"help":"[Image 1x size modifier]||Modifier to template suggested image size for natural pixel size screens"
+		},
+		{
+			"type":"text",
+			"name":"images_2x",
+			"label":"Image 2x size modifier",
+			"default":"1.5",
+			"help":"[Image 2x size modifier]||Modifier to template suggested image size for high density (retina) screens"
+		},
+		{
+			"type":"text",
+			"name":"images_textarea",
+			"label":"Image in textarea size",
+			"default":"0.5",
+			"help":"[Image in textarea size]||Images in textareas width to max width pixels||If result is zero or over 1000px, 1000px is used"
 		}
 	]
 }

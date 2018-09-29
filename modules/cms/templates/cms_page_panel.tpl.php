@@ -244,7 +244,8 @@
 										.'data-lines="'.(!empty($field['lines']) ? $field['lines'] : '3' ).'" '
 										.' data-html="'.(!empty($field['html']) ? $field['html'] : '').'" '
 										.' data-html_class="'.(!empty($field['html_class']) ? $field['html_class'] : '').'" '
-										.' data-html_css="'.(!empty($field['html_css']) ? $field['html_css'] : '').'" ',
+										.' data-html_css="'.(!empty($field['html_css']) ? $field['html_css'] : '').'" '
+										.(!empty($field['styles']) ? ' data-styles="'.str_replace('"','~',json_encode($field['styles'])).'"' : ''),
 								'max_chars_class' => $max_chars_class,
 								'meta_class' => $meta_class,
 								'mandatory_class' => $mandatory_class,
