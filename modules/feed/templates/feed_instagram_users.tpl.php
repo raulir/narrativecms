@@ -55,7 +55,7 @@
 				<br>
 				By clicking "OK" below, I agree that my Instagram basic user data and public posts are used on this website.<br>
 				<br>
-				<a class="feed_instagram_privacy" href="http://www.bytecrackers.com/cms/instagram/" target="_blank">Privacy policy</a>
+				<a class="feed_instagram_privacy" href="http://cms.bytecrackers.com/instagram/" target="_blank">Privacy policy</a>
 			</div>
 		
 			<div class="admin_tool_button feed_instagram_popup_ok">OK</div>

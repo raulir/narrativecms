@@ -432,7 +432,7 @@ class feed_model extends CI_Model {
 
 			$data = file_get_contents($url);
 			
-			file_put_contents($filename, $this->cms_helper_model->json_format($data));
+			file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
 			
 		} else {
 			

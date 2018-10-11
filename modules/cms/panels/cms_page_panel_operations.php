@@ -137,7 +137,7 @@ class cms_page_panel_operations extends MY_Controller{
 		} elseif ($do == 'cms_page_panel_save'){
 			 
 			// collect data
-			$block_id = $this->input->post('block_id');
+			$block_id = $this->input->post('cms_page_panel_id');
 			$data['page_id'] = $this->input->post('page_id');
 			$data['parent_id'] = $this->input->post('parent_id');
 			$data['sort'] = $this->input->post('sort');
@@ -331,7 +331,7 @@ class cms_page_panel_operations extends MY_Controller{
 
 		} elseif ($do == 'cms_page_panel_delete'){
 			 
-			$block_id = $this->input->post('block_id');
+			$block_id = $this->input->post('cms_page_panel_id');
 			
 			// data for filenames
 			$data = $this->cms_page_panel_model->get_cms_page_panel($block_id);

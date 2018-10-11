@@ -14,7 +14,7 @@
 	<form method="post" class="admin_form" style="display: inline; ">
 	
 		<input type="hidden" name="do" value="cms_page_panel_save">
-		<input type="hidden" class="cms_page_panel_id" id="block_id" name="block_id" value="<?php print($block['block_id']); ?>">
+		<input type="hidden" class="cms_page_panel_id" name="cms_page_panel_id" value="<?= $block['cms_page_panel_id'] ?>">
 		<input type="hidden" id="parent_id" name="parent_id" value="<?php print($block['parent_id']); ?>">
 		<?php if(!empty($parent_field_name)): ?>
 			<input class="cms_page_panel_parent_name" type="hidden" name="parent_name" value="<?php print($parent_field_name); ?>">

@@ -5,7 +5,7 @@ function feed_save_push_init(){
 		$button.css({'opacity':'0.3'});
 		get_ajax('feed_save_push', {
 			'do': 'feed_save_push',
-			'cms_page_panel_id': $('[name="block_id"]').val(),
+			'cms_page_panel_id': $('[name="cms_page_panel_id"]').val(),
 			'success': function(){
 				$button.css({'opacity':'1'});
 			}

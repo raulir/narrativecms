@@ -6,7 +6,7 @@ function cms_page_panel_button_delete_init(){
 			panels_display_popup(data.result.html, {
 				'yes': function(){
 					get_ajax_panel('cms_page_panel_operations', {
-						'block_id': $('[name="block_id"]').val(), 
+						'cms_page_panel_id': $('[name="cms_page_panel_id"]').val(), 
 						'do': 'cms_page_panel_delete' 
 					}, function(data){
 						
