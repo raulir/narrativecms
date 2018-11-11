@@ -18,10 +18,10 @@ class cms_page_panel extends MY_Controller{
 
 	function panel_params($params){
 
-		$this->load->model('cms_page_panel_model');
-		$this->load->model('cms_page_model');
-		$this->load->model('cms_panel_model');
-		$this->load->model('cms_module_model');
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_model');
+		$this->load->model('cms/cms_panel_model');
+		$this->load->model('cms/cms_module_model');
 		
 		// if preset panel name (panel type) for new panel
 		if (!is_numeric($params['cms_page_panel_id'])){
@@ -74,7 +74,7 @@ class cms_page_panel extends MY_Controller{
 		if (empty($return['block']['cms_page_panel_id']) && isset($params['panel_name'])){
 			
 			// new block of type
-			$return['block'] = $this->cms_page_panel_model->new_block();
+			$return['block'] = $this->cms_page_panel_model->new_cms_page_panel();
 			$return['block']['panel_params'] = array();
 			$return['block']['page_id'] = $params['page_id'];
 			
@@ -98,14 +98,14 @@ class cms_page_panel extends MY_Controller{
 
 			if (!empty($params['parent_id'])){ // panel in panel
 
-				$return['block'] = $this->cms_page_panel_model->new_block();
+				$return['block'] = $this->cms_page_panel_model->new_cms_page_panel();
 				$return['block']['panel_params'] = array();
 				$return['block']['page_id'] = 0;
 				$return['block']['parent_id'] = $params['parent_id'];
 
 			} else {
 					
-				$return['block'] = $this->cms_page_panel_model->new_block();
+				$return['block'] = $this->cms_page_panel_model->new_cms_page_panel();
 				$return['block']['panel_params'] = array();
 				$return['block']['page_id'] = $params['cms_page_id'];
 

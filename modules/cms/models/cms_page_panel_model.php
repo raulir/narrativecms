@@ -275,13 +275,14 @@ class cms_page_panel_model extends CI_Model {
 	
 	}
 	
-	function new_block(){
+	function new_cms_page_panel(){
 		
 		$sql = "select max(sort) as sort from block";
     	$query = $this->db->query($sql);
     	$result = $query->row_array();
 		
 		return array(
+			'cms_page_panel_id' => 0,
 			'block_id' => 0,
 			'page_id' => 0,
 			'parent_id' => 0,
