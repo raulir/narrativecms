@@ -32,10 +32,10 @@ class Index extends MY_Controller {
 
     function index($page_id = 1, $extra = ''){
     	
-	    $this->load->model('cms_page_panel_model');
-    	$this->load->model('cms_page_model');
-    	$this->load->model('cms_menu_model');
-    	 
+	    $this->load->model('cms/cms_page_panel_model');
+    	$this->load->model('cms/cms_page_model');
+    	$this->load->model('cms/cms_menu_model');
+    	
     	$page_config = array();
     		
     	// set page static config

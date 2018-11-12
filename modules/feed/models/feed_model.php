@@ -4,9 +4,9 @@ class feed_model extends CI_Model {
 	
 	function refresh_feeds(){
 
-   		$this->load->model('cms_page_panel_model');
-   		$this->load->model('cms_image_model');
-   		
+   		$this->load->model('cms/cms_page_panel_model');
+   		$this->load->model('cms/cms_image_model');
+		
    		$feed_settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(array('panel_name' => ['feed/feed_settings', 'feed_settings'], ));
    		
    		if (empty($feed_settings_a[0])){
@@ -131,7 +131,7 @@ class feed_model extends CI_Model {
 		
 		if (!empty($cms_list_item['article_category_id'])){
 			// get source label from other place
-			$this->load->model('cms_page_panel_model');
+			$this->load->model('cms/cms_page_panel_model');
 			$article_category = $this->cms_page_panel_model->get_cms_page_panel($cms_list_item['article_category_id']);
 			$item['source_label'] = $article_category['heading'];
 		} else {
@@ -159,8 +159,8 @@ class feed_model extends CI_Model {
 	
 	function parse_tweet($tweet, $feed_setting){
 		
-		$this->load->model('cms_image_model');
-
+		$this->load->model('cms/cms_image_model');
+		
 		$item = array();
 		$item['hash'] = md5('twitter='.$tweet['twitter_id']);
 
@@ -197,8 +197,8 @@ class feed_model extends CI_Model {
 	
 	function parse_instagram($instagram, $feed_setting){
 		
-		$this->load->model('cms_image_model');
-
+		$this->load->model('cms/cms_image_model');
+		
 		$item = array();
 		$item['hash'] = md5('instagram='.$instagram['id']);
 
@@ -239,8 +239,8 @@ class feed_model extends CI_Model {
 
 	function refresh_item($cms_page_panel_id){ // original panel
 	
-   		$this->load->model('cms_page_panel_model');
-   		$original_a = $this->cms_page_panel_model->get_cms_page_panels_by(array('block_id' => $cms_page_panel_id, ));
+   		$this->load->model('cms/cms_page_panel_model');
+		$original_a = $this->cms_page_panel_model->get_cms_page_panels_by(array('block_id' => $cms_page_panel_id, ));
    		$original = $original_a[0];
    		
    		$old_a = $this->cms_page_panel_model->get_cms_page_panels_by(array(
@@ -402,8 +402,7 @@ class feed_model extends CI_Model {
 			return array();
 		}
 
-		$this->load->model('cms_helper_model');
-		$this->load->model('cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_model');
 			
 		// instagram stuff
 		if ($interval < 5){
@@ -490,7 +489,7 @@ class feed_model extends CI_Model {
 	
 	function clean_feeds(){
 
-   		$this->load->model('cms_page_panel_model');
+   		$this->load->model('cms/cms_page_panel_model');
    		
    		$feed = $this->cms_page_panel_model->get_cms_page_panels_by(array('panel_name' => ['feed', 'feed/feed'], 'page_id' => ['999999','0'], '_limit' => 50, ));
    		
