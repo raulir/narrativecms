@@ -134,7 +134,7 @@ if ( !function_exists('_iw')) {
 					
 					rename($GLOBALS['config']['upload_path'].$new_image, $temp_name);
 					
-					$cmd = (empty($GLOBALS['config']['images_pngquant_executable']) ? $GLOBALS['config']['base_path'].'application/libraries/pngquant/bin/pngquant.bin' : $GLOBALS['config']['images_pngquant_executable'])
+					$cmd = (empty($GLOBALS['config']['images_pngquant_executable']) ? $GLOBALS['config']['base_path'].'system/vendor/pngquant/bin/pngquant.bin' : $GLOBALS['config']['images_pngquant_executable'])
 							.' '.$temp_name.' --strip --speed 1 --quality=0-'.(!empty($GLOBALS['config']['images_quality']) ? $GLOBALS['config']['images_quality'] : 85).' -o '.$GLOBALS['config']['upload_path'].$new_image;
 
 					shell_exec($cmd);
@@ -149,7 +149,7 @@ if ( !function_exists('_iw')) {
 					
 					rename($GLOBALS['config']['upload_path'].$new_image, $temp_name);
 					
-					$cmd = (empty($GLOBALS['config']['images_zopflipng_executable']) ? $GLOBALS['config']['base_path'].'application/libraries/zopflipng/bin/zopflipng.bin' : $GLOBALS['config']['images_zopflipng_executable'])
+					$cmd = (empty($GLOBALS['config']['images_zopflipng_executable']) ? $GLOBALS['config']['base_path'].'system/vendor/zopflipng/bin/zopflipng.bin' : $GLOBALS['config']['images_zopflipng_executable'])
 							.' -y '.$temp_name.' '.$GLOBALS['config']['upload_path'].$new_image;
 
 					shell_exec($cmd);

@@ -1,1 +1,6 @@
+Order deny,allow
 Deny from all
+
+<Files ~ "\.(js|css)$">
+    Allow from all
+</Files>

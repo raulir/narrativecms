@@ -145,7 +145,7 @@ class cms_page_panel_toolbar extends MY_Controller{
 					}
 					
 					$params['breadcrumb'][] = [
-							'text' => (!empty($panel_config['list']['title_field']) ? str_limit($cms_page_panel[$panel_config['list']['title_field']], 40) : $heading),
+							'text' => str_limit(!empty($panel_config['list']['title_field']) ? $cms_page_panel[$panel_config['list']['title_field']] : $heading, 40),
 							'url' => '',
 							'field' => !empty($panel_config['list']['title_field']) ? $panel_config['list']['title_field'] : 'heading', // title field
 					];
@@ -164,7 +164,7 @@ class cms_page_panel_toolbar extends MY_Controller{
 			}
 
 		}
-		
+
 		// buttons
 		if (!empty($panel_config['list']['extra_buttons'])){
 			$params['buttons'] = $panel_config['list']['extra_buttons'];

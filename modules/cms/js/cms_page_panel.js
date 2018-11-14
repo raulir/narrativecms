@@ -20,7 +20,7 @@ function cms_page_panel_check_mandatory(colour){
 		
 		var label = (label_extra + $('label', $this).html()).replace(/ \*$/, '');
 		
-		if ($this.hasClass('cms_input_text')){
+		if ($this.hasClass('cms_input_text') || $this.hasClass('cms_input_date')){
 			
 			if (!$('input', $this).val()){
 				ret.push(label);

@@ -7,7 +7,7 @@
 			<<?= !empty($element['url']) ? 'a' : 'div' ?> class="admin_tool_text cms_page_panel_toolbar_text" 
 					<?php _lh($element['url']); ?> <?php print(!empty($element['field']) ? 'data-title_field="'.$element['field'].'"' : ''); ?>>
 				
-				<?= $element['text'] ?>
+				<?php print(str_limit($element['text'], 40)); ?>
 			
 			</<?= !empty($element['url']) ? 'a' : 'div' ?>>
 			

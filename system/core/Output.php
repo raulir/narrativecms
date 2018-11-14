@@ -56,13 +56,7 @@ class CI_Output {
 	 * @access 	protected
 	 */
 	protected $mime_types		= array();
-	/**
-	 * Determines wether profiler is enabled
-	 *
-	 * @var book
-	 * @access 	protected
-	 */
-	protected $enable_profiler	= FALSE;
+
 	/**
 	 * Determines if output compression is enabled
 	 *
@@ -70,13 +64,7 @@ class CI_Output {
 	 * @access 	protected
 	 */
 	protected $_zlib_oc			= FALSE;
-	/**
-	 * List of profiler sections
-	 *
-	 * @var array
-	 * @access 	protected
-	 */
-	protected $_profiler_sections = array();
+
 	/**
 	 * Whether or not to parse variables like {elapsed_time} and {memory_usage}
 	 *
@@ -243,45 +231,6 @@ class CI_Output {
 		return $this;
 	}
 
-	// --------------------------------------------------------------------
-
-	/**
-	 * Enable/disable Profiler
-	 *
-	 * @access	public
-	 * @param	bool
-	 * @return	void
-	 */
-	function enable_profiler($val = TRUE)
-	{
-		$this->enable_profiler = (is_bool($val)) ? $val : TRUE;
-
-		return $this;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Set Profiler Sections
-	 *
-	 * Allows override of default / config settings for Profiler section display
-	 *
-	 * @access	public
-	 * @param	array
-	 * @return	void
-	 */
-	function set_profiler_sections($sections)
-	{
-		foreach ($sections as $section => $enable)
-		{
-			$this->_profiler_sections[$section] = ($enable !== FALSE) ? TRUE : FALSE;
-		}
-
-		return $this;
-	}
-
-	// --------------------------------------------------------------------
-
 	/**
 	 * Set Cache
 	 *
@@ -306,8 +255,7 @@ class CI_Output {
 	 * $this->final_output
 	 *
 	 * This function sends the finalized output data to the browser along
-	 * with any server headers and profile data.  It also stops the
-	 * benchmark timer so the page rendering speed and memory usage can be shown.
+	 * with any server headers and profile data.
 	 *
 	 * @access	public
 	 * @param 	string
@@ -318,7 +266,7 @@ class CI_Output {
 		// Note:  We use globals because we can't use $CI =& get_instance()
 		// since this function is sometimes called by the caching mechanism,
 		// which happens before the CI super object is available.
-		global $BM, $CFG;
+		global $CFG;
 
 		// Grab the super object if we can.
 		if (class_exists('CI_Controller'))
@@ -344,23 +292,6 @@ class CI_Output {
 			$this->_write_cache($output);
 		}
 
-		// --------------------------------------------------------------------
-
-		// Parse out the elapsed time and memory usage,
-		// then swap the pseudo-variables with the data
-
-		$elapsed = $BM->elapsed_time('total_execution_time_start', 'total_execution_time_end');
-
-		if ($this->parse_exec_vars === TRUE)
-		{
-			$memory	 = ( ! function_exists('memory_get_usage')) ? '0' : round(memory_get_usage()/1024/1024, 2).'MB';
-
-			$output = str_replace('{elapsed_time}', $elapsed, $output);
-			$output = str_replace('{memory_usage}', $memory, $output);
-		}
-
-		// --------------------------------------------------------------------
-
 		// Are there any server headers to send?
 		if (count($this->headers) > 0)
 		{
@@ -385,46 +316,8 @@ class CI_Output {
 
 		// --------------------------------------------------------------------
 
-		// Do we need to generate profile data?
-		// If so, load the Profile class and run it.
-		if ($this->enable_profiler == TRUE)
-		{
-			$CI->load->library('profiler');
+		echo $output;  // Send it to the browser!
 
-			if ( ! empty($this->_profiler_sections))
-			{
-				$CI->profiler->set_sections($this->_profiler_sections);
-			}
-
-			// If the output data contains closing </body> and </html> tags
-			// we will remove them and add them back after we insert the profile data
-			if (preg_match("|</body>.*?</html>|is", $output))
-			{
-				$output  = preg_replace("|</body>.*?</html>|is", '', $output);
-				$output .= $CI->profiler->run();
-				$output .= '</body></html>';
-			}
-			else
-			{
-				$output .= $CI->profiler->run();
-			}
-		}
-
-		// --------------------------------------------------------------------
-
-		// Does the controller contain a function named _output()?
-		// If so send the output there.  Otherwise, echo it.
-		if (method_exists($CI, '_output'))
-		{
-			$CI->_output($output);
-		}
-		else
-		{
-			echo $output;  // Send it to the browser!
-		}
-
-		log_message('debug', "Final output sent to browser");
-		log_message('debug', "Total execution time: ".$elapsed);
 	}
 
 	// --------------------------------------------------------------------

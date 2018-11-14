@@ -75,7 +75,7 @@ if ( !function_exists('pack_css')) {
 				$scss_string .= '/* CUT HERE */'.file_get_contents($GLOBALS['config']['base_path'].$scsss_item['script']);
 	
 				// compile scss
-				require_once($GLOBALS['config']['base_path'].'application/libraries/scss/scss.inc.php');
+				require_once($GLOBALS['config']['base_path'].'system/vendor/scss/scss.inc.php');
 		   
 				$scss_compiler = new Compiler();
 		   
@@ -330,17 +330,10 @@ if ( !function_exists('pack_css')) {
 						
 					$js_string .= $js_file_content."\n";
 				}
-	
-				/*
-				$js_string = trim(preg_replace('/[ \t]+/', ' ', $js_string));
-				$js_string = trim(preg_replace('/\r/', '', $js_string));
-				$js_string = trim(preg_replace('/\n /', "\n", $js_string));
-				$js_string = trim(preg_replace('/[\n]+/', "\n", $js_string));
-				*/
-				
+
 				// js (css) minifier
-				require_once($GLOBALS['config']['base_path'].'application/libraries/minify/src/Minify.php');
-				require_once($GLOBALS['config']['base_path'].'application/libraries/minify/src/JS.php');
+				require_once($GLOBALS['config']['base_path'].'system/vendor/minify/src/Minify.php');
+				require_once($GLOBALS['config']['base_path'].'system/vendor/minify/src/JS.php');
 				
 				$minifier = new Minify\JS($js_string);
 				 

@@ -1,0 +1,58 @@
+.cms_input_date {
+	// clear: both;
+}
+
+.cms_input_date_input {
+	box-sizing: border-box;
+	display: block;
+	border: 1px solid #a0a0a0;
+	width: 250px;
+	height: 26px;
+	line-height: 23px;
+	font-size: 17px;
+	padding: 1px 5px 0px 5px;
+	background-position: right 5px center;
+	background-size: 16px auto;
+	background-repeat: no-repeat;
+	position: absolute;
+	right: 80px;
+	top: 0;
+}
+
+.cms_repeater_block .cms_input_date_input {
+	width: 230px;
+}
+
+.cms_input_date_input_hidden {
+	opacity: 0;
+}
+
+.cms_input_date_clear {
+	box-sizing: border-box;
+	height: 26px;
+	width: 32px;
+	border: 1px solid #a0a0a0;
+	border-radius: 4px;
+	position: absolute;
+	right: 40px;
+	top: 0;
+	background-size: 10px auto;
+	background-position: center;
+	background-repeat: no-repeat;
+	cursor: pointer;
+}
+
+.cms_input_date_today {
+	box-sizing: border-box;
+	height: 26px;
+	width: 32px;
+	border: 1px solid #a0a0a0;
+	border-radius: 4px;
+	position: absolute;
+	right: 0;
+	top: 0;
+	background-size: 16px auto;
+	background-position: center;
+	background-repeat: no-repeat;
+	cursor: pointer;
+}

@@ -61,15 +61,6 @@
 
 /*
  * ------------------------------------------------------
- *  Start the timer... tick tock tick tock...
- * ------------------------------------------------------
- */
-	$BM =& load_class('Benchmark', 'core');
-	$BM->mark('total_execution_time_start');
-	$BM->mark('loading_time:_base_classes_start');
-
-/*
- * ------------------------------------------------------
  *  Instantiate the UTF-8 class
  * ------------------------------------------------------
  *
@@ -137,13 +128,6 @@
 
 /*
  * ------------------------------------------------------
- *  Load the Language class
- * ------------------------------------------------------
- */
-	$LANG =& load_class('Lang', 'core');
-
-/*
- * ------------------------------------------------------
  *  Load the app controller and local controller
  * ------------------------------------------------------
  *
@@ -191,9 +175,6 @@
 	
 	}
 	
-	// Set a mark point for benchmarking
-	$BM->mark('loading_time:_base_classes_end');
-
 /*
  * ------------------------------------------------------
  *  Security check
@@ -230,14 +211,6 @@
 			show_404("{$class}/{$method}");
 		}
 	}
-
-/*
- * ------------------------------------------------------
- *  Instantiate the requested controller
- * ------------------------------------------------------
- */
-	// Mark a start point so we can benchmark the controller
-	$BM->mark('controller_execution_time_( '.$class.' / '.$method.' )_start');
 
 	$CI = new $class();
 
@@ -285,11 +258,6 @@
 		// Any URI segments present (besides the class/function) will be passed to the method for convenience
 		call_user_func_array(array(&$CI, $method), array_slice($URI->rsegments, 2));
 	}
-
-
-	// Mark a benchmark end point
-	$BM->mark('controller_execution_time_( '.$class.' / '.$method.' )_end');
-
 
 /*
  * ------------------------------------------------------

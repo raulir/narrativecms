@@ -94,7 +94,7 @@ class cms_dump extends MY_Controller{
 				
 			if ($params['do'] == 'generate'){
 				
-				include_once($GLOBALS['config']['base_path'].'application/libraries/mysqldump/mysqldump.php');
+				include_once($GLOBALS['config']['base_path'].'system/vendor/mysqldump/mysqldump.php');
 				
 				// images
 				$imagesdir = $GLOBALS['config']['upload_path'];
