@@ -19,6 +19,10 @@
 		{
 			"id":"parallax",
 			"name":"Parallax"
+		},
+		{
+			"id":"sidefloat",
+			"name":"Side float"
 		}
 	],
 	"cms_menu":[

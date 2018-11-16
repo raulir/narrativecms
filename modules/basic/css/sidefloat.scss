@@ -1,0 +1,76 @@
+.sidefloat_container {
+	position: fixed;
+	top: 0;
+	right: 0;
+	width: 20.0rem;
+	box-sizing: border-box;
+	padding: 2.0rem;
+	opacity: 0;
+	height: 0;
+	overflow: hidden;
+	transition: opacity 0.1s;
+	z-index: 100;
+}
+
+.sidefloat_active {
+	height: auto;
+	opacity: 1;
+}
+
+.sidefloat_content {
+	position: relative;
+}
+
+.sidefloat_item {
+	transition: opacity 1s;
+	opacity: 1;
+}
+
+.sidefloat_item_hidden {
+	opacity: 0;
+}
+
+.sidefloat_item_close {
+	
+	position: absolute;
+	height: 1.6rem;
+	width: 1.6rem;
+	right: 0.3rem;
+	top: 0.3rem;
+	cursor: pointer;
+	transition: opacity 0.5s;
+	z-index: 10;
+	
+	&::before {
+		content: '';
+		background-color: $colour_white;
+		height: 0.10rem;
+		transform: rotate(45deg);
+		position: absolute;
+		top: 0.75rem;
+		left: 0.3rem;
+		width: 1.0rem;
+		transition: all 0.2s;
+	}
+	
+	&::after {
+		content: '';
+		background-color: $colour_white;
+		height: 0.10rem;
+		transform: rotate(-45deg);
+		position: absolute;
+		top: 0.75rem;
+		left: 0.3rem;
+		width: 1.0rem;
+		transition: all 0.2s;
+	}
+
+	&:hover {
+		
+		&::before, &::after {
+			box-shadow: 0 0 0.2rem $colour_white;
+		}
+		
+	}
+	
+}
