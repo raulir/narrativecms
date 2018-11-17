@@ -1,5 +1,5 @@
 <div class="cms_input cms_input_date <?= !empty($extra_class) ? $extra_class : '' ?> <?= !empty($mandatory) ? ' cms_input_mandatory ' : '' ?>"
-		<?= !empty($default) ? ' data-default='.$default.' ' : '' ?>>
+		<?= !empty($default) ? ' data-default="'.$default.'" ' : '' ?>>
 		
 	<label for="<?= $name_clean ?>"><?= $label ?></label>
 	<?php if (!empty($help)) _panel('cms_help', ['help' => $help, ]); ?>

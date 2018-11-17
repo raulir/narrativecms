@@ -1,12 +1,12 @@
-.cms_input_date {
+.cms_input_datetime {
 
 }
 
-.cms_input_date_input {
+.cms_input_datetime_date {
 	box-sizing: border-box;
 	display: block;
 	border: 1px solid $colour_border;
-	width: 250px;
+	width: 120px;
 	height: 26px;
 	line-height: 23px;
 	font-size: 17px;
@@ -15,19 +15,47 @@
 	background-size: 16px auto;
 	background-repeat: no-repeat;
 	position: absolute;
-	right: 80px;
+	left: 130px;
 	top: 0;
 }
 
-.cms_repeater_block .cms_input_date_input {
+.cms_input_datetime_time {
+	box-sizing: border-box;
+	border: 1px solid $colour_border;
+	width: 122px;
+	height: 26px;
+	line-height: 23px;
+	font-size: 17px;
+	padding: 1px 5px 0px 5px;
+	background-position: right 5px center;
+	background-size: 16px auto;
+	background-repeat: no-repeat;
+	position: absolute;
+	left: 258px;
+	top: 0;
+}
+
+.cms_input_datetime_hour {
+	width: 43px;
+}
+
+.cms_input_datetime_minute {
+	width: 43px;
+}
+
+.cms_repeater_block .cms_input_datetime_input {
 	width: 230px;
 }
 
-.cms_input_date_input_hidden {
-	opacity: 0;
+.cms_input_datetime_hidden {
+	
+	.cms_input_datetime_date,.cms_input_datetime_hour,.cms_input_datetime_minute {
+		opacity: 0;
+	}
+
 }
 
-.cms_input_date_clear {
+.cms_input_datetime_clear {
 	box-sizing: border-box;
 	height: 26px;
 	width: 32px;
@@ -42,7 +70,7 @@
 	cursor: pointer;
 }
 
-.cms_input_date_today {
+.cms_input_datetime_today {
 	box-sizing: border-box;
 	height: 26px;
 	width: 32px;
