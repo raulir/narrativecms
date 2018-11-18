@@ -1,0 +1,36 @@
+{
+	"version":"2",
+	"list":{
+		"list_title":"Orders",
+		"item_title":"Order",
+		"filter_fields":{
+			"show":"-- show --"
+		},
+		"link_target":"0"
+	},
+	"item":[ 
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Order ID",
+			"mandatory":"1"
+		},
+		{
+			"type":"fk",
+			"name":"user_id",
+			"list":"user/user",
+			"label":"User",
+			"add_empty":"1"
+		},
+		{
+			"type":"datetime",
+			"name":"created",
+			"label":"Created"
+		},
+		{
+			"type":"datetime",
+			"name":"updated",
+			"label":"Updated"
+		}
+	]
+}

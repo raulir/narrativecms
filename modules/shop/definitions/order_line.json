@@ -1,0 +1,67 @@
+{
+	"version":"2",
+	"list":{
+		"list_title":"Order lines",
+		"item_title":"Order line",
+		"filter_fields":{
+			"show":"-- show --"
+		},
+		"link_target":"0"
+	},
+	"item":[ 
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Text"
+		},
+		{
+			"type":"fk",
+			"name":"order_id",
+			"list":"shop/order",
+			"label":"Order ID"
+		},
+		{
+			"type":"datetime",
+			"name":"created",
+			"label":"Created"
+		},
+		{
+			"type":"fk",
+			"name":"product_id",
+			"list":"shop/product",
+			"label":"Product ID",
+			"add_empty":"1",
+			"help":"Linking the line to the product if present"
+		},
+		{
+			"type":"text",
+			"name":"dimension",
+			"label":"Dimension",
+			"help":"One unit consist of how many minutes, kgs etc"
+		},
+		{
+			"type":"text",
+			"name":"unit_price",
+			"label":"Unit price"
+		},
+		{
+			"type":"text",
+			"name":"quantity",
+			"label":"Quantity",
+			"help":"How many of these",
+			"default":"1"
+		},
+		{
+			"type":"text",
+			"name":"price",
+			"label":"Price",
+			"help":"Total price for the line"
+		},
+		{
+			"type":"text",
+			"name":"link",
+			"label":"Link",
+			"help":"Optional link to product page"
+		}
+	]
+}

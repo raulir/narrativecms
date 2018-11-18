@@ -1,0 +1,46 @@
+{
+	"panels":[
+		{
+			"id":"basketmini",
+			"name":"Basket (mini)"
+		},
+		{
+			"id":"checkout",
+			"name":"Checkout"
+		}
+	],
+	"cms_menu":[
+		{
+			"id":"shop",
+			"name":"Shop"
+		},
+		{
+			"id":"shop_orders",
+			"name":"Orders",
+			"parent":"shop",
+			"access":"shop_orders",
+			"url":"admin/cms_list/shop__order/"
+		},
+		{
+			"id":"shop_order_lines",
+			"name":"Order lines",
+			"parent":"shop",
+			"access":"shop_order_lines",
+			"url":"admin/cms_list/shop__order_line/"
+		},
+		{
+			"id":"shop_settings",
+			"name":"Settings",
+			"parent":"shop",
+			"access":"shop_settings",
+			"url":"admin/panel_settings/shop__shop/"
+		},
+		{
+			"id":"basketmini_settings",
+			"name":"Mini basket settings",
+			"parent":"shop",
+			"access":"shop_basketmini_settings",
+			"url":"admin/panel_settings/shop__basketmini/"
+		}
+	]
+}

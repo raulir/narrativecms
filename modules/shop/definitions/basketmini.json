@@ -1,0 +1,51 @@
+{
+	"version":"2",
+	"label":"Mini basket",
+	"settings":[ 
+		{
+			"type":"link",
+			"name":"checkout_link",
+			"label":"Checkout link"
+		},
+		{
+			"type":"text",
+			"name":"checkout_text",
+			"label":"Checkout text"
+		},
+		{
+			"type":"text",
+			"name":"closed_heading",
+			"label":"Closed heading"
+		},
+		{
+			"type":"link",
+			"name":"cta_link",
+			"label":"CTA link"
+		},
+		{
+			"type":"text",
+			"name":"cta_text",
+			"label":"CTA text"
+		},
+		{
+			"type":"text",
+			"name":"open_heading",
+			"label":"Open heading"
+		},
+		{
+			"type":"text",
+			"name":"items_heading",
+			"label":"Items heading"
+		},
+		{
+			"type":"text",
+			"name":"dimension_label",
+			"label":"Dimension label"
+		},
+		{
+			"type":"text",
+			"name":"price_label",
+			"label":"Price label"
+		}
+	]
+}
