@@ -4,7 +4,7 @@
 	right: 0;
 	width: 20.0rem;
 	box-sizing: border-box;
-	padding: 2.0rem;
+	padding: 0 2.0rem;
 	opacity: 0;
 	height: 0;
 	overflow: hidden;
@@ -24,6 +24,8 @@
 .sidefloat_item {
 	transition: opacity 1s;
 	opacity: 1;
+	position: relative;
+	margin: 2.0rem 0;
 }
 
 .sidefloat_item_hidden {

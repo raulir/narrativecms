@@ -1,6 +1,7 @@
+$colour_border: #a0a0a0;
+
 .cms_input_select {
 	
-	float: left;
 	margin-left: 20px;
 	z-index: 10;
 	
@@ -19,7 +20,7 @@
 .cms_input_select > select {
 	box-sizing: border-box;
 	display: block;
-	border: 1px solid #a0a0a0;
+	border: 1px solid $colour_border;
 	width: 330px;
 	height: 26px;
 	line-height: 23px;
