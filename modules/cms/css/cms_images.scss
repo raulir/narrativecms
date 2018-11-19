@@ -323,43 +323,68 @@
 }
 
 .cms_image_left {
-	width: 360px;
-	float: left;
-	margin-top: 10px;
+	width: 310px;
+	position: absolute;
+	bottom: 15px;
+	left: 14px;
 }
 
 .cms_image_right {
-	width: 260px;
-	float: right;
-	margin-top: 10px;
+	width: 310px;
+	position: absolute;
+	bottom: 15px;
+	right: 14px;
 }
 
 .cms_image_input {
+	
 	position: relative;
-	margin-bottom: 5px;
+	margin: 1px 0 5px 0;
+	padding-top: 6px;
+
+	label {
+		width: 80px;
+		height: 26px;
+		line-height: 26px;
+		padding-top: 5px;
+	}
+
+	input {
+		box-sizing: border-box;
+		margin: 0px;
+		border: 1px solid $colour_border;
+		height: 26px;
+		padding: 0px 3px;
+		font-family: foundrysterling;
+		line-height: 24px;
+		font-size: 15px;
+		width: 220px;
+		position: absolute;
+		right: 0;
+		bottom: 0;
+	}
+
 }
 
-.cms_image_input label {
-	width: 80px;
-	height: 26px;
-	line-height: 26px;
-}
-
-.cms_image_input input {
+.cms_image_category {
 	box-sizing: border-box;
 	margin: 0px;
-	border: 1px solid #a0a0a0;
+	border: 1px solid $colour_border;
 	height: 26px;
 	padding: 0px 3px;
+	line-height: 26px;
+	width: 220px;
 	font-family: foundrysterling;
 	line-height: 24px;
 	font-size: 15px;
-	width: 280px;
+	position: absolute;
+	right: 0;
+	bottom: 0;
 }
 
 .cms_image_input textarea {
-	height: 55px;
-	width: 280px;
+	height: 75px;
+	width: 100%;
 	padding: 3px;
 	line-height: 15px;
 	font-size: 15px;
@@ -367,19 +392,6 @@
 	box-sizing: border-box;
 	margin-bottom: 0px;
 	vertical-align: top;
-}
-
-.cms_image_category {
-	box-sizing: border-box;
-	margin: 0px;
-	border: 1px solid #a0a0a0;
-	height: 26px;
-	padding: 0px 3px;
-	line-height: 26px;
-	width: 180px;
-	font-family: foundrysterling;
-	line-height: 24px;
-	font-size: 15px;
 }
 
 .cms_image_keywords_select {
