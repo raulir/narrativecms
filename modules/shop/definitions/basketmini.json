@@ -1,7 +1,49 @@
 {
 	"version":"2",
 	"label":"Mini basket",
-	"settings":[ 
+	"item":[
+		{
+			"type":"subtitle",
+			"label":"Empty"
+		},
+		{
+			"type":"text",
+			"name":"empty_label",
+			"label":"Empty label"
+		},
+		{
+			"type":"text",
+			"name":"empty_cta_text",
+			"label":"Empty CTA text"
+		},
+		{
+			"type":"subtitle",
+			"label":"Closed"
+		},
+		{
+			"type":"text",
+			"name":"closed_heading",
+			"label":"Closed heading"
+		},
+		{
+			"type":"text",
+			"name":"closed_text_singular",
+			"label":"Closed text singular"
+		},
+		{
+			"type":"text",
+			"name":"closed_text_plural",
+			"label":"Closed text plural"
+		},
+		{
+			"type":"text",
+			"name":"closed_button_text",
+			"label":"Closed button text"
+		},
+		{
+			"type":"subtitle",
+			"label":"Open"
+		},
 		{
 			"type":"link",
 			"name":"checkout_link",
@@ -11,11 +53,6 @@
 			"type":"text",
 			"name":"checkout_text",
 			"label":"Checkout text"
-		},
-		{
-			"type":"text",
-			"name":"closed_heading",
-			"label":"Closed heading"
 		},
 		{
 			"type":"link",
@@ -31,11 +68,6 @@
 			"type":"text",
 			"name":"open_heading",
 			"label":"Open heading"
-		},
-		{
-			"type":"text",
-			"name":"items_heading",
-			"label":"Items heading"
 		},
 		{
 			"type":"text",

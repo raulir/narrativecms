@@ -6,12 +6,13 @@
 		"filter_fields":{
 			"show":"-- show --"
 		},
-		"link_target":"0"
+		"link_target":"0",
+		"title_field":"text"
 	},
 	"item":[ 
 		{
 			"type":"text",
-			"name":"heading",
+			"name":"text",
 			"label":"Text"
 		},
 		{

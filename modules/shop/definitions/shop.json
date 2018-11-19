@@ -21,6 +21,16 @@
 			"type":"text",
 			"name":"price_suffix",
 			"label":"Price suffix"
+		},
+		{
+			"type":"text",
+			"name":"dimension_extra",
+			"label":"Dimension extra"
+		},
+		{
+			"type":"text",
+			"name":"dimension_rounding",
+			"label":"Dimension rounding"
 		}
 	]
 }

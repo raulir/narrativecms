@@ -1,0 +1,367 @@
+$colour_white: white;
+$colour_red: red;
+
+$switi_black: #100a01;
+$switi_golden: #c1800b;
+$switi_grey: rgba(20, 12, 0, 0.75);
+$switi_shadow: rgba(0, 0, 0, 0.4);
+	
+.basketmini_container {
+	
+	background-color: $switi_grey;
+	box-sizing: border-box;
+	width: 100%;
+	text-align: center;
+	font-size: 1.2rem;
+    letter-spacing: 0.02rem;
+    line-height: 1.5rem;
+	color: $colour_white;
+	text-shadow: 0 0 0.2rem $switi_shadow;
+	transition: background-color 0.3s;
+	
+	&.basketmini_state_open, &:hover {
+		background-color: $switi_black;
+	}
+
+}
+
+.basketmini_container_hidden {
+	display: none;
+}
+
+.basketmini_content {
+	display: block;
+	padding: 0.8rem 1.2rem 0.7rem 1.2rem;
+	box-sizing: border-box;
+	overflow: hidden;
+	position: relative;
+	transition: height 0.5s;
+}
+
+.basketmini_heading {
+	line-height: 1.9rem;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+	color: $switi_golden;
+	margin: 0 auto;
+	padding-bottom: 0.2rem;
+	border-bottom: 0.12rem solid $switi_golden;
+}
+
+.basketmini_empty {
+	
+}
+
+.basketmini_empty_cta {
+	
+	padding-top: 0.0rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.01rem;
+    line-height: 2.3rem;
+    text-transform: uppercase;
+    position: relative;
+    display: inline-block;
+    color: $switi_golden;
+    
+    &::after {
+	    content: '';
+	    position: absolute;
+	    left: 0.04rem;
+	    bottom: 0.5rem;
+	    width: calc(100% - 0.12rem);
+	    height: 0;
+	    border-top: 0.08rem solid $switi_golden;
+    }
+
+}
+
+.basketmini_closed {
+	
+	position: relative;
+	z-index: 20;
+	opacity: 1;
+	transition: opacity 0.5s;
+	
+	.basketmini_state_open & {
+		z-index: 10;
+		opacity: 0;
+	}	
+	
+}
+
+.basketmini_closed_text {
+	padding: 0.4rem 0;
+	border-bottom: 0.12rem solid $switi_golden;
+}
+
+.basketmini_closed_button {
+	
+	padding: 0 0.5rem 0.8rem 0.5rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.01rem;
+    line-height: 1.1rem;
+    text-transform: uppercase;
+    position: relative;
+    display: inline-block;
+    color: $switi_golden;
+    margin: 0.5rem 0 0.2rem 0;
+    cursor: pointer;
+    transition: color 0.3s;
+
+	&::after {
+		content: '';
+		width: 0.12rem;
+		height: 0.7rem;
+		transform: rotate(40deg);
+		background-color: $switi_golden;
+		position: absolute;
+		bottom: 0.1rem;
+		left: calc(50% + 0.16rem);
+		transition: background-color 0.3s;
+	}
+
+	&::before {
+		content: '';
+		width: 0.12rem;
+		height: 0.7rem;
+		transform: rotate(-40deg);
+		background-color: $switi_golden;
+		position: absolute;
+		bottom: 0.1rem;
+		left: calc(50% - 0.28rem);
+		transition: background-color 0.3s;
+	}
+
+	&:hover {
+		
+		color: $colour_white;
+		
+		&::after, &::before {
+			background-color: $colour_white;
+		}
+		
+	}
+    
+}
+
+.basketmini_open {
+	
+	position: absolute;
+	z-index: 20;
+	opacity: 1;
+	transition: opacity 0.5s;
+	left: 1.2rem;
+	top: 0.8rem;
+	width: calc(100% - 2.4rem);
+	padding: 0 0 1.4rem 0;
+	
+	.basketmini_state_closed & {
+		z-index: 10;
+		opacity: 0;
+	}	
+	
+}
+
+.basketmini_open_close {
+	
+    position: absolute;
+    height: 1.6rem;
+    width: 1.6rem;
+    left: calc(50% - 0.8rem);
+    bottom: 0.1rem;
+    cursor: pointer;
+    
+	&::after {
+		content: '';
+		width: 0.12rem;
+		height: 1.0rem;
+		transform: rotate(-45deg);
+		background-color: $switi_golden;
+		position: absolute;
+		bottom: 0.1rem;
+		left: calc(50% - 0.06rem);
+		transition: background-color 0.3s;
+	}
+
+	&::before {
+		content: '';
+		width: 0.12rem;
+		height: 1.0rem;
+		transform: rotate(45deg);
+		background-color: $switi_golden;
+		position: absolute;
+		bottom: 0.1rem;
+		left: calc(50% - 0.06rem);
+		transition: background-color 0.3s;
+	}
+
+	&:hover {
+		
+		color: $colour_white;
+		
+		&::after, &::before {
+			background-color: $colour_white;
+		}
+
+	}
+
+}
+
+.basketmini_items {
+	
+}
+
+.basketmini_item {
+	
+	position: relative;
+	padding: 0.4rem 0 1.5rem 0;
+	
+	&::after {
+		content: '';
+		bottom: 0;
+		left: 0;
+		height: 0.06rem;
+		background-color: $switi_golden;
+		transform: rotate(0.01deg);
+		position: absolute;
+		width: 100%;
+	}
+
+	&:last-child {
+		
+		&::after {
+			display: none;
+		}
+		
+	}
+
+}
+
+.basketmini_item_heading {
+	text-align: left;
+	font-size: 1.0rem;
+	line-height: 1.2rem;
+	max-width: calc(100% - 2.8rem);
+}
+
+.basketmini_item_dimension {
+	position: absolute;
+	bottom: 0.1rem;
+	right: 2.7rem;
+	font-size: 1.0rem;
+	color: $switi_golden;
+}
+
+.basketmini_item_price {
+	position: absolute;
+	bottom: 0.1rem;
+	right: 0;
+	font-size: 1.2rem;
+	color: $switi_golden;
+}
+
+.basketmini_total_price {
+ 	border-top: 0.12rem solid $switi_golden;
+	position: relative;
+	line-height: 1.6rem;
+	padding-top: 0.6rem;
+}
+
+.basketmini_total_price_label {
+	text-align: left;
+}
+
+.basketmini_total_price_amount {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	color: $switi_golden;
+}
+
+.basketmini_total_dimension {
+	font-size: 1.0rem;
+	position: relative;
+	line-height: 1.1rem;
+	padding-bottom: 0.1rem;
+//	border-bottom: 0.12rem solid $switi_golden;
+	text-align: left;
+}
+
+.basketmini_total_dimension_label {
+	
+}
+
+.basketmini_total_dimension_amount {
+	position: absolute;
+	right: 0;
+	bottom: 0.3rem;
+	color: $switi_golden;
+}
+
+.basketmini_open_cta {
+
+	padding-top: 1.1rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.01rem;
+    line-height: 1.3rem;
+    text-transform: uppercase;
+    position: relative;
+    display: inline-block;
+    color: $switi_golden;
+    transition: color 0.3s;
+    margin: 0 2.0rem;
+
+    &::after {
+	    content: '';
+	    position: absolute;
+	    left: 0.04rem;
+	    bottom: 0;
+	    width: calc(100% - 0.12rem);
+	    height: 0;
+	    border-top: 0.08rem solid $switi_golden;
+	    transform: rotate(0.01deg);
+	    transition: border 0.3s;
+	}
+	
+	&:hover {
+		color: $colour_white;
+		&::after {
+			border-top: 0.08rem solid $colour_white;
+		}
+	}
+	
+}
+
+.basketmini_checkout {
+	
+	padding-top: 0.9rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.01rem;
+    line-height: 1.3rem;
+    text-transform: uppercase;
+    position: relative;
+    display: inline-block;
+    color: $switi_golden;
+    margin: 0 2.0rem 0.6rem 2.0rem;
+    transition: color 0.3s;
+
+    &::after {
+	    content: '';
+	    position: absolute;
+	    left: 0.04rem;
+	    bottom: 0;
+	    width: calc(100% - 0.12rem);
+	    height: 0;
+	    border-top: 0.08rem solid $switi_golden;
+	    transform: rotate(0.01deg);
+	    transition: border 0.3s;
+    }
+
+	&:hover {
+		color: $colour_white;
+		&::after {
+			border-top: 0.08rem solid $colour_white;
+		}
+	}
+
+}

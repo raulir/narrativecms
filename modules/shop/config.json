@@ -34,13 +34,6 @@
 			"parent":"shop",
 			"access":"shop_settings",
 			"url":"admin/panel_settings/shop__shop/"
-		},
-		{
-			"id":"basketmini_settings",
-			"name":"Mini basket settings",
-			"parent":"shop",
-			"access":"shop_basketmini_settings",
-			"url":"admin/panel_settings/shop__basketmini/"
 		}
 	]
 }
