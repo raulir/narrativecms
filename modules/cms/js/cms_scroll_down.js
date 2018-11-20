@@ -5,7 +5,7 @@
 	
     $.fn.cms_scroll_down = function(params) {
     	
-    	params = params || {};
+    	params = $.extend({'steps': 1, 'success': function(){} }, params);
     	
     	$(this).each(function(){
     		
@@ -41,17 +41,21 @@
     					
     				});
     				
-    				var position = $(this).closest('.cms_container').offset().top + $(this).closest('.cms_container').outerHeight();
+    				var $container = $this.closest('.cms_container');
+    				if (!$container.length){
+    					$container = $this;
+    				}
     				
-    				// test it 4 times
+    				var position = $container.offset().top + $container.outerHeight();
     				
     				var header_height = 0;
-    				var i = 4;
+    				var i = params.steps;
     				
     				var interval_f = function(){
     					
     					if (i == 0){
     						clearInterval(interval);
+    						return;
     					}
         				
     					if ($header.length){
@@ -60,7 +64,7 @@
         				
         				$('html, body').stop().animate({
         					scrollTop: position - header_height
-        				}, i*200);
+        				}, 500/params.steps);
         				
         				i = i - 1;
         				
