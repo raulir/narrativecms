@@ -53,7 +53,7 @@ if ( !function_exists('get_position')) {
     	$params = $ci->cms_page_panel_model->get_cms_page_panel($block_id);
     	
     	if (empty($params['show'])){
-    		if (empty($params['_return'])){
+    		if (empty($_params['_return'])){
     			print('<!-- embed '.$params['panel_name'].' #'.$block_id.' is hidden -->');
     			return;
     		} else {
@@ -61,7 +61,11 @@ if ( !function_exists('get_position')) {
     		}
     	}
     	
-    	_panel($params['panel_name'], array_merge( !empty($GLOBALS['_page_params']) ? $GLOBALS['_page_params'] : array() , $params, $_params));
+    	if (empty($_params['_return'])){
+	    	_panel($params['panel_name'], array_merge( !empty($GLOBALS['_page_params']) ? $GLOBALS['_page_params'] : array() , $params, $_params));
+    	} else {
+    		return _panel($params['panel_name'], array_merge( !empty($GLOBALS['_page_params']) ? $GLOBALS['_page_params'] : array() , $params, $_params));
+    	}
     	
     }
     
@@ -76,7 +80,7 @@ if ( !function_exists('get_position')) {
     	
     	$data = $ci->ajax_panel($name, $params);
 
-		$GLOBALS['_panel_js'] = array_merge($GLOBALS['_panel_js'], $data['_panel_js']);
+    	$GLOBALS['_panel_js'] = array_merge($GLOBALS['_panel_js'], $data['_panel_js']);
 		$GLOBALS['_panel_css'] = array_merge($GLOBALS['_panel_css'], $data['_panel_css']);
 		$GLOBALS['_panel_scss'] = array_merge($GLOBALS['_panel_scss'], $data['_panel_scss']);
 
