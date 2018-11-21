@@ -26,7 +26,7 @@ $switi_shadow: rgba(0, 0, 0, 0.4);
 }
 
 .basketmini_container_hidden {
-	display: none;
+//	display: none;
 }
 
 .basketmini_content {
@@ -45,7 +45,6 @@ $switi_shadow: rgba(0, 0, 0, 0.4);
 	color: $switi_golden;
 	margin: 0 auto;
 	padding-bottom: 0.2rem;
-	border-bottom: 0.12rem solid $switi_golden;
 }
 
 .basketmini_empty {
@@ -91,7 +90,6 @@ $switi_shadow: rgba(0, 0, 0, 0.4);
 
 .basketmini_closed_text {
 	padding: 0.4rem 0;
-	border-bottom: 0.12rem solid $switi_golden;
 }
 
 .basketmini_closed_button {
@@ -155,10 +153,14 @@ $switi_shadow: rgba(0, 0, 0, 0.4);
 	width: calc(100% - 2.4rem);
 	padding: 0 0 1.4rem 0;
 	
+	.basketmini_heading {
+		border-bottom: 0.12rem solid $switi_golden;
+	}
+
 	.basketmini_state_closed & {
 		z-index: 10;
 		opacity: 0;
-	}	
+	}
 	
 }
 
@@ -256,8 +258,49 @@ $switi_shadow: rgba(0, 0, 0, 0.4);
 	position: absolute;
 	bottom: 0.1rem;
 	right: 0;
-	font-size: 1.2rem;
+	font-size: 1.0rem;
 	color: $switi_golden;
+}
+
+.basketmini_item_delete {
+	
+    position: absolute;
+    height: 1.0rem;
+    width: 1.0rem;
+    right: 0;
+    top: 0;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s;
+    
+    .basketmini_item:hover & {
+    	opacity: 1;
+    }
+    
+	&::after {
+		content: '';
+		width: 0.12rem;
+		height: 0.7rem;
+		transform: rotate(-45deg);
+		background-color: $switi_golden;
+		position: absolute;
+		top: calc(50% - 0.06rem);
+		left: calc(50% - 0.06rem);
+		transition: background-color 0.3s;
+	}
+
+	&::before {
+		content: '';
+		width: 0.12rem;
+		height: 0.7rem;
+		transform: rotate(45deg);
+		background-color: $switi_golden;
+		position: absolute;
+		top: calc(50% - 0.06rem);
+		left: calc(50% - 0.06rem);
+		transition: background-color 0.3s;
+	}
+
 }
 
 .basketmini_total_price {
@@ -275,7 +318,6 @@ $switi_shadow: rgba(0, 0, 0, 0.4);
 	position: absolute;
 	right: 0;
 	bottom: 0;
-	color: $switi_golden;
 }
 
 .basketmini_total_dimension {
@@ -283,18 +325,17 @@ $switi_shadow: rgba(0, 0, 0, 0.4);
 	position: relative;
 	line-height: 1.1rem;
 	padding-bottom: 0.1rem;
-//	border-bottom: 0.12rem solid $switi_golden;
 	text-align: left;
 }
 
 .basketmini_total_dimension_label {
-	
+	color: $switi_golden;
 }
 
 .basketmini_total_dimension_amount {
 	position: absolute;
 	right: 0;
-	bottom: 0.3rem;
+	bottom: 0.1rem;
 	color: $switi_golden;
 }
 
@@ -364,4 +405,79 @@ $switi_shadow: rgba(0, 0, 0, 0.4);
 		}
 	}
 
+}
+
+.basketmini_modal {
+	height: 0;
+	overflow: hidden;
+	opacity: 0;
+	transition: opacity 0.3s, height 0s 0.3s;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	background-color: $switi_black;
+	z-index: 30;
+}
+
+.basketmini_modal_active {
+	height: 100%;
+	opacity: 1;
+	transition: opacity 0.3s, height 0s;
+}
+
+.basketmini_modal_table {
+	display: table;
+	table-layout: fixed;
+	width: 100%;
+	height: 100%;
+}
+
+.basketmini_modal_cell {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+.basketmini_modal_text {
+	padding: 0 1.0rem;
+}
+
+.basketmini_modal_buttons {
+	padding-top: 1.5rem;
+	line-height: 0;
+	font-size: 0;
+	letter-spacing: 0;
+}
+
+.basketmini_modal_yes, .basketmini_modal_cancel {
+	
+    font-size: 0.95rem;
+    letter-spacing: 0.01rem;
+    line-height: 1.3rem;
+    text-transform: uppercase;
+    position: relative;
+    display: inline-block;
+    color: $switi_golden;
+    transition: color 0.3s;
+    margin: 0 1.0rem;
+    cursor: pointer;
+
+    &::after {
+	    content: '';
+	    position: absolute;
+	    left: 0.04rem;
+	    bottom: 0;
+	    width: calc(100% - 0.12rem);
+	    height: 0;
+	    border-top: 0.08rem solid $switi_golden;
+	    transform: rotate(0.01deg);
+	    transition: border 0.3s;
+	}
+	
+	&:hover {
+		color: $colour_white;
+		&::after {
+			border-top: 0.08rem solid $colour_white;
+		}
+	}
 }

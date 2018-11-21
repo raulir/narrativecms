@@ -4,6 +4,8 @@ class basketmini extends MY_Controller{
 	
 	function panel_params($params){
 		
+		$this->js[] = 'modules/cms/js/cms_cookie.js';
+		
 		$this->load->model('cms/cms_page_panel_model');
 		
 		// get options

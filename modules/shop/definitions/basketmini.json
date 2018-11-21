@@ -78,6 +78,25 @@
 			"type":"text",
 			"name":"price_label",
 			"label":"Price label"
+		},
+		{
+			"type":"subtitle",
+			"label":"Open"
+		},
+		{
+			"type":"text",
+			"name":"modal_text",
+			"label":"Modal text"
+		},
+		{
+			"type":"text",
+			"name":"modal_yes",
+			"label":"Modal yes"
+		},
+		{
+			"type":"text",
+			"name":"modal_cancel",
+			"label":"Modal cancel"
 		}
 	]
 }
