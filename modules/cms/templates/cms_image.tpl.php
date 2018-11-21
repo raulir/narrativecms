@@ -24,27 +24,27 @@
 			<textarea id="cms_image_description" class="cms_image_input cms_image_description"><?php print($description); ?></textarea>
 		</div>
 		
-		<div class="cms_image_input cms_input">
-			<label for="cms_image_author">Author</label>
-			<input id="cms_image_author" type="text" class="cms_image_input cms_image_author" value="<?php print($author); ?>">
-		</div>
-		
-		<div class="cms_image_input cms_input">
-			<label for="cms_image_copyright">Copyright</label>
-			<input id="cms_image_copyright" type="text" class="cms_image_input cms_image_copyright" value="<?php print($copyright); ?>">
-		</div>
-		
 	</div>
 	
 	<div class="cms_image_right">
 		
-		<div class="cms_image_input cms_input">
+		<div class="cms_image_input">
 			<label for="cms_image_category">Category</label>
 			<select id="cms_image_category" class="cms_image_category">
 				<?php foreach($categories as $key => $cat): ?>
 					<option value="<?php print($key); ?>" <?php print($key === $category ? 'selected="selected"' : ''); ?>><?php print($cat); ?></option>
 				<?php endforeach ?>
 			</select>
+		</div>
+		
+		<div class="cms_image_input">
+			<label for="cms_image_author">Author</label>
+			<input id="cms_image_author" type="text" class="cms_image_input cms_image_author" value="<?php print($author); ?>">
+		</div>
+		
+		<div class="cms_image_input">
+			<label for="cms_image_copyright">Copyright</label>
+			<input id="cms_image_copyright" type="text" class="cms_image_input cms_image_copyright" value="<?php print($copyright); ?>">
 		</div>
 		
 		<?php if(in_array('keyword', $GLOBALS['config']['modules'])): ?>
