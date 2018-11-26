@@ -69,7 +69,7 @@ class do_send extends MY_Controller{
 					}
 				}
 				
-				$this->form_model->send_contact_request($params['emails'], $data, $title, $from);
+				$this->form_model->send_contact_request($params['emails'], $data, $title, $from, !empty($params['noreply_notification']));
 			
 			}
 			

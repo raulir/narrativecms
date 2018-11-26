@@ -17,15 +17,23 @@ class form_model extends CI_Model {
 	
 	}
 	
-    function send_contact_request($emails, $data, $title, $from){
+    function send_contact_request($emails, $data, $title, $from, $warning){
 
 		foreach($emails as $email){    	
 
  			$content = $title.':'."\n\n";
-
+ 			
 			foreach($data as $key => $value){
 				$content .= $key . ': ' . $value . "\n";
  			}
+ 			
+		 	if ($warning){
+ 				$content .= "\n\n".'This email is sent from the server address to reduce chance of this email being marked as spam.'."\n".
+ 						'Please replace recipient email with the email in the submitted data when replying to the website visitor.';
+ 			}
+
+ 			$content .= "\n\n".'You received this email because this email address is included as recipient for notifications at '.$_SERVER['SERVER_NAME'].
+ 					' Please contact webmaster to unsubscribe.'."\n\n";
  
 	   		// send email
 	    	@mail($email['email'], $title, $content, 'From: '.$from."\r\n".'Auto-Submitted: auto-generated'."\r\n");
