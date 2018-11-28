@@ -48,32 +48,9 @@ class cms_page_panel_model extends CI_Model {
 			
 	}
 	
-	/**
-	 * get available lists based on json files, SLOW!
-	 */
-	function get_old_lists(){
-		
-		$this->load->model('cms_panel_model');
-		
-		$return = [];
-		
-		foreach ($GLOBALS['config']['modules'] as $module){
-			foreach(glob($GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/*.json') as $filename){
-				$list_name = basename($filename, '.json');
-				$block_config = $this->cms_panel_model->get_cms_panel_config($list_name);
-				if (!empty($block_config['list'])){
-					$return[$list_name] = $list_name;
-				}
-			}
-		}
-		
-		return $return;
-
-	}
-	
 	function get_lists(){
 	
-		$this->load->model('cms_panel_model');
+		$this->load->model('cms/cms_panel_model');
 	
 		$return = [];
 	
@@ -347,11 +324,14 @@ class cms_page_panel_model extends CI_Model {
 		
 		// if list item, invalidate all related panel caches as well
 		$block = $this->get_cms_page_panel($cms_page_panel_id);
-		if ($block['page_id'] == 999999 || $block['page_id'] === 0){
+		if (empty($block['cms_page_id'])){
+			
 			$lists = $this->get_lists();
+			
 			if (in_array($block['panel_name'], $lists)){
+
+				$sql = "select cms_page_panel_id from cms_page_panel_param where value like '%" . $block['panel_name'] . "%' and name = '_cache_lists'";
 				
-				$sql = "select cms_page_panel_id from cms_page_panel_param where value = '%" . $block['panel_name'] . "%' and name = '_cache_lists'";
     			$query = $this->db->query($sql);
 	    		if ($query->num_rows()){
 
@@ -362,7 +342,7 @@ class cms_page_panel_model extends CI_Model {
 	    				$ids[$row['cms_page_panel_id']] = $row['cms_page_panel_id'];
     				}
     				
-    				foreach($ids as $id){
+					foreach($ids as $id){
     					$filestart = $GLOBALS['config']['base_path'].'cache/_'.(int)$id.'_';
     					array_map('unlink', glob($filestart.'*'));
     				}
@@ -499,6 +479,8 @@ class cms_page_panel_model extends CI_Model {
 			return;
 		}
 		
+		$this->invalidate_html_cache($cms_page_panel_id);
+		
 		// delete children
 		$sql = "select block_id from block where parent_id = ? ";
    		$query = $this->db->query($sql, array($cms_page_panel_id));
@@ -548,9 +530,7 @@ class cms_page_panel_model extends CI_Model {
 	    // delete slug pointing to this panel
 	    $this->load->model('cms_slug_model');
 	    $this->cms_slug_model->delete_slug($cms_page_panel['panel_name'].'='.$cms_page_panel_id);
-	    
-		$this->invalidate_html_cache($cms_page_panel_id);
-	
+	    	
 	}
 	
 	function count_cms_page_panels_by($filter){

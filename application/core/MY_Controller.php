@@ -84,6 +84,7 @@ class MY_Controller extends CI_Controller{
     		if (method_exists($this->panel_ci->{$extends_panel_name}, $panel_method)){
     			$this->panel_ci->{$extends_panel_name}->init_panel(array('name' => $files['extends_name'], 'controller' => $files['extends_controller'], ));
     			$params = $this->panel_ci->{$extends_panel_name}->{$panel_method}($params);
+    			$params['_no_cache'] = 1;
 	    	}
 	    	
 	    	// clear temporary resource
@@ -113,14 +114,21 @@ class MY_Controller extends CI_Controller{
 
 	    		// get params through panel controller
 	    		$params = $this->panel_ci->{$panel_name}->{$panel_method}($params);
-
+	    		
+	    		$params['_no_cache'] = 1;
+	    		 
 			}
     		
     		// clear temporary resource
     		unset($this->panel_ci);
 
     	} else if ($panel_method != 'panel_action' && method_exists($this, $panel_method)){
+    		
     		$params = $this->{$panel_method}($params);
+    		if (is_array($params)){
+    			$params['_no_cache'] = 1;
+    		}
+    		
     	}
     	 
     	return $params;
@@ -607,12 +615,13 @@ class MY_Controller extends CI_Controller{
     		if (empty($params['cms_page_panel_id'])) $params['cms_page_panel_id'] = 0;
 
     		// cache file name
-    		$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.str_replace('/', '__', $panel_config['panel']).'_'.md5($panel_config['panel'].serialize($params)).'.txt';
+    		$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.str_replace('/', '__', $panel_config['panel']).'_'.substr(md5($panel_config['panel'].serialize($params)), 0, 6).'.txt';
 
     		// check for cache
-    		if (empty($action_result) && !(!empty($panel_config['module']) && $panel_config['module'] == 'cms') 
-    				&& !empty($GLOBALS['config']['panel_cache']) && (empty($params['_cache_time']) || $params['_cache_time'] > -1)){
-    			
+    		if (empty($action_result['_no_cache']) && !(!empty($params['module']) && $params['module'] == 'cms') 
+    				&& (!empty($GLOBALS['config']['panel_cache']) || (isset($params['_cache_time']) && $params['_cache_time'] > 0))
+    				&& empty($GLOBALS['config']['cache']['force_download'])){
+    		
     			// if cache file exists
     			if (is_file($filename)){
     				
@@ -621,7 +630,7 @@ class MY_Controller extends CI_Controller{
     					$params['_cache_time'] = 0;
     				}
     				$cache_time = $params['_cache_time'] != 0 ? $params['_cache_time'] : (!empty($GLOBALS['config']['panel_cache']) ? $GLOBALS['config']['panel_cache'] : 0);
-    				
+
     				if ((time() - filemtime($filename)) < $cache_time){
 	    				
     					$panel_data = unserialize(file_get_contents($filename));
@@ -638,18 +647,20 @@ class MY_Controller extends CI_Controller{
     			}
  
     		}
-    		
+
     		// if no data from cache
     		if (empty($panel_data)){
-    			
+
     			$params['module'] = !empty($panel_config['module']) ? $panel_config['module'] : '';
     			$panel_data = $this->panel($panel_config['panel'], $params, true);
-    			
+
     			// check if to save to cache file
-    			if (empty($action_result) && !(!empty($panel_config['module']) && $panel_config['module'] == 'cms')
-    					&& !empty($GLOBALS['config']['panel_cache']) && (empty($params['_cache_time']) || $params['_cache_time'] > -1)){
-    				
-    				file_put_contents($filename, serialize($panel_data));
+    			if (empty($action_result['_no_cache']) && !(!empty($params['module']) && $params['module'] == 'cms') 
+    				&& (!empty($GLOBALS['config']['panel_cache']) || (isset($params['_cache_time']) && $params['_cache_time'] > 0))
+    				&& empty($GLOBALS['config']['cache']['force_download'])){
+
+    					$panel_data['html'] .= '<!-- cached: '.date('Y-m-d H:i:s').' -->'."\n";
+    					file_put_contents($filename, serialize($panel_data));
     			
     			}
     		
