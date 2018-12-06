@@ -138,16 +138,18 @@ class form_model extends CI_Model {
 
     function create_cm_subscriber($data, $params){
     	
-        $postdata = array(
+        $postdata = [
             'EmailAddress' => $data['email'],
-            'Name' => '',
+            'Name' => !empty($data['name']) ? $data['name'] : '',
             'Resubscribe' => true,
             'RestartSubscriptionBasedAutoresponders' => true,
-        );
+        	'ConsentToTrack' => 'Yes',
+        ];
 
         $context = stream_context_create(array (
             'http' => array (
                 'method'  => 'POST',
+            	'ignore_errors' => true,
                 'header'  =>
                     'Content-Type: application/json'."\r\n".
                     'Accept: application/json'."\r\n".
@@ -156,8 +158,8 @@ class form_model extends CI_Model {
             ),
         ));
 
-        $result = @file_get_contents($params['cm_api_url'].'subscribers/'.$params['cm_list_id'].'.json', false, $context);
-        
+        $result = file_get_contents($params['cm_api_url'].'subscribers/'.$params['cm_list_id'].'.json', false, $context);
+
         return $result;
     
     }
