@@ -5,6 +5,10 @@
 			"name":"Analytics"
 		},
 		{
+			"id":"gtm",
+			"name":"GTM"
+		},
+		{
 			"id":"console_log",
 			"name":"Console log"
 		},
@@ -36,6 +40,13 @@
 			"url":"admin/panel_settings/basic__analytics/",
 			"parent":"cms",
 			"access":"basic_analytics"
+		},
+		{
+			"id":"gtm",
+			"name":"GTM settings",
+			"url":"admin/panel_settings/basic__gtm/",
+			"parent":"cms",
+			"access":"basic_gtm"
 		}
 	],
 	"access":[

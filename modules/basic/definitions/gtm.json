@@ -1,0 +1,12 @@
+{
+	"version":"2",
+	"label":"GTM settings",
+	"item":[
+		{
+			"type":"text",
+			"name":"gtm_id",
+			"label":"GTM ID",
+			"help":"[GTM ID]||Eg: GTM-123ABC4"
+		}
+	]
+}
