@@ -151,4 +151,11 @@ if (!empty($GLOBALS['config']['targets_enabled'])){
 	
 }
 
+// router - check if landing page and landing page set
+if (!empty($GLOBALS['config']['landing_page._value']) && empty($request_uri)){
+	$landing_route = '/index/'.$GLOBALS['config']['landing_page._value'];
+} else {
+	$landing_route = '';
+}
+
 require_once BASEPATH.'core/CodeIgniter.php';

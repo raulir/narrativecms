@@ -43,7 +43,7 @@ class admin extends MY_Controller {
 		$page_config = array(
 				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
 				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'admin_pages', 'module' => 'cms', ),
+				array('position' => 'main', 'panel' => 'cms_pages', 'module' => 'cms', ),
 		);
 
 		// render panels

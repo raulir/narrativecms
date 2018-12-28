@@ -63,7 +63,7 @@
 						'value' => $page['slug'],
 						'name_clean' => 'page_slug',
 						'label' => 'Slug',
-						'help' => '[Page slug]||Can be seen on browser address bar following the main address part of the site. Important for SEO.||Must be left empty for homepage||Can contain only letters, numbers, hyphens and underscores (_).',
+						'help' => '[Page slug]||Can be seen on browser address bar following the main address part of the site. Important for SEO.||Can contain only letters, numbers, hyphens and underscores (_).',
 						'meta_class' => 'cms_page_slug',
 				]); ?>
 				

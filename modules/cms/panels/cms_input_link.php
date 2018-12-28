@@ -21,10 +21,10 @@ class cms_input_link extends MY_Controller{
 		// todo: cache data here, as there might be more link inputs on the page
 		// or move where fk data is prepared
 
-		$this->load->model('cms_page_panel_model');
-		$this->load->model('cms_panel_model');
-		$this->load->model('cms_page_model');
-		$this->load->model('cms_slug_model');
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_panel_model');
+		$this->load->model('cms/cms_page_model');
+		$this->load->model('cms/cms_slug_model');
 
 		// check if targets are limited
 		if (!empty($params['targets'])){
@@ -150,6 +150,18 @@ class cms_input_link extends MY_Controller{
 		} else {
 			$params['name_extra'] = '';
 		}
+		
+		// _value
+		$params['_value'] = '';
+		if ($params['value']['target'] == '_page'){
+			$params['_value'] = $params['value']['cms_page_id'];
+		} elseif ($params['value']['target'] == '_list'){
+			$params['_value'] = $params['value']['url'];
+		} elseif ($params['value']['target'] == '_manual'){
+			$params['_value'] = $params['value']['url'];
+		}
+		
+		unset($params['panel_structure']);
 
 		return $params;
 

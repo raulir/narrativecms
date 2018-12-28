@@ -66,7 +66,7 @@ class CI_DB_Cache {
 		// Add a trailing slash to the path if needed
 		$path = preg_replace("/(.+?)\/*$/", "\\1/",  $path);
 
-		if ( ! is_dir($path) OR ! is_really_writable($path))
+		if ( ! is_dir($path) )
 		{
 			// If the path is wrong we'll turn off caching
 			return $this->db->cache_off();
@@ -133,12 +133,11 @@ class CI_DB_Cache {
 
 		if ( ! @is_dir($dir_path))
 		{
-			if ( ! @mkdir($dir_path, DIR_WRITE_MODE))
+			if ( ! @mkdir($dir_path))
 			{
 				return FALSE;
 			}
 
-			@chmod($dir_path, DIR_WRITE_MODE);
 		}
 
 		if (write_file($dir_path.$filename, serialize($object)) === FALSE)
@@ -146,7 +145,6 @@ class CI_DB_Cache {
 			return FALSE;
 		}
 
-		@chmod($dir_path.$filename, FILE_WRITE_MODE);
 		return TRUE;
 	}
 

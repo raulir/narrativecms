@@ -285,20 +285,6 @@
 								'help' => !empty($field['help']) ? $field['help'] : '',
 						));
 						
-					} elseif ($field['type'] == 'link'){
-						
-						$return .= _panel('cms_input_link', array(
-								'label' => $field['label'], 
-								'value' => ($field_empty && isset($field['default']) ? (!empty($field['default']) ? $field['default'] : '') : $field_data ),
-								'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'), 
-								'name_clean' => ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']),
-								'extra_class' => ($prefix ? '' : 'admin_column'),
-								'mandatory_class' => $mandatory_class,
-								'targets' => !empty($field['targets']) ? $field['targets'] : '',
-								'_return' => true,
-								'help' => !empty($field['help']) ? $field['help'] : '',
-						));
-						
 					} elseif ($field['type'] == 'select'){
 						
 						$name = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
@@ -371,7 +357,7 @@
 						
 						// add field
 						$return .= _panel('cms/cms_input', $field);
-						
+
 					}
 
 				}

@@ -1,106 +1,4 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-/**
- * CodeIgniter
- *
- * An open source application development framework for PHP 5.1.6 or newer
- *
- * @package		CodeIgniter
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc.
- * @license		http://codeigniter.com/user_guide/license.html
- * @link		http://codeigniter.com
- * @since		Version 1.0
- * @filesource
- */
-
-// ------------------------------------------------------------------------
-
-/**
- * Common Functions
- *
- * Loads the base classes and executes the request.
- *
- * @package		CodeIgniter
- * @subpackage	codeigniter
- * @category	Common Functions
- * @author		ExpressionEngine Dev Team
- * @link		http://codeigniter.com/user_guide/
- */
-
-// ------------------------------------------------------------------------
-
-/**
-* Determines if the current version of PHP is greater then the supplied value
-*
-* @access	public
-* @param	string
-* @return	bool	TRUE if the current version is $version or higher
-*/
-if ( ! function_exists('is_php'))
-{
-	function is_php($version = '5.0.0')
-	{
-		static $_is_php;
-		$version = (string)$version;
-
-		if ( ! isset($_is_php[$version]))
-		{
-			$_is_php[$version] = (version_compare(PHP_VERSION, $version) < 0) ? FALSE : TRUE;
-		}
-
-		return $_is_php[$version];
-	}
-}
-
-// ------------------------------------------------------------------------
-
-/**
- * Tests for file writability
- *
- * is_writable() returns TRUE on Windows servers when you really can't write to
- * the file, based on the read-only attribute.  is_writable() is also unreliable
- * on Unix servers if safe_mode is on.
- *
- * @access	private
- * @return	void
- */
-if ( ! function_exists('is_really_writable'))
-{
-	function is_really_writable($file)
-	{
-		// If we're on a Unix server with safe_mode off we call is_writable
-		if (DIRECTORY_SEPARATOR == '/' AND @ini_get("safe_mode") == FALSE)
-		{
-			return is_writable($file);
-		}
-
-		// For windows servers and safe_mode "on" installations we'll actually
-		// write a file then read it.  Bah...
-		if (is_dir($file))
-		{
-			$file = rtrim($file, '/').'/'.md5(mt_rand(1,100).mt_rand(1,100));
-
-			if (($fp = @fopen($file, FOPEN_WRITE_CREATE)) === FALSE)
-			{
-				return FALSE;
-			}
-
-			fclose($fp);
-			@chmod($file, DIR_WRITE_MODE);
-			@unlink($file);
-			return TRUE;
-		}
-		elseif ( ! is_file($file) OR ($fp = @fopen($file, FOPEN_WRITE_CREATE)) === FALSE)
-		{
-			return FALSE;
-		}
-
-		fclose($fp);
-		return TRUE;
-	}
-}
-
-// ------------------------------------------------------------------------
 
 /**
 * Class registry
@@ -140,13 +38,13 @@ if ( ! function_exists('load_class'))
 		}
 
 		// Is the request a class extension?  If so we load it too
-		if (file_exists(APPPATH.$directory.'/'.config_item('subclass_prefix').$class.'.php'))
+		if (file_exists(APPPATH.$directory.'/MY_'.$class.'.php'))
 		{
-			$name = config_item('subclass_prefix').$class;
+			$name = 'MY_'.$class;
 
 			if (class_exists($name) === FALSE)
 			{
-				require(APPPATH.$directory.'/'.config_item('subclass_prefix').$class.'.php');
+				require(APPPATH.$directory.'/MY_'.$class.'.php');
 			}
 		}
 

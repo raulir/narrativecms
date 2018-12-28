@@ -95,3 +95,23 @@
 	opacity: 0.3;
 	color: black;
 }
+
+.cms_input_link_short {
+	
+	&.cms_input_link_container {
+		height: 30px;
+	}
+
+	.cms_input_link_select_spacer {
+		display: none;
+	}
+
+	.cms_input_link_url_display {
+		display: none;
+	}
+
+	.cms_input_link_text_display {
+		display: none;
+	}
+
+}

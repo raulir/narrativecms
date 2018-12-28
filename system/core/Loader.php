@@ -490,26 +490,6 @@ class CI_Loader {
 				continue;
 			}
 
-			$ext_helper = APPPATH.'helpers/'.config_item('subclass_prefix').$helper.'.php';
-
-			// Is this a helper extension request?
-			if (file_exists($ext_helper))
-			{
-				$base_helper = BASEPATH.'helpers/'.$helper.'.php';
-
-				if ( ! file_exists($base_helper))
-				{
-					show_error('Unable to load the requested file: helpers/'.$helper.'.php');
-				}
-
-				include_once($ext_helper);
-				include_once($base_helper);
-
-				$this->_ci_helpers[$helper] = TRUE;
-				log_message('debug', 'Helper loaded: '.$helper);
-				continue;
-			}
-
 			// Try to load the helper
 			foreach ($this->_ci_helper_paths as $path)
 			{
@@ -930,7 +910,7 @@ class CI_Loader {
 		// We'll test for both lowercase and capitalized versions of the file name
 		foreach (array(ucfirst($class), strtolower($class)) as $class)
 		{
-			$subclass = APPPATH.'libraries/'.$subdir.config_item('subclass_prefix').$class.'.php';
+			$subclass = APPPATH.'libraries/'.$subdir.'MY_'.$class.'.php';
 
 			// Is this a class extension request?
 			if (file_exists($subclass))
@@ -954,7 +934,7 @@ class CI_Loader {
 						$CI =& get_instance();
 						if ( ! isset($CI->$object_name))
 						{
-							return $this->_ci_init_class($class, config_item('subclass_prefix'), $params, $object_name);
+							return $this->_ci_init_class($class, 'MY_', $params, $object_name);
 						}
 					}
 
@@ -967,7 +947,7 @@ class CI_Loader {
 				include_once($subclass);
 				$this->_ci_loaded_files[] = $subclass;
 
-				return $this->_ci_init_class($class, config_item('subclass_prefix'), $params, $object_name);
+				return $this->_ci_init_class($class, 'MY_', $params, $object_name);
 			}
 
 			// Lets search for the requested library file and load it.
@@ -1050,9 +1030,9 @@ class CI_Loader {
 			{
 				$name = 'CI_'.$class;
 			}
-			elseif (class_exists(config_item('subclass_prefix').$class))
+			elseif (class_exists('MY_'.$class))
 			{
-				$name = config_item('subclass_prefix').$class;
+				$name = 'MY_'.$class;
 			}
 			else
 			{

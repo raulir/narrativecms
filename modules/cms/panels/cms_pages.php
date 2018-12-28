@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class admin_pages extends MY_Controller{
+class cms_pages extends MY_Controller{
 
 	function __construct(){
 
@@ -16,9 +16,13 @@ class admin_pages extends MY_Controller{
 
 	function panel_params($params){
 
-		$this->load->model('cms_page_model');
+		$this->load->model('cms/cms_page_model');
 
 		$return['pages'] = $this->cms_page_model->get_cms_pages();
+		
+		if (empty($GLOBALS['config']['landing_page._value'])){
+			$GLOBALS['config']['landing_page._value'] = 0;
+		}
 
 		return $return;
 

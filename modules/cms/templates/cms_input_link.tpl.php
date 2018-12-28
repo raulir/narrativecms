@@ -1,4 +1,6 @@
-<div class="cms_input cms_input_link_container admin_input_link_container_<?php print($name_clean); ?> <?php print(!empty($extra_class) ? $extra_class : ''); ?> <?= !empty($mandatory_class) ? $mandatory_class : '' ?>">
+<div class="cms_input cms_input_link_container admin_input_link_container_<?php print($name_clean); ?> 
+		<?= !empty($extra_class) ? $extra_class : '' ?> <?= !empty($mandatory_class) ? $mandatory_class : '' ?>
+		<?= !empty($format) && $format == 'short' ? ' cms_input_link_short ' : '' ?>">
 	
 	<label for="admin_input_link_<?php print($name_clean); ?>"><?php print($label); ?></label>
 	<?php _panel('cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
@@ -55,7 +57,9 @@
 
 		<input type="hidden" class="cms_input_link_target_id" name="<?php print($name); ?>[target_id]<?php print($name_extra); ?>" 
 				value="<?php print(!empty($value['target_id']) ? $value['target_id'] : ''); ?>">
-	
+				
+		<input type="hidden" class="cms_input_link_value" name="<?= $name ?>[_value]<?= $name_extra ?>" value="<?= $_value ?>">
+			
 	</div>
 	
 </div>
