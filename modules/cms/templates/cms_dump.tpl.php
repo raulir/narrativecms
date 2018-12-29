@@ -1,13 +1,6 @@
 <div class="cms_toolbar">
 
 	<div class="admin_tool_text">Download and upload site dumps</div>
-	
-	<!-- div class="cms_toolbar_buttons">
-		<div class="cms_cssjs_settings_save admin_tool_button admin_right">
-			Update all
-			<div class="cms_ctrl_hint">S</div>
-		</div>
-	</div -->
 
 </div>
 

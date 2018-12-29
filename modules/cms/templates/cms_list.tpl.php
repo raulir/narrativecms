@@ -4,7 +4,7 @@
 	
 	<?php if(empty($hide_new)): ?>
 
-		<a class="admin_tool_button admin_right" href="<?php print($GLOBALS['config']['base_url'].$edit_base.str_replace('/', '__', $new_panel_name).'/'); ?>">New</a>
+		<a class="cms_tool_button admin_right" href="<?php print($GLOBALS['config']['base_url'].$edit_base.str_replace('/', '__', $new_panel_name).'/'); ?>">New</a>
 		
 		<?php if($GLOBALS['config']['environment'] == 'NOP'): ?>
 		
@@ -21,15 +21,15 @@
 		<?php endforeach ?>
 	<?php endif ?>
 	
-	<div class="admin_tool_button admin_right cms_paging_last"></div>
-	<div class="admin_tool_button admin_right cms_paging_next"></div>
+	<div class="cms_tool_button admin_right cms_paging_last"></div>
+	<div class="cms_tool_button admin_right cms_paging_next"></div>
 
 	<div class="admin_tool_text admin_right">
 		<span class="admin_paging_current">&nbsp;&nbsp;</span>/<span class="admin_paging_total">&nbsp;&nbsp;</span>
 	</div>
 
-	<div class="admin_tool_button admin_right cms_paging_previous"></div>
-	<div class="admin_tool_button admin_right cms_paging_first"></div>
+	<div class="cms_tool_button admin_right cms_paging_previous"></div>
+	<div class="cms_tool_button admin_right cms_paging_first"></div>
 	
 	<?php if(!empty($filter_fields)) foreach($filter_fields as $filter_field => $filter_field_label): ?>
 		<select class="admin_tool_select admin_right admin_tool_filter" data-field="<?php print($filter_field); ?>">

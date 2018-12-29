@@ -527,32 +527,6 @@ class CI_Loader {
 		$this->helper($helpers);
 	}
 
-	// --------------------------------------------------------------------
-
-	/**
-	 * Loads a language file
-	 *
-	 * @param	array
-	 * @param	string
-	 * @return	void
-	 */
-	public function language($file = array(), $lang = '')
-	{
-		$CI =& get_instance();
-
-		if ( ! is_array($file))
-		{
-			$file = array($file);
-		}
-
-		foreach ($file as $langfile)
-		{
-			$CI->lang->load($langfile, $lang);
-		}
-	}
-
-	// --------------------------------------------------------------------
-
 	/**
 	 * Loads a config file
 	 *
@@ -1101,8 +1075,8 @@ class CI_Loader {
 			return FALSE;
 		}
 
-		// Autoload helpers and languages
-		foreach (array('helper', 'language') as $type)
+		// Autoload helpers
+		foreach (array('helper') as $type)
 		{
 			if (isset($autoload[$type]) AND count($autoload[$type]) > 0)
 			{

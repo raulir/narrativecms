@@ -11,17 +11,18 @@
 					"type":"text",
 					"name":"heading",
 					"label":"Group ID",
-					"help":"Small letters and numbers, one word"
+					"help":"Lowercase letters and numbers, one word"
 				},
 				{
 					"type":"select",
 					"name":"strategy",
 					"label":"Strategy",
 					"values":{
-						"random":"By random",
-						"loggedin":"Visitor is logged in",
-						"mobile":"Visitor is mobile",
-						"admin": "Visitor is logged in to CMS admin"
+						"random": "By random",
+						"loggedin": "Visitor is logged in",
+						"mobile": "Visitor is mobile",
+						"admin": "Visitor is logged in to CMS admin",
+						"language": "Visitor language"
 					},
 					"default":"day",
 					"help":"[Random] Visitors are divided randomly by weights setting||[Logged in] Visitors are logged in are in 1st division||[Mobile] Visitors on mobile are in 2nd division"

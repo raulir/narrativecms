@@ -102,7 +102,7 @@ ul {
 	padding-bottom: 10px;
 	margin-bottom: 20px;
 	position: relative;
-	overflow: hidden;
+	z-index: 20;
 }
 
 .cms_toolbar_buttons {
@@ -250,7 +250,7 @@ a.admin_tool_text:hover {
 	text-decoration: underline;
 }
 
-.admin_tool_button {
+.cms_tool_button {
 	box-sizing: border-box;
 	display: inline-block;
 	height: 30px;

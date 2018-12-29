@@ -20,7 +20,7 @@
 	<div class="cms_toolbar_buttons">
 	
 		<?php if(!empty($hidden_section)): ?>
-			<div class="admin_tool_button admin_right cms_toolbar_buttons_hidden" style="background-image: url('<?= $GLOBALS['config']['base_url']; ?>modules/cms/img/cms_settings.png'); ">
+			<div class="cms_tool_button admin_right cms_toolbar_buttons_hidden" style="background-image: url('<?= $GLOBALS['config']['base_url']; ?>modules/cms/img/cms_settings.png'); ">
 				<div class="cms_toolbar_buttons_hidden_arrow" style="background-image: url('<?= $GLOBALS['config']['base_url']; ?>modules/cms/img/cms_down.png'); "></div>
 				<div class="cms_toolbar_buttons_hidden_container">
 				

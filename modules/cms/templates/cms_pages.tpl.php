@@ -1,6 +1,6 @@
 <div class="cms_toolbar">
 	<div class="admin_tool_text">Pages</div>
-	<a class="admin_tool_button admin_right" href="<?php print($GLOBALS['config']['base_url']); ?>admin/page/0">New Page</a>
+	<a class="cms_tool_button admin_right" href="<?php print($GLOBALS['config']['base_url']); ?>admin/page/0">New Page</a>
 </div>
 
 <div>

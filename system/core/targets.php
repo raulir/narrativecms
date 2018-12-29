@@ -91,6 +91,63 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 			
 			}
 
+		} else if ($group['strategy'] == 'language' && $group['heading'] == 'language'){
+			
+			$GLOBALS[$group['heading']] = [];
+			
+			$ug_labels = explode('|',$group['labels']);
+			$ug_matches = explode('|',$group['settings']);
+
+			if (!empty($_COOKIE['language']) && (false !== $key = array_search($_COOKIE['language'], $ug_matches))){
+				
+				$GLOBALS[$group['heading']] = [
+						'label' => $ug_labels[$key],
+						'language_id' => $ug_matches[$key],
+						'default' => $ug_matches[0],
+				];
+				
+			} else if (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])){
+				
+				$languages = explode(',', str_replace(';', ',', $_SERVER['HTTP_ACCEPT_LANGUAGE']));
+
+				foreach($languages as $lang){
+
+					if (empty($GLOBALS[$group['heading']]) && (false !== $key = array_search($lang, $ug_matches))){
+
+						$GLOBALS[$group['heading']] = [
+								'label' => $ug_labels[$key],
+								'language_id' => $ug_matches[$key],
+								'default' => $ug_matches[0],
+						];
+						
+						setcookie('language', $GLOBALS[$group['heading']]['language_id'], time() + 10000000, '/');
+						
+					}
+				}
+				
+			} else {
+				
+				$GLOBALS[$group['heading']] = [
+						'label' => $ug_labels[0],
+						'language_id' => $ug_matches[0],
+						'default' => $ug_matches[0],
+				];
+				
+				setcookie('language', $GLOBALS[$group['heading']]['language_id'], time() + 10000000, '/');
+				
+			}
+
+			$GLOBALS[$group['heading']]['languages'] = [];
+			foreach($ug_matches as $key => $language_id){
+				
+				$GLOBALS[$group['heading']]['languages'][$language_id] = $ug_labels[$key];
+				
+			}
+			
+			if (empty($_SESSION['cms_language'])){
+				$_SESSION['cms_language'] = $GLOBALS[$group['heading']]['default'];
+			}
+
 		}
 
 	}

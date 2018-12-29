@@ -4,8 +4,8 @@
 	<div class="admin_tool_text">
 		&nbsp; &gt; &nbsp; <?php print($cms_keyword_id ? str_limit($cms_keyword_id, 40) : 'New keyword'); ?>
 	</div>
-	<a class="cms_keyword_save admin_tool_button admin_right">Save</a>
-	<a class="cms_keyword_delete admin_tool_button admin_right">Delete</a>
+	<a class="cms_keyword_save cms_tool_button admin_right">Save</a>
+	<a class="cms_keyword_delete cms_tool_button admin_right">Delete</a>
 </div>
 
 <div>
