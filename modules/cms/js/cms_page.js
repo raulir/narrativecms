@@ -18,9 +18,10 @@ function cms_page_save(params){
 	
 	params = params || {'success':function(){}};
 
-	get_ajax('cms_page_operations', {
+	get_ajax('cms/cms_page_operations', {
 		'page_id': $('.cms_page_id').val(),
 		'do': 'cms_page_save',
+		'language': $('.cms_language_select_current').data('language'),
 		'sort': $('.cms_page_sort').val(),
 		'title': $('.cms_page_title').val(),
 		'slug': $('.cms_page_slug').val(),

@@ -229,6 +229,7 @@
 								'extra_data' => $max_chars_data.' '.$meta_data.' ',
 								'_return' => true,
 								'help' => !empty($field['help']) ? $field['help'] : '',
+								'translate' => !empty($field['translate']) ? 1 : 0,
 								'params' => $field,
 						]);
 												
@@ -252,6 +253,7 @@
 								'tinymce' => !empty($field['html']),
 								'_return' => true,
 								'help' => !empty($field['help']) ? $field['help'] : '',
+								'translate' => !empty($field['translate']) ? 1 : 0,
 								'params' => $field,
 						));
 

@@ -16,9 +16,9 @@ class cms_page_operations extends MY_Controller{
 
 	function panel_action(){
 		
-		$this->load->model('cms_page_model');
-		$this->load->model('cms_slug_model');
-		$this->load->model('cms_page_panel_model');
+		$this->load->model('cms/cms_page_model');
+		$this->load->model('cms/cms_slug_model');
+		$this->load->model('cms/cms_page_panel_model');
 		
 		$do = $this->input->post('do');
 		if ($do == 'cms_page_delete'){
@@ -31,6 +31,11 @@ class cms_page_operations extends MY_Controller{
 			 
 			// collect data
 			$page_id = $this->input->post('page_id');
+			$language = $this->input->post('language');
+			if (empty($GLOBALS['language']['languages'][$language])){
+				$language = false;
+			}
+			
 			$data['sort'] = $this->input->post('sort');
 			$data['title'] = $this->input->post('title');
 			$data['slug'] = $this->input->post('slug');
@@ -42,7 +47,7 @@ class cms_page_operations extends MY_Controller{
 			 
 			// save data
 			if($page_id){
-				$this->cms_page_model->update_page($page_id, $data);
+				$this->cms_page_model->update_page($page_id, $data, $language);
 			} else {
 				$page_id = $this->cms_page_model->create_page($data);
 			}

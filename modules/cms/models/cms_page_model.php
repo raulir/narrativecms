@@ -29,7 +29,11 @@ class cms_page_model extends CI_Model {
     	return $result;
 	}
 	
-	function get_page($cms_page_id){
+	function get_page($cms_page_id, $language = false){
+		
+		if ($language == $GLOBALS['language']['default']){
+			$language = false;
+		}
 		
 		$sql = "select * from cms_page where cms_page_id = ? ";
     	$query = $this->db->query($sql, array($cms_page_id));
@@ -45,13 +49,27 @@ class cms_page_model extends CI_Model {
 	    		}
 	    	}
 	    	
-	    	return $row;
+	    	$return = $row;
     	
     	} else {
     		
-    		return array();
+    		$return = [];
     		
     	}
+    	
+    	if ($language !== false){
+    		
+    	    if (!empty($return['_'.$language]) && isset($return['_'.$language]['seo_title'])){
+    			$return['seo_title'] = $return['_'.$language]['seo_title'];
+    		}
+    		
+    		if (!empty($return['_'.$language]) && isset($return['_'.$language]['description'])){
+    			$return['description'] = $return['_'.$language]['description'];
+    		}
+    		
+    	}
+    	
+    	return $return;
     	
 	}
 	
@@ -97,7 +115,11 @@ class cms_page_model extends CI_Model {
 		);
 	}
 	
-	function update_page($cms_page_id, $data){
+	function update_page($cms_page_id, $data, $language = false){
+		
+		if ($language == $GLOBALS['language']['default']){
+			$language = false;
+		}
 		
 		// check whats in meta
 		$meta = array();
@@ -119,8 +141,15 @@ class cms_page_model extends CI_Model {
 				
 		foreach($data as $field => $value){
 			if (!in_array($field, array('sort', 'slug', ))){
-				$meta[$field] = $value;
+				
+				if ($language === false || !in_array($field, ['seo_title','description'])){
+					$meta[$field] = $value;
+				} else {
+					$meta['_'.$language][$field] = $value;
+				}
+				
 				unset($data[$field]);
+			
 			}
 		}
 		

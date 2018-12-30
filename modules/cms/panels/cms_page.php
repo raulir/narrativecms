@@ -16,14 +16,16 @@ class cms_page extends MY_Controller{
 
 	function panel_params($params){
 
-		$this->load->model('cms_page_model');
-		$this->load->model('cms_page_panel_model');
+		$this->load->model('cms/cms_page_model');
+		$this->load->model('cms/cms_page_panel_model');
 
 		$return['block_list'] = array();
+		
+		$cms_language = !empty($_SESSION['cms_language']) ? $_SESSION['cms_language'] : false;
 
 		if ($params['page_id']){
 				
-			$return['page'] = $this->cms_page_model->get_page($params['page_id']);
+			$return['page'] = $this->cms_page_model->get_page($params['page_id'], $cms_language);
 			$blocks = $this->cms_page_panel_model->get_cms_page_panels_by(array('page_id' => $params['page_id'], ));
 				
 			foreach($blocks as $block){
