@@ -55,5 +55,9 @@
 }
 
 .language_language {
-	
+
+	&:hover {
+		color: $colour_red;
+	}
+
 }

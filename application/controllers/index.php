@@ -65,7 +65,7 @@ class Index extends MY_Controller {
     	// get panels on page
     	if (!stristr($page_id, '=')){ // direct page id
 
-			$page = $this->cms_page_model->get_page($page_id);
+			$page = $this->cms_page_model->get_page($page_id, 'auto');
 
 			if (!empty($page['seo_title'])){
     			$GLOBALS['_panel_titles'][] = $page['seo_title'];
@@ -111,7 +111,7 @@ class Index extends MY_Controller {
     		} else {
     			
     			// special template
-    			$page = $this->cms_page_model->get_page($list_item_data['_template_page_id']);
+    			$page = $this->cms_page_model->get_page($list_item_data['_template_page_id'], 'auto');
     			
     		}
     		

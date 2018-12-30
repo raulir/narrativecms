@@ -31,7 +31,11 @@ class cms_page_model extends CI_Model {
 	
 	function get_page($cms_page_id, $language = false){
 		
-		if ($language == $GLOBALS['language']['default']){
+		if ($language == 'auto'){
+			$language = !empty($GLOBALS['language']['language_id']) ? $GLOBALS['language']['language_id'] : false;
+		}
+		
+		if (!empty($GLOBALS['language']['language_id']) && $language == $GLOBALS['language']['default']){
 			$language = false;
 		}
 		
@@ -51,21 +55,21 @@ class cms_page_model extends CI_Model {
 	    	
 	    	$return = $row;
     	
+    	   	if ($language !== false){
+    		
+	    	    if (!empty($return['_'.$language]) && isset($return['_'.$language]['seo_title'])){
+	    			$return['seo_title'] = $return['_'.$language]['seo_title'];
+	    		}
+	    		
+	    		if (!empty($return['_'.$language]) && isset($return['_'.$language]['description'])){
+	    			$return['description'] = $return['_'.$language]['description'];
+	    		}
+	    		
+	    	}
+    	
     	} else {
     		
     		$return = [];
-    		
-    	}
-    	
-    	if ($language !== false){
-    		
-    	    if (!empty($return['_'.$language]) && isset($return['_'.$language]['seo_title'])){
-    			$return['seo_title'] = $return['_'.$language]['seo_title'];
-    		}
-    		
-    		if (!empty($return['_'.$language]) && isset($return['_'.$language]['description'])){
-    			$return['description'] = $return['_'.$language]['description'];
-    		}
     		
     	}
     	
@@ -74,22 +78,22 @@ class cms_page_model extends CI_Model {
 	}
 	
 	function get_page_by_slug($slug){
-		$sql = "select * from cms_page where slug = ? ";
-    	$query = $this->db->query($sql, array($slug));
+		
+		$sql = "select cms_page_id from cms_page where slug = ? ";
+    	$query = $this->db->query($sql, [$slug]);
+    	
     	if ($query->num_rows()){
-	    	$row = $query->row_array();
-	    	$row['page_id'] = $row['cms_page_id'];
-			$row['title'] = $row['slug'];
-	    	if (!empty($row['meta'])){
-	    		$meta = json_decode($row['meta'], true);
-	    		if (!empty($meta)){
-	    			$row = array_merge($row, $meta);
-	    		}
-	    	}
-	    	return $row;
+	    	
+    		$row = $query->row_array();
+	    	
+	    	return $this->get_page($row['cms_page_id'], 'auto');
+
     	} else {
-    		return array();
+    		
+    		return [];
+    	
     	}
+    	
 	}
 	
 	function new_page(){
