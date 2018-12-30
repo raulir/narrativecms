@@ -4,9 +4,13 @@ class cms_slug_model extends CI_Model {
 	
 	function generate_page_slug($page_id, $slug_string){
 		
-		// page id 1 always has empty slug
-		if ($page_id == 1 ){
-			return '';
+		$this->load->model('cms/cms_page_model');
+
+		if (empty($slug_string)){
+		
+			$page = $this->cms_page_model->get_page($page_id);
+			$slug_string = !empty($page['seo_title']) ? $page['seo_title'] : $page['title'];
+
 		}
 
 		$this->delete_slug($page_id);

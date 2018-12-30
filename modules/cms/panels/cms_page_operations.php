@@ -53,7 +53,7 @@ class cms_page_operations extends MY_Controller{
 			}
 
 			// get slug for page
-			$slug = $this->cms_slug_model->generate_page_slug($page_id, !empty($data['slug']) ? $data['slug'] : $data['title']);
+			$slug = $this->cms_slug_model->generate_page_slug($page_id, $data['slug']);
 
 			// if page is list item page
 			$lists = $this->cms_page_panel_model->get_lists();
@@ -80,12 +80,12 @@ class cms_page_operations extends MY_Controller{
 				
 			}
 			
-			$this->cms_page_model->update_page($page_id, array('slug' => $slug, ));
+			$this->cms_page_model->update_page($page_id, ['slug' => $slug]);
 			
-			return array(
+			return [
 					'cms_page_id' => $page_id, 
 					'slug' => $slug,
-			);
+			];
 
 		}
 	

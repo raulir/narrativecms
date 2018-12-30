@@ -27,6 +27,10 @@
 		{
 			"id":"sidefloat",
 			"name":"Side float"
+		},
+		{
+			"id":"language",
+			"name":"Language"
 		}
 	],
 	"cms_menu":[

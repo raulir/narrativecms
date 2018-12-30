@@ -1,0 +1,14 @@
+{
+	"version":"2",
+	"label":"GTM settings",
+	"item":[
+		{
+			"type":"text",
+			"name":"select_label",
+			"label":"Select label",
+			"default":"Select language:",
+			"translate":"1",
+			"help":"Label for language selection dropdown"
+		}
+	]
+}
