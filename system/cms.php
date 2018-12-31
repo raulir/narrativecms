@@ -74,7 +74,7 @@ if ($GLOBALS['config']['database']['dbdriver'] = 'mysqli') {
 // load config from db
 $db = $GLOBALS['dbconnections'][md5($GLOBALS['config']['database']['hostname'].$GLOBALS['config']['database']['username'].$GLOBALS['config']['database']['password'].$config['database']['database'])];
 
-$sql = "select b.name, b.value from block a join cms_page_panel_param b on a.block_id = b.cms_page_panel_id where (a.panel_name = 'cms_settings' or a.panel_name = 'cms/cms_settings') and b.name != ''";
+$sql = "select b.name, b.value from cms_page_panel a join cms_page_panel_param b on a.cms_page_panel_id = b.cms_page_panel_id where (a.panel_name = 'cms_settings' or a.panel_name = 'cms/cms_settings') and b.name != ''";
 $query = mysqli_query($db, $sql);
 
 while($result = mysqli_fetch_assoc($query)){

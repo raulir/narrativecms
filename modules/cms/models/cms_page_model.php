@@ -210,7 +210,7 @@ class cms_page_model extends CI_Model {
 	
 	function get_layouts(){
 		
-		$this->load->model('cms_module_model');
+		$this->load->model('cms/cms_module_model');
 		
 		$return = array();
 	

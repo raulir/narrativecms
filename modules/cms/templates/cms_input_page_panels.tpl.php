@@ -15,9 +15,9 @@
 						style="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/drag.png'); ">
 				
 					<?php if(empty($name)): ?>
-						<input type="hidden" class="block_id" value="<?php print($block['block_id']); ?>">
+						<input type="hidden" class="block_id" value="<?php print($block['cms_page_panel_id']); ?>">
 					<?php else: ?>
-						<input type="hidden" name="<?php print($name); ?>[]" value="<?php print($block['block_id']); ?>">
+						<input type="hidden" name="<?php print($name); ?>[]" value="<?php print($block['cms_page_panel_id']); ?>">
 					<?php endif ?>
 				
 					<div class="admin_text cms_input_page_panels_item_heading"><?php print(!empty($block['title']) ? $block['title'] : '[ no title ]'); ?></div>
@@ -25,16 +25,16 @@
 					<div class="cms_input_page_panels_item_buttons">
 					
 						<?php if (!empty($block['_delete'])): ?>
-							<div class="admin_list_sortable_div cms_list_item_button cms_page_panel_delete" data-cms_page_panel_id="<?php print($block['block_id']); ?>">
+							<div class="admin_list_sortable_div cms_list_item_button cms_page_panel_delete" data-cms_page_panel_id="<?php print($block['cms_page_panel_id']); ?>">
 								remove
 							</div>
 						<?php endif ?>
 						
 						<?php if (!empty($block['_edit'])): ?>
-							<a class="cms_list_item_button" <?php _lh('admin/cms_page_panel/'.$block['block_id'].'/'); ?>>edit</a>
+							<a class="cms_list_item_button" <?php _lh('admin/cms_page_panel/'.$block['cms_page_panel_id'].'/'); ?>>edit</a>
 						<?php endif ?>
 						
-						<div class="admin_list_sortable_div cms_list_item_button cms_page_panel_show" data-cms_page_panel_id="<?php print($block['block_id']); ?>">
+						<div class="admin_list_sortable_div cms_list_item_button cms_page_panel_show" data-cms_page_panel_id="<?php print($block['cms_page_panel_id']); ?>">
 							<?php print($block['show'] ? 'hide' : 'show'); ?>
 						</div>
 						
@@ -54,10 +54,19 @@
 	
 	<div style="clear: both; "><!-- --></div>
 	
-	<?php if (isset($page_id)): ?>
-		<div class="admin_small_button admin_right cms_input_page_panels_add" data-target="<?php _l('admin/cms_page_panel/0/'.$page_id.'/'); ?>">Add page panel</div>
+	<?php
+		if (!isset($cms_page_id) && isset($page_id)){
+			$cms_page_id = $page_id;
+		}
+		if (!isset($cms_page_panel_id) && isset($block_id)){
+			$cms_page_panel_id = $block_id;
+		}
+	?>
+	
+	<?php if (isset($cms_page_id)): ?>
+		<div class="admin_small_button admin_right cms_input_page_panels_add" data-target="<?php _l('admin/cms_page_panel/0/'.$cms_page_id.'/'); ?>">Add page panel</div>
 	<?php else: ?>
-		<div class="admin_small_button admin_right cms_input_page_panels_add" data-target="<?php _l('admin/cms_page_panel/0/0/'.$block_id.'/'.$name_clean.'/'); ?>" data-name="<?= $name_clean ?>">Add page panel</div>
+		<div class="admin_small_button admin_right cms_input_page_panels_add" data-target="<?php _l('admin/cms_page_panel/0/0/'.$cms_page_panel_id.'/'.$name_clean.'/'); ?>" data-name="<?= $name_clean ?>">Add page panel</div>
 	<?php endif ?>
 
 	<div style="clear: both; "><!-- --></div>

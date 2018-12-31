@@ -23,13 +23,13 @@ class cms_page extends MY_Controller{
 		
 		$cms_language = !empty($_SESSION['cms_language']) ? $_SESSION['cms_language'] : false;
 
-		if ($params['page_id']){
+		if ($params['cms_page_id']){
 				
-			$return['page'] = $this->cms_page_model->get_page($params['page_id'], $cms_language);
-			$blocks = $this->cms_page_panel_model->get_cms_page_panels_by(array('page_id' => $params['page_id'], ));
+			$return['page'] = $this->cms_page_model->get_page($params['cms_page_id'], $cms_language);
+			$blocks = $this->cms_page_panel_model->get_cms_page_panels_by(['cms_page_id' => $params['cms_page_id']]);
 				
 			foreach($blocks as $block){
-				$return['block_list'][] = $block['block_id'];
+				$return['block_list'][] = $block['cms_page_panel_id'];
 			}
 
 		} else {

@@ -22,11 +22,11 @@ class cms_search_operations extends MY_Controller{
 			
 			$term = $this->input->post('term');
 			 
-			$this->load->model('cms_search_model');
-			$this->load->model('cms_page_model');
-			$this->load->model('cms_slug_model');
-			$this->load->model('cms_page_panel_model');
-			$this->load->model('cms_panel_model');
+			$this->load->model('cms/cms_search_model');
+			$this->load->model('cms/cms_page_model');
+			$this->load->model('cms/cms_slug_model');
+			$this->load->model('cms/cms_page_panel_model');
+			$this->load->model('cms/cms_panel_model');
 			
 			$lists = $this->cms_page_panel_model->get_lists();
 			
@@ -99,12 +99,12 @@ class cms_search_operations extends MY_Controller{
 				
 				} else if (in_array($result['panel_data'][$cms_page_panel_id]['panel_name'], $lists) || !empty($result['panel_data'][$cms_page_panel_id]['parent_id'])) { // list panels
 				
-					$this->load->model('cms_page_panel_model'); // TODO: bug here - on second round this model disappears
+					$this->load->model('cms/cms_page_panel_model'); // TODO: bug here - on second round this model disappears
 					$data = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
 					
 					// get main heading
 					if (!empty($result['panel_data'][$cms_page_panel_id]['parent_id'])){
-						$this->load->model('cms_page_panel_model'); // TODO: bug here - on second round this model disappears
+						$this->load->model('cms/cms_page_panel_model'); // TODO: bug here - on second round this model disappears
 						$parent_data = $this->cms_page_panel_model->get_cms_page_panel($result['panel_data'][$cms_page_panel_id]['parent_id']);
 						$parent_title = $this->run_panel_method($result['panel_data'][$cms_page_panel_id]['panel_name'], 'panel_heading', $parent_data);
 						if (mb_strlen($parent_title) > 25){
@@ -113,7 +113,7 @@ class cms_search_operations extends MY_Controller{
 						$parent_title .= ' &gt; ';
 						$title = $parent_data['panel_name'] . ' - ' . $parent_title.$data['title'];
 					} else {
-						$this->load->model('cms_page_panel_model'); // TODO: bug here - on second round this model disappears
+						$this->load->model('cms/cms_page_panel_model'); // TODO: bug here - on second round this model disappears
 						$title = $this->run_panel_method($result['panel_data'][$cms_page_panel_id]['panel_name'], 'panel_heading', $data);
 						$title = $result['panel_data'][$cms_page_panel_id]['panel_name'] . ' - ' . $title;
 					}

@@ -502,5 +502,27 @@ class cms_update_model extends CI_Model {
 		return $result;
 		
 	}
+	
+	function up(){
+		
+		// check if table block exists and update
+		
+		$sql = "select 1 from block limit 1";
+		$query = $this->db->query($sql);
+		
+		if ($query && $query->num_rows()){
+			
+			$sql = "rename table `block` to `cms_page_panel`";
+			$this->run_sql($sql);
+			
+			$sql = "ALTER TABLE `cms_page_panel` CHANGE `block_id` `cms_page_panel_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT";
+			$this->run_sql($sql);
+			
+			$sql = "ALTER TABLE `cms_page_panel` CHANGE `page_id` `cms_page_id` INT(10) UNSIGNED NOT NULL";
+			$this->run_sql($sql);
+				
+		}
+		
+	}
 
 }

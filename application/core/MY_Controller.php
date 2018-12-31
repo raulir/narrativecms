@@ -6,6 +6,9 @@ class MY_Controller extends CI_Controller{
         
         parent::__construct();
         
+        $this->load->model('cms/cms_update_model');
+        $this->cms_update_model->up();
+        
 		$this->load->helper('panel_helper');
 		$this->load->helper('image_helper');
 		$this->load->helper('packer_helper');
@@ -36,7 +39,7 @@ class MY_Controller extends CI_Controller{
         if (!isset($GLOBALS['_panel_js'])){
         	$GLOBALS['_panel_js'] = array();
         }
-        
+
     }
     
     function panel_heading($params){
@@ -428,7 +431,7 @@ class MY_Controller extends CI_Controller{
     		
     		$this->load->model('cms/cms_page_panel_model');
 
-    		$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'cms_cssjs_settings', 'page_id' => 0, ]);
+    		$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'cms_cssjs_settings', 'cms_page_id' => 0, ]);
     		if (!empty($settings_a[0]['css'])){
     			$global_css = $settings_a[0]['css'];
     		}

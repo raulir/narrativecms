@@ -44,6 +44,10 @@ function cms_page_panel_save(params){
 			}
 		});
 		
+		// add do and language
+		data_to_submit['do'] = 'cms_page_panel_save';
+		data_to_submit['language'] = $('.cms_language_select_current').data('language');
+		
 		if (params && params.success){
 			
 			$.extend(data_to_submit, {

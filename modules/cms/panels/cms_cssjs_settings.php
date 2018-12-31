@@ -24,7 +24,7 @@ class cms_cssjs_settings extends MY_Controller{
 		$this->load->model('cms_page_panel_model');
 		
 		// get current config
-		$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'cms_cssjs_settings', 'page_id' => 0, ]);
+		$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'cms_cssjs_settings', 'cms_page_id' => 0, ]);
 		if (!count($settings_a)){
 			$this->cms_page_panel_model->create_cms_page_panel(['panel_name' => 'cms_cssjs_settings', ]);
 			$params['current_css'] = [];

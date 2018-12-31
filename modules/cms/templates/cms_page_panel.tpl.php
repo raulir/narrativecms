@@ -1,8 +1,8 @@
 <?php
 	
 	_panel('cms_page_panel_toolbar', [
-			'cms_page_panel_id' => $block['block_id'],
-			'cms_page_id' => $block['page_id'],
+			'cms_page_panel_id' => $block['cms_page_panel_id'],
+			'cms_page_id' => $block['cms_page_id'],
 			'breadcrumb' => !empty($breadcrumb) ? $breadcrumb : [],
 			'parent_id' => $block['parent_id'],
 	]);
@@ -13,13 +13,12 @@
 
 	<form method="post" class="admin_form" style="display: inline; ">
 	
-		<input type="hidden" name="do" value="cms_page_panel_save">
 		<input type="hidden" class="cms_page_panel_id" name="cms_page_panel_id" value="<?= $block['cms_page_panel_id'] ?>">
 		<input type="hidden" id="parent_id" name="parent_id" value="<?php print($block['parent_id']); ?>">
 		<?php if(!empty($parent_field_name)): ?>
 			<input class="cms_page_panel_parent_name" type="hidden" name="parent_name" value="<?php print($parent_field_name); ?>">
 		<?php endif ?>
-		<input type="hidden" class="cms_page_id" id="page_id" name="page_id" value="<?php print( isset($_admin_title) ? $block['page_id'] : $cms_page_id); ?>">
+		<input type="hidden" class="cms_page_id" id="page_id" name="page_id" value="<?php print( isset($_admin_title) ? $block['cms_page_id'] : $cms_page_id); ?>">
 		<input type="hidden" name="sort" value="<?php print($block['sort']); ?>">
 		<?php if(!empty($_mode)): ?>
 			<input class="cms_page_panel_mode" type="hidden" name="_mode" value="<?php print($_mode); ?>">

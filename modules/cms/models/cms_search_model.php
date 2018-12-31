@@ -9,14 +9,14 @@ class cms_search_model extends CI_Model {
 	 */
 	function get_search($term, $params = []){
 		
-		$this->load->model('cms_page_panel_model');
-		$this->load->model('cms_slug_model');
-		$this->load->model('cms_module_model');
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_slug_model');
+		$this->load->model('cms/cms_module_model');
 		
 		if (!empty($params['all'])){
 			$sql = "select * from cms_page_panel_param where value like ? ";
 		} else {
-			$sql = "select a.*, b.show from cms_page_panel_param a join block b on a.cms_page_panel_id = b.block_id where b.show = 1 and a.search > 0 and a.value like ? ";
+			$sql = "select a.*, b.show from cms_page_panel_param a join cms_page_panel b on a.cms_page_panel_id = b.cms_page_panel_id where b.show = 1 and a.search > 0 and a.value like ? ";
 		}
 		
 		$query = $this->db->query($sql, array('%'.$term.'%', ));
@@ -40,7 +40,7 @@ class cms_search_model extends CI_Model {
 		// cms page panel data
 		foreach($cms_page_panels as $cms_page_panel_id => $data){
 			
-			$sql = "select * from block where block_id = ? ";
+			$sql = "select * from cms_page_panel where cms_page_panel_id = ? ";
 			$query = $this->db->query($sql, array($cms_page_panel_id, ));
 			$cms_page_panels[$cms_page_panel_id] = $query->row_array();
 			
@@ -80,12 +80,12 @@ class cms_search_model extends CI_Model {
 			
 			// if child panel page, then not present in this array
 			if (empty($cms_page_panels[$block_id])){
-				$sql = "select * from block where block_id = ? ";
+				$sql = "select * from cms_page_panel where cms_page_panel_id = ? ";
 				$query = $this->db->query($sql, array($cms_page_panel_id, ));
 				$cms_page_panels[$block_id] = $query->row_array();
 			}
 		
-			$page_id = !in_array($cms_page_panels[$block_id]['page_id'], [0, 999999]) ? $cms_page_panels[$block_id]['page_id'] : $cms_page_panels[$block_id]['panel_name'].'='.$cms_page_panels[$block_id]['block_id'];
+			$page_id = !in_array($cms_page_panels[$block_id]['cms_page_id'], [0, 999999]) ? $cms_page_panels[$block_id]['cms_page_id'] : $cms_page_panels[$block_id]['panel_name'].'='.$cms_page_panels[$block_id]['cms_page_panel_id'];
 			
 			// settings block is not page and should be excluded?
 			if (stristr($page_id, '=') && !in_array($cms_page_panels[$block_id]['panel_name'], $lists)){
@@ -93,7 +93,7 @@ class cms_search_model extends CI_Model {
 			}
 			
 			// if do not show list main pages
-			if (empty($params['all']) && $cms_page_panels[$block_id]['page_id'] != 0 && in_array($cms_page_panels[$block_id]['panel_name'], $lists)){
+			if (empty($params['all']) && $cms_page_panels[$block_id]['cms_page_id'] != 0 && in_array($cms_page_panels[$block_id]['panel_name'], $lists)){
 				continue;
 			}
 			
@@ -172,16 +172,16 @@ class cms_search_model extends CI_Model {
     	// get page scores
     	$page_scores = array();
     	foreach($block_scores as $block_id => $block_score){
-    		$sql = "select * from block where block_id = ? ";
+    		$sql = "select * from cms_page_panel where cms_page_panel_id = ? ";
      		$query = $this->db->query($sql, array($block_id, ));
     		$row = $query->row_array();
     		
-    		$page_id = (!($row['page_id'] == 999999 || $row['page_id'] == 0)) ? $row['page_id'] : $row['panel_name'].'='.$row['block_id']; 
+    		$page_id = (!($row['cms_page_id'] == 999999 || $row['cms_page_id'] == 0)) ? $row['cms_page_id'] : $row['panel_name'].'='.$row['cms_page_panel_id']; 
    		
    			if (empty($page_scores[$page_id])){
 	    		$page_scores[$page_id] = array(
-    					'page_id' => $row['page_id'],
-    					'block_id' => $row['block_id'],
+    					'page_id' => $row['cms_page_id'],
+    					'block_id' => $row['cms_page_panel_id'],
      					'panel_name' => $row['panel_name'],
     					'score' => $block_score,
     			);
@@ -279,9 +279,9 @@ class cms_search_model extends CI_Model {
 			$result = $this->get_result($term);
 			
 			// get page data
-			$this->load->model('cms_slug_model');
-			$this->load->model('cms_page_model');
-			$this->load->model('cms_page_panel_model');
+			$this->load->model('cms/cms_slug_model');
+			$this->load->model('cms/cms_page_model');
+			$this->load->model('cms/cms_page_panel_model');
 			
 			// load header params
 			$blocks = $this->cms_page_panel_model->get_cms_page_panels_by(array('panel_name' => 'header', ));
@@ -291,9 +291,9 @@ class cms_search_model extends CI_Model {
 				
 				// reclassify type
 				$type = '';
-				if (!empty($page['block_id'])){
+				if (!empty($page['cms_page_panel_id'])){
 					if ($page['type'] == 'article'){
-						$block = $this->cms_page_panel_model->get_cms_page_panel($page['block_id']);
+						$block = $this->cms_page_panel_model->get_cms_page_panel($page['cms_page_panel_id']);
 						if(empty($block['show'])){
 							$type = '';
 						} else if ($block['type'] == 'plus'){
@@ -327,9 +327,9 @@ class cms_search_model extends CI_Model {
 						$preresult[$type][$key]['title'] = $pagex['title'];
 //						$preresult[$type][$key]['block_id'] = $page['page_id'];
 					} else {
-						$block = $this->cms_page_panel_model->get_cms_page_panel($page['block_id']);
+						$block = $this->cms_page_panel_model->get_cms_page_panel($page['cms_page_panel_id']);
 						$preresult[$type][$key]['title'] = $block['heading'];
-						$preresult[$type][$key]['block_id'] = $page['block_id'];
+						$preresult[$type][$key]['block_id'] = $page['cms_page_panel_id'];
 					}
 				}
 

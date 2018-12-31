@@ -19,13 +19,13 @@ class cms_page_panel_toolbar extends MY_Controller{
 		// deprecate
 		if ($params['cms_page_id'] == 999999) $params['cms_page_id'] = 0;
 
-		$this->load->model('cms_page_panel_model');
-		$this->load->model('cms_page_model');
-		$this->load->model('cms_panel_model');
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_model');
+		$this->load->model('cms/cms_panel_model');
 
 		$cms_page_panel = $this->cms_page_panel_model->get_cms_page_panel($params['cms_page_panel_id']);
 		// deprecate
-		if ($cms_page_panel['page_id'] == 999999) $cms_page_panel['page_id'] = 0;
+		if ($cms_page_panel['cms_page_id'] == 999999) $cms_page_panel['cms_page_id'] = 0;
 
 		if (!empty($params['parent_id'])) {
 			$cms_page_panel['parent_id'] = $params['parent_id'];
@@ -48,15 +48,15 @@ class cms_page_panel_toolbar extends MY_Controller{
 				$parent = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel['parent_id']);
 
 				// deprecate
-				if ($parent['page_id'] == 999999){
-					$parent['page_id'] = 0;
+				if ($parent['cms_page_id'] == 999999){
+					$parent['cms_page_id'] = 0;
 				}
 				
 				if (empty($params['cms_page_id'])){
-					$params['cms_page_id'] = $parent['page_id'];
+					$params['cms_page_id'] = $parent['cms_page_id'];
 				}
 
-				if (!empty($parent['page_id'])){
+				if (!empty($parent['cms_page_id'])){
 
 					$params['page'] = $this->cms_page_model->get_page($params['cms_page_id']);
 					$params['breadcrumb'][] = [ // root url to pages
