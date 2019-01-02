@@ -15,14 +15,14 @@ class Index extends MY_Controller {
    	 */
    	function _get_cms_page_panels($page_id){
    		
-	    $blocks = $this->cms_page_panel_model->get_cms_page_panels_by(array('page_id' => $page_id, 'show' => 1, ));
+	    $blocks = $this->cms_page_panel_model->get_cms_page_panels_by(['cms_page_id' => $page_id, 'show' => 1, ]);
 	    
 		foreach($blocks as $key => $block){
 	    	// check for shorcut panels
     		if (is_numeric($block['panel_name']) && (int)$block['panel_name'] == $block['panel_name']){
     			// get real panel data
 				$blocks[$key] = $this->cms_page_panel_model->get_cms_page_panel($block['panel_name']);
-				$blocks[$key]['page_id'] = $page_id;
+				$blocks[$key]['cms_page_id'] = $page_id;
     		}
 		}
 		
@@ -46,7 +46,7 @@ class Index extends MY_Controller {
     			}
     			foreach($panel_name as $pn){
 	    			// get data
-	    			$panel_a = $this->cms_page_panel_model->get_cms_page_panels_by(array('panel_name' => $pn, 'page_id' => [999999,0], ));
+	    			$panel_a = $this->cms_page_panel_model->get_cms_page_panels_by(array('panel_name' => $pn, 'cms_page_id' => [999999,0], ));
 	    			if (!empty($panel_a[0])){
 	    				$params = array_merge($panel_a[0], array('page_id' => $page_id, ));
 	    			} else {
@@ -65,7 +65,7 @@ class Index extends MY_Controller {
     	// get panels on page
     	if (!stristr($page_id, '=')){ // direct page id
 
-			$page = $this->cms_page_model->get_page($page_id);
+			$page = $this->cms_page_model->get_page($page_id, 'auto');
 
 			if (!empty($page['seo_title'])){
     			$GLOBALS['_panel_titles'][] = $page['seo_title'];
@@ -111,7 +111,7 @@ class Index extends MY_Controller {
     		} else {
     			
     			// special template
-    			$page = $this->cms_page_model->get_page($list_item_data['_template_page_id']);
+    			$page = $this->cms_page_model->get_page($list_item_data['_template_page_id'], 'auto');
     			
     		}
     		

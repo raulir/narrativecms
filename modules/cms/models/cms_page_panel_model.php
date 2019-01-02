@@ -14,7 +14,7 @@ class cms_page_panel_model extends CI_Model {
 
 		$return = [];
 		
-		$list = $this->get_cms_page_panels_by(array_merge(['panel_name' => $panel_name, 'page_id' => [999999,0], 'show' => '1', 'sort!' => 0, ], $filter));
+		$list = $this->get_cms_page_panels_by(array_merge(['panel_name' => $panel_name, 'cms_page_id' => [999999,0], 'show' => '1', 'sort!' => 0, ], $filter));
 		
 		foreach($list as $item){
 			$return[$item['cms_page_panel_id']] = $item;
@@ -30,7 +30,7 @@ class cms_page_panel_model extends CI_Model {
 	}
 	
 	function get_list_stats($panel_name){
-		$sql = "select count(*) as count from `block` where panel_name = ? and (page_id = ? or page_id = ?) and `show` = 1 group by panel_name ";
+		$sql = "select count(*) as count from `cms_page_panel` where panel_name = ? and (cms_page_id = ? or cms_page_id = ?) and `show` = 1 group by panel_name ";
 		$query = $this->db->query($sql, array($panel_name, 999999, 0, ));
 		return $query->row_array();
 	}
@@ -227,17 +227,19 @@ class cms_page_panel_model extends CI_Model {
 		
 	}
 	
-	function get_cms_page_panel($cms_page_panel_id){
+	function get_cms_page_panel($cms_page_panel_id, $language = false){
+		
+		// defaults to frontend language
 	
-		$sql = "select *, block_id as cms_page_panel_id, page_id as cms_page_id from block where block_id = ? ";
+		$sql = "select *, cms_page_panel_id as block_id from cms_page_panel where cms_page_panel_id = ? ";
 		$query = $this->db->query($sql, array($cms_page_panel_id));
 		$row = $query->row_array();
 		 
-		if (empty($row['block_id'])) {
+		if (empty($row['cms_page_panel_id'])) {
 			return false;
 		}
 
-		$panel_params = $this->get_cms_page_panel_params($row['block_id']);
+		$panel_params = $this->get_cms_page_panel_params($row['cms_page_panel_id']);
 	    
 		if (is_array($panel_params)){
 			$return = array_merge($panel_params, $row);
@@ -254,14 +256,14 @@ class cms_page_panel_model extends CI_Model {
 	
 	function new_cms_page_panel(){
 		
-		$sql = "select max(sort) as sort from block";
+		$sql = "select max(sort) as sort from cms_page_panel";
     	$query = $this->db->query($sql);
     	$result = $query->row_array();
 		
 		return array(
 			'cms_page_panel_id' => 0,
 			'block_id' => 0,
-			'page_id' => 0,
+			'cms_page_id' => 0,
 			'parent_id' => 0,
 			'show' => 0,
 			'sort' => $result['sort'] + 1,
@@ -274,7 +276,7 @@ class cms_page_panel_model extends CI_Model {
 	}
 	
 	function update_cms_page_panel($cms_page_panel_id, $data, $no_purge = false){
-
+// print_r($data);
 		if (isset($data['search_params'])){
 			$search_params = $data['search_params'];
 			unset($data['search_params']);
@@ -290,7 +292,7 @@ class cms_page_panel_model extends CI_Model {
 		
 		// new params stuff
 		foreach($data as $key => $value){
-			if (!in_array($key, array('block_id', 'page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title', ))){
+			if (!in_array($key, array('cms_page_panel_id', 'cms_page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title', ))){
 				$params[$key] = $value;
 				unset($data[$key]);
 			}
@@ -309,7 +311,7 @@ class cms_page_panel_model extends CI_Model {
 		}
 
 		if(!empty($data)){
-			$sql = "update block set `".implode('` = ? , `', array_keys($data))."` = ? where block_id = '".(int)$cms_page_panel_id."' ";
+			$sql = "update cms_page_panel set `".implode('` = ? , `', array_keys($data))."` = ? where cms_page_panel_id = '".(int)$cms_page_panel_id."' ";
 			$this->db->query($sql, $data);
 		}
 		
@@ -359,8 +361,8 @@ class cms_page_panel_model extends CI_Model {
 	 */
 	function create_cms_page_panel($data){
 		
-		if (empty($data['page_id'])){
-			$data['page_id'] = 0;
+		if (empty($data['cms_page_id'])){
+			$data['cms_page_id'] = isset($data['page_id']) ? $data['page_id'] : 0;
 		}
 		
 		$search_params = array();
@@ -388,7 +390,7 @@ class cms_page_panel_model extends CI_Model {
 		$panel_params = array();
 		
 		foreach($data as $key => $value){
-			if (!in_array($key, array('block_id', 'page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title', ))){
+			if (!in_array($key, array('cms_page_panel_id', 'cms_page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title', ))){
 				$panel_params[$key] = $value;
 				unset($data[$key]);
 			}
@@ -398,15 +400,15 @@ class cms_page_panel_model extends CI_Model {
 		if (!empty($data['sort']) && $data['sort'] == 'first'){
 			$this->shift_sort($data['panel_name'], 0, 1);
 			$data['sort'] = 1;
-		} elseif (!isset($data['sort']) && ($data['page_id'] == '999999' || $data['page_id'] == 0)) {
+		} elseif (!isset($data['sort']) && ($data['cms_page_id'] == '999999' || $data['cms_page_id'] == 0)) {
 			$sort_stats = $this->get_sort_stats($data['panel_name']);
 			$data['sort'] = !empty($sort_stats['max_sort']) ? $sort_stats['max_sort'] + 1 : 0;
 		} elseif (!empty($data['sort']) && $data['sort'] == 'last'){
-			$sort_stats = $this->get_page_panel_sort_stats($data['page_id']);
+			$sort_stats = $this->get_page_panel_sort_stats($data['cms_page_id']);
 			$data['sort'] = $sort_stats['max_sort'] + 1;
 		}// else stays the same
 		
-		$sql = "insert into block set `".implode('` = ? , `', array_keys($data))."` = ? ";
+		$sql = "insert into cms_page_panel set `".implode('` = ? , `', array_keys($data))."` = ? ";
 		$this->db->query($sql, $data);
 		
 		$insert_id = $this->db->insert_id();
@@ -439,7 +441,7 @@ class cms_page_panel_model extends CI_Model {
 		$search_params = $data['search_params'];
 		unset($data['search_params']);
 		
-		$sql = "insert into block set `".implode('` = ? , `', array_keys($data))."` = ? ";
+		$sql = "insert into cms_page_panel set `".implode('` = ? , `', array_keys($data))."` = ? ";
 		$this->db->query($sql, $data);
 		
 		$insert_id = $this->db->insert_id();
@@ -482,11 +484,11 @@ class cms_page_panel_model extends CI_Model {
 		$this->invalidate_html_cache($cms_page_panel_id);
 		
 		// delete children
-		$sql = "select block_id from block where parent_id = ? ";
+		$sql = "select cms_page_panel_id from cms_page_panel where parent_id = ? ";
    		$query = $this->db->query($sql, array($cms_page_panel_id));
     	$result = $query->result_array();
     	foreach($result as $child){
-    		$this->delete_cms_page_panel($child['block_id']);
+    		$this->delete_cms_page_panel($child['cms_page_panel_id']);
     	}
 		
 		// update parent
@@ -496,7 +498,7 @@ class cms_page_panel_model extends CI_Model {
 	    	if (!empty($cms_page_panel['parent_id'])){
 	    		$parent = $this->get_cms_page_panel($cms_page_panel['parent_id']);
 	    		if (!empty($parent['panel_name'])){
-	    			$this->load->model('cms_panel_model');
+	    			$this->load->model('cms/cms_panel_model');
 					$parent_config = $this->cms_panel_model->get_cms_panel_config($parent['panel_name']);
 					foreach($parent_config['item'] as $item){
 						if ($item['type'] == 'cms_page_panels'){
@@ -517,18 +519,18 @@ class cms_page_panel_model extends CI_Model {
 	    	}
 	    }
 		
-		$sql = "delete from block where block_id = ? ";
+		$sql = "delete from cms_page_panel where cms_page_panel_id = ? ";
 	    $this->db->query($sql, array($cms_page_panel_id, ));
 		
 		$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? ";
 	    $this->db->query($sql, array($cms_page_panel_id, ));
 	    
 	    // shortcuts
-	    $sql = "delete from block where panel_name = ? ";
+	    $sql = "delete from cms_page_panel where panel_name = ? ";
 	    $this->db->query($sql, array($cms_page_panel_id, ));
 	    
 	    // delete slug pointing to this panel
-	    $this->load->model('cms_slug_model');
+	    $this->load->model('cms/cms_slug_model');
 	    $this->cms_slug_model->delete_slug($cms_page_panel['panel_name'].'='.$cms_page_panel_id);
 	    	
 	}
@@ -545,7 +547,7 @@ class cms_page_panel_model extends CI_Model {
 
 		if (count($fields) == 0){
 			$fields = array_keys($filter);
-			$sql = "select count(*) as total from `block` where `" . preg_replace("/[^A-Za-z0-9_=?` ]/", '', implode('` = ? and `', $fields)) . "` = ? ";
+			$sql = "select count(*) as total from `cms_page_panel` where `" . preg_replace("/[^A-Za-z0-9_=?` ]/", '', implode('` = ? and `', $fields)) . "` = ? ";
 			
 	    	$query = $this->db->query($sql, $filter);
 		    $return = $query->row_array();
@@ -568,21 +570,6 @@ class cms_page_panel_model extends CI_Model {
 	 * 
 	 */
 	function get_cms_page_panels_by($filter){
-		
-		if (isset($filter['cms_page_panel_id'])){
-			$filter['block_id'] = $filter['cms_page_panel_id'];
-			unset($filter['cms_page_panel_id']);
-		}
-		
-		if (isset($filter['cms_page_panel_id!'])){
-			$filter['block_id!'] = $filter['cms_page_panel_id!'];
-			unset($filter['cms_page_panel_id!']);
-		}
-		
-		if (isset($filter['cms_page_id'])){
-			$filter['page_id'] = $filter['cms_page_id'];
-			unset($filter['cms_page_id']);
-		}
 		
 		if (isset($filter['_limit'])){
 			$limit = (int)$filter['_limit'];
@@ -609,7 +596,7 @@ class cms_page_panel_model extends CI_Model {
 		
 		foreach($filter as $key => $value){
 			$tkey = str_replace('!', '', $key);
-			if (in_array($tkey, array('block_id', 'page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title', ))){
+			if (in_array($tkey, array('cms_page_panel', 'cms_page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title', ))){
 				
 				// check for arrays in sql filter
 				if (!is_array($value)){
@@ -641,7 +628,7 @@ class cms_page_panel_model extends CI_Model {
 			$sql_arrays_str = '';
 		}
 		
-		$sql = "select a.*, b.value as _params, a.block_id as cms_page_panel_id from `block` a left join cms_page_panel_param b on b.name = '' and b.cms_page_panel_id = a.block_id " .
+		$sql = "select a.*, b.value as _params from `cms_page_panel` a left join cms_page_panel_param b on b.name = '' and b.cms_page_panel_id = a.cms_page_panel_id " .
 				" where ".$sql_filter_str." ".(!empty($sql_filter_str) && !empty($sql_arrays_str) ? ' and ' : '')." ".$sql_arrays_str." order by sort ".$order;
 		$sql = str_replace('!` =', '` !=', $sql); // not query
 
@@ -713,7 +700,7 @@ class cms_page_panel_model extends CI_Model {
     	
     	// check for page panel settings
     	foreach($return as $key => $cms_page_panel){
-    		if ($cms_page_panel['page_id']){
+    		if ($cms_page_panel['cms_page_id']){
     			$return[$key] = array_merge($this->get_cms_page_panel_settings($cms_page_panel['panel_name']), $cms_page_panel);
    			}
     	}
@@ -739,7 +726,7 @@ class cms_page_panel_model extends CI_Model {
 	}
 	
 	function shift_sort($panel_name, $start, $shift){ // panel name, start, amount
-		$sql = "update `block` set sort = sort ".sprintf('%+d', $shift)." where panel_name = ? and sort >= ? and (page_id = ? or page_id = ?)";
+		$sql = "update `cms_page_panel` set sort = sort ".sprintf('%+d', $shift)." where panel_name = ? and sort >= ? and (cms_page_id = ? or cms_page_id = ?)";
 		$query = $this->db->query($sql, array($panel_name, $start, 999999, 0, ));
 	}
 	
@@ -755,13 +742,13 @@ class cms_page_panel_model extends CI_Model {
 	}
 	
 	function get_sort_stats($panel_name){
-		$sql = "select max(sort) as max_sort, count(*) as number from `block` where panel_name = ? and (page_id = ? or page_id = ?)group by panel_name ";
+		$sql = "select max(sort) as max_sort, count(*) as number from `cms_page_panel` where panel_name = ? and (cms_page_id = ? or cms_page_id = ?) group by panel_name ";
 		$query = $this->db->query($sql, array($panel_name, 999999, 0, ));
 		return $query->row_array();
 	}
 	
 	function get_page_panel_sort_stats($page_id){
-		$sql = "select max(sort) as max_sort, count(*) as number from `block` where page_id = ? group by page_id ";
+		$sql = "select max(sort) as max_sort, count(*) as number from `cms_page_panel` where cms_page_id = ? group by cms_page_id ";
 		$query = $this->db->query($sql, array($page_id, ));
 		$return = $query->row_array();
 		if (empty($return['number'])){
@@ -802,12 +789,12 @@ class cms_page_panel_model extends CI_Model {
 	
 	function get_fk_data($panel_name, $filter = array(), $label_field = 'title'){
 
-		$panels = $this->get_cms_page_panels_by(array('panel_name' => $panel_name, 'page_id' => [999999,0], ) + $filter);
+		$panels = $this->get_cms_page_panels_by(array('panel_name' => $panel_name, 'cms_page_id' => [999999,0], ) + $filter);
     	
     	$return = array();
     	
     	foreach($panels as $row){
-    		$return[(int)$row['block_id']] = str_replace('"', '&quot;', $row[$label_field]);
+    		$return[(int)$row['cms_page_panel_id']] = str_replace('"', '&quot;', $row[$label_field]);
     	}
     	
     	return $return;
@@ -818,7 +805,7 @@ class cms_page_panel_model extends CI_Model {
 		
 		foreach($data as $key => $item){
 			if (!empty($item)){
-				$item_a = $this->get_cms_page_panels_by(array('block_id' => $item[$panel_name.'_id'], ));
+				$item_a = $this->get_cms_page_panels_by(array('cms_page_panel_id' => $item[$panel_name.'_id'], ));
 				if (!empty($item_a[0])){
 					$data[$key] = $item_a[0];
 				}
@@ -831,7 +818,7 @@ class cms_page_panel_model extends CI_Model {
 
 	function get_max_cms_page_panel_id($panel_name){
 	
-		$sql = "select max(block_id) as cms_page_panel_id from block where panel_name = ? and (page_id = '999999' or page_id = 0) ";
+		$sql = "select max(cms_page_panel_id) as cms_page_panel_id from cms_page_panel where panel_name = ? and (cms_page_id = '999999' or cms_page_id = 0) ";
 		$query = $this->db->query($sql, array($panel_name, ));
 		$return = $query->row_array();
 	

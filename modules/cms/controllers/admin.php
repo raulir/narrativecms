@@ -59,7 +59,7 @@ class admin extends MY_Controller {
 		$page_config = array(
 				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
 				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms_page', 'module' => 'cms', 'params' => array('page_id' => $page_id, ), ),
+				array('position' => 'main', 'panel' => 'cms_page', 'module' => 'cms', 'params' => array('cms_page_id' => $page_id, ), ),
 		);
 
 		// render panels
@@ -197,7 +197,7 @@ class admin extends MY_Controller {
 		$params = array(
 				'title' => $item_config['list']['list_title'],
 				'edit_base' => 'admin/cms_page_panel/',
-				'filter' => array('panel_name' => $list_item, 'page_id' => [999999,0], ),
+				'filter' => array('panel_name' => $list_item, 'cms_page_id' => [999999,0], ),
 		);
 			
 		if (!empty($item_config['list']['filter_fields'])){
@@ -243,9 +243,9 @@ class admin extends MY_Controller {
 		
 		// check if exists
 		if (stristr($panel_name, 'settings')){ // for backwards compatibility with cms settings and feed settings
-			$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => $panel_name, 'page_id' => 0, 'parent_id' => 0, ]);
+			$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => $panel_name, 'cms_page_id' => 0, 'parent_id' => 0, ]);
 		} else {
-			$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => $panel_name, 'page_id' => 0, 'parent_id' => 0, 'sort' => 0, ]);
+			$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => $panel_name, 'cms_page_id' => 0, 'parent_id' => 0, 'sort' => 0, ]);
 		}
 		
 		if (!count($settings_a)){

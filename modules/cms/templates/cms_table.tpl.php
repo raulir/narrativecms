@@ -2,7 +2,7 @@
 	<div class="admin_tool_text">
 		<?php print(str_limit($table_title, 40)); ?>
 	</div>
-	<a class="cms_table_save admin_tool_button admin_right">Save</a>
+	<a class="cms_table_save cms_tool_button admin_right">Save</a>
 </div>
 
 <div>

@@ -5,9 +5,8 @@
 		
 		<div class="cms_image_filename admin_tool_text"><?php print($filename); ?></div>
 
-		<a class="cms_image_save admin_tool_button admin_right" data-filename="<?php print($filename); ?>">Save</a>
-		<a class="cms_image_cancel admin_tool_button admin_right">Cancel</a>
-		<!-- a class="cms_image_replace admin_tool_button admin_right">Reupload</a -->
+		<a class="cms_image_save cms_tool_button admin_right" data-filename="<?php print($filename); ?>">Save</a>
+		<a class="cms_image_cancel cms_tool_button admin_right">Cancel</a>
 
 	</div>
 

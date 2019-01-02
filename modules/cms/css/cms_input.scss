@@ -96,3 +96,20 @@
     max-height: 2.6rem;
     letter-spacing: -0.045rem;
 }
+
+/* translation */
+.cms_translate_icon {
+	height: 16px;
+    width: 16px;
+    position: absolute;
+    left: 106px;
+    top: 12px;
+    box-sizing: border-box;
+    background-color: white;
+    border-radius: 8px;
+    z-index: 100;
+    background-size: 10px auto;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.7;
+}

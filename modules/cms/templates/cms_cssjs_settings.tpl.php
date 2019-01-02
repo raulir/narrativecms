@@ -3,7 +3,7 @@
 	<div class="admin_tool_text">Global css</div>
 	
 	<div class="cms_toolbar_buttons">
-		<div class="cms_cssjs_settings_save admin_tool_button admin_right">
+		<div class="cms_cssjs_settings_save cms_tool_button admin_right">
 			Save
 			<div class="cms_ctrl_hint">S</div>
 		</div>

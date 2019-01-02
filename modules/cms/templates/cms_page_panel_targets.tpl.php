@@ -29,7 +29,7 @@
 		</div>
 		
 		<div class="cms_page_panel_targets_buttons">
-			<div class="admin_tool_button cms_page_panel_targets_close">Save</div>
+			<div class="cms_tool_button cms_page_panel_targets_close">Save</div>
 		</div>
 	
 	</div>

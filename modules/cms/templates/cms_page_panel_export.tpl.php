@@ -37,8 +37,8 @@
 		<div class="cms_page_panel_export_col3"><?= $stats['total']['compressed'] ?></div>
 		
 		<div class="cms_page_panel_export_buttons">
-			<a class="admin_tool_button cms_page_panel_export_download" <?php _lh('/admin/export/'.$filename); ?>>Download</a>
-			<div class="admin_tool_button cms_page_panel_export_close">Close</div>
+			<a class="cms_tool_button cms_page_panel_export_download" <?php _lh('/admin/export/'.$filename); ?>>Download</a>
+			<div class="cms_tool_button cms_page_panel_export_close">Close</div>
 		</div>
 	
 	</div>

@@ -7,7 +7,7 @@
 		
 				<div class="admin_tool_text admin_left cms_popup_title"><?= $heading ?></div>
 
-				<div class="admin_tool_button admin_right cms_popup_cancel">Cancel</div>
+				<div class="cms_tool_button admin_right cms_popup_cancel">Cancel</div>
 
 			</div>
 		
