@@ -20,7 +20,7 @@
 
 	<form method="post" class="admin_form" style="display: inline; ">
 	
-		<input type="hidden" class="cms_page_id" id="page_id" name="page_id" value="<?php print($page['page_id']); ?>">
+		<input type="hidden" class="cms_page_id" name="page_id" value="<?php print($page['page_id']); ?>">
 		<input type="hidden" class="cms_page_sort" name="sort" value="<?php print($page['sort']); ?>">
 		
 		<div class="admin_block">

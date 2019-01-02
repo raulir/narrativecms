@@ -121,7 +121,7 @@ class cms_page_model extends CI_Model {
 	
 	function update_page($cms_page_id, $data, $language = false){
 		
-		if ($language == $GLOBALS['language']['default']){
+		if ($language !== false && $language == $GLOBALS['language']['default']){
 			$language = false;
 		}
 		
@@ -194,16 +194,16 @@ class cms_page_model extends CI_Model {
 	    
 	    if ($page_id > 0){
 	    
-		    $this->load->model('cms_page_panel_model');
-		    $panels = $this->cms_page_panel_model->get_cms_page_panels_by(array('page_id' => $page_id, ));
+		    $this->load->model('cms/cms_page_panel_model');
+		    $panels = $this->cms_page_panel_model->get_cms_page_panels_by(array('cms_page_id' => $page_id, ));
 		    foreach($panels as $panel){
-		    	$this->cms_page_panel_model->delete_cms_page_panel($panel['block_id']);
+		    	$this->cms_page_panel_model->delete_cms_page_panel($panel['cms_page_panel_id']);
 		    }
 	    
 	    }
 	    
 	    // delete slug
-	    $this->load->model('cms_slug_model');
+	    $this->load->model('cms/cms_slug_model');
 	    $this->cms_slug_model->delete_slug($page_id);
 
 	}

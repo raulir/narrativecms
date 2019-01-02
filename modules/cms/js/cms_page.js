@@ -118,7 +118,7 @@ function cms_page_init(){
 			get_ajax('admin_save_block_order', {
 				'do': 'admin_save_block_order',
 				'block_orders': block_orders,
-				'page_id': $('#page_id').val()
+				'page_id': $('.cms_page_id').val()
 			});
 		},
 	}).disableSelection();

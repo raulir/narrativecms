@@ -18,7 +18,7 @@
 		<?php if(!empty($parent_field_name)): ?>
 			<input class="cms_page_panel_parent_name" type="hidden" name="parent_name" value="<?php print($parent_field_name); ?>">
 		<?php endif ?>
-		<input type="hidden" class="cms_page_id" id="page_id" name="page_id" value="<?php print( isset($_admin_title) ? $block['cms_page_id'] : $cms_page_id); ?>">
+		<input type="hidden" class="cms_page_id" name="cms_page_id" value="<?= isset($_admin_title) ? $block['cms_page_id'] : $cms_page_id ?>">
 		<input type="hidden" name="sort" value="<?php print($block['sort']); ?>">
 		<?php if(!empty($_mode)): ?>
 			<input class="cms_page_panel_mode" type="hidden" name="_mode" value="<?php print($_mode); ?>">
@@ -38,7 +38,7 @@
 					]); ?>
 				
 					<div class="cms_input cms_input_select">
-						<label for="panel_name">Block type</label>
+						<label for="panel_name">Panel type</label>
 						<?php _panel('cms_help', ['help' => '[Page panel type]||Select page panel type from available panel types in installed modules.||When adding a new page panel, '.
 								'one can select an existing panel from {Shortcut to} dropdown instead.||Changing this field may cause losing data already entered for this page panel', ]); ?>
 						<select class="cms_page_panel_panel_name" name="panel_name" id="panel_name">

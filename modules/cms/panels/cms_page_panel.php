@@ -76,7 +76,7 @@ class cms_page_panel extends MY_Controller{
 			// new block of type
 			$return['block'] = $this->cms_page_panel_model->new_cms_page_panel();
 			$return['block']['panel_params'] = array();
-			$return['block']['cms_page_id'] = $params['page_id'];
+			$return['block']['cms_page_id'] = $params['cms_page_id'];
 			
 			$return['block']['panel_name'] = $params['panel_name'];
 			$return['block']['title'] = 'New ' . $params['panel_name'];
@@ -212,7 +212,7 @@ class cms_page_panel extends MY_Controller{
 				$blocks = $this->cms_page_panel_model->get_cms_page_panels_by(array('cms_page_id' => $page['cms_page_id'], ));
 				foreach ($blocks as $block){
 					if ($block['title'] !== ''){
-						$return['shortcuts'][$block['block_id']] = $page['title'].' > '.$block['title'];
+						$return['shortcuts'][$block['cms_page_panel_id']] = $page['title'].' > '.$block['title'];
 					}
 				}
 			}

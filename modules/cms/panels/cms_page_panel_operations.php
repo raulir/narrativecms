@@ -171,8 +171,6 @@ class cms_page_panel_operations extends MY_Controller{
 				$data['panel_params']['_extends'] = $panel_config['extends'];
 			}
 			 
-			$panel_structure = !empty($panel_config['item']) ? $panel_config['item'] : array();
-			
 			// save if special template
 			if (!empty($panel_config['list']['templates'])){
 				$data['panel_params']['_template_page_id'] = $this->input->post('_template_page_id');
@@ -185,6 +183,8 @@ class cms_page_panel_operations extends MY_Controller{
 			}
 			 
 			$data['search_params'] = array();
+			
+			$panel_structure = !empty($panel_config['item']) ? $panel_config['item'] : array();
 			foreach($panel_structure as $struct){
 				if (!empty($struct['search'])){
 					$data['search_params'][$struct['name']] = $struct['search'];

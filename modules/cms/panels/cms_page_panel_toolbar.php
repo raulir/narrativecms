@@ -176,7 +176,7 @@ class cms_page_panel_toolbar extends MY_Controller{
 		$params['buttons'][] = ['name' => 'cms_page_panel_button_save', 'position' => 'visible', ];
 
 		// delete,caching,hide = except not on page && list item == settings
-		if (!empty($cms_page_panel['page_id']) || !empty($cms_page_panel['parent_id']) || !empty($panel_config['list'])){
+		if (!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']) || !empty($panel_config['list'])){
 			
 			$params['buttons'][] = ['name' => 'cms_page_panel_button_delete', 'position' => 'hidden', ];
 			$params['buttons'][] = ['name' => 'cms_page_panel_button_caching', 'position' => 'hidden', ];

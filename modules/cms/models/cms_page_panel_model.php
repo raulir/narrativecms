@@ -256,7 +256,7 @@ class cms_page_panel_model extends CI_Model {
 	
 	function new_cms_page_panel(){
 		
-		$sql = "select max(sort) as sort from block";
+		$sql = "select max(sort) as sort from cms_page_panel";
     	$query = $this->db->query($sql);
     	$result = $query->row_array();
 		
@@ -276,7 +276,7 @@ class cms_page_panel_model extends CI_Model {
 	}
 	
 	function update_cms_page_panel($cms_page_panel_id, $data, $no_purge = false){
-
+// print_r($data);
 		if (isset($data['search_params'])){
 			$search_params = $data['search_params'];
 			unset($data['search_params']);
@@ -484,11 +484,11 @@ class cms_page_panel_model extends CI_Model {
 		$this->invalidate_html_cache($cms_page_panel_id);
 		
 		// delete children
-		$sql = "select block_id from block where parent_id = ? ";
+		$sql = "select cms_page_panel_id from cms_page_panel where parent_id = ? ";
    		$query = $this->db->query($sql, array($cms_page_panel_id));
     	$result = $query->result_array();
     	foreach($result as $child){
-    		$this->delete_cms_page_panel($child['block_id']);
+    		$this->delete_cms_page_panel($child['cms_page_panel_id']);
     	}
 		
 		// update parent
@@ -498,7 +498,7 @@ class cms_page_panel_model extends CI_Model {
 	    	if (!empty($cms_page_panel['parent_id'])){
 	    		$parent = $this->get_cms_page_panel($cms_page_panel['parent_id']);
 	    		if (!empty($parent['panel_name'])){
-	    			$this->load->model('cms_panel_model');
+	    			$this->load->model('cms/cms_panel_model');
 					$parent_config = $this->cms_panel_model->get_cms_panel_config($parent['panel_name']);
 					foreach($parent_config['item'] as $item){
 						if ($item['type'] == 'cms_page_panels'){
@@ -519,18 +519,18 @@ class cms_page_panel_model extends CI_Model {
 	    	}
 	    }
 		
-		$sql = "delete from block where block_id = ? ";
+		$sql = "delete from cms_page_panel where cms_page_panel_id = ? ";
 	    $this->db->query($sql, array($cms_page_panel_id, ));
 		
 		$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? ";
 	    $this->db->query($sql, array($cms_page_panel_id, ));
 	    
 	    // shortcuts
-	    $sql = "delete from block where panel_name = ? ";
+	    $sql = "delete from cms_page_panel where panel_name = ? ";
 	    $this->db->query($sql, array($cms_page_panel_id, ));
 	    
 	    // delete slug pointing to this panel
-	    $this->load->model('cms_slug_model');
+	    $this->load->model('cms/cms_slug_model');
 	    $this->cms_slug_model->delete_slug($cms_page_panel['panel_name'].'='.$cms_page_panel_id);
 	    	
 	}
