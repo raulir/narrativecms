@@ -35,7 +35,7 @@
 						'meta_class' => 'cms_page_title',
 				]); ?>
 				
-				<?php if($page['page_id'] != 1 && !$is_list_item): // Can't hide homepage ?>
+				<?php if(!$is_list_item): ?>
 						
 					<?php _panel('cms/cms_input_select', array(
 							'label' => 'Published status', 

@@ -178,16 +178,22 @@ if ( !function_exists('get_position')) {
     		if (((int)$url == $url && $url != '') || (!stristr($url, '?') && stristr($url, '='))){
     			// get slug
     			$ci =& get_instance();
-    			$ci->load->model('cms_slug_model');
+    			$ci->load->model('cms/cms_slug_model');
     			$slug = $ci->cms_slug_model->get_cms_slug_by_target($url);
     			if ($slug){
     				$url = $slug.'/';
     			}
     		}
+    		
+    		// if homepage
+    		if (ltrim($url, '/') == $GLOBALS['config']['landing_page.url']){
+    			$url = '/';
+    		}
 
     		$url = $GLOBALS['config']['base_url'].ltrim($url, '/');
+    		
     	}
-    	
+    	    	
     	if (!empty($hash)){
     		$url = $url.'#'.$hash;
     	}
