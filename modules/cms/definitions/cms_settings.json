@@ -95,6 +95,12 @@
 			"default":"http://cms.bytecrackers.com/cms/updater/"
 		},
 		{
+			"type":"layout",
+			"name":"layout",
+			"label":"Default layout",
+			"default":"rem"
+		},
+		{
 			"type":"subtitle",
 			"label":"Sizing",
 			"width":"wide",

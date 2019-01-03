@@ -298,7 +298,6 @@
 								'name' => $name, 
 								'name_clean' => !empty($name_clean) ? $name_clean : $name, 
 								'_return' => true, 
-								'extra_class' => ($prefix ? '' : 'admin_column'), 
 								'mandatory_class' => $mandatory_class,
 								'help' => !empty($field['help']) ? $field['help'] : '', 
 								'params' => $field,

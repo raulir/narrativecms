@@ -38,17 +38,6 @@ class cms_page extends MY_Controller{
 
 		}
 
-		// get available layouts
-		$layouts = $this->cms_page_model->get_layouts();
-		$return['layouts'] = array();
-		foreach($layouts as $layout){
-			$return['layouts'][$layout['id']] = $layout['name'];
-		}
-
-		if (empty($return['page']['layout'])){
-			$return['page']['layout'] = 'default';
-		}
-		
 		// is page a list item page?
 		$lists = $this->cms_page_panel_model->get_lists();
 		$lists_clean = array_map(function($list_item){

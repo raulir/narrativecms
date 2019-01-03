@@ -51,18 +51,16 @@
 					<input type="hidden" name="cms_page_status" class="cms_page_status" value="0">
 					
 				<?php endif ?>
-
-				<?php
-					_panel('cms/cms_input_select', array(
-							'label' => 'Layout', 
-							'value' => $page['layout'], 
-							'values' => $layouts,
-							'name' => 'cms_page_layout',
-							'name_clean' => 'layout',
-							'help' => '[Page layout]||CMS "Default fixed" is fixed pixel size layout.||CMS "Default rems" layout changes rem size with page size.||There might be more layouts available, defined in other modules.',
-					));
-				?>
 				
+				<?php
+					_panel('cms/cms_input_layout', [
+							'label' => 'Layout', 
+							'value' => !empty($page['layout']) ? $page['layout'] : !empty($GLOBALS['config']['layout']) ? $GLOBALS['config']['layout'] : 'default', 
+							'name' => 'cms_page_layout', 
+							'help' => '[Page layout]||CMS "Default fixed" is fixed pixel size layout.||CMS "Default rems" layout changes rem size with page size.||There might be more layouts available, defined in other modules.',
+					]);
+				?>
+
 				<?php _panel('cms/cms_input_subtitle', ['label' => 'SEO', 'width' => 'narrow', 'help' => '[SEO]||These fields are very important for search engines, page sharing in social media etc']) ?>
 				
 				<?php _panel('cms/cms_input_text', [
