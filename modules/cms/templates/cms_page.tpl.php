@@ -55,7 +55,7 @@
 				<?php
 					_panel('cms/cms_input_layout', [
 							'label' => 'Layout', 
-							'value' => !empty($page['layout']) ? $page['layout'] : !empty($GLOBALS['config']['layout']) ? $GLOBALS['config']['layout'] : 'default', 
+							'value' => !empty($page['layout']) ? $page['layout'] : (!empty($GLOBALS['config']['layout']) ? $GLOBALS['config']['layout'] : 'rem'), 
 							'name' => 'cms_page_layout', 
 							'help' => '[Page layout]||CMS "Default fixed" is fixed pixel size layout.||CMS "Default rems" layout changes rem size with page size.||There might be more layouts available, defined in other modules.',
 					]);

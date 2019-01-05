@@ -468,7 +468,7 @@ class cms_page_panel_model extends CI_Model {
 	function save_orders($orders){
 		
 		foreach($orders as $name => $value){
-    		$sql = "update block set sort = ? where block_id = ? ";
+    		$sql = "update cms_page_panel set sort = ? where cms_page_panel_id = ? ";
 	    	$this->db->query($sql, array($value, $name, ));
 		}
     	

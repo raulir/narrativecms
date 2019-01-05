@@ -115,10 +115,10 @@ function cms_page_init(){
 			$('.cms_page_sortable .block_id').each(function(index, value){
 				block_orders[$(this).val()] = index + 1;
 			});
-			get_ajax('admin_save_block_order', {
-				'do': 'admin_save_block_order',
-				'block_orders': block_orders,
-				'page_id': $('.cms_page_id').val()
+			get_ajax('cms/cms_page_operations', {
+				'do': 'cms_page_panel_order',
+				'orders': block_orders,
+				'cms_page_id': $('.cms_page_id').val()
 			});
 		},
 	}).disableSelection();

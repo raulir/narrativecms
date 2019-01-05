@@ -87,6 +87,12 @@ class cms_page_operations extends MY_Controller{
 					'slug' => $slug,
 			];
 
+		} else if ($do == 'cms_page_panel_order'){
+
+			$block_orders = $this->input->post('orders');
+
+			$this->cms_page_panel_model->save_orders($block_orders);
+
 		}
 	
 	}
