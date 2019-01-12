@@ -20,7 +20,9 @@
 					var $this = $(this);
 					
 					var delta = 0;
-					if (params.$space){
+					if (params.$space === false){
+						delta = 0;
+					} else if (params.$space){
 						delta = params.$space.height();
 					} else if ($('.cms_header').length){
 						delta = $('.cms_header').height();
