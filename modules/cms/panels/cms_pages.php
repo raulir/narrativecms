@@ -20,10 +20,6 @@ class cms_pages extends MY_Controller{
 
 		$return['pages'] = $this->cms_page_model->get_cms_pages();
 		
-		if (empty($GLOBALS['config']['landing_page._value'])){
-			$GLOBALS['config']['landing_page._value'] = 0;
-		}
-
 		return $return;
 
 	}

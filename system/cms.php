@@ -152,6 +152,11 @@ if (!empty($GLOBALS['config']['targets_enabled'])){
 }
 
 // router - check if landing page and landing page set
+if (empty($GLOBALS['config']['landing_page._value'])){
+	$GLOBALS['config']['landing_page._value'] = '1';
+	$GLOBALS['config']['landing_page.url'] = '/';
+}
+
 if (!empty($GLOBALS['config']['landing_page._value']) && empty($request_uri)){
 	$landing_route = '/index/'.$GLOBALS['config']['landing_page._value'];
 } else {
