@@ -97,7 +97,7 @@ function cms_page_init(){
 			panels_display_popup(data.result.html, {
 				'yes': function(){
 					get_ajax_panel('cms_page_panel_operations', {
-						'block_id': cms_page_panel_id,
+						'cms_page_panel_id': cms_page_panel_id,
 						'do': 'cms_page_panel_delete' 
 					}, function(){
 						$this.closest('li').remove();
