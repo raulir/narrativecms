@@ -240,10 +240,16 @@ if ( !function_exists('get_position')) {
     /**
      * prints link to file from cms file input
      */
-    function _lf($filename){
+    function _lf($filename, $href = true){
     	
     	if ($filename){
-			print(' href="' . _l('files/get/'.str_replace('/', '__', $filename), false) . '" ');
+    		
+    		if ($href){
+				print(' href="' . _l('files/get/'.str_replace('/', '__', $filename), false) . '" ');
+    		} else {
+    			print(_l('files/get/'.str_replace('/', '__', $filename), false));
+    		}
+    	
     	}
     	
     }

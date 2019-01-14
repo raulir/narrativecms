@@ -74,7 +74,7 @@ class form_model extends CI_Model {
     	// check if table exists
 		$this->create_table_form_data();
     		
-		$sql = "select a.cms_page_panel_id, b.title from form_data a join block b on a.cms_page_panel_id = b.block_id group by a.cms_page_panel_id ";
+		$sql = "select a.cms_page_panel_id, b.title from form_data a join cms_page_panel b on a.cms_page_panel_id = b.cms_page_panel_id group by a.cms_page_panel_id ";
 		$query = $this->db->query($sql);
      		
      	$return = $query->result_array();

@@ -182,6 +182,7 @@
 					"text":"Text",
 					"textarea":"Textarea",
 					"select":"Select",
+					"checkbox": "Checkbox",
 					"spacer":"Spacer"
 				},
 				"default":"text"

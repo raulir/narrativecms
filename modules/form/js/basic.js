@@ -1,7 +1,7 @@
 function form_basic_init(){
 
 	$('.form_basic_form>form').on('submit.cms', function(){
-		$('.form_basic_submit').click();
+		$('.form_basic_submit', $(this)).click();
 		return false;
 	});
 	
@@ -54,9 +54,15 @@ function form_basic_init(){
 				setTimeout(function(){
 					$('.form_basic_message').removeClass('form_basic_message_status_active').removeClass('form_basic_message_active');
 					$('.form_basic_input_input', $form).val('');
-				}, 10000);
+					$('.form_basic_close', $form.closest('.form_basic_container')).click();
+				}, 300000);
 				
 			}}, fo));
+			
+			// do after event
+			if ($form.closest('.form_basic_container').data('success_url')){
+				window.location = $form.closest('.form_basic_container').data('success_url');
+			}
 			
 		}
 
@@ -71,6 +77,26 @@ function form_basic_init(){
 				}
 			});
 		}
+	});
+	
+	$('.form_basic_input_checkbox').on('click.cms', function(){
+		
+		var $target = $('#' + $(this).data('target'));
+		
+		if ($target.val()){
+			$target.val(0);
+			$(this).removeClass('form_basic_input_checkbox_active');
+		} else {
+			$target.val(1);
+			$(this).addClass('form_basic_input_checkbox_active');
+		}
+		
+	});
+	
+	$('.form_basic_close').on('click.cms', function(){
+		
+		$(this).closest('.form_basic_container').remove();
+		
 	});
 	
 }
