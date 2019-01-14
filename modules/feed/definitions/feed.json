@@ -28,12 +28,6 @@
 			"category":"feed"
 		},
 		{
-			"type":"image",
-			"name":"icon",
-			"label":"Icon",
-			"category":"icon"
-		},
-		{
 			"type":"textarea",
 			"name":"text",
 			"label":"Text",
@@ -75,11 +69,6 @@
 			"name":"source_id",
 			"type":"text",
 			"label":"Source ID"
-		},
-		{
-			"name":"source_label",
-			"type":"text",
-			"label":"Source label"
 		},
 		{
 			"name":"likes_count",

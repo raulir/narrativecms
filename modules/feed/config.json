@@ -8,23 +8,26 @@
 		{
 			"id":"feed_dashboard",
 			"name":"Dashboard",
-			"user":"1",
 			"parent":"feed",
 			"url":"feed/dashboard/"
 		},
 		{
 			"id":"feed_settings",
-			"name":"Settings",
-			"user":"1",
+			"name":"Channels",
 			"parent":"feed",
-			"url":"admin/panel_settings/feed_settings/"
+			"url":"admin/panel_settings/feed__feed_settings/"
 		},
 		{
 			"id":"instagram_users",
 			"name":"Instagram users",
-			"user":"1",
 			"parent":"feed",
 			"url":"feed/instagram_users/"
+		},
+		{
+			"id":"twitter_settings",
+			"name":"Twitter settings",
+			"parent":"feed",
+			"url":"admin/panel_settings/feed__twitter_settings/"
 		}
-	]
+    ]
 }

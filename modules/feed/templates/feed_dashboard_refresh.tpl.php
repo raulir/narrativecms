@@ -1,1 +1,1 @@
-<div class="admin_tool_button admin_right feed_dashboard_refresh_button">Refresh</div>
+<div class="cms_tool_button admin_right feed_dashboard_refresh_button">Refresh</div>

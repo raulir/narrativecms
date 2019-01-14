@@ -18,6 +18,10 @@ class cms_list_list extends MY_Controller{
 
 		$this->load->model('cms_page_panel_model');
 
+		if ($params['id_field'] == 'block_id'){
+			$params['id_field'] = 'cms_page_panel_id';
+		}
+		
 		$return['edit_base'] = $params['edit_base'];
 		$return['id_field'] = $params['id_field'];
 		$return['title_field'] = !empty($params['title_field']) ? $params['title_field'] : '';

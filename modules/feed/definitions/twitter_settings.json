@@ -1,0 +1,16 @@
+{
+	"version":"2",
+	"label":"Form",
+	"item":[
+		{
+			"type":"text",
+			"name":"twitter_api_key",
+			"label":"Tw API key"
+		},
+		{
+			"type":"text",
+			"name":"twitter_api_secret",
+			"label":"Tw API secret"
+		}
+	]
+}

@@ -19,11 +19,13 @@ class feed_dashboard_refresh extends MY_Controller{
 		$do = $this->input->post('do');
         if ($do == 'feed_dashboard_refresh'){
         	
-        	$this->load->model('feed_model');
+        	$this->load->model('feed/feed_model');
         	
-        	$this->feed_model->refresh_feeds();
+        	$params['stats'] = $this->feed_model->refresh_feeds();
         	
         }
+        
+        return $params;
 
 	}
 
