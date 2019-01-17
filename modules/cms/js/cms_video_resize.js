@@ -1,7 +1,7 @@
 ( function( $ ) {
 	
     $.fn.cms_video_resize = function(params) {
-    	
+
     	params = params || {};
 
     	if (typeof params.after != 'function'){
@@ -45,7 +45,7 @@
     		var video_ratio = video_width/video_height;
     		var parent_ratio = parent_width/parent_height;
     		
-    		if(params.fit == 'cover'){
+    		if(params.fit === 'cover'){
 
         		if (video_ratio > parent_ratio){
         			video_height = parent_height;

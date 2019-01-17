@@ -87,8 +87,10 @@ class MY_Controller extends CI_Controller{
     		if (method_exists($this->panel_ci->{$extends_panel_name}, $panel_method)){
     			$this->panel_ci->{$extends_panel_name}->init_panel(array('name' => $files['extends_name'], 'controller' => $files['extends_controller'], ));
     			$params = $this->panel_ci->{$extends_panel_name}->{$panel_method}($params);
-    			$params['_no_cache'] = 1;
-	    	}
+    		    if (is_array($params)){
+    				$params['_no_cache'] = 1;
+    			}
+    		}
 	    	
 	    	// clear temporary resource
 	    	unset($this->panel_ci);
@@ -117,9 +119,10 @@ class MY_Controller extends CI_Controller{
 
 	    		// get params through panel controller
 	    		$params = $this->panel_ci->{$panel_name}->{$panel_method}($params);
+	    		if (is_array($params)){
+	    			$params['_no_cache'] = 1;
+	    		}
 	    		
-	    		$params['_no_cache'] = 1;
-	    		 
 			}
     		
     		// clear temporary resource
