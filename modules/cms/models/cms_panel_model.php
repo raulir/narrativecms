@@ -81,7 +81,7 @@ class cms_panel_model extends CI_Model {
 				}
 				
 				$extends_config = $this->get_cms_panel_config($extends_cms_panel);
-				
+
 				// join structures
 				$return = array_merge_recursive($extends_config, $return);
 				

@@ -28,7 +28,7 @@ ExpiresByType application/x-font-ttf "access 1 month"
 ExpiresByType application/font-otf "access 1 month"
 ExpiresByType application/x-font-opentype "access 1 month"
 ExpiresByType application/vnd.ms-fontobject "access 1 month"
-ExpiresDefault "access 1 day"
+ExpiresDefault "access 1 year"
 </IfModule>
 
 <IfModule mod_deflate.c>
@@ -59,6 +59,7 @@ AddOutputFilterByType DEFLATE font/opentype
 
 RewriteEngine on
 
+# Protect cache
 RewriteCond %{REQUEST_URI} ^/cache [NC]
 RewriteCond %{REQUEST_URI} ^/_ [NC]
 RewriteCond %{REQUEST_URI} !\.(css|js|xml)$ [NC]

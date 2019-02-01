@@ -7,13 +7,13 @@ function cms_input_repeater_select_reinit(){
 }
 
 function cms_input_repeater_select_init(){
-	
+
 	setTimeout(function(){
 		
 		$('.cms_input_repeater_select').each( function(){
 						
 			var $this = $(this);
-			
+
 			if ($this.hasClass('cms_input_repeater_select_ok')){
 				return;
 			}
@@ -52,7 +52,7 @@ function cms_input_repeater_select_init(){
 				
 				// find value and add to select
 				$('input,textarea', $(this)).each(function(){
-					
+
 					// if called from content change, check if needed to update old selected value to new
 					var $cms_input = $(this).closest('.cms_input_text,.cms_input_textarea');
 

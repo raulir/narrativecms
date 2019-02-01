@@ -308,12 +308,11 @@
 						$repeater_select_data = [
 								'selected' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ),
 								'target' => $field['target'],
-								'field' => $field['field'],
+								'field' => !empty($field['field']) ? $field['field'] : 'heading',
 								'add_empty' => !empty($field['add_empty']) ? '1' : '0',
 								'labels' => !empty($field['labels']) ? $field['labels'] : '',
 						];
-						
-						
+
 						$name = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
 						$name_clean = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
 						

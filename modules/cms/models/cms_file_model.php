@@ -68,12 +68,14 @@ class cms_file_model extends CI_Model {
 		
 	}
 	
-	function create_cms_file($dir, $name_data){
+	function create_cms_file($dir, $name_data, $overwrite = false){
 		
-		$name_data = $this->sanitize_filename($name_data);
+		if (!$overwrite){
+			$name_data = $this->sanitize_filename($name_data);
+		}
 		
 		// make dir
-		$year =  date('Y');
+		$year = date('Y');
 		$month = date('m');
 		
 		if (!is_dir($GLOBALS['config']['upload_path'].$dir.$year)){
@@ -85,6 +87,10 @@ class cms_file_model extends CI_Model {
 		}
 		
 		$filename = $dir.$year.'/'.$month.'/'.$name_data;
+		
+		if ($overwrite){
+			$this->delete_cms_file_by_filename($filename);
+		}
 		
 		$sql = "insert into cms_file set name = ? , filename = ? , date_posted = ? ";
 		$this->db->query($sql, array($name_data, $filename, date('Y-m-d H:i:s')));
@@ -175,6 +181,44 @@ class cms_file_model extends CI_Model {
 			
 		}
 		
+	}
+	
+	function scrape_file($source, $filename = ''){
+	
+		if (empty($filename)){
+			if (stristr($source, '?')){
+				list($fn, $pr) = explode('?', $source, 2);
+				$ext = pathinfo($fn, PATHINFO_EXTENSION);
+				$filename = pathinfo($fn, PATHINFO_BASENAME);
+			} else {
+				$ext = pathinfo($source, PATHINFO_EXTENSION);
+				$filename = pathinfo($source, PATHINFO_BASENAME);
+			}
+		}
+	
+		$return = '';
+	
+
+		$image_content = file_get_contents($source);
+		if (!empty($image_content)){
+
+			// move it to year/month directory
+			if (!file_exists($GLOBALS['config']['upload_path'].date('Y'))){
+				mkdir($GLOBALS['config']['upload_path'].date('Y'));
+			}
+
+			if (!file_exists($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'))){
+				mkdir($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'));
+			}
+
+			$return = $this->create_cms_file('/', $filename, true);
+
+			file_put_contents($GLOBALS['config']['upload_path'].$return['filename'], $image_content);
+
+		}
+	
+		return $return['filename'];
+	
 	}
 	
 }

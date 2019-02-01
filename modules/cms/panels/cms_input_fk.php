@@ -18,8 +18,8 @@ class cms_input_fk extends MY_Controller{
 	
 	function panel_params($params){
 		
-		$this->load->model('cms_panel_model');
-		$this->load->model('cms_page_panel_model');
+		$this->load->model('cms/cms_panel_model');
+		$this->load->model('cms/cms_page_panel_model');
 		
 		// get fk data
 		if (!empty($params['list'])){

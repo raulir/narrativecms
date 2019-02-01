@@ -69,7 +69,7 @@ if ( !function_exists('get_position')) {
     	
     }
     
-    function _panel($name, $params = array()){
+    function _panel($name, $params = []){
 
     	if (!isset($params['_return'])){
     		$params['_return'] = false;
@@ -140,6 +140,11 @@ if ( !function_exists('get_position')) {
     }
 
     function str_limit($string, $length, $extra = ''){
+    	
+    	if (is_array($string)){
+    		$string = array_pop($string);
+    	}
+    	
     	if (strlen($string) > $length){
     		$string = substr($string, 0, $length - strlen($extra));
     		$string = substr($string, 0, strrpos($string, ' '));

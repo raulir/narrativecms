@@ -11,6 +11,10 @@
     	if (typeof params.fit === 'undefined'){
     		params.fit = 'cover';
     	}
+
+    	if (typeof params.retry === 'undefined'){
+    		params.retry = 10;
+    	}
     	
     	/* 
     	 * resizing function itself
@@ -18,8 +22,12 @@
     	 */
     	var cms_video_resize_helper = function($target, params){
     		
-    		var after = params.after;
-    		
+    		if ($target.data('retry')){
+    			$target.data('retry', $target.data('retry') + 1);
+    		} else {
+    			$target.data('retry', 1);
+    		}
+
     		$target.css({
     			'width': '',
     			'height': ''
@@ -28,8 +36,8 @@
     		var video_width = $target.width();
     		var video_height = $target.height();
     		
-    		if ($target[0].readyState !== 4 || video_width == 0 || video_height == 0){
-    			
+    		if ($target.data('retry') <= params.retry && ($target[0].readyState !== 4 || video_width == 0 || video_height == 0)){
+
     			setTimeout(function(){
     				cms_video_resize_helper($target, params);
     			}, 500);
@@ -44,7 +52,7 @@
     		
     		var video_ratio = video_width/video_height;
     		var parent_ratio = parent_width/parent_height;
-    		
+
     		if(params.fit === 'cover'){
 
         		if (video_ratio > parent_ratio){
@@ -81,7 +89,7 @@
 
     		}
 
-    		after($target);
+    		params.after($target);
 
     	}
 
