@@ -367,7 +367,9 @@ class MY_Controller extends CI_Controller{
 			foreach($GLOBALS['_panel_images'] as $image){
 				if (!empty($image)){
 					$image_data = _iw($image, array('width' => 800, ));
-					$image_str .= '<meta property="og:image" content="'.$protocol.$_SERVER['HTTP_HOST'].$GLOBALS['config']['upload_url'].$image_data['image'].'" />'."\n";
+					$image_str .= '<meta property="og:image" content="'.
+							(empty($GLOBALS['config']['cdn_url']) ? $protocol.$_SERVER['HTTP_HOST'] : '').
+							$GLOBALS['config']['upload_url'].$image_data['image'].'" />'."\n";
 					$image_str .= '<meta property="og:image:width" content="'.$image_data['width'].'" />'."\n";
 					$image_str .= '<meta property="og:image:height" content="'.$image_data['height'].'" />'."\n";
 				}
