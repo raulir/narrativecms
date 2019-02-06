@@ -154,7 +154,7 @@ class cms_input_link extends MY_Controller{
 		// _value
 		$params['_value'] = '';
 		if ($params['value']['target'] == '_page'){
-			$params['_value'] = $params['value']['cms_page_id'];
+			$params['_value'] = !empty($params['value']['cms_page_id']) ? $params['value']['cms_page_id'] : 0;
 		} elseif ($params['value']['target'] == '_list'){
 			$params['_value'] = $params['value']['url'];
 		} elseif ($params['value']['target'] == '_manual'){

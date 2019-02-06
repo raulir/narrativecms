@@ -66,7 +66,7 @@
 				<?php endforeach ?>
 
 				<div class="form_basic_submit">
-					<div class="form_basic_submit_label" <?php !empty($submit_icon) ? _ib($submit_icon, 20) : '' ?>><?= $submit_text ?></div>
+					<div class="form_basic_submit_label" <?php !empty($submit_icon) ? _ib($submit_icon, 30) : '' ?>><?= $submit_text ?></div>
 				</div>
 				
 				<div class="form_basic_message">

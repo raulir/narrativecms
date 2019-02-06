@@ -255,7 +255,7 @@ class admin extends MY_Controller {
 			// load definition
 			$panel_config = $this->cms_panel_model->get_cms_panel_config($panel_name);
 			
-			if (is_array($panel_config['label'])){
+			if (!empty($panel_config['label']) && is_array($panel_config['label'])){
 				$panel_config['label'] = array_pop($panel_config['label']);
 			}
 			
