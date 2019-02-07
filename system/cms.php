@@ -136,6 +136,25 @@ if (stristr($request_uri, '/')){
 	
 }
 
+// router - check if landing page and landing page set
+if (empty($GLOBALS['config']['landing_page._value'])){
+	$GLOBALS['config']['landing_page._value'] = '1';
+	$GLOBALS['config']['landing_page.url'] = '/';
+}
+
+// if landing page by slug
+$landing_uri = trim($GLOBALS['config']['landing_page.url'], '/');
+if (!empty($landing_uri) && $landing_uri === $request_uri){
+	header('Location: //'.$_SERVER['HTTP_HOST'].'/'.ltrim($GLOBALS['config']['base_url'], '/'), true, 307);
+	exit();
+}
+
+if (!empty($GLOBALS['config']['landing_page._value']) && empty($request_uri)){
+	$landing_route = '/index/'.$GLOBALS['config']['landing_page._value'];
+} else {
+	$landing_route = '';
+}
+
 // check if cron needs to run
 if (!empty($GLOBALS['config']['cron_trigger']) && $GLOBALS['config']['cron_trigger'] == 'visits'){
 	
@@ -154,18 +173,6 @@ if (!empty($GLOBALS['config']['targets_enabled'])){
 	
 	include($GLOBALS['config']['base_path'].'system/core/targets.php');
 	
-}
-
-// router - check if landing page and landing page set
-if (empty($GLOBALS['config']['landing_page._value'])){
-	$GLOBALS['config']['landing_page._value'] = '1';
-	$GLOBALS['config']['landing_page.url'] = '/';
-}
-
-if (!empty($GLOBALS['config']['landing_page._value']) && empty($request_uri)){
-	$landing_route = '/index/'.$GLOBALS['config']['landing_page._value'];
-} else {
-	$landing_route = '';
 }
 
 require_once BASEPATH.'core/CodeIgniter.php';
