@@ -28,6 +28,9 @@ $config['images_zopflipng'] = 0;
 // This file must be set to be executable! (chmod ugo+x application/libraries/zopflipng/bin/zopflipng.bin)
 $config['images_zopflipng_executable'] = '';
 
+// depending of availability: none - '', PHP - 'gd', Google cwebp - 'cwebp'
+$config['images_webp'] = 'gd'; 
+
 $config['database']['hostname'] = 'localhost';
 $config['database']['username'] = 'root';
 $config['database']['password'] = '';

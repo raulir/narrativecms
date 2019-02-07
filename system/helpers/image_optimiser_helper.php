@@ -158,6 +158,96 @@ if ( !function_exists('_iw')) {
 				
 				}
 			
+			} else if ($extension == 'webp'){
+				
+				// detect if source is png or jpg
+				if ($name_a['extension'] == 'png'){
+				
+					$png_image = _get_iw_new($image, $width, 'png');
+					
+					if (!file_exists($GLOBALS['config']['upload_path'].$png_image)){
+						
+						imagesavealpha($tmp, true);
+						imagepng($tmp, $GLOBALS['config']['upload_path'].$png_image);
+						
+						// optimise on linux
+						if(!empty($GLOBALS['config']['images_pngquant'])){
+							
+							$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($png_image).'.png';
+							
+							rename($GLOBALS['config']['upload_path'].$png_image, $temp_name);
+							
+							$cmd = (empty($GLOBALS['config']['images_pngquant_executable']) ? $GLOBALS['config']['base_path'].'system/vendor/pngquant/bin/pngquant.bin' : $GLOBALS['config']['images_pngquant_executable'])
+									.' '.$temp_name.' --strip --speed 1 --quality=0-'.(!empty($GLOBALS['config']['images_quality']) ? $GLOBALS['config']['images_quality'] : 85).' -o '.$GLOBALS['config']['upload_path'].$new_image;
+		
+							shell_exec($cmd);
+							
+							unlink($temp_name);
+							
+						}
+		
+						if(!empty($GLOBALS['config']['images_zopflipng'])){
+							
+							$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($png_image).'.png';
+							
+							rename($GLOBALS['config']['upload_path'].$png_image, $temp_name);
+							
+							$cmd = (empty($GLOBALS['config']['images_zopflipng_executable']) ? $GLOBALS['config']['base_path'].'system/vendor/zopflipng/bin/zopflipng.bin' : $GLOBALS['config']['images_zopflipng_executable'])
+									.' -y '.$temp_name.' '.$GLOBALS['config']['upload_path'].$png_image;
+		
+							shell_exec($cmd);
+							
+							unlink($temp_name);
+						
+						}
+					
+					}
+					
+					// convert png to webp
+					if ($GLOBALS['config']['images_webp'] == 'gd'){
+						
+						$src = imagecreatefrompng($GLOBALS['config']['upload_path'].$png_image);
+						
+						imagewebp($tmp, $GLOBALS['config']['upload_path'].$new_image);
+						
+					} else if ($GLOBALS['config']['images_webp'] == 'cwebp'){
+						
+						$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($png_image).'.png';
+						rename($GLOBALS['config']['upload_path'].$png_image, $temp_name);
+						
+						$cmd = 'cwebp -z 9 '.$temp_name.' -o '.$GLOBALS['config']['upload_path'].$new_image;
+						
+						shell_exec($cmd);
+						
+						unlink($temp_name);
+						
+					}
+				
+				} else { // if jpg
+					
+					// convert jpg to webp
+					if ($GLOBALS['config']['images_webp'] == 'gd'){
+					
+						imagewebp($tmp, $GLOBALS['config']['upload_path'].$new_image);
+					
+					} else if ($GLOBALS['config']['images_webp'] == 'cwebp'){
+					
+						$jpg_image = _get_iw_new($image, $width, 'jpg');
+						$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($jpg_image).'.jpg';
+						
+						imagesavealpha($tmp, false);
+						imagejpeg($tmp, $temp_name, 100);
+
+						$cmd = 'cwebp -m 6 -q '.(!empty($GLOBALS['config']['images_quality']) ? ($GLOBALS['config']['images_quality'] - 10) : 75).' '.$temp_name.' -o '.$GLOBALS['config']['upload_path'].$new_image;
+					
+						shell_exec($cmd);
+						
+						unlink($temp_name);
+
+					}
+
+				}
+			
 			} else if ($extension == 'ico'){
 					
 				// bmp data part

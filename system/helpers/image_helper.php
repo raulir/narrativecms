@@ -163,6 +163,11 @@ if ( !function_exists('_i')) {
 					$params['output'] = pathinfo($image, PATHINFO_EXTENSION);
 				}
 				
+				// webp
+				if ($_SESSION['webp'] && in_array($params['output'], ['png', 'jpg'])){
+					$params['output'] = 'webp';
+				}
+				
 				// if file exists
 				$image_dir = pathinfo($image, PATHINFO_DIRNAME);
 				$filename_hq = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_hq'].'.'.$params['output'];
