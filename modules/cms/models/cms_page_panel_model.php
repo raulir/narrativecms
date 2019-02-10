@@ -826,4 +826,23 @@ class cms_page_panel_model extends CI_Model {
 	
 	}
 	
+	function swap_param_value($old_value, $new_value){
+		
+		$sql = "select distinct cms_page_panel_id from cms_page_panel_param where value = ? ";
+		$query = $this->db->query($sql, [$old_value]);
+		if ($query->num_rows()){
+			$ids = $query->result_array();
+		} else {
+			$ids = [];
+		}
+		
+		$sql = "update cms_page_panel_param set `value` = ? where value = ? ";
+		$query = $this->db->query($sql, [$new_value, $old_value]);
+		
+		foreach($ids as $row){
+			$this->_update_cached_params($row['cms_page_panel_id']);
+		}
+
+	}
+	
 }

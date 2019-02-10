@@ -16,7 +16,7 @@ class cms_images_page extends MY_Controller{
 
 	function panel_params($params){
 
-		$this->load->model('cms_image_model');
+		$this->load->model('cms/cms_image_model');
 
 		$images = $this->cms_image_model->get_cms_images($params['page'], $params['limit'], $params['category'], $params['search']);
 

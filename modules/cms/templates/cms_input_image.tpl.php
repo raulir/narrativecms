@@ -1,7 +1,8 @@
-<div class="cms_input_container <?= !empty($params['groups']) ? ' cms_input_container_groups ' : '' ?>" <?= !empty($params['groups']) ? ' data-groups="'.implode(',', $params['groups']).'" ' : '' ?>>
+<div class="cms_input_container <?= !empty($params['groups']) ? ' cms_input_container_groups ' : '' ?>"
+		<?= !empty($params['groups']) ? ' data-groups="'.implode(',', $params['groups']).'" ' : '' ?>>
 
-	<div class="cms_input cms_input_image cms_input_image_container_<?php print($name_clean); ?> <?php print(!empty($extra_class) ? $extra_class : ''); ?> <?= !empty($mandatory_class) ? $mandatory_class : '' ?>"
-			<?php print(!empty($extra_data) ? $extra_data : ''); ?>>
+	<div class="cms_input cms_input_image cms_input_image_container_<?= $name_clean ?> <?= !empty($extra_class) ? $extra_class : '' ?> 
+			<?= !empty($mandatory_class) ? $mandatory_class : '' ?>" <?= !empty($extra_data) ? $extra_data : '' ?> data-value="<?= $value ?>">
 	
 		<label for="cms_input_image_<?php print($name_clean); ?>"><?php print($label); ?></label>
 		
@@ -27,7 +28,8 @@
 			Clear
 		</div>
 		
-		<input type="hidden" class="cms_input_image_input cms_image_input_<?php print($name_clean); ?> <?= $name ?>" name="<?php print($name); ?>" value="<?php print($value); ?>">
+		<input type="hidden" class="cms_input_image_input cms_image_input_<?= $name_clean ?> <?= $name ?>"
+				name="<?= $name ?>" value="<?= $value ?>">
 		
 		<div style="clear: both; "></div>
 	

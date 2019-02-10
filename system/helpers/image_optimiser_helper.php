@@ -238,7 +238,7 @@ if ( !function_exists('_iw')) {
 						imagesavealpha($tmp, false);
 						imagejpeg($tmp, $temp_name, 100);
 
-						$cmd = 'cwebp -m 6 -q '.(!empty($GLOBALS['config']['images_quality']) ? ($GLOBALS['config']['images_quality'] - 10) : 75).' '.$temp_name.' -o '.$GLOBALS['config']['upload_path'].$new_image;
+						$cmd = 'cwebp -m 6 -q '.(!empty($GLOBALS['config']['images_quality']) ? ($GLOBALS['config']['images_quality'] - 5) : 75).' '.$temp_name.' -o '.$GLOBALS['config']['upload_path'].$new_image;
 					
 						shell_exec($cmd);
 						

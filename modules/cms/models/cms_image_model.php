@@ -94,11 +94,7 @@ class cms_image_model extends CI_Model {
 
 	function get_cms_images($page, $limit, $category, $search){
 		
-		$this->load->model('cms_page_model');
-
-		if (function_exists('mysql_set_charset')){
-			@mysql_set_charset('utf8mb4');
-		}
+		$this->load->model('cms/cms_page_model');
 
 		$page = (int)$page;
 		$limit = (int)$limit;

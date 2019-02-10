@@ -23,7 +23,7 @@ class cms_input_image extends MY_Controller{
 		}
 
 		if(!file_exists($GLOBALS['config']['upload_path'].$params['value'])){
-			$params['error'] = 'Missing image file<br>Update resources or database<br>or upload a new image';
+			$params['error'] = 'Missing image file<br>Update resources or database<br>or select a different image';
 		}
 
 		return $params;

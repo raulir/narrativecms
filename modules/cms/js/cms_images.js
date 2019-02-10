@@ -142,7 +142,7 @@ function cms_images_activate() {
 				});
 			});
 			
-			$('.cms_images_image_replace', this).on('click.r', function(e){
+			$('.cms_images_image_replace', this).off('click.r').on('click.r', function(e){
 				
 				e.stopPropagation();
 				
@@ -167,9 +167,9 @@ function cms_image_replace($image){
 	var text = 'Replace image?';
 	var usage = $('.cms_images_image_usage', $image).html();
 	if (usage != '0'){
-		text = text + '<br><div class="cms_images_warning_extra">Front end placements updated: <b>' + usage + '</b></div>';
+		text = text + '<br><br><div class="cms_images_warning_extra">Front end placements updated: <b>' + usage + '</b></div>';
 	}
-	text = text + '<div class="cms_images_warning_extra">The old version of image will be permanently deleted.</div>';
+	text = text + '<div class="cms_images_warning_extra">The old data will be overwritten.</div>';
 	
 	get_ajax_panel('cms_popup_yes_no', {'text':text}, function(data){
 		panels_display_popup(data.result.html, {
@@ -182,15 +182,59 @@ function cms_image_replace($image){
 					
 					// do upload
 					var data = new FormData( $('.cms_images_replace_image_form').get(0) );
-					data.append('panel_id', 'cms_images_upload');
+					data.append('panel_id', 'cms/cms_images_upload');
 					data.append('filename', $image.data('filename'));
+					data.append('category', $image.data('category'));
+					
+					var old_name = $image.data('filename');
 					
 					cms_images_transfer(data, function(data){
 						
-						// update screen with new image
-						$('.cms_images_image_img', $image).remove();
-						$('.cms_images_image_cell', $image).append(data.result.html);
-					
+						if ($image.hasClass('cms_images_selected')){
+							// select correct image
+							$('.cms_images_area').data('filename', data.result.filename);
+						}
+						
+				    	// reload images from zero
+				    	cms_images_load_images('0', $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
+				    						
+				    	// update visible inputs on page
+				    	$('.cms_input_image').each(function(){
+				    		
+				    		var $panel = $(this);
+				    		
+				    		if ($panel.data('value') == old_name){
+				    			
+				    			var $container = $panel.closest('.cms_input_container');
+
+				    			get_ajax_panel('cms/cms_input_image', {
+				    				'label': $('label', $container).html(),
+				    				'value': data.result.filename,
+				    				'name': $('.cms_input_image_input', $container).attr('name'),
+				    				'name_clean': $container.data('name'),
+				    				'category': $('.cms_input_image_button', $container).data('category'),
+				    				'_return': '1',
+				    				'extra_class': $('.admin_column', $container).length ? 'admin_column' : '',
+				    				'help': '',
+				    				'embed': '1',
+				    				'module': 'cms'
+				    			}, function(data){
+				    				
+				    				var $new_input = $(data.result.html).replaceAll($container);
+				    				
+				    				$('.cms_input_image_button', $new_input).off('click.r').on('click.r', function(){
+				    					cms_input_image_popup($(this));
+				    				});
+				    				$('.cms_input_image_clear', $new_input).off('click.r').on('click.r', function(){
+				    					cms_input_image_clear($(this));
+				    				});
+
+				    				
+				    			})
+				    			
+				    		}
+				    	});
+
 					});
 
 				});
@@ -222,7 +266,7 @@ function cms_image_init_keywords(){
 function cms_images_upload(){
 	
 	var data = new FormData( $('.cms_images_new_image_form').get(0) );
-	data.append('panel_id', 'cms_images_upload');
+	data.append('panel_id', 'cms/cms_images_upload');
 	data.append('category', $('.cms_images_category').val());
 	
 	cms_images_transfer(data, function(data){

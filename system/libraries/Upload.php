@@ -891,21 +891,17 @@ class CI_Upload {
 	 */
 	public function set_error($msg)
 	{
-		$CI =& get_instance();
-		$CI->lang->load('upload');
 
 		if (is_array($msg))
 		{
 			foreach ($msg as $val)
 			{
-				$msg = ($CI->lang->line($val) == FALSE) ? $val : $CI->lang->line($val);
-				$this->error_msg[] = $msg;
-				log_message('error', $msg);
+				$this->error_msg[] = $val;
+				log_message('error', $val);
 			}
 		}
 		else
 		{
-			$msg = ($CI->lang->line($msg) == FALSE) ? $msg : $CI->lang->line($msg);
 			$this->error_msg[] = $msg;
 			log_message('error', $msg);
 		}
