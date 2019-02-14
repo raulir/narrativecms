@@ -561,27 +561,27 @@ function panels_display_popup(html, params){
 	};
 	
 	$('.popup_yes').off('click.r').on('click.r', function(){
-		clean_up();
 		params.pre_close(function(){
 			params.yes(function(){
+				clean_up();
 				params.clean_up();
 			});
 		});
 	});
 
 	$('.popup_cancel').off('click.r').on('click.r', function(){
-		clean_up();
 		params.pre_close(function(){
 			params.cancel(function(){
+				clean_up();
 				params.clean_up();
 			});
 		});
 	});
 
 	$('.popup_select').off('click.r').on('click.r', function(){
-		clean_up();
 		params.pre_close(function(){
 			params.select(function(){
+				clean_up();
 				params.clean_up();
 			});
 		});

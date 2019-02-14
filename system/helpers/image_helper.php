@@ -7,10 +7,10 @@ if ( !function_exists('_i')) {
 	/**
 	 * prints image url and return image data
 	 */
-	function _i($image, $params = array()){
+	function _i($image, $params = []){
 		 
 		if (is_numeric($params)){
-			$params = array('width' => $params, );
+			$params = ['width' => $params];
 		}
 
 		if (!empty($image)){

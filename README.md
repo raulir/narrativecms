@@ -10,7 +10,7 @@ BC CMS is a full stack PHP/Javascript/SCSS framework with CMS for websites and o
 * Robust and tested tools to work with dynamic page partials and API calls
 * Makes possible for designers and users to upload content and start building pages even in the early stages of project
 * Fast. Even without optional built-in caching
-* Built in image optimisation and optimal loading
+* Built in image optimisation and optimal loading, automatic webp serving
 * Built in SCSS (SASS3) compiler
 * Built in externals optimiser, only scripts and styles really needed on page are loaded
 

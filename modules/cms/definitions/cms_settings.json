@@ -101,6 +101,16 @@
 			"default":"rem"
 		},
 		{
+			"type":"multi",
+			"name":"modules",
+			"label":"Modules to load",
+			"values":{
+				"cms":"cms",
+				"form":"form",
+				"sanders":"sanders"
+			}
+		},
+		{
 			"type":"subtitle",
 			"label":"Sizing",
 			"width":"wide",
