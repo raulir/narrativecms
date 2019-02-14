@@ -101,14 +101,10 @@
 			"default":"rem"
 		},
 		{
-			"type":"multi",
+			"type":"modules",
 			"name":"modules",
-			"label":"Modules to load",
-			"values":{
-				"cms":"cms",
-				"form":"form",
-				"sanders":"sanders"
-			}
+			"label":"Modules",
+			"help":"[modules]||Which modules and in what order to load from modules installed to the server||{cms} is always automatically loaded as the first"
 		},
 		{
 			"type":"subtitle",

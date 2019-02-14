@@ -191,7 +191,7 @@ if ( !function_exists('get_position')) {
     		}
     		
     		// if homepage
-    		if (ltrim($url, '/') == $GLOBALS['config']['landing_page.url']){
+    		if (ltrim($url, '/') == $GLOBALS['config']['landing_page']['url']){
     			$url = '/';
     		}
 
