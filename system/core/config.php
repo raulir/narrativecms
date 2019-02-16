@@ -91,7 +91,7 @@ while($result = mysqli_fetch_assoc($query)){
 }
 
 // load module configs
-if (!is_array($GLOBALS['config']['modules'])){
+if (empty($GLOBALS['config']['modules']) || !is_array($GLOBALS['config']['modules'])){
 	$GLOBALS['config']['modules'] = ['cms'];
 }
 

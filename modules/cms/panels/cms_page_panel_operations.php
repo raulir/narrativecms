@@ -181,7 +181,21 @@ class cms_page_panel_operations extends MY_Controller{
 				$data['panel_params']['_search_time_extra'] = serialize($panel_config['list']['search_time_extra']);
 				$data['panel_params']['_search_time_timestamp_day'] = strtotime($data['panel_params']['date'])/86400;
 			}
-			 
+			
+			// js and css from config
+			if (!empty($panel_config['js']) && is_array($panel_config['js'])){
+				foreach($panel_config['js'] as $_js){
+					list($_js_module, $_js_panel) = explode('/', $_js);
+					$data['panel_params']['_js'][] = 'modules/'.$_js_module.'/js/'.$_js_panel.'.js';
+				}
+			}
+			if (!empty($panel_config['css']) && is_array($panel_config['css'])){
+				foreach($panel_config['css'] as $_css){
+					list($_css_module, $_css_panel) = explode('/', $_css);
+					$data['panel_params']['_css'][] = 'modules/'.$_css_module.'/css/'.$_css_panel.'.scss';
+				}
+			}
+
 			$data['search_params'] = array();
 			
 			$panel_structure = !empty($panel_config['item']) ? $panel_config['item'] : array();

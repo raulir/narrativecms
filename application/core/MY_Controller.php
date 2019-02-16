@@ -66,9 +66,9 @@ class MY_Controller extends CI_Controller{
     function run_panel_method($panel_name_param, $panel_method, $params = []){
     	 
     	if (!empty($params['_extends'])){
-    		$files = $this->get_panel_filenames($panel_name_param, $params['_extends']);
+    		$files = $this->get_panel_filenames($panel_name_param, $params, $params['_extends']);
     	} else {
-    		$files = $this->get_panel_filenames($panel_name_param);
+    		$files = $this->get_panel_filenames($panel_name_param, $params);
     	}
 
     	// if extended, run extended controller first
@@ -146,13 +146,13 @@ class MY_Controller extends CI_Controller{
      * controller as panel stuff
     */
     function panel($name, $params = array(), $return_array = false){
-    	
+
     	if (!empty($params['_extends'])){
-    		$files = $this->get_panel_filenames($name, $params['_extends']);
+    		$files = $this->get_panel_filenames($name, $params, $params['_extends']);
     	} else {
-    		$files = $this->get_panel_filenames($name);
+    		$files = $this->get_panel_filenames($name, $params);
     	}
-    	
+
     	$panel_js = $files['js'];
     	$panel_css = $files['css'];
     	$panel_scss = $files['scss'];
@@ -684,7 +684,7 @@ class MY_Controller extends CI_Controller{
     	
     }
     
-    function get_panel_filenames($panel_name, $extends = []){
+    function get_panel_filenames($panel_name, $params = [], $extends = []){
 
     	if (!empty($GLOBALS['_panel_files'][$panel_name])){
     		return $GLOBALS['_panel_files'][$panel_name];
@@ -749,8 +749,13 @@ class MY_Controller extends CI_Controller{
     
     	// collect panel related js files
     	$return['js'] = [];
+
+    	if (!empty($params['_js'])){
+    		$return['js'] = array_merge($return['js'], array_values($params['_js']));
+    	}
+
     	if (!empty($extends['join_js']) && !empty($extends['panel'])){
-    		$return['js'] = $extends_files['js'];	
+    		$return['js'] = array_merge($return['js'], $extends_files['js']);	
     	}
     	if (file_exists($GLOBALS['config']['base_path'].'modules/'.$return['module'].'/js/'.$return['module'].'.js')) {
     		$return['js'][] = 'modules/'.$return['module'].'/js/'.$return['module'].'.js';
@@ -778,8 +783,13 @@ class MY_Controller extends CI_Controller{
     	}
     	// scss files
     	$return['scss'] = [];
-        if (!empty($extends['join_css']) && !empty($extends['panel'])){
-    		$return['scss'] = $extends_files['scss'];	
+    	
+        if (!empty($params['_css'])){
+    		$return['scss'] = array_merge($return['scss'], $params['_css']);
+    	}
+    	
+    	if (!empty($extends['join_css']) && !empty($extends['panel'])){
+    		$return['scss'] = array_merge($return['scss'], $extends_files['scss']);	
     	}
     	if (file_exists($GLOBALS['config']['base_path'].'modules/'.$return['module'].'/css/'.$return['module'].'.scss')) {
     		$return['scss'][] = array(
