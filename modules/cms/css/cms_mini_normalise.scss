@@ -1,4 +1,4 @@
-html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,em,img,q,s,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,tbody,tfoot,thead,tr,th,td,canvas,embed,footer,header,hgroup,audio,video{border:0;font-size:100%;font:inherit;vertical-align:baseline;margin:0;padding:0}hgroup{display:block}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:none}table{border-collapse:collapse;border-spacing:0}
+html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,em,img,q,s,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,tbody,tfoot,thead,tr,th,td,canvas,embed,footer,header,hgroup,audio,video{border:0;font-size:100%;font:inherit;vertical-align:baseline;margin:0;padding:0}hgroup{display:block}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:none}table{border-collapse:collapse;border-spacing:0}
 
 b {
 	font-weight: bold;
@@ -7,6 +7,10 @@ b {
 a {
 	text-decoration: inherit;
 	color: inherit;
+}
+
+u {
+	text-decoration: inherit;
 }
 
 input {
@@ -29,4 +33,8 @@ body {
 	-webkit-font-smoothing: subpixel-antialiased;
 	-webkit-text-size-adjust: 100%;
 	text-size-adjust: 100%;
+	font-weight: normal;
+	letter-spacing: 0;
+	line-height: 1.0em;
+	font-variant-ligatures: no-common-ligatures;
 }

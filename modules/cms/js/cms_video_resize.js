@@ -36,7 +36,7 @@
     		var video_width = $target.width();
     		var video_height = $target.height();
     		
-    		if ($target.data('retry') <= params.retry && ($target[0].readyState !== 4 || video_width == 0 || video_height == 0)){
+    		if ($target.data('retry') <= params.retry && ($target[0].readyState < 1 || video_width == 0 || video_height == 0)){
 
     			setTimeout(function(){
     				cms_video_resize_helper($target, params);
