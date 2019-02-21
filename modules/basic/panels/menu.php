@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class menu extends MY_Controller{
+class menu extends CI_Controller {
 	
 	function __construct(){
 		

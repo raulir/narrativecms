@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class admin_save_page_order extends MY_Controller{
+class admin_save_page_order extends CI_Controller {
 
 	function __construct(){
 

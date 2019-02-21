@@ -2,33 +2,53 @@
 
 if ( !function_exists('_iw')) {
 	
+	// if used from api, ci object may not exist
+	if ( !function_exists('get_instance')){
+		
+		include_once($GLOBALS['config']['base_path'] . 'system/core/Common.php');
+		include($GLOBALS['config']['base_path'] . 'system/core/Controller.php');
+		
+		function &get_instance(){
+			return CI_Controller::get_instance();
+		}
+
+	}
+	
 	function _get_iw_size($image, $params){
 		
+		$ci =& get_instance();
+		if ($ci === null) {
+			new CI_Controller();
+			$ci =& get_instance();
+		}
+		
+		$ci->load->model('cms/cms_image_model');
+
 		$width = !empty($params['width']) ? $params['width'] : 0;
 		$height = !empty($params['height']) ? $params['height'] : 0;
 		
-		list($original_width, $original_height) = getimagesize($GLOBALS['config']['upload_path'].$image);
+		$image_data = $ci->cms_image_model->get_cms_image_by_filename($image);
 		
 		if (!$width && $height){
-			$width = round($original_width * $height / $original_height);
+			$width = round($image_data['original_width'] * $height / $image_data['original_height']);
 		} else if ($width && !$height){
-			$height = round($original_height * $width / $original_width);
+			$height = round($image_data['original_height'] * $width / $image_data['original_width']);
 		} else {
-			$width = $original_width;
-			$height = $original_height;
+			$width = $image_data['original_width'];
+			$height = $image_data['original_height'];
 		}
 		
 		// do not stretch image bigger
-		if ($width > $original_width || $height > $original_height){
-			$width = $original_width;
-			$height = $original_height;
+		if ($width > $image_data['original_width'] || $height > $image_data['original_height']){
+			$width = $image_data['original_width'];
+			$height = $image_data['original_height'];
 		}
 		
 		return [
 				$width,
 				$height,
-				$original_width,
-				$original_height,
+				$image_data['original_width'],
+				$image_data['original_height'],
 		];
 		
 	}
@@ -62,7 +82,7 @@ if ( !function_exists('_iw')) {
 			return ['image' => $image, 'width' => !empty($params['width']) ? $params['width'] : 0, 'height' => !empty($params['height']) ? $params['height'] : 0, ];
 		
 		}
-		
+
 		// get needed size
 		list($width, $height, $original_width, $original_height) = _get_iw_size($image, $params);
 		
@@ -91,18 +111,23 @@ if ( !function_exists('_iw')) {
 
 		} else {
 
-			if ($name_a['extension'] == 'jpg' || $name_a['extension'] == 'jpeg'){
-					
+			$tmp = imagecreatetruecolor($width, $height);
+			
+			// detect file format
+			$imagetype = exif_imagetype($GLOBALS['config']['upload_path'].$image);
+			
+			if ($imagetype == IMAGETYPE_JPEG){
+				
+				$name_a['extension'] = 'jpg';
+				
 				$src = imagecreatefromjpeg($GLOBALS['config']['upload_path'].$image);
-					
-				$tmp = imagecreatetruecolor($width, $height);
-				imagecopyresampled($tmp, $src, 0, 0, 0, 0, $width, $height, $original_width, $original_height);
-					
-			} else if ($name_a['extension'] == 'png'){
+
+			} else if ($imagetype == IMAGETYPE_PNG){
+				
+				$name_a['extension'] = 'png';
 
 				$src = imagecreatefrompng($GLOBALS['config']['upload_path'].$image);
 					
-				$tmp = imagecreatetruecolor($width, $height);
 				imagesavealpha($tmp, true);
 				imagealphablending($tmp, false);
 					
@@ -110,10 +135,16 @@ if ( !function_exists('_iw')) {
 				imagefill($tmp , 0, 0, $background);
 					
 				imagealphablending($tmp, false); // to preserve transparencies
-				imagecopyresampled($tmp, $src, 0, 0, 0, 0, $width, $height, $original_width, $original_height);
 					
+			} else {
+				
+				$src = imagecreatefrompng($GLOBALS['config']['base_path'].'modules/cms/img/cms_no_image.png');
+				list($original_width, $original_height) = getimagesize($GLOBALS['config']['base_path'].'modules/cms/img/cms_no_image.png');
+				
 			}
 
+			imagecopyresampled($tmp, $src, 0, 0, 0, 0, $width, $height, $original_width, $original_height);
+			
 			/* output */
 
 			imageinterlace($tmp, true);
@@ -332,7 +363,7 @@ if ( !function_exists('_iw')) {
 
 		}
 
-		return array('image' => $image, 'width' => $width, 'height' => $height, );
+		return ['image' => $image, 'width' => $width, 'height' => $height, 'original_width' => $original_width, 'original_height' => $original_height, ];
 		 
 	}
 

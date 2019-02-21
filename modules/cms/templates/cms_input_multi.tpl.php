@@ -1,5 +1,5 @@
 <div class="cms_input cms_input_multi <?= !empty($mandatory) ? ' cms_input_mandatory ' : '' ?>" data-name="<?= $name ?>"
-		data-bg="<?= $GLOBALS['config']['base_url'] ?>modules/cms/img/drag.png">
+		data-bg="<?= $GLOBALS['config']['base_url'] ?>modules/cms/img/cms_drag.png">
 
 	<label for="<?= $name_clean ?>"><?= $label ?></label>
 	<?php if (!empty($help)) _panel('cms_help', ['help' => $help, ]); ?>

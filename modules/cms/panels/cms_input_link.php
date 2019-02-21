@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_input_link extends MY_Controller{
+class cms_input_link extends CI_Controller {
 
 	function __construct(){
 

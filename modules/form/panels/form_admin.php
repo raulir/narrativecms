@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class form_admin extends MY_Controller{
+class form_admin extends CI_Controller {
 	
 	function panel_action($params){
 	

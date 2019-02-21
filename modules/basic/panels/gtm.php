@@ -1,6 +1,6 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-class gtm extends MY_Controller {
+class gtm extends CI_Controller {
 
     function panel_params($params) {
 

@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_table extends MY_Controller{
+class cms_table extends CI_Controller {
 
 	function __construct(){
 

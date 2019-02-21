@@ -12,7 +12,7 @@
 			<?php foreach($cms_page_panels as $block): ?>
 			
 				<li class="cms_list_sortable_item cms_input_page_panels_item <?php print(empty($block['show']) ? 'cms_item_hidden' : ''); ?>" 
-						style="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/drag.png'); ">
+						<?php _ib('cms/cms_drag.png', 14) ?>>
 				
 					<?php if(empty($name)): ?>
 						<input type="hidden" class="block_id" value="<?php print($block['cms_page_panel_id']); ?>">

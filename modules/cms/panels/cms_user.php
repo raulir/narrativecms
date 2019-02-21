@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_user extends MY_Controller{
+class cms_user extends CI_Controller {
 
 	function panel_action($params){
 

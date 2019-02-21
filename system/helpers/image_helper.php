@@ -49,7 +49,7 @@ if ( !function_exists('_i')) {
 		 
 		// check for possible description in db
 		$ci =& get_instance();
-		$ci->load->model('cms_image_model');
+		$ci->load->model('cms/cms_image_model');
 		$image_db_data = $ci->cms_image_model->get_cms_image_by_filename($image);
 		$return['alt'] = empty($return['alt']) && !empty($image_db_data['description']) ? $image_db_data['description'] : $return['alt'];
 
@@ -105,11 +105,47 @@ if ( !function_exists('_i')) {
 			
 		}
 		
+		$extension = pathinfo($image, PATHINFO_EXTENSION);
+		
 		// if gif or svg
-		if ((pathinfo($image, PATHINFO_EXTENSION) == 'gif' || pathinfo($image, PATHINFO_EXTENSION) == 'svg') && file_exists($GLOBALS['config']['upload_path'].$image) && !is_dir($GLOBALS['config']['upload_path'].$image)){
+		if (($extension == 'gif' || $extension == 'svg') && file_exists($GLOBALS['config']['upload_path'].$image) && !is_dir($GLOBALS['config']['upload_path'].$image)){
 			print('style="background-image:  url('.$GLOBALS['config']['upload_url'].trim($image, '/').'); '.$params['css'].'"');
 			return ['image' => $image, 'height' => 0, 'width' => 0, ];
 		}
+		
+		// if from module
+		if (!empty($params['module']) || substr_count($image, '/') == 1){
+			
+			if (empty($params['module'])){
+				list($params['module'], $image) = explode('/', $image);
+			}
+		
+			$fileurl = $GLOBALS['config']['base_url'].'modules/'.$params['module'].'/img/'.$image;
+			
+			$filepath = $GLOBALS['config']['upload_path'].$params['module'].'/'.$image;
+			
+			// if not in uploads, copy over
+			if (!file_exists($filepath)){
+				
+				$original_path = $GLOBALS['config']['base_path'].'modules/'.$params['module'].'/img/'.$image;
+				
+				if (!file_exists($GLOBALS['config']['upload_path'].$params['module'].'/')){
+					mkdir($GLOBALS['config']['upload_path'].$params['module'].'/');
+				}
+				
+				copy($original_path, $filepath);
+				
+				// add to db
+				$ci =& get_instance();
+				$ci->load->model('cms/cms_image_model');
+				
+				$ci->cms_image_model->create_cms_image($params['module'].'/', $image, $params['module']);
+				
+			}
+			
+			$image = $params['module'].'/'.$image;
+
+		} 
 		
 		if (!(file_exists($GLOBALS['config']['upload_path'].$image) && !is_dir($GLOBALS['config']['upload_path'].$image))){
 			
@@ -124,7 +160,7 @@ if ( !function_exists('_i')) {
 		
 			// get data about image from db
 			$ci =& get_instance();
-			$ci->load->model('cms_image_model');
+			$ci->load->model('cms/cms_image_model');
 			$image_db_data = $ci->cms_image_model->get_cms_image_by_filename($image);
 	
 			// if no resizing
@@ -148,19 +184,19 @@ if ( !function_exists('_i')) {
 					$params['width'] = $image_db_data['original_width'];
 				}
 				
-				$params['width_hq'] = round((!empty($GLOBALS['config']['images_2x']) ? $GLOBALS['config']['images_2x'] : 1.5 ) * $params['width']);
+				$params['width_hq'] = round($GLOBALS['config']['images_2x'] * $params['width']);
 				if ($params['width_hq'] > $image_db_data['original_width']){
 					$params['width_hq'] = $image_db_data['original_width'];
 				}
 				
-				$params['width_lq'] = round((!empty($GLOBALS['config']['images_1x']) ? $GLOBALS['config']['images_1x'] : 0.75 ) * $params['width']);
+				$params['width_lq'] = round($GLOBALS['config']['images_1x'] * $params['width']);
 				if ($params['width_lq'] > $image_db_data['original_width']){
 					$params['width_lq'] = $image_db_data['original_width'];
 				}
 					
 				// get image target output format
 				if (empty($params['output'])){
-					$params['output'] = pathinfo($image, PATHINFO_EXTENSION);
+					$params['output'] = $extension;
 				}
 				
 				// webp

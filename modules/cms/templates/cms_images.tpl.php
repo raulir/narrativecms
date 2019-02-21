@@ -22,13 +22,17 @@
 					<input type="file" name="replace_image" class="cms_images_replace_image" style="display: none; ">
 				</form>
 				
-				<div class="cms_tool_button admin_right cms_paging_last cms_images_paging_last cms_images_paging_disabled"></div>
-				<div class="cms_tool_button admin_right cms_paging_next cms_images_paging_next cms_images_paging_disabled"></div>
+				<div class="cms_tool_button admin_right cms_paging_last cms_images_paging_last cms_images_paging_disabled"
+						<?php _ib('cms/cms_paging_last.png', ['height' => 12]) ?>></div>
+				<div class="cms_tool_button admin_right cms_paging_next cms_images_paging_next cms_images_paging_disabled"
+						<?php _ib('cms/cms_paging_next.png', ['height' => 12]) ?>></div>
 				<div class="cms_tool_button admin_right cms_images_paging_page">
 					<span class="cms_images_paging_current">&nbsp;</span>/<span class="cms_images_paging_total">&nbsp;</span>
 				</div>
-				<div class="cms_tool_button admin_right cms_paging_previous cms_images_paging_previous cms_images_paging_disabled"></div>
-				<div class="cms_tool_button admin_right cms_paging_first cms_images_paging_first cms_images_paging_disabled"></div>
+				<div class="cms_tool_button admin_right cms_paging_previous cms_images_paging_previous cms_images_paging_disabled"
+						<?php _ib('cms/cms_paging_previous.png', ['height' => 12]) ?>></div>
+				<div class="cms_tool_button admin_right cms_paging_first cms_images_paging_first cms_images_paging_disabled"
+						<?php _ib('cms/cms_paging_first.png', ['height' => 12]) ?>></div>
 				
 				<select class="cms_images_category admin_tool_select admin_right">
 					<option value="">-- category --</option>

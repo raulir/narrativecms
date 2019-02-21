@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_page_panel_toolbar extends MY_Controller{
+class cms_page_panel_toolbar extends CI_Controller {
 
 	function __construct(){
 

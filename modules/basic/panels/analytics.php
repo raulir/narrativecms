@@ -1,6 +1,6 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-class analytics extends MY_Controller {
+class analytics extends CI_Controller {
 
     function panel_params($params) {
 

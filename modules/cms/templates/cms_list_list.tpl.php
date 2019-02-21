@@ -7,7 +7,7 @@
 					<?php print($block['show'] ? '' : 'cms_item_hidden'); ?>" 
 					data-block_id="<?php print($block[$id_field]); ?>" 
 					<?php if($no_sort !== 'no_sort'): ?>
-						style="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/drag.png'); "
+						<?php _ib('cms/cms_drag.png', 14) ?>
 					<?php else: ?>
 						style="padding-left: 10px; "
 					<?php endif ?>>

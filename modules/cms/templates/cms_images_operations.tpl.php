@@ -1,1 +1,1 @@
-<div class="cms_input_image_image" <?php $i = _ib($filename, ['width' => 600, 'maxwidth' => true, ]); ?>></div>
+<div class="cms_input_image_image" <?php $i = _ib($filename, ['width' => 300, 'maxwidth' => true, ]); ?>></div>

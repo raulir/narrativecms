@@ -69,7 +69,7 @@
 	</form>
 
 	<div class="menu_item_template">
-		<li class="cms_list_sortable_item ui-sortable-handle cms_main_menu_item" style="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/drag.png'); ">
+		<li class="cms_list_sortable_item ui-sortable-handle cms_main_menu_item" <?php _ib('cms/cms_drag.png', 14) ?>>
 		
 			<div class="admin_main_menu_item_toolbar">
 				<div class="admin_main_menu_item_delete">delete</div>

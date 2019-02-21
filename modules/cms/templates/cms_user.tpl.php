@@ -22,7 +22,11 @@
 
 	<div class="cms_user_container">
 		<div class="cms_user_content">
-			<div class="cms_user_user"><div class="cms_user_username" <?php _ib('/modules/cms/img/cms_user.png'); ?>><?= !empty($_SESSION['cms_user']['name']) ? $_SESSION['cms_user']['name'] : $_SESSION['cms_user']['username'] ?></div></div>
+			<div class="cms_user_user">
+				<div class="cms_user_username" <?php _ib('cms/cms_user.png', 14); ?>>
+					<?= !empty($_SESSION['cms_user']['name']) ? $_SESSION['cms_user']['name'] : $_SESSION['cms_user']['username'] ?>
+				</div>
+			</div>
 			<div class="cms_user_button">log out</div>
 		</div>
 	</div>

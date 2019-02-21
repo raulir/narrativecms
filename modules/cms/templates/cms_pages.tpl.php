@@ -11,12 +11,12 @@
 			
 				<li class="cms_pages_page cms_list_sortable_item <?= !empty($page['status']) ? ' cms_item_hidden ' : '' ?>
 						<?= $page['cms_page_id'] == $GLOBALS['config']['landing_page']['_value'] ? ' cms_pages_page_landing ' : '' ?>"
-						style="background-image: url('<?= $GLOBALS['config']['base_url'] ?>modules/cms/img/drag.png'); ">
+						<?php _ib('cms/cms_drag.png', 14) ?>>
 				
 					<input type="hidden" class="page_id" value="<?php print($page['page_id']); ?>">
 				
 					<?php if($page['cms_page_id'] == $GLOBALS['config']['landing_page']['_value']): ?>
-						<div class="cms_pages_landing" style="background-image: url('<?= $GLOBALS['config']['base_url'] ?>modules/cms/img/cms_landing.png'); "></div>
+						<div class="cms_pages_landing" <?php _ib('cms/cms_landing.png', 16) ?>></div>
 					<?php endif ?>
 
 					<div class="admin_list_sortable_div admin_text"><?php print(!empty($page['title']) ? $page['title'] : '[ no title ]'); ?></div>

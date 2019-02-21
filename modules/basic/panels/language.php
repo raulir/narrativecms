@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class language extends MY_Controller{
+class language extends CI_Controller {
 
 	function panel_action($params){
 

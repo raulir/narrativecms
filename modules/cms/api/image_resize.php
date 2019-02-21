@@ -70,7 +70,8 @@
 		
 		print(json_encode(['result' => [
 				'src' => $GLOBALS['config']['upload_url'] . $image_data['image'], 
-				'filename' => $image_data['image'], 
+				'filename' => $image_data['image'],
+				'data' => $image_data,
 		]], JSON_PRETTY_PRINT));
 		
 		// unlock

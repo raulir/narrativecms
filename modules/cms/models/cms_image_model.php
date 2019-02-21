@@ -249,7 +249,6 @@ class cms_image_model extends CI_Model {
 					mkdir($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'));
 				}
 
-				$this->load->model('cms_image_model');
 				$return = $this->create_cms_image(date('Y').'/'.date('m').'/', $prefix.'_'.$filename, $category);
 
 				file_put_contents($GLOBALS['config']['upload_path'].$return, $image_content);

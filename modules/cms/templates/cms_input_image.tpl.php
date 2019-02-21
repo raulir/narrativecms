@@ -8,12 +8,12 @@
 		
 		<?php _panel('cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
 		
-		<div class="admin_image_container" style="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/opacity.png'); ">
+		<div class="admin_image_container" <?php _ib('cms/cms_opacity.png', 40) ?>>
 			<div class="admin_image_content cms_input_image_content_<?php print($name_clean); ?>">
 				<?php if(!empty($error)): ?>
 					<div class="cms_input_image_error"><?= $error ?></div>
 				<?php elseif(!empty($value)): ?>
-					<div class="cms_input_image_image" <?php $i = _ib($value, ['width' => 600, 'maxwidth' => true, ]); ?>></div>
+					<div class="cms_input_image_image" <?php $i = _ib($value, ['width' => 300, 'maxwidth' => true, ]); ?>></div>
 				<?php else: ?>
 					-- no image --
 				<?php endif ?>
