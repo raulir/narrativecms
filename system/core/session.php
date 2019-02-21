@@ -18,7 +18,7 @@ if (!session_id()){
 	if (empty($_SESSION['webp'])){
 		
 		$_SESSION['webp'] = false;
-		if (!empty($GLOBALS['config']['images_webp'])){
+		if (!empty($GLOBALS['config']['images_webp']) && !empty($_SERVER['HTTP_ACCEPT'])){
 			if (empty($_SESSION['webp']) && strpos($_SERVER['HTTP_ACCEPT'], 'image/webp') !== false){
 				$_SESSION['webp'] = true;
 			}
