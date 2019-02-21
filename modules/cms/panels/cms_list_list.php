@@ -16,7 +16,7 @@ class cms_list_list extends CI_Controller {
 
 	function panel_params($params){
 
-		$this->load->model('cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_model');
 
 		if ($params['id_field'] == 'block_id'){
 			$params['id_field'] = 'cms_page_panel_id';

@@ -236,20 +236,6 @@ $config['csrf_expire'] = 7200;
 */
 $config['time_reference'] = 'local';
 
-
-/*
-|--------------------------------------------------------------------------
-| Rewrite PHP Short Tags
-|--------------------------------------------------------------------------
-|
-| If your PHP installation does not have short tag support enabled CI
-| can rewrite the tags on-the-fly, enabling you to utilize that syntax
-| in your view files.  Options are TRUE or FALSE (boolean)
-|
-*/
-$config['rewrite_short_tags'] = FALSE;
-
-
 /*
 |--------------------------------------------------------------------------
 | Reverse Proxy IPs

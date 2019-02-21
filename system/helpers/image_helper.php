@@ -65,7 +65,7 @@ if ( !function_exists('_i')) {
 	 * prints out bg image style parameter with image
 	 */
 	function _ib($image, $params = array()){
-		 
+
 		if (!is_array($params)){
 			$params = array('width' => (int)$params);
 		}

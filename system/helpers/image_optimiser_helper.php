@@ -188,13 +188,28 @@ if ( !function_exists('_iw')) {
 					unlink($temp_name);
 				
 				}
+				
+				// if size is same or bigger, but new filesize is bigger, then use original image instead
+				if ($width >= original_width){
+					
+					$new_filesize = filesize($GLOBALS['config']['upload_path'].$new_image);
+					$old_filesize = filesize($GLOBALS['config']['upload_path'].$image);
+					
+					if ($new_filesize > $old_filesize){
+						
+						unlink($GLOBALS['config']['upload_path'].$new_image);
+						copy($GLOBALS['config']['upload_path'].$image, $GLOBALS['config']['upload_path'].$new_image);
+						
+					}
+					
+				}
 			
 			} else if ($extension == 'webp'){
 				
 				// detect if source is png or jpg
 				if ($name_a['extension'] == 'png'){
 				
-					$png_image = _get_iw_new($image, $width, 'png');
+					$png_image = str_replace('.png', '.tmp.png', _get_iw_new($image, $width, 'png'));
 					
 					if (!file_exists($GLOBALS['config']['upload_path'].$png_image)){
 						
@@ -215,21 +230,6 @@ if ( !function_exists('_iw')) {
 							
 							unlink($temp_name);
 							
-						}
-		
-						if(!empty($GLOBALS['config']['images_zopflipng'])){
-							
-							$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($png_image).'.png';
-							
-							rename($GLOBALS['config']['upload_path'].$png_image, $temp_name);
-							
-							$cmd = (empty($GLOBALS['config']['images_zopflipng_executable']) ? $GLOBALS['config']['base_path'].'system/vendor/zopflipng/bin/zopflipng.bin' : $GLOBALS['config']['images_zopflipng_executable'])
-									.' -y '.$temp_name.' '.$GLOBALS['config']['upload_path'].$png_image;
-		
-							shell_exec($cmd);
-							
-							unlink($temp_name);
-						
 						}
 					
 					}
@@ -253,6 +253,8 @@ if ( !function_exists('_iw')) {
 						unlink($temp_name);
 						
 					}
+					
+					unlink($GLOBALS['config']['upload_path'].$png_image);
 				
 				} else { // if jpg
 					
