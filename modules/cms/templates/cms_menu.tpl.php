@@ -8,7 +8,7 @@
 			</a>
 			
 			<?php if(!empty($children[$menu_item['id']])): ?>
-				<div class="cms_menu_triangle" <?php _ib('/modules/cms/img/cms_triangle.png'); ?>></div>
+				<div class="cms_menu_triangle" <?php _ib('cms/cms_triangle.png', 14); ?>></div>
 				<div class="cms_menu_children">
 					<?php foreach($children[$menu_item['id']] as $child): ?>
 						

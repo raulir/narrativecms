@@ -190,7 +190,7 @@ if ( !function_exists('_iw')) {
 				}
 				
 				// if size is same or bigger, but new filesize is bigger, then use original image instead
-				if ($width >= original_width){
+				if ($width >= $original_width){
 					
 					$new_filesize = filesize($GLOBALS['config']['upload_path'].$new_image);
 					$old_filesize = filesize($GLOBALS['config']['upload_path'].$image);

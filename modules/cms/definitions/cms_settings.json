@@ -174,16 +174,16 @@
 		{
 			"type":"text",
 			"name":"images_1x",
-			"label":"Image 1x size modifier",
+			"label":"Image 1x desktop modifier",
 			"default":"0.75",
-			"help":"[Image 1x size modifier]||Modifier to template suggested image size for natural pixel size screens"
+			"help":"[Image 1x desktop modifier]||Modifier to template suggested image size for natural pixel size screens"
 		},
 		{
 			"type":"text",
 			"name":"images_2x",
-			"label":"Image 2x size modifier",
+			"label":"Image 2x desktop modifier",
 			"default":"1.5",
-			"help":"[Image 2x size modifier]||Modifier to template suggested image size for high density (retina) screens"
+			"help":"[Image 2x desktop modifier]||Modifier to template suggested image size for high density (retina) screens"
 		},
 		{
 			"type":"text",
@@ -191,6 +191,13 @@
 			"label":"Image in textarea size",
 			"default":"0.5",
 			"help":"[Image in textarea size]||Images in textareas width to max width pixels||If result is zero or over 1000px, 1000px is used"
+		},
+		{
+			"type":"text",
+			"name":"images_mobile",
+			"label":"Image mobile modifier",
+			"default":"1.0",
+			"help":"[Image mobile modifier]||Modifier to template suggested image size for mobile devices"
 		},
 		{
 			"type":"subtitle",

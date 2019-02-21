@@ -155,6 +155,7 @@ if ( !function_exists('_i')) {
 			
 			$fileurl_hq = $fileurl;
 			$fileurl_lq = $fileurl;
+			$fileurl_mobile = $fileurl;
 				
 		} else {
 		
@@ -172,6 +173,7 @@ if ( !function_exists('_i')) {
 				
 				$fileurl_hq = $fileurl;
 				$fileurl_lq = $fileurl;
+				$fileurl_mobile = $fileurl;
 					
 			} else {
 	 		
@@ -194,6 +196,11 @@ if ( !function_exists('_i')) {
 					$params['width_lq'] = $image_db_data['original_width'];
 				}
 					
+				$params['width_mobile'] = round($GLOBALS['config']['images_mobile'] * $params['width']);
+				if ($params['width_mobile'] > $image_db_data['original_width']){
+					$params['width_mobile'] = $image_db_data['original_width'];
+				}
+				
 				// get image target output format
 				if (empty($params['output'])){
 					$params['output'] = $extension;
@@ -208,21 +215,39 @@ if ( !function_exists('_i')) {
 				$image_dir = pathinfo($image, PATHINFO_DIRNAME);
 				$filename_hq = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_hq'].'.'.$params['output'];
 				$filename_lq = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_lq'].'.'.$params['output'];
+				$filename_mobile = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_mobile'].'.'.$params['output'];
 				$fileurl_hq = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_hq'].'.'.$params['output'];
 				$fileurl_lq = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_lq'].'.'.$params['output'];
+				$fileurl_mobile = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_mobile'].'.'.$params['output'];
+				
+				// if mobile
+				if ($_SESSION['mobile']){
 					
-				if (!file_exists($filename_hq)){
-					$needs_lazy_loading = true;
+					if (!file_exists($filename_mobile)){
+						$needs_lazy_loading = true;
+						$params['width_1'] = $params['width_mobile'];
+					}
+					
+					$fileurl_a = $fileurl_mobile;
+					$fileurl_b = $fileurl_mobile;
+					
+				} else {
+					
+					if (!file_exists($filename_hq) || !file_exists($filename_lq)){
+						$needs_lazy_loading = true;
+						$params['width_1'] = $params['width_hq'];
+						$params['width_2'] = $params['width_lq'];
+					}
+
+					$fileurl_a = $fileurl_hq;
+					$fileurl_b = $fileurl_lq;
+					
 				}
 				
-				if (!file_exists($filename_lq)){
-					$needs_lazy_loading = true;
-				}
-			
 				if (empty($image_data)){
 					$image_data['width'] = $params['width_hq'];
 					$image_data['height'] = !empty($params['height'])
-							? (round((!empty($GLOBALS['config']['images_2x']) ? $GLOBALS['config']['images_2x'] : 1.5 ) * $params['height']))
+							? (round($GLOBALS['config']['images_2x'] * $params['height']))
 							: round($image_db_data['original_height'] * $params['width_hq'] / $image_db_data['original_width']);
 				}
 				
@@ -230,25 +255,34 @@ if ( !function_exists('_i')) {
 			
 		}
 		
+		if (!empty($params['maxwidth']) && !empty($image_db_data['original_width'])){
+			$params['css'] .= ' max-width: '.$image_db_data['original_width'].'px; ';
+		}
+		
+		if (!empty($params['dataprops'])){
+			$dataprops = ' data-width="'.$image_data['width'].'" data-height="'.$image_data['height'].'" ';
+		} else {
+			$dataprops = '';
+		}
+		
 		if (!empty($needs_lazy_loading)){
 
 			$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_images_lazy.js';
 			
 			print(' style="background-image: url('.$GLOBALS['config']['upload_url'].$image.'); '.$params['css'].
-					(!empty($params['maxwidth']) && !empty($image_db_data['original_width']) ? ' max-width: '.$image_db_data['original_width'].'px; ' : '').
-					'" data-cms_images_lazy="'.$image.'" data-width="'.$params['width_hq'].'" data-width_lq="'.$params['width_lq'].'"
-					data-output="'.$params['output'].'" data-height="'.$image_data['height'].'" ');
+					'" data-cms_images_lazy="'.$image.'" data-output="'.$params['output'].'" '.
+					' data-w1="'.$params['width_1'].'" '.(!empty($params['width_2']) ? ' data-w2="'.$params['width_2'].'" ' : '').$dataprops);
 		
+		} elseif ($_SESSION['mobile']){
+			
+			print(' style="background-image: url('.$fileurl_mobile.'); '.$params['css'].' " '.$dataprops);
+			
 		} else {
 			
 			print(
 					' style="background-image: url('.$fileurl_hq.'); '.
-					( $fileurl_lq != $fileurl_hq ?
-							'background-image: -webkit-image-set( url('.$fileurl_lq.') 1x, url('.$fileurl_hq.') 2x ); background-image: image-set( url('.$fileurl_lq.') 1x, url('.$fileurl_hq.') 2x ); '
-							: '').
-					$params['css'].
-					(!empty($params['maxwidth']) && !empty($image_db_data['original_width']) ? ' max-width: '.$image_db_data['original_width'].'px; ' : '').' " '.
-					(!empty($params['dataprops']) ? ' data-width="'.$image_data['width'].'" data-height="'.$image_data['height'].'" ' : ''));
+					( $fileurl_lq != $fileurl_hq ? 'background-image: -webkit-image-set( url('.$fileurl_lq.') 1x, url('.$fileurl_hq.') 2x ); '.
+							'background-image: image-set( url('.$fileurl_lq.') 1x, url('.$fileurl_hq.') 2x ); '	: '').$params['css'].' " '.$dataprops);
 			
 		}
 
