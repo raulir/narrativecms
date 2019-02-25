@@ -195,8 +195,8 @@ if ( !function_exists('_i')) {
 				if ($params['width_lq'] > $image_db_data['original_width']){
 					$params['width_lq'] = $image_db_data['original_width'];
 				}
-					
-				$params['width_mobile'] = round($GLOBALS['config']['images_mobile'] * $params['width']);
+
+				$params['width_mobile'] = round((!empty($GLOBALS['config']['images_mobile']) ? $GLOBALS['config']['images_mobile'] : 1) * $params['width']);
 				if ($params['width_mobile'] > $image_db_data['original_width']){
 					$params['width_mobile'] = $image_db_data['original_width'];
 				}
@@ -266,7 +266,7 @@ if ( !function_exists('_i')) {
 		}
 		
 		if (!empty($needs_lazy_loading)){
-
+			
 			$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_images_lazy.js';
 			
 			print(' style="background-image: url('.$GLOBALS['config']['upload_url'].$image.'); '.$params['css'].

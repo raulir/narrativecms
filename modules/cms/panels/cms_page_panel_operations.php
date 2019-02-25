@@ -181,7 +181,7 @@ class cms_page_panel_operations extends CI_Controller {
 				$data['panel_params']['_search_time_extra'] = serialize($panel_config['list']['search_time_extra']);
 				$data['panel_params']['_search_time_timestamp_day'] = strtotime($data['panel_params']['date'])/86400;
 			}
-			
+
 			// js and css from config
 			if (!empty($panel_config['js']) && is_array($panel_config['js'])){
 				foreach($panel_config['js'] as $_js){
@@ -195,7 +195,7 @@ class cms_page_panel_operations extends CI_Controller {
 					$data['panel_params']['_css'][] = 'modules/'.$_css_module.'/css/'.$_css_panel.'.scss';
 				}
 			}
-
+			
 			$data['search_params'] = array();
 			
 			$panel_structure = !empty($panel_config['item']) ? $panel_config['item'] : array();
@@ -211,7 +211,30 @@ class cms_page_panel_operations extends CI_Controller {
 					}
 				}
 			}
-			 
+
+			// are there any meta images
+			foreach($panel_structure as $struct){
+				
+				if ($struct['type'] == 'image'){
+					if (!empty($struct['meta']) && $struct['meta'] == 'image'){
+						
+						$data['panel_params']['_images'][] = $data['panel_params'][$struct['name']];
+
+					}
+				}
+				
+				if ($struct['type'] == 'repeater'){
+					foreach ($struct['fields'] as $r_struct){
+						if ($r_struct['type'] == 'image'){
+							if (!empty($r_struct['meta']) && $r_struct['meta'] == 'image'){
+								$data['panel_params']['_images'][] = $data['panel_params'][$r_struct['name']];
+							}
+						}
+					}
+				}
+				
+			}
+
 			foreach ($data['panel_params'] as $key => $value){
 
 				// if repeater with something in it - collect values to records

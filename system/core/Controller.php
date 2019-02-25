@@ -203,8 +203,8 @@ class CI_Controller {
 	/*
 	 * controller as panel stuff
 	 */
-	function panel($name, $params = array(), $return_array = false){
-	
+	function panel($name, $params = array()){
+
 		if (!empty($params['_extends'])){
 			$files = $this->get_panel_filenames($name, $params, $params['_extends']);
 		} else {
@@ -307,26 +307,22 @@ class CI_Controller {
 				$return .
 				"\n".'<!-- panel "' . $files['module'] . '/' . $files['name'] . '" ( '.(!empty($controller_timer_start) ? ' controller: '.($controller_timer_end - $controller_timer_start).'ms ' : '').
 				(!empty($template_timer_start) ? ' template: '.($template_timer_end - $template_timer_start).'ms' : ''). ' ) end -->'."\n";
-	
-				// add js, css, scss to global page files
-				$this->js = array_merge($this->js, $panel_js);
-				$this->css = array_merge($this->css, $panel_css);
-				$this->scss = array_merge($this->scss, $panel_scss);
-	
-				// save panel result params for returning them when ajax panel is requested
-				$this->view_params = $params;
-	
-				if (empty($return_array)){
-					return $return;
-				} else {
-					return [
-							'html' => $return,
-							'js' => $panel_js,
-							'css' => $panel_css,
-							'scss' => $panel_scss,
-					];
-				}
-	
+
+		// add js, css, scss to global page files
+		$this->js = array_merge($this->js, $panel_js);
+		$this->css = array_merge($this->css, $panel_css);
+		$this->scss = array_merge($this->scss, $panel_scss);
+
+		// save panel result params for returning them when ajax panel is requested
+		$this->view_params = $params;
+
+		return [
+				'html' => $return,
+				'js' => $panel_js,
+				'css' => $panel_css,
+				'scss' => $panel_scss,
+		];
+
 	}
 	
 	// overload for calculating panel view parameters
@@ -355,7 +351,7 @@ class CI_Controller {
 			$css_str = '';
 			if (!empty($css_arr)){
 				foreach($css_arr as $css_line){
-					$css_str .= '<link rel="stylesheet" type="text/css" href="'.$css_line['script'].'" />';
+					$css_str .= '<link rel="stylesheet" type="text/css" href="'.$css_line['script'].'" />'."\n";
 				}
 			}
 				
@@ -569,8 +565,13 @@ class CI_Controller {
 		}
 		 
 		// get panel
-		$return['html'] = $this->panel($name, $params);
-		 
+		$return = $this->panel($name, $params);
+
+		// meta images
+		if (!empty($params['_images'])){
+			$GLOBALS['_panel_images'] = array_merge(array_values($GLOBALS['_panel_images']), array_values($params['_images']));
+		}
+
 		// js and css
 		$css_str = '';
 		$js_str = '';
@@ -680,6 +681,11 @@ class CI_Controller {
 			$params = !empty($panel_config['params']) ? $panel_config['params'] : array();
 			if (empty($params['cms_page_panel_id'])) $params['cms_page_panel_id'] = 0;
 	
+			// meta images
+			if (!empty($params['_images'])){
+				$GLOBALS['_panel_images'] = array_merge(array_values($GLOBALS['_panel_images']), array_values($params['_images']));
+			}
+			
 			// cache file name
 			$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.str_replace('/', '__', $panel_config['panel']).'_'.substr(md5($panel_config['panel'].serialize($params)), 0, 6).'.txt';
 	
@@ -718,8 +724,8 @@ class CI_Controller {
 			if (empty($panel_data)){
 	
 				$params['module'] = !empty($panel_config['module']) ? $panel_config['module'] : '';
-				$panel_data = $this->panel($panel_config['panel'], $params, true);
-	
+				$panel_data = $this->panel($panel_config['panel'], $params);
+
 				// check if to save to cache file
 				if (empty($action_result['_no_cache']) && !(!empty($params['module']) && $params['module'] == 'cms')
 						&& (!empty($GLOBALS['config']['panel_cache']) || (isset($params['_cache_time']) && $params['_cache_time'] > 0))
@@ -737,7 +743,8 @@ class CI_Controller {
 			unset($panel_data);
 	
 		}
-	
+		
+		
 		return $return;
 		 
 	}
@@ -807,7 +814,7 @@ class CI_Controller {
 	
 		// collect panel related js files
 		$return['js'] = [];
-	
+
 		if (!empty($params['_js'])){
 			$return['js'] = array_merge($return['js'], array_values($params['_js']));
 		}

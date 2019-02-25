@@ -21,8 +21,7 @@
 			
 		});
 		
-		var preloader = new preloader_class();
-		preloader.preload({
+		cms_preloader.preload({
 			'images': images,
 			'after_each': function(image){
 				$set.each(function(){

@@ -25,6 +25,10 @@ class cms_input_image extends CI_Controller {
 		if(!file_exists($GLOBALS['config']['upload_path'].$params['value'])){
 			$params['error'] = 'Missing image file<br>Update resources or database<br>or select a different image';
 		}
+		
+		if (!empty($params['params']['meta']) && $params['params']['meta'] == 'image'){
+			$params['help'] = (!empty($params['help']) ? $params['help'].'||' : '').'{Page SEO image}';
+		}
 
 		return $params;
 
