@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class feed_save_push extends MY_Controller{
+class feed_save_push extends CI_Controller{
 	
 	function __construct(){
 		

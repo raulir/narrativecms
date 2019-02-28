@@ -3,8 +3,8 @@
 /*
  * LOAD CONFIG
  *
- * Filename for example for dev site hosted at http://project.dev/
- * should be project.dev.php
+ * Filename for example for dev site hosted at http://project.localhost/
+ * should be project.localhost.php
  *
  * Change contents of the file according your project
  *
@@ -53,7 +53,7 @@ $config['js'] = array(
 				'sync' => 'defer',
 		),
 		array(
-				'script' => 'js/main.js',
+				'script' => 'modules/cms/js/cms_site_main.js',
 				'sync' => 'defer',
 		),
 );

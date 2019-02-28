@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class feed extends MY_Controller {
+class feed extends CI_Controller {
 		
 	public function __construct() {
 			

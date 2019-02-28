@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class feed_dashboard_item extends MY_Controller{
+class feed_dashboard_item extends CI_Controller{
 	
 	function panel_params($params){
 
