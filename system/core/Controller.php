@@ -487,17 +487,17 @@ class CI_Controller {
 			$global_css = json_decode(file_get_contents($GLOBALS['config']['base_path'].'cache/cms_sccjs_settings.json'), true);
 			 
 		} else {
-	
-			$this->load->model('cms/cms_page_panel_model');
-	
-			$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'cms_cssjs_settings', 'cms_page_id' => 0, ]);
-			if (!empty($settings_a[0]['css'])){
-				$global_css = $settings_a[0]['css'];
-			}
+			
+			$ci =& get_instance();
+			$ci->load->model('cms/cms_page_panel_model');
+			
+			$cssjs_settings = $ci->cms_page_panel_model->get_cms_page_panel_settings('cms/cms_cssjs_settings');
+
+			$global_css = array_reverse(array_values($cssjs_settings['css']));
 			file_put_contents($GLOBALS['config']['base_path'].'cache/cms_sccjs_settings.json', json_encode($global_css));
 			 
 		}
-		$global_css = array_reverse($global_css);
+
 		foreach($global_css as $css_item){
 	
 			if (substr($css_item, -4) === '.css'){

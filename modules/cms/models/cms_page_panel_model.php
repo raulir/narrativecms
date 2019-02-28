@@ -721,6 +721,19 @@ class cms_page_panel_model extends CI_Model {
 			return $settings_a[0];
 		}
 		
+		// deprecated: fallback to name without module
+		if (stristr($cms_panel_name, '/')){
+		
+			list($module, $cms_panel_name) = explode('/', $cms_panel_name);
+		
+			$settings_a = $this->get_cms_page_panels_by(['panel_name' => $cms_panel_name, 'cms_page_id' => 0, 'parent_id' => 0, 'sort' => 0, ]);
+		 
+			if (!empty($settings_a[0])){
+				return $settings_a[0];
+			}
+		
+		}
+		
 		return [];
 		
 	}

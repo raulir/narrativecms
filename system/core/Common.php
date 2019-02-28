@@ -37,17 +37,6 @@ if ( ! function_exists('load_class'))
 			}
 		}
 
-		// Is the request a class extension?  If so we load it too
-		if (file_exists(APPPATH.$directory.'/MY_'.$class.'.php'))
-		{
-			$name = 'MY_'.$class;
-
-			if (class_exists($name) === FALSE)
-			{
-				require(APPPATH.$directory.'/MY_'.$class.'.php');
-			}
-		}
-
 		// Did we find the class?
 		if ($name === FALSE)
 		{
