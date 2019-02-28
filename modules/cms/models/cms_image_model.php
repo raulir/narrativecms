@@ -4,10 +4,6 @@ class cms_image_model extends CI_Model {
 
 	function get_cms_image_by_filename($filename){
 
-		if (function_exists('mysql_set_charset')){
-			@mysql_set_charset('utf8mb4');
-		}
-		
 		// check if cached image data exists
 		if (empty($GLOBALS['cache']['images_by_filename'])){
 			

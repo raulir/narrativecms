@@ -1,0 +1,18 @@
+{
+	"version":"2",
+	"label":"FB pixel settings",
+	"item":[
+		{
+			"type":"text",
+			"name":"pixel_id",
+			"label":"FB pixel ID",
+			"help":"[FB pixel ID]||Eg: 1233211233211233"
+		},
+		{
+			"type":"text",
+			"name":"delay",
+			"label":"Delay in ms",
+			"help":"[Delay]||Delay after pageload, when FB pixel fires||Allows avoid clashes with GTM"
+		}
+	]
+}

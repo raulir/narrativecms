@@ -9,6 +9,10 @@
 			"name":"GTM"
 		},
 		{
+			"id":"pixel",
+			"name":"FB pixel"
+		},
+		{
 			"id":"console_log",
 			"name":"Console log"
 		},
@@ -50,7 +54,14 @@
 			"name":"GTM settings",
 			"url":"admin/panel_settings/basic__gtm/",
 			"parent":"cms",
-			"access":"basic_gtm"
+			"access":"basic_analytics"
+		},
+		{
+			"id":"gtm",
+			"name":"FB pixel settings",
+			"url":"admin/panel_settings/basic__pixel/",
+			"parent":"cms",
+			"access":"basic_analytics"
 		}
 	],
 	"access":[
