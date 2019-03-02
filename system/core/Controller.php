@@ -330,80 +330,15 @@ class CI_Controller {
 		return $params;
 	}
 	
-	function output($layout_name, $panel_data = array()){
-		 
-		$filename = $GLOBALS['config']['base_path'].'application/views/layout/'.$layout_name.'.tpl.php';
-		if (!file_exists($filename)){
-			foreach($GLOBALS['config']['modules'] as $module){
-				$hfilename = $GLOBALS['config']['base_path'].'modules/'.$module.'/layouts/'.$layout_name.'.tpl.php';
-				if (file_exists($hfilename)){
-					$filename = $hfilename;
-				}
-			}
-		}
-	
-		$page = $this->load->view($filename, array('data' => $panel_data, ), true);
-		 
-		$css_arr = $this->get_page_css(true);
-	
-		if (empty($GLOBALS['config']['inline_css'])){
-				
-			$css_str = '';
-			if (!empty($css_arr)){
-				foreach($css_arr as $css_line){
-					$css_str .= '<link rel="stylesheet" type="text/css" href="'.$css_line['script'].'" />'."\n";
-				}
-			}
-				
-		} else {
-				
-			if (!empty($css_arr)){
-	
-				// check for cache
-				$hash = substr(md5('inline_'.serialize($css_arr).'_'.(!empty($GLOBALS['config']['inline_limit']) ? $GLOBALS['config']['inline_limit'] : 0)), 0, 8);
-				$css_filename = $GLOBALS['config']['base_path'].'cache/'.$hash.'.css';
-				$css2_filename = $GLOBALS['config']['base_path'].'cache/'.$hash.'_2.css';
-				$css2_url = $GLOBALS['config']['base_url'].'cache/'.$hash.'_2.css';
-	
-				if (file_exists($css_filename) && file_exists($css2_filename)){
-						
-					$css_str = file_get_contents($css_filename);
-					$css2_str = file_get_contents($css2_filename);
-	
-				} else {
-						
-					$css_str = '';
-					$css2_str = '';
-	
-					foreach($css_arr as $css_line){
-	
-						$css_tmp = str_replace("url('../", "url('".$GLOBALS['config']['base_url'], file_get_contents($css_line['filename']))."\n";
-						$css_tmp = str_replace(' {', '{', $css_tmp);
-						$css_tmp = preg_replace('!([;}{,:])\s+!s', '$1', $css_tmp);
-						$css_tmp = preg_replace('!/\*.*?\*/!s', ' ', $css_tmp);
-	
-						if (empty($GLOBALS['config']['inline_limit']) || strlen($css_str) < $GLOBALS['config']['inline_limit']){
-							$css_str .= $css_tmp;
-						} else {
-							$css2_str .= $css_tmp;
-						}
-	
-					}
-						
-					file_put_contents($css_filename, $css_str);
-					file_put_contents($css2_filename, $css2_str);
-	
-				}
-	
-			}
-				
-			$css_str = '<style type="text/css">'."\n".$css_str."\n".'</style>'."\n";
-			if (!empty($css2_str)){
-				$css_str .= '<link rel="preload" href="'.$css2_url.(!empty($GLOBALS['config']['cache']['force_download']) ? '?v='.time() : '').'" as="style" onload="this.rel=\'stylesheet\'">'."\n";
-			}
-				
-		}
-	
+	function output($layout_name, $page_id, $panel_data = array()){
+		
+		list($layout_module, $layout_file) = explode('/', $layout_name);
+		$layout_filename = $GLOBALS['config']['base_path'].'modules/'.$layout_module.'/layouts/'.$layout_file.'.tpl.php';
+		$page = $this->load->view($layout_filename, array('data' => $panel_data, ), true);
+
+		// get css part of page head
+		$css_str = $this->get_page_css($page_id);
+
 		// put together mandatory config js and panel/controller loaded js
 		if (!empty($GLOBALS['config']['js'])){
 			$jss = array_merge($GLOBALS['config']['js'], $this->js);
@@ -478,7 +413,56 @@ class CI_Controller {
 	
 	}
 	
-	function get_page_css($return_array = false){
+	function get_page_css($page_id){
+		
+		$starttime = microtime(true);
+
+		// check if repack is needed
+		if ($page_id !== false && !empty($GLOBALS['config']['cache']['vcs_check'])){
+			
+			$page_id_clean = str_replace(['/', '='], '_', $page_id);
+			$page_css_filename = $GLOBALS['config']['base_path'].'cache/page_css_'.$page_id_clean.'.txt';
+		
+			$last_modification = 0;
+				
+			if ($GLOBALS['config']['cache']['vcs_check'] == 'git' && file_exists($GLOBALS['config']['base_path'].'.git/index')){
+				$last_modification = filemtime($GLOBALS['config']['base_path'].'.git/index');
+			}
+				
+			if ($GLOBALS['config']['cache']['vcs_check'] == 'svn' && file_exists($GLOBALS['config']['base_path'].'.svn/wc.db')){
+				$last_modification = filemtime($GLOBALS['config']['base_path'].'.svn/wc.db');
+			}
+				
+			$vcs_check_filename = $GLOBALS['config']['base_path'].'cache/vcs_check.json';
+			if (file_exists($vcs_check_filename)){
+				
+				if (!empty($last_modification)){
+			
+					$vcs_check = json_decode(file_get_contents($vcs_check_filename), true);
+			
+					if (empty($vcs_check[$page_id_clean]) || $vcs_check[$page_id_clean] < $last_modification){
+							
+						// needs update
+						$vcs_check[$page_id_clean] = $last_modification;
+						file_put_contents($vcs_check_filename, json_encode($vcs_check, JSON_PRETTY_PRINT));
+	
+					} else {
+						
+						if (file_exists($page_css_filename)){
+							return file_get_contents($page_css_filename);
+						}
+						
+					}
+			
+				}
+				
+			} else {
+				
+				file_put_contents($vcs_check_filename, json_encode([$page_id_clean => $last_modification], JSON_PRETTY_PRINT));
+				
+			}
+				
+		}
 		 
 		// get global css
 		$global_css = [];
@@ -515,9 +499,73 @@ class CI_Controller {
 		$scsss = array_merge($this->scss, $GLOBALS['_panel_scss']);
 		 
 		// compile files together
-		$css_str = pack_css($csss, $scsss, $return_array);
-		 
-		return $css_str;
+		$css_arr = pack_css($csss, $scsss);
+		
+		if (empty($GLOBALS['config']['inline_css'])){
+		
+			$css_str = '';
+			if (!empty($css_arr)){
+				foreach($css_arr as $css_line){
+					$css_str .= '<link rel="stylesheet" type="text/css" href="'.$css_line['script'].'" />'."\n";
+				}
+			}
+		
+		} else {
+		
+			if (!empty($css_arr)){
+		
+				// check for cache
+				$hash = substr(md5('inline_'.serialize($css_arr).'_'.(!empty($GLOBALS['config']['inline_limit']) ? $GLOBALS['config']['inline_limit'] : 0)), 0, 8);
+				$css_filename = $GLOBALS['config']['base_path'].'cache/'.$hash.'.css';
+				$css2_filename = $GLOBALS['config']['base_path'].'cache/'.$hash.'_2.css';
+				$css2_url = $GLOBALS['config']['base_url'].'cache/'.$hash.'_2.css';
+		
+				if (file_exists($css_filename) && file_exists($css2_filename)){
+		
+					$css_str = file_get_contents($css_filename);
+					$css2_str = file_get_contents($css2_filename);
+		
+				} else {
+		
+					$css_str = '';
+					$css2_str = '';
+		
+					foreach($css_arr as $css_line){
+		
+						$css_tmp = str_replace("url('../", "url('".$GLOBALS['config']['base_url'], file_get_contents($css_line['filename']))."\n";
+						$css_tmp = str_replace(' {', '{', $css_tmp);
+						$css_tmp = preg_replace('!([;}{,:])\s+!s', '$1', $css_tmp);
+						$css_tmp = preg_replace('!/\*.*?\*/!s', ' ', $css_tmp);
+		
+						if (empty($GLOBALS['config']['inline_limit']) || strlen($css_str) < $GLOBALS['config']['inline_limit']){
+							$css_str .= $css_tmp;
+						} else {
+							$css2_str .= $css_tmp;
+						}
+		
+					}
+		
+					file_put_contents($css_filename, $css_str);
+					file_put_contents($css2_filename, $css2_str);
+		
+				}
+		
+			}
+		
+			$css_str = '<style type="text/css">'."\n".$css_str."\n".'</style>'."\n";
+			if (!empty($css2_str)){
+				$css_str .= '<link rel="preload" href="'.$css2_url.(!empty($GLOBALS['config']['cache']['force_download']) ? '?v='.time() : '').'" as="style" onload="this.rel=\'stylesheet\'">'."\n";
+			}
+		
+		}
+		
+		$debug_extra = '';
+		if ($page_id !== false && !empty($GLOBALS['config']['cache']['vcs_check'])){
+			file_put_contents($page_css_filename, $css_str.'<!-- css: '.date('Y-m-d H:i:s').' -->'."\n");
+			$debug_extra = ' (saved to cache)';
+		}
+
+		return $css_str.'<!-- css live: '.round((microtime(true) - $starttime)*1000).'ms'.$debug_extra.' -->'."\n";
 		 
 	}
 	
@@ -600,7 +648,7 @@ class CI_Controller {
 			}
 				
 			// prepare css for onpage loading
-			$css_arr = pack_css($this->css, $this->scss, true);
+			$css_arr = pack_css($this->css, $this->scss);
 	
 			if (count($css_arr)){
 	

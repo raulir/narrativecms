@@ -40,7 +40,7 @@ class form extends CI_Controller {
         // render panels
         $panel_data = $this->render($page_config);
         
-    	$this->output('admin', $panel_data);
+    	$this->output('cms/admin', 'form/admin', $panel_data);
    	
    	}
 

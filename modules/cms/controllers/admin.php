@@ -33,7 +33,7 @@ class admin extends CI_Controller {
 		// render panels
 		$panel_data = $this->render($page_config);
 
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin', $panel_data);
 
 	}
 
@@ -49,7 +49,7 @@ class admin extends CI_Controller {
 		// render panels
 		$panel_data = $this->render($page_config);
 
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/pages', $panel_data);
 
 	}
 
@@ -65,7 +65,7 @@ class admin extends CI_Controller {
 		// render panels
 		$panel_data = $this->render($page_config);
 
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/page', $panel_data);
 
 	}
 
@@ -91,39 +91,7 @@ class admin extends CI_Controller {
 		// render panels
 		$page_panel_data = $this->render($page_config);
 
-		$this->output('admin', $page_panel_data);
-
-	}
-
-	function menu($menu_id = 0){
-
-		// set page config
-		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms_main_menu', 'module' => 'cms', 'params' => array('menu_id' => $menu_id, ), ),
-		);
-
-		// render panels
-		$panel_data = $this->render($page_config);
-
-		$this->output('admin', $panel_data);
-
-	}
-
-	function menu_main(){
-		 
-		// set page config
-		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms_page_panel', 'module' => 'cms', 'params' => array('filter' => array('panel_name' => 'menu_main', ), ), ),
-		);
-
-		// render panels
-		$panel_data = $this->render($page_config);
-
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', false, $page_panel_data);
 
 	}
 
@@ -139,35 +107,7 @@ class admin extends CI_Controller {
 		// render panels
 		$panel_data = $this->render($page_config);
 
-		$this->output('admin', $panel_data);
-
-	}
-
-	function keywords(){
-
-		// set page config
-		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array(
-						'position' => 'main',
-						'panel' => 'cms_list',
-						'module' => 'cms',
-						'params' => array(
-								'title' => 'Keywords',
-								'edit_base' => 'admin/keyword/',
-								'source' => array('model' => 'cms_keyword_model', 'method' => 'get_cms_keywords', ),
-								'title_field' => 'cms_keyword_id',
-								'id_field' => 'cms_keyword_id',
-								'no_sort' => 1,
-						),
-				),
-		);
-
-		// render panels
-		$panel_data = $this->render($page_config);
-
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/table', $panel_data);
 
 	}
 
@@ -225,7 +165,7 @@ class admin extends CI_Controller {
 		// render panels
 		$panel_data = $this->render($page_config);
 		 
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/cms_list', $panel_data);
 
 	}
 
@@ -284,7 +224,7 @@ class admin extends CI_Controller {
 		// render panels
 		$panel_data = $this->render($page_config);
 
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', false, $panel_data);
 
 	}
 
@@ -302,7 +242,7 @@ class admin extends CI_Controller {
 		// render panels
 		$panel_data = $this->render($page_config);
 
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/update', $panel_data);
 		 
 	}
 
@@ -319,7 +259,7 @@ class admin extends CI_Controller {
 		$panel_data = $this->render($page_config);
 
 		// output to layout
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/users', $panel_data);
 		 
 	}
 	
@@ -336,7 +276,7 @@ class admin extends CI_Controller {
 		$panel_data = $this->render($page_config);
 	
 		// output to layout
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/cssjs', $panel_data);
 			
 	}
 	
@@ -353,7 +293,7 @@ class admin extends CI_Controller {
 		$panel_data = $this->render($page_config);
 	
 		// output to layout
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/search', $panel_data);
 			
 	}
 	
@@ -405,7 +345,7 @@ class admin extends CI_Controller {
 		$panel_data = $this->render($page_config);
 		
 		// output to layout
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/dump', $panel_data);
 		
 	}
 

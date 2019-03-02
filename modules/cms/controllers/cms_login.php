@@ -27,7 +27,7 @@ class cms_login extends CI_Controller {
         // render panels
         $panel_data = $this->render($page_config);
         
-    	$this->output('cms_login', $panel_data);
+    	$this->output('cms/cms_login', 'cms_login', $panel_data);
    		
    	}
 

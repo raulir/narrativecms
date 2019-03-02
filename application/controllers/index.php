@@ -181,8 +181,11 @@ class Index extends CI_Controller {
 				
 			// render panels
 			$panel_data = $this->render($page_config);
-			//  output to the template
-			$this->output((!empty($page['layout']) ? $page['layout'] : 'default'), $panel_data);
+			//  output to the template, deprecated - layout without module name
+			if (!stristr($page['layout'], '/')){
+				$page['layout'] = 'cms/'.$page['layout'];
+			}
+			$this->output($page['layout'], $page_id, $panel_data);
 		
 		} else {
 		

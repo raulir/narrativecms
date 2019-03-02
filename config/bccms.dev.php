@@ -11,6 +11,8 @@ $config['analytics'] = 0;
 $config['cache']['force_download'] = 1;
 $config['cache']['pack_js'] = 0;
 $config['cache']['pack_css'] = 0;
+$config['cache']['vcs_check'] = ''; // ''|'git'|'svn'
+
 $config['update']['allow_updates'] = 1;
 
 // Optimise PNG images using pngquant. Pngquant uses lossy compression to define edges and same colour areas. May affect image quality. May not be available in shared hosting.

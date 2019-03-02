@@ -27,7 +27,7 @@ if ( !function_exists('pack_css')) {
 		
 	}
 	
-	function pack_css($csss, $scsss = array(), $return_array = false){
+	function pack_css($csss, $scsss){
 
 		// compile scss
 		foreach($scsss as $scsss_item){
@@ -227,29 +227,21 @@ if ( !function_exists('pack_css')) {
 				
 		}
 
-		if ($return_array){
-			
-			if ($GLOBALS['config']['cache']['pack_css'] && !empty($fileurl)){
-				$csss = ['0' => [
-						'script' => $fileurl.( (!empty($GLOBALS['config']['cache']['force_download']) && empty($GLOBALS['config']['inline_css'])) ? '?v='.time() : ''), 
-						'filename' => $filename,
-						'filemtime' => filemtime($filename),
-				]];
-			} else {
-				foreach($csss as $key => $css){
-					$csss[$key]['script'] = $GLOBALS['config']['base_url'].$css['script'].((!empty($GLOBALS['config']['cache']['force_download']) && empty($GLOBALS['config']['inline_css'])) ? '?v='.time() : '');
-					$csss[$key]['filename'] = $GLOBALS['config']['base_path'].$css['script'];
-					$csss[$key]['filemtime'] = filemtime($csss[$key]['filename']);
-				}
-			}
-
-			return $csss; // as array
-		
+		if ($GLOBALS['config']['cache']['pack_css'] && !empty($fileurl)){
+			$csss = ['0' => [
+					'script' => $fileurl.( (!empty($GLOBALS['config']['cache']['force_download']) && empty($GLOBALS['config']['inline_css'])) ? '?v='.time() : ''), 
+					'filename' => $filename,
+					'filemtime' => filemtime($filename),
+			]];
 		} else {
-			
-			return $css_string;
-		
+			foreach($csss as $key => $css){
+				$csss[$key]['script'] = $GLOBALS['config']['base_url'].$css['script'].((!empty($GLOBALS['config']['cache']['force_download']) && empty($GLOBALS['config']['inline_css'])) ? '?v='.time() : '');
+				$csss[$key]['filename'] = $GLOBALS['config']['base_path'].$css['script'];
+				$csss[$key]['filemtime'] = filemtime($csss[$key]['filename']);
+			}
 		}
+
+		return $csss; // as array
 		 
 	}
 	
