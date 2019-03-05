@@ -332,9 +332,7 @@ class CI_Controller {
 	
 	function output($layout_name, $page_id, $panel_data = array()){
 		
-		list($layout_module, $layout_file) = explode('/', $layout_name);
-		$layout_filename = $GLOBALS['config']['base_path'].'modules/'.$layout_module.'/layouts/'.$layout_file.'.tpl.php';
-		$page = $this->load->view($layout_filename, array('data' => $panel_data, ), true);
+		$page = $this->load->layout($layout_name, $panel_data);
 
 		// get css part of page head
 		$css_str = $this->get_page_css($page_id);

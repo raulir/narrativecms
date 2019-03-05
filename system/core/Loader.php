@@ -407,9 +407,10 @@ class CI_Loader {
 	 */
 	public function view($view, $vars = array(), $return = FALSE)
 	{
+
 		return $this->_ci_load(array('_ci_view' => $view, '_ci_vars' => $this->_ci_object_to_array($vars), '_ci_return' => $return));
 	}
-
+	
 	// --------------------------------------------------------------------
 
 	/**
@@ -684,13 +685,13 @@ class CI_Loader {
 	 * @return	void
 	 */
 	protected function _ci_load($_ci_data) {
-		
+
 		// Set the default data variables
 		foreach (array('_ci_view', '_ci_vars', '_ci_path', '_ci_return') as $_ci_val)
 		{
 			$$_ci_val = ( ! isset($_ci_data[$_ci_val])) ? FALSE : $_ci_data[$_ci_val];
 		}
-
+		
 		$file_exists = FALSE;
 
 		if (!empty($_ci_view) && (stristr($_ci_view, 'modules/') || stristr($_ci_view, $GLOBALS['config']['base_path']))){
@@ -1123,7 +1124,27 @@ class CI_Loader {
 			return $filename;
 		}
 	}
-}
+	
+	function layout($layout, $data){
+	
+		if (stristr($layout, '/')){
+			list($layout_module, $layout_file) = explode('/', $layout);
+		} else { // deprecated - if layout name doesn't contain module name
+			$layout_module = 'cms';
+			$layout_file = $layout;
+		}
+		$layout_filename = $GLOBALS['config']['base_path'].'modules/'.$layout_module.'/layouts/'.$layout_file.'.tpl.php';
+		
+		ob_start();
 
-/* End of file Loader.php */
-/* Location: ./system/core/Loader.php */
+		include($layout_filename); // include() vs include_once() allows for multiple views with the same name
+
+		$buffer = ob_get_contents();
+		
+		@ob_end_clean();
+		
+		return $buffer;
+	
+	}
+	
+}

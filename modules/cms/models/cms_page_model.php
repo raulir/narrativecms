@@ -217,7 +217,9 @@ class cms_page_model extends CI_Model {
 		foreach($GLOBALS['config']['modules'] as $module){
 			$config = $this->cms_module_model->get_module_config($module);
 			if (!empty($config['layouts']) && is_array($config['layouts'])){
-				$return = array_merge($return, $config['layouts']);
+				foreach($config['layouts'] as $key => $value){
+					$return = array_merge($return, [['id' => $module.'/'.$value['id'], 'name' => $value['name']]]);
+				}
 			}
 		}
 
