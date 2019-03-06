@@ -77,6 +77,16 @@ if ( !function_exists('get_position')) {
     	
     	$params['embed'] = 1;
     	$ci =& get_instance();
+
+    	// check if json defined js
+    	$ci->load->model('cms/cms_panel_model');
+    	$panel_config = $ci->cms_panel_model->get_cms_panel_config($name);
+    	if (!empty($panel_config['js'])){
+    		foreach($panel_config['js'] as $js){
+    			list($js_module, $js_file) = explode('/', $js);
+    			$GLOBALS['_panel_js'][] = 'modules/'.$js_module.'/js/'.$js_file.'.js';
+    		}
+    	}
     	
     	$data = $ci->ajax_panel($name, $params);
 

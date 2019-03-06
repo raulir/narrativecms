@@ -98,8 +98,8 @@ class cms_panel_model extends CI_Model {
 	
 	function get_cms_panel_fk_data($block_structure){
 		
-		$this->load->model('cms_page_panel_model');
-		$this->load->model('cms_table_model');
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_table_model');
 		
 		$return = [];
 		

@@ -216,7 +216,7 @@ class cms_page_panel_operations extends CI_Controller {
 			foreach($panel_structure as $struct){
 				
 				if ($struct['type'] == 'image'){
-					if (!empty($struct['meta']) && $struct['meta'] == 'image'){
+					if (!empty($struct['meta']) && $struct['meta'] == 'image' && !empty($data['panel_params'][$struct['name']])){
 						
 						$data['panel_params']['_images'][] = $data['panel_params'][$struct['name']];
 
@@ -226,8 +226,14 @@ class cms_page_panel_operations extends CI_Controller {
 				if ($struct['type'] == 'repeater'){
 					foreach ($struct['fields'] as $r_struct){
 						if ($r_struct['type'] == 'image'){
-							if (!empty($r_struct['meta']) && $r_struct['meta'] == 'image'){
-								$data['panel_params']['_images'][] = $data['panel_params'][$r_struct['name']];
+							if (!empty($r_struct['meta']) && $r_struct['meta'] == 'image' && !empty($data['panel_params'][$struct['name']])){
+								
+								if (empty($data['panel_params']['_images'])){
+									$data['panel_params']['_images'] = [];
+								}
+								
+								array_merge($data['panel_params']['_images'], $data['panel_params'][$struct['name']]);
+								
 							}
 						}
 					}
