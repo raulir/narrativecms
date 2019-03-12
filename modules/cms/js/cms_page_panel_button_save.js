@@ -76,14 +76,14 @@ function cms_page_panel_save(params){
 								location.reload();
 							} 
 							
-						} else if ($('#block_id').val() == '0' && (parseInt(data.result.parent_id) > 0)){
+						} else if ($('.cms_page_panel_id').val() == '0' && (parseInt(data.result.parent_id) > 0)){
 						
 							// adding child
 							cms_notification('Panel created' + mandatory_extra, 3);
 							window.location.href = config_url + 'admin/cms_page_panel/' + data.result.cms_page_panel_id + '/' + data.result.parent_id + 
 									'/' + $('.cms_page_panel_parent_name').val() + '/';
 						
-						} else if ($('#block_id').val() == '0' && (parseInt(data.result.cms_page_panel_id) > 0)){
+						} else if ($('.cms_page_panel_id').val() == '0' && (parseInt(data.result.cms_page_panel_id) > 0)){
 							
 							// adding list item
 							cms_notification('New ' + data.result.panel_name + ' created', 3);

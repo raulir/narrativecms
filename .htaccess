@@ -62,7 +62,7 @@ RewriteEngine on
 # Protect cache
 RewriteCond %{REQUEST_URI} ^/cache [NC]
 RewriteCond %{REQUEST_URI} ^/_ [NC]
-RewriteCond %{REQUEST_URI} !\.(css|js|xml)$ [NC]
+RewriteCond %{REQUEST_URI} !\.(css|js|xml|json)$ [NC]
 RewriteRule .* - [F,L]
 
 # Everything, what is not set domain goes to set domain
