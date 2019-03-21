@@ -22,8 +22,8 @@ class cms_list extends CI_Controller {
 
 		if (!empty($params['filter_fields'])){
 
-			$this->load->model('cms_panel_model');
-			$this->load->model('cms_page_panel_model');
+			$this->load->model('cms/cms_panel_model');
+			$this->load->model('cms/cms_page_panel_model');
 				
 			// load definition
 			$panel_definition = $this->cms_panel_model->get_cms_panel_definition($params['filter']['panel_name']);
@@ -51,7 +51,8 @@ class cms_list extends CI_Controller {
 					}
 						
 					// if fk
-					if (!empty($panel_field['name']) && $panel_field['type'] == 'fk' && 	$panel_field['name'] == $filter_field && $panel_field['target'] == 'block'){
+					if (!empty($panel_field['name']) && $panel_field['type'] == 'fk' && $panel_field['name'] == $filter_field && 
+							!empty($panel_field['target']) && $panel_field['target'] == 'block'){
 
 						$panel_name = str_replace('_id', '', $panel_field['name']);
 
@@ -68,6 +69,21 @@ class cms_list extends CI_Controller {
 								
 						}
 
+					} else if (!empty($panel_field['name']) && $panel_field['type'] == 'fk' && $panel_field['name'] == $filter_field){
+						
+						$target_a = $this->cms_page_panel_model->get_list($panel_field['list'], ['show' => [0,1]]);
+						
+						if (count($target_a)){
+						
+							$params['filter_fields_values'][$filter_field] = [];
+							foreach($target_a as $key => $row){
+								
+								$params['filter_fields_values'][$filter_field][$key] = $this->run_panel_method($panel_field['list'], 'panel_heading', $row);
+									
+							}
+						
+						}
+						
 					}
 						
 				}

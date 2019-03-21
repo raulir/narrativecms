@@ -154,8 +154,8 @@ class CI_Loader {
 		$this->_ci_models = array();
 		$this->_base_classes =& is_loaded();
 
-		$this->_ci_autoloader();
-
+		$this->database();
+		
 		return $this;
 	}
 
@@ -957,10 +957,6 @@ class CI_Loader {
 			{
 				$name = 'CI_'.$class;
 			}
-			elseif (class_exists('MY_'.$class))
-			{
-				$name = 'MY_'.$class;
-			}
 			else
 			{
 				$name = $class;
@@ -1005,67 +1001,6 @@ class CI_Loader {
 			$CI->$classvar = new $name;
 		}
 
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Autoloader
-	 *
-	 * The config/autoload.php file contains an array that permits sub-systems,
-	 * libraries, and helpers to be loaded automatically.
-	 *
-	 * @param	array
-	 * @return	void
-	 */
-	private function _ci_autoloader()
-	{
-	
-		include(APPPATH.'config/autoload.php');
-
-		if ( ! isset($autoload))
-		{
-			return FALSE;
-		}
-
-		// Autoload helpers
-		foreach (array('helper') as $type)
-		{
-			if (isset($autoload[$type]) AND count($autoload[$type]) > 0)
-			{
-				$this->$type($autoload[$type]);
-			}
-		}
-
-		// A little tweak to remain backward compatible
-		// The $autoload['core'] item was deprecated
-		if ( ! isset($autoload['libraries']) AND isset($autoload['core']))
-		{
-			$autoload['libraries'] = $autoload['core'];
-		}
-
-		// Load libraries
-		if (isset($autoload['libraries']) AND count($autoload['libraries']) > 0)
-		{
-			// Load the database driver.
-			if (in_array('database', $autoload['libraries']))
-			{
-				$this->database();
-				$autoload['libraries'] = array_diff($autoload['libraries'], array('database'));
-			}
-
-			// Load all other libraries
-			foreach ($autoload['libraries'] as $item)
-			{
-				$this->library($item);
-			}
-		}
-
-		// Autoload models
-		if (isset($autoload['model']))
-		{
-			$this->model($autoload['model']);
-		}
 	}
 
 	// --------------------------------------------------------------------

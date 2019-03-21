@@ -224,7 +224,7 @@ if ( !function_exists('get_position')) {
      /**
      * prints out a href and target with full site path and opening in new window where needed
      */
-    function _lh($url){
+    function _lh($url, $params = []){
     	
         if (is_array($url)){
     		if(!empty($url['url'])){
@@ -232,6 +232,10 @@ if ( !function_exists('get_position')) {
     		} else {
     			$url = '';
     		}
+    	}
+    	
+    	if (!empty($params['hash'])){
+    		$url .= '#'.trim($params['hash'], ' #');
     	}
     	
     	if(empty($url)){
@@ -255,18 +259,19 @@ if ( !function_exists('get_position')) {
     /**
      * prints link to file from cms file input
      */
-    function _lf($filename, $href = true){
-    	
-    	if ($filename){
-    		
-    		if ($href){
-				print(' href="' . _l('files/get/'.str_replace('/', '__', $filename), false) . '" ');
-    		} else {
-    			print(_l('files/get/'.str_replace('/', '__', $filename), false));
-    		}
-    	
-    	}
-    	
+    function _lf($filename){
+    	if (empty($filename)) return;
+		print(' href="' . _l('files/get/'.str_replace('/', '__', $filename), false) . '" ');
+    }
+    
+    function _lfd($filename){
+    	if (empty($filename)) return;
+    	print(_l('files/get/'.str_replace('/', '__', $filename), false));
+    }
+    
+    function _lfs($filename){
+    	if (empty($filename)) return;
+    	print(' src="' . _l('files/get/'.str_replace('/', '__', $filename), false) . '" ');
     }
     
     /**
