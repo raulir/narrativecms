@@ -95,6 +95,8 @@ class CI_Router {
 	 */
 	function _set_routing()
 	{
+		
+		global $landing_route;
 
 		// load the routes.php file.
 		if (file_exists($GLOBALS['config']['base_path'] . 'cache/routes.php')){
@@ -103,7 +105,7 @@ class CI_Router {
 			$route['(:any)'] = 'cms_operations/update_routes/';
 		}
 
-		$route['default_controller'] = 'index';
+		$route['default_controller'] = 'index'.$landing_route;
 		$route['404_override'] = '';
 
 		$this->routes = ( ! isset($route) OR ! is_array($route)) ? array() : $route;

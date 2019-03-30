@@ -1,0 +1,84 @@
+.cms_input_multi {
+	
+	label {
+		height: 21px;
+	}
+	
+}
+
+.cms_input_multi_values {
+	padding: 2px 0;
+	border-bottom: 1px solid #a0a0a0;
+	border-top: 1px solid #a0a0a0;
+	position: relative;
+	min-height: 24px;
+	line-height: 20px;
+}
+
+.cms_input_multi_item {
+	display: inline-block;
+	box-sizing: border-box;
+    border: 1px solid #a0a0a0;
+    border-radius: 3px;
+    padding: 1px 25px 0px 19px;
+    cursor: pointer;
+    text-align: center;
+    margin: 2px 5px 2px 0;
+    height: 20px;
+    line-height: 19px;
+    font-size: 15px;
+    position: relative;
+    background-position: 4px center;
+    background-size: 10px auto;
+    background-repeat: no-repeat;
+    vertical-align: top;
+    background-color: white;
+
+	&::after {
+		content: 'x';
+		display: block;
+		position: absolute;
+	    height: 15px;
+	    width: 17px;
+	    border-left: 1px solid #c0c0c0;
+	    text-align: center;
+	    font-size: 14px;
+	    line-height: 16px;
+	    right: 0px;
+	    top: 2px;
+	}
+	
+}
+
+.cms_input_multi_bottom {
+	padding: 4px 0;
+}
+
+.cms_input_multi_add {
+	box-sizing: border-box;
+    display: block;
+    border: 1px solid #a0a0a0;
+    border-radius: 4px;
+    float: right;
+    padding: 3px 14px 0px 14px;
+    cursor: pointer;
+    text-align: center;
+    margin-left: 5px;
+    height: auto;
+    line-height: 19px;
+    font-size: 15px;
+    width: auto;
+}
+
+.cms_input_multi_select {
+	float: right;
+	border: 1px solid #a0a0a0;
+	display: block;
+	box-sizing: border-box;
+    padding: 2px 5px 0px 5px;
+    height: 23px;
+    line-height: 20px;
+    font-size: 16px;
+    font-family: foundrysterling;
+    font-weight: 200;
+}

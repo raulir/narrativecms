@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_input_link extends MY_Controller{
+class cms_input_link extends CI_Controller {
 
 	function __construct(){
 
@@ -21,10 +21,10 @@ class cms_input_link extends MY_Controller{
 		// todo: cache data here, as there might be more link inputs on the page
 		// or move where fk data is prepared
 
-		$this->load->model('cms_page_panel_model');
-		$this->load->model('cms_panel_model');
-		$this->load->model('cms_page_model');
-		$this->load->model('cms_slug_model');
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_panel_model');
+		$this->load->model('cms/cms_page_model');
+		$this->load->model('cms/cms_slug_model');
 
 		// check if targets are limited
 		if (!empty($params['targets'])){
@@ -77,7 +77,7 @@ class cms_input_link extends MY_Controller{
 			// get lists
 			// get all no page blocks
 			$block_types = array();
-			$blocks = $this->cms_page_panel_model->get_cms_page_panels_by(array('page_id' => [999999,0], ));
+			$blocks = $this->cms_page_panel_model->get_cms_page_panels_by(array('cms_page_id' => [999999,0], ));
 			foreach($blocks as $block){
 				$block_types[$block['panel_name']] = $block['panel_name'];
 			}
@@ -108,12 +108,12 @@ class cms_input_link extends MY_Controller{
 										$block_title = $block[$block_config['list']['title_field']];
 									}
 
-									$params['lists'][$block_type][$block['block_id']] = substr($block_title, 0, 80);
+									$params['lists'][$block_type][$block['cms_page_panel_id']] = substr($block_title, 0, 80);
 
 									// slug data
-									$block_target = $block_type.'='.$block['block_id'];
+									$block_target = $block_type.'='.$block['cms_page_panel_id'];
 									$block_slug = $this->cms_slug_model->get_cms_slug_by_target($block_target);
-									$params['slugs'][$block_type][$block['block_id']] = !empty($block_slug) ? $block_slug.'/' : $block_target;
+									$params['slugs'][$block_type][$block['cms_page_panel_id']] = !empty($block_slug) ? $block_slug.'/' : $block_target;
 										
 								}
 							}
@@ -150,6 +150,18 @@ class cms_input_link extends MY_Controller{
 		} else {
 			$params['name_extra'] = '';
 		}
+		
+		// _value
+		$params['_value'] = '';
+		if ($params['value']['target'] == '_page'){
+			$params['_value'] = !empty($params['value']['cms_page_id']) ? $params['value']['cms_page_id'] : 0;
+		} elseif ($params['value']['target'] == '_list'){
+			$params['_value'] = $params['value']['url'];
+		} elseif ($params['value']['target'] == '_manual'){
+			$params['_value'] = $params['value']['url'];
+		}
+		
+		unset($params['panel_structure']);
 
 		return $params;
 

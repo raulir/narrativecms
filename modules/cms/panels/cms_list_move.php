@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_list_move extends MY_Controller{
+class cms_list_move extends CI_Controller {
 
 	function __construct(){
 
@@ -41,7 +41,7 @@ class cms_list_move extends MY_Controller{
 					$filters = $this->input->post('filters');
 					$list_order = $this->input->post('list_order');
 
-					$filter = array('panel_name' => $block['panel_name'], 'page_id' => [999999,0], );
+					$filter = array('panel_name' => $block['panel_name'], 'cms_page_id' => [999999,0], );
 					if (is_array($filters)){
 						$filter = array_merge($filter, $filters);
 					}
@@ -51,7 +51,7 @@ class cms_list_move extends MY_Controller{
 
 					// get reusable sorts and updated list sort
 					$previous_sort = array(); // free sorts
-					$new_list_sort = array($old_block_a[0]['block_id']); // what has to be placed there
+					$new_list_sort = array($old_block_a[0]['cms_page_panel_id']); // what has to be placed there
 					foreach($list_order as $list_sort => $cms_page_panel_id){
 						$panel = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
 						$previous_sort[] = $panel['sort'];
@@ -79,7 +79,7 @@ class cms_list_move extends MY_Controller{
 				$filters = $this->input->post('filters');
 				$list_order = $this->input->post('list_order');
 
-				$filter = array('panel_name' => $block['panel_name'], 'page_id' => [999999,0], );
+				$filter = array('panel_name' => $block['panel_name'], 'cms_page_id' => [999999,0], );
 				if (is_array($filters)){
 					$filter = array_merge($filter, $filters);
 				}
@@ -100,7 +100,7 @@ class cms_list_move extends MY_Controller{
 							$new_list_sort[] = $cms_page_panel_id;
 						}
 					}
-					$new_list_sort[] = $old_block_a[0]['block_id']; // old block goes to the end of page
+					$new_list_sort[] = $old_block_a[0]['cms_page_panel_id']; // old block goes to the end of page
 					 
 					// update moving block to next page first sort found before
 					$this->cms_page_panel_model->update_cms_page_panel($block_id, array('sort' => $old_block_a[0]['sort'], ), true);

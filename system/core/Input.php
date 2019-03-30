@@ -569,31 +569,6 @@ class CI_Input {
 							'system_folder', 'application_folder', 'BM', 'EXT',
 							'CFG', 'URI', 'RTR', 'OUT', 'IN');
 
-		// Unset globals for securiy.
-		// This is effectively the same as register_globals = off
-		foreach (array($_GET, $_POST, $_COOKIE) as $global)
-		{
-			if ( ! is_array($global))
-			{
-				if ( ! in_array($global, $protected))
-				{
-					global $$global;
-					$$global = NULL;
-				}
-			}
-			else
-			{
-				foreach ($global as $key => $val)
-				{
-					if ( ! in_array($key, $protected))
-					{
-						global $$key;
-						$$key = NULL;
-					}
-				}
-			}
-		}
-
 		// Is $_GET data allowed? If not we'll set the $_GET to an empty array
 		if ($this->_allow_get_array == FALSE)
 		{
@@ -616,40 +591,6 @@ class CI_Input {
 			foreach ($_POST as $key => $val)
 			{
 				$_POST[$this->_clean_input_keys($key)] = $this->_clean_input_data($val);
-			}
-		}
-
-		// Clean $_COOKIE Data
-		if (is_array($_COOKIE) AND count($_COOKIE) > 0)
-		{
-			// Also get rid of specially treated cookies that might be set by a server
-			// or silly application, that are of no use to a CI application anyway
-			// but that when present will trip our 'Disallowed Key Characters' alarm
-			// http://www.ietf.org/rfc/rfc2109.txt
-			// note that the key names below are single quoted strings, and are not PHP variables
-			unset($_COOKIE['$Version']);
-			unset($_COOKIE['$Path']);
-			unset($_COOKIE['$Domain']);
-
-			// Work-around for PHP bug #66827 (https://bugs.php.net/bug.php?id=66827)
-			//
-			// The session ID sanitizer doesn't check for the value type and blindly does
-			// an implicit cast to string, which triggers an 'Array to string' E_NOTICE.
-			$sess_cookie_name = config_item('cookie_prefix').config_item('sess_cookie_name');
-			if (isset($_COOKIE[$sess_cookie_name]) && ! is_string($_COOKIE[$sess_cookie_name]))
-			{
-				unset($_COOKIE[$sess_cookie_name]);
-			}
-
-			foreach ($_COOKIE as $key => $val)
-			{
-				// _clean_input_data() has been reported to break encrypted cookies
-				if ($key === $sess_cookie_name && config_item('sess_encrypt_cookie'))
-				{
-					continue;
-				}
-
-				$_COOKIE[$this->_clean_input_keys($key)] = $this->_clean_input_data($val);
 			}
 		}
 
@@ -688,16 +629,6 @@ class CI_Input {
 				$new_array[$this->_clean_input_keys($key)] = $this->_clean_input_data($val);
 			}
 			return $new_array;
-		}
-
-		/* We strip slashes if magic quotes is on to keep things consistent
-
-		   NOTE: In PHP 5.4 get_magic_quotes_gpc() will always return 0 and
-			 it will probably not exist in future versions at all.
-		*/
-		if ( ! is_php('5.4') && get_magic_quotes_gpc())
-		{
-			$str = stripslashes($str);
 		}
 
 		// Clean UTF-8 if supported

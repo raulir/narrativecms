@@ -1,3 +1,23 @@
+function cms_input_image_init(){
+
+	// columns are created only once and all such inputs are in these
+	$('.admin_column .cms_input_image_button').off('click.r').on('click.r', function(event){
+		cms_input_image_popup($(this));
+	});
+	$('.admin_column .cms_input_image_clear').off('click.r').on('click.r', function(event){
+		cms_input_image_clear($(this));
+	});
+	
+	// init repeater image inputs
+	$('.admin_repeater_container').on('click.r', '.cms_input_image_button', function(event){
+		cms_input_image_popup($(this));
+	});
+	$('.admin_repeater_container').on('click.r', '.cms_input_image_clear', function(event){
+		cms_input_image_clear($(this));
+	});
+
+}
+
 function cms_input_image_rename(old_name){
 	
 	// TODO: check if such name exists on page
@@ -15,7 +35,7 @@ function cms_input_image_rename(old_name){
 }
 
 function cms_input_image_popup($element){
-	
+
 	var input_name = $element.data('name');
 	cms_input_image_load_images({
 		'input_selector': '.cms_image_input_' + input_name, 
@@ -31,26 +51,6 @@ function cms_input_image_clear($element){
 	$('.cms_image_input_' + input_name + '').val('');
 	$('.cms_input_image_content_' + input_name).html('-- no image --');
 	
-}
-
-function cms_input_image_init(){
-
-	// columns are created only once and all such inputs are in these
-	$('.admin_column .cms_input_image_button').on('click.r', function(event){
-		cms_input_image_popup($(this));
-	});
-	$('.admin_column .cms_input_image_clear').off('click.r').on('click.r', function(event){
-		cms_input_image_clear($(this));
-	});
-	
-	// init repeater image inputs
-	$('.admin_repeater_container').on('click.r', '.cms_input_image_button', function(event){
-		cms_input_image_popup($(this));
-	});
-	$('.admin_repeater_container').on('click.r', '.cms_input_image_clear', function(event){
-		cms_input_image_clear($(this));
-	});
-
 }
 
 function cms_input_image_load_images(params){

@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_page_panel_export extends MY_Controller{
+class cms_page_panel_export extends CI_Controller {
 
 	function __construct(){
 
@@ -125,7 +125,7 @@ class cms_page_panel_export extends MY_Controller{
 		// set changes
 		$data['show'] = 0;
 		
-		if ($data['page_id'] == 999999) $data['page_id'] = 0;
+		if ($data['cms_page_id'] == 999999) $data['cms_page_id'] = 0;
 					
 		// add images and files
 		foreach($panel_structure as $struct){

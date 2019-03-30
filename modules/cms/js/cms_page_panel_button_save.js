@@ -4,13 +4,13 @@ function cms_page_panel_save(params){
 	
 	// if shortcut, go back to page page
 	if ($('.admin_block_shortcut_to').length && $('.admin_block_shortcut_to').val() != ''){
-		get_ajax('cms_page_panel_operations', {
+		get_ajax('cms/cms_page_panel_operations', {
 			'do': 'cms_page_panel_shortcut',
-			'cms_page_id': $('[name="page_id"]').val(),
+			'cms_page_id': $('.cms_page_id').val(),
 			'cms_page_panel_id': $('.admin_block_shortcut_to').val(),
 			'success': function(){
 				cms_notification('Shortcut created', 3);
-				window.location.href = config_url + 'admin/page/' + $('[name="page_id"]').val() + '/';
+				window.location.href = config_url + 'admin/page/' + $('.cms_page_id').val() + '/';
 			}
 		});
 	} else if ($('.cms_page_panel_panel_name').val() != ''){
@@ -44,6 +44,10 @@ function cms_page_panel_save(params){
 			}
 		});
 		
+		// add do and language
+		data_to_submit['do'] = 'cms_page_panel_save';
+		data_to_submit['language'] = $('.cms_language_select_current').data('language');
+		
 		if (params && params.success){
 			
 			$.extend(data_to_submit, {
@@ -59,7 +63,7 @@ function cms_page_panel_save(params){
 					if ($('.admin_block_shortcut_to').length){
 						
 						cms_notification('Panel created', 3);
-						window.location.href = config_url + 'admin/cms_page_panel/' + data.result.block_id + '/';
+						window.location.href = config_url + 'admin/cms_page_panel/' + data.result.cms_page_panel_id + '/';
 						
 					} else {
 						
@@ -72,18 +76,18 @@ function cms_page_panel_save(params){
 								location.reload();
 							} 
 							
-						} else if ($('#block_id').val() == '0' && (parseInt(data.result.parent_id) > 0)){
+						} else if ($('.cms_page_panel_id').val() == '0' && (parseInt(data.result.parent_id) > 0)){
 						
 							// adding child
 							cms_notification('Panel created' + mandatory_extra, 3);
-							window.location.href = config_url + 'admin/cms_page_panel/' + data.result.block_id + '/' + data.result.parent_id + 
+							window.location.href = config_url + 'admin/cms_page_panel/' + data.result.cms_page_panel_id + '/' + data.result.parent_id + 
 									'/' + $('.cms_page_panel_parent_name').val() + '/';
 						
-						} else if ($('#block_id').val() == '0' && (parseInt(data.result.block_id) > 0)){
+						} else if ($('.cms_page_panel_id').val() == '0' && (parseInt(data.result.cms_page_panel_id) > 0)){
 							
 							// adding list item
 							cms_notification('New ' + data.result.panel_name + ' created', 3);
-							window.location.href = config_url + 'admin/cms_page_panel/' + data.result.block_id + '/';
+							window.location.href = config_url + 'admin/cms_page_panel/' + data.result.cms_page_panel_id + '/';
 							
 						} else {
 						
@@ -97,7 +101,7 @@ function cms_page_panel_save(params){
 			
 		}
 		
-		get_ajax('cms_page_panel_operations', data_to_submit);
+		get_ajax('cms/cms_page_panel_operations', data_to_submit);
 		
 	} else {
 		

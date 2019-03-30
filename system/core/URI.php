@@ -236,7 +236,7 @@ class CI_URI {
 		if (empty($GLOBALS['permitted'])){
 			$GLOBALS['permitted'] = 'a-z 0-9~%.:_\-';
 		}
-		
+/*		
 		if ($str != '')
 		{
 			// preg_quote() in PHP 5.3 escapes -, so the str_replace() and addition of - to preg_quote() is to maintain backwards
@@ -246,7 +246,7 @@ class CI_URI {
 				show_error('The URI you submitted has disallowed characters.', 400);
 			}
 		}
-
+*/
 		// Convert programatic characters to entities
 		$bad	= array('$',		'(',		')',		'%28',		'%29');
 		$good	= array('&#36;',	'&#40;',	'&#41;',	'&#40;',	'&#41;');

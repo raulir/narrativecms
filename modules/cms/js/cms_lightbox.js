@@ -219,8 +219,7 @@
     	
     	setTimeout(function(){
     		
-			var preloader = new preloader_class();
-			preloader.preload({
+			cms_preloader.preload({
 				'images': images
 			});
 		

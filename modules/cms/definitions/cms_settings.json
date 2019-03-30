@@ -3,10 +3,16 @@
 	"label":"CMS settings",
 	"item":[
 		{
+			"type":"image",
+			"name":"favicon",
+			"label":"Favicon",
+			"category":"icon"
+		},
+		{
 			"type":"text",
 			"name":"site_title",
 			"label":"Site title",
-			"default":"New website",
+			"default":"New website - #page#",
 			"help":"Use #page# where page title etc has to appear"
 		},
 		{
@@ -16,22 +22,18 @@
 			"default":"-"
 		},
 		{
-			"type":"image",
-			"name":"favicon",
-			"label":"Favicon",
-			"category":"icon"
-		},
-		{
-			"type":"image",
-			"name":"cms_background",
-			"label":"CMS Background",
-			"category":"content"
+			"type":"link",
+			"name":"landing_page",
+			"label":"Default landing page",
+			"targets":"page,lists",
+			"format":"short",
+			"help":"Page to land when empty slug (host domain name only)"
 		},
 		{
 			"type":"text",
-			"name":"cms_update_url",
-			"label":"CMS update URL",
-			"default":"http://cms.bytecrackers.com/cms/updater/"
+			"name":"email",
+			"label":"Admin email",
+			"help":"Email to send notifications"
 		},
 		{
 			"type":"select",
@@ -66,24 +68,14 @@
 		},
 		{
 			"type":"select",
-			"name":"images_rows",
-			"label":"Image library rows",
+			"name":"targets_enabled",
+			"label":"Visitor target groups",
 			"values":{
-				"3":"3",
-				"4":"4",
-				"5":"5"
+				"0":"Disabled",
+				"1":"Enabled"
 			},
-			"default":"4"
-		},
-		{
-			"type":"select",
-			"name":"input_link_order",
-			"label":"Link input order",
-			"values":{
-				"0":"As sorted",
-				"1":"Alphabetical"
-			},
-			"default":"0"
+			"default":"0",
+			"help":"Enable visitor target groups for languages, AB testing, logged in panels etc"
 		},
 		{
 			"type":"select",
@@ -98,20 +90,21 @@
 		},
 		{
 			"type":"text",
-			"name":"email",
-			"label":"Admin email",
-			"help":"Email to send notifications"
+			"name":"cms_update_url",
+			"label":"CMS update URL",
+			"default":"http://cms.bytecrackers.com/cms/updater/"
 		},
 		{
-			"type":"select",
-			"name":"targets_enabled",
-			"label":"Visitor target groups",
-			"values":{
-				"0":"Disabled",
-				"1":"Enabled"
-			},
-			"default":"0",
-			"help":"Enable visitor target groups for AB testing, logged in panels etc"
+			"type":"layout",
+			"name":"layout",
+			"label":"Default layout",
+			"default":"cms/rem"
+		},
+		{
+			"type":"modules",
+			"name":"modules",
+			"label":"Modules",
+			"help":"[modules]||Which modules and in what order to load from modules installed to the server||{cms} is always automatically loaded as the first"
 		},
 		{
 			"type":"subtitle",
@@ -176,21 +169,21 @@
 			"name":"images_quality",
 			"label":"Image packing quality",
 			"default":"85",
-			"help":"[Image packing quality]||When jpgs are resized or pngs compressed, they are saved in this quality.||If you want to make {Google Page Insights} happy, set it to 85||Otherwise, when there is no problems with page speed, set this to 95."
+			"help":"[Image packing quality]||When jpgs are resized or pngs compressed, they are saved in this quality.||If you want to make {Google Page Insights} happy, set it to 85||Otherwise, when there is no problems with page speed, set this to 95.||Webp uses this - 5"
 		},
 		{
 			"type":"text",
 			"name":"images_1x",
-			"label":"Image 1x size modifier",
+			"label":"Image 1x desktop modifier",
 			"default":"0.75",
-			"help":"[Image 1x size modifier]||Modifier to template suggested image size for natural pixel size screens"
+			"help":"[Image 1x desktop modifier]||Modifier to template suggested image size for natural pixel size screens"
 		},
 		{
 			"type":"text",
 			"name":"images_2x",
-			"label":"Image 2x size modifier",
+			"label":"Image 2x desktop modifier",
 			"default":"1.5",
-			"help":"[Image 2x size modifier]||Modifier to template suggested image size for high density (retina) screens"
+			"help":"[Image 2x desktop modifier]||Modifier to template suggested image size for high density (retina) screens"
 		},
 		{
 			"type":"text",
@@ -198,6 +191,46 @@
 			"label":"Image in textarea size",
 			"default":"0.5",
 			"help":"[Image in textarea size]||Images in textareas width to max width pixels||If result is zero or over 1000px, 1000px is used"
+		},
+		{
+			"type":"text",
+			"name":"images_mobile",
+			"label":"Image mobile modifier",
+			"default":"1.0",
+			"help":"[Image mobile modifier]||Modifier to template suggested image size for mobile devices"
+		},
+		{
+			"type":"subtitle",
+			"label":"CMS interface",
+			"width":"wide",
+			"help":"Settings related to CMS look"
+		},
+		{
+			"type":"image",
+			"name":"cms_background",
+			"label":"CMS Background",
+			"category":"content"
+		},
+		{
+			"type":"select",
+			"name":"images_rows",
+			"label":"Image library rows",
+			"values":{
+				"3":"3",
+				"4":"4",
+				"5":"5"
+			},
+			"default":"4"
+		},
+		{
+			"type":"select",
+			"name":"input_link_order",
+			"label":"Link input order",
+			"values":{
+				"0":"As sorted",
+				"1":"Alphabetical"
+			},
+			"default":"0"
 		}
 	]
 }

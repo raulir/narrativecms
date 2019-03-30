@@ -1,3 +1,8 @@
 .cms_page_toolbar_title {
 	display: inline;
 }
+
+.cms_page_container {
+	position: relative;
+	z-index: 10;
+}

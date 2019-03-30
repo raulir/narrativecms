@@ -1,16 +1,10 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms extends MY_Controller {
+class cms extends CI_Controller {
 		
-    public function __construct() {
-    	
-        parent::__construct();        
-
-   	}
-	
    	function updater($param = '', $second = ''){
 
-   		$this->load->model('cms_update_model');
+   		$this->load->model('cms/cms_update_model');
    		
 		if (!empty($param)){
 			$do = $param;

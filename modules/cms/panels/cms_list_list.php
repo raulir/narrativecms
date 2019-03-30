@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_list_list extends MY_Controller{
+class cms_list_list extends CI_Controller {
 
 	function __construct(){
 
@@ -16,8 +16,12 @@ class cms_list_list extends MY_Controller{
 
 	function panel_params($params){
 
-		$this->load->model('cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_model');
 
+		if ($params['id_field'] == 'block_id'){
+			$params['id_field'] = 'cms_page_panel_id';
+		}
+		
 		$return['edit_base'] = $params['edit_base'];
 		$return['id_field'] = $params['id_field'];
 		$return['title_field'] = !empty($params['title_field']) ? $params['title_field'] : '';
@@ -30,7 +34,7 @@ class cms_list_list extends MY_Controller{
 				$params['panel_name'] = explode('|', $params['panel_name']);
 			}
 				
-			$filter = ['panel_name' => $params['panel_name'], 'page_id' => [999999,0], 'sort!' => '0', ];
+			$filter = ['panel_name' => $params['panel_name'], 'cms_page_id' => [999999,0], 'sort!' => '0', ];
 				
 			if (!empty($params['filters'])){
 				$filter = array_merge($filter, $params['filters']);
@@ -41,14 +45,14 @@ class cms_list_list extends MY_Controller{
 				
 				$return['total'] = 0;
 				foreach($params['panel_name'] as $panel_name){
-					$return['total'] += $this->cms_page_panel_model->count_cms_page_panels_by(array_merge($filter, ['panel_name' => $panel_name, 'page_id' => 999999, ]));
-					$return['total'] += $this->cms_page_panel_model->count_cms_page_panels_by(array_merge($filter, ['panel_name' => $panel_name, 'page_id' => 0, ]));
+					$return['total'] += $this->cms_page_panel_model->count_cms_page_panels_by(array_merge($filter, ['panel_name' => $panel_name, 'cms_page_id' => 999999, ]));
+					$return['total'] += $this->cms_page_panel_model->count_cms_page_panels_by(array_merge($filter, ['panel_name' => $panel_name, 'cms_page_id' => 0, ]));
 				}
 				
 			} else {
 				
-				$return['total'] = $this->cms_page_panel_model->count_cms_page_panels_by(array_merge($filter, ['panel_name' => $params['panel_name'], 'page_id' => 999999, ]));
-				$return['total'] += $this->cms_page_panel_model->count_cms_page_panels_by(array_merge($filter, ['panel_name' => $params['panel_name'], 'page_id' => 0, ]));
+				$return['total'] = $this->cms_page_panel_model->count_cms_page_panels_by(array_merge($filter, ['panel_name' => $params['panel_name'], 'cms_page_id' => 999999, ]));
+				$return['total'] += $this->cms_page_panel_model->count_cms_page_panels_by(array_merge($filter, ['panel_name' => $params['panel_name'], 'cms_page_id' => 0, ]));
 			
 			}
 			

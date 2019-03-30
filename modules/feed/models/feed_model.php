@@ -7,7 +7,7 @@ class feed_model extends CI_Model {
    		$this->load->model('cms/cms_page_panel_model');
    		$this->load->model('cms/cms_image_model');
 		
-   		$feed_settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(array('panel_name' => ['feed/feed_settings', 'feed_settings'], ));
+   		$feed_settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'feed/feed_settings']);
    		
    		if (empty($feed_settings_a[0])){
    			return array();
@@ -15,7 +15,7 @@ class feed_model extends CI_Model {
    		
    		$feed_settings = $feed_settings_a[0];
    		
-   		$stats = array();
+   		$stats = [];
    		
    		if (!empty($feed_settings['channels'])){
    		
@@ -84,7 +84,15 @@ class feed_model extends CI_Model {
 	
 					$stats['instagrams'] = 0;
 					
-					$instagrams = $this->get_instagram_by_username($feed_setting['username']);
+					if (stristr($feed_setting['filter'], '#')){
+					
+						$instagrams = $this->get_instagram_by_hashtag(str_replace('#', '', $feed_setting['filter']));
+						
+	   				} else {
+	   					
+	   					$instagrams = $this->get_instagram_by_username(str_replace('@', '', $feed_setting['filter']));
+	   						
+	   				}
 	
 			   		foreach($instagrams as $instagram){
 			   			
@@ -92,7 +100,7 @@ class feed_model extends CI_Model {
 			   			
 						// check if this item is already there?
 						$item_check_a = $this->cms_page_panel_model->get_cms_page_panels_by(
-								array('_limit' => 1, 'panel_name' => ['feed', 'feed/feed'], 'page_id' => ['999999','0'], 'hash' => $hash, ));
+								['_limit' => 1, 'panel_name' => 'feed/feed', 'cms_page_id' => '0', 'hash' => $hash]);
 								
 						if(!count($item_check_a)){
 				   			$item = $this->parse_instagram($instagram, $feed_setting);
@@ -129,20 +137,10 @@ class feed_model extends CI_Model {
 		$item['source'] = $feed_setting['source'];
 		$item['source_id'] = $cms_list_item['block_id'];
 		
-		if (!empty($cms_list_item['article_category_id'])){
-			// get source label from other place
-			$this->load->model('cms/cms_page_panel_model');
-			$article_category = $this->cms_page_panel_model->get_cms_page_panel($cms_list_item['article_category_id']);
-			$item['source_label'] = $article_category['heading'];
-		} else {
-			$item['source_label'] = $feed_setting['heading'];
-		}
-		
 		$item['update_time'] = time();
 
 		// data fields
 		$item['image'] = $cms_list_item['image'];
-		$item['icon'] = $feed_setting['icon'];
 		$item['heading'] = $cms_list_item['heading'];
 		$item['text'] = !empty($cms_list_item['lead']) ? $cms_list_item['lead'] : '';
 		if (empty($item['text'])){
@@ -176,12 +174,10 @@ class feed_model extends CI_Model {
 		$item['moderated'] = 0;
 		$item['source'] = 'twitter';
 		$item['source_id'] = $tweet['twitter_id'];
-		$item['source_label'] = $feed_setting['heading'];
 		$item['update_time'] = time();
 
 		// data fields
 		$item['image'] = $this->cms_image_model->scrape_image($tweet['image'], 'twitter', 'feed');
-		$item['icon'] = $feed_setting['icon'];
 		$item['heading'] = $tweet['title'];
 		$item['text'] = $tweet['html'];
 		$item['date'] = date('d/m/Y', strtotime($tweet['date']));
@@ -214,12 +210,10 @@ class feed_model extends CI_Model {
 		$item['moderated'] = 0;
 		$item['source'] = 'instagram';
 		$item['source_id'] = $instagram['id'];
-		$item['source_label'] = $feed_setting['heading'];
 		$item['update_time'] = time();
 
 		// data fields
 		$item['image'] = $this->cms_image_model->scrape_image($instagram['image_full'], 'instagram', 'feed');
-		$item['icon'] = $feed_setting['icon'];
 		$item['heading'] = iconv('UTF-8', 'UTF-8//IGNORE', $instagram['title']);
 		$item['text'] = iconv('UTF-8', 'UTF-8//IGNORE', $instagram['html']);
 		$item['date'] = date('d/m/Y', $instagram['created_time']);
@@ -392,6 +386,97 @@ class feed_model extends CI_Model {
 
 		return $return;
 
+	}
+	
+	function get_instagram_by_hashtag($hashtag){
+		
+		$hashtag = trim($hashtag);
+		
+		if (empty($hashtag)){
+			return [];
+		}
+		
+		$filename = $GLOBALS['config']['base_path'] . 'cache/instagram_hashtag_' . $hashtag . '.json';
+		
+		// update when needed
+		if (!file_exists($filename) || time()-filemtime($filename) > 900) {
+				
+			// to avoid multiple updates during update
+			if (file_exists($filename)){
+				touch($filename);
+			}
+		
+			$url = 'https://www.instagram.com/explore/tags/'.$hashtag.'/?__a=1';
+		
+			$data = file_get_contents($url);
+				
+			file_put_contents($filename, json_encode(json_decode($data, true), JSON_PRETTY_PRINT));
+				
+		} else {
+				
+			$data = file_get_contents($filename);
+				
+		}
+		
+		$data = json_decode($data, true);
+		
+		$posts = $data['graphql']['hashtag']['edge_hashtag_to_media']['edges'];
+		$return = array();
+		if (!empty($posts)){
+			foreach($posts as $image){
+				
+				// more information
+				$details_filename = $GLOBALS['config']['base_path'] . 'cache/instagram_details_' . $image['node']['shortcode'] . '.json';
+				if (!file_exists($details_filename) || time()-filemtime($details_filename) > 10000000) {
+					// to avoid multiple updates during update
+					if (file_exists($details_filename)){
+						touch($details_filename);
+					}
+					$details_url = 'https://www.instagram.com/p/' . $image['node']['shortcode'] . '/?__a=1';
+					$details_data = file_get_contents($details_url);
+					file_put_contents($details_filename, json_encode(json_decode($details_data, true), JSON_PRETTY_PRINT));
+				} else {
+					$details_data = file_get_contents($details_filename);
+				}
+				$details_data = json_decode($details_data, true);
+
+				$return_item = array(
+						'image_full' => $image['node']['display_url'],
+						'link' => '',
+						'likes_count' => $image['node']['edge_liked_by']['count'],
+						'comments_count' => $image['node']['edge_media_to_comment']['count'],
+						'id' => $image['node']['id'],
+						'created_time' => $image['node']['taken_at_timestamp'],
+						'username' => $details_data['graphql']['shortcode_media']['owner']['username'],
+						'profile_picture' => $details_data['graphql']['shortcode_media']['owner']['profile_pic_url'],
+				);
+					
+				if (!empty($details_data['graphql']['shortcode_media']['edge_media_to_caption']['edges'][0]['node']['text'])){
+					$return_item['text'] = $details_data['graphql']['shortcode_media']['edge_media_to_caption']['edges'][0]['node']['text'];
+				} else {
+					$return_item['text'] = '';
+				}
+					
+				$return[] = $return_item;
+					
+			}
+
+		}
+		
+		// cleanup
+		foreach($return as $key => $tweet){
+			$text = trim(preg_replace('~http[A-Za-z0-9/.:]+~', '', $tweet['text']));
+			$return[$key]['title'] = trim(str_replace(':', ' ', $text), ' .,');
+			if (strlen($return[$key]['title']) > 40 ){
+				$return[$key]['title'] = substr($return[$key]['title'], 0, 36).' ...';
+			}
+			$text = str_replace(array('@','#'), array(' @', ' #'), $text);
+			$text = trim(preg_replace('~([@#][A-Za-z0-9_]+)~', '<b>$1</b>', $text));
+			$return[$key]['html'] = trim(str_replace(':', ' ', $text), ' .,');
+		}
+		
+		return $return;
+		
 	}
 	
 	function get_instagram_by_username($username, $interval = 5, $limit = 20){

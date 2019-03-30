@@ -15,8 +15,6 @@ function cms_user_settings_init(){
 					'</div>');
 			
 			$('.cms_user_settings_user_rights_select_' + $(this).data('target') + ' :selected').remove();
-
-			$('.cms_page_panel_caching_lists_option_' + value).remove();
 			
 			cms_user_settings_item_init(); // reinit all items again, as this is easier
 			

@@ -1,0 +1,8 @@
+[
+	{
+		"type":"text",
+		"name":"heading",
+		"label":"Heading",
+		"default":"Related Content"
+	}
+]

@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_cssjs_settings extends MY_Controller{
+class cms_cssjs_settings extends CI_Controller {
 	
 	function __construct(){
 		
@@ -20,13 +20,13 @@ class cms_cssjs_settings extends MY_Controller{
 	
 	function panel_params($params){
 		
-		$this->load->model('cms_module_model');
-		$this->load->model('cms_page_panel_model');
+		$this->load->model('cms/cms_module_model');
+		$this->load->model('cms/cms_page_panel_model');
 		
 		// get current config
-		$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'cms_cssjs_settings', 'page_id' => 0, ]);
+		$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'cms/cms_cssjs_settings', 'cms_page_id' => 0, ]);
 		if (!count($settings_a)){
-			$this->cms_page_panel_model->create_cms_page_panel(['panel_name' => 'cms_cssjs_settings', ]);
+			$this->cms_page_panel_model->create_cms_page_panel(['panel_name' => 'cms/cms_cssjs_settings', ]);
 			$params['current_css'] = [];
 		} else {
 			if (empty($settings_a[0]['css'])){

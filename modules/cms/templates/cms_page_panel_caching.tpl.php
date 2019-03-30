@@ -9,9 +9,9 @@
 					
 					<div class="admin_tool_text">Panel cache settings</div>
 					
-					<a class="cms_page_panel_caching_save admin_tool_button admin_right popup_yes">Save</a>
+					<a class="cms_page_panel_caching_save cms_tool_button admin_right popup_yes">Save</a>
 					
-					<a class="cms_page_panel_caching_cancel admin_tool_button admin_right popup_cancel">Cancel</a>
+					<a class="cms_page_panel_caching_cancel cms_tool_button admin_right popup_cancel">Cancel</a>
 					
 				</div>
 				

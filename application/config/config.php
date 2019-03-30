@@ -56,20 +56,6 @@ $config['charset'] = 'UTF-8';
 
 /*
 |--------------------------------------------------------------------------
-| Class Extension Prefix
-|--------------------------------------------------------------------------
-|
-| This item allows you to set the filename/classname prefix when extending
-| native libraries.  For more information please see the user guide:
-|
-| http://codeigniter.com/user_guide/general/core_classes.html
-| http://codeigniter.com/user_guide/general/creating_libraries.html
-|
-*/
-$config['subclass_prefix'] = 'MY_';
-
-/*
-|--------------------------------------------------------------------------
 | Enable Query Strings
 |--------------------------------------------------------------------------
 |
@@ -249,20 +235,6 @@ $config['csrf_expire'] = 7200;
 |
 */
 $config['time_reference'] = 'local';
-
-
-/*
-|--------------------------------------------------------------------------
-| Rewrite PHP Short Tags
-|--------------------------------------------------------------------------
-|
-| If your PHP installation does not have short tag support enabled CI
-| can rewrite the tags on-the-fly, enabling you to utilize that syntax
-| in your view files.  Options are TRUE or FALSE (boolean)
-|
-*/
-$config['rewrite_short_tags'] = FALSE;
-
 
 /*
 |--------------------------------------------------------------------------

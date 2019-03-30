@@ -6,6 +6,10 @@
 		
 		<?php _panel('cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
 		
+		<?php if (!empty($translate) && !empty($GLOBALS['language'])): ?>
+			<div class="cms_translate_icon" style="background-image: url('<?= $GLOBALS['config']['base_url'] ?>modules/cms/img/cms_translate.png'); "></div>
+		<?php endif ?>
+
 		<textarea name="<?php print($name); ?>" class="<?= $name ?> 
 				<?php print(!empty($tinymce) ? ' admin_tinymce ' : ''); ?>
 				<?php print(!empty($max_chars_class) ? $max_chars_class : ''); ?>

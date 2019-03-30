@@ -8,7 +8,7 @@
 				<div class="cms_page_panel_import_first">
 
 					<form class="cms_page_panel_import_form"><input type="file" name="file" class="cms_page_panel_import_input"></form>
-					<div class="admin_tool_button cms_page_panel_import_upload">Upload</div>
+					<div class="cms_tool_button cms_page_panel_import_upload">Upload</div>
 
 				</div>
 				
@@ -37,7 +37,7 @@
 					<div class="cms_page_panel_import_col3 cms_page_panel_import_new_images_count"></div>
 
 					<div class="cms_page_panel_import_buttons">
-						<div class="admin_tool_button cms_page_panel_import_close">Close</div>
+						<div class="cms_tool_button cms_page_panel_import_close">Close</div>
 					</div>
 					
 				</div>

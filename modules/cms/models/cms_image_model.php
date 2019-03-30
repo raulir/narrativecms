@@ -4,10 +4,6 @@ class cms_image_model extends CI_Model {
 
 	function get_cms_image_by_filename($filename){
 
-		if (function_exists('mysql_set_charset')){
-			@mysql_set_charset('utf8mb4');
-		}
-		
 		// check if cached image data exists
 		if (empty($GLOBALS['cache']['images_by_filename'])){
 			
@@ -94,11 +90,7 @@ class cms_image_model extends CI_Model {
 
 	function get_cms_images($page, $limit, $category, $search){
 		
-		$this->load->model('cms_page_model');
-
-		if (function_exists('mysql_set_charset')){
-			@mysql_set_charset('utf8mb4');
-		}
+		$this->load->model('cms/cms_page_model');
 
 		$page = (int)$page;
 		$limit = (int)$limit;
@@ -211,7 +203,7 @@ class cms_image_model extends CI_Model {
 		 
 		$name_a = pathinfo($filename);
 
-		$image_names = $GLOBALS['config']['upload_path'].$name_a['dirname'].'/_'.$name_a['filename'].'.*.'.$name_a['extension'];
+		$image_names = $GLOBALS['config']['upload_path'].$name_a['dirname'].'/_'.$name_a['filename'].'.*.*';
 		foreach(glob($image_names) as $_filename) {
 			unlink($_filename);
 		}
@@ -253,7 +245,6 @@ class cms_image_model extends CI_Model {
 					mkdir($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'));
 				}
 
-				$this->load->model('cms_image_model');
 				$return = $this->create_cms_image(date('Y').'/'.date('m').'/', $prefix.'_'.$filename, $category);
 
 				file_put_contents($GLOBALS['config']['upload_path'].$return, $image_content);

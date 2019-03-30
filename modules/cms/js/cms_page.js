@@ -18,9 +18,10 @@ function cms_page_save(params){
 	
 	params = params || {'success':function(){}};
 
-	get_ajax('cms_page_operations', {
+	get_ajax('cms/cms_page_operations', {
 		'page_id': $('.cms_page_id').val(),
 		'do': 'cms_page_save',
+		'language': $('.cms_language_select_current').data('language'),
 		'sort': $('.cms_page_sort').val(),
 		'title': $('.cms_page_title').val(),
 		'slug': $('.cms_page_slug').val(),
@@ -96,7 +97,7 @@ function cms_page_init(){
 			panels_display_popup(data.result.html, {
 				'yes': function(){
 					get_ajax_panel('cms_page_panel_operations', {
-						'block_id': cms_page_panel_id,
+						'cms_page_panel_id': cms_page_panel_id,
 						'do': 'cms_page_panel_delete' 
 					}, function(){
 						$this.closest('li').remove();
@@ -114,10 +115,10 @@ function cms_page_init(){
 			$('.cms_page_sortable .block_id').each(function(index, value){
 				block_orders[$(this).val()] = index + 1;
 			});
-			get_ajax('admin_save_block_order', {
-				'do': 'admin_save_block_order',
-				'block_orders': block_orders,
-				'page_id': $('#page_id').val()
+			get_ajax('cms/cms_page_operations', {
+				'do': 'cms_page_panel_order',
+				'orders': block_orders,
+				'cms_page_id': $('.cms_page_id').val()
 			});
 		},
 	}).disableSelection();

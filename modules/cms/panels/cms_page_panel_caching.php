@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_page_panel_caching extends MY_Controller{
+class cms_page_panel_caching extends CI_Controller {
 
 	function __construct(){
 
@@ -18,7 +18,7 @@ class cms_page_panel_caching extends MY_Controller{
 
 	function panel_params($params){
 
-		$this->load->model('cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_model');
 
 		// get target_id caching parameters
 		$cms_page_panel = $this->cms_page_panel_model->get_cms_page_panel($params['target_id']);
@@ -41,12 +41,12 @@ class cms_page_panel_caching extends MY_Controller{
 				'-1' => 'No caching',
 				'180' => '3 minutes',
 				'900' => '15 minutes',
-				'86400' => '24 hours',
-				'7776000' => '3 months'
+				'7200' => '2 hours',
+				'86400' => '24 hours'
 		);
 
 		// get available lists
-		$params['lists'] = $this->cms_page_panel_model->get_old_lists(); // TODO: old because deprecated function - refactor
+		$params['lists'] = $this->cms_page_panel_model->get_lists();
 
 		$params['params'] = $params;
 		return $params; // array('params' => $params);

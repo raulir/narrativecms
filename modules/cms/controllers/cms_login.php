@@ -1,16 +1,11 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_login extends MY_Controller {
+class cms_login extends CI_Controller {
 		
     public function __construct() {
     	
         parent::__construct();        
 
-        $this->js[] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
-
-        $this->js[] = 'js/main.js';
-        $this->js[] = 'modules/cms/js/cms.js';
-  
         $GLOBALS['_panel_titles'][] = 'ADMIN';
         
    	}
@@ -32,7 +27,7 @@ class cms_login extends MY_Controller {
         // render panels
         $panel_data = $this->render($page_config);
         
-    	$this->output('cms_login', $panel_data);
+    	$this->output('cms/cms_login', 'cms_login', $panel_data);
    		
    	}
 

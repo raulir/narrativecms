@@ -1,4 +1,4 @@
-<div class="form_basic_container">
+<div class="form_basic_container" <?php if (!empty($brochure)): ?> data-success_url="<?php _lf($brochure, false) ?>" <?php endif ?>>
 	<div class="form_basic_content">
 
 		<?php if(!empty($heading)): ?>
@@ -50,6 +50,13 @@
 								<?php endforeach ?>
 						
 							</select>
+							
+						<?php elseif ($element['type'] == 'checkbox'): ?>
+						
+							<input class="form_basic_input_input <?= $element['mandatory'] ? 'form_basic_mandatory' : '' ?>" 
+									id="form_basic_<?= $element['name'] ?>" type="hidden" name="<?= $element['name'] ?>">
+						
+							<div class="form_basic_input_checkbox" data-target="form_basic_<?= $element['name'] ?>"></div>
 
 						<?php elseif ($element['type'] == 'spacer'): ?>
 														
@@ -59,7 +66,7 @@
 				<?php endforeach ?>
 
 				<div class="form_basic_submit">
-					<div class="form_basic_submit_label" <?php !empty($submit_icon) ? _ib($submit_icon, 20) : '' ?>><?= $submit_text ?></div>
+					<div class="form_basic_submit_label" <?php !empty($submit_icon) ? _ib($submit_icon, 30) : '' ?>><?= $submit_text ?></div>
 				</div>
 				
 				<div class="form_basic_message">
@@ -69,6 +76,8 @@
 
 			</form>
 		</div>
+		
+		<div class="form_basic_close"></div>
 
 	</div>
 </div>

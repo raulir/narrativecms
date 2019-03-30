@@ -7,10 +7,10 @@ if ( !function_exists('_i')) {
 	/**
 	 * prints image url and return image data
 	 */
-	function _i($image, $params = array()){
+	function _i($image, $params = []){
 		 
 		if (is_numeric($params)){
-			$params = array('width' => $params, );
+			$params = ['width' => $params];
 		}
 
 		if (!empty($image)){
@@ -49,7 +49,7 @@ if ( !function_exists('_i')) {
 		 
 		// check for possible description in db
 		$ci =& get_instance();
-		$ci->load->model('cms_image_model');
+		$ci->load->model('cms/cms_image_model');
 		$image_db_data = $ci->cms_image_model->get_cms_image_by_filename($image);
 		$return['alt'] = empty($return['alt']) && !empty($image_db_data['description']) ? $image_db_data['description'] : $return['alt'];
 
@@ -65,7 +65,7 @@ if ( !function_exists('_i')) {
 	 * prints out bg image style parameter with image
 	 */
 	function _ib($image, $params = array()){
-		 
+
 		if (!is_array($params)){
 			$params = array('width' => (int)$params);
 		}
@@ -105,11 +105,47 @@ if ( !function_exists('_i')) {
 			
 		}
 		
+		$extension = pathinfo($image, PATHINFO_EXTENSION);
+		
 		// if gif or svg
-		if ((pathinfo($image, PATHINFO_EXTENSION) == 'gif' || pathinfo($image, PATHINFO_EXTENSION) == 'svg') && file_exists($GLOBALS['config']['upload_path'].$image) && !is_dir($GLOBALS['config']['upload_path'].$image)){
+		if (($extension == 'gif' || $extension == 'svg') && file_exists($GLOBALS['config']['upload_path'].$image) && !is_dir($GLOBALS['config']['upload_path'].$image)){
 			print('style="background-image:  url('.$GLOBALS['config']['upload_url'].trim($image, '/').'); '.$params['css'].'"');
 			return ['image' => $image, 'height' => 0, 'width' => 0, ];
 		}
+		
+		// if from module
+		if (!empty($params['module']) || substr_count($image, '/') == 1){
+			
+			if (empty($params['module'])){
+				list($params['module'], $image) = explode('/', $image);
+			}
+		
+			$fileurl = $GLOBALS['config']['base_url'].'modules/'.$params['module'].'/img/'.$image;
+			
+			$filepath = $GLOBALS['config']['upload_path'].$params['module'].'/'.$image;
+			
+			// if not in uploads, copy over
+			if (!file_exists($filepath)){
+				
+				$original_path = $GLOBALS['config']['base_path'].'modules/'.$params['module'].'/img/'.$image;
+				
+				if (!file_exists($GLOBALS['config']['upload_path'].$params['module'].'/')){
+					mkdir($GLOBALS['config']['upload_path'].$params['module'].'/');
+				}
+				
+				copy($original_path, $filepath);
+				
+				// add to db
+				$ci =& get_instance();
+				$ci->load->model('cms/cms_image_model');
+				
+				$ci->cms_image_model->create_cms_image($params['module'].'/', $image, $params['module']);
+				
+			}
+			
+			$image = $params['module'].'/'.$image;
+
+		} 
 		
 		if (!(file_exists($GLOBALS['config']['upload_path'].$image) && !is_dir($GLOBALS['config']['upload_path'].$image))){
 			
@@ -119,16 +155,17 @@ if ( !function_exists('_i')) {
 			
 			$fileurl_hq = $fileurl;
 			$fileurl_lq = $fileurl;
+			$fileurl_mobile = $fileurl;
 				
 		} else {
 		
 			// get data about image from db
 			$ci =& get_instance();
-			$ci->load->model('cms_image_model');
+			$ci->load->model('cms/cms_image_model');
 			$image_db_data = $ci->cms_image_model->get_cms_image_by_filename($image);
-	
+
 			// if no resizing
-			if(empty($params['width']) && empty($params['height'])){
+			if((empty($params['width']) && empty($params['height'])) || empty($image_db_data['name'])){
 				
 				$fileurl = $GLOBALS['config']['upload_url'].$image;
 				$image_data['width'] = $image_db_data['original_width'];
@@ -136,6 +173,7 @@ if ( !function_exists('_i')) {
 				
 				$fileurl_hq = $fileurl;
 				$fileurl_lq = $fileurl;
+				$fileurl_mobile = $fileurl;
 					
 			} else {
 	 		
@@ -148,40 +186,76 @@ if ( !function_exists('_i')) {
 					$params['width'] = $image_db_data['original_width'];
 				}
 				
-				$params['width_hq'] = round((!empty($GLOBALS['config']['images_2x']) ? $GLOBALS['config']['images_2x'] : 1.5 ) * $params['width']);
+				if (empty($GLOBALS['config']['images_2x'])){
+					$GLOBALS['config']['images_2x'] = 1;
+				}
+				
+				$params['width_hq'] = round($GLOBALS['config']['images_2x'] * $params['width']);
 				if ($params['width_hq'] > $image_db_data['original_width']){
 					$params['width_hq'] = $image_db_data['original_width'];
 				}
 				
-				$params['width_lq'] = round((!empty($GLOBALS['config']['images_1x']) ? $GLOBALS['config']['images_1x'] : 0.75 ) * $params['width']);
+				if (empty($GLOBALS['config']['images_1x'])){
+					$GLOBALS['config']['images_1x'] = 1;
+				}
+				
+				$params['width_lq'] = round($GLOBALS['config']['images_1x'] * $params['width']);
 				if ($params['width_lq'] > $image_db_data['original_width']){
 					$params['width_lq'] = $image_db_data['original_width'];
 				}
-					
+
+				$params['width_mobile'] = round((!empty($GLOBALS['config']['images_mobile']) ? $GLOBALS['config']['images_mobile'] : 1) * $params['width']);
+				if ($params['width_mobile'] > $image_db_data['original_width']){
+					$params['width_mobile'] = $image_db_data['original_width'];
+				}
+				
 				// get image target output format
 				if (empty($params['output'])){
-					$params['output'] = pathinfo($image, PATHINFO_EXTENSION);
+					$params['output'] = $extension;
+				}
+				
+				// webp
+				if ($_SESSION['webp'] && in_array($params['output'], ['png', 'jpg'])){
+					$params['output'] = 'webp';
 				}
 				
 				// if file exists
 				$image_dir = pathinfo($image, PATHINFO_DIRNAME);
 				$filename_hq = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_hq'].'.'.$params['output'];
 				$filename_lq = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_lq'].'.'.$params['output'];
+				$filename_mobile = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_mobile'].'.'.$params['output'];
 				$fileurl_hq = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_hq'].'.'.$params['output'];
 				$fileurl_lq = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_lq'].'.'.$params['output'];
+				$fileurl_mobile = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_mobile'].'.'.$params['output'];
+				
+				// if mobile
+				if ($_SESSION['mobile']){
 					
-				if (!file_exists($filename_hq)){
-					$needs_lazy_loading = true;
+					if (!file_exists($filename_mobile)){
+						$needs_lazy_loading = true;
+						$params['width_1'] = $params['width_mobile'];
+					}
+					
+					$fileurl_a = $fileurl_mobile;
+					$fileurl_b = $fileurl_mobile;
+					
+				} else {
+					
+					if (!file_exists($filename_hq) || !file_exists($filename_lq)){
+						$needs_lazy_loading = true;
+						$params['width_1'] = $params['width_hq'];
+						$params['width_2'] = $params['width_lq'];
+					}
+
+					$fileurl_a = $fileurl_hq;
+					$fileurl_b = $fileurl_lq;
+					
 				}
 				
-				if (!file_exists($filename_lq)){
-					$needs_lazy_loading = true;
-				}
-			
 				if (empty($image_data)){
 					$image_data['width'] = $params['width_hq'];
 					$image_data['height'] = !empty($params['height'])
-							? (round((!empty($GLOBALS['config']['images_2x']) ? $GLOBALS['config']['images_2x'] : 1.5 ) * $params['height']))
+							? (round($GLOBALS['config']['images_2x'] * $params['height']))
 							: round($image_db_data['original_height'] * $params['width_hq'] / $image_db_data['original_width']);
 				}
 				
@@ -189,25 +263,34 @@ if ( !function_exists('_i')) {
 			
 		}
 		
+		if (!empty($params['maxwidth']) && !empty($image_db_data['original_width'])){
+			$params['css'] .= ' max-width: '.$image_db_data['original_width'].'px; ';
+		}
+		
+		if (!empty($params['dataprops'])){
+			$dataprops = ' data-width="'.$image_data['width'].'" data-height="'.$image_data['height'].'" ';
+		} else {
+			$dataprops = '';
+		}
+		
 		if (!empty($needs_lazy_loading)){
-
+			
 			$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_images_lazy.js';
 			
 			print(' style="background-image: url('.$GLOBALS['config']['upload_url'].$image.'); '.$params['css'].
-					(!empty($params['maxwidth']) && !empty($image_db_data['original_width']) ? ' max-width: '.$image_db_data['original_width'].'px; ' : '').
-					'" data-cms_images_lazy="'.$image.'" data-width="'.$params['width_hq'].'" data-width_lq="'.$params['width_lq'].'"
-					data-output="'.$params['output'].'" data-height="'.$image_data['height'].'" ');
+					'" data-cms_images_lazy="'.$image.'" data-output="'.$params['output'].'" '.
+					' data-w1="'.$params['width_1'].'" '.(!empty($params['width_2']) ? ' data-w2="'.$params['width_2'].'" ' : '').$dataprops);
 		
+		} elseif ($_SESSION['mobile']){
+			
+			print(' style="background-image: url('.$fileurl_mobile.'); '.$params['css'].' " '.$dataprops);
+			
 		} else {
 			
 			print(
 					' style="background-image: url('.$fileurl_hq.'); '.
-					( $fileurl_lq != $fileurl_hq ?
-							'background-image: -webkit-image-set( url('.$fileurl_lq.') 1x, url('.$fileurl_hq.') 2x ); background-image: image-set( url('.$fileurl_lq.') 1x, url('.$fileurl_hq.') 2x ); '
-							: '').
-					$params['css'].
-					(!empty($params['maxwidth']) && !empty($image_db_data['original_width']) ? ' max-width: '.$image_db_data['original_width'].'px; ' : '').' " '.
-					(!empty($params['dataprops']) ? ' data-width="'.$image_data['width'].'" data-height="'.$image_data['height'].'" ' : ''));
+					( $fileurl_lq != $fileurl_hq ? 'background-image: -webkit-image-set( url('.$fileurl_lq.') 1x, url('.$fileurl_hq.') 2x ); '.
+							'background-image: image-set( url('.$fileurl_lq.') 1x, url('.$fileurl_hq.') 2x ); '	: '').$params['css'].' " '.$dataprops);
 			
 		}
 

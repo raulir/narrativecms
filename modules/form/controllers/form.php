@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class form extends MY_Controller {
+class form extends CI_Controller {
 		
     public function __construct() {
     	
@@ -40,7 +40,7 @@ class form extends MY_Controller {
         // render panels
         $panel_data = $this->render($page_config);
         
-    	$this->output('admin', $panel_data);
+    	$this->output('cms/admin', 'form/admin', $panel_data);
    	
    	}
 

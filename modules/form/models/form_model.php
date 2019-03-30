@@ -17,15 +17,23 @@ class form_model extends CI_Model {
 	
 	}
 	
-    function send_contact_request($emails, $data, $title, $from){
+    function send_contact_request($emails, $data, $title, $from, $warning){
 
 		foreach($emails as $email){    	
 
  			$content = $title.':'."\n\n";
-
+ 			
 			foreach($data as $key => $value){
 				$content .= $key . ': ' . $value . "\n";
  			}
+ 			
+		 	if ($warning){
+ 				$content .= "\n\n".'This email is sent from the server address to reduce chance of this email being marked as spam.'."\n".
+ 						'Please replace recipient email with the email in the submitted data when replying to the website visitor.';
+ 			}
+
+ 			$content .= "\n\n".'You received this email because this email address is included as recipient for notifications at '.$_SERVER['SERVER_NAME'].
+ 					' Please contact webmaster to unsubscribe.'."\n\n";
  
 	   		// send email
 	    	@mail($email['email'], $title, $content, 'From: '.$from."\r\n".'Auto-Submitted: auto-generated'."\r\n");
@@ -66,7 +74,7 @@ class form_model extends CI_Model {
     	// check if table exists
 		$this->create_table_form_data();
     		
-		$sql = "select a.cms_page_panel_id, b.title from form_data a join block b on a.cms_page_panel_id = b.block_id group by a.cms_page_panel_id ";
+		$sql = "select a.cms_page_panel_id, b.title from form_data a join cms_page_panel b on a.cms_page_panel_id = b.cms_page_panel_id group by a.cms_page_panel_id ";
 		$query = $this->db->query($sql);
      		
      	$return = $query->result_array();
@@ -130,16 +138,18 @@ class form_model extends CI_Model {
 
     function create_cm_subscriber($data, $params){
     	
-        $postdata = array(
+        $postdata = [
             'EmailAddress' => $data['email'],
-            'Name' => '',
+            'Name' => !empty($data['name']) ? $data['name'] : '',
             'Resubscribe' => true,
             'RestartSubscriptionBasedAutoresponders' => true,
-        );
+        	'ConsentToTrack' => 'Yes',
+        ];
 
         $context = stream_context_create(array (
             'http' => array (
                 'method'  => 'POST',
+            	'ignore_errors' => true,
                 'header'  =>
                     'Content-Type: application/json'."\r\n".
                     'Accept: application/json'."\r\n".
@@ -148,8 +158,8 @@ class form_model extends CI_Model {
             ),
         ));
 
-        $result = @file_get_contents($params['cm_api_url'].'subscribers/'.$params['cm_list_id'].'.json', false, $context);
-        
+        $result = file_get_contents($params['cm_api_url'].'subscribers/'.$params['cm_list_id'].'.json', false, $context);
+
         return $result;
     
     }

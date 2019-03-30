@@ -29,7 +29,15 @@ class cms_page_model extends CI_Model {
     	return $result;
 	}
 	
-	function get_page($cms_page_id){
+	function get_page($cms_page_id, $language = false){
+		
+		if ($language == 'auto'){
+			$language = !empty($GLOBALS['language']['language_id']) ? $GLOBALS['language']['language_id'] : false;
+		}
+		
+		if (!empty($GLOBALS['language']['language_id']) && $language == $GLOBALS['language']['default']){
+			$language = false;
+		}
 		
 		$sql = "select * from cms_page where cms_page_id = ? ";
     	$query = $this->db->query($sql, array($cms_page_id));
@@ -45,33 +53,47 @@ class cms_page_model extends CI_Model {
 	    		}
 	    	}
 	    	
-	    	return $row;
+	    	$return = $row;
+    	
+    	   	if ($language !== false){
+    		
+	    	    if (!empty($return['_'.$language]) && isset($return['_'.$language]['seo_title'])){
+	    			$return['seo_title'] = $return['_'.$language]['seo_title'];
+	    		}
+	    		
+	    		if (!empty($return['_'.$language]) && isset($return['_'.$language]['description'])){
+	    			$return['description'] = $return['_'.$language]['description'];
+	    		}
+	    		
+	    	}
     	
     	} else {
     		
-    		return array();
+    		$return = [];
     		
     	}
+    	
+    	return $return;
     	
 	}
 	
 	function get_page_by_slug($slug){
-		$sql = "select * from cms_page where slug = ? ";
-    	$query = $this->db->query($sql, array($slug));
+		
+		$sql = "select cms_page_id from cms_page where slug = ? ";
+    	$query = $this->db->query($sql, [$slug]);
+    	
     	if ($query->num_rows()){
-	    	$row = $query->row_array();
-	    	$row['page_id'] = $row['cms_page_id'];
-			$row['title'] = $row['slug'];
-	    	if (!empty($row['meta'])){
-	    		$meta = json_decode($row['meta'], true);
-	    		if (!empty($meta)){
-	    			$row = array_merge($row, $meta);
-	    		}
-	    	}
-	    	return $row;
+	    	
+    		$row = $query->row_array();
+	    	
+	    	return $this->get_page($row['cms_page_id'], 'auto');
+
     	} else {
-    		return array();
+    		
+    		return [];
+    	
     	}
+    	
 	}
 	
 	function new_page(){
@@ -97,7 +119,11 @@ class cms_page_model extends CI_Model {
 		);
 	}
 	
-	function update_page($cms_page_id, $data){
+	function update_page($cms_page_id, $data, $language = false){
+		
+		if ($language !== false && $language == $GLOBALS['language']['default']){
+			$language = false;
+		}
 		
 		// check whats in meta
 		$meta = array();
@@ -119,8 +145,15 @@ class cms_page_model extends CI_Model {
 				
 		foreach($data as $field => $value){
 			if (!in_array($field, array('sort', 'slug', ))){
-				$meta[$field] = $value;
+				
+				if ($language === false || !in_array($field, ['seo_title','description'])){
+					$meta[$field] = $value;
+				} else {
+					$meta['_'.$language][$field] = $value;
+				}
+				
 				unset($data[$field]);
+			
 			}
 		}
 		
@@ -161,30 +194,32 @@ class cms_page_model extends CI_Model {
 	    
 	    if ($page_id > 0){
 	    
-		    $this->load->model('cms_page_panel_model');
-		    $panels = $this->cms_page_panel_model->get_cms_page_panels_by(array('page_id' => $page_id, ));
+		    $this->load->model('cms/cms_page_panel_model');
+		    $panels = $this->cms_page_panel_model->get_cms_page_panels_by(array('cms_page_id' => $page_id, ));
 		    foreach($panels as $panel){
-		    	$this->cms_page_panel_model->delete_cms_page_panel($panel['block_id']);
+		    	$this->cms_page_panel_model->delete_cms_page_panel($panel['cms_page_panel_id']);
 		    }
 	    
 	    }
 	    
 	    // delete slug
-	    $this->load->model('cms_slug_model');
+	    $this->load->model('cms/cms_slug_model');
 	    $this->cms_slug_model->delete_slug($page_id);
 
 	}
 	
 	function get_layouts(){
 		
-		$this->load->model('cms_module_model');
+		$this->load->model('cms/cms_module_model');
 		
 		$return = array();
 	
 		foreach($GLOBALS['config']['modules'] as $module){
 			$config = $this->cms_module_model->get_module_config($module);
 			if (!empty($config['layouts']) && is_array($config['layouts'])){
-				$return = array_merge($return, $config['layouts']);
+				foreach($config['layouts'] as $key => $value){
+					$return = array_merge($return, [['id' => $module.'/'.$value['id'], 'name' => $value['name']]]);
+				}
 			}
 		}
 

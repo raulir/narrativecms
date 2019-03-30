@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class admin extends MY_Controller {
+class admin extends CI_Controller {
 
 	public function __construct() {
 		 
@@ -33,7 +33,7 @@ class admin extends MY_Controller {
 		// render panels
 		$panel_data = $this->render($page_config);
 
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin', $panel_data);
 
 	}
 
@@ -43,13 +43,13 @@ class admin extends MY_Controller {
 		$page_config = array(
 				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
 				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'admin_pages', 'module' => 'cms', ),
+				array('position' => 'main', 'panel' => 'cms_pages', 'module' => 'cms', ),
 		);
 
 		// render panels
 		$panel_data = $this->render($page_config);
 
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/pages', $panel_data);
 
 	}
 
@@ -59,13 +59,13 @@ class admin extends MY_Controller {
 		$page_config = array(
 				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
 				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms_page', 'module' => 'cms', 'params' => array('page_id' => $page_id, ), ),
+				array('position' => 'main', 'panel' => 'cms_page', 'module' => 'cms', 'params' => array('cms_page_id' => $page_id, ), ),
 		);
 
 		// render panels
 		$panel_data = $this->render($page_config);
 
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/page', $panel_data);
 
 	}
 
@@ -91,39 +91,7 @@ class admin extends MY_Controller {
 		// render panels
 		$page_panel_data = $this->render($page_config);
 
-		$this->output('admin', $page_panel_data);
-
-	}
-
-	function menu($menu_id = 0){
-
-		// set page config
-		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms_main_menu', 'module' => 'cms', 'params' => array('menu_id' => $menu_id, ), ),
-		);
-
-		// render panels
-		$panel_data = $this->render($page_config);
-
-		$this->output('admin', $panel_data);
-
-	}
-
-	function menu_main(){
-		 
-		// set page config
-		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms_page_panel', 'module' => 'cms', 'params' => array('filter' => array('panel_name' => 'menu_main', ), ), ),
-		);
-
-		// render panels
-		$panel_data = $this->render($page_config);
-
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', false, $page_panel_data);
 
 	}
 
@@ -139,35 +107,7 @@ class admin extends MY_Controller {
 		// render panels
 		$panel_data = $this->render($page_config);
 
-		$this->output('admin', $panel_data);
-
-	}
-
-	function keywords(){
-
-		// set page config
-		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array(
-						'position' => 'main',
-						'panel' => 'cms_list',
-						'module' => 'cms',
-						'params' => array(
-								'title' => 'Keywords',
-								'edit_base' => 'admin/keyword/',
-								'source' => array('model' => 'cms_keyword_model', 'method' => 'get_cms_keywords', ),
-								'title_field' => 'cms_keyword_id',
-								'id_field' => 'cms_keyword_id',
-								'no_sort' => 1,
-						),
-				),
-		);
-
-		// render panels
-		$panel_data = $this->render($page_config);
-
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/table', $panel_data);
 
 	}
 
@@ -197,7 +137,7 @@ class admin extends MY_Controller {
 		$params = array(
 				'title' => $item_config['list']['list_title'],
 				'edit_base' => 'admin/cms_page_panel/',
-				'filter' => array('panel_name' => $list_item, 'page_id' => [999999,0], ),
+				'filter' => array('panel_name' => $list_item, 'cms_page_id' => [999999,0], ),
 		);
 			
 		if (!empty($item_config['list']['filter_fields'])){
@@ -225,7 +165,7 @@ class admin extends MY_Controller {
 		// render panels
 		$panel_data = $this->render($page_config);
 		 
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/cms_list', $panel_data);
 
 	}
 
@@ -243,9 +183,9 @@ class admin extends MY_Controller {
 		
 		// check if exists
 		if (stristr($panel_name, 'settings')){ // for backwards compatibility with cms settings and feed settings
-			$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => $panel_name, 'page_id' => 0, 'parent_id' => 0, ]);
+			$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => $panel_name, 'cms_page_id' => 0, 'parent_id' => 0, ]);
 		} else {
-			$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => $panel_name, 'page_id' => 0, 'parent_id' => 0, 'sort' => 0, ]);
+			$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => $panel_name, 'cms_page_id' => 0, 'parent_id' => 0, 'sort' => 0, ]);
 		}
 		
 		if (!count($settings_a)){
@@ -254,6 +194,10 @@ class admin extends MY_Controller {
 			
 			// load definition
 			$panel_config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+			
+			if (!empty($panel_config['label']) && is_array($panel_config['label'])){
+				$panel_config['label'] = array_pop($panel_config['label']);
+			}
 			
 			$params['title'] = (!empty($panel_config['label']) ? $panel_config['label'] : $panel_name).' settings';
 			$params['sort'] = 0;
@@ -280,7 +224,7 @@ class admin extends MY_Controller {
 		// render panels
 		$panel_data = $this->render($page_config);
 
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', false, $panel_data);
 
 	}
 
@@ -298,7 +242,7 @@ class admin extends MY_Controller {
 		// render panels
 		$panel_data = $this->render($page_config);
 
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/update', $panel_data);
 		 
 	}
 
@@ -315,7 +259,7 @@ class admin extends MY_Controller {
 		$panel_data = $this->render($page_config);
 
 		// output to layout
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/users', $panel_data);
 		 
 	}
 	
@@ -332,7 +276,7 @@ class admin extends MY_Controller {
 		$panel_data = $this->render($page_config);
 	
 		// output to layout
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/cssjs', $panel_data);
 			
 	}
 	
@@ -349,7 +293,7 @@ class admin extends MY_Controller {
 		$panel_data = $this->render($page_config);
 	
 		// output to layout
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/search', $panel_data);
 			
 	}
 	
@@ -401,7 +345,7 @@ class admin extends MY_Controller {
 		$panel_data = $this->render($page_config);
 		
 		// output to layout
-		$this->output('admin', $panel_data);
+		$this->output('cms/admin', 'admin/dump', $panel_data);
 		
 	}
 

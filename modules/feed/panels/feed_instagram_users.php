@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class feed_instagram_users extends MY_Controller{
+class feed_instagram_users extends CI_Controller{
 	
 	function __construct(){
 		

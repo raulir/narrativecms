@@ -2,7 +2,7 @@
 	<div class="admin_tool_text">
 		<?php print(str_limit($table_title, 40)); ?>
 	</div>
-	<a class="cms_table_save admin_tool_button admin_right">Save</a>
+	<a class="cms_table_save cms_tool_button admin_right">Save</a>
 </div>
 
 <div>
@@ -33,7 +33,7 @@
 						if (!empty($data[$field['name']])){
 							foreach($data[$field['name']] as $repeater_key => $repeater_data){
 								$return .= '<div class="cms_repeater_block ui-sortable-handle" ' .
-										'style="background-image: url(\'' . $GLOBALS['config']['base_url'] . 'modules/cms/img/drag.png\'); ">'.
+										'style="background-image: url(\'' . $GLOBALS['config']['base_url'] . 'modules/cms/img/cms_drag.png\'); ">'.
 										'<div class="cms_repeater_block_toolbar"><div class="cms_repeater_block_delete">Remove</div></div>'.
 										print_fields($field['fields'], $repeater_data, $fk_data, $field['name'], $repeater_key).
 										'</div>';
@@ -45,7 +45,7 @@
 						$return .= '<div class="admin_small_button admin_right cms_repeater_button" ';
 						$return .= ' data-html="'.
 								str_replace('"', '#', '<div class="cms_repeater_block" ' .
-										'style="background-image: url(\'' . $GLOBALS['config']['base_url'] . 'modules/cms/img/drag.png\'); ">'.
+										'style="background-image: url(\'' . $GLOBALS['config']['base_url'] . 'modules/cms/img/cms_drag.png\'); ">'.
 										'<div class="cms_repeater_block_toolbar"><div class="cms_repeater_block_delete">Remove</div></div>'.
 										print_fields($field['fields'], array(), $fk_data, $field['name'], '###random###').
 										'</div>').

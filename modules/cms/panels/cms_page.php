@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_page extends MY_Controller{
+class cms_page extends CI_Controller {
 
 	function __construct(){
 
@@ -16,18 +16,20 @@ class cms_page extends MY_Controller{
 
 	function panel_params($params){
 
-		$this->load->model('cms_page_model');
-		$this->load->model('cms_page_panel_model');
+		$this->load->model('cms/cms_page_model');
+		$this->load->model('cms/cms_page_panel_model');
 
 		$return['block_list'] = array();
+		
+		$cms_language = !empty($_SESSION['cms_language']) ? $_SESSION['cms_language'] : false;
 
-		if ($params['page_id']){
+		if ($params['cms_page_id']){
 				
-			$return['page'] = $this->cms_page_model->get_page($params['page_id']);
-			$blocks = $this->cms_page_panel_model->get_cms_page_panels_by(array('page_id' => $params['page_id'], ));
+			$return['page'] = $this->cms_page_model->get_page($params['cms_page_id'], $cms_language);
+			$blocks = $this->cms_page_panel_model->get_cms_page_panels_by(['cms_page_id' => $params['cms_page_id']]);
 				
 			foreach($blocks as $block){
-				$return['block_list'][] = $block['block_id'];
+				$return['block_list'][] = $block['cms_page_panel_id'];
 			}
 
 		} else {
@@ -36,17 +38,6 @@ class cms_page extends MY_Controller{
 
 		}
 
-		// get available layouts
-		$layouts = $this->cms_page_model->get_layouts();
-		$return['layouts'] = array();
-		foreach($layouts as $layout){
-			$return['layouts'][$layout['id']] = $layout['name'];
-		}
-
-		if (empty($return['page']['layout'])){
-			$return['page']['layout'] = 'default';
-		}
-		
 		// is page a list item page?
 		$lists = $this->cms_page_panel_model->get_lists();
 		$lists_clean = array_map(function($list_item){

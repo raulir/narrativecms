@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_page_panel extends MY_Controller{
+class cms_page_panel extends CI_Controller {
 
 	function __construct(){
 
@@ -27,7 +27,7 @@ class cms_page_panel extends MY_Controller{
 		if (!is_numeric($params['cms_page_panel_id'])){
 			$params['panel_name'] = str_replace('__', '/', trim($params['cms_page_panel_id']));
 			$params['cms_page_panel_id'] = 0;
-			$params['page_id'] = 0;
+			$params['cms_page_id'] = 0;
 		}
 		
 		$return = array();
@@ -76,7 +76,7 @@ class cms_page_panel extends MY_Controller{
 			// new block of type
 			$return['block'] = $this->cms_page_panel_model->new_cms_page_panel();
 			$return['block']['panel_params'] = array();
-			$return['block']['page_id'] = $params['page_id'];
+			$return['block']['cms_page_id'] = $params['cms_page_id'];
 			
 			$return['block']['panel_name'] = $params['panel_name'];
 			$return['block']['title'] = 'New ' . $params['panel_name'];
@@ -100,24 +100,24 @@ class cms_page_panel extends MY_Controller{
 
 				$return['block'] = $this->cms_page_panel_model->new_cms_page_panel();
 				$return['block']['panel_params'] = array();
-				$return['block']['page_id'] = 0;
+				$return['block']['cms_page_id'] = 0;
 				$return['block']['parent_id'] = $params['parent_id'];
 
 			} else {
 					
 				$return['block'] = $this->cms_page_panel_model->new_cms_page_panel();
 				$return['block']['panel_params'] = array();
-				$return['block']['page_id'] = $params['cms_page_id'];
+				$return['block']['cms_page_id'] = $params['cms_page_id'];
 
 			}
 
 		}
 
 		// no page page_id -> 0
-		if ($return['block']['page_id'] == 999999) $return['block']['page_id'] = 0;
+		if ($return['block']['cms_page_id'] == 999999) $return['block']['cms_page_id'] = 0;
 
-		if (!empty($return['block']['page_id'])){
-			$return['cms_page'] = $this->cms_page_model->get_page($return['block']['page_id']);
+		if (!empty($return['block']['cms_page_id'])){
+			$return['cms_page'] = $this->cms_page_model->get_page($return['block']['cms_page_id']);
 			$return['cms_page_id'] = $return['cms_page']['cms_page_id'];
 		} else {
 			$return['_admin_title'] = $return['block']['title'];
@@ -174,7 +174,7 @@ class cms_page_panel extends MY_Controller{
 		} else {
 			
 			
-			if (!empty($return['cms_page_id']) || !empty($return['block']['page_id']) || !empty($return['block']['sort']) || !empty($return['block']['parent_id'])){
+			if (!empty($return['cms_page_id']) || !empty($return['block']['cms_page_id']) || !empty($return['block']['sort']) || !empty($return['block']['parent_id'])){
 
 				$panel_structure = !empty($panel_definition['item']) ? $panel_definition['item'] : [];
 			
@@ -209,10 +209,10 @@ class cms_page_panel extends MY_Controller{
 			$pages = $this->cms_page_model->get_cms_pages();
 
 			foreach($pages as $page){
-				$blocks = $this->cms_page_panel_model->get_cms_page_panels_by(array('page_id' => $page['page_id'], ));
+				$blocks = $this->cms_page_panel_model->get_cms_page_panels_by(array('cms_page_id' => $page['cms_page_id'], ));
 				foreach ($blocks as $block){
 					if ($block['title'] !== ''){
-						$return['shortcuts'][$block['block_id']] = $page['title'].' > '.$block['title'];
+						$return['shortcuts'][$block['cms_page_panel_id']] = $page['title'].' > '.$block['title'];
 					}
 				}
 			}

@@ -154,8 +154,8 @@ class CI_Loader {
 		$this->_ci_models = array();
 		$this->_base_classes =& is_loaded();
 
-		$this->_ci_autoloader();
-
+		$this->database();
+		
 		return $this;
 	}
 
@@ -407,9 +407,10 @@ class CI_Loader {
 	 */
 	public function view($view, $vars = array(), $return = FALSE)
 	{
+
 		return $this->_ci_load(array('_ci_view' => $view, '_ci_vars' => $this->_ci_object_to_array($vars), '_ci_return' => $return));
 	}
-
+	
 	// --------------------------------------------------------------------
 
 	/**
@@ -490,26 +491,6 @@ class CI_Loader {
 				continue;
 			}
 
-			$ext_helper = APPPATH.'helpers/'.config_item('subclass_prefix').$helper.'.php';
-
-			// Is this a helper extension request?
-			if (file_exists($ext_helper))
-			{
-				$base_helper = BASEPATH.'helpers/'.$helper.'.php';
-
-				if ( ! file_exists($base_helper))
-				{
-					show_error('Unable to load the requested file: helpers/'.$helper.'.php');
-				}
-
-				include_once($ext_helper);
-				include_once($base_helper);
-
-				$this->_ci_helpers[$helper] = TRUE;
-				log_message('debug', 'Helper loaded: '.$helper);
-				continue;
-			}
-
 			// Try to load the helper
 			foreach ($this->_ci_helper_paths as $path)
 			{
@@ -546,32 +527,6 @@ class CI_Loader {
 	{
 		$this->helper($helpers);
 	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Loads a language file
-	 *
-	 * @param	array
-	 * @param	string
-	 * @return	void
-	 */
-	public function language($file = array(), $lang = '')
-	{
-		$CI =& get_instance();
-
-		if ( ! is_array($file))
-		{
-			$file = array($file);
-		}
-
-		foreach ($file as $langfile)
-		{
-			$CI->lang->load($langfile, $lang);
-		}
-	}
-
-	// --------------------------------------------------------------------
 
 	/**
 	 * Loads a config file
@@ -730,13 +685,13 @@ class CI_Loader {
 	 * @return	void
 	 */
 	protected function _ci_load($_ci_data) {
-		
+
 		// Set the default data variables
 		foreach (array('_ci_view', '_ci_vars', '_ci_path', '_ci_return') as $_ci_val)
 		{
 			$$_ci_val = ( ! isset($_ci_data[$_ci_val])) ? FALSE : $_ci_data[$_ci_val];
 		}
-
+		
 		$file_exists = FALSE;
 
 		if (!empty($_ci_view) && (stristr($_ci_view, 'modules/') || stristr($_ci_view, $GLOBALS['config']['base_path']))){
@@ -814,16 +769,7 @@ class CI_Loader {
 		// do a little string replacement, changing the short tags
 		// to standard PHP echo statements.
 
-		if ((bool) @ini_get('short_open_tag') === FALSE AND config_item('rewrite_short_tags') == TRUE)
-		{
-			echo eval('?>'.preg_replace("/;*\s*\?>/", "; ?>", str_replace('<?=', '<?php echo ', file_get_contents($_ci_path))));
-		}
-		else
-		{
-			include($_ci_path); // include() vs include_once() allows for multiple views with the same name
-		}
-
-		log_message('debug', 'File loaded: '.$_ci_path);
+		include($_ci_path); // include() vs include_once() allows for multiple views with the same name
 
 		// Return the file data if requested
 		if ($_ci_return === TRUE)
@@ -930,45 +876,6 @@ class CI_Loader {
 		// We'll test for both lowercase and capitalized versions of the file name
 		foreach (array(ucfirst($class), strtolower($class)) as $class)
 		{
-			$subclass = APPPATH.'libraries/'.$subdir.config_item('subclass_prefix').$class.'.php';
-
-			// Is this a class extension request?
-			if (file_exists($subclass))
-			{
-				$baseclass = BASEPATH.'libraries/'.ucfirst($class).'.php';
-
-				if ( ! file_exists($baseclass))
-				{
-					log_message('error', "Unable to load the requested class: ".$class);
-					show_error("Unable to load the requested class: ".$class);
-				}
-
-				// Safety:  Was the class already loaded by a previous call?
-				if (in_array($subclass, $this->_ci_loaded_files))
-				{
-					// Before we deem this to be a duplicate request, let's see
-					// if a custom object name is being supplied.  If so, we'll
-					// return a new instance of the object
-					if ( ! is_null($object_name))
-					{
-						$CI =& get_instance();
-						if ( ! isset($CI->$object_name))
-						{
-							return $this->_ci_init_class($class, config_item('subclass_prefix'), $params, $object_name);
-						}
-					}
-
-					$is_duplicate = TRUE;
-					log_message('debug', $class." class already loaded. Second attempt ignored.");
-					return;
-				}
-
-				include_once($baseclass);
-				include_once($subclass);
-				$this->_ci_loaded_files[] = $subclass;
-
-				return $this->_ci_init_class($class, config_item('subclass_prefix'), $params, $object_name);
-			}
 
 			// Lets search for the requested library file and load it.
 			$is_duplicate = FALSE;
@@ -1050,10 +957,6 @@ class CI_Loader {
 			{
 				$name = 'CI_'.$class;
 			}
-			elseif (class_exists(config_item('subclass_prefix').$class))
-			{
-				$name = config_item('subclass_prefix').$class;
-			}
 			else
 			{
 				$name = $class;
@@ -1098,67 +1001,6 @@ class CI_Loader {
 			$CI->$classvar = new $name;
 		}
 
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Autoloader
-	 *
-	 * The config/autoload.php file contains an array that permits sub-systems,
-	 * libraries, and helpers to be loaded automatically.
-	 *
-	 * @param	array
-	 * @return	void
-	 */
-	private function _ci_autoloader()
-	{
-	
-		include(APPPATH.'config/autoload.php');
-
-		if ( ! isset($autoload))
-		{
-			return FALSE;
-		}
-
-		// Autoload helpers and languages
-		foreach (array('helper', 'language') as $type)
-		{
-			if (isset($autoload[$type]) AND count($autoload[$type]) > 0)
-			{
-				$this->$type($autoload[$type]);
-			}
-		}
-
-		// A little tweak to remain backward compatible
-		// The $autoload['core'] item was deprecated
-		if ( ! isset($autoload['libraries']) AND isset($autoload['core']))
-		{
-			$autoload['libraries'] = $autoload['core'];
-		}
-
-		// Load libraries
-		if (isset($autoload['libraries']) AND count($autoload['libraries']) > 0)
-		{
-			// Load the database driver.
-			if (in_array('database', $autoload['libraries']))
-			{
-				$this->database();
-				$autoload['libraries'] = array_diff($autoload['libraries'], array('database'));
-			}
-
-			// Load all other libraries
-			foreach ($autoload['libraries'] as $item)
-			{
-				$this->library($item);
-			}
-		}
-
-		// Autoload models
-		if (isset($autoload['model']))
-		{
-			$this->model($autoload['model']);
-		}
 	}
 
 	// --------------------------------------------------------------------
@@ -1217,7 +1059,27 @@ class CI_Loader {
 			return $filename;
 		}
 	}
-}
+	
+	function layout($layout, $data){
+	
+		if (stristr($layout, '/')){
+			list($layout_module, $layout_file) = explode('/', $layout);
+		} else { // deprecated - if layout name doesn't contain module name
+			$layout_module = 'cms';
+			$layout_file = $layout;
+		}
+		$layout_filename = $GLOBALS['config']['base_path'].'modules/'.$layout_module.'/layouts/'.$layout_file.'.tpl.php';
+		
+		ob_start();
 
-/* End of file Loader.php */
-/* Location: ./system/core/Loader.php */
+		include($layout_filename); // include() vs include_once() allows for multiple views with the same name
+
+		$buffer = ob_get_contents();
+		
+		@ob_end_clean();
+		
+		return $buffer;
+	
+	}
+	
+}

@@ -3,7 +3,7 @@
 	<div class="admin_tool_text">Global css</div>
 	
 	<div class="cms_toolbar_buttons">
-		<div class="cms_cssjs_settings_save admin_tool_button admin_right">
+		<div class="cms_cssjs_settings_save cms_tool_button admin_right">
 			Save
 			<div class="cms_ctrl_hint">S</div>
 		</div>
@@ -20,13 +20,13 @@
 				css
 			</div>
 		
-			<div class="cms_cssjs_settings_csss ui-sortable" data-bg="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/drag.png'); ">
+			<div class="cms_cssjs_settings_csss ui-sortable" data-bg="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/cms_drag.png'); ">
 			
 				<?php foreach($current_css as $current_css_item): ?>
 					
 					<div class="cms_list_sortable_item cms_cssjs_settings_csss_item ui-sortable-handle" data-value="<?= $current_css_item ?>" 
 							data-text="<?= str_replace(['modules/','css/', '.css','.scss'], '', $current_css_item) ?>"
-							style="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/drag.png'); ">
+							<?php _ib('cms/cms_drag.png', 14) ?>>
 						<?= str_replace(['modules/','css/', '.css','.scss'], '', $current_css_item) ?>
 						<div class="cms_cssjs_settings_csss_item_delete cms_list_item_button">remove</div>
 					</div>

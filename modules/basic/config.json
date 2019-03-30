@@ -5,6 +5,14 @@
 			"name":"Analytics"
 		},
 		{
+			"id":"gtm",
+			"name":"GTM"
+		},
+		{
+			"id":"pixel",
+			"name":"FB pixel"
+		},
+		{
 			"id":"console_log",
 			"name":"Console log"
 		},
@@ -23,6 +31,10 @@
 		{
 			"id":"sidefloat",
 			"name":"Side float"
+		},
+		{
+			"id":"language",
+			"name":"Language"
 		}
 	],
 	"cms_menu":[
@@ -34,6 +46,20 @@
 			"id":"analytics",
 			"name":"Analytics settings",
 			"url":"admin/panel_settings/basic__analytics/",
+			"parent":"cms",
+			"access":"basic_analytics"
+		},
+		{
+			"id":"gtm",
+			"name":"GTM settings",
+			"url":"admin/panel_settings/basic__gtm/",
+			"parent":"cms",
+			"access":"basic_analytics"
+		},
+		{
+			"id":"gtm",
+			"name":"FB pixel settings",
+			"url":"admin/panel_settings/basic__pixel/",
 			"parent":"cms",
 			"access":"basic_analytics"
 		}

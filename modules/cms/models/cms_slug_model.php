@@ -4,9 +4,13 @@ class cms_slug_model extends CI_Model {
 	
 	function generate_page_slug($page_id, $slug_string){
 		
-		// page id 1 always has empty slug
-		if ($page_id == 1 ){
-			return '';
+		$this->load->model('cms/cms_page_model');
+
+		if (empty($slug_string)){
+		
+			$page = $this->cms_page_model->get_page($page_id);
+			$slug_string = !empty($page['seo_title']) ? $page['seo_title'] : $page['title'];
+
 		}
 
 		$this->delete_slug($page_id);
@@ -170,16 +174,19 @@ class cms_slug_model extends CI_Model {
     	$sql = "select * from cms_slug";
     	$query = $this->db->query($sql);
     	$routes = $query->result_array();
+    	
+    	$secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443;
+    	$protocol = !$secure ? 'http' : 'https';
 
         $data = array();
         $data[] = '<?xml version="1.0" encoding="UTF-8"?>';
-        $data[] = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+        $data[] = '<urlset xmlns="'.$protocol.'://www.sitemaps.org/schemas/sitemap/0.9">';
         
         if (!empty($routes )) {
             foreach ($routes as $route) {
             	if ($route['cms_slug_id'] && $route['status'] == 0){
 
-            		$data[] = '<url><loc>http://' . $_SERVER['HTTP_HOST'] . '/' . $route['cms_slug_id'] . '/</loc></url>';
+            		$data[] = '<url><loc>'.$protocol.'://' . $_SERVER['HTTP_HOST'] . '/' . $route['cms_slug_id'] . '/</loc></url>';
 
             	}
             }
@@ -191,7 +198,7 @@ class cms_slug_model extends CI_Model {
         file_put_contents($GLOBALS['config']['base_path'].'cache/sitemap.xml', $output);
         
         // put it to robots.txt
-        file_put_contents($GLOBALS['config']['base_path'].'robots.txt', 'Sitemap: http://'.$_SERVER['HTTP_HOST'].'/cache/sitemap.xml'."\n");
+        file_put_contents($GLOBALS['config']['base_path'].'robots.txt', 'Sitemap: '.$protocol.'://'.$_SERVER['HTTP_HOST'].'/cache/sitemap.xml'."\n");
 
 	}
 	

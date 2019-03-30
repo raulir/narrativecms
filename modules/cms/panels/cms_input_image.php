@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_input_image extends MY_Controller{
+class cms_input_image extends CI_Controller {
 
 	function __construct(){
 
@@ -23,7 +23,11 @@ class cms_input_image extends MY_Controller{
 		}
 
 		if(!file_exists($GLOBALS['config']['upload_path'].$params['value'])){
-			$params['error'] = 'Missing image file<br>Update resources or database<br>or upload a new image';
+			$params['error'] = 'Missing image file<br>Update resources or database<br>or select a different image';
+		}
+		
+		if (!empty($params['params']['meta']) && $params['params']['meta'] == 'image'){
+			$params['help'] = (!empty($params['help']) ? $params['help'].'||' : '').'{Page SEO image}';
 		}
 
 		return $params;

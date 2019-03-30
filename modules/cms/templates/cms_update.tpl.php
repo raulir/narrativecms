@@ -6,7 +6,7 @@
 		</div>
 		
 		<?php if($can_update && !empty($GLOBALS['config']['update']['allow_updates']) && !empty($master_version)): ?>
-			<div class="cms_update_button admin_tool_button admin_right">Update</div>
+			<div class="cms_update_button cms_tool_button admin_right">Update</div>
 		<?php endif ?>
 	
 	</div>

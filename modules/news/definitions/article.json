@@ -1,0 +1,151 @@
+{
+	"version":"2",
+	"list":{
+		"list_title":"Articles",
+		"item_title":"Article",
+		"title_field":"heading",
+		"filter_fields":{
+			"show":"-- show --"
+		},
+		"link_target":"1"
+	},
+	"item":[
+		{
+			"name":"heading",
+			"type":"textarea",
+			"label":"Heading",
+			"lines":"4",
+			"max_chars":"150",
+			"search":"3"
+		},
+		{
+			"type":"select",
+			"name":"type",
+			"label":"Category",
+			"values":{
+				"news":"News"
+			},
+			"default":"news"
+		},
+		{
+			"type":"text",
+			"name":"read_more",
+			"label":"Link to read more"
+		},
+		{
+			"type":"text",
+			"name":"read_more_text",
+			"label":"Text read more",
+			"default":"find out more"
+		},
+	    {
+	      "type":"select",
+	      "name":"images_position",
+	      "label":"Images in mobile",
+	      "values":{
+	        "before":"Before text",
+	        "after":"After text"
+	      },
+	      "default":"before"
+	    },
+		{
+			"name":"lead_text",
+			"type":"textarea",
+			"label":"Lead",
+			"lines":"5",
+			"search":"2",
+			"width":"wide"
+		},
+		{
+			"name":"text",
+			"type":"textarea",
+			"label":"Text",
+			"lines":"15",
+			"width":"wide",
+			"search":"1",
+			"html":"HLTAB",
+			"html_class":"article_text",
+			"html_css":"modules/news/css/article.css"
+		},
+	    {
+	      	"type":"repeater",
+	      	"name":"article_images",
+	      	"label":"Article images",
+	      	"fields":[
+	        	{
+	          		"name":"image",
+	          		"type":"image",
+	         		"label":"Image",
+	         		"category":"content"
+	        	},
+	        	{
+	          		"name":"caption",
+	          		"type":"textarea",
+	          		"label":"Caption",
+	          		"lines":"3",
+	          		"default":":meta:image:description"
+	        	}
+	      	]
+	    },
+		{
+			"type":"repeater",
+			"name":"features",
+			"label":"Feature blocks",
+			"fields":[
+				{
+					"type":"text",
+					"name":"heading",
+					"label":"Name"
+				},
+				{
+					"type":"textarea",
+					"name":"text",
+					"label":"Text",
+					"lines":"15",
+					"search":"1",
+					"html":"HLTAB",
+					"html_class":"article_text",
+					"html_css":"modules/news/css/article.css"
+				},
+				{
+					"type":"image",
+					"name":"image",
+					"label":"Image after",
+					"filter":"news",
+					"category":"content"
+				},
+				{
+					"type":"text",
+					"name":"image_text",
+					"label":"Image text"
+				},
+				{
+					"type":"text",
+					"name":"image_copyright",
+					"label":"Image copyright"
+				},
+				{
+					"type":"select",
+					"name":"video_site",
+					"label":"Video source",
+					"values":{
+						"0":"-- no video --",
+						"youtube":"YouTube",
+						"dailymotion":"DailyMotion"
+					},
+					"default":"0"
+				},
+				{
+					"type":"text",
+					"name":"video_id",
+					"label":"Video ID"
+				},
+				{
+					"type":"text",
+					"name":"quote",
+					"label":"Quote"
+				}
+			]
+		}
+	]
+}

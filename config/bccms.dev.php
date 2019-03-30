@@ -11,6 +11,8 @@ $config['analytics'] = 0;
 $config['cache']['force_download'] = 1;
 $config['cache']['pack_js'] = 0;
 $config['cache']['pack_css'] = 0;
+$config['cache']['vcs_check'] = ''; // ''|'git'|'svn'
+
 $config['update']['allow_updates'] = 1;
 
 // Optimise PNG images using pngquant. Pngquant uses lossy compression to define edges and same colour areas. May affect image quality. May not be available in shared hosting.
@@ -27,6 +29,9 @@ $config['images_zopflipng'] = 0;
 // zopflipng executable full path. If empty, uses application/libraries/zopflipng/bin/zopflipng.bin
 // This file must be set to be executable! (chmod ugo+x application/libraries/zopflipng/bin/zopflipng.bin)
 $config['images_zopflipng_executable'] = '';
+
+// depending of availability: none - '', PHP - 'gd', Google cwebp - 'cwebp'
+$config['images_webp'] = 'gd'; 
 
 $config['database']['hostname'] = 'localhost';
 $config['database']['username'] = 'root';

@@ -69,7 +69,7 @@ if ( !function_exists('get_position')) {
     	
     }
     
-    function _panel($name, $params = array()){
+    function _panel($name, $params = []){
 
     	if (!isset($params['_return'])){
     		$params['_return'] = false;
@@ -77,6 +77,16 @@ if ( !function_exists('get_position')) {
     	
     	$params['embed'] = 1;
     	$ci =& get_instance();
+
+    	// check if json defined js
+    	$ci->load->model('cms/cms_panel_model');
+    	$panel_config = $ci->cms_panel_model->get_cms_panel_config($name);
+    	if (!empty($panel_config['js'])){
+    		foreach($panel_config['js'] as $js){
+    			list($js_module, $js_file) = explode('/', $js);
+    			$GLOBALS['_panel_js'][] = 'modules/'.$js_module.'/js/'.$js_file.'.js';
+    		}
+    	}
     	
     	$data = $ci->ajax_panel($name, $params);
 
@@ -140,6 +150,11 @@ if ( !function_exists('get_position')) {
     }
 
     function str_limit($string, $length, $extra = ''){
+    	
+    	if (is_array($string)){
+    		$string = array_pop($string);
+    	}
+    	
     	if (strlen($string) > $length){
     		$string = substr($string, 0, $length - strlen($extra));
     		$string = substr($string, 0, strrpos($string, ' '));
@@ -178,16 +193,22 @@ if ( !function_exists('get_position')) {
     		if (((int)$url == $url && $url != '') || (!stristr($url, '?') && stristr($url, '='))){
     			// get slug
     			$ci =& get_instance();
-    			$ci->load->model('cms_slug_model');
+    			$ci->load->model('cms/cms_slug_model');
     			$slug = $ci->cms_slug_model->get_cms_slug_by_target($url);
     			if ($slug){
     				$url = $slug.'/';
     			}
     		}
+    		
+    		// if homepage
+    		if (ltrim($url, '/') == $GLOBALS['config']['landing_page']['url']){
+    			$url = '/';
+    		}
 
     		$url = $GLOBALS['config']['base_url'].ltrim($url, '/');
+    		
     	}
-    	
+    	    	
     	if (!empty($hash)){
     		$url = $url.'#'.$hash;
     	}
@@ -203,7 +224,7 @@ if ( !function_exists('get_position')) {
      /**
      * prints out a href and target with full site path and opening in new window where needed
      */
-    function _lh($url){
+    function _lh($url, $params = []){
     	
         if (is_array($url)){
     		if(!empty($url['url'])){
@@ -211,6 +232,10 @@ if ( !function_exists('get_position')) {
     		} else {
     			$url = '';
     		}
+    	}
+    	
+    	if (!empty($params['hash'])){
+    		$url .= '#'.trim($params['hash'], ' #');
     	}
     	
     	if(empty($url)){
@@ -235,11 +260,18 @@ if ( !function_exists('get_position')) {
      * prints link to file from cms file input
      */
     function _lf($filename){
-    	
-    	if ($filename){
-			print(' href="' . _l('files/get/'.str_replace('/', '__', $filename), false) . '" ');
-    	}
-    	
+    	if (empty($filename)) return;
+		print(' href="' . _l('files/get/'.str_replace('/', '__', $filename), false) . '" ');
+    }
+    
+    function _lfd($filename){
+    	if (empty($filename)) return;
+    	print(_l('files/get/'.str_replace('/', '__', $filename), false));
+    }
+    
+    function _lfs($filename){
+    	if (empty($filename)) return;
+    	print(' src="' . _l('files/get/'.str_replace('/', '__', $filename), false) . '" ');
     }
     
     /**

@@ -2,33 +2,53 @@
 
 if ( !function_exists('_iw')) {
 	
+	// if used from api, ci object may not exist
+	if ( !function_exists('get_instance')){
+		
+		include_once($GLOBALS['config']['base_path'] . 'system/core/Common.php');
+		include($GLOBALS['config']['base_path'] . 'system/core/Controller.php');
+		
+		function &get_instance(){
+			return CI_Controller::get_instance();
+		}
+
+	}
+	
 	function _get_iw_size($image, $params){
 		
+		$ci =& get_instance();
+		if ($ci === null) {
+			new CI_Controller();
+			$ci =& get_instance();
+		}
+		
+		$ci->load->model('cms/cms_image_model');
+
 		$width = !empty($params['width']) ? $params['width'] : 0;
 		$height = !empty($params['height']) ? $params['height'] : 0;
 		
-		list($original_width, $original_height) = getimagesize($GLOBALS['config']['upload_path'].$image);
+		$image_data = $ci->cms_image_model->get_cms_image_by_filename($image);
 		
 		if (!$width && $height){
-			$width = round($original_width * $height / $original_height);
+			$width = round($image_data['original_width'] * $height / $image_data['original_height']);
 		} else if ($width && !$height){
-			$height = round($original_height * $width / $original_width);
+			$height = round($image_data['original_height'] * $width / $image_data['original_width']);
 		} else {
-			$width = $original_width;
-			$height = $original_height;
+			$width = $image_data['original_width'];
+			$height = $image_data['original_height'];
 		}
 		
 		// do not stretch image bigger
-		if ($width > $original_width || $height > $original_height){
-			$width = $original_width;
-			$height = $original_height;
+		if ($width > $image_data['original_width'] || $height > $image_data['original_height']){
+			$width = $image_data['original_width'];
+			$height = $image_data['original_height'];
 		}
 		
 		return [
 				$width,
 				$height,
-				$original_width,
-				$original_height,
+				$image_data['original_width'],
+				$image_data['original_height'],
 		];
 		
 	}
@@ -62,7 +82,7 @@ if ( !function_exists('_iw')) {
 			return ['image' => $image, 'width' => !empty($params['width']) ? $params['width'] : 0, 'height' => !empty($params['height']) ? $params['height'] : 0, ];
 		
 		}
-		
+
 		// get needed size
 		list($width, $height, $original_width, $original_height) = _get_iw_size($image, $params);
 		
@@ -91,18 +111,23 @@ if ( !function_exists('_iw')) {
 
 		} else {
 
-			if ($name_a['extension'] == 'jpg' || $name_a['extension'] == 'jpeg'){
-					
+			$tmp = imagecreatetruecolor($width, $height);
+			
+			// detect file format
+			$imagetype = exif_imagetype($GLOBALS['config']['upload_path'].$image);
+			
+			if ($imagetype == IMAGETYPE_JPEG){
+				
+				$name_a['extension'] = 'jpg';
+				
 				$src = imagecreatefromjpeg($GLOBALS['config']['upload_path'].$image);
-					
-				$tmp = imagecreatetruecolor($width, $height);
-				imagecopyresampled($tmp, $src, 0, 0, 0, 0, $width, $height, $original_width, $original_height);
-					
-			} else if ($name_a['extension'] == 'png'){
+
+			} else if ($imagetype == IMAGETYPE_PNG){
+				
+				$name_a['extension'] = 'png';
 
 				$src = imagecreatefrompng($GLOBALS['config']['upload_path'].$image);
 					
-				$tmp = imagecreatetruecolor($width, $height);
 				imagesavealpha($tmp, true);
 				imagealphablending($tmp, false);
 					
@@ -110,10 +135,16 @@ if ( !function_exists('_iw')) {
 				imagefill($tmp , 0, 0, $background);
 					
 				imagealphablending($tmp, false); // to preserve transparencies
-				imagecopyresampled($tmp, $src, 0, 0, 0, 0, $width, $height, $original_width, $original_height);
 					
+			} else {
+				
+				$src = imagecreatefrompng($GLOBALS['config']['base_path'].'modules/cms/img/cms_no_image.png');
+				list($original_width, $original_height) = getimagesize($GLOBALS['config']['base_path'].'modules/cms/img/cms_no_image.png');
+				
 			}
 
+			imagecopyresampled($tmp, $src, 0, 0, 0, 0, $width, $height, $original_width, $original_height);
+			
 			/* output */
 
 			imageinterlace($tmp, true);
@@ -156,6 +187,99 @@ if ( !function_exists('_iw')) {
 					
 					unlink($temp_name);
 				
+				}
+				
+				// if size is same or bigger, but new filesize is bigger, then use original image instead
+				if ($width >= $original_width){
+					
+					$new_filesize = filesize($GLOBALS['config']['upload_path'].$new_image);
+					$old_filesize = filesize($GLOBALS['config']['upload_path'].$image);
+					
+					if ($new_filesize > $old_filesize){
+						
+						unlink($GLOBALS['config']['upload_path'].$new_image);
+						copy($GLOBALS['config']['upload_path'].$image, $GLOBALS['config']['upload_path'].$new_image);
+						
+					}
+					
+				}
+			
+			} else if ($extension == 'webp'){
+				
+				// detect if source is png or jpg
+				if ($name_a['extension'] == 'png'){
+				
+					$png_image = str_replace('.png', '.tmp.png', _get_iw_new($image, $width, 'png'));
+					
+					if (!file_exists($GLOBALS['config']['upload_path'].$png_image)){
+						
+						imagesavealpha($tmp, true);
+						imagepng($tmp, $GLOBALS['config']['upload_path'].$png_image);
+						
+						// optimise on linux
+						if(!empty($GLOBALS['config']['images_pngquant'])){
+							
+							$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($png_image).'.png';
+							
+							rename($GLOBALS['config']['upload_path'].$png_image, $temp_name);
+							
+							$cmd = (empty($GLOBALS['config']['images_pngquant_executable']) ? $GLOBALS['config']['base_path'].'system/vendor/pngquant/bin/pngquant.bin' : $GLOBALS['config']['images_pngquant_executable'])
+									.' '.$temp_name.' --strip --speed 1 --quality=0-'.(!empty($GLOBALS['config']['images_quality']) ? $GLOBALS['config']['images_quality'] : 85).' -o '.$GLOBALS['config']['upload_path'].$new_image;
+		
+							shell_exec($cmd);
+							
+							unlink($temp_name);
+							
+						}
+					
+					}
+					
+					// convert png to webp
+					if ($GLOBALS['config']['images_webp'] == 'gd'){
+						
+						$src = imagecreatefrompng($GLOBALS['config']['upload_path'].$png_image);
+						
+						imagewebp($tmp, $GLOBALS['config']['upload_path'].$new_image);
+						
+					} else if ($GLOBALS['config']['images_webp'] == 'cwebp'){
+						
+						$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($png_image).'.png';
+						rename($GLOBALS['config']['upload_path'].$png_image, $temp_name);
+						
+						$cmd = 'cwebp -z 9 '.$temp_name.' -o '.$GLOBALS['config']['upload_path'].$new_image;
+						
+						shell_exec($cmd);
+						
+						unlink($temp_name);
+						
+					}
+					
+					unlink($GLOBALS['config']['upload_path'].$png_image);
+				
+				} else { // if jpg
+					
+					// convert jpg to webp
+					if ($GLOBALS['config']['images_webp'] == 'gd'){
+					
+						imagewebp($tmp, $GLOBALS['config']['upload_path'].$new_image);
+					
+					} else if ($GLOBALS['config']['images_webp'] == 'cwebp'){
+					
+						$jpg_image = _get_iw_new($image, $width, 'jpg');
+						$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($jpg_image).'.jpg';
+						
+						imagesavealpha($tmp, false);
+						imagejpeg($tmp, $temp_name, 100);
+
+						$cmd = 'cwebp -m 6 -q '.(!empty($GLOBALS['config']['images_quality']) ? ($GLOBALS['config']['images_quality'] - 5) : 75).
+								' '.$temp_name.' -o '.$GLOBALS['config']['upload_path'].$new_image;
+					
+						shell_exec($cmd);
+						
+						unlink($temp_name);
+
+					}
+
 				}
 			
 			} else if ($extension == 'ico'){
@@ -241,7 +365,7 @@ if ( !function_exists('_iw')) {
 
 		}
 
-		return array('image' => $image, 'width' => $width, 'height' => $height, );
+		return ['image' => $image, 'width' => $width, 'height' => $height, 'original_width' => $original_width, 'original_height' => $original_height, ];
 		 
 	}
 

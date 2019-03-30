@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class do_send extends MY_Controller{
+class do_send extends CI_Controller {
 	
 	function panel_action($params){
 
@@ -69,7 +69,7 @@ class do_send extends MY_Controller{
 					}
 				}
 				
-				$this->form_model->send_contact_request($params['emails'], $data, $title, $from);
+				$this->form_model->send_contact_request($params['emails'], $data, $title, $from, !empty($params['noreply_notification']));
 			
 			}
 			

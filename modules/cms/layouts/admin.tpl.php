@@ -7,7 +7,7 @@
  			var config_url = '<?php print($GLOBALS['config']['base_url']); ?>';
 		</script>
    	</head>
-	<body <?php if (!empty($GLOBALS['config']['cms_background'])) _ib($GLOBALS['config']['cms_background']); ?>>
+	<body <?php if (!empty($GLOBALS['config']['cms_background'])) _ib($GLOBALS['config']['cms_background'], 1200); ?>>
 	
 		<div class="admin_container">
 			

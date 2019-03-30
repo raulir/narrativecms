@@ -1,5 +1,5 @@
 
-function preloader_class(){
+function cms_preloader_class(){
 	
 	this.preloaded_images = [];
 	
@@ -150,3 +150,5 @@ console.log('loaded ' + next_key + ' ' + _preloader.preloaded_videos[next_key].t
 	}
 
 }
+
+var cms_preloader = new cms_preloader_class();

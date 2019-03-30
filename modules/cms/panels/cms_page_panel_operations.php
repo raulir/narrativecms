@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_page_panel_operations extends MY_Controller{
+class cms_page_panel_operations extends CI_Controller {
 
 	function __construct(){
 
@@ -16,9 +16,9 @@ class cms_page_panel_operations extends MY_Controller{
 	
 	function panel_action($params){
 
-		$this->load->model('cms_page_panel_model');
-		$this->load->model('cms_panel_model');
-		$this->load->model('cms_slug_model');
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_panel_model');
+		$this->load->model('cms/cms_slug_model');
 		
 		$do = $this->input->post('do');
 
@@ -30,7 +30,7 @@ class cms_page_panel_operations extends MY_Controller{
 			// save data
 			$this->cms_page_panel_model->create_cms_page_panel(array(
 					'sort' => 'last',
-					'page_id' => $cms_page_id,
+					'cms_page_id' => $cms_page_id,
 					'title' => '',
 					'panel_name' => $cms_page_panel_id,
 			));
@@ -118,7 +118,7 @@ class cms_page_panel_operations extends MY_Controller{
 			}
 
 			// set new block sort to old + 1 and move other blocks out of the way
-			if ($data['page_id'] == 999999 || $data['page_id'] == 0){
+			if ($data['cms_page_id'] == 999999 || $data['cms_page_id'] == 0){
 				$data['sort'] = $data['sort'] + 1;
 				$this->cms_page_panel_model->shift_sort($data['panel_name'], $data['sort'], 1);
 			}
@@ -138,7 +138,9 @@ class cms_page_panel_operations extends MY_Controller{
 			 
 			// collect data
 			$block_id = $this->input->post('cms_page_panel_id');
-			$data['page_id'] = $this->input->post('page_id');
+			$language = $this->input->post('language');
+			
+			$data['cms_page_id'] = $this->input->post('cms_page_id');
 			$data['parent_id'] = $this->input->post('parent_id');
 			$data['sort'] = $this->input->post('sort');
 			$data['title'] = $this->input->post('title');
@@ -148,7 +150,7 @@ class cms_page_panel_operations extends MY_Controller{
 			$data['panel_params'] = $this->input->post('panel_params');
 			 
 			// load existing data and save some of it
-			$old_data = $this->cms_page_panel_model->get_cms_page_panel($block_id);
+			$old_data = $this->cms_page_panel_model->get_cms_page_panel($block_id, $language);
 			if (!empty($old_data['_cache_lists'])){
 				$data['_cache_lists'] = $old_data['_cache_lists'];
 			}
@@ -169,8 +171,6 @@ class cms_page_panel_operations extends MY_Controller{
 				$data['panel_params']['_extends'] = $panel_config['extends'];
 			}
 			 
-			$panel_structure = !empty($panel_config['item']) ? $panel_config['item'] : array();
-			
 			// save if special template
 			if (!empty($panel_config['list']['templates'])){
 				$data['panel_params']['_template_page_id'] = $this->input->post('_template_page_id');
@@ -181,8 +181,24 @@ class cms_page_panel_operations extends MY_Controller{
 				$data['panel_params']['_search_time_extra'] = serialize($panel_config['list']['search_time_extra']);
 				$data['panel_params']['_search_time_timestamp_day'] = strtotime($data['panel_params']['date'])/86400;
 			}
-			 
+
+			// js and css from config
+			if (!empty($panel_config['js']) && is_array($panel_config['js'])){
+				foreach($panel_config['js'] as $_js){
+					list($_js_module, $_js_panel) = explode('/', $_js);
+					$data['panel_params']['_js'][] = 'modules/'.$_js_module.'/js/'.$_js_panel.'.js';
+				}
+			}
+			if (!empty($panel_config['css']) && is_array($panel_config['css'])){
+				foreach($panel_config['css'] as $_css){
+					list($_css_module, $_css_panel) = explode('/', $_css);
+					$data['panel_params']['_css'][] = 'modules/'.$_css_module.'/css/'.$_css_panel.'.scss';
+				}
+			}
+			
 			$data['search_params'] = array();
+			
+			$panel_structure = !empty($panel_config['item']) ? $panel_config['item'] : array();
 			foreach($panel_structure as $struct){
 				if (!empty($struct['search'])){
 					$data['search_params'][$struct['name']] = $struct['search'];
@@ -195,7 +211,36 @@ class cms_page_panel_operations extends MY_Controller{
 					}
 				}
 			}
-			 
+
+			// are there any meta images
+			foreach($panel_structure as $struct){
+				
+				if ($struct['type'] == 'image'){
+					if (!empty($struct['meta']) && $struct['meta'] == 'image' && !empty($data['panel_params'][$struct['name']])){
+						
+						$data['panel_params']['_images'][] = $data['panel_params'][$struct['name']];
+
+					}
+				}
+				
+				if ($struct['type'] == 'repeater'){
+					foreach ($struct['fields'] as $r_struct){
+						if ($r_struct['type'] == 'image'){
+							if (!empty($r_struct['meta']) && $r_struct['meta'] == 'image' && !empty($data['panel_params'][$struct['name']])){
+								
+								if (empty($data['panel_params']['_images'])){
+									$data['panel_params']['_images'] = [];
+								}
+								
+								array_merge($data['panel_params']['_images'], $data['panel_params'][$struct['name']]);
+								
+							}
+						}
+					}
+				}
+				
+			}
+
 			foreach ($data['panel_params'] as $key => $value){
 
 				// if repeater with something in it - collect values to records
@@ -227,7 +272,7 @@ class cms_page_panel_operations extends MY_Controller{
 
 			}
 
-			if (($data['page_id'] == 999999 || $data['page_id'] == 0) && !empty($data['panel_params']['heading'])){
+			if (($data['cms_page_id'] == 999999 || $data['cms_page_id'] == 0) && !empty($data['panel_params']['heading'])){
 				$data['title'] = $data['panel_params']['heading'];
 			}
 
@@ -327,7 +372,7 @@ class cms_page_panel_operations extends MY_Controller{
 				}
 			}
 			 
-			$params = array_merge($params, array('block_id' => $block_id, 'filter' => array('block_id' => $block_id, )));
+			$params = array_merge($params, array('cms_page_panel_id' => $block_id, 'filter' => array('cms_page_panel_id' => $block_id, )));
 
 		} elseif ($do == 'cms_page_panel_delete'){
 			 

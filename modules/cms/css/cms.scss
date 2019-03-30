@@ -102,7 +102,7 @@ ul {
 	padding-bottom: 10px;
 	margin-bottom: 20px;
 	position: relative;
-	overflow: hidden;
+	z-index: 20;
 }
 
 .cms_toolbar_buttons {
@@ -250,7 +250,7 @@ a.admin_tool_text:hover {
 	text-decoration: underline;
 }
 
-.admin_tool_button {
+.cms_tool_button {
 	box-sizing: border-box;
 	display: inline-block;
 	height: 30px;
@@ -601,7 +601,6 @@ a.admin_tool_text:hover {
 
 .cms_paging_first {
 	width: 40px;
-	background-image: url('../img/cms_paging_first.png');
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: auto 12px;
@@ -609,7 +608,6 @@ a.admin_tool_text:hover {
 
 .cms_paging_previous {
 	width: 40px;
-	background-image: url('../img/cms_paging_previous.png');
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: auto 12px;
@@ -617,7 +615,6 @@ a.admin_tool_text:hover {
 
 .cms_paging_next {
 	width: 40px;
-	background-image: url('../img/cms_paging_next.png');
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: auto 12px;
@@ -625,7 +622,6 @@ a.admin_tool_text:hover {
 
 .cms_paging_last {
 	width: 40px;
-	background-image: url('../img/cms_paging_last.png');
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: auto 12px;

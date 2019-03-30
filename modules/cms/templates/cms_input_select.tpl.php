@@ -1,6 +1,6 @@
 <div class="cms_input_container <?= !empty($params['groups']) ? ' cms_input_container_groups ' : '' ?>" <?= !empty($params['groups']) ? ' data-groups="'.implode(',', $params['groups']).'" ' : '' ?>>
 
-	<div class="cms_input cms_input_select <?php print(!empty($extra_class) ? $extra_class : ''); ?> <?= !empty($mandatory_class) ? $mandatory_class : '' ?>"
+	<div class="cms_input cms_input_select admin_column <?= !empty($mandatory_class) ? $mandatory_class : '' ?> <?= !empty($extra_class) ? $extra_class : '' ?>"
 			<?php if(!empty($extra_data)): ?>
 				<?php foreach($extra_data as $data_key => $data_data): ?>
 					data-<?= $data_key ?>="<?= $data_data ?>"

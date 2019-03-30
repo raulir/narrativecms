@@ -1,8 +1,8 @@
 <?php
 	
 	_panel('cms_page_panel_toolbar', [
-			'cms_page_panel_id' => $block['block_id'],
-			'cms_page_id' => $block['page_id'],
+			'cms_page_panel_id' => $block['cms_page_panel_id'],
+			'cms_page_id' => $block['cms_page_id'],
 			'breadcrumb' => !empty($breadcrumb) ? $breadcrumb : [],
 			'parent_id' => $block['parent_id'],
 	]);
@@ -13,13 +13,12 @@
 
 	<form method="post" class="admin_form" style="display: inline; ">
 	
-		<input type="hidden" name="do" value="cms_page_panel_save">
 		<input type="hidden" class="cms_page_panel_id" name="cms_page_panel_id" value="<?= $block['cms_page_panel_id'] ?>">
 		<input type="hidden" id="parent_id" name="parent_id" value="<?php print($block['parent_id']); ?>">
 		<?php if(!empty($parent_field_name)): ?>
 			<input class="cms_page_panel_parent_name" type="hidden" name="parent_name" value="<?php print($parent_field_name); ?>">
 		<?php endif ?>
-		<input type="hidden" class="cms_page_id" id="page_id" name="page_id" value="<?php print( isset($_admin_title) ? $block['page_id'] : $cms_page_id); ?>">
+		<input type="hidden" class="cms_page_id" name="cms_page_id" value="<?= isset($_admin_title) ? $block['cms_page_id'] : $cms_page_id ?>">
 		<input type="hidden" name="sort" value="<?php print($block['sort']); ?>">
 		<?php if(!empty($_mode)): ?>
 			<input class="cms_page_panel_mode" type="hidden" name="_mode" value="<?php print($_mode); ?>">
@@ -39,7 +38,7 @@
 					]); ?>
 				
 					<div class="cms_input cms_input_select">
-						<label for="panel_name">Block type</label>
+						<label for="panel_name">Panel type</label>
 						<?php _panel('cms_help', ['help' => '[Page panel type]||Select page panel type from available panel types in installed modules.||When adding a new page panel, '.
 								'one can select an existing panel from {Shortcut to} dropdown instead.||Changing this field may cause losing data already entered for this page panel', ]); ?>
 						<select class="cms_page_panel_panel_name" name="panel_name" id="panel_name">
@@ -195,7 +194,7 @@
 							
 							foreach($data[$field['name']] as $repeater_key => $repeater_data){
 								$return .= '<div class="cms_repeater_block ui-sortable-handle" ' .
-										'style="background-image: url(\'' . $GLOBALS['config']['base_url'] . 'modules/cms/img/drag.png\'); ">'.
+										'style="background-image: url(\'' . $GLOBALS['config']['base_url'] . 'modules/cms/img/cms_drag.png\'); ">'.
 										'<div class="cms_repeater_block_toolbar"><div class="cms_repeater_block_delete">Remove</div></div>'.
 										print_fields($field['fields'], $repeater_data, $field['name'], $repeater_key).
 										'</div>';
@@ -207,7 +206,7 @@
 						$return .= '<div class="admin_small_button admin_right cms_repeater_button" ';
 						$return .= ' data-html="'.
 								str_replace('"', '#', '<div class="cms_repeater_block" ' .
-										'style="background-image: url(\'' . $GLOBALS['config']['base_url'] . 'modules/cms/img/drag.png\'); ">'.
+										'style="background-image: url(\'' . $GLOBALS['config']['base_url'] . 'modules/cms/img/cms_drag.png\'); ">'.
 										'<div class="cms_repeater_block_toolbar"><div class="cms_repeater_block_delete">Remove</div></div>'.
 										print_fields($field['fields'], array(), $field['name'], '###random###').
 										'</div>').
@@ -229,6 +228,7 @@
 								'extra_data' => $max_chars_data.' '.$meta_data.' ',
 								'_return' => true,
 								'help' => !empty($field['help']) ? $field['help'] : '',
+								'translate' => !empty($field['translate']) ? 1 : 0,
 								'params' => $field,
 						]);
 												
@@ -252,6 +252,7 @@
 								'tinymce' => !empty($field['html']),
 								'_return' => true,
 								'help' => !empty($field['help']) ? $field['help'] : '',
+								'translate' => !empty($field['translate']) ? 1 : 0,
 								'params' => $field,
 						));
 
@@ -285,20 +286,6 @@
 								'help' => !empty($field['help']) ? $field['help'] : '',
 						));
 						
-					} elseif ($field['type'] == 'link'){
-						
-						$return .= _panel('cms_input_link', array(
-								'label' => $field['label'], 
-								'value' => ($field_empty && isset($field['default']) ? (!empty($field['default']) ? $field['default'] : '') : $field_data ),
-								'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'), 
-								'name_clean' => ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']),
-								'extra_class' => ($prefix ? '' : 'admin_column'),
-								'mandatory_class' => $mandatory_class,
-								'targets' => !empty($field['targets']) ? $field['targets'] : '',
-								'_return' => true,
-								'help' => !empty($field['help']) ? $field['help'] : '',
-						));
-						
 					} elseif ($field['type'] == 'select'){
 						
 						$name = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
@@ -311,7 +298,6 @@
 								'name' => $name, 
 								'name_clean' => !empty($name_clean) ? $name_clean : $name, 
 								'_return' => true, 
-								'extra_class' => ($prefix ? '' : 'admin_column'), 
 								'mandatory_class' => $mandatory_class,
 								'help' => !empty($field['help']) ? $field['help'] : '', 
 								'params' => $field,
@@ -322,12 +308,11 @@
 						$repeater_select_data = [
 								'selected' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ),
 								'target' => $field['target'],
-								'field' => $field['field'],
+								'field' => !empty($field['field']) ? $field['field'] : 'heading',
 								'add_empty' => !empty($field['add_empty']) ? '1' : '0',
 								'labels' => !empty($field['labels']) ? $field['labels'] : '',
 						];
-						
-						
+
 						$name = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
 						$name_clean = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
 						
@@ -371,7 +356,7 @@
 						
 						// add field
 						$return .= _panel('cms/cms_input', $field);
-						
+
 					}
 
 				}

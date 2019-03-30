@@ -33,7 +33,7 @@
 					clearInterval(cms_images_lazy_interval);
 				}
 			}
-		}, 200);
+		}, 500);
 		
 
     };
@@ -44,27 +44,39 @@ function cms_images_lazy_next($this){
 	
 	get_api('cms/image_resize', {
 		'do':'resize',
-		'width': $this.data('width'),
+		'width': $this.data('w1'),
 		'output': $this.data('output'),
 		'name': $this.data('cms_images_lazy'),
 		'success': function(data){
 			
-			var hq_src = data.result.src;
+			$this.css({'background-image': 'url(' + data.result.src + '?v=' + Math.floor(Date.now() / 1000) + ')'});
 
-			// lq width
-			get_api('cms/image_resize', {
-				'do':'resize',
-				'width': $this.data('width_lq'),
-				'output': $this.data('output'),
-				'name': $this.data('cms_images_lazy'),
-				'success': function(data){
-					
-					$this.css({'background-image': 'url(' + hq_src + '?v=' + Math.floor(Date.now() / 1000) + ')'});
-					$this.addClass('cms_images_lazy_done');
-					$this.removeClass('cms_images_lazy_loading');
+			if ($this.data('w2')){
 				
-				}
-			})
+				setTimeout(function(){
+					
+					// lq width
+					get_api('cms/image_resize', {
+						'do':'resize',
+						'width': $this.data('w2'),
+						'output': $this.data('output'),
+						'name': $this.data('cms_images_lazy'),
+						'success': function(data){
+							
+							$this.addClass('cms_images_lazy_done');
+							$this.removeClass('cms_images_lazy_loading');
+						
+						}
+					})
+					
+				}, 250);
+			
+			} else {
+				
+				$this.addClass('cms_images_lazy_done');
+				$this.removeClass('cms_images_lazy_loading');
+				
+			}
 			
 		}
 	})

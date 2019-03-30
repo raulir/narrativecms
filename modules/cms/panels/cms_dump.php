@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_dump extends MY_Controller{
+class cms_dump extends CI_Controller {
 
 	function __construct(){
 
@@ -85,7 +85,7 @@ class cms_dump extends MY_Controller{
 		
 		$this->load->model('cms_update_model');
 		
-		$tables = ['block', 'cms_file', 'cms_image', 'cms_keyword', 'cms_page', 'cms_page_panel_param', 'cms_search_cache', 'cms_slug', 'cms_text', 'cms_user', 'menu_item', ];
+		$tables = ['block', 'cms_page_panel', 'cms_file', 'cms_image', 'cms_keyword', 'cms_page', 'cms_page_panel_param', 'cms_search_cache', 'cms_slug', 'cms_text', 'cms_user', 'menu_item', ];
 		
 		if (!empty($params['do'])){
 				
@@ -258,10 +258,15 @@ class cms_dump extends MY_Controller{
 							
 						$sql = 'drop table if exists '.$table.'_bu';
 						$this->cms_update_model->run_sql($sql);
-							
-						$sql = 'RENAME TABLE `'.$table.'` TO `'.$table.'_bu`';
-						$this->cms_update_model->run_sql($sql);
-							
+						
+						$sql = "select 1 from ".$table." limit 1";
+						$query = $this->db->query($sql);
+						
+						if ($query && $query->num_rows()){
+							$sql = 'RENAME TABLE `'.$table.'` TO `'.$table.'_bu`';
+							$this->cms_update_model->run_sql($sql);
+						}
+						
 					}
 						
 					// import sql
@@ -275,19 +280,18 @@ class cms_dump extends MY_Controller{
 					foreach ( $lines as $line ) {
 							
 						// Skip it if it's a comment
-						if (substr ( $line, 0, 2 ) == '--' || $line == '')
-							continue;
-			
-							// Add this line to the current segment
-							$templine .= $line;
-							// If it has a semicolon at the end, it's the end of the query
-							if (substr ( trim ( $line ), - 1, 1 ) == ';') {
-			
-								$this->cms_update_model->run_sql($templine);
-								$templine = '';
-			
-							}
-								
+						if (substr ( $line, 0, 2 ) == '--' || $line == '') continue;
+
+						// Add this line to the current segment
+						$templine .= $line;
+						// If it has a semicolon at the end, it's the end of the query
+						if (substr ( trim ( $line ), - 1, 1 ) == ';') {
+		
+							$this->cms_update_model->run_sql($templine);
+							$templine = '';
+		
+						}
+
 					}
 					
 					unlink($sqlfile);

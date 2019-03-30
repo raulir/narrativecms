@@ -184,7 +184,7 @@ class CI_Cache_file extends CI_Driver {
 	 */
 	public function is_supported()
 	{
-		return is_really_writable($this->_cache_path);
+		return true;
 	}
 
 }

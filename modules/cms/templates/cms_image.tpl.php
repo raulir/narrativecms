@@ -5,14 +5,13 @@
 		
 		<div class="cms_image_filename admin_tool_text"><?php print($filename); ?></div>
 
-		<a class="cms_image_save admin_tool_button admin_right" data-filename="<?php print($filename); ?>">Save</a>
-		<a class="cms_image_cancel admin_tool_button admin_right">Cancel</a>
-		<!-- a class="cms_image_replace admin_tool_button admin_right">Reupload</a -->
+		<a class="cms_image_save cms_tool_button admin_right" data-filename="<?php print($filename); ?>">Save</a>
+		<a class="cms_image_cancel cms_tool_button admin_right">Cancel</a>
 
 	</div>
 
 	<div class="cms_image_area">
-		<div class="cms_image_cell" style="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/opacity.png'); ">
+		<div class="cms_image_cell" <?php _ib('cms/cms_opacity.png', 40) ?>>
 			<img class="cms_image_image" src="<?php print($GLOBALS['config']['upload_url'].$filename); ?>?v=<?= time() ?>">
 		</div>
 	</div>

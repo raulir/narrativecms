@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_images_upload extends MY_Controller{
+class cms_images_upload extends CI_Controller {
 
 	function __construct(){
 
@@ -11,20 +11,50 @@ class cms_images_upload extends MY_Controller{
 			header('Location: '.$GLOBALS['config']['base_url'].'cms_login/', true, 302);
 			exit();
 		}
+		
+		$this->load->model('cms/cms_image_model');
+		
+	}
+	
+	// common functionality of file uploading
+	function image_upload($input_name, $category){
+		
+		$this->load->library('upload', array('allowed_types' => 'svg|gif|jpg|png|jpeg', 'upload_path' => $GLOBALS['config']['upload_path'], ));
+		
+		$new_image = $this->upload->upload_image($input_name);
+		
+		if (!empty($new_image)){
+		
+			// move it to year/month directory
+			if (!file_exists($GLOBALS['config']['upload_path'].date('Y'))){
+				mkdir($GLOBALS['config']['upload_path'].date('Y'));
+			}
+		
+			if (!file_exists($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'))){
+				mkdir($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'));
+			}
+		
+			$filename = $this->cms_image_model->create_cms_image(date('Y').'/'.date('m').'/', $new_image, $category);
 
+			// delete existing images
+			if(file_exists($GLOBALS['config']['upload_path'].$filename)){
+				$this->cms_image_model->delete_cms_image_by_filename($filename, false);
+			}
+		
+			rename($GLOBALS['config']['upload_path'].$new_image, $GLOBALS['config']['upload_path'].$filename);
+		
+		}
+		
+		return $filename;
+		
 	}
 
 	function panel_action(){
-
-		$this->load->model('cms_image_model');
 					
 		$do = $this->input->post('do');
 		if ($do == 'cms_images_upload'){
 
 			$return = ['filenames' => [], ];
-
-			// collect data
-			$this->load->library('upload', array('allowed_types' => 'svg|gif|jpg|png|jpeg', 'upload_path' => $GLOBALS['config']['upload_path'], ));
 
 			// normalise files array
 			$input_name = 'new_image';
@@ -38,33 +68,11 @@ class cms_images_upload extends MY_Controller{
 			}
 			unset($_FILES[$input_name]);
 
+			$category = $this->input->post('category');
+
 			foreach ($keys as $key){
 
-				$new_image = $this->upload->upload_image($input_name.'_'.$key);
-				if (!empty($new_image)){
-
-					// move it to year/month directory
-					if (!file_exists($GLOBALS['config']['upload_path'].date('Y'))){
-						mkdir($GLOBALS['config']['upload_path'].date('Y'));
-					}
-
-					if (!file_exists($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'))){
-						mkdir($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'));
-					}
-
-					$category = $this->input->post('category');
-					$return['filename'] = $this->cms_image_model->create_cms_image(date('Y').'/'.date('m').'/', $new_image, $category);
-
-					$return['filenames'][] = $return['filename'];
-					
-					// delete existing images
-					if(file_exists($GLOBALS['config']['upload_path'].$return['filename'])){
-						$this->cms_image_model->delete_cms_image_by_filename($return['filename'], false);
-					}
-
-					rename($GLOBALS['config']['upload_path'].$new_image, $GLOBALS['config']['upload_path'].$return['filename']);
-
-				}
+				$return['filenames'][] = $this->image_upload($input_name.'_'.$key, $category);
 
 			}
 			
@@ -72,38 +80,34 @@ class cms_images_upload extends MY_Controller{
 
 		} else if ($do == 'cms_images_replace'){
 			
+			$this->load->model('cms/cms_page_panel_model');
+			$this->load->model('cms/cms_page_model');
+				
 			// collect data
 			$filename = $this->input->post('filename');
+			$category = $this->input->post('category');
 			
-			$this->load->library('upload', array('allowed_types' => 'svg|gif|jpg|png|jpeg', 'upload_path' => $GLOBALS['config']['upload_path'], ));
-			
-			$new_image = $this->upload->upload_image('replace_image');
-
+			$new_image = $this->image_upload('replace_image', $category);
+				
 			if (!empty($new_image)){
-			
-				// remove old image files
-				$this->cms_image_model->delete_cms_image_by_filename($filename, false);
-				
-				// check, if there is a place to copy
-				list($year, $month, $rest) = explode('/', $filename);
-				
-				if (!file_exists($GLOBALS['config']['upload_path'].$year)){
-					mkdir($GLOBALS['config']['upload_path'].$year);
+
+				// replace all image occassions
+				$this->cms_page_panel_model->swap_param_value($filename, $new_image);
+
+				// add page images to count
+				$pages = $this->cms_page_model->get_cms_pages();
+
+				foreach($pages as $page){
+						
+					if ($filename == $page['image']){
+						$this->cms_page_model->update_page($page['cms_page_id'], ['image' => $new_image]);
+					}
+						
 				}
 
-				if (!file_exists($GLOBALS['config']['upload_path'].$year.'/'.$month)){
-					mkdir($GLOBALS['config']['upload_path'].$year.'/'.$month);
-				}
-				
-				// copy new image to place
-				rename($GLOBALS['config']['upload_path'].$new_image, $GLOBALS['config']['upload_path'].$filename);
-				
-				// update image hash
-				$this->cms_image_model->refresh_cms_image_hash($filename);
-				
 			}
 			
-			return ['filename' => $GLOBALS['config']['upload_url'].$filename.'?v='.time(), ];
+			return ['filename' => $new_image];
 			
 		}
 
