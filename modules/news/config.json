@@ -1,0 +1,32 @@
+{
+	"cms_menu":[
+		{
+			"id":"articles",
+			"name":"Articles",
+			"url":"admin/cms_list/article/"
+		},
+		{
+			"id":"article_thumbnail_settings",
+			"name":"Article settings",
+			"parent":"articles",
+			"url":"admin/panel_settings/news__article_thumbnail/"
+		}
+	],
+	"panels":[
+		{
+			"id":"article",
+			"name":"Article",
+			"definition":"article_settings"
+		},
+		{
+			"id":"article_related",
+			"name":"Article related",
+			"definition":"article_related_settings"
+		},
+		{
+			"id":"articles_three_cols",
+			"name":"Articles three cols"
+		}
+	]
+}
+			

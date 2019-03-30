@@ -1,0 +1,12 @@
+[
+	{
+		"type":"image",
+		"name":"title_arrow",
+		"label":"title arrow"
+	},
+	{
+		"type":"text",
+		"name":"title_text",
+		"label":"Title text"
+	}
+]

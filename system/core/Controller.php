@@ -464,9 +464,9 @@ class CI_Controller {
 		 
 		// get global css
 		$global_css = [];
-		if (file_exists($GLOBALS['config']['base_path'].'cache/cms_sccjs_settings.json')){
+		if (file_exists($GLOBALS['config']['base_path'].'cache/cms_cssjs_settings.json')){
 	
-			$global_css = json_decode(file_get_contents($GLOBALS['config']['base_path'].'cache/cms_sccjs_settings.json'), true);
+			$global_css = json_decode(file_get_contents($GLOBALS['config']['base_path'].'cache/cms_cssjs_settings.json'), true);
 			 
 		} else {
 			
@@ -475,19 +475,23 @@ class CI_Controller {
 			
 			$cssjs_settings = $ci->cms_page_panel_model->get_cms_page_panel_settings('cms/cms_cssjs_settings');
 
-			$global_css = array_reverse(array_values($cssjs_settings['css']));
-			file_put_contents($GLOBALS['config']['base_path'].'cache/cms_sccjs_settings.json', json_encode($global_css));
+			if (!empty($cssjs_settings['css'])){
+				$global_css = array_reverse(array_values($cssjs_settings['css']));
+				file_put_contents($GLOBALS['config']['base_path'].'cache/cms_sccjs_settings.json', json_encode($global_css));
+			}
 			 
 		}
 
-		foreach($global_css as $css_item){
-	
-			if (substr($css_item, -4) === '.css'){
-				array_unshift($this->css, ['script' => $css_item, 'top' => 2, ]);
-			} else {
-				array_unshift($this->scss, ['script' => $css_item, 'top' => 2, ]);
+		if (!empty($global_css) && is_array($global_css)){
+			foreach($global_css as $css_item){
+		
+				if (substr($css_item, -4) === '.css'){
+					array_unshift($this->css, ['script' => $css_item, 'top' => 2, ]);
+				} else {
+					array_unshift($this->scss, ['script' => $css_item, 'top' => 2, ]);
+				}
+		
 			}
-	
 		}
 	
 		// merge config css and panel/controller loaded css

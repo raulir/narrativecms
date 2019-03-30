@@ -1,0 +1,46 @@
+[
+	{
+		"type":"text",
+		"name":"bottom_button_text",
+		"label":"Bottom button"
+	},
+	{
+		"type":"text",
+		"name":"limit",
+		"label":"Initial limit",
+		"default":"12"
+	},
+	{
+		"type":"text",
+		"name":"limit_increment",
+		"label":"Limit increment",
+		"default":"6"
+	},
+	{
+		"type":"text",
+		"name":"read_more",
+		"label":"Read more",
+		"default":"Read more"
+	},
+	{
+		"type":"repeater",
+		"name":"types",
+		"label":"Categories",
+		"fields":[
+			{
+				"type":"text",
+				"name":"label",
+				"label":"Label"
+			},
+			{
+				"type":"select",
+				"name":"type",
+				"label":"Category",
+				"values":{
+					"news":"News"
+				},
+				"default":"news"
+			}
+		]
+	}
+]

@@ -1,0 +1,55 @@
+.article_related_container {
+	width: 100%;
+}
+
+.article_related_heading {
+	height: 71px;
+	line-height: 70px;
+	font-size: 16px;
+	clear: both;
+	margin: 0px auto;
+	box-sizing: border-box;
+    color: #002f87;
+    text-transform: uppercase;
+    text-align: center;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.article_related_content {
+	width: 100%;
+	max-width: 1240px;
+	box-sizing: border-box;
+	position: relative;
+	margin: 0px auto;
+	padding: 0px 5px;
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
+}
+
+.article_related_container .article_thumbnail_content {
+  	height: 500px;
+}
+
+@media (max-width: 1050px) {
+	
+	.article_related_content {
+		max-width: 800px;
+		padding: 0px 30px;
+	}
+	
+	.article_related_container .article_thumbnail_container {
+		max-width: 600px;
+		width: auto;
+		margin: 0px auto 30px auto;
+	  	padding: 10px 0px;
+	  	float: none;
+	  	height: auto;
+	}
+	
+	.article_related_container .article_thumbnail_content {
+  		height: auto;
+	}
+	
+}

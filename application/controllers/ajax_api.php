@@ -22,7 +22,7 @@ class Ajax_api extends CI_Controller {
 		}
 		
 		// if list item, load data
-		if (!empty($this->params['cms_page_panel_id']) && empty($this->params['no_html'])){
+		if (!empty($this->params['cms_page_panel_id']) && empty($this->params['no_html']) && empty($this->params['do'])){
 			
 			$this->load->model('cms/cms_panel_model');
 			$this->load->model('cms/cms_page_panel_model');
