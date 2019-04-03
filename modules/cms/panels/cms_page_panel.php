@@ -230,7 +230,7 @@ class cms_page_panel extends CI_Controller {
 			$parent_structure = $this->cms_panel_model->get_cms_panel_definition($parent['panel_name']);
 
 			foreach($parent_structure as $key => $field){
-				if ($field['name'] == $params['parent_field_name']){
+				if (!empty($field['name']) && $field['name'] == $params['parent_field_name']){
 
 					$params['allowed_panels'] = $field['panels'];
 
