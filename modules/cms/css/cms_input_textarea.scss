@@ -1,0 +1,40 @@
+.cms_input_container {
+
+	.cms_input_textarea {
+		
+	}
+	
+	.cms_input_textarea>textarea {
+		box-sizing: border-box;
+		display: block;
+		border: 1px solid #a0a0a0;
+		height: 300px;
+		line-height: 18px;
+		font-size: 14px;
+		padding: 1px 5px 0px 5px;
+		width: 460px;
+	}
+	
+	.admin_column .cms_input_textarea>textarea {
+		width: 460px;
+	}
+	
+	.admin_column.cms_input_textarea>textarea {
+		width: 460px;
+	}
+	
+	.cms_repeater_block .cms_input_textarea>textarea {
+		width: 440px;
+	}
+	
+	& > .cms_input.cms_input_textarea_wide {
+		
+		width: 940px;
+	
+		textarea {
+			width: 940px;
+		}
+	
+	}
+
+}

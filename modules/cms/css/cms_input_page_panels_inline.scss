@@ -1,0 +1,76 @@
+.cms_input_page_panels_inline_container {
+	width: 98.0rem;
+	background-color: #ffeeee;
+	overflow: hidden;
+}
+
+.cms_input_page_panels_inline_content {
+	width: 94.0rem;
+	margin: 0 auto;
+	padding-top: 1.4rem;
+}
+
+.cms_input_page_panels_inline_label {
+	
+	padding: 0 2.6rem 1.0rem 2.6rem;
+	box-sizing: border-box;
+	position: relative;
+	
+	&::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0.9rem;
+		height: 3.5rem;
+		border: 0.2rem dashed $colour_border;
+		border-bottom: 0;
+		width: 94.0rem;
+		box-sizing: border-box;
+		z-index: 10;
+	}
+
+	.cms_help {
+		left: auto;
+		right: 0;
+		top: -0.8rem;
+	}
+
+	.cms_help_text {
+		left: auto;
+		right: 0;
+	}
+	
+}
+
+.cms_input_page_panels_inline_label_text {
+	font-size: 1.8rem;
+	line-height: 1.8rem;
+	display: inline;
+	padding: 0 0.9rem;
+	background-color: $colour_background;
+	position: relative;
+	z-index: 20;
+}
+
+.cms_input_page_panels_inline_footer {
+	
+	border: 0.2rem dashed $colour_border;
+	border-top: 0;
+	padding: 0 1rem 1rem 1rem;
+	width: 94rem;
+    margin: 0 auto;
+    box-sizing: border-box;
+    overflow: hidden;
+	
+	.admin_right {
+		margin: 0;
+	}
+	
+}
+
+.cms_input_page_panels_inline_message {
+	font-size: 1.6rem;
+	line-height: 2.5rem;
+	padding: 2.5rem 0 2.0rem 0;
+	text-align: center;
+}
