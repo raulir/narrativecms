@@ -138,12 +138,12 @@ class CI_Exceptions {
 
 		$message = '<p>'.implode('</p><p>', ( ! is_array($message)) ? array($message) : $message).'</p>';
 
-		if (ob_get_level() > $this->ob_level + 1)
-		{
+		if (ob_get_level() > $this->ob_level + 1){
 			ob_end_flush();
 		}
+		
 		ob_start();
-		include(APPPATH.'errors/'.$template.'.php');
+		include($GLOBALS['base_path'].'system/helpers/'.$template.'.php');
 		$buffer = ob_get_contents();
 		ob_end_clean();
 		return $buffer;
@@ -179,7 +179,7 @@ class CI_Exceptions {
 			ob_end_flush();
 		}
 		ob_start();
-		include(APPPATH.'errors/error_php.php');
+		include($GLOBALS['base_path'].'system/helpers/error_php.php');
 		$buffer = ob_get_contents();
 		ob_end_clean();
 		echo $buffer;

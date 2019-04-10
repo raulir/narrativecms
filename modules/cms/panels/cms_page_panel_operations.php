@@ -300,7 +300,7 @@ class cms_page_panel_operations extends CI_Controller {
 				 
 			} else {
 
-				$block_id = $this->cms_page_panel_model->create_block($data);
+				$block_id = $this->cms_page_panel_model->create_cms_page_panel($data);
 
 				// if list and add to top, move to top
 				if (!empty($panel_config['list']['new_first'])){
