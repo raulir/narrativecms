@@ -51,11 +51,11 @@ class feed extends CI_Controller {
 					),
 				),
         );
-        
+
         // render panels
         $panel_data = $this->render($page_config);
-        
-    	$this->output('admin', $panel_data);
+
+        $this->output('cms/admin', 'feed/dashboard', $panel_data);
    	
    	}
    	
@@ -88,7 +88,7 @@ class feed extends CI_Controller {
         // render panels
         $panel_data = $this->render($page_config);
         
-    	$this->output('admin', $panel_data);
+    	$this->output('cms/admin', 'feed/instagram_users', $panel_data);
    	
    	}
 
@@ -102,7 +102,7 @@ class feed extends CI_Controller {
 		
 		}
 
-   		$this->load->model('feed_model');
+   		$this->load->model('feed/feed_model');
    		
    		$stats = $this->feed_model->refresh_feeds();
 
@@ -116,7 +116,7 @@ class feed extends CI_Controller {
 			newrelic_ignore_transaction();
 		}
 
-   		$this->load->model('feed_model');
+   		$this->load->model('feed/feed_model');
    		
    		$this->feed_model->clean_feeds();
    		

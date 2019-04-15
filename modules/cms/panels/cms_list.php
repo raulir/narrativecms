@@ -63,7 +63,7 @@ class cms_list extends CI_Controller {
 							$params['filter_fields_values'][$filter_field] = array();
 							foreach($target_a as $row){
 
-								$params['filter_fields_values'][$filter_field][$row['block_id']] = !empty($row['heading']) ? $row['heading'] : $row['block_id'];
+								$params['filter_fields_values'][$filter_field][$row['cms_page_panel_id']] = !empty($row['heading']) ? $row['heading'] : $row['cms_page_panel_id'];
 									
 							}
 								

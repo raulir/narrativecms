@@ -179,7 +179,7 @@ class CI_Exceptions {
 			ob_end_flush();
 		}
 		ob_start();
-		include($GLOBALS['base_path'].'system/helpers/error_php.php');
+		include($GLOBALS['config']['base_path'].'system/helpers/error_php.php');
 		$buffer = ob_get_contents();
 		ob_end_clean();
 		echo $buffer;

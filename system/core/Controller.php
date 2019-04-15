@@ -330,6 +330,15 @@ class CI_Controller {
 		return $params;
 	}
 	
+	/**
+	 * 
+	 * puts together and outputs page html
+	 * 
+	 * @param layout module/layout
+	 * @param page_id for caching
+	 * @param panel_data
+	 * 
+	 */
 	function output($layout_name, $page_id, $panel_data = array()){
 		
 		$page = $this->load->layout($layout_name, $panel_data);

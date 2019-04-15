@@ -40,6 +40,10 @@ class cms_input_fk extends CI_Controller {
 			foreach($list as $item_id => $item){
 				$params['values'][$item_id] = $item[$title_field];
 			}
+			
+			if(empty($params['values'])){
+				$params['values'] = ['0' => '-- no values --'];
+			}
 		
 		} else {
 
