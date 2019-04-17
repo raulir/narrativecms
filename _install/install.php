@@ -154,7 +154,7 @@ if (!empty($_POST['do'])){
 				$counter += 1;
 				file_put_contents($dir.'cache/install.txt', $counter.'/'.$master_length);
 				
-				// doesn't delete extra existing files
+				// TODO: doesn't delete extra existing files
 				
 				// if more than 10s, then next try
 				if (time() - $starttime > 10){
@@ -171,6 +171,186 @@ if (!empty($_POST['do'])){
 
 		die();
 	
+	}
+	
+	if ($do == 'install_database'){
+		
+		// create database
+		$mysqli = mysqli_connect($_POST['db_host'], $_POST['db_admin_user'], $_POST['db_admin_pass']);
+		$mysqli->set_charset('utf8mb4');
+		
+		// database
+		$mysqli->query('create database '.$_POST['db_db']);
+		
+		// user
+		$db_relative = $_POST['db_host'] == 'localhost' ? 'localhost' : '%';
+		
+		$query = $mysqli->prepare('insert into `mysql`.`user` (Host, User, Password) values (?,?,password(?))');
+		$query->bind_param('sss', $db_relative, $_POST['db_user'], $_POST['db_pass']);
+		$query->execute();
+		$query->close();
+		
+		$mysqli->query('grant all privileges on '.$_POST['db_db'].'.* to \''.$_POST['db_user'].'\'@\''.$db_relative.'\' '.
+				'identified by \''.$_POST['db_pass'].'\' ');
+		
+		// init database
+		$mysqli->select_db($_POST['db_db']);
+		
+		$sql = '
+CREATE TABLE `cms_file` (
+  `cms_file_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `cms_user_id` int(10) unsigned NOT NULL,
+  `sort` int(10) unsigned NOT NULL,
+  `filename` varchar(100) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `icon` varchar(100) NOT NULL,
+  `title` varchar(500) NOT NULL,
+  `date_posted` datetime NOT NULL,
+  PRIMARY KEY (`cms_file_id`),
+  KEY `user_id` (`cms_user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `cms_image` (
+  `cms_image_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `filename` varchar(100) NOT NULL,
+  `hash` varchar(40) NOT NULL,
+  `title` varchar(500) NOT NULL DEFAULT \'\',
+  `description` varchar(500) NOT NULL DEFAULT \'\',
+  `category` varchar(30) NOT NULL,
+  `meta` mediumtext NOT NULL,
+  `keyword` varchar(200) NOT NULL,
+  PRIMARY KEY (`cms_image_id`),
+  KEY `filename_idx` (`filename`(10)),
+  KEY `category_idx` (`category`(10)),
+  KEY `hash_idx` (`hash`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `cms_keyword` (
+  `cms_keyword_id` varchar(100) NOT NULL,
+  PRIMARY KEY (`cms_keyword_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `cms_page` (
+  `cms_page_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `sort` int(11) unsigned NOT NULL,
+  `slug` varchar(100) NOT NULL,
+  `meta` mediumtext NOT NULL,
+  PRIMARY KEY (`cms_page_id`),
+  KEY `slug_idx` (`slug`(4))
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `cms_page_panel` (
+  `cms_page_panel_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `cms_page_id` int(10) unsigned NOT NULL,
+  `parent_id` int(10) unsigned NOT NULL,
+  `show` int(10) unsigned NOT NULL,
+  `sort` int(10) unsigned NOT NULL,
+  `title` varchar(100) NOT NULL,
+  `panel_name` varchar(50) NOT NULL,
+  `submenu_anchor` varchar(50) NOT NULL,
+  `submenu_title` varchar(100) NOT NULL,
+  PRIMARY KEY (`cms_page_panel_id`),
+  KEY `page_idx` (`cms_page_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `cms_page_panel_param` (
+  `cms_page_panel_param_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `cms_page_panel_id` int(10) unsigned NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `value` mediumtext NOT NULL,
+  `search` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`cms_page_panel_param_id`),
+  UNIQUE KEY `cms_page_panel_idx` (`cms_page_panel_id`,`name`),
+  KEY `search_idx` (`search`),
+  KEY `value_idx` (`value`(10))
+) ENGINE=InnoDB AUTO_INCREMENT=438 DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `cms_search_cache` (
+  `term` varchar(30) NOT NULL,
+  `cached_time` int(11) NOT NULL,
+  `result` mediumtext NOT NULL,
+  PRIMARY KEY (`term`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `cms_slug` (
+  `cms_slug_id` varchar(100) NOT NULL,
+  `target` varchar(100) NOT NULL,
+  `status` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`cms_slug_id`),
+  KEY `target_idx` (`target`(10))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `cms_text` (
+  `cms_text_id` varchar(50) NOT NULL,
+  `text` mediumtext NOT NULL,
+  KEY `cms_text_id` (`cms_text_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `cms_user` (
+  `cms_user_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(50) NOT NULL,
+  `access` varchar(250) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `email` varchar(50) NOT NULL,
+  `sort` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`cms_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO cms_page VALUES
+("1","1","homepage","{\"title\":\"Homepage\",\"status\":\"0\",\"seo_title\":\"\",\"description\":\"\",\"image\":\"\",\"layout\":\"rem\"}");
+
+INSERT INTO cms_page_panel VALUES
+("1","0","0","0","1","","cms/cms_settings","",""),
+("2","0","0","0","0","","cms/cms_cssjs_settings","","");				
+
+INSERT INTO cms_page_panel_param VALUES
+("372","2","css.000","modules/cms/css/cms_mini_normalise.scss","0"),
+("373","2","","{\"css\":{\"000\":\"modules\\/cms\\/css\\/cms_mini_normalise.scss\"}}","0"),
+("406","1","favicon","","0"),
+("407","1","site_title","#page# - BC CMS","0"),
+("408","1","site_title_delimiter","-","0"),
+("409","1","landing_page.target","_page","0"),
+("410","1","landing_page.cms_page_id","1","0"),
+("411","1","landing_page.url","homepage/","0"),
+("412","1","landing_page.text","Homepage","0"),
+("413","1","landing_page.target_id","","0"),
+("414","1","landing_page._value","1","0"),
+("415","1","email","","0"),
+("416","1","panel_cache","0","0"),
+("417","1","inline_limit","100000","0"),
+("418","1","targets_enabled","0","0"),
+("419","1","cron_trigger","visits","0"),
+("420","1","cms_update_url","http://cms.bytecrackers.com/cms/updater/","0"),
+("421","1","layout","rem","0"),
+("422","1","modules.000","cms","0"),
+("423","1","modules.001","afro","0"),
+("424","1","rem_px","1400","0"),
+("425","1","rem_ratio","1.0","0"),
+("426","1","rem_m_px","900","0"),
+("427","1","rem_switched","0","0"),
+("428","1","rem_k","100","0"),
+("429","1","rem_m_k","50","0"),
+("430","1","images_quality","85","0"),
+("431","1","images_1x","1","0"),
+("432","1","images_2x","1.5","0"),
+("433","1","images_textarea","0.5","0"),
+("434","1","cms_background","","0"),
+("435","1","images_rows","4","0"),
+("436","1","input_link_order","0","0"),
+("437","1","","{\"cms_background\":\"\",\"cms_update_url\":\"http:\\/\\/cms.bytecrackers.com\\/cms\\/updater\\/\",\"cron_trigger\":\"visits\",\"email\":\"\",\"favicon\":\"\",\"images_1x\":\"1\",\"images_2x\":\"1.5\",\"images_quality\":\"85\",\"images_rows\":\"4\",\"images_textarea\":\"0.5\",\"inline_limit\":\"100000\",\"input_link_order\":\"0\",\"landing_page\":{\"cms_page_id\":\"1\",\"target\":\"_page\",\"target_id\":\"\",\"text\":\"Homepage\",\"url\":\"homepage\\/\",\"_value\":\"1\"},\"layout\":\"rem\",\"modules\":{\"000\":\"cms\",\"001\":\"afro\"},\"panel_cache\":\"0\",\"rem_k\":\"100\",\"rem_m_k\":\"50\",\"rem_m_px\":\"900\",\"rem_px\":\"1400\",\"rem_ratio\":\"1.0\",\"rem_switched\":\"0\",\"site_title\":\"Afro Clash - #page#\",\"site_title_delimiter\":\"-\",\"targets_enabled\":\"0\"}","0");
+
+INSERT INTO cms_slug VALUES
+("homepage","1","1");
+		';
+		
+		$mysqli->multi_query($sql);
+		
+		print(json_encode(['ok' => 1]));
+		
+		die();
+		
 	}
 	
 }
@@ -343,6 +523,10 @@ $project_name = strtolower($project_name);
 		
 			<div class="q_files">
 				<span class="install_files">&nbsp;</span> Install files <span class="step_5_files"></span>
+			</div>
+			
+			<div class="q_database">
+				<span class="install_database">&nbsp;</span> Install database
 			</div>
 
 			<div class="step_5_next" style="cursor: pointer; ">DONE</div>
@@ -538,24 +722,36 @@ $project_name = strtolower($project_name);
 									$('.step_5_files').html(data);
 								}
 							});
-						}, 500);
+						}, 1000);
 					}, 200);
 
-					function try_files(){
+					function try_files(deferred){
+
+						deferred = deferred || $.Deferred();
 						
-						return do_task('install_files', {'no_red':true}).then(function(){
+						do_task('install_files', {'no_red':true}).then(() => {
 							$.get('cache/install.txt', data => {
 								if (data != 'done'){
-									return try_files();
+									try_files(deferred);
 								} else {
-									return;
+									deferred.resolve();
 								}
 							});
 						});
 
+						return deferred.promise();
+
 					}
 					
-					try_files().then(console.log('next thing!'));
+					try_files()
+						.then(() => do_task('install_database', {
+							db_host: $('#db_host').val(),
+							db_admin_user: $('#db_admin_user').val(),
+							db_admin_pass: $('#db_admin_pass').val(),
+							db_db: $('#db_db').val(),
+							db_user: $('#db_user').val(),
+							db_pass: $('#db_pass').val()
+						}));
 
 				}
 
