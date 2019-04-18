@@ -193,6 +193,8 @@ if (!empty($_POST['do'])){
 		$mysqli->query('grant all privileges on '.$_POST['db_db'].'.* to \''.$_POST['db_user'].'\'@\''.$db_relative.'\' '.
 				'identified by \''.$_POST['db_pass'].'\' ');
 		
+		$mysqli->query('flush privileges');
+		
 		// init database
 		$mysqli->select_db($_POST['db_db']);
 		
@@ -325,7 +327,6 @@ INSERT INTO cms_page_panel_param VALUES
 ("420","1","cms_update_url","http://cms.bytecrackers.com/cms/updater/","0"),
 ("421","1","layout","rem","0"),
 ("422","1","modules.000","cms","0"),
-("423","1","modules.001","afro","0"),
 ("424","1","rem_px","1400","0"),
 ("425","1","rem_ratio","1.0","0"),
 ("426","1","rem_m_px","900","0"),
@@ -339,7 +340,7 @@ INSERT INTO cms_page_panel_param VALUES
 ("434","1","cms_background","","0"),
 ("435","1","images_rows","4","0"),
 ("436","1","input_link_order","0","0"),
-("437","1","","{\"cms_background\":\"\",\"cms_update_url\":\"http:\\/\\/cms.bytecrackers.com\\/cms\\/updater\\/\",\"cron_trigger\":\"visits\",\"email\":\"\",\"favicon\":\"\",\"images_1x\":\"1\",\"images_2x\":\"1.5\",\"images_quality\":\"85\",\"images_rows\":\"4\",\"images_textarea\":\"0.5\",\"inline_limit\":\"100000\",\"input_link_order\":\"0\",\"landing_page\":{\"cms_page_id\":\"1\",\"target\":\"_page\",\"target_id\":\"\",\"text\":\"Homepage\",\"url\":\"homepage\\/\",\"_value\":\"1\"},\"layout\":\"rem\",\"modules\":{\"000\":\"cms\",\"001\":\"afro\"},\"panel_cache\":\"0\",\"rem_k\":\"100\",\"rem_m_k\":\"50\",\"rem_m_px\":\"900\",\"rem_px\":\"1400\",\"rem_ratio\":\"1.0\",\"rem_switched\":\"0\",\"site_title\":\"Afro Clash - #page#\",\"site_title_delimiter\":\"-\",\"targets_enabled\":\"0\"}","0");
+("437","1","","{\"cms_background\":\"\",\"cms_update_url\":\"http:\\/\\/cms.bytecrackers.com\\/cms\\/updater\\/\",\"cron_trigger\":\"visits\",\"email\":\"\",\"favicon\":\"\",\"images_1x\":\"1\",\"images_2x\":\"1.5\",\"images_quality\":\"85\",\"images_rows\":\"4\",\"images_textarea\":\"0.5\",\"inline_limit\":\"100000\",\"input_link_order\":\"0\",\"landing_page\":{\"cms_page_id\":\"1\",\"target\":\"_page\",\"target_id\":\"\",\"text\":\"Homepage\",\"url\":\"homepage\\/\",\"_value\":\"1\"},\"layout\":\"rem\",\"modules\":{\"000\":\"cms\"},\"panel_cache\":\"0\",\"rem_k\":\"100\",\"rem_m_k\":\"50\",\"rem_m_px\":\"900\",\"rem_px\":\"1400\",\"rem_ratio\":\"1.0\",\"rem_switched\":\"0\",\"site_title\":\"#page# - BC CMS\",\"site_title_delimiter\":\"-\",\"targets_enabled\":\"0\"}","0");
 
 INSERT INTO cms_slug VALUES
 ("homepage","1","1");
@@ -351,6 +352,132 @@ INSERT INTO cms_slug VALUES
 		
 		die();
 		
+	}
+	
+	if ($do == 'install_config'){
+		
+		$current_dir = str_replace("\\", "/", rtrim(getcwd(), " /\\")).'/';
+	
+		$config = [
+				'base_path' => '_auto_',
+				'base_url' => pathinfo(parse_url($_SERVER['REQUEST_URI'])['path'], PATHINFO_DIRNAME ).'/',
+				'upload_path' => 'img/',
+				'upload_url' => 'img/',
+				'environment' => $_POST['environment'],
+				'errors_visible' => 1,
+				'errors_log' => 'cache/errors_'.$_POST['project_name'].'.log',
+				'analytics' => 0,
+				'cache' => [
+						'force_download' => 1,
+						'pack_js' => 0,
+						'pack_css' => 0,
+				],
+				'update' => [
+						'allow_updates' => 1,
+				],
+				'images_webp' => extension_loaded('gd') ? 'gd' : '',
+				'database' => [
+						'hostname' => $_POST['db_host'],
+						'username' => $_POST['db_user'],
+						'password' => $_POST['db_pass'],
+						'database' => $_POST['db_db'],
+						'dbdriver' => 'mysqli',
+				],
+				'admin_username' => $_POST['admin_user'],
+				'admin_password' => $_POST['admin_pass'],
+		];
+
+		if (!file_exists($current_dir.'config')){
+			mkdir($current_dir.'config');
+		}
+		file_put_contents($current_dir.'config/'.strtolower($_SERVER['SERVER_NAME']).'.json', json_encode($config, JSON_PRETTY_PRINT));
+		
+		// htaccess
+		$htaccess = '
+DirectoryIndex index.php
+Options -Indexes
+
+AddType application/vnd.ms-fontobject    .eot
+AddType application/x-font-opentype      .otf
+AddType image/svg+xml                    .svg
+AddType application/x-font-ttf           .ttf
+AddType application/font-woff            .woff
+
+<IfModule mod_expires.c>
+ExpiresActive On
+ExpiresByType image/jpg "access 1 year"
+ExpiresByType image/jpeg "access 1 year"
+ExpiresByType image/gif "access 1 year"
+ExpiresByType image/png "access 1 year"
+ExpiresByType image/ico "access 1 year"
+ExpiresByType image/svg+xml "access 1 year"
+ExpiresByType text/css "access 1 year"
+ExpiresByType text/html "access 1 year"
+ExpiresByType application/pdf "access 1 year"
+ExpiresByType application/x-javascript "access 1 year"
+ExpiresByType text/javascript "access 1 year"
+ExpiresByType application/javascript "access 1 year"
+ExpiresByType image/x-icon "access 1 year"
+ExpiresByType application/font-woff "access 1 year"
+ExpiresByType application/font-ttf "access 1 year"
+ExpiresByType application/x-font-ttf "access 1 year"
+ExpiresByType application/font-otf "access 1 year"
+ExpiresByType application/x-font-opentype "access 1 year"
+ExpiresByType application/vnd.ms-fontobject "access 1 year"
+ExpiresDefault "access 1 year"
+</IfModule>
+
+<IfModule mod_deflate.c>
+AddOutputFilterByType DEFLATE text/plain
+AddOutputFilterByType DEFLATE text/html
+AddOutputFilterByType DEFLATE text/xml
+AddOutputFilterByType DEFLATE text/css
+AddOutputFilterByType DEFLATE text/javascript
+AddOutputFilterByType DEFLATE application/xml
+AddOutputFilterByType DEFLATE application/xhtml+xml
+AddOutputFilterByType DEFLATE application/rss+xml
+AddOutputFilterByType DEFLATE application/javascript
+AddOutputFilterByType DEFLATE application/x-javascript
+AddOutputFilterByType DEFLATE application/x-httpd-php
+AddOutputFilterByType DEFLATE application/x-httpd-fastphp
+AddOutputFilterByType DEFLATE application/x-font
+AddOutputFilterByType DEFLATE application/x-font-truetype
+AddOutputFilterByType DEFLATE application/x-font-ttf
+AddOutputFilterByType DEFLATE application/x-font-otf
+AddOutputFilterByType DEFLATE application/x-font-opentype
+AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+AddOutputFilterByType DEFLATE image/svg+xml
+AddOutputFilterByType DEFLATE image/x-icon
+AddOutputFilterByType DEFLATE font/ttf
+AddOutputFilterByType DEFLATE font/otf
+AddOutputFilterByType DEFLATE font/opentype
+</IfModule>
+
+RewriteEngine on
+
+# Protect cache
+RewriteCond %{REQUEST_URI} ^/cache [NC]
+RewriteCond %{REQUEST_URI} ^/_ [NC]
+RewriteCond %{REQUEST_URI} !\.(css|js|xml)$ [NC]
+RewriteRule .* - [F,L]
+
+# Everything, what is not set domain goes to set domain
+RewriteCond %{HTTP_HOST} !^(.*)\.localhost
+RewriteCond %{HTTP_HOST} !^stg\.
+RewriteCond %{HTTP_HOST} !^'.str_replace('.', '\.', $_SERVER['SERVER_NAME']).'
+RewriteRule ^(.*)$ http://'.$_SERVER['SERVER_NAME'].'%{REQUEST_URI} [R=302,L]
+
+RewriteCond %{ENV:REDIRECT_STATUS} ^$
+RewriteCond $1 !^(index\.php|modules|img|css|js|robots\.txt|favicon\.ico)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ ./index.php?/$1 [L,QSA]';
+		
+		file_put_contents($current_dir.'.htaccess', $htaccess);
+		
+		print(json_encode(['ok' => 1]));
+		die();
+	
 	}
 	
 }
@@ -528,6 +655,31 @@ $project_name = strtolower($project_name);
 			<div class="q_database">
 				<span class="install_database">&nbsp;</span> Install database
 			</div>
+			
+			<div class="q_config">
+				<span class="install_config">&nbsp;</span> Set up config files
+			</div>
+
+			<div class="step_5_next" style="cursor: pointer; ">DONE</div>
+		
+		</div>
+
+		<div class="step_6" style="display: none; ">
+		
+			<div class="q_files">
+				Thank you!<br>
+				<br>
+				<a href="./">Homepage</a><br>
+				<a href="./admin/">CMS admin</a>			
+			</div>
+			
+			<div class="q_database">
+				<span class="install_database">&nbsp;</span> Install database
+			</div>
+			
+			<div class="q_config">
+				<span class="install_config">&nbsp;</span> Set up config files
+			</div>
 
 			<div class="step_5_next" style="cursor: pointer; ">DONE</div>
 		
@@ -702,9 +854,9 @@ $project_name = strtolower($project_name);
 				
 				$('.step_5_next').on('click', function(){
 
-					// show step 5 - installation
-					//					$('.step_4').css({'display':'none'});
-					//					$('.step_4').css({'display':'block'});
+					// show step 6 - done
+					$('.step_5').css({'display':'none'});
+					$('.step_6').css({'display':'block'});
 					
 				});
 
@@ -751,6 +903,17 @@ $project_name = strtolower($project_name);
 							db_db: $('#db_db').val(),
 							db_user: $('#db_user').val(),
 							db_pass: $('#db_pass').val()
+						}))
+						.then(() => do_task('install_config', {
+							page_title: $('#page_title').val(),
+							project_name: $('#project_name').val(),
+							environment: $('#environment').val(),
+							db_host: $('#db_host').val(),
+							db_db: $('#db_db').val(),
+							db_user: $('#db_user').val(),
+							db_pass: $('#db_pass').val(),
+							admin_user: $('#admin_user').val(),
+							admin_pass: $('#admin_pass').val()
 						}));
 
 				}
