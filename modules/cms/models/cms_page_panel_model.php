@@ -393,6 +393,10 @@ class cms_page_panel_model extends CI_Model {
 	 */
 	function create_cms_page_panel($data){
 		
+		if (!empty($data['panel_params']) && is_array($data['panel_params'])){
+			$data = array_merge($data['panel_params'], $data);
+		}
+		
 		if (empty($data['cms_page_id'])){
 			$data['cms_page_id'] = isset($data['page_id']) ? $data['page_id'] : 0;
 		}
