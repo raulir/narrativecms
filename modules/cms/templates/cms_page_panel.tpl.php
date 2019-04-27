@@ -216,7 +216,7 @@
 					
 					} elseif ($field['type'] == 'text'){
 						
-						$return .= _panel('cms_input_text', [
+						$return .= _panel('cms/cms_input_text', [
 								'label' => $field['label'].$mandatory_label,
 								'value' => ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) ),
 								'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'),
@@ -234,7 +234,7 @@
 												
 					} elseif ($field['type'] == 'textarea'){
 						
-						$return .= _panel('cms_input_textarea', array(
+						$return .= _panel('cms/cms_input_textarea', array(
 								'label' => $field['label'].$mandatory_label,
 								'value' => ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) ),
 								'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'),
@@ -256,25 +256,9 @@
 								'params' => $field,
 						));
 
-					} elseif ($field['type'] == 'image'){
-						
-						$return .= _panel('cms_input_image', array(
-								'label' => $field['label'].$mandatory_label, 
-								'value' => ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) ), 
-								'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'), 
-								'name_clean' => ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']), 
-								'category' => !empty($field['category']) ? $field['category'] : '',
-								'_return' => true, 
-								'extra_class' => ($prefix ? '' : 'admin_column'),
-								'mandatory_class' => $mandatory_class,
-								'extra_data' => ' data-name="'.$field['name'].'" ',
-								'help' => !empty($field['help']) ? $field['help'] : '',
-								'params' => $field,
-						));
-						
 					} elseif ($field['type'] == 'cms_page_panels' || $field['type'] == 'panels'){
 						
-						$return .= _panel('cms_input_page_panels', array(
+						$return .= _panel('cms/cms_input_page_panels', array(
 								'label' => $field['label'], 
 								'value' => ($field_empty ? array() : $field_data ), 
 								'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'), 
@@ -291,7 +275,7 @@
 						$name = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
 						$name_clean = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
 						
-						$return .= _panel('cms_input_select', array(
+						$return .= _panel('cms/cms_input_select', array(
 								'label' => $field['label'].$mandatory_label, 
 								'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
 								'values' => $field['values'],
@@ -316,7 +300,7 @@
 						$name = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
 						$name_clean = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
 						
-						$return .= _panel('cms_input_repeater_select', [
+						$return .= _panel('cms/cms_input_repeater_select', [
 								'select_params' => [
 										'label' => $field['label'].$mandatory_label, 
 										'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
@@ -333,7 +317,7 @@
 						
 					} elseif ($field['type'] == 'file'){
 						
-						$return .= _panel('cms_input_file', array(
+						$return .= _panel('cms/cms_input_file', array(
 								'label' => $field['label'].$mandatory_label, 
 								'value' => ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) ), 
 								'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'), 
@@ -349,10 +333,10 @@
 						
 						$field['_return'] = true;
 						$field['value'] = ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) );
-						$field['name_clean'] = $field['name'];
+						$field['name_clean'] = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
 						$field['name'] = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
-						$field['label'] = $field['label'].$mandatory_label;
 						$field['panel_structure'] = $structure;
+						$field['extra_class'] = ($prefix ? '' : 'admin_column');
 						
 						// add field
 						$return .= _panel('cms/cms_input', $field);

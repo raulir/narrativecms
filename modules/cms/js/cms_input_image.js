@@ -15,6 +15,14 @@ function cms_input_image_init(){
 	$('.admin_repeater_container').on('click.r', '.cms_input_image_clear', function(event){
 		cms_input_image_clear($(this));
 	});
+	
+	$('.cms_input_image_size_small .cms_input_image_overlay')
+		.on('mouseenter.cms', function(){
+			$(this).closest('.cms_input_image_size_small').addClass('cms_input_image_hover');
+		})
+		.on('mouseleave.cms', function(){
+			$(this).closest('.cms_input_image_size_small').removeClass('cms_input_image_hover');
+		});
 
 }
 

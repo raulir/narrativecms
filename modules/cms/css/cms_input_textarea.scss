@@ -1,9 +1,5 @@
 .cms_input_container {
 
-	.cms_input_textarea {
-		
-	}
-	
 	.cms_input_textarea>textarea {
 		box-sizing: border-box;
 		display: block;
@@ -13,28 +9,16 @@
 		font-size: 14px;
 		padding: 1px 5px 0px 5px;
 		width: 460px;
-	}
-	
-	.admin_column .cms_input_textarea>textarea {
-		width: 460px;
-	}
-	
-	.admin_column.cms_input_textarea>textarea {
-		width: 460px;
-	}
-	
-	.cms_repeater_block .cms_input_textarea>textarea {
-		width: 440px;
+		.cms_repeater_block & {
+			width: 440px;
+		}
 	}
 	
 	& > .cms_input.cms_input_wide_textarea {
-		
 		width: 940px;
-	
 		textarea {
 			width: 940px;
 		}
-	
 	}
 
 }
