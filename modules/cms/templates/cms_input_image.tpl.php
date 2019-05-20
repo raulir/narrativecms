@@ -28,7 +28,7 @@
 	
 	<span class="cms_input_image_overlay">
 		<input type="<?= (!empty($size) && $size == 'small') ? 'text' : 'hidden' ?>" class="cms_input_image_input cms_image_input_<?= $name_clean ?>" 
-				disabled="disabled" name="<?= $name ?>" value="<?= $value ?>">
+				name="<?= $name ?>" value="<?= $value ?>">
 	</span>
 	
 	<div style="clear: both; "></div>

@@ -19,7 +19,7 @@ function cms_page_save(params){
 	params = params || {'success':function(){}};
 
 	get_ajax('cms/cms_page_operations', {
-		'page_id': $('.cms_page_id').val(),
+		'cms_page_id': $('.cms_page_id').val(),
 		'do': 'cms_page_save',
 		'language': $('.cms_language_select_current').data('language'),
 		'sort': $('.cms_page_sort').val(),
@@ -28,7 +28,7 @@ function cms_page_save(params){
 		'status': $('.cms_page_status').val(),
 		'seo_title': $('.cms_page_seo_title').val(),
 		'description': $('.cms_page_description').val(),
-		'image': $('.cms_page_image').val(),
+		'image': $('.cms_image_input_cms_page_image').val(),
 		'layout': $('.cms_page_layout').val(),
 		'success': function(data){
 			

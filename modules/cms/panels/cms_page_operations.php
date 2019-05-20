@@ -30,7 +30,7 @@ class cms_page_operations extends CI_Controller {
 		} else if ($do == 'cms_page_save'){
 			 
 			// collect data
-			$page_id = $this->input->post('page_id');
+			$page_id = $this->input->post('cms_page_id');
 			$language = $this->input->post('language');
 			if (empty($GLOBALS['language']['languages'][$language])){
 				$language = false;
