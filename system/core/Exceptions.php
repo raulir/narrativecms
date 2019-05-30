@@ -143,7 +143,7 @@ class CI_Exceptions {
 		}
 		
 		ob_start();
-		include($GLOBALS['base_path'].'system/helpers/'.$template.'.php');
+		include($GLOBALS['config']['base_path'].'system/helpers/'.$template.'.php');
 		$buffer = ob_get_contents();
 		ob_end_clean();
 		return $buffer;
