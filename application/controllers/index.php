@@ -95,6 +95,11 @@ class Index extends CI_Controller {
     	
    			// list item panel data, for example article
     		$list_item_data = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
+    		
+    		// if can't find list item - error 404
+    		if (!is_array($list_item_data)){
+    			show_404($page_id);
+    		}
  			
     		if (empty($list_item_data['_template_page_id'])){
  			

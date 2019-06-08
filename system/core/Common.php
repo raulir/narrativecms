@@ -188,10 +188,10 @@ if ( ! function_exists('show_error'))
 */
 if ( ! function_exists('show_404'))
 {
-	function show_404($page = '', $log_error = TRUE)
+	function show_404($page = '')
 	{
 		$_error =& load_class('Exceptions', 'core');
-		$_error->show_404($page, $log_error);
+		$_error->show_404($page);
 		exit;
 	}
 }

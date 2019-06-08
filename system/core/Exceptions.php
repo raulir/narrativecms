@@ -101,15 +101,20 @@ class CI_Exceptions {
 	 * @param 	bool	log error yes/no
 	 * @return	string
 	 */
-	function show_404($page = '', $log_error = TRUE)
+	function show_404($page = '')
 	{
 		$heading = "404 Page Not Found";
 		$message = "The page you requested was not found.";
 
 		// By default we log this, but allow a dev to skip it
-		if ($log_error)
-		{
-			log_message('error', '404 Page Not Found --> '.$page);
+		if (!empty($GLOBALS['config']['not_found_log'])){
+			
+			$ip = '[' . $_SERVER['REMOTE_ADDR'] . (!empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? ' ' . $_SERVER['HTTP_X_FORWARDED_FOR'] : '') . ']';
+			
+			file_put_contents($GLOBALS['config']['base_path'].'cache/'.$GLOBALS['config']['not_found_log'],
+					date('Y-m-d H:i:s') . ' | ' . $page.' | '. 
+					(!empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '') . ' | ' . $ip . "\n", FILE_APPEND);
+			
 		}
 
 		echo $this->show_error($heading, $message, 'error_404', 404);

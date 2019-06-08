@@ -49,13 +49,6 @@ class CI_Output {
 	 * @access 	protected
 	 */
 	protected $headers			= array();
-	/**
-	 * List of mime types
-	 *
-	 * @var array
-	 * @access 	protected
-	 */
-	protected $mime_types		= array();
 
 	/**
 	 * Determines if output compression is enabled
@@ -80,11 +73,6 @@ class CI_Output {
 	function __construct()
 	{
 		$this->_zlib_oc = @ini_get('zlib.output_compression');
-
-		// Get mime types for later
-		include APPPATH.'config/mimes.php';
-
-		$this->mime_types = $mimes;
 
 		log_message('debug', "Output Class Initialized");
 	}
@@ -175,40 +163,6 @@ class CI_Output {
 		}
 
 		$this->headers[] = array($header, $replace);
-
-		return $this;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Set Content Type Header
-	 *
-	 * @access	public
-	 * @param	string	extension of the file we're outputting
-	 * @return	void
-	 */
-	function set_content_type($mime_type)
-	{
-		if (strpos($mime_type, '/') === FALSE)
-		{
-			$extension = ltrim($mime_type, '.');
-
-			// Is this extension supported?
-			if (isset($this->mime_types[$extension]))
-			{
-				$mime_type =& $this->mime_types[$extension];
-
-				if (is_array($mime_type))
-				{
-					$mime_type = current($mime_type);
-				}
-			}
-		}
-
-		$header = 'Content-Type: '.$mime_type;
-
-		$this->headers[] = array($header, TRUE);
 
 		return $this;
 	}

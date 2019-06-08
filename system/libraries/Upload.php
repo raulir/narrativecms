@@ -46,7 +46,6 @@ class CI_Upload {
 	public $image_type				= '';
 	public $image_size_str			= '';
 	public $error_msg				= array();
-	public $mimes					= array();
 	public $remove_spaces			= TRUE;
 	public $xss_clean				= FALSE;
 	public $temp_prefix				= "temp_file_";
@@ -203,13 +202,6 @@ class CI_Upload {
 		$this->file_ext	 = $this->get_extension($this->file_name);
 		$this->client_name = $this->file_name;
 
-		// Is the file type allowed to be uploaded?
-		if ( ! $this->is_allowed_filetype())
-		{
-			$this->set_error('upload_invalid_filetype');
-			return FALSE;
-		}
-
 		// if we're overriding, let's now make sure the new name and type is allowed
 		if ($this->_file_name_override != '')
 		{
@@ -227,11 +219,6 @@ class CI_Upload {
 				$this->file_ext	 = $this->get_extension($this->_file_name_override);
 			}
 
-			if ( ! $this->is_allowed_filetype(TRUE))
-			{
-				$this->set_error('upload_invalid_filetype');
-				return FALSE;
-			}
 		}
 
 		// Convert the file size to kilobytes
@@ -576,69 +563,6 @@ class CI_Upload {
 
 	// --------------------------------------------------------------------
 
-	/**
-	 * Verify that the filetype is allowed
-	 *
-	 * @return	bool
-	 */
-	public function is_allowed_filetype($ignore_mime = FALSE)
-	{
-		if ($this->allowed_types == '*')
-		{
-			return TRUE;
-		}
-
-		if (count($this->allowed_types) == 0 OR ! is_array($this->allowed_types))
-		{
-			$this->set_error('upload_no_file_types');
-			return FALSE;
-		}
-
-		$ext = strtolower(ltrim($this->file_ext, '.'));
-
-		if ( ! in_array($ext, $this->allowed_types))
-		{
-			return FALSE;
-		}
-		
-		if ($ext == 'svg'){
-			return true;
-		}
-
-		// Images get some additional checks
-		$image_types = array('gif', 'jpg', 'jpeg', 'png', 'jpe');
-
-		if (in_array($ext, $image_types))
-		{
-			if (getimagesize($this->file_temp) === FALSE)
-			{
-				return FALSE;
-			}
-		}
-
-		if ($ignore_mime === TRUE)
-		{
-			return TRUE;
-		}
-
-		$mime = $this->mimes_types($ext);
-
-		if (is_array($mime))
-		{
-			if (in_array($this->file_type, $mime, TRUE))
-			{
-				return TRUE;
-			}
-		}
-		elseif ($mime == $this->file_type)
-		{
-				return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	// --------------------------------------------------------------------
 
 	/**
 	 * Verify that the file is within the allowed size
@@ -930,34 +854,6 @@ class CI_Upload {
 	// --------------------------------------------------------------------
 
 	/**
-	 * List of Mime Types
-	 *
-	 * This is a list of mime types.  We use it to validate
-	 * the "allowed types" set by the developer
-	 *
-	 * @param	string
-	 * @return	string
-	 */
-	public function mimes_types($mime)
-	{
-		global $mimes;
-
-		if (count($this->mimes) == 0)
-		{
-
-			include(APPPATH.'config//mimes.php');
-
-			$this->mimes = $mimes;
-			unset($mimes);
-			
-		}
-
-		return ( ! isset($this->mimes[$mime])) ? FALSE : $this->mimes[$mime];
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Prep Filename
 	 *
 	 * Prevents possible script execution from Apache's handling of files multiple extensions
@@ -979,7 +875,7 @@ class CI_Upload {
 
 		foreach ($parts as $part)
 		{
-			if ( ! in_array(strtolower($part), $this->allowed_types) OR $this->mimes_types(strtolower($part)) === FALSE)
+			if ( ! in_array(strtolower($part), $this->allowed_types))
 			{
 				$filename .= '.'.$part.'_';
 			}
