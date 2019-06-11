@@ -1108,6 +1108,14 @@ function format_date(date, format, utc) {
     return format;
 };
 
+var cms_disable_zoom = function () { 
+	if (!(/iPad|iPhone|iPod/.test(navigator.userAgent))) return; 
+	$(document.head).append('<style>*{cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,0)}</style>'); 
+	$(window).on('gesturestart touchmove', function (evt) {
+		if (evt.originalEvent.scale !== 1) { evt.originalEvent.preventDefault(); document.body.style.transform = 'scale(1)'; } 
+	}); 
+}
+
 $(document).ready(function() {
 	
 	cms_hover_init();
