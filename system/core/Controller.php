@@ -744,16 +744,19 @@ class CI_Controller {
 			if (!empty($params['_images'])){
 				$GLOBALS['_panel_images'] = array_merge(array_values($GLOBALS['_panel_images']), array_values($params['_images']));
 			}
-			
-			// cache file name
-			$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.str_replace('/', '__', $panel_config['panel']).'_'.substr(md5($panel_config['panel'].serialize($params)), 0, 6).'.txt';
-	
+
 			// check for cache
 			if (empty($action_result['_no_cache']) && !(!empty($params['module']) && $params['module'] == 'cms')
 					&& (!empty($GLOBALS['config']['panel_cache']) || (isset($params['_cache_time']) && $params['_cache_time'] > 0))
 					&& empty($GLOBALS['config']['cache']['force_download'])){
 	
+						$params['module'] = !empty($panel_config['module']) ? $panel_config['module'] : '';
+				
 						// if cache file exists
+						$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.str_replace('/', '__', $panel_config['panel']).
+								'_'.substr(md5($panel_config['panel'].serialize($params).$_SESSION['config']['targets']['hash'].
+								$_SESSION['webp']), 0, 6).'.txt';
+								
 						if (is_file($filename)){
 	
 							// if panel cache time is different from empty, keep it, else use global cache time setting
@@ -790,6 +793,10 @@ class CI_Controller {
 						&& (!empty($GLOBALS['config']['panel_cache']) || (isset($params['_cache_time']) && $params['_cache_time'] > 0))
 						&& empty($GLOBALS['config']['cache']['force_download'])){
 	
+							$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.
+									str_replace('/', '__', $panel_config['panel']).'_'.substr(md5($panel_config['panel'].serialize($params).
+									$_SESSION['config']['targets']['hash'].$_SESSION['webp']), 0, 6).'.txt';
+										
 							$panel_data['html'] .= '<!-- cached: '.date('Y-m-d H:i:s').' -->'."\n";
 							file_put_contents($filename, serialize($panel_data));
 							 

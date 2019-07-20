@@ -1,9 +1,7 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-// all the cms special stuff goes here
-
+// load config
 $working_directory = str_replace('\\', '/', trim(getcwd()).'/');
-
 include($working_directory.'system/core/config.php');
 
 // check if api call
@@ -67,6 +65,7 @@ if (!empty($GLOBALS['config']['cron_trigger']) && $GLOBALS['config']['cron_trigg
 include($GLOBALS['config']['base_path'].'system/core/session.php');
 
 // check for visitor target groups
+$_SESSION['config']['targets']['hash'] = '';
 if (!empty($GLOBALS['config']['targets_enabled'])){
 	
 	include($GLOBALS['config']['base_path'].'system/core/targets.php');
