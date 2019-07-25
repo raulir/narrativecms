@@ -715,7 +715,7 @@ class CI_Controller {
 	 * for main controller to generate panels output as texts
 	 */
 	function render($page_config){
-	
+
 		foreach($page_config as $key => $panel_config){
 			if (stristr($panel_config['panel'], '/')){
 				list($module, $panel_name) = explode('/', $panel_config['panel']);
@@ -784,7 +784,7 @@ class CI_Controller {
 	
 			// if no data from cache
 			if (empty($panel_data)){
-	
+
 				$params['module'] = !empty($panel_config['module']) ? $panel_config['module'] : '';
 				$panel_data = $this->panel($panel_config['panel'], $params);
 

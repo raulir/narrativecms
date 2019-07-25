@@ -14,8 +14,8 @@ class Index extends CI_Controller {
    	 *  get cms_page_panels data and check for shortcuts 
    	 */
    	function _get_cms_page_panels($page_id){
-   		
-	    $blocks = $this->cms_page_panel_model->get_cms_page_panels_by(['cms_page_id' => $page_id, 'show' => 1, ]);
+
+   		$blocks = $this->cms_page_panel_model->get_cms_page_panels_by(['cms_page_id' => $page_id, 'show' => 1, ]);
 	    
 		foreach($blocks as $key => $block){
 	    	// check for shorcut panels
@@ -38,6 +38,11 @@ class Index extends CI_Controller {
     	
     	$page_config = array();
     		
+        // if module list item module/item=XX then / causes second parameter
+    	if (!empty($extra)){
+    		$page_id = $page_id . '/' . $extra;
+    	}
+    	
     	// set page static config
     	if (!empty($GLOBALS['config']['static_panels'])){
     		foreach($GLOBALS['config']['static_panels'] as $position => $panel_name ){
@@ -45,21 +50,29 @@ class Index extends CI_Controller {
     				$panel_name = array($panel_name);
     			}
     			foreach($panel_name as $pn){
-	    			// get data
+    				
+	    			// get static panel settings data
 	    			$panel_a = $this->cms_page_panel_model->get_cms_page_panels_by(array('panel_name' => $pn, 'cms_page_id' => [999999,0], ));
 	    			if (!empty($panel_a[0])){
 	    				$params = array_merge($panel_a[0], array('page_id' => $page_id, ));
 	    			} else {
 	    				$params = array('page_id' => $page_id, );
 	    			}
+	    			
+	    			if (stristr($page_id, '=')){
+	    				
+    					list($panel_name, $cms_page_panel_id) = explode('=', $page_id);
+    					$params[$panel_name] = $cms_page_panel_id;
+    					$params['_panel_name'] = $panel_name;
+    					$params['_cms_page_panel_id'] = $cms_page_panel_id;
+    					$params['_page_id'] = $page_id;
+    					
+	    			}
+
 	    			$page_config[] = array('position' => $position, 'panel' => $pn, 'params' => $params, );
+	    			
     			}
     		}
-    	}
-    	
-    	// if module list item module/item=XX then / causes second parameter
-    	if (!empty($extra)){
-    		$page_id = $page_id . '/' . $extra;
     	}
 
     	// get panels on page
@@ -92,8 +105,8 @@ class Index extends CI_Controller {
     		list($panel_name, $cms_page_panel_id) = explode('=', $page_id);
  			$extra_params = array($panel_name => $cms_page_panel_id, '_panel_name' => $panel_name, '_cms_page_panel_id' => $cms_page_panel_id, '_page_id' => $page_id, );
  			$GLOBALS['_page_params'] = $extra_params;
-    	
-   			// list item panel data, for example article
+
+ 			// list item panel data, for example article
     		$list_item_data = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
     		
     		// if can't find list item - error 404
@@ -162,7 +175,7 @@ class Index extends CI_Controller {
     		}
     		
     	}
-    	
+
     	if (extension_loaded('newrelic') && !empty($page_config)) {
 
 			newrelic_set_appname($GLOBALS['config']['title']);
@@ -183,9 +196,10 @@ class Index extends CI_Controller {
 		//
 		$_ajax = $this->input->post('_ajax');
 		if (empty($_ajax)){
-				
+
 			// render panels
 			$panel_data = $this->render($page_config);
+
 			//  output to the template, deprecated - layout without module name
 			if (!stristr($page['layout'], '/')){
 				$page['layout'] = 'cms/'.$page['layout'];
