@@ -165,7 +165,8 @@
 			"type":"text",
 			"name":"cm_api_url",
 			"label":"CM API URL",
-			"default":""
+			"default":"",
+			"help":"Optional"
 		},
 		{
 			"type":"text",

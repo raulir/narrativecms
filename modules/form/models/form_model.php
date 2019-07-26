@@ -157,8 +157,13 @@ class form_model extends CI_Model {
                     'content' => json_encode($postdata),
             ),
         ));
+        
+        if (empty($params['cm_api_url'])){
+        	$params['cm_api_url'] = 'https://api.createsend.com/api/v3.2/';
+        }
 
-        $result = file_get_contents($params['cm_api_url'].'subscribers/'.$params['cm_list_id'].'.json', false, $context);
+        $url = $params['cm_api_url'].'subscribers/'.$params['cm_list_id'].'.json';
+        $result = file_get_contents($url, false, $context);
 
         return $result;
     
