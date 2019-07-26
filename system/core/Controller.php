@@ -301,11 +301,16 @@ class CI_Controller {
 		if(!empty($params['submenu_anchor'])){
 			$return = '<div class="cms_anchor" id="'.$params['submenu_anchor'].'" name="'.$params['submenu_anchor'].'"></div>'.$return;
 		}
-	
+
 		// add debug data
-		$return = "\n".'<!-- panel "' . $files['module'] . '/' . $files['name'] . '" start -->'."\n".
+		$return = "\n".'<!-- panel "' . $files['module'] . '/' . $files['name'] . '" '.
+						(!empty($params['_extends']['panel']) ? 'extends "'.$params['_extends']['panel'].'" ' : '' ).'start -->'."\n".
+				(!empty($files['template_extends']) && empty($params['_extends']['no_wrapper']) ? 
+						'<span class="cms_wrapper cms_wrapper_'.$files['module'].'_'.$files['name'].'">'."\n" : '').
 				$return .
-				"\n".'<!-- panel "' . $files['module'] . '/' . $files['name'] . '" ( '.(!empty($controller_timer_start) ? ' controller: '.($controller_timer_end - $controller_timer_start).'ms ' : '').
+				(!empty($files['template_extends']) && empty($params['_extends']['no_wrapper']) ? "\n</span>" : '').
+				"\n".'<!-- panel "' . $files['module'] . '/' . $files['name'] . 
+						'" ( '.(!empty($controller_timer_start) ? ' controller: '.($controller_timer_end - $controller_timer_start).'ms ' : '').
 				(!empty($template_timer_start) ? ' template: '.($template_timer_end - $template_timer_start).'ms' : ''). ' ) end -->'."\n";
 
 		// add js, css, scss to global page files
@@ -781,7 +786,7 @@ class CI_Controller {
 						}
 	
 			}
-	
+
 			// if no data from cache
 			if (empty($panel_data)){
 
@@ -871,6 +876,7 @@ class CI_Controller {
 			$return['template'] = $template_filename;
 		} else if (!empty($extends_files['template'])){ // if no template, but has extends template, use this
 			$return['template'] = $extends_files['template'];
+			$return['template_extends'] = true;
 		} else {
 			$return['template'] = '';
 		}
