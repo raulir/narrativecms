@@ -360,7 +360,7 @@ INSERT INTO cms_slug VALUES
 	
 		$config = [
 				'base_path' => '_auto_',
-				'base_url' => pathinfo(parse_url($_SERVER['REQUEST_URI'])['path'], PATHINFO_DIRNAME ).'/',
+				'base_url' => str_replace('\\', '/', pathinfo(parse_url($_SERVER['REQUEST_URI'])['path'].'.php')['dirname']).'/',
 				'upload_path' => 'img/',
 				'upload_url' => 'img/',
 				'environment' => $_POST['environment'],
@@ -368,12 +368,12 @@ INSERT INTO cms_slug VALUES
 				'errors_log' => 'cache/errors_'.$_POST['project_name'].'.log',
 				'analytics' => 0,
 				'cache' => [
-						'force_download' => 1,
-						'pack_js' => 0,
-						'pack_css' => 0,
+						'force_download' => ($_POST['environment'] == 'DEV' || $_POST['environment'] == 'STG' ? 1 : 0),
+						'pack_js' => ($_POST['environment'] == 'DEV' ? 0 : 1),
+						'pack_css' => ($_POST['environment'] == 'DEV' ? 0 : 1),
 				],
 				'update' => [
-						'allow_updates' => 1,
+						'allow_updates' => ($_POST['environment'] == 'DEV' ? 1 : 0),
 				],
 				'images_webp' => extension_loaded('gd') ? 'gd' : '',
 				'database' => [
@@ -475,6 +475,10 @@ RewriteRule ^(.*)$ ./index.php?/$1 [L,QSA]';
 		
 		file_put_contents($current_dir.'.htaccess', $htaccess);
 		
+		// clean up
+		rename($current_dir.'_install/install.php', $current_dir.'cache/install.tmp');
+		rmdir($current_dir.'_install');
+		
 		print(json_encode(['ok' => 1]));
 		die();
 	
@@ -512,7 +516,7 @@ $project_name = strtolower($project_name);
 
 	<head>
 	
-		<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+		<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 	
 	</head>
 
@@ -663,7 +667,7 @@ $project_name = strtolower($project_name);
 				<span class="install_config">&nbsp;</span> Set up config files
 			</div>
 
-			<div class="step_5_next" style="cursor: pointer; ">DONE (log in and delete install script)</div>
+			<div class="step_5_next" style="cursor: pointer; ">OK</div>
 		
 		</div>
 
@@ -672,19 +676,9 @@ $project_name = strtolower($project_name);
 			<div class="q_files">
 				Thank you!<br>
 				<br>
-				<a href="./">Homepage</a><br>
-				<a href="./admin/">CMS admin</a>			
+				<a href="./">&gt; Homepage</a><br>
+				<a href="./admin/">&gt; CMS admin</a>			
 			</div>
-			
-			<div class="q_database">
-				<span class="install_database">&nbsp;</span> Install database
-			</div>
-			
-			<div class="q_config">
-				<span class="install_config">&nbsp;</span> Set up config files
-			</div>
-
-			<div class="step_5_next" style="cursor: pointer; ">DONE</div>
 		
 		</div>
 
@@ -866,18 +860,6 @@ $project_name = strtolower($project_name);
 					$('.step_3').css({'display':'block'});
 				});
 
-				/**
-				*	step 5 functionality
-				*/
-				
-				$('.step_5_next').on('click', function(){
-
-					// show step 6 - done
-					$('.step_5').css({'display':'none'});
-					$('.step_6').css({'display':'block'});
-					
-				});
-
 				function run_installation(){
 
 					// files installation progress
@@ -935,6 +917,19 @@ $project_name = strtolower($project_name);
 						}));
 
 				}
+
+
+				/**
+				*	step 5 functionality
+				*/
+				
+				$('.step_5_next').on('click', function(){
+
+					// show step 6 - done
+					$('.step_5').css({'display':'none'});
+					$('.step_6').css({'display':'block'});
+					
+				});
 
 			});
 		
