@@ -565,16 +565,16 @@ $project_name = strtolower($project_name);
 			<div>DB admin access for making database, if not available or not needed, do not change<br><br></div>
 			
 			<div>
-				<label style="display: block; " for="db_admin_user">DB username: </label>
+				<label style="display: block; " for="db_admin_user">DB admin username: </label>
 				<input id="db_admin_user" value="root"><br><br>
 			</div>
 			
 			<div>
-				<label style="display: block; " for="db_admin_pass">DB password: </label>
+				<label style="display: block; " for="db_admin_pass">DB admin password: </label>
 				<input id="db_admin_pass" value=""><br><br><br>
 			</div>
 
-			<div>
+			<div style="display: none; ">
 				<label style="display: block; " for="db_createnew">I want to create new database<!-- br>(Selecting "No" may cause losing existing data in 
 						database)-->: </label>
 				<select id="db_createnew">
@@ -594,6 +594,7 @@ $project_name = strtolower($project_name);
 				<input id="db_pass"> <span class="generate_db_password" style="cursor: pointer; ">generate new</span><br><br>
 			</div>
 			
+			<div class="step_2_previous" style="cursor: pointer; ">PREVIOUS</div>
 			<div class="step_2_next" style="cursor: pointer; ">NEXT</div>
 		
 		</div>
@@ -612,6 +613,7 @@ $project_name = strtolower($project_name);
 				<input id="admin_pass" value=""> <span class="generate_admin_password" style="cursor: pointer; ">generate new</span><br><br><br>
 			</div>
 			
+			<div class="step_3_previous" style="cursor: pointer; ">PREVIOUS</div>
 			<div class="step_3_next" style="cursor: pointer; ">NEXT</div>
 		
 		</div>
@@ -642,6 +644,7 @@ $project_name = strtolower($project_name);
 						
 			<div class="check_again" style="cursor: pointer; ">CHECK AGAIN</div>
 			
+			<div class="step_4_previous" style="cursor: pointer; ">PREVIOUS</div>
 			<div class="step_4_next" style="cursor: pointer; ">NEXT (INSTALL)</div>
 		
 		</div>
@@ -660,7 +663,7 @@ $project_name = strtolower($project_name);
 				<span class="install_config">&nbsp;</span> Set up config files
 			</div>
 
-			<div class="step_5_next" style="cursor: pointer; ">DONE</div>
+			<div class="step_5_next" style="cursor: pointer; ">DONE (log in and delete install script)</div>
 		
 		</div>
 
@@ -782,6 +785,11 @@ $project_name = strtolower($project_name);
 					}
 				});
 
+				$('.step_2_previous').on('click', function(){
+					$('.step_2').css({'display':'none'});
+					$('.step_1').css({'display':'block'});
+				});
+				
 				/**
 				*	step 3 functionality
 				*/
@@ -803,6 +811,11 @@ $project_name = strtolower($project_name);
 				
 				$('.generate_admin_password').on('click', function(){
 					$('#admin_pass').val(make_string(10));
+				});
+
+				$('.step_3_previous').on('click', function(){
+					$('.step_3').css({'display':'none'});
+					$('.step_2').css({'display':'block'});
 				});
 
 				/**
@@ -848,6 +861,11 @@ $project_name = strtolower($project_name);
 
 				}
 				
+				$('.step_4_previous').on('click', function(){
+					$('.step_4').css({'display':'none'});
+					$('.step_3').css({'display':'block'});
+				});
+
 				/**
 				*	step 5 functionality
 				*/

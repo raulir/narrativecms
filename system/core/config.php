@@ -36,8 +36,14 @@ if (file_exists($config['config_file'])){
 		}
 	
 	} else {
-	
-		print('No config file for this host found: '.$working_directory.'config/'.strtolower($_SERVER['SERVER_NAME']).'.json or '.$config['config_file']);
+			
+		// check if install script is present
+		if (file_exists($working_directory.'_install/install.php')){
+			include($working_directory.'_install/install.php');
+		} else {
+			print('No config file for this host found: '.$working_directory.'config/'.strtolower($_SERVER['SERVER_NAME']).'.json or '.$config['config_file']);
+		}
+		
 		die();
 	
 	}
@@ -80,8 +86,16 @@ if ($GLOBALS['config']['database']['dbdriver'] = 'mysqli') {
 $db = $GLOBALS['dbconnections'][md5($GLOBALS['config']['database']['hostname'].$GLOBALS['config']['database']['username'].$GLOBALS['config']['database']['password'].$config['database']['database'])];
 
 if ($db === false){
-	print('Can\'t connect database!');
+	
+	// check if install script is present
+	if (file_exists($working_directory.'_install/install.php')){
+		include($working_directory.'_install/install.php');
+	} else {
+		print('Can\'t connect database!');
+	}
+	
 	die();
+
 }
 
 $sql = "select b.name, b.value from cms_page_panel a join cms_page_panel_param b on a.cms_page_panel_id = b.cms_page_panel_id where (a.panel_name = 'cms_settings' or a.panel_name = 'cms/cms_settings') and b.name != ''";
