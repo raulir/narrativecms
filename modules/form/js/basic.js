@@ -50,10 +50,10 @@ function form_basic_init(){
 				get_ajax('form/do_send', $.extend({ 'success': function(data){
 					
 					// register google analytics event
-					if (typeof ga_cms !== 'undefined'){
-						ga_cms('send', 'event', 'Form', 'submit', $("input[name='id']", $form).val(), 10);
+					if (typeof analytics_trackers !== 'undefined'){
+						analytics_send('event', 'Form', 'submit', $("input[name='id']", $form).val(), 10);
 					}
-
+	
 					setTimeout(function(){
 						setTimeout(function(){
 							$('.form_basic_message', $container).removeClass('form_basic_message_status_sending').addClass('form_basic_message_status_active');
