@@ -86,8 +86,8 @@ class CI_Input {
 		log_message('debug', "Input Class Initialized");
 
 		$this->_allow_get_array	= (config_item('allow_get_array') === TRUE);
-		$this->_enable_xss		= (config_item('global_xss_filtering') === TRUE);
-		$this->_enable_csrf		= (config_item('csrf_protection') === TRUE);
+		$this->_enable_xss		= false;
+		$this->_enable_csrf		= false;
 
 		global $SEC;
 		$this->security =& $SEC;
@@ -315,41 +315,7 @@ class CI_Input {
 			return $this->ip_address;
 		}
 
-		$proxy_ips = config_item('proxy_ips');
-		if ( ! empty($proxy_ips))
-		{
-			$proxy_ips = explode(',', str_replace(' ', '', $proxy_ips));
-			foreach (array('HTTP_X_FORWARDED_FOR', 'HTTP_CLIENT_IP', 'HTTP_X_CLIENT_IP', 'HTTP_X_CLUSTER_CLIENT_IP') as $header)
-			{
-				if (($spoof = $this->server($header)) !== FALSE)
-				{
-					// Some proxies typically list the whole chain of IP
-					// addresses through which the client has reached us.
-					// e.g. client_ip, proxy_ip1, proxy_ip2, etc.
-					if (strpos($spoof, ',') !== FALSE)
-					{
-						$spoof = explode(',', $spoof, 2);
-						$spoof = $spoof[0];
-					}
-
-					if ( ! $this->valid_ip($spoof))
-					{
-						$spoof = FALSE;
-					}
-					else
-					{
-						break;
-					}
-				}
-			}
-
-			$this->ip_address = ($spoof !== FALSE && in_array($_SERVER['REMOTE_ADDR'], $proxy_ips, TRUE))
-				? $spoof : $_SERVER['REMOTE_ADDR'];
-		}
-		else
-		{
-			$this->ip_address = $_SERVER['REMOTE_ADDR'];
-		}
+		$this->ip_address = $_SERVER['REMOTE_ADDR'];
 
 		if ( ! $this->valid_ip($this->ip_address))
 		{
@@ -596,13 +562,6 @@ class CI_Input {
 
 		// Sanitize PHP_SELF
 		$_SERVER['PHP_SELF'] = strip_tags($_SERVER['PHP_SELF']);
-
-
-		// CSRF Protection check on HTTP requests
-		if ($this->_enable_csrf == TRUE && ! $this->is_cli_request())
-		{
-			$this->security->csrf_verify();
-		}
 
 		log_message('debug', "Global POST and COOKIE data sanitized");
 	}

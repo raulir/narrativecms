@@ -958,22 +958,6 @@ class CI_Controller {
 		return $return;
 	
 	}
-	
-	function get_panel_view_filename($panel_name){
-		$filename = 'views/panels/' . $panel_name . '.tpl.php';
-		if (!file_exists(APPPATH . $filename)){
-			foreach($GLOBALS['config']['modules'] as $module){
-				$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/templates/'.$panel_name.'.tpl.php';
-				if (file_exists($filename)){
-	
-					return array('full' => $filename, 'relative' => $filename, 'module' => $module, );
-	
-				}
-			}
-		} else {
-			return array('full' => APPPATH . $filename, 'relative' => '../' . $filename, 'module' => '', );
-		}
-	}
 
 }
 // END Controller class

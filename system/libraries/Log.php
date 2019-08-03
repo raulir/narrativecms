@@ -37,24 +37,19 @@ class CI_Log {
 	 */
 	public function __construct()
 	{
-		$config =& get_config();
 
-		$this->_log_path = ($config['log_path'] != '') ? $config['log_path'] : APPPATH.'logs/';
+		$this->_log_path = (config_item('log_path') != '') ? config_item('log_path') : 'cache/logs/';
 
 		if ( ! is_dir($this->_log_path))
 		{
 			$this->_enabled = FALSE;
 		}
 
-		if (is_numeric($config['log_threshold']))
+		if (is_numeric(config_item('log_threshold')))
 		{
-			$this->_threshold = $config['log_threshold'];
+			$this->_threshold = config_item('log_threshold');
 		}
 
-		if ($config['log_date_format'] != '')
-		{
-			$this->_date_fmt = $config['log_date_format'];
-		}
 	}
 
 	// --------------------------------------------------------------------

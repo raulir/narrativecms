@@ -1,5 +1,16 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
+// static system config (CI heritage, deprecated)
+$config['system']['charset'] = 'UTF-8';
+$config['system']['allow_get_array'] = TRUE;
+$config['system']['log_threshold'] = 4;
+$config['system']['log_path'] = '';
+$config['system']['log_date_format'] = 'Y-m-d H:i:s';
+$config['system']['cookie_prefix'] = "";
+$config['system']['cookie_domain'] = "";
+$config['system']['cookie_path'] = "/";
+$config['system']['cookie_secure'] = FALSE;
+
 /*
  * LOAD CONFIG
  */

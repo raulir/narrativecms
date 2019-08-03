@@ -2,7 +2,7 @@
 <div class="cms_toolbar">
 	<a class="admin_tool_text" <?php _lh('admin/keywords/'); ?>>Keywords</a>
 	<div class="admin_tool_text">
-		&nbsp; &gt; &nbsp; <?php print($cms_keyword_id ? str_limit($cms_keyword_id, 40) : 'New keyword'); ?>
+		&nbsp; &gt; &nbsp; <?php print($cms_keyword_id ? $cms_keyword_id : 'New keyword'); ?>
 	</div>
 	<a class="cms_keyword_save cms_tool_button admin_right">Save</a>
 	<a class="cms_keyword_delete cms_tool_button admin_right">Delete</a>

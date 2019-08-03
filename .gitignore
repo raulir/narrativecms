@@ -1,20 +1,12 @@
 /robots.txt
 .DS_Store
 
-application/cache/*
-!application/cache/index.html
-!application/cache/.htaccess
-
 /cache/*
 !/cache/index.html
 !/system/libraries/Cache/
 
 _db/*
 !_db/cms.sql
-
-application/logs/*
-!application/logs/index.html
-!application/logs/.htaccess
 
 .svn
 .settings

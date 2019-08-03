@@ -124,15 +124,15 @@ class CI_Loader {
 	public function __construct()
 	{
 		$this->_ci_ob_level  = ob_get_level();
-		$this->_ci_library_paths = array(APPPATH, BASEPATH);
-		$this->_ci_helper_paths = array(APPPATH, BASEPATH);
+		$this->_ci_library_paths = array(BASEPATH);
+		$this->_ci_helper_paths = array(BASEPATH);
 		
-		$this->_ci_model_paths = array(APPPATH);
+		$this->_ci_model_paths = [];
 		foreach($GLOBALS['config']['modules'] as $module){
     		$this->_ci_model_paths[] = $GLOBALS['config']['base_path'].'modules/'.$module.'/';
 		}
 
-		$this->_ci_view_paths = array(APPPATH.'views/'	=> TRUE);
+		$this->_ci_view_paths = [];
 
 		log_message('debug', "Loader Class Initialized");
 	}
@@ -665,11 +665,11 @@ class CI_Loader {
 		}
 
 		// make sure the application default paths are still in the array
-		$this->_ci_library_paths = array_unique(array_merge($this->_ci_library_paths, array(APPPATH, BASEPATH)));
-		$this->_ci_helper_paths = array_unique(array_merge($this->_ci_helper_paths, array(APPPATH, BASEPATH)));
-		$this->_ci_model_paths = array_unique(array_merge($this->_ci_model_paths, array(APPPATH)));
-		$this->_ci_view_paths = array_merge($this->_ci_view_paths, array(APPPATH.'views/' => TRUE));
-		$config->_config_paths = array_unique(array_merge($config->_config_paths, array(APPPATH)));
+		$this->_ci_library_paths = array_unique(array_merge($this->_ci_library_paths, array(BASEPATH)));
+		$this->_ci_helper_paths = array_unique(array_merge($this->_ci_helper_paths, array(BASEPATH)));
+		$this->_ci_model_paths = array_unique(array_merge($this->_ci_model_paths, []));
+		$this->_ci_view_paths = array_merge($this->_ci_view_paths, []);
+		$config->_config_paths = array_unique(array_merge($config->_config_paths, []));
 	}
 
 	// --------------------------------------------------------------------
@@ -852,6 +852,7 @@ class CI_Loader {
 			}
 		} else {
 
+			// deprecated
 			$class = str_replace($GLOBALS['config']['base_path'].'application/controllers/panels/', '../controllers/panels/', $class);
 		
 		}

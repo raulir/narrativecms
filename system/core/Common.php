@@ -1,5 +1,17 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+if ( ! function_exists('config_item')) {
+	function config_item($item)	{
+
+		if (empty($GLOBALS['config']['system'][$item])){
+			return false;
+		}
+
+		return $GLOBALS['config']['system'][$item];
+
+	}
+}
+
 /**
 * Class registry
 *
@@ -74,79 +86,6 @@ if ( ! function_exists('is_loaded'))
 		}
 
 		return $_is_loaded;
-	}
-}
-
-// ------------------------------------------------------------------------
-
-/**
-* Loads the main config.php file
-*
-* @access	private
-* @return	array
-*/
-if ( ! function_exists('get_config'))
-{
-	function &get_config($replace = array())
-	{
-		static $_config;
-
-		if (isset($_config))
-		{
-			return $_config[0];
-		}
-		
-		require(APPPATH.'config/config.php');
-
-		// Does the $config array exist in the file?
-		if ( ! isset($config) OR ! is_array($config))
-		{
-			exit('Your config file does not appear to be formatted correctly.');
-		}
-
-		// Are any values being dynamically replaced?
-		if (count($replace) > 0)
-		{
-			foreach ($replace as $key => $val)
-			{
-				if (isset($config[$key]))
-				{
-					$config[$key] = $val;
-				}
-			}
-		}
-
-		$_config[0] =& $config;
-		return $_config[0];
-	}
-}
-
-// ------------------------------------------------------------------------
-
-/**
-* Returns the specified config item
-*
-* @access	public
-* @return	mixed
-*/
-if ( ! function_exists('config_item'))
-{
-	function config_item($item)
-	{
-		static $_config_item = array();
-
-		if ( ! isset($_config_item[$item]))
-		{
-			$config =& get_config();
-
-			if ( ! isset($config[$item]))
-			{
-				return FALSE;
-			}
-			$_config_item[$item] = $config[$item];
-		}
-
-		return $_config_item[$item];
 	}
 }
 

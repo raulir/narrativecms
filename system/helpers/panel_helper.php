@@ -149,22 +149,6 @@ if ( !function_exists('get_position')) {
     	
     }
 
-    function str_limit($string, $length, $extra = ''){
-    	
-    	if (is_array($string)){
-    		$string = array_pop($string);
-    	}
-    	
-    	if (strlen($string) > $length){
-    		$string = substr($string, 0, $length - strlen($extra));
-    		$string = substr($string, 0, strrpos($string, ' '));
-    		$string = trim($string, ' -:;,').$extra;
-
-    		$string .= $extra;
-    	}
-    	return $string;
-    }
-    
     /**
      * prints out url with full site path where needed
      */
