@@ -15,12 +15,12 @@ class cms_update extends CI_Controller {
 	}
 
 	function panel_action($params){
+		
+		$this->load->model('cms/cms_update_model');
 
 		$do = $this->input->post('do');
 
 		if ($do == 'cms_update' && !empty($GLOBALS['config']['update']['allow_updates'])){
-
-			$this->load->model('cms_update_model');
 
 			$params['result'] = $this->cms_update_model->update();
 			$params['ajax'] = true;
@@ -33,14 +33,12 @@ class cms_update extends CI_Controller {
 
 		} else if ($do == 'cms_update_list'){
 			 
-			$this->load->model('cms_update_model');
 			$params['result'] = $this->cms_update_model->get_needed_files();
 			 
 		} else if ($do == 'cms_update_file'){ // updates file
 			 
 			$filename = $this->input->post('filename');
-			$this->load->model('cms_update_model');
-
+			
 			$this->cms_update_model->update_file($filename);
 			 
 			$params['result']['filename'] = $filename;
@@ -49,7 +47,6 @@ class cms_update extends CI_Controller {
 			 
 		} else if ($do == 'cms_update_copy'){
 
-			$this->load->model('cms_update_model');
 			$this->cms_update_model->update_copy();
 			
 			// check and update version information
@@ -68,6 +65,10 @@ class cms_update extends CI_Controller {
 				]);
 			}
 
+		} else if ($do == 'cms_update_cleanup'){
+			
+			while ($this->cms_update_model->update_cleanup());
+			
 		}
 
 		return $params;
