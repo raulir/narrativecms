@@ -123,7 +123,7 @@ class cms_image_model extends CI_Model {
 		foreach($return['result'] as $key => $image){
 			foreach($pages as $page){
 					
-				if ($image['filename'] == $page['image']){
+				if (!empty($page['image']) && $image['filename'] == $page['image']){
 					$return['result'][$key]['number'] += 1;
 				}
 			

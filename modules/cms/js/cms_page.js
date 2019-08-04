@@ -30,6 +30,7 @@ function cms_page_save(params){
 		'description': $('.cms_page_description').val(),
 		'image': $('.cms_image_input_cms_page_image').val(),
 		'layout': $('.cms_page_layout').val(),
+		'position': $('.cms_page_position').val(),
 		'success': function(data){
 			
 			// update possible changes on form

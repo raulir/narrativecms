@@ -35,7 +35,8 @@ class cms_page extends CI_Controller {
 		} else {
 				
 			$return['page'] = $this->cms_page_model->new_page();
-
+			$return['page']['position'] = !empty($params['position']) ? $params['position'] : 'main';
+			$return['page']['title'] = 'New '.(!empty($params['position']) ? $params['position'] : 'page');
 		}
 
 		// is page a list item page?

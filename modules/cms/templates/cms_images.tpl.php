@@ -4,7 +4,7 @@
 
 			<div class="cms_images_toolbar cms_toolbar">
 				
-				<div class="admin_tool_text">Select image</div>
+				<div class="cms_tool_text">Select image</div>
 				
 				<a class="cms_images_select cms_tool_button admin_right popup_select" data-value="<?php print($filename); ?>">Select</a>
 				

@@ -144,7 +144,7 @@ class cms_page_model extends CI_Model {
 		unset($data['page_id']);
 				
 		foreach($data as $field => $value){
-			if (!in_array($field, array('sort', 'slug', ))){
+			if (!in_array($field, ['sort', 'slug', 'position'])){
 				
 				if ($language === false || !in_array($field, ['seo_title','description'])){
 					$meta[$field] = $value;
@@ -168,7 +168,7 @@ class cms_page_model extends CI_Model {
 	
 	function create_page($data){
 		
-		$sql = "insert into cms_page set slug = '', sort = 0, meta = '' ";
+		$sql = "insert into cms_page set slug = '', sort = 0, meta = '', position = '' ";
 		$this->db->query($sql);
 		$cms_page_id = $this->db->insert_id();
 		
@@ -223,6 +223,29 @@ class cms_page_model extends CI_Model {
 			}
 		}
 
+		return $return;
+		
+	}
+	
+	function get_positions(){
+		
+		$this->load->model('cms/cms_module_model');
+		
+		$return = [];
+		
+		foreach($this->cms_module_model->get_modules() as $module){
+			if ($module['active']){
+				$config = $this->cms_module_model->get_module_config($module['name']);
+				if (!empty($config['positions']) && is_array($config['positions'])){
+					foreach($config['positions'] as $key => $value){
+						if ($value['id'] !== 'main' || !empty($value['id'])){
+							$return[] = array_merge($value, ['module' => $module['name']]);
+						}
+					}
+				}
+			}
+		}
+		
 		return $return;
 		
 	}

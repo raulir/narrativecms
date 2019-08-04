@@ -1,7 +1,7 @@
 <?php if(empty($ajax)): ?>
 	<div class="cms_toolbar">
 	
-		<div class="admin_tool_text">
+		<div class="cms_tool_text">
 			<?php print('System update'); ?>
 		</div>
 		
