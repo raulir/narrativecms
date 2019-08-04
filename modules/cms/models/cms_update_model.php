@@ -11,7 +11,8 @@ class cms_update_model extends CI_Model {
 			'modules/cms/',
 		);
 		
-		$extensions = array(
+		$extensions = [
+				'',
 				'bin',
 				'css',
 				'eot',
@@ -30,7 +31,7 @@ class cms_update_model extends CI_Model {
 				'ttf',
 				'txt',
 				'woff',
-		);
+		];
 		
 		$hashes = array();
 		$version_hashes = array();
@@ -49,7 +50,7 @@ class cms_update_model extends CI_Model {
 					
 	    			$cms_filename = $folder.str_replace($full_folder, '', str_replace("\\", '/', $filename));
 	 				
-	 				if(in_array(pathinfo($cms_filename, PATHINFO_EXTENSION), $extensions)){
+	 				if(!is_dir($filename) && in_array(pathinfo($cms_filename, PATHINFO_EXTENSION), $extensions)){
 	
 						// if matches, get hash
 						$cms_md5 = md5_file($filename);
@@ -523,6 +524,44 @@ class cms_update_model extends CI_Model {
 				
 		}
 		
+	}
+	
+	function update_cleanup(){
+		
+		$return = 0;
+		
+		$folders = [
+				'application/',
+				'js/',
+				'system/',
+				'modules/cms/',
+		];
+
+		// go over all folders
+		foreach($folders as $folder){
+				
+			// go over all files recursively
+			$full_folder = str_replace("\\", '/', $GLOBALS['config']['base_path'].$folder);
+				
+			if (file_exists($full_folder)){
+					
+				$it = new RecursiveDirectoryIterator($full_folder);
+				foreach (new RecursiveIteratorIterator($it) as $filename => $file) {
+						
+					if (is_dir($filename) && substr($filename, -3, 3) !== '/..'){
+						
+						$fi = new FilesystemIterator($filename, FilesystemIterator::SKIP_DOTS);
+						if (!iterator_count($fi)) {
+							rmdir($filename);
+						}
+						
+					}
+						
+				}
+		
+			}
+				
+		}
 	}
 
 }

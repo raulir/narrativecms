@@ -55,7 +55,14 @@ function cms_update_init(){
 						get_ajax('cms_update', {
 							'do': 'cms_update_copy',
 							'success': function(data){
-								cms_notification('CMS updated', 5);
+								
+								get_ajax('cms_update', {
+									'do': 'cms_update_cleanup',
+									'success': function(data){
+										cms_notification('CMS updated', 5);
+									}
+								});
+
 							}
 						});
 						
