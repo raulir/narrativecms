@@ -386,6 +386,10 @@ INSERT INTO cms_slug VALUES
 				'admin_username' => $_POST['admin_user'],
 				'admin_password' => $_POST['admin_pass'],
 		];
+		
+		if ($config['base_url'] == '//') {
+			$config['base_url'] = '/';
+		}
 
 		if (!file_exists($current_dir.'config')){
 			mkdir($current_dir.'config');
