@@ -85,7 +85,7 @@ class cms_search_operations extends CI_Controller {
 			foreach($result['cms_page_panels'] as $cms_page_panel_id => $score){
 				
 				// pages panels
-				if (!in_array($result['panel_data'][$cms_page_panel_id]['page_id'], [0,999999])){
+				if (!in_array($result['panel_data'][$cms_page_panel_id]['cms_page_id'], [0,999999])){
 					
 					$page_data = $this->cms_page_model->get_page($result['panel_data'][$cms_page_panel_id]['page_id']);
 				
