@@ -87,7 +87,7 @@ class cms_search_operations extends CI_Controller {
 				// pages panels
 				if (!in_array($result['panel_data'][$cms_page_panel_id]['cms_page_id'], [0,999999])){
 					
-					$page_data = $this->cms_page_model->get_page($result['panel_data'][$cms_page_panel_id]['page_id']);
+					$page_data = $this->cms_page_model->get_page($result['panel_data'][$cms_page_panel_id]['cms_page_id']);
 				
 					$return['result']['page_panels']['pages'][$cms_page_panel_id] = [
 							'title' => (!empty($page_data['title']) ? $page_data['title'] : '[ no title ]') . ' &gt; ' . $result['panel_data'][$cms_page_panel_id]['title'],
