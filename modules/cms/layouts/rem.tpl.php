@@ -14,11 +14,11 @@
 
 <body>
 
-	<?php print(get_position('header', $data)); ?>
+	<?= get_position('header', $data) ?>
 
-	<?php print(get_position('main', $data)); ?>
+	<?= get_position('main', $data) ?>
 
-	<?php print(get_position('footer', $data)); ?>
+	<?= get_position('footer', $data) ?>
 
 	<script type="text/javascript">
 

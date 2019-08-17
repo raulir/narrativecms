@@ -250,4 +250,29 @@ class cms_page_model extends CI_Model {
 		
 	}
 	
+	function get_layout_positions($layout){
+		
+		if (stristr($layout, '/')){
+			list($module, $layout) = explode('/', $layout);
+		} else {
+			$module = 'cms';
+		}
+		
+		$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/layouts/'.$layout.'.tpl.php';
+		
+		$data = '_collect';
+		$GLOBALS['_collect'] = [];
+		
+		if (file_exists($filename)){
+			
+			ob_start();
+			include($filename);
+			ob_end_clean();
+			
+		}
+
+		return $GLOBALS['_collect'];
+		
+	}
+	
 }

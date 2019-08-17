@@ -13,7 +13,7 @@
 			</ul>
 		<?php else: ?>
 			<ul>
-				<div class="admin_text">No pages found</div>
+				<div class="admin_text">No pages defined</div>
 			</ul>
 		<?php endif ?>
 
@@ -35,7 +35,7 @@
 					<?php cms_pages_list($pages[$position['id']]) ?>
 				</ul>
 			<?php else: ?>
-				<div class="cms_pages_position_empty">No <?= $position['plural'] ?> found</div>
+				<div class="cms_pages_position_empty">No <?= $position['plural'] ?> defined</div>
 			<?php endif ?>
 		
 		<?php endforeach ?>

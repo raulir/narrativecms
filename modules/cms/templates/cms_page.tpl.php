@@ -46,7 +46,8 @@
 								'values' => ['0' => 'Automatic', '1' => 'Hidden', ],
 								'name' => 'cms_page_status',
 								'name_clean' => 'status',
-								'help' => '[Page published status]||"{Automatic}" - hidden when page doesn\'t have any panels added, otherwise visible.||"{Hidden}" - visible only while logged into CMS admin.',
+								'help' => '[Page published status]||"{Automatic}" - hidden when page doesn\'t have any panels added, otherwise visible.||
+										"{Hidden}" - visible only while logged into CMS admin.',
 						)); ?>
 							
 					<?php else: ?>
@@ -55,12 +56,22 @@
 						
 					<?php endif ?>
 					
+					<?php _panel('cms/cms_input_subtitle', ['label' => 'Structure', 'width' => 'narrow', 
+							'help' => '[Structure]||These fields define general layout and static areas of page, like header and footer']) ?>
+					
 					<?php
 						_panel('cms/cms_input_layout', [
 								'label' => 'Layout', 
-								'value' => !empty($page['layout']) ? $page['layout'] : (!empty($GLOBALS['config']['layout']) ? $GLOBALS['config']['layout'] : 'rem'), 
+								'value' => $cms_page_layout, 
 								'name' => 'cms_page_layout', 
 								'help' => '[Page layout]||CMS "Default fixed" is fixed pixel size layout.||CMS "Default rems" layout changes rem size with page size.||There might be more layouts available, defined in other modules.',
+						]);
+					?>
+					
+					<?php
+						_panel('cms/cms_page_positions', [
+								'cms_page_id' => $page['cms_page_id'],
+								'cms_page_layout' => $cms_page_layout,
 						]);
 					?>
 	

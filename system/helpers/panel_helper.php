@@ -5,7 +5,15 @@ if ( !function_exists('get_position')) {
 	/**
 	 * checks if in template variable "data" is key starting with position name and outputs all such
 	 */
-    function get_position($name, $data) {
+    function get_position($name, &$data) {
+
+    	// to check for positions
+    	if ($data === '_collect'){
+    		if (!in_array($name, $GLOBALS['_collect'])){
+    			$GLOBALS['_collect'][] = $name;
+    		}
+    		return;
+    	}
     	
     	$return = '';
     	

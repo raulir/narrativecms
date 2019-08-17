@@ -28,7 +28,7 @@ class cms_page_operations extends CI_Controller {
 			$this->cms_page_model->delete_page($page_id);
 			 
 		} else if ($do == 'cms_page_save'){
-			 
+
 			// collect data
 			$page_id = $this->input->post('cms_page_id');
 			$language = $this->input->post('language');
@@ -52,6 +52,7 @@ class cms_page_operations extends CI_Controller {
 				$data['description'] = $this->input->post('description');
 				$data['image'] = $this->input->post('image');
 				$data['layout'] = $this->input->post('layout');
+				$data['positions'] = $this->input->post('positions');
 			}
 			 
 			// save data

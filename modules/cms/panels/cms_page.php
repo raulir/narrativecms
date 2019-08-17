@@ -48,6 +48,9 @@ class cms_page extends CI_Controller {
 		
 		$return['is_list_item'] = in_array($return['page']['slug'], $lists_clean) ? 1 : 0;
 		
+		// layout
+		$return['cms_page_layout'] = !empty($return['page']['layout']) ? $return['page']['layout'] : 
+				(!empty($GLOBALS['config']['layout']) ? $GLOBALS['config']['layout'] : 'cms/rem');
 
 		return $return;
 
