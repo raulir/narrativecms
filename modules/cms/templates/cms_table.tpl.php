@@ -1,5 +1,5 @@
 <div class="cms_toolbar">
-	<div class="admin_tool_text">
+	<div class="cms_tool_text">
 		<?php print($table_title); ?>
 	</div>
 	<a class="cms_table_save cms_tool_button admin_right">Save</a>

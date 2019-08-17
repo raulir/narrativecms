@@ -1,6 +1,6 @@
 <div class="cms_toolbar">
 
-	<div class="admin_tool_text">Admin users</div>
+	<div class="cms_tool_text">Admin users</div>
 
 </div>
 

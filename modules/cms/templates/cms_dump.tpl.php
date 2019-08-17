@@ -1,6 +1,6 @@
 <div class="cms_toolbar">
 
-	<div class="admin_tool_text">Download and upload site dumps</div>
+	<div class="cms_tool_text">Download and upload site dumps</div>
 
 </div>
 

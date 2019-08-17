@@ -4,14 +4,14 @@
 
 		<?php foreach($breadcrumb as $element): ?>
 			
-			<<?= !empty($element['url']) ? 'a' : 'div' ?> class="admin_tool_text cms_page_panel_toolbar_text" 
+			<<?= !empty($element['url']) ? 'a' : 'div' ?> class="cms_tool_text cms_page_panel_toolbar_text" 
 					<?php _lh($element['url']); ?> <?php print(!empty($element['field']) ? 'data-title_field="'.$element['field'].'"' : ''); ?>>
 				
 				<?= $element['text'] ?>
 			
 			</<?= !empty($element['url']) ? 'a' : 'div' ?>>
 			
-			<div class="admin_tool_text cms_page_panel_toolbar_gt">&nbsp; &gt; &nbsp;</div>
+			<div class="cms_tool_text cms_page_panel_toolbar_gt">&nbsp; &gt; &nbsp;</div>
 		
 		<?php endforeach ?>
 

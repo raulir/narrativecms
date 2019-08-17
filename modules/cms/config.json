@@ -77,6 +77,18 @@
 			"name":"Default rems"
 		}
 	],
+	"positions":[
+		{
+			"id":"header",
+			"name":"Header",
+			"plural":"Headers"
+		},
+		{
+			"id":"footer",
+			"name":"Footer",
+			"plural":"Footers"
+		}
+	],
 	"access":[
 		{
 			"access":"*",
