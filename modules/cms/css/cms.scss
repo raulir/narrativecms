@@ -1,5 +1,6 @@
 $colour_background: white;
 $colour_border: #a0a0a0;
+$colour_shadow: #606060;
 
 @font-face {
     font-family: 'foundrysterling';
@@ -81,21 +82,25 @@ ul {
 
 .cms_content {
 	box-sizing: border-box;
-	width: 980px;
-	padding: 29px 19px;
-	margin: 0px auto;
-	background-color: white;
-	border: 1px solid #a0a0a0;
-	box-shadow: 1px 2px 7px #606060;
+	width: 100rem;
+	padding: 3.0rem 2.0rem;
+	margin: 0 auto;
+	background-color: $colour_background;
+	border: 0.1rem solid $colour_border;
+	box-shadow: 0.1rem 0.2rem 0.7rem $colour_shadow;
+	font-size: 1.6rem;
+	line-height: 2.6rem;
 }
 
 .cms_header_content {
 	box-sizing: border-box;
-	width: 980px;
-	padding: 19px 0px;
-	margin: 0px auto;
+	width: 100rem;
+	padding: 2.0rem 0;
+	margin: 0 auto;
 	position: relative;
 }
+
+/* cms toolbar */
 
 .cms_toolbar {
 	box-sizing: border-box;
@@ -173,16 +178,6 @@ ul {
 	height: 100%;
 }
 
-.cms_content {
-	box-sizing: border-box;
-	width: 980px;
-	padding: 29px 19px;
-	margin: 0px auto;
-	background-color: white;
-	border: 1px solid #a0a0a0;
-	box-shadow: 1px 2px 7px #606060;
-}
-
 .login_container {
 	vertical-align: middle;
 }
@@ -233,7 +228,7 @@ ul {
 	cursor: pointer;
 }
 
-.admin_tool_text {
+.cms_tool_text {
 	box-sizing: border-box;
 	display: inline-block;
 	height: 30px;
@@ -245,10 +240,6 @@ ul {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-}
-
-a.admin_tool_text:hover {
-	text-decoration: underline;
 }
 
 .cms_tool_button {
