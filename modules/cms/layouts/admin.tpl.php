@@ -7,7 +7,9 @@
  			var config_url = '<?php print($GLOBALS['config']['base_url']); ?>';
 		</script>
    	</head>
-	<body <?php if (!empty($GLOBALS['config']['cms_background'])) _ib($GLOBALS['config']['cms_background'], 1200); ?>>
+	<body <?php (!empty($GLOBALS['config']['cms_background'])) ? 
+			_ib($GLOBALS['config']['cms_background'], ['width' => 1000, 'css' => 'font-size: 9.8px; ']) : 
+			print(' style="font-size: 9.8px; " ') ?>>
 	
 		<div class="admin_container">
 			

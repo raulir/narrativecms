@@ -18,7 +18,26 @@ class cms_pages extends CI_Controller {
 
 		$this->load->model('cms/cms_page_model');
 
-		$return['pages'] = $this->cms_page_model->get_cms_pages();
+		$pages = $this->cms_page_model->get_cms_pages();
+		
+		// get positions
+		$return['positions'] = $this->cms_page_model->get_positions();
+		
+		$return['pages'] = [];
+		
+		foreach($pages as $page){
+			
+			if (empty($page['position'])){
+				$page['position'] = 'main';
+			}
+			
+			if (empty($return['pages'][$page['position']])){
+				$return['pages'][$page['position']] = [];
+			}
+			
+			$return['pages'][$page['position']][] = $page;
+			
+		}
 		
 		return $return;
 

@@ -1,3 +1,25 @@
+.cms_pages_container {
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
+}
+
+.cms_pages_left {
+	width: 50%;
+	display: inline-block;
+	vertical-align: top;
+	box-sizing: border-box;
+	padding-right: 1.0rem;
+}
+
+.cms_pages_right {
+	width: 50%;
+	display: inline-block;
+	vertical-align: top;
+	box-sizing: border-box;
+	padding-left: 1.0rem;
+}
+
 .cms_pages_page {
 	position: relative;
 	padding: 2px 3px 0px 26px;
@@ -16,4 +38,21 @@
 
 .cms_pages_page_landing {
 	padding: 2px 3px 0px 46px;
+}
+
+.cms_pages_position_empty {
+	font-size: 1.6rem;
+	line-height: 1.6rem;
+	padding-bottom: 3.0rem;
+	text-transform: lowercase;
+	&::first-letter {
+		text-transform: uppercase;
+	}
+}
+
+.cms_pages_container .cms_tool_button {
+	text-transform: lowercase;
+	&::first-letter {
+		text-transform: uppercase;
+	}
 }

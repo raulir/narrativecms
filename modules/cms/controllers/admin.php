@@ -53,13 +53,14 @@ class admin extends CI_Controller {
 
 	}
 
-	function page($page_id){
+	function page($page_id, $position = 0){
 		 
 		// set page config
 		$page_config = array(
 				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
 				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms_page', 'module' => 'cms', 'params' => array('cms_page_id' => $page_id, ), ),
+				array('position' => 'main', 'panel' => 'cms_page', 'module' => 'cms', 
+						'params' => ['cms_page_id' => $page_id, 'position' => $position, ], ),
 		);
 
 		// render panels

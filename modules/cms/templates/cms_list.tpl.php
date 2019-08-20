@@ -1,6 +1,6 @@
 <div class="cms_toolbar">
 	
-	<div class="admin_tool_text"><?php print($title); ?></div>
+	<div class="cms_tool_text"><?php print($title); ?></div>
 	
 	<?php if(empty($hide_new)): ?>
 
@@ -24,7 +24,7 @@
 	<div class="cms_tool_button admin_right cms_paging_last" <?php _ib('cms/cms_paging_last.png', ['height' => 12]) ?>></div>
 	<div class="cms_tool_button admin_right cms_paging_next" <?php _ib('cms/cms_paging_next.png', ['height' => 12]) ?>></div>
 
-	<div class="admin_tool_text admin_right">
+	<div class="cms_tool_text admin_right">
 		<span class="admin_paging_current">&nbsp;&nbsp;</span>/<span class="admin_paging_total">&nbsp;&nbsp;</span>
 	</div>
 

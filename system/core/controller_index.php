@@ -76,6 +76,7 @@ class Index extends CI_Controller {
     	}
 
     	// get panels on page
+    	$cms_page_id = 0;
     	if (!stristr($page_id, '=')){ // direct page id
 
 			$page = $this->cms_page_model->get_page($page_id, 'auto');
@@ -99,8 +100,10 @@ class Index extends CI_Controller {
 				);
 				
 			}
-			
-    	} else { // put a panel to main position
+
+			$cms_page_id = $page['cms_page_id'];
+
+    	} else { // list item page
 
     		list($panel_name, $cms_page_panel_id) = explode('=', $page_id);
  			$extra_params = array($panel_name => $cms_page_panel_id, '_panel_name' => $panel_name, '_cms_page_panel_id' => $cms_page_panel_id, '_page_id' => $page_id, );
@@ -140,7 +143,8 @@ class Index extends CI_Controller {
 	    		 
 				foreach($blocks as $block){
 					
-					// if the same block, load extra variable params, eg panel_name comes from url: "article=42" and block['panel_name'] is "article" or "news/article"
+					// if the same block, load extra variable params, eg panel_name comes from url: "article=42" 
+					// and block['panel_name'] is "article" or "news/article"
 					if(stristr($block['panel_name'], '/')){
 						list($block_module, $block_panel_name) = explode('/', $block['panel_name']);
 					} else {
@@ -161,8 +165,10 @@ class Index extends CI_Controller {
 					);
 					
 				}
+				
+				$cms_page_id = $page['cms_page_id'];
 
-    		} else {
+    		} else { // put a panel to main position
     			
 	    		if ($list_item_data['show'] == 1){
 					$page_config[] = array(
@@ -172,6 +178,31 @@ class Index extends CI_Controller {
 					);
 	    		}
 	    		
+    		}
+    		
+    	}
+    	
+    	// add headers, footers, etc
+    	if($cms_page_id && !empty($page['positions'])){
+    		
+    		foreach($page['positions'] as $position){
+    			
+    			if (!empty($position['value'])){
+    		
+		    		$blocks = $this->_get_cms_page_panels($position['value']);
+		    		
+		    		foreach($blocks as $block){
+		    		
+		    			$page_config[] = array(
+		    					'position' => $position['name'],
+		    					'panel' => $block['panel_name'],
+		    					'params' => $block,
+		    			);
+		    		
+		    		}
+	    		
+    			}
+
     		}
     		
     	}
