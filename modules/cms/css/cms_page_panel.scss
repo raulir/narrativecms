@@ -1,3 +1,13 @@
+.cms_page_panel_container {
+
+}
+
+.cms_page_panel_content {
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
+}
+
 .cms_page_panel_template {
 	
 	overflow: hidden;
@@ -13,4 +23,8 @@
 		width: 130px;
 	}
 	
+}
+
+.cms_page_panel_fields {
+	padding: 2.0rem 0 0 0;
 }

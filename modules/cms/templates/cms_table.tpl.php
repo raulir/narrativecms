@@ -27,7 +27,7 @@
 						
 						// print repeater header
 						$return .= '<div style="clear: both; "></div>' .
-								'<div class="admin_block admin_repeater_container ui-sortable">'; /* data-label="'.$field['label'].'">'; */
+								'<div class="admin_block cms_repeater_area ui-sortable">'; /* data-label="'.$field['label'].'">'; */
 						
 						// print fields for existing data
 						if (!empty($data[$field['name']])){
@@ -55,7 +55,7 @@
 					
 					} elseif ($field['type'] == 'text'){
 						
-						$return .= '<div class="cms_input admin_input_text'.($prefix ? '' : ' admin_column').'">';
+						$return .= '<div class="cms_input admin_input_text'.($prefix ? '' : ' cms_column').'">';
 						$return .= '<label for="'.($prefix ? $prefix.'_' : '').$field['name'].'">'.$field['label'].'</label>';
 						$return .= '<input id="'.($prefix ? $prefix.'_' : '').$field['name'].'" type="text" class="admin_input_'.$field['name'].'" ' .
 								' name="data'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']').'" ' .
@@ -77,7 +77,6 @@
 								'name_clean' => ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']), 
 								'category' => !empty($field['category']) ? $field['category'] : '',
 								'_return' => true, 
-								'extra_class' => ($prefix ? '' : 'admin_column'), 
 						));
 						
 					} elseif ($field['type'] == 'select'){
@@ -89,7 +88,6 @@
 								'name' => 'data'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'), 
 								'name_clean' => ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']), 
 								'_return' => true, 
-								'extra_class' => ($prefix ? '' : 'admin_column'), 
 						));
 						
 					} elseif ($field['type'] == 'fk'){
@@ -102,7 +100,6 @@
 								'name' => 'data'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'), 
 								'name_clean' => ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']), 
 								'_return' => true, 
-								'extra_class' => ($prefix ? '' : 'admin_column'), 
 						));
 						
 					} elseif ($field['type'] == 'file'){
@@ -113,7 +110,6 @@
 								'name' => 'data'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'), 
 								'name_clean' => ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']), 
 								'_return' => true, 
-								'extra_class' => ($prefix ? '' : 'admin_column'), 
 						));
 						
 					}

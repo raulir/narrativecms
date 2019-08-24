@@ -83,7 +83,7 @@ ul {
 .cms_content {
 	box-sizing: border-box;
 	width: 100rem;
-	padding: 3.0rem 2.0rem;
+	padding: 3.0rem 1.0rem;
 	margin: 0 auto;
 	background-color: $colour_background;
 	border: 0.1rem solid $colour_border;
@@ -104,11 +104,15 @@ ul {
 
 .cms_toolbar {
 	box-sizing: border-box;
-	border-bottom: 1px solid $colour_border;
-	padding-bottom: 10px;
-	margin-bottom: 20px;
+	border-bottom: 0.1rem solid $colour_border;
+	padding: 0 0 1.0rem 0;
+	margin: 0 auto 2.0rem auto;
 	position: relative;
 	z-index: 20;
+	width: calc(100% - 2.0rem);
+	.cms_column & {
+		width: 100%;
+	}
 }
 
 .cms_toolbar_buttons {
@@ -133,10 +137,10 @@ ul {
 .cms_column {
 	display: inline-block;
 	vertical-align: top;
-	font-size: 1rem;
-	line-height: 1rem;
+	font-size: 1.0rem;
+	line-height: 1.0rem;
 	width: 50%;
-	padding: 10px;
+	padding: 0 1.0rem;
 	box-sizing: border-box;
 }
 
@@ -147,11 +151,86 @@ ul {
     padding-top: 35px;
 }
 
-/* old column structure */
-
-.admin_block {
-	
+/* repeater */
+.cms_repeater_container {
+    position: relative;
+    text-align: left;
 }
+
+.cms_repeater_label {
+	padding: 0 1.6rem;
+    z-index: 20;
+    box-sizing: border-box;
+    line-height: 1.6rem;
+    font-size: 1.8rem;
+    transform: translateZ(0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+	position: relative;
+	background-color: white;
+	display: inline-block;
+	top: 1.8rem;
+	left: 3.3rem;
+}
+
+.cms_repeater_line {
+    border-top: 0.16rem dashed $colour_border;
+    width: calc(100% - 2.0rem);
+    margin: 0 auto;
+}
+
+.cms_repeater_area {
+    padding: 1.0rem 0;
+    font-size: 0;
+    letter-spacing: 0;
+    line-height: 0;
+}
+
+.cms_repeater_block {
+	box-sizing: border-box;
+	display: inline-block;
+	vertical-align: top;
+	padding: 1.0rem;
+	background-repeat: no-repeat;
+	background-position: 1.6rem 1.6rem;
+	background-size: 1.4rem 1.4rem;
+	width: 50%;
+}
+
+.cms_repeater_block_content {
+	box-sizing: border-box;
+	border: 0.1rem solid #909090;
+	padding: 0.5rem 0.9rem 0.5rem 0.9rem;
+	font-size: 1.6rem;
+	line-height: 1.6rem;
+}
+
+.cms_repeater_block_toolbar {
+	clear: both;
+	height: 2.2rem;
+	border-bottom: 0.1rem solid #a0a0a0;
+	margin: 0 -0.6rem 0.2rem -0.6rem;
+}
+
+.cms_repeater_block_delete {
+	box-sizing: border-box;
+	display: block;
+	border: 1px solid #a0a0a0;
+	border-radius: 3px;
+	height: 18px;
+	line-height: 15px;
+	font-size: 13px;
+	float: right;
+	padding: 1px 8px 0px 8px;
+	clear: both;
+	cursor: pointer;
+	text-align: center;
+	transform: translateZ(0);
+	-webkit-transform: translateZ(0);
+}
+
+/* old column structure */
 
 .cms_input_button {
 	box-sizing: border-box;
@@ -240,6 +319,7 @@ ul {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	vertical-align: top;
 }
 
 .cms_tool_button {
@@ -405,85 +485,6 @@ ul {
 	bottom: 4px;
 	right: 10px;
 }
-
-.admin_column {
-	width: 460px;
-	margin-bottom: 10px;
-}
-
-.admin_column_left {
-	float: left;
-}
-
-.admin_column_right {
-	float: right;
-}
-
-/* repeater fixes and other stuff */
-
-.admin_repeater_container {
-	width: 100%;
-    box-sizing: border-box;
-    position: relative;
-    left: 10px;
-    clear: both;
-    text-align: left;
-    font-size: 0;
-    letter-spacing: 0;
-    line-height: 0;
-}
-
-.admin_repeater_container .admin_block_label {
-	margin-left: 10px;
-    width: calc(100% - 20px);
-    text-align: left;
-}
-
-.cms_repeater_block {
-	box-sizing: border-box;
-	display: inline-block;
-	margin: 0 10px 20px 10px;
-	vertical-align: top;
-	border: 1px solid #909090;
-	padding: 5px 9px 2px 9px ;
-	background-color: white;
-	background-repeat: no-repeat;
-	background-position: 6px 6px;
-	background-size: 14px 14px;
-	width: 460px;
-	font-size: 1.6rem;
-	line-height: 1.6rem;
-	text-align: left;
-}
-
-.cms_repeater_block .admin_column {
-	width: auto;
-}
-
-.cms_repeater_block_toolbar {
-	clear: both;
-	height: 22px;
-	border-bottom: 1px solid #a0a0a0;
-	margin: 0px -6px 12px -6px;
-}
-
-.cms_repeater_block_delete {
-	box-sizing: border-box;
-	display: block;
-	border: 1px solid #a0a0a0;
-	border-radius: 3px;
-	height: 18px;
-	line-height: 15px;
-	font-size: 13px;
-	float: right;
-	padding: 1px 8px 0px 8px;
-	clear: both;
-	cursor: pointer;
-	text-align: center;
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
-}
-
 
 .admin_inline_button {
 	cursor: pointer;

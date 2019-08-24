@@ -3,22 +3,26 @@
 }
 
 .cms_input {
-	margin-bottom: 10px;
+	display: inline-block;
+	vertical-align: top;
+	padding: 0.5rem 0;
 	position: relative;
+	box-sizing: border-box;
+	width: 100%;
 }
 
 .cms_input label {
 	box-sizing: border-box;
 	display: inline-block;
-	width: 120px;
-	line-height: 26px;
-	max-height: 26px;
-	transform: translateZ(0);
-	letter-spacing: -0.45px;
+	width: 12.0rem;
+	line-height: 2.6rem;
+	max-height: 2.6rem;
+	letter-spacing: -0.045rem;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	font-size: 1.6rem;
+	vertical-align: top;
 }
 
 .cms_repeater_block .cms_input_select > select {

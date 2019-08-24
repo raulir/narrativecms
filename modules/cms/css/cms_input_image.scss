@@ -21,18 +21,16 @@
 		}
 	}
 
-	.admin_image_content {
+	.cms_input_image_content {
 		box-sizing: border-box;
 		display: table-cell;
 		width: 328px;
 		height: 246px;
 		text-align: center;
 		vertical-align: middle;
-		line-height: 0px;
-	}
-	
-	.admin_image_content {
+		line-height: 0;
 		position: relative;
+		font-size: 1.6rem;
 	}
 	
 	.cms_input_image_error {
@@ -74,7 +72,7 @@
 			}
 		}
 		
-		.admin_image_content {
+		.cms_input_image_content {
 			width: 308px;
 			height: 231px;
 		}

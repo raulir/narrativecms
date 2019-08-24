@@ -24,8 +24,8 @@
 		<input type="hidden" class="cms_page_sort" name="sort" value="<?php print($page['sort']); ?>">
 		<input type="hidden" class="cms_page_position" name="position" value="<?= $page['position'] ?>">
 		
-		<div class="admin_block">
-			<div class="admin_column admin_column_left">
+		<div class="cms_page_content">
+			<div class="cms_column">
 				
 				<?php _panel('cms/cms_input_text', [
 						'name' => 'title',
@@ -55,26 +55,7 @@
 						<input type="hidden" name="cms_page_status" class="cms_page_status" value="0">
 						
 					<?php endif ?>
-					
-					<?php _panel('cms/cms_input_subtitle', ['label' => 'Structure', 'width' => 'narrow', 
-							'help' => '[Structure]||These fields define general layout and static areas of page, like header and footer']) ?>
-					
-					<?php
-						_panel('cms/cms_input_layout', [
-								'label' => 'Layout', 
-								'value' => $cms_page_layout, 
-								'name' => 'cms_page_layout', 
-								'help' => '[Page layout]||CMS "Default fixed" is fixed pixel size layout.||CMS "Default rems" layout changes rem size with page size.||There might be more layouts available, defined in other modules.',
-						]);
-					?>
-					
-					<?php
-						_panel('cms/cms_page_positions', [
-								'cms_page_id' => $page['cms_page_id'],
-								'cms_page_layout' => $cms_page_layout,
-						]);
-					?>
-	
+						
 					<?php _panel('cms/cms_input_subtitle', ['label' => 'SEO', 'width' => 'narrow', 'help' => '[SEO]||These fields are very important for search engines, page sharing in social media etc']) ?>
 					
 					<?php _panel('cms/cms_input_text', [
@@ -117,11 +98,32 @@
 								'help' => '[Page image]||Important for social media sharing.||Can be seen in social media shares. Shouldn\'t be left empty.||There might be additional images added when page is list item page. In this case this should be left empty.',
 						));
 					?>
+				
+					<?php _panel('cms/cms_input_subtitle', ['label' => 'Structure', 'width' => 'narrow', 
+							'help' => '[Structure]||These fields define general layout and static areas of page, like header and footer']) ?>
+					
+					<?php
+						_panel('cms/cms_input_layout', [
+								'label' => 'Layout', 
+								'value' => $cms_page_layout, 
+								'name' => 'cms_page_layout', 
+								'help' => '[Page layout]||CMS "Default fixed" is fixed pixel size layout.||'.
+										'CMS "Default rems" layout changes rem size with page size.||'.
+										'There might be more layouts available, defined in other modules.',
+						]);
+					?>
+					
+					<?php
+						_panel('cms/cms_page_positions', [
+								'cms_page_id' => $page['cms_page_id'],
+								'cms_page_layout' => $cms_page_layout,
+						]);
+					?>
 					
 				<?php endif ?>
-				
+
 			</div>
-			<div class="admin_column admin_column_right">
+			<div class="cms_column">
 				
 				<?php
 					_panel('cms/cms_input_page_panels', array(
@@ -130,9 +132,9 @@
 							'sortable_class' => 'cms_page_sortable',
 					)); 
 				?>
-			
+
 			</div>
-			<div style="clear: both; "></div>
+
 		</div>
 	
 	</form>

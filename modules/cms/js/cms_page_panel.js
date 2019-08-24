@@ -12,9 +12,9 @@ function cms_page_panel_check_mandatory(colour){
 		$('label', $this).css({'color':''});
 		
 		// check if inside repeater
-		if ($this.closest('.admin_repeater_container').length){
+		if ($this.closest('.cms_repeater_area').length){
 			
-			label_extra = $this.closest('.admin_repeater_container').data('label') + ' &gt; ' + ($this.closest('.cms_repeater_block').prevAll('.cms_repeater_block').length + 1) + ': ';
+			label_extra = $this.closest('.cms_repeater_area').data('label') + ' &gt; ' + ($this.closest('.cms_repeater_block').prevAll('.cms_repeater_block').length + 1) + ': ';
 			
 		}
 		
@@ -109,7 +109,9 @@ function cms_page_panel_set_title(title, after){
 
 function cms_page_panel_init(){
 
-	$('.admin_block,.admin_column').each(function(){
+	console.log('TODO: cms page panel remove!');
+	/*
+	$('.admin_block,.cms_column').each(function(){
 		$this = $(this);
 		var label = $this.data('label')
 		if (label){
@@ -117,6 +119,7 @@ function cms_page_panel_init(){
 			$this.prepend('<div class="admin_block_label"><div class="admin_block_title">' + $this.data('label') + '</div></div>');
 		}
 	});
+	*/
 	
 	var $title = $('input', '.cms_page_panel_title');
 	if ($title.val() == 'New block'){
@@ -198,7 +201,7 @@ function cms_page_panel_init(){
 	
 	init_cms_repeater_block_delete();
 	
-	$('.admin_repeater_container').sortable().disableSelection();
+	$('.cms_repeater_area').sortable().disableSelection();
 	
 	var title_field = $('.admin_title_text').data('title_field');
 	var $title_field = $('textarea,input,select').filter('[name="panel_params[' + title_field + ']"]');
