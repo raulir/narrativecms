@@ -1,0 +1,71 @@
+.cms_menu_container {
+	font-family: asap;
+  	padding: 0.3rem 2.0rem 0 2.0rem;
+	color: white;
+	text-align: left;
+}
+
+.cms_menu_content {
+	padding-top: 1.0rem;
+}
+
+.cms_menu_items {
+	font-size: 2.2rem;
+  	line-height: 3.3rem;
+	letter-spacing: 0.015rem;
+}
+
+.cms_menu_item {
+	display: inline-block;
+	vertical-align: top;
+	padding-right: 3.6rem;
+  	background-size: 0;
+	position: relative;
+	&.cms_menu_parent {
+  		padding-right: 5.6rem;
+		background-size: 1.4rem auto;
+		background-position: right 3.6rem top 1.6rem;
+		background-repeat: no-repeat;
+	}
+}
+
+.cms_menu_link {
+	text-decoration: none;
+	height: 100%;
+  	display: block;
+}
+
+
+.cms_menu_children {
+	position: absolute;
+	min-width: 100%;
+	top: 3.4rem;
+	left: -1.5rem;
+	overflow: hidden;
+	box-sizing: border-box;
+	background-color: white;
+	z-index: 101;
+	display: none;
+	padding: 0.6rem 0;
+	border: 0.1rem solid #a0a0a0;
+	box-shadow: 0.1rem 0.2rem 0.6rem #b0b0b0;
+}
+
+.cms_menu_child {
+	display: block;
+	padding-left: 1.5rem;
+	color: #404040;
+	font-size: 2.0rem;
+	line-height: 3.4rem;
+	white-space: nowrap;
+	padding-right: 2.5rem;
+	background-color: white;
+	transition: background-color 0.3s;
+	&:hover {
+		background-color: #efefef;
+	}
+}
+	
+.cms_menu_children_hover {
+	display: block;
+}

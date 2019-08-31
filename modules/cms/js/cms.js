@@ -125,11 +125,24 @@ function cms_init(){
 
 }
 
+function cms_scroll(){
+	
+	var scrolltop = self.pageYOffset || document.documentElement.scrollTop  || document.body.scrollTop;
+	if (scrolltop > 0){
+		$('.cms_header_container').addClass('cms_header_active');
+	} else {
+		$('.cms_header_container').removeClass('cms_header_active');
+	}
+	
+}
+
 $(document).ready(function() {
 	
 	$(window).on('resize.cms', cms_resize);
+	$(window).on('scroll.cms', cms_scroll);
 	
 	cms_init();
 	cms_resize();
+	cms_scroll();
 
 });
