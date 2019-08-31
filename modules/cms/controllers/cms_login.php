@@ -21,13 +21,13 @@ class cms_login extends CI_Controller {
    		
         // set page config
         $page_config = array(
-        		array('position' => 'main', 'panel' => 'cms_user', 'module' => 'cms', ),
+        		array('position' => 'main', 'panel' => 'cms_user_login', 'module' => 'cms', ),
         );
         
         // render panels
         $panel_data = $this->render($page_config);
         
-    	$this->output('cms/cms_login', 'cms_login', $panel_data);
+    	$this->output('cms/admin', 'cms_login', $panel_data);
    		
    	}
 

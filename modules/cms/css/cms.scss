@@ -1,32 +1,44 @@
 $colour_background: white;
 $colour_border: #a0a0a0;
 $colour_shadow: #606060;
+$colour_light_shadow: #e0e0e0;
+$colour_grey: #606060;
+$colour_white: white;
+$cms_orange: #f7a034;
+
+$cms_orange_button_border: #884825;
+$cms_orange_button_background: #e1c05f;
 
 @font-face {
-    font-family: 'foundrysterling';
-    src: url('../css/foundrysterling/foundrysterling_normal.eot');
-    src: url('../css/foundrysterling/foundrysterling_normal.eot') format('embedded-opentype'),
-         url('../css/foundrysterling/foundrysterling_normal.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'foundrysterling';
-    src: url('../css/foundrysterling/foundrysterling_200.eot');
-    src: url('../css/foundrysterling/foundrysterling_200.eot') format('embedded-opentype'),
-         url('../css/foundrysterling/foundrysterling_200.woff') format('woff');
+    font-family: source;
+    src: url('source/source_light.ttf') format('truetype');
     font-weight: 200;
     font-style: normal;
+    font-display: fallback;
 }
 
 @font-face {
-    font-family: 'foundrysterling';
-    src: url('../css/foundrysterling/foundrysterling_600.eot');
-    src: url('../css/foundrysterling/foundrysterling_600.eot') format('embedded-opentype'),
-         url('../css/foundrysterling/foundrysterling_600.woff') format('woff');
-    font-weight: 600;
+    font-family: source;
+    src: url('source/source.ttf') format('truetype');
+    font-weight: normal;
     font-style: normal;
+    font-display: fallback;
+}
+
+@font-face {
+  	font-family: source;
+  	src: url('source/source_bold.ttf') format('truetype');
+  	font-style: normal;
+  	font-weight: bold;
+  	font-display: fallback;
+}
+
+@font-face {
+    font-family: asap;
+    src: url('asap/asap.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: fallback;
 }
 
 html {
@@ -35,29 +47,27 @@ html {
 }
 
 body {
-	font-family: foundrysterling;
-	font-weight: 200;
+	font-family: source,Helvetica,Verdana,sans-serif;
+	font-weight: normal;
 	font-smoothing: antialiased;
 	-webkit-font-smoothing: antialiased;
 	min-height: 100vh;
-    margin: 0px;
-    padding: 0px;
-    display: table;
-    width: 100%;
+    margin: 0;
+    padding: 0;
     overflow-x: hidden;
     color: black;
     background-position: center;
-    background-size: cover;
+    background-size: 100% auto;
     font-size: 1.6rem;
-    background-color: #ffbd4f;
+    background-color: $cms_orange;
 }
 
 input {
-	font-family: Arial,Verdana,sans-serif;
+	font-family: asap,Arial,Verdana,sans-serif;
 	font-smoothing: antialiased;
-	text-shadow: rgba(0,0,0,.01) 0 0 1px;
+	text-shadow: rgba(0,0,0,.01) 0 0 1rem;
 	-webkit-font-smoothing: antialiased;
-	-webkit-text-stroke: 1px transparent;
+	-webkit-text-stroke: 0.1rem transparent;
 	transform: translateZ(0);
 	-webkit-transform: translateZ(0);
 }
@@ -75,21 +85,21 @@ ul {
 	padding: 0;
 }
 
-.cms_container {
-	display: table-cell;
-	vertical-align: top;
+.cms_admin_container {
+	margin: 0 auto;
+	width: 100rem;
 }
 
-.cms_content {
+.cms_admin_content {
 	box-sizing: border-box;
-	width: 100rem;
 	padding: 3.0rem 1.0rem;
 	margin: 0 auto;
 	background-color: $colour_background;
-	border: 0.1rem solid $colour_border;
+	outline: 0.1rem solid $colour_border;
 	box-shadow: 0.1rem 0.2rem 0.7rem $colour_shadow;
 	font-size: 1.6rem;
 	line-height: 2.6rem;
+	position: relative;
 }
 
 .cms_header_content {
@@ -246,65 +256,6 @@ ul {
 	text-align: center;
 	transform: translateZ(0);
 	-webkit-transform: translateZ(0);
-}
-
-.admin_container {
-	display: table-cell;
-	vertical-align: top;
-	overflow: hidden;
-	width: 100%;
-	color: black;
-	height: 100%;
-}
-
-.login_container {
-	vertical-align: middle;
-}
-
-.login_content {
-	width: 300px;
-}
-
-.login_label {
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
-	color: #606060;
-	margin-bottom: 3px;	
-}
-
-.login_input {
-	display: block;
-	border: 1px solid #606060;
-	box-sizing: border-box;
-	height: 40px;
-	margin-bottom: 20px;	
-	width: 100%;
-	box-shadow: 1px 2px 5px #e0e0e0;
-	padding: 3px 10px;
-	line-height: 32px;
-	font-size: 20px;
-	font-family: foundrysterling;
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
-	color: #909090;
-}
-
-.login_button {
-	box-sizing: border-box;
-	display: block;
-	border: 1px solid #884825;
-	border-radius: 5px;
-	float: right;
-	height: 34px;
-	line-height: 26px;
-	font-size: 18px;
-	font-family: foundrysterling;
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
-	color: white;
-	background-color: #e1c05f;
-	padding: 3px 20px;
-	cursor: pointer;
 }
 
 .cms_tool_text {

@@ -27,4 +27,7 @@
 
 .cms_page_panel_fields {
 	padding: 2.0rem 0 0 0;
+	&:first-of-type {
+		padding: 0;
+	}
 }

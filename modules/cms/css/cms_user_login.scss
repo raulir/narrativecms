@@ -1,0 +1,95 @@
+.cms_user_login_container {
+	overflow: hidden;
+	width: 100%;
+	color: black;
+	height: calc(100vh - 14rem);
+	display: table;
+	max-height: 70rem;
+}
+
+.cms_user_login_content {
+	display: table-cell;
+	vertical-align: middle;
+	padding: 0 calc(50% - 16.0rem);
+}
+
+.cms_user_login_box {
+	padding: 2.0rem 2.0rem 2.2rem 2.0rem;
+	border: 0.1rem solid $colour_border;
+	border-radius: 0.5rem;
+	position: relative;
+	text-align: left;
+}
+
+.cms_user_login_heading {
+	line-height: 3.4rem;
+	font-size: 2.3rem;
+	font-family: asap;
+	background-size: 3.2rem auto;
+	background-repeat: no-repeat;
+	background-position: left top 0.1rem;
+	overflow: hidden;
+	max-width: 100%;
+	padding: 0 0 1.3rem 4.6rem;
+	max-height: 3.4rem;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	border-bottom: 0.1rem solid $colour_border;
+	margin-bottom: 1.4rem;
+}
+
+.cms_user_login_label {
+	color: $colour_grey;
+	margin-bottom: 0.3rem;
+}
+
+.cms_user_login_input {
+	display: block;
+	border: 0.1rem solid $colour_grey;
+	box-sizing: border-box;
+	height: 4.0rem;
+	margin-bottom: 1.3rem;	
+	width: 100%;
+	box-shadow: 0.1rem 0.2rem 0.5rem $colour_light_shadow;
+	padding: 0.3rem 1.0rem;
+	line-height: 3.2rem;
+	font-size: 2.0rem;
+	color: $colour_grey;
+}
+
+.cms_user_login_button {
+	box-sizing: border-box;
+	display: block;
+	border: 0.1rem solid $cms_orange_button_border;
+	border-radius: 0.5rem;
+	height: 3.4rem;
+	line-height: 2.6rem;
+	font-size: 1.8rem;
+	color: $colour_white;
+	background-color: $cms_orange_button_background;
+	padding: 0.3rem 2.0rem;
+	cursor: pointer;
+	margin: 2.4rem 0 0 auto;
+	font-family: asap;
+}
+
+.cms_user_login_copyright {
+	width: 100%;
+	line-height: 2.7rem;
+	font-size: 1.5rem;
+	text-align: center;
+	position: absolute;
+	left: 0;
+	bottom: -3.4rem;
+	font-family: asap;
+	font-weight: 200;
+	color: #575757;
+}
+
+.cms_user_login_cms {
+	display: inline-block;
+	background-size: 1.5rem auto;
+	background-repeat: no-repeat;
+	background-position: left center;
+	padding: 0 0 0 2.0rem;
+}

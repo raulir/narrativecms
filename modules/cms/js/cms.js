@@ -113,8 +113,23 @@ function cms_error(text, timer){
 	cms_notification(text, timer, 'error');
 }
 
-$(document).ready(function() {
+function cms_resize(){
+	
+	$('body').css({'height': parseInt($(window).innerHeight()) - 0.5 + 'px'});
+
+}
+
+function cms_init(){
 	
 	activate_cms_page_panel_show();
+
+}
+
+$(document).ready(function() {
 	
+	$(window).on('resize.cms', cms_resize);
+	
+	cms_init();
+	cms_resize();
+
 });
