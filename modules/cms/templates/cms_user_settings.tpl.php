@@ -4,7 +4,7 @@
 
 </div>
 
-<div>
+<div class="cms_user_settings_container">
 
 	<?php if (!empty($GLOBALS['config']['admin_username'])): ?>
 		<div class="cms_user_settings_superuser">

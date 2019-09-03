@@ -26,72 +26,66 @@
 
 		<?php if (empty($independent_block) || !empty($block['parent_id'])): ?>
 			<div class="cms_page_panel_content">
-				<div class="cms_column">
+
+				<?php _panel('cms_input_text', [
+						'name' => 'title',
+						'value' => $block['title'],
+						'name_clean' => 'block_title',
+						'label' => 'Title',
+						'help' => '[Page panel title]||Not visible in frontend. When page panel has {heading} field, this is overwritten from there',
+						'extra_class' => 'cms_page_panel_title',
+				]); ?>
+			
+				<?php _panel('cms_input_text', [
+						'name' => 'submenu_title',
+						'value' => $block['submenu_title'],
+						'name_clean' => 'block_submenu_title',
+						'label' => 'Menu title',
+						'help' => '[In page menu label]||When {Menu anchor} is set, this field could be used as menu item label',
+				]); ?>
 				
-					<?php _panel('cms_input_text', [
-							'name' => 'title',
-							'value' => $block['title'],
-							'name_clean' => 'block_title',
-							'label' => 'Title',
-							'help' => '[Page panel title]||Not visible in frontend. When page panel has {heading} field, this is overwritten from there',
-							'extra_class' => 'cms_page_panel_title',
-					]); ?>
+				<div class="cms_input cms_input_select">
+					<label for="panel_name">Panel type</label>
+					<?php _panel('cms_help', ['help' => '[Page panel type]||Select page panel type from available panel types in installed modules.||When adding a new page panel, '.
+							'one can select an existing panel from {Shortcut to} dropdown instead.||Changing this field may cause losing data already entered for this page panel', ]); ?>
+					<select class="cms_page_panel_panel_name" name="panel_name" id="panel_name">
+						<option value="">-- select block type --</option>
+						<?php foreach ($panel_types as $panel_type => $panel_type_label): ?>
+						
+							<?php // make panel names w/o module work: 
+								if (!stristr($block['panel_name'], '/')){
+									list($_module, $_panel_type) = explode('/', $panel_type); // w/o module
+								} else {
+									$_panel_type = $panel_type; // w/ module
+								}
+							?>
+							
+							<option value="<?= $panel_type ?>" <?= $block['panel_name'] == $_panel_type ? 'selected="selected"' : '' ?>><?= $panel_type_label ?></option>
+						
+						<?php endforeach ?>
+					</select>
+				</div>
 				
+				<?php _panel('cms_input_text', [
+						'name' => 'submenu_anchor',
+						'value' => $block['submenu_anchor'],
+						'name_clean' => 'block_submenu_anchor',
+						'label' => 'Menu anchor',
+						'help' => '[Page panel anchor]||Use only for in page anchors. Non-empty value may affect page layout',
+				]); ?>
+				
+				<?php if($block['panel_name'] === '' && empty($block['parent_id'])): /* last cond == no shortcuts for panel in panel */ ?>
 					<div class="cms_input cms_input_select">
-						<label for="panel_name">Panel type</label>
-						<?php _panel('cms_help', ['help' => '[Page panel type]||Select page panel type from available panel types in installed modules.||When adding a new page panel, '.
-								'one can select an existing panel from {Shortcut to} dropdown instead.||Changing this field may cause losing data already entered for this page panel', ]); ?>
-						<select class="cms_page_panel_panel_name" name="panel_name" id="panel_name">
-							<option value="">-- select block type --</option>
-							<?php foreach ($panel_types as $panel_type => $panel_type_label): ?>
-							
-								<?php // make panel names w/o module work: 
-									if (!stristr($block['panel_name'], '/')){
-										list($_module, $_panel_type) = explode('/', $panel_type); // w/o module
-									} else {
-										$_panel_type = $panel_type; // w/ module
-									}
-								?>
-								
-								<option value="<?= $panel_type ?>" <?= $block['panel_name'] == $_panel_type ? 'selected="selected"' : '' ?>><?= $panel_type_label ?></option>
-							
+						<label for="shortcut_to">Shortcut to</label>
+						<select class="admin_block_shortcut_to" name="shortcut_to" id="shortcut_to">
+							<option value="">-- shortcut to --</option>
+							<?php foreach ($shortcuts as $key => $value): ?>
+								<option value="<?php print($key); ?>"><?php print($value); ?></option>
 							<?php endforeach ?>
 						</select>
 					</div>
-					
-					<?php if($block['panel_name'] === '' && empty($block['parent_id'])): /* last cond == no shortcuts for panel in panel */ ?>
-						<div class="cms_input cms_input_select">
-							<label for="shortcut_to">Shortcut to</label>
-							<select class="admin_block_shortcut_to" name="shortcut_to" id="shortcut_to">
-								<option value="">-- shortcut to --</option>
-								<?php foreach ($shortcuts as $key => $value): ?>
-									<option value="<?php print($key); ?>"><?php print($value); ?></option>
-								<?php endforeach ?>
-							</select>
-						</div>
-					<?php endif ?>
-								
-				</div>
-				<div class="cms_column">
-					
-					<?php _panel('cms_input_text', [
-							'name' => 'submenu_title',
-							'value' => $block['submenu_title'],
-							'name_clean' => 'block_submenu_title',
-							'label' => 'Menu title',
-							'help' => '[In page menu label]||When {Menu anchor} is set, this field could be used as menu item label',
-					]); ?>
-					
-					<?php _panel('cms_input_text', [
-							'name' => 'submenu_anchor',
-							'value' => $block['submenu_anchor'],
-							'name_clean' => 'block_submenu_anchor',
-							'label' => 'Menu anchor',
-							'help' => '[Page panel anchor]||Use only for in page anchors. Non-empty value may affect page layout',
-					]); ?>
-				
-				</div>
-			
+				<?php endif ?>
+		
 			</div>
 		<?php else: ?>
 			<input type="hidden" name="panel_name" value="<?php print($block['panel_name']); ?>">

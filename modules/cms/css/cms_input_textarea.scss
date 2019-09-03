@@ -1,14 +1,15 @@
-.cms_input_container {
+.cms_input_textarea {
 
-	.cms_input_textarea>textarea {
+	textarea {
 		box-sizing: border-box;
 		display: block;
 		border: 1px solid $colour_border;
 		height: 300px;
-		line-height: 18px;
-		font-size: 14px;
-		padding: 1px 5px 0px 5px;
+		padding: 0.3rem 0.5rem;
 		width: 100%;
+		font-family: asap;
+		font-size: 1.7rem;
+		line-height: 2.1rem;
 	}
 	
 	& > .cms_input.cms_input_wide_textarea {

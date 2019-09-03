@@ -161,16 +161,6 @@ ul {
 
 /* new column structure to be rolled out */
 
-.cms_columns {
-	line-height: 0;
-	font-size: 0;
-	letter-spacing: 0;
-	text-align: left;
-	position: relative;
-	left: -10px;
-	width: calc(100% + 20px);
-}
-
 .cms_column {
 	display: inline-block;
 	vertical-align: top;
@@ -198,7 +188,7 @@ ul {
 	padding: 0 1.6rem;
     z-index: 20;
     box-sizing: border-box;
-    line-height: 1.6rem;
+    line-height: 2.6rem;
     font-size: 1.8rem;
     transform: translateZ(0);
     white-space: nowrap;
@@ -207,7 +197,7 @@ ul {
 	position: relative;
 	background-color: white;
 	display: inline-block;
-	top: 1.8rem;
+	top: 1.1rem;
 	left: 3.3rem;
 }
 
@@ -406,14 +396,6 @@ ul {
 	text-align: center;
 	color: #606060;
 	background-color:#ffffff;
-}
-
-.admin_list_sortable a {
-	display: inline-block;
-	float: right;
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
-	color: #606060;
 }
 
 .admin_list_sortable_blocks_container {

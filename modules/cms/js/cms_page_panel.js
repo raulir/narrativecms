@@ -109,18 +109,6 @@ function cms_page_panel_set_title(title, after){
 
 function cms_page_panel_init(){
 
-	console.log('TODO: cms page panel remove!');
-	/*
-	$('.admin_block,.cms_column').each(function(){
-		$this = $(this);
-		var label = $this.data('label')
-		if (label){
-			$this.children('.admin_block_label').remove();
-			$this.prepend('<div class="admin_block_label"><div class="admin_block_title">' + $this.data('label') + '</div></div>');
-		}
-	});
-	*/
-	
 	var $title = $('input', '.cms_page_panel_title');
 	if ($title.val() == 'New block'){
 		$title.data('new_block', true);
