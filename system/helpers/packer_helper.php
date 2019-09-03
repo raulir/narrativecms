@@ -237,7 +237,7 @@ if ( !function_exists('pack_css')) {
 			foreach($csss as $key => $css){
 				$csss[$key]['script'] = $GLOBALS['config']['base_url'].$css['script'].((!empty($GLOBALS['config']['cache']['force_download']) && empty($GLOBALS['config']['inline_css'])) ? '?v='.time() : '');
 				$csss[$key]['filename'] = $GLOBALS['config']['base_path'].$css['script'];
-				$csss[$key]['filemtime'] = filemtime($csss[$key]['filename']);
+				$csss[$key]['filemtime'] = file_exists($csss[$key]['filename']) ? filemtime($csss[$key]['filename']) : 0;
 			}
 		}
 

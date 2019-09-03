@@ -103,7 +103,7 @@ function cms_input_file_upload(params){
 function cms_input_file_init(){
 
 	if(!$('.cms_input_file_form').length){
-		$('.cms_content').append('<form class="cms_input_file_form" method="post" enctype="multipart/form-data" style="display: none; ">' +
+		$('.cms_admin_content').append('<form class="cms_input_file_form" method="post" enctype="multipart/form-data" style="display: none; ">' +
 				'<input type="hidden" name="do" value="cms_input_file_upload"><input type="file" name="new_file" class="cms_input_file_form_file"></form>');
 	}
 	

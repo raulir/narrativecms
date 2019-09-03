@@ -16,7 +16,7 @@
 		<input type="hidden" id="cms_keyword_id" name="cms_keyword_id" value="<?php print($cms_keyword_id); ?>">
 		
 		<div class="admin_block">
-			<div class="admin_column admin_column_left">
+			<div class="cms_column">
 				
 				<?php _panel('cms_input_text', [
 						'name' => 'keyword',
@@ -26,7 +26,7 @@
 				]); ?>
 
 			</div>
-			<div class="admin_column admin_column_right">
+			<div class="cms_column">
 
 			</div>
 			<div style="clear: both; "></div>

@@ -37,10 +37,10 @@ function cms_input_repeater_select_init(){
 				$select.append('<option value="">-- not specified --</option>');
 			}
 			
-			$('.admin_repeater_container_' + target).addClass('cms_repeater_target');
+			$('.cms_repeater_area_' + target).addClass('cms_repeater_target');
 			
 			// create contents
-			$('.admin_repeater_container_' + target + ' .cms_repeater_block').each(function(){
+			$('.cms_repeater_area_' + target + ' .cms_repeater_block').each(function(){
 				
 				// find label
 				var label = '';

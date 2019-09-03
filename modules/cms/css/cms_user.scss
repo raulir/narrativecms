@@ -1,13 +1,15 @@
 .cms_user_container {
 	box-sizing: border-box;
     position: absolute;
-    right: 0;
-    top: 4px;
-    height: 64px;
-    font-family: foundrysterling;
+    right: 2.0rem;
+    top: 0.3rem;
+    height: 5.0rem;
     color: white;
-    font-weight: 600;
     text-align: center;
+    font-weight: normal;
+    font-family: source;
+	font-size: 1.4rem;
+    letter-spacing: 0.05rem;
 }
 
 .cms_user_content {
@@ -20,23 +22,24 @@
 }
 
 .cms_user_username {
-    line-height: 31px;
-	font-size: 14px;
-    letter-spacing: 0.7px;
+    line-height: 2.5rem;
     display: inline-block;
-    padding-left: 18px;
+    padding-left: 0;
     background-position: left 46%;
-    background-size: 14px auto;
+    background-size: 1.3rem auto;
     background-repeat: no-repeat;
+    padding-left: 1.8rem;
 }
 
 .cms_user_button {
-    line-height: 22px;
-    font-size: 14px;
-    letter-spacing: 0.6px;
-    border: 1.5px solid white;
-    border-radius: 4px;
+    line-height: 2.2rem;
+    border: 0.12rem solid white;
+    border-radius: 0.4rem;
     cursor: pointer;
-    width: 75px;
-    display: inline-block;
+    width: 7.5rem;
+    background-color: transparent;
+    transition: background-color 0.3s;
+    &:hover {
+    	background-color: rgba(255,255,255,0.1);
+    }
 }

@@ -1,18 +1,18 @@
 function cms_input_image_init(){
 
 	// columns are created only once and all such inputs are in these
-	$('.admin_column .cms_input_image_button').off('click.r').on('click.r', function(event){
+	$('.cms_input_image_button').off('click.r').on('click.r', function(event){
 		cms_input_image_popup($(this));
 	});
-	$('.admin_column .cms_input_image_clear').off('click.r').on('click.r', function(event){
+	$('.cms_input_image_clear').off('click.r').on('click.r', function(event){
 		cms_input_image_clear($(this));
 	});
 	
 	// init repeater image inputs
-	$('.admin_repeater_container').on('click.r', '.cms_input_image_button', function(event){
+	$('.cms_repeater_area').on('click.r', '.cms_input_image_button', function(event){
 		cms_input_image_popup($(this));
 	});
-	$('.admin_repeater_container').on('click.r', '.cms_input_image_clear', function(event){
+	$('.cms_repeater_area').on('click.r', '.cms_input_image_clear', function(event){
 		cms_input_image_clear($(this));
 	});
 	
@@ -33,7 +33,7 @@ function cms_input_image_rename(old_name){
 	var new_name = ('0000'+Math.random().toString(36).replace('.', '')).substr(-5);
 	
 	$('.cms_input_image_container_' + old_name + ' label').attr({'for':'cms_input_image_' + new_name});
-	$('.cms_input_image_container_' + old_name + ' .admin_image_content')
+	$('.cms_input_image_container_' + old_name + ' .cms_input_image_content')
 			.removeClass('cms_input_image_content_' + old_name).addClass('cms_input_image_content_' + new_name);
 	$('.cms_input_image_container_' + old_name + ' .cms_input_button').data('name', new_name);
 	$('.cms_input_image_container_' + old_name + ' input').removeClass('cms_image_input_' + old_name).addClass('cms_image_input_' + new_name);

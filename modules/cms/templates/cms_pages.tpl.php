@@ -1,6 +1,6 @@
 <div class="cms_pages_container">
 
-	<div class="cms_pages_left">
+	<div class="cms_column">
 
 		<div class="cms_toolbar">
 			<div class="cms_tool_text">Pages</div>
@@ -8,7 +8,7 @@
 		</div>
 
 		<?php if (!(empty($pages['main']) || count($pages['main']) == 0)): ?>
-			<ul class="cms_pages_list admin_list_sortable">
+			<ul class="admin_list_sortable cms_pages_list">
 				<?php cms_pages_list($pages['main']) ?>
 			</ul>
 		<?php else: ?>
@@ -19,7 +19,7 @@
 
 	</div>
 	
-	<div class="cms_pages_right" style="font-size: 10px;">
+	<div class="cms_column">
 	
 		<?php foreach($positions as $position): ?>
 
@@ -31,7 +31,7 @@
 			</div>
 			
 			<?php if (!(empty($pages[$position['id']]) || count($pages[$position['id']]) == 0)): ?>
-				<ul class="cms_pages_list admin_list_sortable">
+				<ul class="admin_list_sortable cms_pages_list">
 					<?php cms_pages_list($pages[$position['id']]) ?>
 				</ul>
 			<?php else: ?>

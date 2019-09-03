@@ -8,22 +8,21 @@
 		</script>
    	</head>
 	<body <?php (!empty($GLOBALS['config']['cms_background'])) ? 
-			_ib($GLOBALS['config']['cms_background'], ['width' => 1000, 'css' => 'font-size: 9.8px; ']) : 
-			print(' style="font-size: 9.8px; " ') ?>>
+			_ib($GLOBALS['config']['cms_background'], ['width' => 1400, 'css' => 'font-size: 10px; ']) : 
+			_ib('cms/cms_background.jpg', ['width' => 1000, 'css' => 'font-size: 10px; background-size: 1000px; ']) ?>>
 	
-		<div class="admin_container">
-			
+		<div class="cms_header_container">
 			<div class="cms_header_content">
-				<?php print(get_position('header', $data)); ?>
-				<div style="clear: both; "><!--  --></div>
+				<div class="cms_header_area">
+					<?= get_position('header', $data) ?>
+				</div>
 			</div>
-			
-			<div class="cms_content">
-		
-				<?php print(get_position('main', $data)); ?>
-	
-				<div style="clear: both; "><!--  --></div>
-	
+		</div>
+
+		<div class="cms_admin_container">
+
+			<div class="cms_admin_content">
+				<?= get_position('main', $data) ?>
 			</div>
 			
 		</div>

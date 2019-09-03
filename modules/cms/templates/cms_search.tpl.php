@@ -11,7 +11,7 @@
 
 </div>
 
-<div class="cms_columns cms_search_result">
+<div class="cms_search_result">
 
 	<div class="cms_column">
 		<div class="cms_search_result_pages"></div>

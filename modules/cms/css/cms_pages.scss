@@ -4,25 +4,12 @@
 	letter-spacing: 0;
 }
 
-.cms_pages_left {
-	width: 50%;
-	display: inline-block;
-	vertical-align: top;
-	box-sizing: border-box;
-	padding-right: 1.0rem;
-}
-
-.cms_pages_right {
-	width: 50%;
-	display: inline-block;
-	vertical-align: top;
-	box-sizing: border-box;
-	padding-left: 1.0rem;
-}
-
 .cms_pages_page {
 	position: relative;
-	padding: 2px 3px 0px 26px;
+}
+
+.cms_pages_list {
+	padding-bottom: 4.5rem;
 }
 
 .cms_pages_landing {
@@ -37,7 +24,7 @@
 }
 
 .cms_pages_page_landing {
-	padding: 2px 3px 0px 46px;
+	padding-left: 4.6rem;
 }
 
 .cms_pages_position_empty {

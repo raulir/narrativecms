@@ -214,7 +214,6 @@ function cms_image_replace($image){
 				    				'name_clean': $container.data('name'),
 				    				'category': $('.cms_input_image_button', $container).data('category'),
 				    				'_return': '1',
-				    				'extra_class': $('.admin_column', $container).length ? 'admin_column' : '',
 				    				'help': '',
 				    				'embed': '1',
 				    				'module': 'cms'

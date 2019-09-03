@@ -378,15 +378,19 @@ class CI_Controller {
 		}
 	
 		$favicon_str = '';
-		if (!empty($GLOBALS['config']['favicon'])){
-			//			$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
-			$icon_data = _iw($GLOBALS['config']['favicon'], array('width' => 48, 'output' => 'ico', ));
-			$favicon_str .= '<link href="'.$GLOBALS['config']['upload_url'].$icon_data['image'].'" rel="shortcut icon">'."\n";
-			$icon_data = _iw($GLOBALS['config']['favicon'], array('width' => 192, 'output' => 'png', ));
-			$favicon_str .= '<link href="'.$GLOBALS['config']['upload_url'].$icon_data['image'].'" rel="icon" type="image/png" sizes="192x192">'."\n";
-			$icon_data = _iw($GLOBALS['config']['favicon'], array('width' => 180, 'output' => 'png', ));
-			$favicon_str .= '<link href="'.$GLOBALS['config']['upload_url'].$icon_data['image'].'" rel="apple-touch-icon" sizes="180x180">'."\n";
+		
+		if (empty($GLOBALS['config']['favicon'])){
+			$favicon = 'cms/cms_icon_black.png';
+		} else {
+			$favicon = $GLOBALS['config']['favicon'];
 		}
+		
+		$icon_data = _iw($favicon, array('width' => 48, 'output' => 'ico', ));
+		$favicon_str .= '<link href="'.$GLOBALS['config']['upload_url'].$icon_data['image'].'" rel="shortcut icon">'."\n";
+		$icon_data = _iw($favicon, array('width' => 192, 'output' => 'png', ));
+		$favicon_str .= '<link href="'.$GLOBALS['config']['upload_url'].$icon_data['image'].'" rel="icon" type="image/png" sizes="192x192">'."\n";
+		$icon_data = _iw($favicon, array('width' => 180, 'output' => 'png', ));
+		$favicon_str .= '<link href="'.$GLOBALS['config']['upload_url'].$icon_data['image'].'" rel="apple-touch-icon" sizes="180x180">'."\n";
 	
 		if (!empty($GLOBALS['_panel_descriptions'])){
 			$_description = trim(implode(' - ', $GLOBALS['_panel_descriptions']), ' -');

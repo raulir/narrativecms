@@ -1,6 +1,18 @@
 .cms_input_subtitle_container {
-	padding: 30px 0 10px 0;
+	
+	padding-top: 3.0rem;
 	clear: both;
+	
+	&.cms_input_subtitle_wide {
+		width: 100%;
+	}
+	
+	.cms_help {
+		left: auto;
+		right: 0;
+		top: -0.5rem;
+	}
+
 }
 
 .cms_input_subtitle_content {
@@ -22,10 +34,6 @@
 }
 
 /* widths */
-
-.admin_block_container > .cms_input_container > .cms_input.cms_input_subtitle_wide {
-	width: 940px;
-}
 
 .cms_input_subtitle_narrow {
 	

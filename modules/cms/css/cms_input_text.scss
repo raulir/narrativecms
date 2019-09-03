@@ -1,19 +1,20 @@
-.cms_input_text {
-	// clear: both;
+.cms_input_text_container {
+	max-width: 47.0rem;
 }
 
-.cms_input_text>input {
+.cms_input_text_input {
 	box-sizing: border-box;
 	display: block;
-	border: 1px solid #a0a0a0;
+	border: 0.1rem solid $colour_border;
 	width: 330px;
 	height: 26px;
 	line-height: 23px;
 	font-size: 17px;
 	float: right;
 	padding: 1px 5px 0px 5px;
+	box-shadow: 0 0 0.02rem $colour_border;
 }
 
-.cms_repeater_block .cms_input_text>input {
+.cms_repeater_block .cms_input_text_input {
 	width: 310px;
 }

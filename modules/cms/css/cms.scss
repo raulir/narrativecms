@@ -1,32 +1,44 @@
 $colour_background: white;
 $colour_border: #a0a0a0;
 $colour_shadow: #606060;
+$colour_light_shadow: #e0e0e0;
+$colour_grey: #606060;
+$colour_white: white;
+$cms_orange: #f7a034;
+
+$cms_orange_button_border: #884825;
+$cms_orange_button_background: #e1c05f;
 
 @font-face {
-    font-family: 'foundrysterling';
-    src: url('../css/foundrysterling/foundrysterling_normal.eot');
-    src: url('../css/foundrysterling/foundrysterling_normal.eot') format('embedded-opentype'),
-         url('../css/foundrysterling/foundrysterling_normal.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'foundrysterling';
-    src: url('../css/foundrysterling/foundrysterling_200.eot');
-    src: url('../css/foundrysterling/foundrysterling_200.eot') format('embedded-opentype'),
-         url('../css/foundrysterling/foundrysterling_200.woff') format('woff');
+    font-family: source;
+    src: url('source/source_light.ttf') format('truetype');
     font-weight: 200;
     font-style: normal;
+    font-display: fallback;
 }
 
 @font-face {
-    font-family: 'foundrysterling';
-    src: url('../css/foundrysterling/foundrysterling_600.eot');
-    src: url('../css/foundrysterling/foundrysterling_600.eot') format('embedded-opentype'),
-         url('../css/foundrysterling/foundrysterling_600.woff') format('woff');
-    font-weight: 600;
+    font-family: source;
+    src: url('source/source.ttf') format('truetype');
+    font-weight: normal;
     font-style: normal;
+    font-display: fallback;
+}
+
+@font-face {
+  	font-family: source;
+  	src: url('source/source_bold.ttf') format('truetype');
+  	font-style: normal;
+  	font-weight: bold;
+  	font-display: fallback;
+}
+
+@font-face {
+    font-family: asap;
+    src: url('asap/asap.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: fallback;
 }
 
 html {
@@ -35,29 +47,27 @@ html {
 }
 
 body {
-	font-family: foundrysterling;
-	font-weight: 200;
+	font-family: source,Helvetica,Verdana,sans-serif;
+	font-weight: normal;
 	font-smoothing: antialiased;
 	-webkit-font-smoothing: antialiased;
 	min-height: 100vh;
-    margin: 0px;
-    padding: 0px;
-    display: table;
-    width: 100%;
+    margin: 0;
+    padding: 0;
     overflow-x: hidden;
     color: black;
     background-position: center;
-    background-size: cover;
+    background-size: 100% auto;
     font-size: 1.6rem;
-    background-color: #ffbd4f;
+    background-color: $cms_orange;
 }
 
 input {
-	font-family: Arial,Verdana,sans-serif;
+	font-family: asap,Arial,Verdana,sans-serif;
 	font-smoothing: antialiased;
-	text-shadow: rgba(0,0,0,.01) 0 0 1px;
+	text-shadow: rgba(0,0,0,.01) 0 0 1rem;
 	-webkit-font-smoothing: antialiased;
-	-webkit-text-stroke: 1px transparent;
+	-webkit-text-stroke: 0.1rem transparent;
 	transform: translateZ(0);
 	-webkit-transform: translateZ(0);
 }
@@ -75,28 +85,55 @@ ul {
 	padding: 0;
 }
 
-.cms_container {
-	display: table-cell;
-	vertical-align: top;
-}
+/* cms header area */
 
-.cms_content {
-	box-sizing: border-box;
-	width: 100rem;
-	padding: 3.0rem 2.0rem;
-	margin: 0 auto;
-	background-color: $colour_background;
-	border: 0.1rem solid $colour_border;
-	box-shadow: 0.1rem 0.2rem 0.7rem $colour_shadow;
-	font-size: 1.6rem;
-	line-height: 2.6rem;
+.cms_header_container {
+	height: 6.0rem;
+	position: relative;
+	z-index: 20;
 }
 
 .cms_header_content {
+	height: 6.0rem;
+	position: fixed;
+	width: 100%;
+	top: 0;
+	left: 0;
+	border-bottom: 0.1rem solid transparent;
 	box-sizing: border-box;
+	background-color: transparent;
+	transition: border 0.5s, background-color 0.5s;
+	.cms_header_active & {
+		background-color: rgba(124,80,26,0.6);
+		border-color: rgba(124,80,26,0.8);
+	}
+}
+
+.cms_header_area {
 	width: 100rem;
-	padding: 2.0rem 0;
 	margin: 0 auto;
+	position: relative;
+	height: 100%;
+}
+
+/* cms main area */
+
+.cms_admin_container {
+	margin: 0 auto;
+	width: 100rem;
+	position: relative;
+	z-index: 10;
+}
+
+.cms_admin_content {
+	box-sizing: border-box;
+	padding: 3.0rem 1.0rem;
+	margin: 0 auto;
+	background-color: $colour_background;
+	outline: 0.1rem solid $colour_border;
+	box-shadow: 0.1rem 0.2rem 0.7rem $colour_shadow;
+	font-size: 1.6rem;
+	line-height: 2.6rem;
 	position: relative;
 }
 
@@ -104,11 +141,15 @@ ul {
 
 .cms_toolbar {
 	box-sizing: border-box;
-	border-bottom: 1px solid $colour_border;
-	padding-bottom: 10px;
-	margin-bottom: 20px;
+	border-bottom: 0.1rem solid $colour_border;
+	padding: 0 0 1.0rem 0;
+	margin: 0 auto 2.0rem auto;
 	position: relative;
 	z-index: 20;
+	width: calc(100% - 2.0rem);
+	.cms_column & {
+		width: 100%;
+	}
 }
 
 .cms_toolbar_buttons {
@@ -120,23 +161,13 @@ ul {
 
 /* new column structure to be rolled out */
 
-.cms_columns {
-	line-height: 0;
-	font-size: 0;
-	letter-spacing: 0;
-	text-align: left;
-	position: relative;
-	left: -10px;
-	width: calc(100% + 20px);
-}
-
 .cms_column {
 	display: inline-block;
 	vertical-align: top;
-	font-size: 1rem;
-	line-height: 1rem;
+	font-size: 1.0rem;
+	line-height: 1.0rem;
 	width: 50%;
-	padding: 10px;
+	padding: 0 1.0rem;
 	box-sizing: border-box;
 }
 
@@ -147,11 +178,86 @@ ul {
     padding-top: 35px;
 }
 
-/* old column structure */
-
-.admin_block {
-	
+/* repeater */
+.cms_repeater_container {
+    position: relative;
+    text-align: left;
 }
+
+.cms_repeater_label {
+	padding: 0 1.6rem;
+    z-index: 20;
+    box-sizing: border-box;
+    line-height: 2.6rem;
+    font-size: 1.8rem;
+    transform: translateZ(0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+	position: relative;
+	background-color: white;
+	display: inline-block;
+	top: 1.1rem;
+	left: 3.3rem;
+}
+
+.cms_repeater_line {
+    border-top: 0.16rem dashed $colour_border;
+    width: calc(100% - 2.0rem);
+    margin: 0 auto;
+}
+
+.cms_repeater_area {
+    padding: 1.0rem 0;
+    font-size: 0;
+    letter-spacing: 0;
+    line-height: 0;
+}
+
+.cms_repeater_block {
+	box-sizing: border-box;
+	display: inline-block;
+	vertical-align: top;
+	padding: 1.0rem;
+	background-repeat: no-repeat;
+	background-position: 1.6rem 1.6rem;
+	background-size: 1.4rem 1.4rem;
+	width: 50%;
+}
+
+.cms_repeater_block_content {
+	box-sizing: border-box;
+	border: 0.1rem solid #909090;
+	padding: 0.5rem 0.9rem 0.5rem 0.9rem;
+	font-size: 1.6rem;
+	line-height: 1.6rem;
+}
+
+.cms_repeater_block_toolbar {
+	clear: both;
+	height: 2.2rem;
+	border-bottom: 0.1rem solid #a0a0a0;
+	margin: 0 -0.6rem 0.2rem -0.6rem;
+}
+
+.cms_repeater_block_delete {
+	box-sizing: border-box;
+	display: block;
+	border: 1px solid #a0a0a0;
+	border-radius: 3px;
+	height: 18px;
+	line-height: 15px;
+	font-size: 13px;
+	float: right;
+	padding: 1px 8px 0px 8px;
+	clear: both;
+	cursor: pointer;
+	text-align: center;
+	transform: translateZ(0);
+	-webkit-transform: translateZ(0);
+}
+
+/* old column structure */
 
 .cms_input_button {
 	box-sizing: border-box;
@@ -169,65 +275,6 @@ ul {
 	-webkit-transform: translateZ(0);
 }
 
-.admin_container {
-	display: table-cell;
-	vertical-align: top;
-	overflow: hidden;
-	width: 100%;
-	color: black;
-	height: 100%;
-}
-
-.login_container {
-	vertical-align: middle;
-}
-
-.login_content {
-	width: 300px;
-}
-
-.login_label {
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
-	color: #606060;
-	margin-bottom: 3px;	
-}
-
-.login_input {
-	display: block;
-	border: 1px solid #606060;
-	box-sizing: border-box;
-	height: 40px;
-	margin-bottom: 20px;	
-	width: 100%;
-	box-shadow: 1px 2px 5px #e0e0e0;
-	padding: 3px 10px;
-	line-height: 32px;
-	font-size: 20px;
-	font-family: foundrysterling;
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
-	color: #909090;
-}
-
-.login_button {
-	box-sizing: border-box;
-	display: block;
-	border: 1px solid #884825;
-	border-radius: 5px;
-	float: right;
-	height: 34px;
-	line-height: 26px;
-	font-size: 18px;
-	font-family: foundrysterling;
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
-	color: white;
-	background-color: #e1c05f;
-	padding: 3px 20px;
-	cursor: pointer;
-}
-
 .cms_tool_text {
 	box-sizing: border-box;
 	display: inline-block;
@@ -240,6 +287,7 @@ ul {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	vertical-align: top;
 }
 
 .cms_tool_button {
@@ -309,16 +357,16 @@ ul {
 	box-sizing: border-box;
 	display: block;
 	background-color: white;
-	height: 28px;
-	line-height: 24px;
-	font-size: 16px;
-	border: 1px solid #c0c0c0;
+	height: 2.8rem;
+	line-height: 2.6rem;
+	font-size: 1.6rem;
+	border: 0.1rem solid #c0c0c0;
 	color: #101010;
-	padding: 2px 3px 0px 26px;
-	margin-bottom: 6px;
+	padding: 0 0.3rem 0 2.6rem;
+	margin-bottom: 0.6rem;
 	background-repeat: no-repeat;
-	background-position: 6px 6px;
-	background-size: 14px 14px;
+	background-position: 0.6rem 0.6rem;
+	background-size: 1.4rem auto;
 	transition: background-color 0.2s;
 
 	&:last-of-type {
@@ -332,30 +380,22 @@ ul {
 }
 
 .cms_list_item_button {
-	height: 20px;
-	border: 1px solid #a0a0a0;
+	height: 2.0rem;
+	border: 0.1rem solid #a0a0a0;
 	box-sizing: border-box;
-	line-height: 18px;
-	padding: 0px 10px;
-	border-radius: 3px;
-	margin: 1px 0px 0px 4px;
-	font-size: 14px;
+	line-height: 1.8rem;
+	padding: 0 1.0rem;
+	border-radius: 0.3rem;
+	margin: 0.3rem 0 0 0.4rem;
+	font-size: 1.4rem;
 	text-decoration: none;
 	display: block;
 	float: right;
 	cursor: pointer;
-	min-width: 52px;
+	min-width: 5.2rem;
 	text-align: center;
 	color: #606060;
 	background-color:#ffffff;
-}
-
-.admin_list_sortable a {
-	display: inline-block;
-	float: right;
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
-	color: #606060;
 }
 
 .admin_list_sortable_blocks_container {
@@ -405,85 +445,6 @@ ul {
 	bottom: 4px;
 	right: 10px;
 }
-
-.admin_column {
-	width: 460px;
-	margin-bottom: 10px;
-}
-
-.admin_column_left {
-	float: left;
-}
-
-.admin_column_right {
-	float: right;
-}
-
-/* repeater fixes and other stuff */
-
-.admin_repeater_container {
-	width: 100%;
-    box-sizing: border-box;
-    position: relative;
-    left: 10px;
-    clear: both;
-    text-align: left;
-    font-size: 0;
-    letter-spacing: 0;
-    line-height: 0;
-}
-
-.admin_repeater_container .admin_block_label {
-	margin-left: 10px;
-    width: calc(100% - 20px);
-    text-align: left;
-}
-
-.cms_repeater_block {
-	box-sizing: border-box;
-	display: inline-block;
-	margin: 0 10px 20px 10px;
-	vertical-align: top;
-	border: 1px solid #909090;
-	padding: 5px 9px 2px 9px ;
-	background-color: white;
-	background-repeat: no-repeat;
-	background-position: 6px 6px;
-	background-size: 14px 14px;
-	width: 460px;
-	font-size: 1.6rem;
-	line-height: 1.6rem;
-	text-align: left;
-}
-
-.cms_repeater_block .admin_column {
-	width: auto;
-}
-
-.cms_repeater_block_toolbar {
-	clear: both;
-	height: 22px;
-	border-bottom: 1px solid #a0a0a0;
-	margin: 0px -6px 12px -6px;
-}
-
-.cms_repeater_block_delete {
-	box-sizing: border-box;
-	display: block;
-	border: 1px solid #a0a0a0;
-	border-radius: 3px;
-	height: 18px;
-	line-height: 15px;
-	font-size: 13px;
-	float: right;
-	padding: 1px 8px 0px 8px;
-	clear: both;
-	cursor: pointer;
-	text-align: center;
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
-}
-
 
 .admin_inline_button {
 	cursor: pointer;

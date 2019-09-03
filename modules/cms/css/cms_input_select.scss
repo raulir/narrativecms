@@ -1,21 +1,5 @@
-$colour_border: #a0a0a0;
-
 .cms_input_select {
-	
-	margin-left: 20px;
 	z-index: 10;
-	display: inline-block;
-	
-	.cms_repeater_block & {
-    	margin-left: 0;
-    	width: 100%;
-    }
-    
-    .admin_column & {
-    	margin-left: 0;
-    	width: 100%;
-    }
-	
 }
 
 .cms_input_select > select {
