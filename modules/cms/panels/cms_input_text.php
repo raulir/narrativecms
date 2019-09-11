@@ -12,8 +12,8 @@ class cms_input_text extends CI_Controller {
 			exit();
 		}
 
-		$this->scss[] = ['script' => 'modules/cms/css/cms_input.scss', ];
-	
+		add_css('modules/cms/css/cms_input.scss');
+		
 	}
 
 }

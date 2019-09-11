@@ -12,7 +12,7 @@ class cms_list extends CI_Controller {
 			exit();
 		}
 
-		$this->js[] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
+		$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
 
 	}
 

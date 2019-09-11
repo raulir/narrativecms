@@ -6,12 +6,12 @@ class feed extends CI_Controller {
 			
 		parent::__construct();
 	
-		$this->css[] = array('script' => 'modules/cms/css/cms.css', 'no_pack' => 1, );
+		add_css(array('script' => 'modules/cms/css/cms.scss', 'no_pack' => 1, ));
 	
-		$this->js[] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
+		$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
 		
-		$this->js[] = 'modules/cms/js/cms_preloader.js';
-		$this->js[] = 'modules/cms/js/cms.js';
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_preloader.js';
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms.js';
 	
 		$GLOBALS['_panel_titles'][] = 'ADMIN';
 		$GLOBALS['_panel_titles'][] = 'FEED';
@@ -26,9 +26,7 @@ class feed extends CI_Controller {
    			exit();
    		}
    		
-   		$this->css[] = array(
-				'script' => 'modules/feed/css/feed.css',
-		);
+   		add_css('modules/feed/css/feed.scss');
 
         // set page config
         $page_config = array(
@@ -67,9 +65,7 @@ class feed extends CI_Controller {
    			exit();
    		}
    		 
-		$this->css[] = array(
-				'script' => 'modules/feed/css/feed.css',
-		);
+		add_css('modules/feed/css/feed.scss');
 
         // set page config
         $page_config = array(

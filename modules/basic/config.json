@@ -35,6 +35,10 @@
 		{
 			"id":"language",
 			"name":"Language"
+		},
+		{
+			"id":"gtag",
+			"name":"Analytics gtag.js"
 		}
 	],
 	"cms_menu":[
@@ -60,6 +64,13 @@
 			"id":"gtm",
 			"name":"FB pixel settings",
 			"url":"admin/panel_settings/basic__pixel/",
+			"parent":"cms",
+			"access":"basic_analytics"
+		},
+		{
+			"id":"gtag",
+			"name":"Gtag.js settings",
+			"url":"admin/panel_settings/basic__gtag/",
 			"parent":"cms",
 			"access":"basic_analytics"
 		}

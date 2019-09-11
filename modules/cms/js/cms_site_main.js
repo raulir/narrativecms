@@ -949,6 +949,28 @@ var cms_disable_zoom = function () {
 	}); 
 }
 
+var injectScript = function(src, id) {
+	
+	return new Promise((resolve, reject) => {
+		
+		var s = 'script';
+	    var js, fjs = document.getElementsByTagName(s)[0];
+	    
+	    if (!id) id = src
+
+	    if (document.getElementById(id)) abort('Script loaded already: ' + src)
+	    
+	    js = document.createElement(s)
+	    js.id = id
+	    js.onload = () => resolve
+	    js.onerror = () => reject('Script loading error: ' + src)
+	    js.src = src
+	    fjs.parentNode.insertBefore(js, fjs)
+	
+	})
+	
+}
+
 $(document).ready(function() {
 	
 	cms_hover_init();

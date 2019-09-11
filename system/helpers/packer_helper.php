@@ -27,10 +27,16 @@ if ( !function_exists('pack_css')) {
 		
 	}
 	
-	function pack_css($csss, $scsss){
+	function pack_css($scsss){
+		
+		$csss = [];
 
 		// compile scss
 		foreach($scsss as $scsss_item){
+			
+			if (!is_array($scsss_item)){
+				$scsss_item = ['script' => $scsss_item];
+			}
 	
 			// put together related scss files
 			if (!empty($scsss_item['related'])){
@@ -59,6 +65,7 @@ if ( !function_exists('pack_css')) {
 			foreach($scss_set as $scss_file){
 				$css_file = $GLOBALS['config']['base_path'].$scsss_item['css'];
 				// if needs update
+				
 				if(!file_exists($css_file) || (filemtime($GLOBALS['config']['base_path'].$scss_file) > filemtime($css_file))){
 					$css_file_update_needed = true;
 				}
@@ -83,14 +90,22 @@ if ( !function_exists('pack_css')) {
 					$compiled = $scss_compiler->compile($scss_string);
 
 					list($throwaway, $css_string) = explode('/* CUT HERE */', $compiled);
-					
+
 					// if has resources
 					if(!empty($scsss_item['module_path'])){
 						
 						// fonts x 2, background
 						$css_string = str_replace(
-								array("src: url('", ", url('", "image: url('../"), 
-								array("src: url('../".$scsss_item['module_path'].'css/', ", url('../".$scsss_item['module_path'].'css/', "image: url('../".$scsss_item['module_path']), 
+								[
+										"src: url('", 
+										", url('",
+										"image: url('../",
+								], 
+								[
+										"src: url('".$GLOBALS['config']['base_url'].$scsss_item['module_path'].'css/', 
+										", url('".$GLOBALS['config']['base_url'].$scsss_item['module_path'].'css/', 
+										"image: url('".$GLOBALS['config']['base_url'].$scsss_item['module_path'],
+								], 
 								$css_string);
 						
 					}
@@ -352,6 +367,26 @@ if ( !function_exists('pack_css')) {
 	
 		return implode("\n", $js_strs)."\n".$js_cache;
 	
+	}
+	
+	function add_css($file){
+
+		if (!empty($file['script'])){
+			$filename = $file['script'];
+		} else {
+			$filename = $file;
+		}
+		
+		if (empty($GLOBALS['_panel_scss'])){
+			$GLOBALS['_panel_scss'] = [];
+			$GLOBALS['_panel_scss_names'] = [];
+		}
+		
+		if (!in_array($file, $GLOBALS['_panel_scss_names'])){
+			$GLOBALS['_panel_scss'][] = $file;
+			$GLOBALS['_panel_scss_names'][] = $filename;
+		}
+		
 	}
 	
 }

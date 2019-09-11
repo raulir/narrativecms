@@ -63,10 +63,6 @@ class CI_Controller {
 		// panels stuff
 		$this->init_panel();
 		
-		$this->js = array();
-		$this->css = array();
-		$this->scss = array();
-		
 		if (!isset($GLOBALS['_panel_titles'])){
 			$GLOBALS['_panel_titles'] = array();
 		}
@@ -77,14 +73,8 @@ class CI_Controller {
 			$GLOBALS['_panel_images'] = array();
 		}
 		
-		if (!isset($GLOBALS['_panel_css'])){
-			$GLOBALS['_panel_css'] = array();
-		}
-		if (!isset($GLOBALS['_panel_scss'])){
-			$GLOBALS['_panel_scss'] = array();
-		}
-		if (!isset($GLOBALS['_panel_js'])){
-			$GLOBALS['_panel_js'] = array();
+		if (empty($GLOBALS['_panel_js'])){
+			$GLOBALS['_panel_js'] = [];
 		}
 		
 	}
@@ -210,7 +200,7 @@ class CI_Controller {
 		} else {
 			$files = $this->get_panel_filenames($name, $params);
 		}
-	
+
 		$panel_js = $files['js'];
 		$panel_css = $files['css'];
 		$panel_scss = $files['scss'];
@@ -263,11 +253,6 @@ class CI_Controller {
 				// get params through panel controller
 				$params = $this->panel_ci->{$panel_name}->panel_params($params);
 	
-				// get js, css, title and description back and automatically load named js and css from panels dirs
-				$panel_js = array_merge($panel_js, $this->panel_ci->{$panel_name}->js);
-				$panel_css = array_merge($panel_css, $this->panel_ci->{$panel_name}->css);
-				$panel_scss = array_merge($panel_scss, $this->panel_ci->{$panel_name}->scss);
-		   
 				// clear temporary resource
 				unset($this->panel_ci);
 	
@@ -314,9 +299,14 @@ class CI_Controller {
 				(!empty($template_timer_start) ? ' template: '.($template_timer_end - $template_timer_start).'ms' : ''). ' ) end -->'."\n";
 
 		// add js, css, scss to global page files
-		$this->js = array_merge($this->js, $panel_js);
-		$this->css = array_merge($this->css, $panel_css);
-		$this->scss = array_merge($this->scss, $panel_scss);
+		$GLOBALS['_panel_js'] = array_merge($GLOBALS['_panel_js'], $panel_js);
+		
+		foreach($panel_css as $css_file){
+			add_css($css_file);
+		}
+		foreach($panel_scss as $css_file){
+			add_css($css_file);
+		}
 
 		// save panel result params for returning them when ajax panel is requested
 		$this->view_params = $params;
@@ -353,7 +343,7 @@ class CI_Controller {
 
 		// put together mandatory config js and panel/controller loaded js
 		if (!empty($GLOBALS['config']['js'])){
-			$jss = array_merge($GLOBALS['config']['js'], $this->js);
+			$jss = $GLOBALS['config']['js'];
 		} else {
 			$jss = array();
 		}
@@ -502,24 +492,14 @@ class CI_Controller {
 
 		if (!empty($global_css) && is_array($global_css)){
 			foreach($global_css as $css_item){
-		
-				if (substr($css_item, -4) === '.css'){
-					array_unshift($this->css, ['script' => $css_item, 'top' => 2, ]);
-				} else {
-					array_unshift($this->scss, ['script' => $css_item, 'top' => 2, ]);
-				}
+				
+				add_css(['script' => $css_item, 'top' => 2, ]);
 		
 			}
 		}
-	
-		// merge config css and panel/controller loaded css
-		$csss = array_merge($this->css, $GLOBALS['_panel_css']);
-		 
-		// scss
-		$scsss = array_merge($this->scss, $GLOBALS['_panel_scss']);
-		 
+
 		// compile files together
-		$css_arr = pack_css($csss, $scsss);
+		$css_arr = pack_css($GLOBALS['_panel_scss']);
 		
 		if (empty($GLOBALS['config']['inline_css'])){
 		
@@ -645,30 +625,21 @@ class CI_Controller {
 		$js_str = '';
 		if (!empty($params['embed'])){
 	
-			$return['_panel_js'] = $this->js;
-				
-			if (empty($params['_no_css'])){
-				$return['_panel_css'] = $this->css;
-				$return['_panel_scss'] = $this->scss;
-			} else {
-				$return['_panel_css'] = [];
-				$return['_panel_scss'] = [];
-			}
+			$return['_panel_js'] = [];
+			$return['_panel_scss'] = $return['scss'];
 	
 		} else if (empty($params['no_html'])){
 	
-			$this->js = array_merge($GLOBALS['_panel_js'], $this->js);
+			$js = $GLOBALS['_panel_js'];
 	
 			if (empty($params['_no_css'])){
-				$this->css = array_merge($GLOBALS['_panel_css'], $this->css);
-				$this->scss = array_merge($GLOBALS['_panel_scss'], $this->scss);
+				$scss = $return['scss'];
 			} else {
-				$this->css = [];
-				$this->scss = [];
+				$scss = [];
 			}
 				
 			// prepare css for onpage loading
-			$css_arr = pack_css($this->css, $this->scss);
+			$css_arr = pack_css($scss);
 	
 			if (count($css_arr)){
 	
@@ -686,7 +657,7 @@ class CI_Controller {
 			}
 				
 			// get js
-			$js_str = pack_js($this->js);
+			$js_str = pack_js($js);
 	
 		}
 	
@@ -772,6 +743,7 @@ class CI_Controller {
 							if (empty($params['_cache_time'])) {
 								$params['_cache_time'] = 0;
 							}
+							
 							$cache_time = $params['_cache_time'] != 0 ? $params['_cache_time'] : (!empty($GLOBALS['config']['panel_cache']) ? $GLOBALS['config']['panel_cache'] : 0);
 	
 							if ((time() - filemtime($filename)) < $cache_time){
@@ -780,11 +752,15 @@ class CI_Controller {
 	
 								// add js, css, scss to global page files
 								$this->js = array_merge($this->js, $panel_data['js']);
-								$this->css = array_merge($this->css, $panel_data['css']);
-								$this->scss = array_merge($this->scss, $panel_data['scss']);
+
+								foreach($panel_data['scss'] as $scss_file){
+									add_css($scss_file);
+								}
 								 
 							} else {
+								
 								unlink($filename);
+								
 							}
 	
 						}

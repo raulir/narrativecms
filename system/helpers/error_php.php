@@ -6,8 +6,6 @@
 <p>Filename: <?php echo $filepath; ?></p>
 <p>Line Number: <?php echo $line; ?></p>
 
-<!--  >pre>
 <?php // print_r(debug_backtrace()) ?>
-</pre -->
 
 </div>

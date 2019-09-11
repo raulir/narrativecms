@@ -6,11 +6,11 @@ class menu extends CI_Controller {
 		
         parent::__construct();        
 
-		$this->js[] = [
+		$GLOBALS['_panel_js'][] = [
 				'script' => 'modules/cms/js/cms_change_hash.js',
 				'sync' => 'defer', 
 		];
-		$this->js[] = [
+		$GLOBALS['_panel_js'][] = [
 				'script' => 'modules/cms/js/cms_scroll_to.js',
 				'sync' => 'defer',
 		];

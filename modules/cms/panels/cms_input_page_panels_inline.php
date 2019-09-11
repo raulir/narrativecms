@@ -12,16 +12,16 @@ class cms_input_page_panels_inline extends CI_Controller{
 			exit();
 		}
 
-		$this->scss[] = ['script' => 'modules/cms/css/cms_input.scss', ];
-	
+		add_css('modules/cms/css/cms_input.scss');
+		
 	}
 
 	function panel_params($params){
 				
 		$params['cms_page_panels'] = [];
 
-		$this->load->model('cms_page_panel_model');
-		$this->load->model('cms_page_model');
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_model');
 
 		if (!is_array($params['value'])){
 			$params['value'] = explode(',', $params['value']);

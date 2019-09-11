@@ -12,18 +12,18 @@ class cms_input_textarea extends CI_Controller {
 			exit();
 		}
 
-		$this->scss[] = ['script' => 'modules/cms/css/cms_input.scss', ];
-	
+		add_css('modules/cms/css/cms_input.scss');
+		
 	}
 
 	function panel_params($params){
 
 		if (!empty($params['tinymce'])){
 			
-			$this->js[] = array('script' => 'modules/cms/js/tinymce/tinymce.min.js', 'no_pack' => 1, 'sync' => '', );
+			$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/tinymce/tinymce.min.js', 'no_pack' => 1, 'sync' => '', );
 			
 			if (stristr($params['params']['html'], 'M')){
-				$this->js[] = 'modules/cms/js/cms_input_image.js';
+				$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_input_image.js';
 			}
 
 		}

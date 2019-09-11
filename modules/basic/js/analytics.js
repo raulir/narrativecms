@@ -21,7 +21,7 @@ function analytics_send(type, category, action, label, value){
 	if (value){
 		params.eventValue = value 
 	}
-console.log(analytics_trackers);	
+
 	$.each(analytics_trackers, (index, value) => ga(value + '.send', params))
 
 }

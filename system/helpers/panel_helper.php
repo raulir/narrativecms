@@ -98,9 +98,21 @@ if ( !function_exists('get_position')) {
     	
     	$data = $ci->ajax_panel($name, $params);
 
-    	$GLOBALS['_panel_js'] = array_merge($GLOBALS['_panel_js'], $data['_panel_js']);
-		$GLOBALS['_panel_css'] = array_merge($GLOBALS['_panel_css'], $data['_panel_css']);
-		$GLOBALS['_panel_scss'] = array_merge($GLOBALS['_panel_scss'], $data['_panel_scss']);
+    	if(!empty($data['_panel_js'])){
+    		$GLOBALS['_panel_js'] = array_merge($GLOBALS['_panel_js'], $data['_panel_js']);
+    	}
+    	
+    	if(!empty($data['_panel_css'])){
+    		foreach($data['_panel_css'] as $scss_file){
+    			add_css($scss_file);
+    		}
+    	}
+    	
+    	if(!empty($data['_panel_scss'])){
+    		foreach($data['_panel_scss'] as $scss_file){
+    			add_css($scss_file);
+    		}
+    	}
 
     	if(!empty($data['_panel_image'])){
 	    	$GLOBALS['_panel_images'][] = $data['_panel_image'];

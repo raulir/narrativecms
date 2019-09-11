@@ -12,7 +12,7 @@ class cms_page_panel extends CI_Controller {
 			exit();
 		}
 		
-		$this->scss[] = ['script' => 'modules/cms/css/cms_input_select.scss', ];
+		add_css('modules/cms/css/cms_input_select.scss');
 		
 	}
 

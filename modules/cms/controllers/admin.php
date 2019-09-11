@@ -12,10 +12,10 @@ class admin extends CI_Controller {
 			exit();
 		}
 
-		$this->js[] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
+		$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
 
-		$this->js[] = 'modules/cms/js/cms_preloader.js';
-		$this->js[] = 'modules/cms/js/cms.js';
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_preloader.js';
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms.js';
 
 		$GLOBALS['_panel_titles'][] = 'ADMIN';
 		
