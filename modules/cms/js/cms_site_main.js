@@ -954,7 +954,7 @@ var injectScript = function(src, id) {
 	return new Promise((resolve, reject) => {
 		
 		var s = 'script';
-	    var js, fjs = document.getElementsByTagName(s)[0];
+	    var js, fjs = document.getElementsByTagName(s)[0]
 	    
 	    if (!id) id = src
 
@@ -962,8 +962,8 @@ var injectScript = function(src, id) {
 	    
 	    js = document.createElement(s)
 	    js.id = id
-	    js.onload = () => resolve
-	    js.onerror = () => reject('Script loading error: ' + src)
+	    js.addEventListener('load', resolve)
+	    js.addEventListener('error', () => reject('Script loading error: ' + src))
 	    js.src = src
 	    fjs.parentNode.insertBefore(js, fjs)
 	
