@@ -31,6 +31,7 @@ class cms_update_model extends CI_Model {
 				'ttf',
 				'txt',
 				'woff',
+				'jpg',
 		];
 		
 		$hashes = array();
