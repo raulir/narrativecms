@@ -1,7 +1,7 @@
 function cms_input_image_init(){
 
 	// columns are created only once and all such inputs are in these
-	$('.cms_input_image_button').off('click.r').on('click.r', function(event){
+	$('.cms_input_image_button').off('click.r').on('click.r', function(event){console.log('jou');
 		cms_input_image_popup($(this));
 	});
 	$('.cms_input_image_clear').off('click.r').on('click.r', function(event){

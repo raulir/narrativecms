@@ -633,29 +633,29 @@ class CI_Controller {
 			$js = $GLOBALS['_panel_js'];
 	
 			if (empty($params['_no_css'])){
-				$scss = $return['scss'];
-			} else {
-				$scss = [];
-			}
 				
-			// prepare css for onpage loading
-			$css_arr = pack_css($scss);
+				$scss = array_merge($return['scss'], $return['css']);
+				
+				// prepare css for onpage loading
+				$css_arr = pack_css($scss);
 	
-			if (count($css_arr)){
-	
-				$css_arr_prep = [];
-				foreach ($css_arr as $css_inc){
-					$css_arr_prep[] = $css_inc['script'];
+				if (count($css_arr)){
+		
+					$css_arr_prep = [];
+					foreach ($css_arr as $css_inc){
+						$css_arr_prep[] = $css_inc['script'];
+					}
+					$css_arr_str = implode('\', \'', $css_arr_prep);
+		
+					$css_str .= '<script class="cms_load_css cms_load_css_'.md5($css_arr_str).'" type="text/javascript">'."\n";
+					$css_str .= 'cms_load_css([\'';
+					$css_str .=	$css_arr_str;
+					$css_str .= '\'], '. (!empty($GLOBALS['config']['cache']['force_download']) ? 'true' : 'false') .', \'cms_load_css_'. md5($css_arr_str) .'\');'."\n".'</script>'."\n";
+		
 				}
-				$css_arr_str = implode('\', \'', $css_arr_prep);
-	
-				$css_str .= '<script class="cms_load_css cms_load_css_'.md5($css_arr_str).'" type="text/javascript">'."\n";
-				$css_str .= 'cms_load_css([\'';
-				$css_str .=	$css_arr_str;
-				$css_str .= '\'], '. (!empty($GLOBALS['config']['cache']['force_download']) ? 'true' : 'false') .', \'cms_load_css_'. md5($css_arr_str) .'\');'."\n".'</script>'."\n";
-	
+			
 			}
-				
+
 			// get js
 			$js_str = pack_js($js);
 	
