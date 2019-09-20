@@ -14,7 +14,7 @@ class cms extends CI_Controller {
 		
         if ($do == 'version'){
         	
-   			$version_data = $this->cms_update_model->get_version();
+   			$version_data = $this->cms_update_model->get_version($this->input->post('module'));
    			print(json_encode($version_data));
    			exit();
         	

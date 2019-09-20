@@ -25,7 +25,7 @@ class cms_update extends CI_Controller {
 			$params['result'] = $this->cms_update_model->update();
 			$params['ajax'] = true;
 
-			$version_data = $this->cms_update_model->get_version();
+			$version_data = $this->cms_update_model->get_version('');
 			$params['local_version'] = $version_data['version'];
 
 			$version_data = $this->cms_update_model->get_master_version();
@@ -52,7 +52,7 @@ class cms_update extends CI_Controller {
 			// check and update version information
 			$master_data = $this->cms_update_model->get_master_version();
 			$this->cms_update_model->rebuild();
-			$local_data = $this->cms_update_model->get_version();
+			$local_data = $this->cms_update_model->get_version('');
 			
 			$master_hash = !empty($master_data['version_hash']) ? $master_data['version_hash'] : 'error';
 			if ($local_data['current_hash'] == $master_hash){
@@ -81,57 +81,62 @@ class cms_update extends CI_Controller {
 			return $params;
 		}
 
-		$this->load->model('cms_update_model');
+		$this->load->model('cms/cms_update_model');
 
 		$params['can_update'] = false;
 
 		// update local hashes
-		$this->cms_update_model->rebuild();
+		$params['data'] = $this->cms_update_model->rebuild();
+		
+		if (empty($GLOBALS['config']['update']['master'])){
+			$GLOBALS['config']['update']['master'] = [];
+		}
+		
+		if (!empty($GLOBALS['config']['update']['is_master'])){
+			$GLOBALS['config']['update']['master'][] = '';
+		}
 
-		// get local version
-		$version_data = $this->cms_update_model->get_version();
-		$params['local_version'] = $version_data['version'];
-		$params['local_hash'] = $version_data['version_hash'];
-		$params['current_hash'] = $version_data['current_hash'];
-		$params['version_time'] = !empty($version_data['version_time']) ? $version_data['version_time'] : 0;
-		$params['update_time'] = !empty($version_data['update_time']) ? $version_data['update_time'] : 0;
-		
 		// get master version
-		if (empty($GLOBALS['config']['update']['is_master'])){
-			$version_data = $this->cms_update_model->get_master_version();
-			$params['master_version'] = !empty($version_data['version']) ? $version_data['version'] : '';
-			$params['master_hash'] = !empty($version_data['version_hash']) ? $version_data['version_hash'] : '';
-			$params['master_time'] = !empty($version_data['version_time']) ? $version_data['version_time'] : 0;
-			if ($params['master_version'] != $params['local_version']){
-				$params['can_update'] = true;
+		foreach($params['data'] as $key => $module){
+			
+			if (!in_array($module['module'], $GLOBALS['config']['update']['master'])){
+				
+				$version_data = $this->cms_update_model->get_master_version($module['module']);
+// print('<pre>');
+// print_r($version_data);
+// print('</pre>');
+				$params['data'][$key]['master_version'] = !empty($version_data['version']) ? $version_data['version'] : '';
+				$params['data'][$key]['master_hash'] = !empty($version_data['current_hash']) ? $version_data['current_hash'] : '';
+				$params['data'][$key]['master_time'] = !empty($version_data['version_time']) ? $version_data['version_time'] : 0;
+				if ($params['data'][$key]['master_hash'] != $module['local_hash']){
+					$params['data'][$key]['can_update'] = true;
+				}
+				
+			} else {
+				
+				// check if to increment master version
+				if (!empty($GLOBALS['config']['update']['master']) && in_array($module['module'], $GLOBALS['config']['update']['master'])){
+
+					if ($module['local_hash'] !== $module['version_hash']){
+
+						$this->cms_update_model->increment_master_version($module['module']);
+						$local_data = $this->cms_update_model->get_version($module['module']);
+						
+//						print_r($local_data);
+						
+						$params['data'][$key]['local_version'] = $local_data['version'];
+						$params['data'][$key]['local_hash'] = $local_data['version_hash'];
+						$params['data'][$key]['current_hash'] = $local_data['current_hash'];
+						$params['data'][$key]['local_updated'] = $local_data['version_time'];
+						
+					}
+					
+					$params['data'][$key]['status'] = 'This is master';
+				
+				}
+
 			}
-		} else {
-			// check if to increment master version
-			if ($params['current_hash'] !== $params['local_hash']){
-				$this->cms_update_model->increment_master_version();
-				$local_data = $this->cms_update_model->get_version();
-				$params['local_version'] = $local_data['version'];
-				$params['local_hash'] = $local_data['version_hash'];
-				$params['current_hash'] = $local_data['current_hash'];
-			}				 	
-			$params['master_version'] = 'This is master';
-		}
 		
-		// if master and local hash are the same, then has to be the same version
-		if (empty($params['local_version']) && $params['local_hash'] == $params['master_hash']){
-			$params['local_version'] = $params['master_version'];
-		}
-		
-		if ($params['local_version'] == $params['master_version'] && $params['current_hash'] == $params['master_hash']){
-			$params['current_version'] = 'up to date';
-		} else {
-			$params['current_version'] = 'needs update';
-			$params['can_update'] = true;
-		}
-		
-		if (empty($GLOBALS['config']['update']['is_master']) && $params['master_hash'] != $params['current_hash']){
-			$params['local_changes'] = true;
-			$params['can_update'] = true;
 		}
 
 		return $params;
