@@ -13,7 +13,7 @@
 			</ul>
 		<?php else: ?>
 			<ul>
-				<div class="admin_text">No pages defined</div>
+				<div class="admin_text cms_pages_position_empty">No pages defined</div>
 			</ul>
 		<?php endif ?>
 
