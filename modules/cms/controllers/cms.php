@@ -20,7 +20,9 @@ class cms extends CI_Controller {
         	
         } else if ($do == 'files'){
         	
-        	$data = $this->cms_update_model->get_files();
+        	$module = $this->input->post('module');
+        	
+        	$data = $this->cms_update_model->get_files($module);
    			print(json_encode($data));
    			exit();
 
@@ -31,8 +33,10 @@ class cms extends CI_Controller {
 			} else {
 				$filename = $this->input->post('filename');
 			}
-	        	
-        	$data = $this->cms_update_model->get_file($filename);
+			
+			$module = $this->input->post('module');
+				
+        	$data = $this->cms_update_model->get_file($filename, $module);
    			print(json_encode($data));
    			exit();
         	

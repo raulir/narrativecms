@@ -20,7 +20,13 @@ class cms_update extends CI_Controller {
 
 		$do = $this->input->post('do');
 
-		if ($do == 'cms_update' && !empty($GLOBALS['config']['update']['allow_updates'])){
+		if ($do == 'cms_update_list'){
+			
+			$module = $this->input->post('module');
+			 
+			$params['result'] = $this->cms_update_model->get_needed_files($module);
+			 
+		} else if ($do == 'cms_update' && !empty($GLOBALS['config']['update']['allow_updates'])){
 
 			$params['result'] = $this->cms_update_model->update();
 			$params['ajax'] = true;
@@ -31,15 +37,12 @@ class cms_update extends CI_Controller {
 			$version_data = $this->cms_update_model->get_master_version();
 			$params['master_version'] = !empty($version_data['version']) ? $version_data['version'] : '';
 
-		} else if ($do == 'cms_update_list'){
-			 
-			$params['result'] = $this->cms_update_model->get_needed_files();
-			 
 		} else if ($do == 'cms_update_file'){ // updates file
 			 
 			$filename = $this->input->post('filename');
-			
-			$this->cms_update_model->update_file($filename);
+			$module = $this->input->post('module');
+				
+			$this->cms_update_model->update_file($filename, $module);
 			 
 			$params['result']['filename'] = $filename;
 			$params['result']['fn_hash'] = md5($filename);
@@ -47,17 +50,19 @@ class cms_update extends CI_Controller {
 			 
 		} else if ($do == 'cms_update_copy'){
 
-			$this->cms_update_model->update_copy();
+			$module = $this->input->post('module');
+			
+			$this->cms_update_model->update_copy($module);
 			
 			// check and update version information
-			$master_data = $this->cms_update_model->get_master_version();
+			$master_data = $this->cms_update_model->get_master_version($module);
 			$this->cms_update_model->rebuild();
-			$local_data = $this->cms_update_model->get_version('');
+			$local_data = $this->cms_update_model->get_version($module);
 			
 			$master_hash = !empty($master_data['version_hash']) ? $master_data['version_hash'] : 'error';
 			if ($local_data['current_hash'] == $master_hash){
 				// update local json
-				$this->cms_update_model->update_version_cache([
+				$this->cms_update_model->update_version_cache($module, [
 						'version' => !empty($master_data['version']) ? $master_data['version'] : '',
 						'version_hash' => !empty($master_data['version_hash']) ? $master_data['version_hash'] : '',
 						'version_time' => !empty($master_data['version_time']) ? $master_data['version_time'] : '',
@@ -67,7 +72,9 @@ class cms_update extends CI_Controller {
 
 		} else if ($do == 'cms_update_cleanup'){
 			
-			while ($this->cms_update_model->update_cleanup());
+			$module = $this->input->post('module');
+			
+			while ($this->cms_update_model->update_cleanup($module));
 			
 		}
 
@@ -108,7 +115,7 @@ class cms_update extends CI_Controller {
 				$params['data'][$key]['master_version'] = !empty($version_data['version']) ? $version_data['version'] : '';
 				$params['data'][$key]['master_hash'] = !empty($version_data['current_hash']) ? $version_data['current_hash'] : '';
 				$params['data'][$key]['master_time'] = !empty($version_data['version_time']) ? $version_data['version_time'] : 0;
-				if ($params['data'][$key]['master_hash'] != $module['local_hash']){
+				if ($params['data'][$key]['master_hash'] != $module['local_current_hash']){
 					$params['data'][$key]['can_update'] = true;
 				}
 				
@@ -117,7 +124,7 @@ class cms_update extends CI_Controller {
 				// check if to increment master version
 				if (!empty($GLOBALS['config']['update']['master']) && in_array($module['module'], $GLOBALS['config']['update']['master'])){
 
-					if ($module['local_hash'] !== $module['version_hash']){
+					if ($module['local_current_hash'] !== $module['local_version_hash']){
 
 						$this->cms_update_model->increment_master_version($module['module']);
 						$local_data = $this->cms_update_model->get_version($module['module']);
@@ -125,9 +132,10 @@ class cms_update extends CI_Controller {
 //						print_r($local_data);
 						
 						$params['data'][$key]['local_version'] = $local_data['version'];
-						$params['data'][$key]['local_hash'] = $local_data['version_hash'];
-						$params['data'][$key]['current_hash'] = $local_data['current_hash'];
+						$params['data'][$key]['local_version_hash'] = $local_data['version_hash'];
+						$params['data'][$key]['local_current_hash'] = $local_data['current_hash'];
 						$params['data'][$key]['local_updated'] = $local_data['version_time'];
+						$params['data'][$key]['local_version_time'] = $local_data['version_time'];
 						
 					}
 					
