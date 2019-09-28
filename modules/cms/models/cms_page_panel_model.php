@@ -308,7 +308,7 @@ class cms_page_panel_model extends CI_Model {
 	}
 	
 	function update_cms_page_panel($cms_page_panel_id, $data, $no_purge = false){
-// print_r($data);
+		
 		if (isset($data['search_params'])){
 			$search_params = $data['search_params'];
 			unset($data['search_params']);
@@ -320,6 +320,21 @@ class cms_page_panel_model extends CI_Model {
 
 		if (isset($data['panel_params'])){
 			unset($data['panel_params']);
+		}
+		
+		// check if update time and user needs update
+		$was_update = false;
+		$keys = array_keys($data);
+		$keys = array_diff($keys, ['show', 'sort', 'cms_page_panel_id', 'cms_page_id', 'parent_id', ]);
+		foreach($keys as $ckey => $cval){
+			if (substr($cval, 0, 1) == '_'){
+				unset($keys[$ckey]);
+			}
+		}
+		if (count($keys)){
+			$data['update_cms_user_id'] = !empty($_SESSION['cms_user']['cms_user_id']) ? $_SESSION['cms_user']['cms_user_id'] : 0;
+			$date = new DateTime();
+			$data['update_time'] = $date->getTimestamp();
 		}
 		
 		// new params stuff
@@ -448,6 +463,13 @@ class cms_page_panel_model extends CI_Model {
 		$this->db->query($sql, $data);
 		
 		$insert_id = $this->db->insert_id();
+		
+		// creation data
+		$panel_params['create_cms_user_id'] = !empty($_SESSION['cms_user']['cms_user_id']) ? $_SESSION['cms_user']['cms_user_id'] : 0;
+		$date = new DateTime();
+		$panel_params['create_time'] = $date->getTimestamp();
+		$panel_params['update_cms_user_id'] = $panel_params['create_cms_user_id'];
+		$panel_params['update_time'] = $panel_params['create_time'];
 		
 		if (!empty($panel_params)){
 		

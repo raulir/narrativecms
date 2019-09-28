@@ -20,7 +20,7 @@ class cms_user_settings extends CI_Controller {
 	
 	function panel_params($params){
 		
-		$this->load->model('cms_user_model');
+		$this->load->model('cms/cms_user_model');
 		
 		// get superuser if present
 		$params['config_file'] = str_replace($GLOBALS['config']['base_path'], '', $GLOBALS['config']['config_file']);

@@ -116,4 +116,17 @@
 
 	</form>
 	
+	<div class="cms_page_panel_info">
+		<div class="cms_page_panel_info_column">
+			<div class="cms_page_panel_info_label">created:</div>
+			<div class="cms_page_panel_info_value"><?= !empty($block['create_time']) ? date('Y-m-d H:i:s', $block['create_time']) : '' ?>
+			<?= !empty($block['create_user']['username']) ? $block['create_user']['username'] : '-' ?></div>
+		</div>
+		<div class="cms_page_panel_info_column">
+			<div class="cms_page_panel_info_label">updated:</div>
+			<div class="cms_page_panel_info_value"><?= !empty($block['update_time']) ? date('Y-m-d H:i:s', $block['update_time']) : '' ?>
+			<?= !empty($block['update_user']['username']) ? $block['update_user']['username'] : '-' ?></div>
+		</div>
+	</div>
+	
 </div>

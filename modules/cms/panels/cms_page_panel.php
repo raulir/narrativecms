@@ -22,6 +22,7 @@ class cms_page_panel extends CI_Controller {
 		$this->load->model('cms/cms_page_model');
 		$this->load->model('cms/cms_panel_model');
 		$this->load->model('cms/cms_module_model');
+		$this->load->model('cms/cms_user_model');
 		
 		// if preset panel name (panel type) for new panel
 		if (!is_numeric($params['cms_page_panel_id'])){
@@ -200,8 +201,6 @@ class cms_page_panel extends CI_Controller {
 		
 		$return['panel_params_structure'] = $panel_structure; // $this->cms_panel_model->get_cms_panel_definition($return['block']['panel_definition']);
 
-		// print_r($return);
-
 		if ((empty($return['independent_block']) || !empty($return['block']['parent_id'])) && $return['block']['panel_name'] === ''){
 
 			$return['shortcuts'] = array();
@@ -267,7 +266,21 @@ class cms_page_panel extends CI_Controller {
 		}
 
 		asort($return['panel_types']);
-
+		
+		// creation and update
+		if (!empty($return['block']['create_cms_user_id'])){
+			$return['block']['create_user'] = $this->cms_user_model->get_cms_user($return['block']['create_cms_user_id']);
+		}
+		if (empty($return['block']['create_user'])){
+			$return['block']['create_user'] = [];
+		}
+		if (!empty($return['block']['update_cms_user_id'])){
+			$return['block']['update_user'] = $this->cms_user_model->get_cms_user($return['block']['update_cms_user_id']);
+		}
+		if (empty($return['block']['update_user'])){
+			$return['block']['update_user'] = [];
+		}
+		
 		return $return;
 
 	}

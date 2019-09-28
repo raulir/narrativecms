@@ -18,7 +18,7 @@ function cms_input_textarea_init(){
 
 	$('.cms_input_textarea textarea').each(function(){
 		$this = $(this);
-		$this.css({'height':parseInt($this.css('line-height')) * parseInt($this.data('lines')) + 3 + 'px'});
+		$this.css({'height':parseInt($this.css('line-height')) * parseInt($this.data('lines')) + 7 + 'px'});
 	});
 	
 	setTimeout(function(){
