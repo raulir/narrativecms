@@ -12,8 +12,9 @@ class cms_page_panel extends CI_Controller {
 			exit();
 		}
 		
-		add_css('modules/cms/css/cms_input_select.scss');
-		
+		// for type select
+		add_css('cms/cms_input_select.scss');
+
 	}
 
 	function panel_params($params){

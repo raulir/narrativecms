@@ -22,7 +22,7 @@
 			"name":"Settings",
 			"parent":"cms",
 			"access":"cms_cms",
-			"url":"admin/panel_settings/cms_settings/"
+			"url":"admin/panel_settings/cms__cms_settings/"
 		},
 		{
 			"id":"cms_user_settings",

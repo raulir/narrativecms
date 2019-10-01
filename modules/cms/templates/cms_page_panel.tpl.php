@@ -1,6 +1,6 @@
 <?php
 	
-	_panel('cms_page_panel_toolbar', [
+	_panel('cms/cms_page_panel_toolbar', [
 			'cms_page_panel_id' => $block['cms_page_panel_id'],
 			'cms_page_id' => $block['cms_page_id'],
 			'breadcrumb' => !empty($breadcrumb) ? $breadcrumb : [],
@@ -27,7 +27,7 @@
 		<?php if (empty($independent_block) || !empty($block['parent_id'])): ?>
 			<div class="cms_page_panel_content">
 
-				<?php _panel('cms_input_text', [
+				<?php _panel('cms/cms_input_text', [
 						'name' => 'title',
 						'value' => $block['title'],
 						'name_clean' => 'block_title',
@@ -36,7 +36,7 @@
 						'extra_class' => 'cms_page_panel_title',
 				]); ?>
 			
-				<?php _panel('cms_input_text', [
+				<?php _panel('cms/cms_input_text', [
 						'name' => 'submenu_title',
 						'value' => $block['submenu_title'],
 						'name_clean' => 'block_submenu_title',
@@ -46,7 +46,7 @@
 				
 				<div class="cms_input cms_input_select">
 					<label for="panel_name">Panel type</label>
-					<?php _panel('cms_help', ['help' => '[Page panel type]||Select page panel type from available panel types in installed modules.||When adding a new page panel, '.
+					<?php _panel('cms/cms_help', ['help' => '[Page panel type]||Select page panel type from available panel types in installed modules.||When adding a new page panel, '.
 							'one can select an existing panel from {Shortcut to} dropdown instead.||Changing this field may cause losing data already entered for this page panel', ]); ?>
 					<select class="cms_page_panel_panel_name" name="panel_name" id="panel_name">
 						<option value="">-- select block type --</option>
@@ -60,13 +60,14 @@
 								}
 							?>
 							
-							<option value="<?= $panel_type ?>" <?= $block['panel_name'] == $_panel_type ? 'selected="selected"' : '' ?>><?= $panel_type_label ?></option>
+							<option value="<?= $panel_type ?>" <?= $block['panel_name'] == $_panel_type ? 'selected="selected"' : '' ?>>
+								<?= $panel_type_label ?></option>
 						
 						<?php endforeach ?>
 					</select>
 				</div>
 				
-				<?php _panel('cms_input_text', [
+				<?php _panel('cms/cms_input_text', [
 						'name' => 'submenu_anchor',
 						'value' => $block['submenu_anchor'],
 						'name_clean' => 'block_submenu_anchor',

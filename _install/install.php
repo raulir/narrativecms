@@ -311,7 +311,7 @@ INSERT INTO cms_page_panel_param VALUES
 ("372","2","css.000","modules/cms/css/cms_mini_normalise.scss","0"),
 ("373","2","","{\"css\":{\"000\":\"modules\\/cms\\/css\\/cms_mini_normalise.scss\"}}","0"),
 ("406","1","favicon","","0"),
-("407","1","site_title","#page# - BC CMS","0"),
+("407","1","site_title","#page# - '.trim($_POST['page_title'], "\n\t -").'","0"),
 ("408","1","site_title_delimiter","-","0"),
 ("409","1","landing_page.target","_page","0"),
 ("410","1","landing_page.cms_page_id","1","0"),
@@ -340,7 +340,12 @@ INSERT INTO cms_page_panel_param VALUES
 ("434","1","cms_background","","0"),
 ("435","1","images_rows","4","0"),
 ("436","1","input_link_order","0","0"),
-("437","1","","{\"cms_background\":\"\",\"cms_update_url\":\"http:\\/\\/cms.bytecrackers.com\\/cms\\/updater\\/\",\"cron_trigger\":\"visits\",\"email\":\"\",\"favicon\":\"\",\"images_1x\":\"1\",\"images_2x\":\"1.5\",\"images_quality\":\"85\",\"images_rows\":\"4\",\"images_textarea\":\"0.5\",\"inline_limit\":\"100000\",\"input_link_order\":\"0\",\"landing_page\":{\"cms_page_id\":\"1\",\"target\":\"_page\",\"target_id\":\"\",\"text\":\"Homepage\",\"url\":\"homepage\\/\",\"_value\":\"1\"},\"layout\":\"rem\",\"modules\":{\"000\":\"cms\"},\"panel_cache\":\"0\",\"rem_k\":\"100\",\"rem_m_k\":\"50\",\"rem_m_px\":\"900\",\"rem_px\":\"1400\",\"rem_ratio\":\"1.0\",\"rem_switched\":\"0\",\"site_title\":\"#page# - BC CMS\",\"site_title_delimiter\":\"-\",\"targets_enabled\":\"0\"}","0");
+("437","1","","{\"cms_background\":\"\",\"cms_update_url\":\"http:\\/\\/cms.bytecrackers.com\\/cms\\/updater\\/\",\"cron_trigger\":\"visits\",\"email\":\"\",'.
+'\"favicon\":\"\",\"images_1x\":\"1\",\"images_2x\":\"1.5\",\"images_quality\":\"85\",\"images_rows\":\"4\",\"images_textarea\":\"0.5\",'.
+'\"inline_limit\":\"100000\",\"input_link_order\":\"0\",\"landing_page\":{\"cms_page_id\":\"1\",\"target\":\"_page\",\"target_id\":\"\",'.
+'\"text\":\"Homepage\",\"url\":\"homepage\\/\",\"_value\":\"1\"},\"layout\":\"rem\",\"modules\":{\"000\":\"cms\"},\"panel_cache\":\"0\",'.
+'\"rem_k\":\"100\",\"rem_m_k\":\"50\",\"rem_m_px\":\"900\",\"rem_px\":\"1400\",\"rem_ratio\":\"1.0\",\"rem_switched\":\"0\",'.
+'\"site_title\":\"#page# - '.trim($_POST['page_title'], "\n\t -").'\",\"site_title_delimiter\":\"-\",\"targets_enabled\":\"0\"}","0");
 
 INSERT INTO cms_slug VALUES
 ("homepage","1","1");
@@ -480,8 +485,12 @@ RewriteRule ^(.*)$ ./index.php?/$1 [L,QSA]';
 		file_put_contents($current_dir.'.htaccess', $htaccess);
 		
 		// clean up
-		rename($current_dir.'_install/install.php', $current_dir.'cache/install.tmp');
-		rmdir($current_dir.'_install');
+		if (file_exists($current_dir.'_install/install.php')){
+			rename($current_dir.'_install/install.php', $current_dir.'cache/install.tmp');
+			rmdir($current_dir.'_install');
+		} else if (file_exists($current_dir.'install.php')){
+			rename($current_dir.'install.php', $current_dir.'cache/install.tmp');
+		}
 		
 		print(json_encode(['ok' => 1]));
 		die();
@@ -906,10 +915,10 @@ $project_name = strtolower($project_name);
 							db_admin_pass: $('#db_admin_pass').val(),
 							db_db: $('#db_db').val(),
 							db_user: $('#db_user').val(),
-							db_pass: $('#db_pass').val()
+							db_pass: $('#db_pass').val(),
+							page_title: $('#page_title').val()
 						}))
 						.then(() => do_task('install_config', {
-							page_title: $('#page_title').val(),
 							project_name: $('#project_name').val(),
 							environment: $('#environment').val(),
 							db_host: $('#db_host').val(),

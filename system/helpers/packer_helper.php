@@ -72,7 +72,7 @@ if ( !function_exists('pack_css')) {
 			}
 	
 			if ($css_file_update_needed){
-	
+
 				// load files
 				$scss_string = '';
 				foreach($scsss_item['related'] as $scss_file){
@@ -375,6 +375,21 @@ if ( !function_exists('pack_css')) {
 			$filename = $file['script'];
 		} else {
 			$filename = $file;
+		}
+		
+		// for module/file.scss format
+		if (!is_array($file) && substr_count($filename, '/') == 1){
+			
+			$file = [
+					'script' => 'modules/'.str_replace('/', '/css/', $filename),
+			];
+			
+			list($module, $file_short) = explode('/', $filename);
+			
+			if (file_exists($GLOBALS['config']['base_path'].'modules/'.$module.'/css/'.$module.'.scss')){
+				$file['related'] = ['modules/'.$module.'/css/'.$module.'.scss'];
+			}
+			
 		}
 		
 		if (empty($GLOBALS['_panel_scss'])){
