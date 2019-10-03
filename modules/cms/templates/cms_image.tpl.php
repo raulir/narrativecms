@@ -10,15 +10,17 @@
 
 	</div>
 
-	<div class="cms_image_area">
-		<div class="cms_image_cell" <?php _ib('cms/cms_opacity.png', 40) ?>>
-			<img class="cms_image_image" src="<?php print($GLOBALS['config']['upload_url'].$filename); ?>?v=<?= time() ?>">
+	<div class="cms_image_area" <?php _ib('cms/cms_opacity.png', 40) ?>>
+		<div class="cms_image_cell">
+			<img class="cms_image_image" src="<?php $image = _i($filename, ['data' => true, ]) ?>?v=<?= time() ?>">
 		</div>
 	</div>
 	
 	<div class="cms_image_left">
+	
+		<div class="cms_image_stats">Size: &nbsp; <?= $image['width'] ?> x <?= $image['height'] ?> &nbsp; <?= $image['size'] ?>b</div>
 		
-		<div class="cms_image_input cms_input">
+		<div class="cms_input cms_image_description_input">
 			<label for="cms_image_description">Description</label>
 			<textarea id="cms_image_description" class="cms_image_input cms_image_description"><?php print($description); ?></textarea>
 		</div>
@@ -45,28 +47,6 @@
 			<label for="cms_image_copyright">Copyright</label>
 			<input id="cms_image_copyright" type="text" class="cms_image_input cms_image_copyright" value="<?php print($copyright); ?>">
 		</div>
-		
-		<?php if(in_array('keyword', $GLOBALS['config']['modules'])): ?>
-			<div class="cms_image_input cms_input">
-				<select class="cms_image_keywords_select">
-					<option value="">-- select keyword --</option>
-					<?php foreach($possible_keywords as $keyword): ?>
-						<option value="<?php print($keyword['cms_keyword_id']); ?>"><?php print($keyword['cms_keyword_id']); ?></option>
-					<?php endforeach ?>
-				</select>
-				<div class="cms_image_add_keyword">Add</div>
-				<div class="cms_image_keywords_container">
-					<?php if (!empty($keywords)) foreach($keywords as $keyword): ?>
-						<div class="cms_image_keywords_item" data-keyword="<?php print($keyword); ?>" 
-								style="background-image: url('<?php print($GLOBALS['config']['base_url']); ?>modules/cms/img/close.png'); ">
-							
-							<?php print($keyword); ?>
-						
-						</div>
-					<?php endforeach ?>
-				</div>
-			</div>
-		<?php endif ?>
 		
 	</div>
 

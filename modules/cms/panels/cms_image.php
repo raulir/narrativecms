@@ -35,12 +35,6 @@ class cms_image extends CI_Controller {
 
 		$params['category'] = $image['category'];
 
-		$params['possible_keywords'] = $this->cms_keyword_model->get_cms_keywords();
-
-		if(!empty($image['keyword'])){
-			$params['keywords'] = explode(',', $image['keyword']);
-		}
-
 		return $params;
 
 	}
