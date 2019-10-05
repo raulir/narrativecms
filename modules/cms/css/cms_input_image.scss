@@ -1,88 +1,77 @@
-.cms_input_image {
-
-	&>.cms_input_button {
-		width: 120px;
-		float: left;
-		margin-bottom: 7px;
+.cms_input_image_area {
+	
+	box-sizing: border-box;
+	display: inline-block;
+	border: 0.1rem solid $colour_border;
+	width: 33.0rem;
+	height: 24.8rem;
+	line-height: 24.6rem;
+	font-size: 0;
+	float: right;
+	background-position: center;
+	background-size: 40px auto;
+	
+	.cms_repeater_block & {
+		width: 31.0rem;
+		height: 23.3rem;
+		line-height: 23.1rem;
 	}
 
-	.cms_input_image_container {
-		box-sizing: border-box;
-		display: inline-block;
-		border: 1px solid #a0a0a0;
-		width: 330px;
-		height: 248px;
-		float: right;
-		background-position: center;
-		background-size: 40px auto;
-		img {
-			max-width: 328px;
-			max-height: 246px;
-		}
-	}
+}
 
-	.cms_input_image_content {
-		box-sizing: border-box;
-		display: table-cell;
-		width: 328px;
-		height: 246px;
-		text-align: center;
-		vertical-align: middle;
-		line-height: 0;
-		position: relative;
-		font-size: 1.6rem;
+.cms_input_image_content {
+	
+	box-sizing: border-box;
+	display: inline-block;
+	text-align: center;
+	vertical-align: middle;
+	position: relative;
+	font-size: 1.6rem;
+	width: 100%;
+	
+	.cms_repeater_block & {
+		height: 23.1rem;
 	}
 	
-	.cms_input_image_error {
-		line-height: 20px;
-		color: red;
-		padding: 20px;
-		font-weight: 400;
-	}
+}
+
+.cms_input_image_image {
 	
-	.cms_input_image_image {
-		
-		position: relative;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		left: 0;
-		margin: 0 auto;
-		background-position: center;
-		background-repeat: no-repeat;
-		background-size: contain;
-		z-index: 10;
-		filter: grayscale(0%);
-		transition: filter 0.5s;
-	
-		&.cms_images_lazy_waiting, &.cms_images_lazy_loading {
-			filter: grayscale(100%);
-		}
-	
+	width: 100%;
+	height: 24.6rem;
+	margin: 0 auto;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	z-index: 10;
+	filter: grayscale(0%);
+	transition: filter 0.5s;
+
+	&.cms_images_lazy_waiting, &.cms_images_lazy_loading {
+		filter: grayscale(100%);
 	}
 
 	.cms_repeater_block & {
+		height: 23.1rem;
+	}
+
+}
+
+.cms_input_image .cms_input_button {
+	width: 120px;
+	float: left;
+	margin-bottom: 7px;
+}
+
+.cms_input_image_error {
+	line-height: 20px;
+	color: red;
+	padding: 20px;
+	font-weight: 400;
+}
+
+.cms_input_image_overlay {
 	
-		.cms_input_image_container {
-			width: 310px;
-			height: 233px;
-			img {
-				max-width: 308px;
-				max-height: 231px;
-			}
-		}
-		
-		.cms_input_image_content {
-			width: 308px;
-			height: 231px;
-		}
-
-	}
-
-	.cms_input_image_overlay {
-		
-	}
-
 }
 
 /* image input size */
@@ -123,7 +112,7 @@
 		border: 1px solid #a0a0a0;
 	}
 
-	.cms_input_image_container {
+	.cms_input_image_area {
 		display: none;
 		float: none;
 		position: absolute;
@@ -140,7 +129,7 @@
 	
 	&.cms_input_image_hover {
 		z-index: 10;
-		.cms_input_image_container {
+		.cms_input_image_area {
 			display: block;
 		}
 	}

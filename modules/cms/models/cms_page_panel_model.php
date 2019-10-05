@@ -234,7 +234,7 @@ class cms_page_panel_model extends CI_Model {
 	}
 	
 	function _purge_param($cms_page_panel_id){
-		$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? ";
+		$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name != 'create_cms_user_id' and name != 'create_time'";
 		$this->db->query($sql, array($cms_page_panel_id, ));
 	}
 	

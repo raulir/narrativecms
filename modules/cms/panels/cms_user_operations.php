@@ -28,7 +28,7 @@ class cms_user_operations extends CI_Controller {
 			$email = $this->input->post('email');
 			$sort = $this->input->post('sort');
 
-			$this->load->model('cms_user_model');
+			$this->load->model('cms/cms_user_model');
 			 
 			if (!is_array($rights)){
 				$rights = [];
@@ -68,7 +68,7 @@ class cms_user_operations extends CI_Controller {
 			 
 			$cms_user_id = $this->input->post('cms_user_id');
 
-			$this->load->model('cms_user_model');
+			$this->load->model('cms/cms_user_model');
 			 
 			$this->cms_user_model->delete_cms_user($cms_user_id);
 			 

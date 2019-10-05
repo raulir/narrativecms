@@ -1,5 +1,5 @@
-<div class="cms_input_container">
-	<div class="cms_input cms_input_image cms_input_image_container_<?= $name_clean ?> cms_input_image_size_<?= !empty($size) ? $size : 'normal' ?>
+<div class="cms_input_container cms_input_image_container">
+	<div class="cms_input cms_input_image cms_input_image_area_<?= $name_clean ?> cms_input_image_size_<?= !empty($size) ? $size : 'normal' ?>
 			<?= !empty($extra_class) ? $extra_class : '' ?>	<?= !empty($mandatory) ? ' cms_input_mandatory' : '' ?>" 
 			data-name="<?= $name ?>" data-value="<?= $value ?>">
 	
@@ -7,7 +7,7 @@
 		
 		<?php _panel('cms_help', ['help' => $help]) ?>
 		
-		<div class="cms_input_image_container" <?php _ib('cms/cms_opacity.png', 40) ?>>
+		<div class="cms_input_image_area" <?php _ib('cms/cms_opacity.png', 40) ?>>
 			<div class="cms_input_image_content cms_input_image_content_<?= $name_clean ?>">
 				<?php if(!empty($error)): ?>
 					<div class="cms_input_image_error"><?= $error ?></div>

@@ -42,7 +42,7 @@
 	
 </div>
 
-<div class="admin_list_container <?php print(!empty($extra_class) ? $extra_class : ''); ?> cms_list_container" 
+<div class="<?php print(!empty($extra_class) ? $extra_class : ''); ?> cms_list_container" 
 		data-edit_base="<?php print($GLOBALS['config']['base_url'].$edit_base); ?>"
 		<?php if(!empty($filter['panel_name'])): ?>
 			data-panel_name="<?php print($filter['panel_name']); ?>" 

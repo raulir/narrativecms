@@ -1,0 +1,42 @@
+.cms_repeater_block {
+	box-sizing: border-box;
+	display: inline-block;
+	vertical-align: top;
+	padding: 1.0rem;
+	background-repeat: no-repeat;
+	background-position: 1.6rem 1.6rem;
+	background-size: 1.4rem 1.4rem;
+	width: 50%;
+}
+
+.cms_repeater_block_content {
+	box-sizing: border-box;
+	border: 0.1rem solid #909090;
+	padding: 0.5rem 0.9rem 0.5rem 0.9rem;
+	font-size: 1.6rem;
+	line-height: 1.6rem;
+}
+
+.cms_repeater_block_toolbar {
+	clear: both;
+	height: 2.2rem;
+	border-bottom: 0.1rem solid #a0a0a0;
+	margin: 0 -0.6rem 0.2rem -0.6rem;
+}
+
+.cms_repeater_block_delete {
+	box-sizing: border-box;
+	display: block;
+	border: 1px solid #a0a0a0;
+	border-radius: 3px;
+	height: 18px;
+	line-height: 15px;
+	font-size: 13px;
+	float: right;
+	padding: 1px 8px 0px 8px;
+	clear: both;
+	cursor: pointer;
+	text-align: center;
+	transform: translateZ(0);
+	-webkit-transform: translateZ(0);
+}
