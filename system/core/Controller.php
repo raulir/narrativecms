@@ -576,7 +576,17 @@ class CI_Controller {
 	 * @param embed 	returns only html part and adds js and css to ci (this) object
 	 *
 	 */
-	function ajax_panel($name, $params = array()){
+	function ajax_panel($name, $params = []){
+	
+		$this->load->model('cms/cms_page_panel_model');
+		
+		if (is_numeric($name)){
+			$params_db = $this->cms_page_panel_model->get_cms_page_panel($name);
+			if ($params_db['show']){
+				$params = array_merge($params, $params_db);
+				$name = $params['panel_name'];
+			}
+		}
 	
 		// new method for w/o html
 		if (!empty($params['no_html']) && stristr($name, '/')){
@@ -594,9 +604,7 @@ class CI_Controller {
 			return $params;
 	
 		}
-	
-		$this->load->model('cms/cms_page_panel_model');
-		 
+			 
 		$return = array();
 		 
 		if (!is_array($params)){
@@ -614,7 +622,7 @@ class CI_Controller {
 		 
 		// get panel
 		$return = $this->panel($name, $params);
-
+		
 		// meta images
 		if (!empty($params['_images'])){
 			$GLOBALS['_panel_images'] = array_merge(array_values($GLOBALS['_panel_images']), array_values($params['_images']));
@@ -635,7 +643,8 @@ class CI_Controller {
 			if (empty($params['_no_css'])){
 				
 				$scss = array_merge($return['scss'], $return['css']);
-				
+				$scss = array_merge($scss, $GLOBALS['_panel_scss']);
+
 				// prepare css for onpage loading
 				$css_arr = pack_css($scss);
 	

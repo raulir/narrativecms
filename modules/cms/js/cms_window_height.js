@@ -51,7 +51,7 @@
 				
 				var $this = $(this);
 				
-				if ($this.data('cms_window_height_minwidth') < $(window).width()){
+				if (_cms_mobile){
 					
 					var new_height = Math.round(height * $this.data('cms_window_height')) / 100;
 					if ($this.data('cms_window_height_current') != new_height){
@@ -96,7 +96,7 @@ function cms_window_height_init(){
 		
 		$('[data-cms_window_height]').cms_window_height();
 
-	}, 30);
+	}, 100);
 
 }
 

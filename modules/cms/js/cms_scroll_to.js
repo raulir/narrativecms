@@ -32,12 +32,14 @@
 						var name = $this.attr('href').replace('#', '');
 					} else if ($this.data('cms_scroll_to')) {
 						var name = $this.data('cms_scroll_to').replace('#', '');
+					} else if (params.target) {
+						var name = params.target
 					} else {
 						var name = '_top';
 					}
-					
+
 					if (name && $('#' + name).length){
-					
+
 						var elementtop = $('#' + name).offset().top;
 					
 						$('html, body').animate({ scrollTop: elementtop - delta }, 800);
