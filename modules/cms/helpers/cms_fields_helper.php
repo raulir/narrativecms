@@ -69,6 +69,7 @@ if (!function_exists('print_fields')){
 						'name' => $field['name'],
 						'fields' => $field['fields'],
 						'data' => $data[$field['name']],
+						'_return' => true,
 				]); 
 			
 			} elseif ($field['type'] == 'text'){
