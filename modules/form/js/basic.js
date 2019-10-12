@@ -54,6 +54,18 @@ function form_basic_init(){
 						analytics_send('event', 'Form', 'submit', $("input[name='id']", $form).val(), 10);
 					}
 	
+					// register gtag event
+					if (typeof gtag !== 'undefined'){
+					
+						gtag('event', 'form', {
+					    	'event_category': 'submit',
+					    	'event_label': $("input[name='id']", $form).val(),
+					    	'transport_type': 'beacon',
+					    	'value': 10
+						})
+
+					}
+					
 					setTimeout(function(){
 						setTimeout(function(){
 							$('.form_basic_message', $container).removeClass('form_basic_message_status_sending').addClass('form_basic_message_status_active');
