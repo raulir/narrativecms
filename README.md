@@ -21,4 +21,4 @@ BC CMS is branched from Codeigniter 2.0 (2013)
 
 ### Installation and setup
 
-https://github.com/raulir/bccms/wiki/Installation
+https://github.com/raulir/bccms/wiki/2.-Installation
