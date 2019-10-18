@@ -1,0 +1,256 @@
+.carousel_basic_container {
+	background-color: $colour_black;
+}
+
+.carousel_basic_content {
+	
+}
+
+.carousel_basic_items {
+	height: calc(100vh - 2.0rem);
+	position: relative;
+	overflow: hidden;
+	max-height: 65vw;
+	opacity: 1;
+	transition: opacity 0.2s;
+}
+
+.carousel_basic_carousel_hidden {
+	opacity: 0;
+}
+
+.carousel_basic_item {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+}
+
+.carousel_basic_item_image {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	z-index: 10;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.carousel_basic_item_mobile_image {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	z-index: 20;
+	display: none;
+}
+
+.carousel_basic_item_video {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	z-index: 30;	
+}
+
+.carousel_basic_item_video_video {
+	opacity: 0;
+	transition: opacity 0.3s;
+	position: absolute;
+}
+
+.carousel_basic_item_video_visible {
+	opacity: 1;
+}
+
+.carousel_basic_item_overlay {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	z-index: 40;	
+	background-size: 80% auto;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.carousel_basic_item_mobile_overlay {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	z-index: 50;
+	background-size: 80% auto;
+	background-position: center;
+	background-repeat: no-repeat;
+	display: none;
+}
+
+.carousel_basic_item_copy {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	z-index: 60;
+	display: table;
+	table-layout: fixed;
+	text-align: center;
+}
+
+.carousel_basic_item_copy_cell {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+.carousel_basic_item_heading {
+	font-size: 8.0rem;
+	line-height: 7.0rem;
+	text-transform: uppercase;
+	padding: 0.5rem 0;
+    white-space: pre-line;
+}
+
+.carousel_basic_item_text {
+	font-family: favorit;
+    font-size: 1.6rem;
+    line-height: 1.8rem;
+    white-space: pre-line;
+	padding: 1.0rem 0;
+}
+
+.carousel_basic_item_subheading {
+	font-size: 3.0rem;
+	line-height: 3.0rem;
+	text-transform: uppercase;
+	padding: 0.5rem 0;
+    white-space: pre-line;
+}
+
+.carousel_basic_item_cta {
+	display: inline-block;
+	padding: 0.5rem 1.0rem;
+	font-family: favorit;
+	margin: 2.0rem 0 0 0;
+	font-size: 0.8rem;
+	font-weight: bold;
+	text-transform: uppercase;
+	transition: background-color 0.5s, color 0.5s;
+}
+
+.carousel_basic_arrow_left {
+	
+}
+
+.carousel_basic_arrow_right {
+	
+}
+
+.carousel_basic_buttons {
+	position: absolute;
+	bottom: 3.5rem;
+	left: 0;
+	width: 100%;
+	z-index: 100;
+	text-align: center;
+}
+
+.carousel_basic_button {
+	height: 0.2rem;
+	width: 4.0rem;
+	margin: 0 0.3rem;
+	opacity: 0.5;
+	transition: opacity 0.5s, background-color 0.5s;
+	background-color: $colour_white;
+	display: inline-block;
+	cursor: pointer;
+	&.carousel_basic_active {
+		opacity: 1;
+	}
+	.carousel_basic_black & {
+		background-color: $colour_black;
+	}
+}
+
+/* colour schemes */
+
+.carousel_basic_item_scheme_white {
+	
+	color: $colour_white;
+	background-color: $colour_black;
+	
+	.carousel_basic_item_cta {
+		border: 0.1rem solid $colour_white;
+		background-color: $colour_white;
+		color: $colour_black;
+		&:hover {
+			background-color: rgba(255, 255, 255, 0);
+			color: $colour_white;
+		}
+	}
+
+}
+
+.carousel_basic_item_scheme_black {
+	
+	color: $colour_black;
+	background-color: $colour_yellow;
+
+	.carousel_basic_item_cta {
+		border: 0.1rem solid $colour_black;
+		background-color: $colour_black;
+		color: $colour_white;
+		&:hover {
+			background-color: rgba(0, 0, 0, 0);
+			color: $colour_black;
+		}
+	}
+
+}
+
+@media screen and (max-width: $mobile_width) {
+
+	.carousel_basic_items {
+		max-height: 100%;
+	}
+
+	.carousel_basic_item_overlay {
+		display: none;
+	}
+
+	.carousel_basic_item_mobile_overlay {
+		display: block;
+	}
+
+	.carousel_basic_item_heading {
+	
+		font-size: 5rem;
+		line-height: 4.3rem;
+		padding: 0.3rem 0;
+
+		.carousel_basic_item_scheme_black & {
+			font-size: 4.3rem;
+			line-height: 4.0rem;
+			padding: 0.25rem 0;
+		}
+
+	}
+	
+	.carousel_basic_item_text {
+	    font-size: 1.2rem;
+	    line-height: 1.5rem;
+		padding: 0.75rem 0;
+	}
+
+	.carousel_basic_item_cta {
+		margin-top: 1.2rem;
+	}
+
+}

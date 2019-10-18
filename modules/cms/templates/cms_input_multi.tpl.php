@@ -6,15 +6,14 @@
 
 	<div class="cms_input_multi_values">
 		<?php foreach($value as $key): ?>
+			<?php if(!empty($values[$key])): ?>
 
 		    	<div class="cms_input_multi_item">
-						
 					<input type="hidden" name="<?= $name ?>[]" value="<?= $key ?>">
-					
 					<div class="cms_input_multi_item_label"><?= $values[$key] ?></div>
-				
 				</div>
-			
+				
+			<?php endif ?>
 		<?php endforeach ?>
 	</div>
 

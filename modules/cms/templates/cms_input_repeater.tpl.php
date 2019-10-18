@@ -12,6 +12,7 @@
 						'repeater_data' => $repeater_data,
 						'name' => $name,
 						'repeater_key' => $repeater_key,
+						'height' => $height,
 				]) ?>
 			
 			<?php endforeach ?>

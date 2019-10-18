@@ -69,6 +69,7 @@ if (!function_exists('print_fields')){
 						'name' => $field['name'],
 						'fields' => $field['fields'],
 						'data' => !empty($data[$field['name']]) ? $data[$field['name']] : [],
+						'height' => !empty($field['height']) ? $field['height'] : 0,
 						'_return' => true,
 				]); 
 			
@@ -169,19 +170,6 @@ if (!function_exists('print_fields')){
 						],
 						'_return' => true,
 				]);
-				
-			} elseif ($field['type'] == 'file'){
-				
-				$return .= _panel('cms/cms_input_file', array(
-						'label' => $field['label'].$mandatory_label, 
-						'value' => ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) ), 
-						'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'), 
-						'name_clean' => ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']), 
-						'_return' => true, 
-						'mandatory_class' => $mandatory_class,
-						'accept' => !empty($field['accept']) ? $field['accept'] : '',
-						'help' => !empty($field['help']) ? $field['help'] : '',
-				));
 				
 			} else {
 				

@@ -67,6 +67,8 @@
 
 /* input group hidden */
 
-.cms_input_groups_hidden {
-	display: none;
+.cms_input_container_groups {
+	&.cms_input_groups_hidden {
+		display: none;
+	}
 }

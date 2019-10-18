@@ -1,0 +1,141 @@
+{
+	"version":"2",
+    "js": [
+    	"cms/cms_video_resize"
+    ],
+	"item":[
+		{
+			"type":"repeater",
+			"name":"items",
+			"label":"Items",
+			"height": "58",
+			"fields":[
+		        {
+					"type":"groups",
+					"name":"responsive_images",
+					"label":"Item content",
+					"values": {
+						"copy": "Copy",
+						"desktop":"Images",
+						"mobile":"Mobile images"
+					},
+					"default":"copy"
+				},
+				{
+					"type": "textarea",
+					"name": "heading",
+					"label": "Heading",
+					"lines": "2",
+					"groups":["copy"]
+				},
+				{
+					"type": "text",
+					"name": "subheading",
+					"label": "Subheading",
+					"groups":["copy"]
+				},
+				{
+					"type": "textarea",
+					"name": "text",
+					"label": "Text",
+					"lines": "2",
+					"groups":["copy"]
+				},
+				{
+					"type": "text",
+					"name": "cta_text",
+					"label": "CTA text",
+					"default": "Find out more",
+					"groups":["copy"]
+				},
+				{
+					"type": "link",
+					"name": "cta_link",
+					"label": "CTA link",
+					"groups":["copy"]
+				},
+				{
+		        	"type": "file",
+		        	"name": "video",
+		        	"label": "Video",
+		        	"accept": ".mp4",
+		        	"help": "[.mp4 only]||Uploading any other format may cause undetermined results in various browsers.",
+					"groups": ["copy"]
+		        },
+				{
+					"type":"image",
+					"name":"image",
+					"label":"Image",
+					"category":"content",
+					"groups":["desktop"]
+				},
+				{
+					"type":"image",
+					"name":"overlay",
+					"label":"Overlay",
+					"category":"content",
+					"groups":["desktop"]
+				},
+				{
+					"type":"image",
+					"name":"mobile_image",
+					"label":"Mobile image",
+					"category":"content",
+					"groups":["mobile"]
+				},
+				{
+					"type":"image",
+					"name":"mobile_overlay",
+					"label":"Mobile overlay",
+					"category":"content",
+					"groups":["mobile"]
+				},
+				{
+					"type": "subtitle",
+					"label": "Design",
+					"groups": ["copy"]
+				},
+				{
+					"type": "select",
+					"name": "colour_scheme",
+					"label": "Colour scheme",
+					"values": {
+						"white": "White",
+						"black": "Black"
+					},
+					"default": "white",
+					"groups":["copy"]
+				}
+			]
+		},
+		{
+			"type": "subtitle",
+			"label": "Settings"
+		},
+		{
+			"type": "text",
+			"name": "delay",
+			"label": "Delay",
+			"default": "4000",
+			"help": "Time to show one image slide"
+		},
+		{
+			"type": "text",
+			"name": "speed",
+			"label": "Speed",
+			"default": "500",
+			"help": "Animation speed between slides"
+		},
+		{
+			"type": "select",
+			"name": "cycle",
+			"label": "Cycle",
+			"values": {
+				"0": "No",
+				"1": "Yes"
+			},
+			"default": "1",
+			"help": "Should carousel continue over the ends?"
+		}
+	]
+}
