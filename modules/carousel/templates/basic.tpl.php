@@ -14,8 +14,9 @@
 					<?php if(!empty($item['video'])): ?>
 						
 						<div class="carousel_basic_item_video">
-							<video class="carousel_basic_item_video_video" playsinline reload="auto" height="auto" width="auto" muted>
-			             		<source <?php _lfs($item['video']) ?> type="video/mp4">
+							<video class="carousel_basic_item_video_video" playsinline reload="auto" muted>
+								<source src="<?= $GLOBALS['config']['upload_url'] . $item['video'] ?>" type="video/mp4">
+								<!-- <?php _lfs($item['video']) ?> -->
 			            	</video>
 		            	</div>
 						

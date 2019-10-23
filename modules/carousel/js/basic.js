@@ -1,5 +1,5 @@
 function carousel_basic_clear_progress_handlers($this){
-	
+
 	// remove play handler
 	if ($this.data('play_handler')){
 		clearTimeout($this.data('play_handler'));
@@ -7,16 +7,16 @@ function carousel_basic_clear_progress_handlers($this){
 	}
 	
 	// remove video ended events
-	$('.carousel_basic_item_video_video', $this).off('ended.cms');
+	$('.carousel_basic_item_video_video', $this).each(function(){
+		$(this).off('ended.cms')
+	})
 	
 }
 
 function carousel_basic_user_hide($this){
 	
 	'use strict'
-	
-	carousel_basic_clear_progress_handlers($this)
-	
+
 	var $button = $('.carousel_basic_active', $this);
 	var $slide = $('.carousel_basic_item_' + $button.data('carousel_basic_number'), $this);
 	
@@ -32,7 +32,7 @@ function carousel_basic_user_hide($this){
 			$video.data('state', 'pause');
 		}
 
-	}, 300);
+	}, 100);
 	
 }
 
@@ -54,12 +54,12 @@ function carousel_basic_user_show($this){
 		} else {
 			$video.get(0).muted = true;
 		}
-		
+
 		carousel_basic_video_play($video).then(() => {
 			
 			$video.on('ended.cms', function(){
-
-				carousel_basic_play($this);
+console.log('video ended');
+//				carousel_basic_play($this, 100);
 				carousel_basic_next($this);
 				
 			});
@@ -77,44 +77,55 @@ function carousel_basic_user_show($this){
 function carousel_basic_video_play($video){
 	
 	'use strict'
-
+console.log('video play');
 	return new Promise((resolve, reject) => {
 		
 		var i = 0;
 		
 		var interval = setInterval(() => {
 			
-			if($video.hasClass('carousel_basic_item_video_visible')){
-				
+			var ready = $video.hasClass('carousel_basic_item_video_visible')
+			
+			$video.get(0).muted = true;
+			
+			if(ready && i < 50){
+
+				$video.get(0).currentTime = 0
+
 				$video.get(0).play().then(() => {
-					
+console.log('play success')
+setTimeout(() => {console.log($video.get(0).currentTime)}, 1000)
 					clearInterval(interval)
 					resolve()
-				
+					
 				}, (error) => {
+					
+					console.log('error in play promise, forcing mute')
 					
 					$video.get(0).muted = true;
 					$('.carousel_basic_sound_on').removeClass('carousel_basic_sound_on');
-					
-					$video.get(0).play();
-					
+
 					clearInterval(interval)
 					resolve()
 
+				}).catch(error => {
+					
+					console.log('general play promise error', error.message)
+										
 				});
 
 				$video.data('state', 'play');
 
-			} else if (i > 50){
+			} else if (i >= 50) {
 				
 				clearInterval(interval)
 				reject()
 			
 			}
 
-			i++;
+			i = i + 1;
 			
-		}, 100)
+		}, 200)
 		
 	})
 
@@ -159,14 +170,6 @@ function carousel_basic_init(){
 		}
 		$this.addClass('cms_init');
 
-        // set next function for this carousel
-		$this.carousel_basic_next = function(){
-			carousel_basic_next($this);
-		}
-		$this.carousel_basic_previous = function(){
-			carousel_basic_previous($this);
-		}
-
 		// create carousel buttons
 		$this.append('<div class="carousel_basic_buttons"></div>');
 		
@@ -182,13 +185,13 @@ function carousel_basic_init(){
 		// activate next and previous buttons
 		$('.carousel_basic_arrow_right', $this.closest('.carousel_basic_carousel')).on('click.cms', function(e){
 			e.stopPropagation();
-			carousel_basic_pause($this, $this.data('delay') * 4);
-			$this.carousel_basic_next();
+//			carousel_basic_pause($this, $this.data('delay') * 4);
+			carousel_basic_next($this, $this.data('delay') * 4)
 		});
 		$('.carousel_basic_arrow_left', $this.closest('.carousel_basic_carousel')).on('click.cms', function(e){
 			e.stopPropagation();
-			carousel_basic_pause($this, $this.data('delay') * 4);
-			$this.carousel_basic_previous();
+//			carousel_basic_pause($this, $this.data('delay') * 4);
+			carousel_basic_previous($this, $this.data('delay') * 4)
 		});
 		
 		setTimeout(function(){
@@ -201,10 +204,9 @@ function carousel_basic_init(){
 			
 			carousel_basic_cycle_arrows($this, 0)
 			
-			setTimeout(() => {
-				carousel_basic_user_show($this)
-			}, 100);
-			
+console.log('show init')
+			carousel_basic_show($this);
+
 		}, 200);
 
 		// if more than one image, init
@@ -217,13 +219,16 @@ function carousel_basic_init(){
 
 				if (!$(this).hasClass('carousel_basic_active')){
 					
+					carousel_basic_clear_progress_handlers($this)
+					
 					var carousel_basic_number = parseInt($(this).data('carousel_basic_number'));
 					var current_number = parseInt($('.carousel_basic_active').data('carousel_basic_number'));
 					
+					// carousel_basic_show($this, number, reverse, speed, delay){
 					if (current_number < carousel_basic_number){
-						carousel_basic_show($(this).closest('.carousel_basic_container'), carousel_basic_number, 0, parseInt($this.data('animation_speed')));
+						carousel_basic_show($this, carousel_basic_number, 0, parseInt($this.data('animation_speed')), $this.data('delay') * 4);
 					} else {
-						carousel_basic_show($(this).closest('.carousel_basic_container'), carousel_basic_number, 1, parseInt($this.data('animation_speed')));
+						carousel_basic_show($this, carousel_basic_number, 1, parseInt($this.data('animation_speed')), $this.data('delay') * 4);
 					}
 				}
 				
@@ -337,8 +342,6 @@ function carousel_basic_init(){
 			});
 		}
 		
-		carousel_basic_play($this);
-		
 	});
 	
 	$('.carousel_basic_sound').on('click.cms', function(){
@@ -392,9 +395,9 @@ function carousel_basic_dragend($this, $touch_area, e){
     }
     
 	if (delta_x > 100){
-		$this.carousel_basic_previous();
+		carousel_basic_previous($this, $this.data('delay') * 4);
 	} else if (delta_x < -100){
-		$this.carousel_basic_next();
+		carousel_basic_next($this, $this.data('delay') * 4);
 	} else {
 		
 		var current_number = parseInt($('.carousel_basic_active', $this).data('carousel_basic_number'));
@@ -407,6 +410,7 @@ function carousel_basic_dragend($this, $touch_area, e){
 		if (delta_x < 10 && delta_x > -10 && delta_y < 10 && delta_y > -10 && 
 				(typeof e !== 'undefined' && (e.type == 'touchend' || e.which == 1)) && delta_t < 200){
 			
+			carousel_basic_clear_progress_handlers($this)
 			carousel_basic_click($this, $current_panel);
 			
 		}
@@ -432,9 +436,11 @@ function carousel_basic_play($this, delay){
 	'use strict'
 
 	if (!delay) delay = $this.data('delay'); // slider autoadvance delay
-
+	
+console.log('set handler - play', delay);
+	clearTimeout($this.data('play_handler'))
 	$this.data('play_handler', setTimeout(function(){
-		carousel_basic_play($this);
+//		carousel_basic_play($this);
 		carousel_basic_next($this);
 	}, delay));
 	
@@ -443,11 +449,13 @@ function carousel_basic_play($this, delay){
 function carousel_basic_pause($this, delay){
 	
 	'use strict'
-
+console.log($this.data());
 	if (!delay) delay = $this.data('delay') * 4;
-	
+console.log('set handler - pause', delay);
+
+	clearTimeout($this.data('play_handler'))
 	$this.data('play_handler', setTimeout(function(){
-		carousel_basic_play($this);
+//		carousel_basic_play($this);
 		carousel_basic_next($this);
 	}, delay));
 	
@@ -475,24 +483,25 @@ function carousel_basic_get_next($this){
 	
 }
 
-function carousel_basic_next($this){
+function carousel_basic_next($this, delay){
 	
 	'use strict'
 
 	if ($this.data('animating')){
 		return;
 	}
-	
+console.log('next requested');	
 	$this.data('animating', true);
 	setTimeout(function(){
 		$this.data('animating', false);
 	}, 300);
 	
-	carousel_basic_show($this, carousel_basic_get_next($this), 0);
+	// carousel_basic_show($this, number, reverse, speed, delay){
+	carousel_basic_show($this, carousel_basic_get_next($this), 0, $this.data('animation_speed'), $this.data('delay'));
 
 }
 
-function carousel_basic_previous($this){
+function carousel_basic_previous($this, delay){
 	
 	'use strict'
 
@@ -505,7 +514,7 @@ function carousel_basic_previous($this){
 		$this.data('animating', false);
 	}, 300);
 
-	carousel_basic_show($this, carousel_basic_get_previous($this), 1);
+	carousel_basic_show($this, carousel_basic_get_previous($this), 1, $this.data('animation_speed'), $this.data('delay'));
 
 }
 
@@ -550,8 +559,15 @@ function carousel_basic_cycle_arrows($this, number){
 function carousel_basic_show($this, number, reverse, speed, delay){
 	
 	'use strict'
+console.log('show clear handlers')
+	carousel_basic_clear_progress_handlers($this)
 
-	if (!speed) speed = parseInt($this.data('animation_speed'));
+	if (!number) number = 0
+	if (!reverse) reverse = 0
+	if (!speed) speed = parseInt($this.data('animation_speed'))
+	if (!delay) delay = parseInt($this.data('delay'))
+
+console.log('show: number ' + number + ' reverse ' + reverse + ' speed ' + speed + ' delay ' + delay);
 	
 	$this.data('drag_disabled', 'on');
 	setTimeout(function(){
@@ -564,48 +580,55 @@ function carousel_basic_show($this, number, reverse, speed, delay){
 	var current_number = parseInt($('.carousel_basic_active', $this).data('carousel_basic_number'));
 	var new_number = number;
 
-	// if no over the end move
-	if ($this.data('cycle') == 0){
+	if (new_number != current_number){
 	
-		if ((reverse == 0 && current_number > new_number) || (reverse == 1 && current_number < new_number)){
-			$('.carousel_basic_item_' + current_number, $this).animate({'left': '0'}, speed/5);
-			return;
+		// if no over the end move
+		if ($this.data('cycle') == 0){
+		
+			if ((reverse == 0 && current_number > new_number) || (reverse == 1 && current_number < new_number)){
+				$('.carousel_basic_item_' + current_number, $this).animate({'left': '0'}, speed/5);
+				return;
+			}
 		}
-	}
+		
+		carousel_basic_cycle_arrows($this, new_number)
+		
+		$('.carousel_basic_item_' + current_number + ',.carousel_basic_item_' + new_number, $this).finish();
+		
+		$('.carousel_basic_button_' + current_number, $this).removeClass('carousel_basic_active');
+		
+		$('.carousel_basic_button_' + new_number, $this).addClass('carousel_basic_active');
+		
+		// move thingies
+		$('.carousel_basic_item', $this).not('.carousel_basic_item_' + current_number + ',.carousel_basic_item_' + new_number).css({'z-index':'48'});
+		$('.carousel_basic_item_' + current_number, $this).css({'z-index':'49'});
+		var animate_width = $('.carousel_basic_item_' + current_number, $this).width();
+		var starting_x = parseInt($('.carousel_basic_item_' + current_number, $this).css('left'));
+		if (reverse == 0){
+			$('.carousel_basic_item_' + new_number, $this).css({'left': animate_width + starting_x + 'px', 'z-index':'50', 'display':'block'});
+			$('.carousel_basic_item_' + new_number, $this).animate({'left':'0px'}, speed);
+			$('.carousel_basic_item_' + current_number, $this).animate({'left': '-' + animate_width + 'px'}, speed);
+		} else {
+			$('.carousel_basic_item_' + new_number, $this).css({'left': - animate_width + starting_x + 'px', 'z-index':'50', 'display':'block'});
+			$('.carousel_basic_item_' + new_number, $this).animate({'left':'0px'}, speed);
+			$('.carousel_basic_item_' + current_number, $this).animate({'left': animate_width + 'px'}, speed);
+		}
 	
-	carousel_basic_cycle_arrows($this, new_number)
-	
-	$('.carousel_basic_item_' + current_number + ',.carousel_basic_item_' + new_number, $this).finish();
-	
-	$('.carousel_basic_button_' + current_number, $this).removeClass('carousel_basic_active');
-	
-	$('.carousel_basic_button_' + new_number, $this).addClass('carousel_basic_active');
-	
-	// move thingies
-	$('.carousel_basic_item', $this).not('.carousel_basic_item_' + current_number + ',.carousel_basic_item_' + new_number).css({'z-index':'48'});
-	$('.carousel_basic_item_' + current_number, $this).css({'z-index':'49'});
-	var animate_width = $('.carousel_basic_item_' + current_number, $this).width();
-	var starting_x = parseInt($('.carousel_basic_item_' + current_number, $this).css('left'));
-	if (reverse == 0){
-		$('.carousel_basic_item_' + new_number, $this).css({'left': animate_width + starting_x + 'px', 'z-index':'50', 'display':'block'});
-		$('.carousel_basic_item_' + new_number, $this).animate({'left':'0px'}, speed);
-		$('.carousel_basic_item_' + current_number, $this).animate({'left': '-' + animate_width + 'px'}, speed);
-	} else {
-		$('.carousel_basic_item_' + new_number, $this).css({'left': - animate_width + starting_x + 'px', 'z-index':'50', 'display':'block'});
-		$('.carousel_basic_item_' + new_number, $this).animate({'left':'0px'}, speed);
-		$('.carousel_basic_item_' + current_number, $this).animate({'left': animate_width + 'px'}, speed);
 	}
 	
 	var $video = $('.carousel_basic_item_video_video', $('.carousel_basic_item_' + new_number, $this));
 	if ($video.length){
-		$video.get(0).muted = false;
+		$video.get(0).muted = true; // false;
+console.log('show - has video');
 	}
 
 	carousel_basic_user_show($this)
 	
 	if (!$video.length){
+
+console.log('set handler - show', delay);
+
 		$this.data('play_handler', setTimeout(function(){
-			carousel_basic_play($this);
 			carousel_basic_next($this);
 		}, delay));
 	}
@@ -616,7 +639,7 @@ function carousel_basic_sound_on(){
 	
 	'use strict'
 
-	$('.carousel_basic_item_video_visible', $('.carousel_basic_item_' + $('.carousel_basic_active').data('carousel_basic_number'))).get(0).muted = false;
+	$('.carousel_basic_item_video_visible', $('.carousel_basic_item_' + $('.carousel_basic_active').data('carousel_basic_number'))).get(0).muted = true; // false;
 
 }
 
