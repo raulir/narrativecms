@@ -389,7 +389,8 @@ class CI_Controller {
 		}
 	
 		if (!empty($GLOBALS['_panel_titles'])){
-			$_title = trim(implode(' '.(!empty($GLOBALS['config']['site_title_delimiter']) ? $GLOBALS['config']['site_title_delimiter'] : '-').' ', $GLOBALS['_panel_titles']), ' -');
+			$_title = trim(implode(' '.(!empty($GLOBALS['config']['site_title_delimiter']) ? $GLOBALS['config']['site_title_delimiter'] : '-').
+					' ', $GLOBALS['_panel_titles']), ' -');
 		} else {
 			$_title = '';
 		}

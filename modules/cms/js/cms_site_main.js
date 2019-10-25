@@ -711,8 +711,8 @@ function lock_scroll(){
 
 function cms_lock_scroll(){
 	
-    $html = $('html'); 
-    $body = $('body'); 
+    var $html = $('html'); 
+    var $body = $('body'); 
     var initWidth = $body.outerWidth();
     var initHeight = $body.outerHeight();
 
@@ -747,8 +747,8 @@ function unlock_scroll(){
 
 function cms_unlock_scroll(){
 
-	$html = $('html');
-    $body = $('body');
+	var $html = $('html');
+    var $body = $('body');
 
     var previous_overflow_x = $html.data('previous_overflow_x');
     var previous_overflow_y = $html.data('previous_overflow_y');
@@ -781,7 +781,7 @@ function change_url(new_url){
 
 		if ( !window.location.href.endsWith(new_url) || new_url == '/'){
 			history.pushState({}, '', new_url);
-			cms_last_url = window.location.href;
+			var cms_last_url = window.location.href;
 		}
 
 	}

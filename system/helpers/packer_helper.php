@@ -57,7 +57,11 @@ if ( !function_exists('pack_css')) {
 			
 			if (empty($scsss_item['css'])){
 				$m_path = pack_get_scss_path($scsss_item['script']);
-				$scsss_item['css'] = $m_path['css_cache'];
+				if (!empty($m_path['css_cache'])){
+					$scsss_item['css'] = $m_path['css_cache'];
+				} else {
+					$scsss_item['css'] = $scsss_item['script'];
+				}
 			}
 				
 			// check if needed to compile, happens when any of files in set is newer than cache
