@@ -1,10 +1,6 @@
 {
 	"panels":[
 		{
-			"id":"analytics",
-			"name":"Analytics"
-		},
-		{
 			"id":"gtm",
 			"name":"GTM"
 		},
@@ -38,7 +34,7 @@
 		},
 		{
 			"id":"gtag",
-			"name":"Analytics gtag.js"
+			"name":"Analytics"
 		}
 	],
 	"cms_menu":[
@@ -47,9 +43,9 @@
 			"name":"CMS"
 		},
 		{
-			"id":"analytics",
+			"id":"gtag",
 			"name":"Analytics settings",
-			"url":"admin/panel_settings/basic__analytics/",
+			"url":"admin/panel_settings/basic__gtag/",
 			"parent":"cms",
 			"access":"basic_analytics"
 		},
@@ -64,13 +60,6 @@
 			"id":"gtm",
 			"name":"FB pixel settings",
 			"url":"admin/panel_settings/basic__pixel/",
-			"parent":"cms",
-			"access":"basic_analytics"
-		},
-		{
-			"id":"gtag",
-			"name":"Gtag.js settings",
-			"url":"admin/panel_settings/basic__gtag/",
 			"parent":"cms",
 			"access":"basic_analytics"
 		}

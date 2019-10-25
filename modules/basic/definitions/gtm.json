@@ -2,11 +2,19 @@
 	"version":"2",
 	"label":"GTM settings",
 	"item":[
+	],
+	"settings":[
 		{
 			"type":"text",
 			"name":"gtm_id",
 			"label":"GTM ID",
 			"help":"[GTM ID]||Eg: GTM-123ABC4"
+		},
+		{
+			"type":"text",
+			"name":"delay",
+			"label":"Delay",
+			"help":""
 		}
 	]
 }
