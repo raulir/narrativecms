@@ -79,25 +79,26 @@ class CI_Controller {
 		
 	}
 
-	public static function &get_instance()
-	{
+	static function &get_instance(){
 
 		return self::$instance;
 		
 	}
 	
-	/**
-	 * past in MY Controller
-	 */
-	
 	function panel_heading($params){
-		 
-		$return = !empty($params['heading']) ? $params['heading'] : '';
-		 
-		if (empty($params['heading']) && !empty($params['cms_page_panel_id'])){
+		
+		$this->load->model('cms/cms_panel_model');
+		
+		$config = $this->cms_panel_model->get_cms_panel_config($params['panel_name']);
+		
+		$title_field = !empty($config['list']['title_field']) ? $config['list']['title_field'] : 'heading';
+				 
+		if (!isset($params[$title_field]) && !empty($params['cms_page_panel_id'])){
 			$return = $params['panel_name'].'='.$params['cms_page_panel_id'];
+		} else {
+			$return = $params[$title_field];
 		}
-	
+
 		return $return;
 		 
 	}
@@ -386,6 +387,10 @@ class CI_Controller {
 			$_description = trim(implode(' - ', $GLOBALS['_panel_descriptions']), ' -');
 		} else {
 			$_description = '';
+		}
+		
+		if (strlen($_description) > 300){
+			$_description = substr($_description, 0, strrpos($_description, ' '));
 		}
 	
 		if (!empty($GLOBALS['_panel_titles'])){

@@ -145,7 +145,7 @@ class cms_page_panel_toolbar extends CI_Controller {
 					}
 					
 					$params['breadcrumb'][] = [
-							'text' => !empty($panel_config['list']['title_field']) ? $cms_page_panel[$panel_config['list']['title_field']] : $heading,
+							'text' => $heading,
 							'url' => '',
 							'field' => !empty($panel_config['list']['title_field']) ? $panel_config['list']['title_field'] : 'heading', // title field
 					];

@@ -80,8 +80,6 @@ function cms_list_load(start, limit, after){
 		panel_name: panel_name,
 		source: source,
 		filters: filters,
-		title_field: $('.cms_list_container').data('title_field'),
-		title_panel: $('.cms_list_container').data('title_panel'),
 		id_field: $('.cms_list_container').data('id_field'),
 		no_sort: $('.cms_list_container').data('no_sort') //,
 		// _no_css: true
