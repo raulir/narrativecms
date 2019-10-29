@@ -92,7 +92,7 @@ class CI_Controller {
 		$config = $this->cms_panel_model->get_cms_panel_config($params['panel_name']);
 		
 		$title_field = !empty($config['list']['title_field']) ? $config['list']['title_field'] : 'heading';
-				 
+
 		if (!isset($params[$title_field]) && !empty($params['cms_page_panel_id'])){
 			$return = $params['panel_name'].'='.$params['cms_page_panel_id'];
 		} elseif(!empty($params[$title_field])) {
@@ -100,7 +100,7 @@ class CI_Controller {
 		} elseif(!empty($config['label'])) {
 			$return = $config['label'];
 		} else {
-			$return = $params['panel_name'].'='.$params['cms_page_panel_id'];
+			$return = $params['panel_name'].('='.$params['cms_page_panel_id']);
 		}
 
 		return $return;

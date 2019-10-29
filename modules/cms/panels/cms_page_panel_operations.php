@@ -297,6 +297,7 @@ class cms_page_panel_operations extends CI_Controller {
 			$data_merged = $data;
 			unset($data_merged['panel_params']);
 			$data_merged = array_merge($data['panel_params'], $data_merged);
+			$data_merged['cms_page_panel_id'] = $block_id;
 			
 			$data['panel_params']['_panel_heading'] = $this->run_panel_method($data['panel_name'], 'panel_heading', $data_merged);
 			
