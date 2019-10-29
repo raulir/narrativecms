@@ -280,7 +280,7 @@ class cms_page_panel_model extends CI_Model {
 		}
 		
 		// add settings if present
-		$return = array_merge($this->cms_page_panel_model->get_cms_page_panel_settings($return['panel_name']), $return);
+		$return = array_merge($this->get_cms_page_panel_settings($return['panel_name']), $return);
 	
 		return $return;
 	
