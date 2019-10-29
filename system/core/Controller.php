@@ -95,8 +95,12 @@ class CI_Controller {
 				 
 		if (!isset($params[$title_field]) && !empty($params['cms_page_panel_id'])){
 			$return = $params['panel_name'].'='.$params['cms_page_panel_id'];
-		} else {
+		} elseif(!empty($params[$title_field])) {
 			$return = $params[$title_field];
+		} elseif(!empty($config['label'])) {
+			$return = $config['label'];
+		} else {
+			$return = $params['panel_name'].'='.$params['cms_page_panel_id'];
 		}
 
 		return $return;
