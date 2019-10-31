@@ -110,6 +110,22 @@
 		},
 		{
 			"type": "subtitle",
+			"label": "Design"
+		},
+		{
+			"type":"image",
+			"name":"arrow_left",
+			"label":"Arrow left",
+			"category":"icon"
+		},
+		{
+			"type":"image",
+			"name":"arrow_right",
+			"label":"Arrow right",
+			"category":"icon"
+		},
+		{
+			"type": "subtitle",
 			"label": "Settings"
 		},
 		{
