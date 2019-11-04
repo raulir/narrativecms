@@ -183,12 +183,12 @@ function carousel_basic_init(){
 		});
 
 		// activate next and previous buttons
-		$('.carousel_basic_arrow_right', $this.closest('.carousel_basic_carousel')).on('click.cms', function(e){
+		$('.carousel_basic_arrow_right', $this.closest('.carousel_basic_container')).on('click.cms', function(e){
 			e.stopPropagation();
 //			carousel_basic_pause($this, $this.data('delay') * 4);
 			carousel_basic_next($this, $this.data('delay') * 4)
 		});
-		$('.carousel_basic_arrow_left', $this.closest('.carousel_basic_carousel')).on('click.cms', function(e){
+		$('.carousel_basic_arrow_left', $this.closest('.carousel_basic_container')).on('click.cms', function(e){
 			e.stopPropagation();
 //			carousel_basic_pause($this, $this.data('delay') * 4);
 			carousel_basic_previous($this, $this.data('delay') * 4)

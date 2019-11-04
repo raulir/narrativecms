@@ -295,7 +295,7 @@ class CI_Controller {
 		// add debug data
 		$return = "\n".'<!-- panel "' . $files['module'] . '/' . $files['name'] . '" '.
 						(!empty($params['_extends']['panel']) ? 'extends "'.$params['_extends']['panel'].'" ' : '' ).'start -->'."\n".
-				(!empty($files['template_extends']) && empty($params['_extends']['no_wrapper']) ? 
+				(!empty($params['_extends']['panel']) && empty($params['_extends']['no_wrapper']) ? 
 						'<span class="cms_wrapper cms_wrapper_'.$files['module'].'_'.$files['name'].'">'."\n" : '').
 				$return .
 				(!empty($files['template_extends']) && empty($params['_extends']['no_wrapper']) ? "\n</span>" : '').
