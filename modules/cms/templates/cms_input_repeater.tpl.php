@@ -20,8 +20,7 @@
 
 	</div>
 
-	<div class="admin_small_button admin_right cms_repeater_button" 
-			data-name="<?= $name ?>" data-fields="<?= base64_encode(json_encode($fields)) ?>">
+	<div class="admin_small_button cms_repeater_button" data-name="<?= $name ?>" data-fields="<?= base64_encode(json_encode($fields)) ?>">
 		Add element
 	</div>
 	

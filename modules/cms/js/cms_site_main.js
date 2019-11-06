@@ -456,6 +456,8 @@ var _cms_test_localstorage = function() {
 
 function get_ajax_panel(name, params, action_on_success){
 	
+	// TODO: cms_page_panel.js:144-163 - use script running from there to activate external javascripts
+	
 	var data = false;
 	
 	var cache = 0;
@@ -472,11 +474,9 @@ function get_ajax_panel(name, params, action_on_success){
 			data = $.parseJSON(local_data);
 			if (data.storage_timestamp > +new Date() - (cache * 1000)){
 				action_on_success(data);
-// console.log('cache hit age: ' + (+new Date() - data.storage_timestamp))
 			} else {
 				data = false;
 				localStorage.removeItem(key);
-// console.log('cache old')
 			}
 		}
 	}
@@ -495,7 +495,6 @@ function get_ajax_panel(name, params, action_on_success){
 		  		if (_cms_test_localstorage() && cache > 0){
 		  			returned_data.storage_timestamp = new Date().getTime();
 		  			localStorage.setItem(key, JSON.stringify(returned_data));
-// console.log('cache new ' + key)
 		  		}
 		  		
 		  		action_on_success(returned_data);
