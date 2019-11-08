@@ -1,4 +1,12 @@
-.cms_page_panel_toolbar {
+.cms_page_panel_toolbar_container {
+	height: 6.1rem;
+}
+
+.cms_page_panel_toolbar_content {
+	transition: background-color 0.3s;
+}
+
+.cms_page_panel_toolbar_area {
 	overflow: visible;
 	z-index: 20;
 }
@@ -23,6 +31,7 @@
     	.cms_toolbar_buttons_hidden_container {
     		opacity: 1;
     		max-height: 1000px;
+    		max-width: 200px;
     		transition: opacity 0.2s, max-height 0.2s 0s;
     	}
     }
@@ -45,21 +54,22 @@
 .cms_toolbar_buttons_hidden_container {
 	opacity: 0;
 	max-height: 0;
-	transition: opacity 0.2s, max-height 0s;
+	max-width: 50px;
+	transition: opacity 0.2s, max-height 0s, max-width 0s;
 	position: absolute;
-	top: 30px;
+	top: 2.9rem;
     right: -4px;
     z-index: 10;
     padding: 6px 3px 1px 5px;
 	background-color: white;
 	border-radius: 7px;
 	overflow: hidden;
+	box-sizing: border-box;
 	
 	.cms_tool_button {
 		float: none;
 		display: block;
 		margin-left: 0;
-		background-color: white;
 		margin-bottom: 5px;
 		text-align: center;
 		white-space: nowrap;
@@ -70,4 +80,37 @@
     	text-transform: lowercase;
 	}
 	
+}
+
+/* fixed */
+.cms_page_panel_toolbar_fixed {
+	
+	.cms_page_panel_toolbar_content {
+		position: fixed;
+		background-color: rgba(255,255,255,0.8);
+    	top: 6.0rem;
+    	z-index: 1000;
+    	left: 0;
+    	width: 100rem;
+    	left: 50%;
+    	transform: translate(-50%);
+		border-bottom: 0.1rem solid $colour_border;
+		text-shadow: 0 0 0.2rem $colour_white;
+		&:hover {
+			background-color: $colour_white;
+		}
+	}
+
+	.cms_page_panel_toolbar_area {
+		width: 96.0rem;
+		margin: 0 auto;
+		padding-top: 0.5rem;
+		padding-bottom: 0.5rem;
+		border: 0;
+	}
+
+	.cms_toolbar_buttons {
+		top: 0.5rem;
+	}
+
 }
