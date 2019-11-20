@@ -4,8 +4,8 @@
 	display: inline-block;
 	border: 0.1rem solid $colour_border;
 	width: 33.0rem;
-	height: 24.8rem;
-	line-height: 24.6rem;
+	height: 23.5rem;
+	line-height: 23.3rem;
 	font-size: 0;
 	float: right;
 	background-position: center;
@@ -13,14 +13,11 @@
 	
 	.cms_repeater_block & {
 		width: 31.0rem;
-		height: 23.3rem;
-		line-height: 23.1rem;
 	}
 
 }
 
 .cms_input_image_content {
-	
 	box-sizing: border-box;
 	display: inline-block;
 	text-align: center;
@@ -28,17 +25,12 @@
 	position: relative;
 	font-size: 1.6rem;
 	width: 100%;
-	
-	.cms_repeater_block & {
-		height: 23.1rem;
-	}
-	
 }
 
 .cms_input_image_image {
-	
+
 	width: 100%;
-	height: 24.6rem;
+	height: 23.3rem;
 	margin: 0 auto;
 	background-position: center;
 	background-repeat: no-repeat;
@@ -49,10 +41,6 @@
 
 	&.cms_images_lazy_waiting, &.cms_images_lazy_loading {
 		filter: grayscale(100%);
-	}
-
-	.cms_repeater_block & {
-		height: 23.1rem;
 	}
 
 }

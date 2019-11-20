@@ -10,6 +10,10 @@ function init_cms_repeater_block_delete(){
 		// remove repeater block
 		$(this).closest('.cms_repeater_block').remove();
 		
+		if (typeof cms_page_panel_fields_init === 'function') {
+			cms_page_panel_fields_init()
+		}
+		
 	});
 	
 }

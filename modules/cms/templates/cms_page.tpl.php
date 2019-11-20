@@ -82,8 +82,8 @@
 								'label' => 'Description',
 								'value' => (!empty($page['description']) ? $page['description'] : ''),
 								'name' => 'cms_page_description',
+								'lines' => 4, 
 								'translate' => 1,
-								'extra_data' => ' data-lines="4" ',
 								'help' => '[Page description]||Very important for SEO.||Can be seen in search engine results and social media shares. Shouldn\'t be left empty and should be different for all pages. '.
 										'||This text might be ignored when page is list item (like an article or blog post) template. In this case this can be left empty.',
 						));

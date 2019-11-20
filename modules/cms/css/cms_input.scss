@@ -17,30 +17,20 @@
 		padding-right: 0;
 	}
 
-	.cms_repeater_block & {
-		width: 100%;
-		padding-left: 0;
-		padding-right: 0;
-	}
-
 }
 
 .cms_input label {
 	box-sizing: border-box;
 	display: inline-block;
 	width: 12.0rem;
-	line-height: 2.6rem;
-	max-height: 2.6rem;
-	letter-spacing: -0.045rem;
+	line-height: 2.5rem;
+	max-height: 2.5rem;
+	letter-spacing: -0.04rem;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	font-size: 1.6rem;
 	vertical-align: top;
-}
-
-.cms_repeater_block .cms_input_select > select {
-	width: 310px;
 }
 
 .admin_input_error {

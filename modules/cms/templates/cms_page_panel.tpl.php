@@ -48,7 +48,7 @@
 					<label for="panel_name">Panel type</label>
 					<?php _panel('cms/cms_help', ['help' => '[Page panel type]||Select page panel type from available panel types in installed modules.||When adding a new page panel, '.
 							'one can select an existing panel from {Shortcut to} dropdown instead.||Changing this field may cause losing data already entered for this page panel', ]); ?>
-					<select class="cms_page_panel_panel_name" name="panel_name" id="panel_name">
+					<select class="cms_input_select_select cms_page_panel_panel_name" name="panel_name" id="panel_name">
 						<option value="">-- select block type --</option>
 						<?php foreach ($panel_types as $panel_type => $panel_type_label): ?>
 						
@@ -111,9 +111,7 @@
 			
 		<?php endif ?>
 		
-		<div class="cms_page_panel_fields">
-			<?php _panel('cms/cms_page_panel_fields', ['panel_params_structure' => $panel_params_structure, 'block' => $block]) ?>
-		</div>
+		<?php _panel('cms/cms_page_panel_fields', ['panel_params_structure' => $panel_params_structure, 'block' => $block]) ?>
 
 	</form>
 	

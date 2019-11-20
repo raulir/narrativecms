@@ -96,9 +96,9 @@ if (!function_exists('print_fields')){
 						'label' => $field['label'].$mandatory_label,
 						'value' => ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) ),
 						'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'),
-						'extra_class' => ((!empty($field['width']) && $field['width'] == 'wide') ? ' cms_input_wide_textarea ' : ''),
+						'lines' => (!empty($field['lines']) ? $field['lines'] : '3' ),
+						'width' => !empty($field['width']) ? $field['width'] : 'narrow',
 						'extra_data' => $max_chars_data.' '.$meta_data.' '
-								.'data-lines="'.(!empty($field['lines']) ? $field['lines'] : '3' ).'" '
 								.' data-html="'.(!empty($field['html']) ? $field['html'] : '').'" '
 								.' data-html_class="'.(!empty($field['html_class']) ? $field['html_class'] : '').'" '
 								.' data-html_css="'.(!empty($field['html_css']) ? $field['html_css'] : '').'" '

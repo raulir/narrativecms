@@ -16,13 +16,6 @@ function cms_input_textarea_srcconverter(url, node, on_save, name) {
 
 function cms_input_textarea_init(){
 
-	$('.cms_input_textarea textarea').each(function(){
-
-		$this = $(this);
-		$this.css({'height':parseInt($this.css('line-height')) * parseInt($this.data('lines')) + 7 + 'px'});
-		
-	});
-	
 	$('.cms_input_textarea').each(function(){
 		
 		var $this = $(this);
@@ -187,6 +180,7 @@ function cms_input_textarea_init(){
 			    	convert_urls : true,
 			    	relative_urls : false,
 			    	document_base_url: config_url,
+			    	height: 'calc(100% - 2.5rem)',
 			    	setup : function(ed) {
 			    		ed.on('init', function(ed) {
 			    			ed.pasteAsPlainText = true;
@@ -202,23 +196,22 @@ function cms_input_textarea_init(){
 
 				i++;
 				
-				setTimeout(() => {
-					$('.cms_input_textarea textarea').each(function(){
-
-						$this = $(this);
-						$this.css({'height':parseInt($this.css('line-height')) * parseInt($this.data('lines')) + 7 + 'px'});
-						
-					});
-				}, 1000)
-
-			
 			}
 
 		});
 
 	}, 200);
 	
-	
+	setTimeout(() => {
+		$('.cms_input_textarea textarea').each(function(){
+
+			$this = $(this);
+			if (!$this.closest('.cms_page_panel_fields').length){
+				$this.css({'height':parseInt($this.css('line-height')) * parseInt($this.data('lines')) + 7 + 'px'});
+			}
+		});
+	}, 30)
+
 }
 
 function cms_input_textarea_resize(){

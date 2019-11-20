@@ -1,5 +1,5 @@
-<div class="cms_input_container cms_input_image_container">
-	<div class="cms_input cms_input_image cms_input_image_area_<?= $name_clean ?> cms_input_image_size_<?= !empty($size) ? $size : 'normal' ?>
+<div class="cms_input cms_input_image_container" data-cms_input_height="<?= (empty($size) || $size == 'normal') ? '7' : '3' ?>">
+	<div class="cms_input_image cms_input_image_area_<?= $name_clean ?> cms_input_image_size_<?= !empty($size) ? $size : 'normal' ?>
 			<?= !empty($extra_class) ? $extra_class : '' ?>	<?= !empty($mandatory) ? ' cms_input_mandatory' : '' ?>" 
 			data-name="<?= $name ?>" data-value="<?= $value ?>">
 	

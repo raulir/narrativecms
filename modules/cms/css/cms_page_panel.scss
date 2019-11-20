@@ -25,18 +25,8 @@
 	
 }
 
-.cms_page_panel_fields {
-	padding: 2.0rem 0 0 0;
-	font-size: 0;
-	letter-spacing: 0;
-	line-height: 0;
-	&:first-of-type {
-		padding: 0;
-	}
-}
-
 .cms_page_panel_info {
-	margin: 2.4rem auto 0 auto;
+	margin: 2.0rem auto 0 auto;
 	border-top: 0.1rem solid $colour_border;
 	text-align: center;
 	font-size: 0;

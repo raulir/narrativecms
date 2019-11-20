@@ -1,0 +1,28 @@
+.cms_page_panel_fields {
+	
+	padding: 2.0rem 0 0 0;
+	font-size: 0;
+	letter-spacing: 0;
+	line-height: 0;
+	position: relative;
+	opacity: 1;
+	transition: opacity 0.2s;
+
+	&:first-of-type {
+		padding: 0;
+	}
+
+	&.cms_page_panel_fields_hidden {
+		opacity: 0;
+	}
+
+	.cms_input {
+		position: absolute;
+	}
+
+	.cms_repeater_container {
+		position: absolute;
+		width: 100%;
+	}
+	
+}
