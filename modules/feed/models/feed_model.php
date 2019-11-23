@@ -47,17 +47,19 @@ class feed_model extends CI_Model {
 			   		}
 		   		}
 	   		}
-	   		
+
 	   		// check for twitter
 	   		foreach($feed_settings['channels'] as $feed_setting){
 	   			if ($feed_setting['source'] == 'twitter'){
-	
-					$stats['tweets'] = 0;
+	   				
+	   				$twitter_settings = $this->cms_page_panel_model->get_cms_page_panel_settings('feed/twitter_settings');
+
+	   				$stats['tweets'] = 0;
 	
 					$tweets = $this->get_twitter_by_username(
-							$feed_setting['username'], 
-							$feed_settings['twitter_api_key'], 
-							$feed_settings['twitter_api_secret']
+							$feed_setting['filter'], 
+							$twitter_settings['twitter_api_key'], 
+							$twitter_settings['twitter_api_secret']
 					);
 	
 			   		foreach($tweets as $tweet){

@@ -272,10 +272,6 @@ class cms_page_panel_operations extends CI_Controller {
 
 			}
 
-			if (($data['cms_page_id'] == 999999 || $data['cms_page_id'] == 0) && !empty($data['panel_params']['heading'])){
-				$data['title'] = $data['panel_params']['heading'];
-			}
-
 			// if it contains cms_page_panels (panel_in_panel) fields which are empty
 			foreach($panel_structure as $struct){
 				
@@ -292,7 +288,19 @@ class cms_page_panel_operations extends CI_Controller {
 				}
 				
 			}
+			
+			// panel heading for cms
+			if (($data['cms_page_id'] == 999999 || $data['cms_page_id'] == 0) && !empty($data['panel_params']['heading'])){
+				$data['title'] = $data['panel_params']['heading'];
+			}
 
+			$data_merged = $data;
+			unset($data_merged['panel_params']);
+			$data_merged = array_merge($data['panel_params'], $data_merged);
+			$data_merged['cms_page_panel_id'] = $block_id;
+			
+			$data['panel_params']['_panel_heading'] = $this->run_panel_method($data['panel_name'], 'panel_heading', $data_merged);
+			
 			// save data
 			if($block_id){
 
@@ -300,7 +308,7 @@ class cms_page_panel_operations extends CI_Controller {
 				 
 			} else {
 
-				$block_id = $this->cms_page_panel_model->create_block($data);
+				$block_id = $this->cms_page_panel_model->create_cms_page_panel($data);
 
 				// if list and add to top, move to top
 				if (!empty($panel_config['list']['new_first'])){

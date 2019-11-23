@@ -49,13 +49,6 @@ class CI_Output {
 	 * @access 	protected
 	 */
 	protected $headers			= array();
-	/**
-	 * List of mime types
-	 *
-	 * @var array
-	 * @access 	protected
-	 */
-	protected $mime_types		= array();
 
 	/**
 	 * Determines if output compression is enabled
@@ -80,11 +73,6 @@ class CI_Output {
 	function __construct()
 	{
 		$this->_zlib_oc = @ini_get('zlib.output_compression');
-
-		// Get mime types for later
-		include APPPATH.'config/mimes.php';
-
-		$this->mime_types = $mimes;
 
 		log_message('debug', "Output Class Initialized");
 	}
@@ -182,40 +170,6 @@ class CI_Output {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Set Content Type Header
-	 *
-	 * @access	public
-	 * @param	string	extension of the file we're outputting
-	 * @return	void
-	 */
-	function set_content_type($mime_type)
-	{
-		if (strpos($mime_type, '/') === FALSE)
-		{
-			$extension = ltrim($mime_type, '.');
-
-			// Is this extension supported?
-			if (isset($this->mime_types[$extension]))
-			{
-				$mime_type =& $this->mime_types[$extension];
-
-				if (is_array($mime_type))
-				{
-					$mime_type = current($mime_type);
-				}
-			}
-		}
-
-		$header = 'Content-Type: '.$mime_type;
-
-		$this->headers[] = array($header, TRUE);
-
-		return $this;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Set HTTP Status Header
 	 * moved to Common procedural functions in 1.7.2
 	 *
@@ -282,16 +236,6 @@ class CI_Output {
 			$output =& $this->final_output;
 		}
 
-		// --------------------------------------------------------------------
-
-		// Do we need to write a cache file?  Only if the controller does not have its
-		// own _output() method and we are not dealing with a cache file, which we
-		// can determine by the existence of the $CI object above
-		if ($this->cache_expiration > 0 && isset($CI) && ! method_exists($CI, '_output'))
-		{
-			$this->_write_cache($output);
-		}
-
 		// Are there any server headers to send?
 		if (count($this->headers) > 0)
 		{
@@ -318,57 +262,6 @@ class CI_Output {
 
 		echo $output;  // Send it to the browser!
 
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Write a Cache File
-	 *
-	 * @access	public
-	 * @param 	string
-	 * @return	void
-	 */
-	function _write_cache($output)
-	{
-		$CI =& get_instance();
-		$path = $CI->config->item('cache_path');
-
-		$cache_path = ($path == '') ? APPPATH.'cache/' : $path;
-
-		if ( ! is_dir($cache_path) )
-		{
-			log_message('error', "Unable to write cache file: ".$cache_path);
-			return;
-		}
-
-		$uri =	$CI->config->item('base_url').
-				$CI->config->item('index_page').
-				$CI->uri->uri_string();
-
-		$cache_path .= md5($uri);
-
-		if ( ! $fp = @fopen($cache_path, FOPEN_WRITE_CREATE_DESTRUCTIVE))
-		{
-			log_message('error', "Unable to write cache file: ".$cache_path);
-			return;
-		}
-
-		$expire = time() + ($this->cache_expiration * 60);
-
-		if (flock($fp, LOCK_EX))
-		{
-			fwrite($fp, $expire.'TS--->'.$output);
-			flock($fp, LOCK_UN);
-		}
-		else
-		{
-			log_message('error', "Unable to secure a file lock for file at: ".$cache_path);
-			return;
-		}
-		fclose($fp);
-
-		log_message('debug', "Cache file written: ".$cache_path);
 	}
 
 	// --------------------------------------------------------------------

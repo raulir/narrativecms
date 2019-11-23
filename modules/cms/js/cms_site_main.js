@@ -1,3 +1,32 @@
+'use strict';
+
+/* promise polyfill */
+!function(e,n){"object"==typeof exports&&"undefined"!=typeof module?n():"function"==typeof define&&define.amd?define(n):n()}(0,function(){"use strict";
+function e(e){var n=this.constructor;return this.then(function(t){return n.resolve(e()).then(function(){
+return t})},function(t){return n.resolve(e()).then(function(){return n.reject(t)})})}function n(e){return!(!e||"undefined"==typeof e.length)}
+function t(){}function o(e){if(!(this instanceof o))throw new TypeError("Promises must be constructed via new");
+if("function"!=typeof e)throw new TypeError("not a function");this._state=0,this._handled=!1,this._value=undefined,this._deferreds=[],c(e,this)}
+function r(e,n){for(;3===e._state;)e=e._value;0!==e._state?(e._handled=!0,o._immediateFn(function(){var t=1===e._state?n.onFulfilled:n.onRejected;
+if(null!==t){var o;try{o=t(e._value)}catch(r){return void f(n.promise,r)}i(n.promise,o)}else(1===e._state?i:f)(n.promise,e._value)})):e._deferreds.push(n)}
+function i(e,n){try{if(n===e)throw new TypeError("A promise cannot be resolved with itself.");if(n&&("object"==typeof n||"function"==typeof n)){
+var t=n.then;if(n instanceof o)return e._state=3,e._value=n,void u(e);if("function"==typeof t)return void c(function(e,n){
+return function(){e.apply(n,arguments)}}(t,n),e)}e._state=1,e._value=n,u(e)}catch(r){f(e,r)}}function f(e,n){e._state=2,e._value=n,u(e)}
+function u(e){2===e._state&&0===e._deferreds.length&&o._immediateFn(function(){e._handled||o._unhandledRejectionFn(e._value)});
+for(var n=0,t=e._deferreds.length;t>n;n++)r(e,e._deferreds[n]);e._deferreds=null}function c(e,n){var t=!1;try{e(function(e){t||(t=!0,i(n,e))},
+function(e){t||(t=!0,f(n,e))})}catch(o){if(t)return;t=!0,f(n,o)}}var a=setTimeout;o.prototype["catch"]=function(e){
+return this.then(null,e)},o.prototype.then=function(e,n){var o=new this.constructor(t);return r(this,new function(e,n,t){
+this.onFulfilled="function"==typeof e?e:null,this.onRejected="function"==typeof n?n:null,this.promise=t}(e,n,o)),o},
+o.prototype["finally"]=e,o.all=function(e){return new o(function(t,o){function r(e,n){try{if(n&&("object"==typeof n||"function"==typeof n)){
+var u=n.then;if("function"==typeof u)return void u.call(n,function(n){r(e,n)},o)}i[e]=n,0==--f&&t(i)}catch(c){o(c)}}if(!n(e))
+return o(new TypeError("Promise.all accepts an array"));var i=Array.prototype.slice.call(e);if(0===i.length)return t([]);
+for(var f=i.length,u=0;i.length>u;u++)r(u,i[u])})},o.resolve=function(e){return e&&"object"==typeof e&&e.constructor===o?e:new o(function(n){n(e)})},
+o.reject=function(e){return new o(function(n,t){t(e)})},o.race=function(e){return new o(function(t,r){if(!n(e))
+return r(new TypeError("Promise.race accepts an array"));for(var i=0,f=e.length;f>i;i++)o.resolve(e[i]).then(t,r)})},
+o._immediateFn="function"==typeof setImmediate&&function(e){setImmediate(e)}||function(e){a(e,0)},o._unhandledRejectionFn=function(e){
+void 0!==console&&console&&console.warn("Possible Unhandled Promise Rejection:",e)};var l=function(){if("undefined"!=typeof self)return self;
+if("undefined"!=typeof window)return window;if("undefined"!=typeof global)return global;throw Error("unable to locate global object")}();
+"Promise"in l?l.Promise.prototype["finally"]||(l.Promise.prototype["finally"]=e):l.Promise=o});
+
 /*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
  * Digest Algorithm, as defined in RFC 1321.
@@ -427,6 +456,8 @@ var _cms_test_localstorage = function() {
 
 function get_ajax_panel(name, params, action_on_success){
 	
+	// TODO: cms_page_panel.js:144-163 - use script running from there to activate external javascripts
+	
 	var data = false;
 	
 	var cache = 0;
@@ -443,11 +474,9 @@ function get_ajax_panel(name, params, action_on_success){
 			data = $.parseJSON(local_data);
 			if (data.storage_timestamp > +new Date() - (cache * 1000)){
 				action_on_success(data);
-// console.log('cache hit age: ' + (+new Date() - data.storage_timestamp))
 			} else {
 				data = false;
 				localStorage.removeItem(key);
-// console.log('cache old')
 			}
 		}
 	}
@@ -466,7 +495,6 @@ function get_ajax_panel(name, params, action_on_success){
 		  		if (_cms_test_localstorage() && cache > 0){
 		  			returned_data.storage_timestamp = new Date().getTime();
 		  			localStorage.setItem(key, JSON.stringify(returned_data));
-// console.log('cache new ' + key)
 		  		}
 		  		
 		  		action_on_success(returned_data);
@@ -642,8 +670,6 @@ function get_api(name, params){
 	
 }
 
-
-
 /*
  * 
  *  framework related javascript 
@@ -684,8 +710,8 @@ function lock_scroll(){
 
 function cms_lock_scroll(){
 	
-    $html = $('html'); 
-    $body = $('body'); 
+    var $html = $('html'); 
+    var $body = $('body'); 
     var initWidth = $body.outerWidth();
     var initHeight = $body.outerHeight();
 
@@ -720,8 +746,8 @@ function unlock_scroll(){
 
 function cms_unlock_scroll(){
 
-	$html = $('html');
-    $body = $('body');
+	var $html = $('html');
+    var $body = $('body');
 
     var previous_overflow_x = $html.data('previous_overflow_x');
     var previous_overflow_y = $html.data('previous_overflow_y');
@@ -754,7 +780,7 @@ function change_url(new_url){
 
 		if ( !window.location.href.endsWith(new_url) || new_url == '/'){
 			history.pushState({}, '', new_url);
-			cms_last_url = window.location.href;
+			var cms_last_url = window.location.href;
 		}
 
 	}
@@ -820,171 +846,6 @@ var get_ios_windowheight = function() {
     var zoomLevel = document.documentElement.clientWidth / window.innerWidth;
     return window.innerHeight * zoomLevel;
 };
-
-( function( $ ) {
-	 
-    $.fn.equalize_height = function() {
-    	
-    	var $set = this;
- 
-    	$set.css({'height':'', 'min-height':''});
-
-    	for (var i = 0; i <= 9; i++) {
-
-    		$set.each(function(){
-
-    			var $this = $(this);
-    			var max_height = 0;
-    			var top = $this.offset().top;
-
-    			$set.each(function(){
-    				
-    				var $that = $(this);
-    				if ($that.offset().top == top && $that.height() > max_height){
-    					max_height = $that.height();
-    				}
-    				
-    			});
-    			
-    			if (max_height > 0 && !$this.data('max_height_set')){
-    				$this.css({'min-height': Math.ceil(max_height) + 'px'}).data('max_height_set', true);
-    			}
-    	
-    		});
-    	
-    	}
-    	
-    	$set.data('max_height_set', false);
- 
-        return $set;
- 
-    };
- 
-}( jQuery ));
-
-( function( $ ) {
-	
-	// params.step = percentage to shrink at each try
-    $.fn.equalize_content = function(params) {
-    	
-    	params = params || {};
-    	
-    	var try_narrower = function($item, iteration){
-    		
-    		var check_result = function(){
-    			
-    			if ($item.innerHeight() > old_h || iteration > 10){
-    				
-    				// bad
-    				if (iteration <= 10){
-    					$item.innerWidth(old_w);
-    				}
-    				
-    				$item.css({'max-height':''}).css({'color':''});
-    				
-    				todo = todo - 1;
-    				if (todo == 0){
-    					$item.data('equalize_content', '');
-    					params.after();
-    				}
- 
-    			} else {
-    			
-    				try_narrower($item, iteration + 1);
-    			
-    			}
-
-    		}
-    		
-    		if (!iteration){
-    			iteration = 0;
-    		}
-    		
-    		var old_w = $item.innerWidth();
-    		var old_h = $item.innerHeight();
-    		
-    		$item.innerWidth(old_w * (1 - params.step/100));
-    		
-    		// if (typeof window.requestAnimationFrame === 'function'){
-    		// 	requestAnimationFrame(check_result);
-    		// } else {
-    			setTimeout(check_result, 0);
-    		// }
-    		
-    	}
-    	
-    	if (!params.step) params.step = 10;
-    	if (!params.after) params.after = function(){};
-    	
-    	if (this.length == 0) {
-    		params.after();
-    		return this;
-    	}
-    	
-    	var window_width = $(window).width();
-
-    	var todo = this.length;
-    	
-    	this.each(function(){
-    		
-        	var $container = $(this);
-        	
-        	// only if page width or parent width has changed
-        	var parent_width = $container.parent().width();
-        	if ($container.data('window_width') != window_width || $container.data('parent_width') != parent_width){
-        		
-        		$container.data('window_width', window_width);
-        		$container.data('parent_width', parent_width);
-        		
-        		if ($container.data('equalize_content') !== '1'){
-                	
-    	        	$container.css({'width':'','max-height':'none','color':'transparent'}).data('equalize_content', '1');
-    	        	
-    	        	if ($container.innerHeight() > 0){
-    	        		setTimeout(function(){
-    	            		try_narrower($container);
-    	        		}, 30);
-    	        	}
-            	
-            	}
-
-        	}
-        	
-    	});
-
-        return this;
- 
-    };
- 
-}( jQuery ));
-
-( function( $ ) {
-	
-    $.fn.cms_scroll_top = function(params) {
-
-    	params = params || {};
-    	
-    	$(this).each(function(){
-    		
-    		var $this = $(this);
-    		
-    		if ($this.data('cms_scroll_top') != '1'){
-
-    			$(this).on('click.cms', function(){
-	    			$('html, body').animate({ 
-	    				scrollTop: 0
-	    			}, 800);
-	    		});
-	    		
-    			$this.data('cms_scroll_top', '1');
-
-    		}
-
-    	});
-    	
-    };
-    
-}( jQuery ));
 
 // detect if touch
 function is_touch_event(e){
@@ -1107,6 +968,36 @@ function format_date(date, format, utc) {
 
     return format;
 };
+
+var cms_disable_zoom = function () { 
+	if (!(/iPad|iPhone|iPod/.test(navigator.userAgent))) return; 
+	$(document.head).append('<style>*{cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,0)}</style>'); 
+	$(window).on('gesturestart touchmove', function (evt) {
+		if (evt.originalEvent.scale !== 1) { evt.originalEvent.preventDefault(); document.body.style.transform = 'scale(1)'; } 
+	}); 
+}
+
+var injectScript = function(src, id) {
+	
+	return new Promise((resolve, reject) => {
+		
+		var s = 'script';
+	    var js, fjs = document.getElementsByTagName(s)[0]
+	    
+	    if (!id) id = src
+
+	    if (document.getElementById(id)) abort('Script loaded already: ' + src)
+	    
+	    js = document.createElement(s)
+	    js.id = id
+	    js.addEventListener('load', resolve)
+	    js.addEventListener('error', () => reject('Script loading error: ' + src))
+	    js.src = src
+	    fjs.parentNode.insertBefore(js, fjs)
+	
+	})
+	
+}
 
 $(document).ready(function() {
 	

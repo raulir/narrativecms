@@ -1,0 +1,26 @@
+{
+	"version":"2",
+	"list":{
+		"list_title":"Menu groups",
+		"item_title":"Menu group",
+		"title_field":"heading",
+		"filter_fields":{
+			"show":"-- show --",
+			"menucategory_id":"-- menu category --"
+		},
+		"link_target":"0"
+	},
+	"item":[
+		{
+			"type":"fk",
+			"list":"marcella/menucategory",
+			"name":"menucategory_id",
+			"label":"Menu category"
+		},
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Heading"
+		}
+	]
+}

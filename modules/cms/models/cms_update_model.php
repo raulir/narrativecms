@@ -1,17 +1,26 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class cms_update_model extends CI_Model {
-	
-	function rebuild(){
 
-		$folders = array(
-			'application/',
-			'js/',
-			'system/',
-			'modules/cms/',
-		);
+	// rebuilds module hash caches
+	function rebuild_module($module, $folders = []){
 		
-		$extensions = array(
+		if (empty($module)){
+
+			// system and cms
+			$folders = [
+					'application/',
+					'js/',
+					'system/',
+					'modules/cms/',
+			];
+
+		}
+
+		$return = ['module' => $module];
+		
+		$extensions = [
+				'',
 				'bin',
 				'css',
 				'eot',
@@ -30,9 +39,10 @@ class cms_update_model extends CI_Model {
 				'ttf',
 				'txt',
 				'woff',
-		);
+				'jpg',
+		];
 		
-		$hashes = array();
+		$hashes = [];
 		$version_hashes = array();
 		$current_hash = '';
 		
@@ -41,7 +51,7 @@ class cms_update_model extends CI_Model {
 			
 			// go over all files recursively
 			$full_folder = str_replace("\\", '/', $GLOBALS['config']['base_path'].$folder);
-			
+
 			if (file_exists($full_folder)){
 			
 				$it = new RecursiveDirectoryIterator($full_folder);
@@ -49,9 +59,9 @@ class cms_update_model extends CI_Model {
 					
 	    			$cms_filename = $folder.str_replace($full_folder, '', str_replace("\\", '/', $filename));
 	 				
-	 				if(in_array(pathinfo($cms_filename, PATHINFO_EXTENSION), $extensions)){
-	
-						// if matches, get hash
+	 				if(!is_dir($filename) && in_array(pathinfo($cms_filename, PATHINFO_EXTENSION), $extensions)){
+
+	 					// if matches, get hash
 						$cms_md5 = md5_file($filename);
 				
 						// add to hashes
@@ -71,30 +81,40 @@ class cms_update_model extends CI_Model {
 			
 		}
 		
-		// index.php
-		$cms_md5 = md5_file(str_replace("\\", '/', $GLOBALS['config']['base_path']).'index.php');
-		$hashes[] = array(
-				'filename' => 'index.php',
-				'hash' => $cms_md5,
-				'size' => filesize(str_replace("\\", '/', $GLOBALS['config']['base_path']).'index.php'),
-		);
-		$version_hashes[] = $cms_md5;
+		// special case for system and cms
+		if (empty($module)){
 		
-		// LICENSE
-		if (file_exists(str_replace("\\", '/', $GLOBALS['config']['base_path']).'LICENSE')){
-			$cms_md5 = md5_file(str_replace("\\", '/', $GLOBALS['config']['base_path']).'LICENSE');
+			// index.php
+			$cms_md5 = md5_file(str_replace("\\", '/', $GLOBALS['config']['base_path']).'index.php');
 			$hashes[] = array(
-					'filename' => 'LICENSE',
+					'filename' => 'index.php',
 					'hash' => $cms_md5,
-					'size' => filesize(str_replace("\\", '/', $GLOBALS['config']['base_path']).'LICENSE'),
+					'size' => filesize(str_replace("\\", '/', $GLOBALS['config']['base_path']).'index.php'),
 			);
 			$version_hashes[] = $cms_md5;
+			
+			// LICENSE
+			if (file_exists(str_replace("\\", '/', $GLOBALS['config']['base_path']).'LICENSE')){
+				$cms_md5 = md5_file(str_replace("\\", '/', $GLOBALS['config']['base_path']).'LICENSE');
+				$hashes[] = array(
+						'filename' => 'LICENSE',
+						'hash' => $cms_md5,
+						'size' => filesize(str_replace("\\", '/', $GLOBALS['config']['base_path']).'LICENSE'),
+				);
+				$version_hashes[] = $cms_md5;
+			}
+			
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
+
+		} else {
+			
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$module.'.json';
+			
 		}
 		
 		sort($version_hashes);
 		
 		$current_hash = md5(implode($version_hashes));
-		$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
 		
 		// load current version data, if exists
 		if (file_exists($filename)){
@@ -103,54 +123,84 @@ class cms_update_model extends CI_Model {
 			$old_data = array();
 		}
 		
-		if (empty($old_data['current_hash']) || $current_hash !== $old_data['current_hash']){
+		if (empty($old_data['version'])){
+			$old_data['version'] = '0.0.0';
+		}
 		
-			if (empty($old_data['version'])){
-				$old_data['version'] = '0.0.0';
-			}
+		if (empty($old_data['current_hash']) || $current_hash !== $old_data['current_hash']){
 			
-			list($old_data['version_major'], $old_data['version_minor'], $old_data['version_number']) = explode('.', $old_data['version']);
-			$version_major = !empty($old_data['version_major']) ? $old_data['version_major'] : '0';
-			$version_minor = !empty($old_data['version_minor']) ? $old_data['version_minor'] : '0';
-			$version_number = !empty($old_data['version_number']) ? $old_data['version_number'] : '0';
+			$new_data = [
+					'version' => $old_data['version'],
+					'version_hash' => !empty($old_data['version_hash']) ? $old_data['version_hash'] : '[unknown]',
+					'version_time' => !empty($old_data['version_time']) ? $old_data['version_time'] : '0',
+					'update_time' => !empty($old_data['update_time']) ? $old_data['update_time'] : '0',
+					'current_hash' => $current_hash,
+					'files' => $hashes,
+			];
 			
 			// write hashes to hash cache
-			$this->load->model('cms_helper_model');
-			file_put_contents($filename, json_encode(array(
-				'version' => $version_major.'.'.$version_minor.'.'.$version_number,
-				'version_major' => $version_major,
-				'version_minor' => $version_minor,
-				'version_number' => $version_number,
-				'version_hash' => !empty($old_data['version_hash']) ? $old_data['version_hash'] : '[unknown]',
-				'version_time' => !empty($old_data['version_time']) ? $old_data['version_time'] : '0',
-				'update_time' => !empty($old_data['update_time']) ? $old_data['update_time'] : '0',
-				'current_hash' => $current_hash,
-				'files' => $hashes,
-			)), JSON_PRETTY_PRINT);
+			file_put_contents($filename, json_encode($new_data, JSON_PRETTY_PRINT));
 		
 		}
+		
+		$return['local_version'] = $old_data['version'];
+		$return['local_updated'] = !empty($old_data['update_time']) ? $old_data['update_time'] : '0';
+		$return['local_version_time'] = !empty($old_data['version_time']) ? $old_data['version_time'] : '0';
+		$return['local_current_hash'] = $current_hash;
+		$return['local_version_hash'] = !empty($old_data['version_hash']) ? $old_data['version_hash'] : '[unknown]';
+		
+		return $return;
+		
+	}
+
+	// rebuild all modules
+	function rebuild(){
+		
+		$return = [];		
+		$return[] = $this->rebuild_module('');
+		
+		// other modules
+		$this->load->model('cms/cms_module_model');
+		
+		$modules = $this->cms_module_model->get_modules();
+		
+		foreach($modules as $module){
+			if ($module['name'] !== 'cms'){
+				
+				$return[] = $this->rebuild_module($module['name'], ['modules/'.$module['name'].'/']);
+				
+			}
+		}
+		
+		return $return;
 
 	}
 	
-	function increment_master_version(){
-
+	function increment_master_version($module){
+		
+		if (empty($module)){
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
+		} else {
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$module.'.json';
+		}
+		
 		// load cache file
-		$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
 		$data = json_decode(file_get_contents($filename), true);
 		
-		// change values
-		if ($data['version_major'] != (!empty($GLOBALS['config']['update']['version_major']) ? $GLOBALS['config']['update']['version_major'] : '0')){
-			$data['version_number'] = 0;
+		list($maj, $min, $num) = explode('.', $data['version']);
+		
+		// TODO: get maj and min from module config
+		
+		if ($maj != $maj){ // from config
+			$min = 0;
+			$num = 0;
 		}
 		
-		if ($data['version_minor'] != (!empty($GLOBALS['config']['update']['version_minor']) ? $GLOBALS['config']['update']['version_minor'] : '0')){
-			$data['version_number'] = 0;
+		if ($min != $min){ // from config
+			$num = 0;
 		}
 		
-		$data['version_major'] = !empty($GLOBALS['config']['update']['version_major']) ? $GLOBALS['config']['update']['version_major'] : '0';
-		$data['version_minor'] = !empty($GLOBALS['config']['update']['version_minor']) ? $GLOBALS['config']['update']['version_minor'] : '0';
-		$data['version_number'] = $data['version_number'] + 1;
-		$data['version'] = $data['version_major'].'.'.$data['version_minor'].'.'.$data['version_number'];
+		$data['version'] = $maj.'.'.$min.'.'.($num + 1);
 		$data['version_hash'] = $data['current_hash'];
 		
 		$data['version_time'] = time();
@@ -161,52 +211,77 @@ class cms_update_model extends CI_Model {
 		
 	}
 	
-	function get_version(){
+	function get_version($module){
 		
-		$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
+		if (empty($module)){
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
+		} else {
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$module.'.json';
+		}
 		
 		// load current version data, if exists
-		if (file_exists($filename)){
-			$old_data = json_decode(file_get_contents($filename), true);
-			$return = array(
-				'version_hash' => $old_data['version_hash'],
-				'current_hash' => $old_data['current_hash'],
-				'version_time' => !empty($old_data['version_time']) ? $old_data['version_time'] : 0,
-				'update_time' => !empty($old_data['update_time']) ? $old_data['update_time'] : 0,
-				'version' => $old_data['version'],
-				'hash' => $old_data['version_hash'],
-			);
-		} else {
-			$return = [
-				'version_hash' => '[unknown]',
-				'current_hash' => '[unknown]',
-				'version_time' => '0',
-				'update_time' => '0',
-				'version' => '[unknown]',
-				'hash' => '0',
-			];
+		if (!file_exists($filename)){
+
+			if (!empty($module)){
+				if (file_exists($GLOBALS['config']['base_path'].'modules/'.$module['name'].'/')){
+					
+					$this->rebuild_module($module, ['modules/'.$module['name'].'/']);
+					
+				}
+			} else {
+				
+				$this->rebuild_module('');
+				
+			}
+
 		}
+		
+		$old_data = json_decode(file_get_contents($filename), true);
+		$return = array(
+			'version_hash' => $old_data['version_hash'],
+			'current_hash' => $old_data['current_hash'],
+			'version_time' => !empty($old_data['version_time']) ? $old_data['version_time'] : 0,
+			'update_time' => !empty($old_data['update_time']) ? $old_data['update_time'] : 0,
+			'version' => $old_data['version'],
+		);
 		
 		return $return;
 		
 	}
 	
-	function get_master_version(){
-
-		$postdata = http_build_query(array('do' => 'version', ));
-		$context  = stream_context_create(array('http' => array(
-		        'method'  => 'POST',
-        		'header'  => 'Content-type: application/x-www-form-urlencoded',
-        		'content' => $postdata
-    	)));
-    	
-    	if (empty($GLOBALS['config']['cms_update_url'])){
+	function get_master_version($module = ''){
+		
+	    if (empty($GLOBALS['config']['cms_update_url'])){
     		return false;
     	}
+    	
+		$header = [
+				'Content-type: application/x-www-form-urlencoded',
+		];
 
-		$master_data = @file_get_contents($GLOBALS['config']['cms_update_url'], false, $context);
-		
-		if ($master_data === false){
+		$postdata = http_build_query([
+				'do' => 'version',
+				'module' => $module,
+		]);
+    	
+    	// check url
+    	if (stristr($GLOBALS['config']['cms_update_url'], 'localhost')){
+    		$host = parse_url($GLOBALS['config']['cms_update_url'], PHP_URL_HOST);
+    		$url = str_replace($host, 'localhost', $GLOBALS['config']['cms_update_url']);
+    		$header[] = 'Host: '.$host;
+    	} else {
+    		$url = $GLOBALS['config']['cms_update_url'];
+    	}
+    	
+    	$context  = stream_context_create(array('http' => array(
+    			'method'  => 'POST',
+    			'header'  => $header,
+    			'content' => $postdata
+    	)));
+    	 
+    	$master_data = file_get_contents($url, false, $context);
+
+    	if ($master_data === false){
 			return [];
 		}
 		
@@ -214,9 +289,13 @@ class cms_update_model extends CI_Model {
 		
 	}
 	
-	function get_files(){
+	function get_files($module){
 		
-		$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
+		if (empty($module)){
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
+		} else {
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$module.'.json';
+		}
 		
 		// load current version data, if exists
 		if (file_exists($filename)){
@@ -235,18 +314,37 @@ class cms_update_model extends CI_Model {
 
 	}
 	
-	function get_master_files(){
+	function get_master_files($module){
 		
-		$postdata = http_build_query(array('do' => 'files', ));
-		$context  = stream_context_create(array('http' => array(
-		        'method'  => 'POST',
-        		'header'  => 'Content-type: application/x-www-form-urlencoded',
-        		'content' => $postdata
-    	)));
-
-		if (!empty($GLOBALS['config']['cms_update_url'])){
-			$master_data = file_get_contents($GLOBALS['config']['cms_update_url'], false, $context);
+		if (empty($GLOBALS['config']['cms_update_url'])){
+			return false;
 		}
+		
+		$header = [
+				'Content-type: application/x-www-form-urlencoded',
+		];
+		
+		$postdata = http_build_query([
+				'do' => 'files',
+				'module' => $module,
+		]);
+		 
+		// check url
+		if (stristr($GLOBALS['config']['cms_update_url'], 'localhost')){
+			$host = parse_url($GLOBALS['config']['cms_update_url'], PHP_URL_HOST);
+			$url = str_replace($host, 'localhost', $GLOBALS['config']['cms_update_url']);
+			$header[] = 'Host: '.$host;
+		} else {
+			$url = $GLOBALS['config']['cms_update_url'];
+		}
+		 
+		$context  = stream_context_create(array('http' => array(
+				'method'  => 'POST',
+				'header'  => $header,
+				'content' => $postdata
+		)));
+		
+		$master_data = file_get_contents($url, false, $context);
 		
 		if (empty($master_data)){
 			return false;
@@ -256,9 +354,13 @@ class cms_update_model extends CI_Model {
 		
 	}
 
-	function get_file($needed_filename){
+	function get_file($needed_filename, $module){
 		
-		$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
+		if (empty($module)){
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
+		} else {
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$module.'.json';
+		}
 		
 		// load current version data, if exists
 		if (file_exists($filename)){
@@ -296,36 +398,53 @@ class cms_update_model extends CI_Model {
 		
 	}
 	
-	function get_master_file($needed_filename){
-
-		$postdata = http_build_query(array('do' => 'file', 'filename' => $needed_filename, ));
-		$context  = stream_context_create(array('http' => array(
-		        'method'  => 'POST',
-        		'header'  => 'Content-type: application/x-www-form-urlencoded',
-        		'content' => $postdata
-    	)));
+	function get_master_file($needed_filename, $module){
 		
-		// if fails to load configuration in db use master copy
 		if (empty($GLOBALS['config']['cms_update_url'])){
-			$GLOBALS['config']['cms_update_url'] = 'http://www.bytecrackers.com/cms/cms/updater/';
+			return false;
 		}
-
-		$master_data = file_get_contents($GLOBALS['config']['cms_update_url'], false, $context);
+		
+		$header = [
+				'Content-type: application/x-www-form-urlencoded',
+		];
+		
+		$postdata = http_build_query([
+				'do' => 'file',
+				'module' => $module,
+				'filename' => $needed_filename,
+		]);
+			
+		// check url
+		if (stristr($GLOBALS['config']['cms_update_url'], 'localhost')){
+			$host = parse_url($GLOBALS['config']['cms_update_url'], PHP_URL_HOST);
+			$url = str_replace($host, 'localhost', $GLOBALS['config']['cms_update_url']);
+			$header[] = 'Host: '.$host;
+		} else {
+			$url = $GLOBALS['config']['cms_update_url'];
+		}
+			
+		$context  = stream_context_create(array('http' => array(
+				'method'  => 'POST',
+				'header'  => $header,
+				'content' => $postdata
+		)));
+		
+		$master_data = file_get_contents($url, false, $context);
 		
 		return json_decode($master_data, true);
 
 	}
 	
-	function get_needed_files(){
+	function get_needed_files($module){
 		
 		// get master list
-		$master_files = $this->get_master_files();
-		
+		$master_files = $this->get_master_files($module);
+
 		// get local list
-		$local_files = $this->get_files();
+		$local_files = $this->get_files($module);
 		
 		$return = array();
-		
+
 		// remove 
 		foreach($master_files['files'] as $master_key => $master_file){
 				
@@ -386,10 +505,10 @@ class cms_update_model extends CI_Model {
 	}
 	
 	// copies files from server to local cache
-	function update_file($filename){
+	function update_file($filename, $module){
 		
 		// get remote file
-		$master_file_data = $this->get_master_file($filename);
+		$master_file_data = $this->get_master_file($filename, $module);
 
 		// create cache folder if not exists
 		$pathinfo = pathinfo($GLOBALS['config']['base_path'] . 'cache/update/' . $filename);
@@ -421,12 +540,18 @@ class cms_update_model extends CI_Model {
 		
 	}
 	
-	function update_copy(){
-		
+	function update_copy($module){
+
 		// go over all cache files recursively
 		$folder = $GLOBALS['config']['base_path']. 'cache/update/';
 		
-		if (file_exists($folder)){
+		if (!empty($module)){
+			$folder_module = $folder.'modules/'.$module.'/';
+		} else {
+			$folder_module = $folder;
+		}
+
+		if (file_exists($folder_module)){
 			
 			$it = new RecursiveDirectoryIterator($folder);
 			foreach (new RecursiveIteratorIterator($it) as $filename => $file) {
@@ -436,9 +561,10 @@ class cms_update_model extends CI_Model {
 				if (!is_dir($from_filename)){
 				
 					$to_filename = $GLOBALS['config']['base_path'] . str_replace($folder, '', str_replace("\\", '/', $filename));
-						
+
 					// check whats inside
 					$contents = file_get_contents($from_filename);
+
 					if ($contents == '_DELETE_'){
 						unlink($to_filename);
 					} else {
@@ -472,10 +598,15 @@ class cms_update_model extends CI_Model {
 
 	}
 	
-	function update_version_cache($params){
-		
+	function update_version_cache($module, $params){
+
 		// load cache file
-		$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
+		if (empty($module)){
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
+		} else {
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$module.'.json';
+		}
+		
 		$data = json_decode(file_get_contents($filename), true);
 		
 		// change values
@@ -523,6 +654,44 @@ class cms_update_model extends CI_Model {
 				
 		}
 		
+	}
+	
+	function update_cleanup(){
+		
+		$return = 0;
+		
+		$folders = [
+				'application/',
+				'js/',
+				'system/',
+				'modules/cms/',
+		];
+
+		// go over all folders
+		foreach($folders as $folder){
+				
+			// go over all files recursively
+			$full_folder = str_replace("\\", '/', $GLOBALS['config']['base_path'].$folder);
+				
+			if (file_exists($full_folder)){
+					
+				$it = new RecursiveDirectoryIterator($full_folder);
+				foreach (new RecursiveIteratorIterator($it) as $filename => $file) {
+						
+					if (is_dir($filename) && substr($filename, -3, 3) !== '/..'){
+						
+						$fi = new FilesystemIterator($filename, FilesystemIterator::SKIP_DOTS);
+						if (!iterator_count($fi)) {
+							rmdir($filename);
+						}
+						
+					}
+						
+				}
+		
+			}
+				
+		}
 	}
 
 }

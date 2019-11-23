@@ -72,17 +72,6 @@ function cms_images_activate() {
 					
 					$('.cms_image_save').on('click.cms', function(){
 						
-						// collect keywords
-						var keywords = '';
-						$('.cms_image_keywords_item').each(function(){
-							
-							if (keywords != ''){
-								keywords = keywords + ',';
-							}
-							keywords = keywords + $(this).data('keyword');
-							
-						});
-						
 						get_ajax_panel('cms_images_operations', {
 							'filename': $(this).data('filename'), 
 							'do': 'cms_images_save',
@@ -90,7 +79,6 @@ function cms_images_activate() {
 							'copyright': $('.cms_image_copyright').val(),
 							'description': $('.cms_image_description').val(),
 							'category': $('.cms_image_category').val(),
-							'keywords': keywords
 						}, function(){
 							
 							if ($('.cms_images_category').val() != $('.cms_image_category').val()){
@@ -115,30 +103,6 @@ function cms_images_activate() {
 						})
 						
 					});
-					
-					// update keywords selector
-					cms_image_init_keywords();
-					
-					$('.cms_image_add_keyword').on('click.cms', function(){
-						if ($('.cms_image_keywords_select').val() != ''){
-						
-							$('.cms_image_keywords_container').append(
-									'<div class="cms_image_keywords_item" data-keyword="' + $('.cms_image_keywords_select').val() + '" ' +
-									'style="background-image: url(' + config_url + 'modules/cms/img/close.png); ">' + 
-									$('.cms_image_keywords_select').val() + '</div>');
-							
-							$('.cms_image_keywords_select').val('');
-							
-							cms_image_init_keywords();
-						
-						}
-					});
-					
-					$('.cms_image_keywords_container').on('click.r', '.cms_image_keywords_item', function(){
-						$(this).remove();
-						cms_image_init_keywords();
-					});
-					
 				});
 			});
 			
@@ -214,7 +178,6 @@ function cms_image_replace($image){
 				    				'name_clean': $container.data('name'),
 				    				'category': $('.cms_input_image_button', $container).data('category'),
 				    				'_return': '1',
-				    				'extra_class': $('.admin_column', $container).length ? 'admin_column' : '',
 				    				'help': '',
 				    				'embed': '1',
 				    				'module': 'cms'
@@ -246,21 +209,6 @@ function cms_image_replace($image){
 		}); 
 	});
 
-}
-
-function cms_image_init_keywords(){
-	
-	$('.cms_image_keywords_select option').css({'display':''});
-	
-	$('.cms_image_keywords_item').each(function(){
-		var keyword = $(this).data('keyword');
-		$('.cms_image_keywords_select option').each(function(){
-			if ($(this).attr('value') == keyword){
-				$(this).css({'display':'none'});
-			}
-		});
-	});
-	
 }
 
 function cms_images_upload(){

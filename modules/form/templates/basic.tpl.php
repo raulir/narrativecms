@@ -1,4 +1,4 @@
-<div class="form_basic_container" <?php if (!empty($brochure)): ?> data-success_url="<?php _lf($brochure, false) ?>" <?php endif ?>>
+<div class="form_basic_container" <?php if (!empty($brochure)): ?> data-success_url="<?php _lfd($brochure, false) ?>" <?php endif ?>>
 	<div class="form_basic_content">
 
 		<?php if(!empty($heading)): ?>

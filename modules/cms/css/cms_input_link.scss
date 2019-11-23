@@ -1,16 +1,15 @@
 .cms_input_link_container {
-	height: 56px;
+	overflow: hidden;
 }
 
 .cms_input_link_content {
 	width: 330px;
 	float: right;
 	position: relative;
-	padding-bottom: 8px;
     overflow: hidden;
 }
 
-.admin_repeater_container .cms_input_link_content {
+.cms_repeater_area .cms_input_link_content {
 	width: 310px;
 }
 
@@ -27,7 +26,7 @@
     position: relative;
 }
 
-.admin_repeater_container .cms_input_link_dropdown {
+.cms_repeater_area .cms_input_link_dropdown {
 	width: 153px;
 }
 
@@ -52,7 +51,7 @@
     z-index: 0;
 }
 
-.admin_repeater_container .cms_input_link_select_placeholder {
+.cms_repeater_area .cms_input_link_select_placeholder {
 	width: 153px;
 }
 
@@ -73,7 +72,7 @@
     padding: 1px 5px 0px 5px;
 }
 
-.admin_repeater_container .cms_input_link_text_display,.admin_repeater_container .cms_input_link_url_display {
+.cms_repeater_area .cms_input_link_text_display,.cms_repeater_area .cms_input_link_url_display {
 	width: 153px;
 }
 

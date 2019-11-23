@@ -59,7 +59,7 @@
     					}
         				
     					if ($header.length){
-        					header_height = $header.height();
+        					header_height = $header.outerHeight() - 1;
         				}
         				
         				$('html, body').stop().animate({

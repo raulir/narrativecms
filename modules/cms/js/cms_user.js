@@ -9,8 +9,6 @@ function cms_user_init(){
 }
 
 function cms_user_resize(){
-	
-	$('body').css({'height': parseInt($(window).innerHeight()) + 'px'});
 
 }
 

@@ -123,7 +123,7 @@ class cms_image_model extends CI_Model {
 		foreach($return['result'] as $key => $image){
 			foreach($pages as $page){
 					
-				if ($image['filename'] == $page['image']){
+				if (!empty($page['image']) && $image['filename'] == $page['image']){
 					$return['result'][$key]['number'] += 1;
 				}
 			
@@ -173,16 +173,27 @@ class cms_image_model extends CI_Model {
 		$str = $name_data;
 		$i = 1;
 		while($found){
+			
 			$sql = "select * from cms_image where name = ? ";
 			$query = $this->db->query($sql, array($str));
 			$result = $query->result_array();
-			if (!empty($result[0]['name'])){
+			
+			if (!empty($result[0]['name']) && substr_count($name_data, '/') == 1){ // module image and exists in db
+				
+				return $dir . $name_data . '.' . $extension;
+				
+			} else if (!empty($result[0]['name'])){
+				
 				$str = $name_data . '_' . $i;
 				$i = $i + 1;
+				
 			} else {
+				
 				$found = false;
 				$name_data = $str;
+				
 			}
+			
 		}
 
 		$filename = $dir . $name_data . '.' . $extension;
@@ -307,23 +318,6 @@ class cms_image_model extends CI_Model {
 			$query = $this->db->query($sql, array($value, $filename, ));
 		}
 
-	}
-
-	function purge_keyword($keyword){
-		$sql = "select cms_image_id, keyword from cms_image where find_in_set( ? , keyword)";
-		$query = $this->db->query($sql, array($keyword, ));
-		$result = $query->result_array();
-		foreach ($result as $row){
-			$keywords = explode(',', $row['keyword']);
-			if(($key = array_search($keyword, $keywords)) !== false) {
-				 
-				unset($keywords[$key]);
-				 
-				$sql = "update cms_image set keyword = ? where cms_image_id = ? ";
-				$this->db->query($sql, array(implode(',', $keywords), $row['cms_image_id'], ));
-				 
-			}
-		}
 	}
 
 	function get_cms_image_by_hash($hash){

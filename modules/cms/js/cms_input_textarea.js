@@ -16,9 +16,28 @@ function cms_input_textarea_srcconverter(url, node, on_save, name) {
 
 function cms_input_textarea_init(){
 
-	$('.cms_input_textarea textarea').each(function(){
-		$this = $(this);
-		$this.css({'height':parseInt($this.css('line-height')) * parseInt($this.data('lines')) + 3 + 'px'});
+	$('.cms_input_textarea').each(function(){
+		
+		var $this = $(this);
+		
+		if ($this.hasClass('cms_input_textarea_ok')){
+			return;
+		}
+		
+		if ($this.closest('.cms_repeater_target').length){
+
+			$this.addClass('cms_input_textarea_ok');
+			
+			$('textarea', $this).on('focus.cms', function(){
+				$this.data('old_value', $(this).val());
+			});
+			
+			$('textarea', $this).on('change.cms', function(){
+				cms_input_repeater_select_reinit();
+			});
+			
+		}
+		
 	});
 	
 	setTimeout(function(){
@@ -29,11 +48,11 @@ function cms_input_textarea_init(){
 		$('.admin_tinymce').each(function(){
 			
 			var $this = $(this);
-			
+
 			if (!$this.hasClass('cms_tinymce_formatted')){
 
 				$this.addClass('cms_tinymce_formatted');
-				
+
 				$this.addClass('admin_tinymce_' + i);
 				
 				// get buttons
@@ -149,7 +168,7 @@ function cms_input_textarea_init(){
 					valid_elements: valid_elements, 
 					toolbar: toolbar,
 					mode : 'textareas',
-					theme: 'modern',
+					theme: 'silver',
 					content_css: config_url + $this.data('html_css'),
 					body_class: $this.data('html_class') + ' admin_tinymce_body',
 				    forced_root_block : '',
@@ -161,6 +180,7 @@ function cms_input_textarea_init(){
 			    	convert_urls : true,
 			    	relative_urls : false,
 			    	document_base_url: config_url,
+			    	height: 'calc(100% - 2.5rem)',
 			    	setup : function(ed) {
 			    		ed.on('init', function(ed) {
 			    			ed.pasteAsPlainText = true;
@@ -175,37 +195,22 @@ function cms_input_textarea_init(){
 				}, extra_init));
 
 				i++;
-			
+				
 			}
 
 		});
-		
+
 	}, 200);
 	
-	
-	$('.cms_input_textarea').each(function(){
-		
-		var $this = $(this);
-		
-		if ($this.hasClass('cms_input_textarea_ok')){
-			return;
-		}
-		
-		if ($this.closest('.cms_repeater_target').length){
+	setTimeout(() => {
+		$('.cms_input_textarea textarea').each(function(){
 
-			$this.addClass('cms_input_textarea_ok');
-			
-			$('textarea', $this).on('focus.cms', function(){
-				$this.data('old_value', $(this).val());
-			});
-			
-			$('textarea', $this).on('change.cms', function(){
-				cms_input_repeater_select_reinit();
-			});
-			
-		}
-		
-	});
+			$this = $(this);
+			if (!$this.closest('.cms_page_panel_fields').length){
+				$this.css({'height':parseInt($this.css('line-height')) * parseInt($this.data('lines')) + 7 + 'px'});
+			}
+		});
+	}, 30)
 
 }
 

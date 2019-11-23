@@ -27,7 +27,7 @@ if (!session_id()){
 	}
 	
 	// detect mobile
-	if (!isset($_SESSION['mobile'])){
+	if (!isset($_SESSION['mobile']) && !empty($_SERVER['HTTP_USER_AGENT'])){
 	
 		$useragent = $_SERVER['HTTP_USER_AGENT'];
 		

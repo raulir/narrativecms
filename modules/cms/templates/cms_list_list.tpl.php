@@ -14,13 +14,13 @@
 			
 				<input type="hidden" class="block_id" value="<?php print($block[$id_field]); ?>">
 				
-				<?php if(!empty($title_field)): ?>
-					<div class="admin_list_sortable_div admin_text cms_list_list_item_heading"><?= preg_replace('#<[^>]+>#', ' ', $block[$title_field]) ?></div>
-				<?php elseif(!empty($title_panel)): ?>
-					<?php _panel($title_panel, array('id' => $block[$id_field], 'edit_base' => $edit_base, 'list_block' => $block['list_block'], '_no_css' => 1, )); ?>
-				<?php else: ?>
-					<div class="admin_list_sortable_div admin_text cms_list_list_item_heading"><?= $block['title'] ?></div>
-				<?php endif ?>
+				<div class="admin_list_sortable_div admin_text cms_list_list_item_heading">
+					<?php if(empty($title_panel)): ?>
+						<?= $block['_panel_heading'] ?>
+					<?php else: ?>
+						<?php _panel($title_panel, $block) ?>
+					<?php endif ?>
+				</div>
 				
 				<a class="cms_list_item_button" href="<?php print($edit_base.$block[$id_field]); ?>/">edit</a>
 

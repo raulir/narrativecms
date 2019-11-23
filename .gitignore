@@ -1,20 +1,12 @@
 /robots.txt
 .DS_Store
 
-application/cache/*
-!application/cache/index.html
-!application/cache/.htaccess
-
 /cache/*
 !/cache/index.html
 !/system/libraries/Cache/
 
 _db/*
 !_db/cms.sql
-
-application/logs/*
-!application/logs/index.html
-!application/logs/.htaccess
 
 .svn
 .settings
@@ -24,18 +16,7 @@ application/logs/*
 _feed
 
 /img/*
-
-!/img/2017
-/img/2017/*
-!/img/2017/04
-/img/2017/04/*
-!/img/2017/04/bytecrackers_logo_black.png
-
-!/img/2015
-/img/2015/*
-!/img/2015/11
-/img/2015/11/*
-!/img/2015/11/background.jpg
+!/img/index.html
 
 /config/*
 !/config/bccms.dev.php

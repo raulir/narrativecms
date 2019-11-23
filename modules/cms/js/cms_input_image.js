@@ -1,20 +1,33 @@
 function cms_input_image_init(){
-
-	// columns are created only once and all such inputs are in these
-	$('.admin_column .cms_input_image_button').off('click.r').on('click.r', function(event){
-		cms_input_image_popup($(this));
-	});
-	$('.admin_column .cms_input_image_clear').off('click.r').on('click.r', function(event){
-		cms_input_image_clear($(this));
-	});
 	
-	// init repeater image inputs
-	$('.admin_repeater_container').on('click.r', '.cms_input_image_button', function(event){
-		cms_input_image_popup($(this));
-	});
-	$('.admin_repeater_container').on('click.r', '.cms_input_image_clear', function(event){
-		cms_input_image_clear($(this));
-	});
+	var $cms_input_image_containers = $('.cms_input_image_container');
+	
+	$cms_input_image_containers.each(function(){
+		
+		var $cms_input_image_container = $(this);
+		
+		if (!$cms_input_image_container.data('cms_initiated')){
+
+			$('.cms_input_image_button', $cms_input_image_container).on('click.cms', function(){
+				cms_input_image_popup($(this));
+			});
+			$('.cms_input_image_clear', $cms_input_image_container).on('click.cms', function(){
+				cms_input_image_clear($(this));
+			});
+		
+			$('.cms_input_image_size_small .cms_input_image_overlay', $cms_input_image_container)
+				.on('mouseenter.cms', function(){
+					$(this).closest('.cms_input_image_size_small').addClass('cms_input_image_hover');
+				})
+				.on('mouseleave.cms', function(){
+					$(this).closest('.cms_input_image_size_small').removeClass('cms_input_image_hover');
+				});
+			
+			$cms_input_image_container.data('cms_initiated', true);
+
+		}
+		
+	})
 
 }
 
@@ -24,13 +37,13 @@ function cms_input_image_rename(old_name){
 	
 	var new_name = ('0000'+Math.random().toString(36).replace('.', '')).substr(-5);
 	
-	$('.cms_input_image_container_' + old_name + ' label').attr({'for':'cms_input_image_' + new_name});
-	$('.cms_input_image_container_' + old_name + ' .admin_image_content')
+	$('.cms_input_image_area_' + old_name + ' label').attr({'for':'cms_input_image_' + new_name});
+	$('.cms_input_image_area_' + old_name + ' .cms_input_image_content')
 			.removeClass('cms_input_image_content_' + old_name).addClass('cms_input_image_content_' + new_name);
-	$('.cms_input_image_container_' + old_name + ' .cms_input_button').data('name', new_name);
-	$('.cms_input_image_container_' + old_name + ' input').removeClass('cms_image_input_' + old_name).addClass('cms_image_input_' + new_name);
+	$('.cms_input_image_area_' + old_name + ' .cms_input_button').data('name', new_name);
+	$('.cms_input_image_area_' + old_name + ' input').removeClass('cms_image_input_' + old_name).addClass('cms_image_input_' + new_name);
 	
-	$('.cms_input_image_container_' + old_name).removeClass('cms_input_image_container_' + old_name).addClass('cms_input_image_container_' + new_name);
+	$('.cms_input_image_area_' + old_name).removeClass('cms_input_image_area_' + old_name).addClass('cms_input_image_area_' + new_name);
 	
 }
 

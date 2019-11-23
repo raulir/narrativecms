@@ -1,0 +1,56 @@
+{
+	"version":"2",
+	"list":{
+		"list_title":"Menu items",
+		"item_title":"Menu item",
+		"filter_fields":{
+			"show":"-- show --",
+			"menugroup_id":"-- group --"
+		},
+		"link_target":"0"
+	},
+	"item":[ 
+		{
+			"type":"textarea",
+			"name":"heading",
+			"label":"Heading",
+			"lines":"2"
+		},
+		{
+			"type":"textarea",
+			"name":"description",
+			"label":"Description",
+			"lines":"2"
+		},
+		{
+			"type":"fk",
+			"list":"marcella/menugroup",
+			"name":"menugroup_id",
+			"label":"Group"
+		},
+		{
+			"type":"text",
+			"name":"price",
+			"label":"Price",
+			"help":"Price when there is no size related prices set."
+		},
+		{
+			"type":"repeater",
+			"name":"prices",
+			"label":"Size prices",
+			"fields":[
+				{
+					"type":"fk",
+					"list":"marcella/menusize",
+					"name":"menusize_id",
+					"label":"Size"
+				},
+				{
+					"type":"text",
+					"name":"price",
+					"label":"Price"
+				}
+			]
+		}
+	]
+}

@@ -6,12 +6,12 @@ class feed extends CI_Controller {
 			
 		parent::__construct();
 	
-		$this->css[] = array('script' => 'modules/cms/css/cms.css', 'no_pack' => 1, );
+		add_css(array('script' => 'modules/cms/css/cms.scss', 'no_pack' => 1, ));
 	
-		$this->js[] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
+		$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
 		
-		$this->js[] = 'modules/cms/js/cms_preloader.js';
-		$this->js[] = 'modules/cms/js/cms.js';
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_preloader.js';
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms.js';
 	
 		$GLOBALS['_panel_titles'][] = 'ADMIN';
 		$GLOBALS['_panel_titles'][] = 'FEED';
@@ -26,9 +26,7 @@ class feed extends CI_Controller {
    			exit();
    		}
    		
-   		$this->css[] = array(
-				'script' => 'modules/feed/css/feed.css',
-		);
+   		add_css('modules/feed/css/feed.scss');
 
         // set page config
         $page_config = array(
@@ -51,11 +49,11 @@ class feed extends CI_Controller {
 					),
 				),
         );
-        
+
         // render panels
         $panel_data = $this->render($page_config);
-        
-    	$this->output('admin', $panel_data);
+
+        $this->output('cms/admin', 'feed/dashboard', $panel_data);
    	
    	}
    	
@@ -67,9 +65,7 @@ class feed extends CI_Controller {
    			exit();
    		}
    		 
-		$this->css[] = array(
-				'script' => 'modules/feed/css/feed.css',
-		);
+		add_css('modules/feed/css/feed.scss');
 
         // set page config
         $page_config = array(
@@ -88,7 +84,7 @@ class feed extends CI_Controller {
         // render panels
         $panel_data = $this->render($page_config);
         
-    	$this->output('admin', $panel_data);
+    	$this->output('cms/admin', 'feed/instagram_users', $panel_data);
    	
    	}
 
@@ -102,7 +98,7 @@ class feed extends CI_Controller {
 		
 		}
 
-   		$this->load->model('feed_model');
+   		$this->load->model('feed/feed_model');
    		
    		$stats = $this->feed_model->refresh_feeds();
 
@@ -116,7 +112,7 @@ class feed extends CI_Controller {
 			newrelic_ignore_transaction();
 		}
 
-   		$this->load->model('feed_model');
+   		$this->load->model('feed/feed_model');
    		
    		$this->feed_model->clean_feeds();
    		

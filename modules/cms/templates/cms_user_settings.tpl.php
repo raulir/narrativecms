@@ -1,10 +1,10 @@
 <div class="cms_toolbar">
 
-	<div class="admin_tool_text">Admin users</div>
+	<div class="cms_tool_text">Admin users</div>
 
 </div>
 
-<div>
+<div class="cms_user_settings_container">
 
 	<?php if (!empty($GLOBALS['config']['admin_username'])): ?>
 		<div class="cms_user_settings_superuser">

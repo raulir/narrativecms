@@ -63,10 +63,6 @@ class CI_Controller {
 		// panels stuff
 		$this->init_panel();
 		
-		$this->js = array();
-		$this->css = array();
-		$this->scss = array();
-		
 		if (!isset($GLOBALS['_panel_titles'])){
 			$GLOBALS['_panel_titles'] = array();
 		}
@@ -77,37 +73,36 @@ class CI_Controller {
 			$GLOBALS['_panel_images'] = array();
 		}
 		
-		if (!isset($GLOBALS['_panel_css'])){
-			$GLOBALS['_panel_css'] = array();
-		}
-		if (!isset($GLOBALS['_panel_scss'])){
-			$GLOBALS['_panel_scss'] = array();
-		}
-		if (!isset($GLOBALS['_panel_js'])){
-			$GLOBALS['_panel_js'] = array();
+		if (empty($GLOBALS['_panel_js'])){
+			$GLOBALS['_panel_js'] = [];
 		}
 		
 	}
 
-	public static function &get_instance()
-	{
+	static function &get_instance(){
 
 		return self::$instance;
 		
 	}
 	
-	/**
-	 * past in MY Controller
-	 */
-	
 	function panel_heading($params){
-		 
-		$return = !empty($params['heading']) ? $params['heading'] : '';
-		 
-		if (empty($params['heading']) && !empty($params['cms_page_panel_id'])){
+		
+		$this->load->model('cms/cms_panel_model');
+		
+		$config = $this->cms_panel_model->get_cms_panel_config($params['panel_name']);
+		
+		$title_field = !empty($config['list']['title_field']) ? $config['list']['title_field'] : 'heading';
+
+		if (!isset($params[$title_field]) && !empty($params['cms_page_panel_id'])){
 			$return = $params['panel_name'].'='.$params['cms_page_panel_id'];
+		} elseif(!empty($params[$title_field])) {
+			$return = $params[$title_field];
+		} elseif(!empty($config['label'])) {
+			$return = $config['label'];
+		} else {
+			$return = $params['panel_name'].('='.$params['cms_page_panel_id']);
 		}
-	
+
 		return $return;
 		 
 	}
@@ -210,7 +205,7 @@ class CI_Controller {
 		} else {
 			$files = $this->get_panel_filenames($name, $params);
 		}
-	
+
 		$panel_js = $files['js'];
 		$panel_css = $files['css'];
 		$panel_scss = $files['scss'];
@@ -263,11 +258,6 @@ class CI_Controller {
 				// get params through panel controller
 				$params = $this->panel_ci->{$panel_name}->panel_params($params);
 	
-				// get js, css, title and description back and automatically load named js and css from panels dirs
-				$panel_js = array_merge($panel_js, $this->panel_ci->{$panel_name}->js);
-				$panel_css = array_merge($panel_css, $this->panel_ci->{$panel_name}->css);
-				$panel_scss = array_merge($panel_scss, $this->panel_ci->{$panel_name}->scss);
-		   
 				// clear temporary resource
 				unset($this->panel_ci);
 	
@@ -301,17 +291,27 @@ class CI_Controller {
 		if(!empty($params['submenu_anchor'])){
 			$return = '<div class="cms_anchor" id="'.$params['submenu_anchor'].'" name="'.$params['submenu_anchor'].'"></div>'.$return;
 		}
-	
+
 		// add debug data
-		$return = "\n".'<!-- panel "' . $files['module'] . '/' . $files['name'] . '" start -->'."\n".
+		$return = "\n".'<!-- panel "' . $files['module'] . '/' . $files['name'] . '" '.
+						(!empty($params['_extends']['panel']) ? 'extends "'.$params['_extends']['panel'].'" ' : '' ).'start -->'."\n".
+				(!empty($params['_extends']['panel']) && empty($params['_extends']['no_wrapper']) ? 
+						'<span class="cms_wrapper cms_wrapper_'.$files['module'].'_'.$files['name'].'">'."\n" : '').
 				$return .
-				"\n".'<!-- panel "' . $files['module'] . '/' . $files['name'] . '" ( '.(!empty($controller_timer_start) ? ' controller: '.($controller_timer_end - $controller_timer_start).'ms ' : '').
+				(!empty($files['template_extends']) && empty($params['_extends']['no_wrapper']) ? "\n</span>" : '').
+				"\n".'<!-- panel "' . $files['module'] . '/' . $files['name'] . 
+						'" ( '.(!empty($controller_timer_start) ? ' controller: '.($controller_timer_end - $controller_timer_start).'ms ' : '').
 				(!empty($template_timer_start) ? ' template: '.($template_timer_end - $template_timer_start).'ms' : ''). ' ) end -->'."\n";
 
 		// add js, css, scss to global page files
-		$this->js = array_merge($this->js, $panel_js);
-		$this->css = array_merge($this->css, $panel_css);
-		$this->scss = array_merge($this->scss, $panel_scss);
+		$GLOBALS['_panel_js'] = array_merge($GLOBALS['_panel_js'], $panel_js);
+		
+		foreach($panel_css as $css_file){
+			add_css($css_file);
+		}
+		foreach($panel_scss as $css_file){
+			add_css($css_file);
+		}
 
 		// save panel result params for returning them when ajax panel is requested
 		$this->view_params = $params;
@@ -330,6 +330,15 @@ class CI_Controller {
 		return $params;
 	}
 	
+	/**
+	 * 
+	 * puts together and outputs page html
+	 * 
+	 * @param layout module/layout
+	 * @param page_id for caching
+	 * @param panel_data
+	 * 
+	 */
 	function output($layout_name, $page_id, $panel_data = array()){
 		
 		$page = $this->load->layout($layout_name, $panel_data);
@@ -339,7 +348,7 @@ class CI_Controller {
 
 		// put together mandatory config js and panel/controller loaded js
 		if (!empty($GLOBALS['config']['js'])){
-			$jss = array_merge($GLOBALS['config']['js'], $this->js);
+			$jss = $GLOBALS['config']['js'];
 		} else {
 			$jss = array();
 		}
@@ -364,24 +373,33 @@ class CI_Controller {
 		}
 	
 		$favicon_str = '';
-		if (!empty($GLOBALS['config']['favicon'])){
-			//			$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
-			$icon_data = _iw($GLOBALS['config']['favicon'], array('width' => 48, 'output' => 'ico', ));
-			$favicon_str .= '<link href="'.$GLOBALS['config']['upload_url'].$icon_data['image'].'" rel="shortcut icon">'."\n";
-			$icon_data = _iw($GLOBALS['config']['favicon'], array('width' => 192, 'output' => 'png', ));
-			$favicon_str .= '<link href="'.$GLOBALS['config']['upload_url'].$icon_data['image'].'" rel="icon" type="image/png" sizes="192x192">'."\n";
-			$icon_data = _iw($GLOBALS['config']['favicon'], array('width' => 180, 'output' => 'png', ));
-			$favicon_str .= '<link href="'.$GLOBALS['config']['upload_url'].$icon_data['image'].'" rel="apple-touch-icon" sizes="180x180">'."\n";
+		
+		if (empty($GLOBALS['config']['favicon'])){
+			$favicon = 'cms/cms_icon_black.png';
+		} else {
+			$favicon = $GLOBALS['config']['favicon'];
 		}
+		
+		$icon_data = _iw($favicon, array('width' => 48, 'output' => 'ico', ));
+		$favicon_str .= '<link href="'.$GLOBALS['config']['upload_url'].$icon_data['image'].'" rel="shortcut icon">'."\n";
+		$icon_data = _iw($favicon, array('width' => 192, 'output' => 'png', ));
+		$favicon_str .= '<link href="'.$GLOBALS['config']['upload_url'].$icon_data['image'].'" rel="icon" type="image/png" sizes="192x192">'."\n";
+		$icon_data = _iw($favicon, array('width' => 180, 'output' => 'png', ));
+		$favicon_str .= '<link href="'.$GLOBALS['config']['upload_url'].$icon_data['image'].'" rel="apple-touch-icon" sizes="180x180">'."\n";
 	
 		if (!empty($GLOBALS['_panel_descriptions'])){
 			$_description = trim(implode(' - ', $GLOBALS['_panel_descriptions']), ' -');
 		} else {
 			$_description = '';
 		}
+		
+		if (strlen($_description) > 300){
+			$_description = substr($_description, 0, strrpos($_description, ' '));
+		}
 	
 		if (!empty($GLOBALS['_panel_titles'])){
-			$_title = trim(implode(' '.(!empty($GLOBALS['config']['site_title_delimiter']) ? $GLOBALS['config']['site_title_delimiter'] : '-').' ', $GLOBALS['_panel_titles']), ' -');
+			$_title = trim(implode(' '.(!empty($GLOBALS['config']['site_title_delimiter']) ? $GLOBALS['config']['site_title_delimiter'] : '-').
+					' ', $GLOBALS['_panel_titles']), ' -');
 		} else {
 			$_title = '';
 		}
@@ -484,24 +502,14 @@ class CI_Controller {
 
 		if (!empty($global_css) && is_array($global_css)){
 			foreach($global_css as $css_item){
-		
-				if (substr($css_item, -4) === '.css'){
-					array_unshift($this->css, ['script' => $css_item, 'top' => 2, ]);
-				} else {
-					array_unshift($this->scss, ['script' => $css_item, 'top' => 2, ]);
-				}
+				
+				add_css(['script' => $css_item, 'top' => 2, ]);
 		
 			}
 		}
-	
-		// merge config css and panel/controller loaded css
-		$csss = array_merge($this->css, $GLOBALS['_panel_css']);
-		 
-		// scss
-		$scsss = array_merge($this->scss, $GLOBALS['_panel_scss']);
-		 
+
 		// compile files together
-		$css_arr = pack_css($csss, $scsss);
+		$css_arr = pack_css($GLOBALS['_panel_scss']);
 		
 		if (empty($GLOBALS['config']['inline_css'])){
 		
@@ -578,7 +586,17 @@ class CI_Controller {
 	 * @param embed 	returns only html part and adds js and css to ci (this) object
 	 *
 	 */
-	function ajax_panel($name, $params = array()){
+	function ajax_panel($name, $params = []){
+	
+		$this->load->model('cms/cms_page_panel_model');
+		
+		if (is_numeric($name)){
+			$params_db = $this->cms_page_panel_model->get_cms_page_panel($name);
+			if ($params_db['show']){
+				$params = array_merge($params, $params_db);
+				$name = $params['panel_name'];
+			}
+		}
 	
 		// new method for w/o html
 		if (!empty($params['no_html']) && stristr($name, '/')){
@@ -596,9 +614,7 @@ class CI_Controller {
 			return $params;
 	
 		}
-	
-		$this->load->model('cms/cms_page_panel_model');
-		 
+			 
 		$return = array();
 		 
 		if (!is_array($params)){
@@ -616,7 +632,7 @@ class CI_Controller {
 		 
 		// get panel
 		$return = $this->panel($name, $params);
-
+		
 		// meta images
 		if (!empty($params['_images'])){
 			$GLOBALS['_panel_images'] = array_merge(array_values($GLOBALS['_panel_images']), array_values($params['_images']));
@@ -627,48 +643,40 @@ class CI_Controller {
 		$js_str = '';
 		if (!empty($params['embed'])){
 	
-			$return['_panel_js'] = $this->js;
-				
-			if (empty($params['_no_css'])){
-				$return['_panel_css'] = $this->css;
-				$return['_panel_scss'] = $this->scss;
-			} else {
-				$return['_panel_css'] = [];
-				$return['_panel_scss'] = [];
-			}
+			$return['_panel_js'] = [];
+			$return['_panel_scss'] = $return['scss'];
 	
 		} else if (empty($params['no_html'])){
 	
-			$this->js = array_merge($GLOBALS['_panel_js'], $this->js);
+			$js = $GLOBALS['_panel_js'];
 	
 			if (empty($params['_no_css'])){
-				$this->css = array_merge($GLOBALS['_panel_css'], $this->css);
-				$this->scss = array_merge($GLOBALS['_panel_scss'], $this->scss);
-			} else {
-				$this->css = [];
-				$this->scss = [];
-			}
 				
-			// prepare css for onpage loading
-			$css_arr = pack_css($this->css, $this->scss);
+				$scss = array_merge($return['scss'], $return['css']);
+				$scss = array_merge($scss, $GLOBALS['_panel_scss']);
+
+				// prepare css for onpage loading
+				$css_arr = pack_css($scss);
 	
-			if (count($css_arr)){
-	
-				$css_arr_prep = [];
-				foreach ($css_arr as $css_inc){
-					$css_arr_prep[] = $css_inc['script'];
+				if (count($css_arr)){
+		
+					$css_arr_prep = [];
+					foreach ($css_arr as $css_inc){
+						$css_arr_prep[] = $css_inc['script'];
+					}
+					$css_arr_str = implode('\', \'', $css_arr_prep);
+		
+					$css_str .= '<script class="cms_load_css cms_load_css_'.md5($css_arr_str).'" type="text/javascript">'."\n";
+					$css_str .= 'cms_load_css([\'';
+					$css_str .=	$css_arr_str;
+					$css_str .= '\'], '. (!empty($GLOBALS['config']['cache']['force_download']) ? 'true' : 'false') .', \'cms_load_css_'. md5($css_arr_str) .'\');'."\n".'</script>'."\n";
+		
 				}
-				$css_arr_str = implode('\', \'', $css_arr_prep);
-	
-				$css_str .= '<script class="cms_load_css cms_load_css_'.md5($css_arr_str).'" type="text/javascript">'."\n";
-				$css_str .= 'cms_load_css([\'';
-				$css_str .=	$css_arr_str;
-				$css_str .= '\'], '. (!empty($GLOBALS['config']['cache']['force_download']) ? 'true' : 'false') .', \'cms_load_css_'. md5($css_arr_str) .'\');'."\n".'</script>'."\n";
-	
+			
 			}
-				
+
 			// get js
-			$js_str = pack_js($this->js);
+			$js_str = pack_js($js);
 	
 		}
 	
@@ -706,7 +714,7 @@ class CI_Controller {
 	 * for main controller to generate panels output as texts
 	 */
 	function render($page_config){
-	
+
 		foreach($page_config as $key => $panel_config){
 			if (stristr($panel_config['panel'], '/')){
 				list($module, $panel_name) = explode('/', $panel_config['panel']);
@@ -735,22 +743,26 @@ class CI_Controller {
 			if (!empty($params['_images'])){
 				$GLOBALS['_panel_images'] = array_merge(array_values($GLOBALS['_panel_images']), array_values($params['_images']));
 			}
-			
-			// cache file name
-			$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.str_replace('/', '__', $panel_config['panel']).'_'.substr(md5($panel_config['panel'].serialize($params)), 0, 6).'.txt';
-	
+
 			// check for cache
 			if (empty($action_result['_no_cache']) && !(!empty($params['module']) && $params['module'] == 'cms')
 					&& (!empty($GLOBALS['config']['panel_cache']) || (isset($params['_cache_time']) && $params['_cache_time'] > 0))
 					&& empty($GLOBALS['config']['cache']['force_download'])){
 	
+						$params['module'] = !empty($panel_config['module']) ? $panel_config['module'] : '';
+				
 						// if cache file exists
+						$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.str_replace('/', '__', $panel_config['panel']).
+								'_'.substr(md5($panel_config['panel'].serialize($params).$_SESSION['config']['targets']['hash'].
+								$_SESSION['webp']), 0, 6).'.txt';
+								
 						if (is_file($filename)){
 	
 							// if panel cache time is different from empty, keep it, else use global cache time setting
 							if (empty($params['_cache_time'])) {
 								$params['_cache_time'] = 0;
 							}
+							
 							$cache_time = $params['_cache_time'] != 0 ? $params['_cache_time'] : (!empty($GLOBALS['config']['panel_cache']) ? $GLOBALS['config']['panel_cache'] : 0);
 	
 							if ((time() - filemtime($filename)) < $cache_time){
@@ -759,20 +771,24 @@ class CI_Controller {
 	
 								// add js, css, scss to global page files
 								$this->js = array_merge($this->js, $panel_data['js']);
-								$this->css = array_merge($this->css, $panel_data['css']);
-								$this->scss = array_merge($this->scss, $panel_data['scss']);
+
+								foreach($panel_data['scss'] as $scss_file){
+									add_css($scss_file);
+								}
 								 
 							} else {
+								
 								unlink($filename);
+								
 							}
 	
 						}
 	
 			}
-	
+
 			// if no data from cache
 			if (empty($panel_data)){
-	
+
 				$params['module'] = !empty($panel_config['module']) ? $panel_config['module'] : '';
 				$panel_data = $this->panel($panel_config['panel'], $params);
 
@@ -781,6 +797,10 @@ class CI_Controller {
 						&& (!empty($GLOBALS['config']['panel_cache']) || (isset($params['_cache_time']) && $params['_cache_time'] > 0))
 						&& empty($GLOBALS['config']['cache']['force_download'])){
 	
+							$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.
+									str_replace('/', '__', $panel_config['panel']).'_'.substr(md5($panel_config['panel'].serialize($params).
+									$_SESSION['config']['targets']['hash'].$_SESSION['webp']), 0, 6).'.txt';
+										
 							$panel_data['html'] .= '<!-- cached: '.date('Y-m-d H:i:s').' -->'."\n";
 							file_put_contents($filename, serialize($panel_data));
 							 
@@ -855,6 +875,7 @@ class CI_Controller {
 			$return['template'] = $template_filename;
 		} else if (!empty($extends_files['template'])){ // if no template, but has extends template, use this
 			$return['template'] = $extends_files['template'];
+			$return['template_extends'] = true;
 		} else {
 			$return['template'] = '';
 		}
@@ -935,22 +956,6 @@ class CI_Controller {
 	
 		return $return;
 	
-	}
-	
-	function get_panel_view_filename($panel_name){
-		$filename = 'views/panels/' . $panel_name . '.tpl.php';
-		if (!file_exists(APPPATH . $filename)){
-			foreach($GLOBALS['config']['modules'] as $module){
-				$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/templates/'.$panel_name.'.tpl.php';
-				if (file_exists($filename)){
-	
-					return array('full' => $filename, 'relative' => $filename, 'module' => $module, );
-	
-				}
-			}
-		} else {
-			return array('full' => APPPATH . $filename, 'relative' => '../' . $filename, 'module' => '', );
-		}
 	}
 
 }

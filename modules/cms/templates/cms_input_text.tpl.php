@@ -1,6 +1,8 @@
-<div class="cms_input_container <?= !empty($params['groups']) ? ' cms_input_container_groups ' : '' ?>" <?= !empty($params['groups']) ? ' data-groups="'.implode(',', $params['groups']).'" ' : '' ?>>
+<div class="cms_input_container <?= !empty($params['groups']) ? ' cms_input_container_groups ' : '' ?>" 
+		<?= !empty($params['groups']) ? ' data-groups="'.implode(',', $params['groups']).'" ' : '' ?>>
 
-	<div class="cms_input cms_input_text <?= !empty($extra_class) ? $extra_class : '' ?> <?= !empty($mandatory_class) ? $mandatory_class : '' ?>">
+	<div class="cms_input cms_input_text <?= !empty($extra_class) ? $extra_class : '' ?> <?= !empty($mandatory_class) ? $mandatory_class : '' ?>"
+			data-cms_input_height="1">
 	
 		<label for="<?= $name_clean ?>"><?= $label ?></label>
 		
@@ -10,8 +12,9 @@
 			<div class="cms_translate_icon" style="background-image: url('<?= $GLOBALS['config']['base_url'] ?>modules/cms/img/cms_translate.png'); "></div>
 		<?php endif ?>
 		
-		<input id="<?= $name_clean ?>" type="text" class="<?= !empty($max_chars_class) ? $max_chars_class : '' ?> <?= !empty($meta_class) ? $meta_class : '' ?>"
-			<?= !empty($extra_data) ? $extra_data : '' ?> name="<?= $name ?>" value="<?= $value ?>">
+		<input id="<?= $name_clean ?>" type="text" 
+				class="cms_input_text_input <?= !empty($max_chars_class) ? $max_chars_class : '' ?> <?= !empty($meta_class) ? $meta_class : '' ?>"
+				<?= !empty($extra_data) ? $extra_data : '' ?> name="<?= $name ?>" value="<?= $value ?>">
 	
 	</div>
 	

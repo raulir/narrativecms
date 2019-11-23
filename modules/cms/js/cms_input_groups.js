@@ -34,8 +34,6 @@ function cms_input_groups_set($this, value){
 	// init all neighbouring inputs
 	$('.cms_input_container', $this.closest('.cms_repeater_block')).each(function(){
 		
-		$(this).css({'background-color':'green'});
-		
 		if ($(this).hasClass('cms_input_container_groups')){
 			var groups = $(this).data('groups').split(',');
 			if (groups.indexOf(value) > -1){

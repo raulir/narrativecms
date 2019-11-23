@@ -13,19 +13,5 @@ define('SELF', pathinfo(__FILE__, PATHINFO_BASENAME));
 // Path to the system folder
 define('BASEPATH', realpath('system').'/');
 
-// The path to the "application" folder
-if (is_dir('application')) {
-	define('APPPATH', 'application/');
-} else {
-	
-	if ( ! is_dir(BASEPATH.'application/')) {
-		exit("Your application folder path does not appear to be set correctly. Please open the following file and correct this: ".SELF);
-	}
-
-	define('APPPATH', BASEPATH.'application/');
-	
-}
-
 // And away we go...
-
- require_once BASEPATH.'cms.php';
+require_once BASEPATH.'cms.php';

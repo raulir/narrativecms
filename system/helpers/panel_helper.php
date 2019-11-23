@@ -5,7 +5,15 @@ if ( !function_exists('get_position')) {
 	/**
 	 * checks if in template variable "data" is key starting with position name and outputs all such
 	 */
-    function get_position($name, $data) {
+    function get_position($name, &$data) {
+
+    	// to check for positions
+    	if ($data === '_collect'){
+    		if (!in_array($name, $GLOBALS['_collect'])){
+    			$GLOBALS['_collect'][] = $name;
+    		}
+    		return;
+    	}
     	
     	$return = '';
     	
@@ -76,6 +84,10 @@ if ( !function_exists('get_position')) {
     	}
     	
     	$params['embed'] = 1;
+    	
+    	if (empty($params['cms_page_panel_id'])) $params['cms_page_panel_id'] = 1;
+    	// if (empty($params['cms_page_id'])) $params['cms_page_id'] = 1;
+    	
     	$ci =& get_instance();
 
     	// check if json defined js
@@ -90,9 +102,21 @@ if ( !function_exists('get_position')) {
     	
     	$data = $ci->ajax_panel($name, $params);
 
-    	$GLOBALS['_panel_js'] = array_merge($GLOBALS['_panel_js'], $data['_panel_js']);
-		$GLOBALS['_panel_css'] = array_merge($GLOBALS['_panel_css'], $data['_panel_css']);
-		$GLOBALS['_panel_scss'] = array_merge($GLOBALS['_panel_scss'], $data['_panel_scss']);
+    	if(!empty($data['_panel_js'])){
+    		$GLOBALS['_panel_js'] = array_merge($GLOBALS['_panel_js'], $data['_panel_js']);
+    	}
+    	
+    	if(!empty($data['_panel_css'])){
+    		foreach($data['_panel_css'] as $scss_file){
+    			add_css($scss_file);
+    		}
+    	}
+    	
+    	if(!empty($data['_panel_scss'])){
+    		foreach($data['_panel_scss'] as $scss_file){
+    			add_css($scss_file);
+    		}
+    	}
 
     	if(!empty($data['_panel_image'])){
 	    	$GLOBALS['_panel_images'][] = $data['_panel_image'];
@@ -149,22 +173,6 @@ if ( !function_exists('get_position')) {
     	
     }
 
-    function str_limit($string, $length, $extra = ''){
-    	
-    	if (is_array($string)){
-    		$string = array_pop($string);
-    	}
-    	
-    	if (strlen($string) > $length){
-    		$string = substr($string, 0, $length - strlen($extra));
-    		$string = substr($string, 0, strrpos($string, ' '));
-    		$string = trim($string, ' -:;,').$extra;
-
-    		$string .= $extra;
-    	}
-    	return $string;
-    }
-    
     /**
      * prints out url with full site path where needed
      */
@@ -296,5 +304,5 @@ if ( !function_exists('get_position')) {
     	];
 
     }
-   
+
 }

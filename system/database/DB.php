@@ -30,8 +30,26 @@ function &DB($params = '', $active_record_override = NULL)
 	if (is_string($params) AND strpos($params, '://') === FALSE)
 	{
 
-		include(APPPATH.'config/database.php');
-
+		$active_group = 'default';
+		$active_record = TRUE;
+		
+		$db['default']['hostname'] = $GLOBALS['config']['database']['hostname'];
+		$db['default']['username'] = $GLOBALS['config']['database']['username'];
+		$db['default']['password'] = $GLOBALS['config']['database']['password'];
+		$db['default']['database'] = $GLOBALS['config']['database']['database'];
+		$db['default']['dbdriver'] = $GLOBALS['config']['database']['dbdriver'];
+		
+		$db['default']['dbprefix'] = '';
+		$db['default']['pconnect'] = TRUE;
+		$db['default']['db_debug'] = false;
+		$db['default']['cache_on'] = FALSE;
+		$db['default']['cachedir'] = '';
+		$db['default']['char_set'] = 'utf8mb4';
+		$db['default']['dbcollat'] = 'utf8mb4_general_ci';
+		$db['default']['swap_pre'] = '';
+		$db['default']['autoinit'] = TRUE;
+		$db['default']['stricton'] = FALSE;
+		
 		if ( ! isset($db) OR count($db) == 0)
 		{
 			show_error('No database connection settings were found in the database config file.');

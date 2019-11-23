@@ -1,3 +1,13 @@
+.cms_page_panel_container {
+
+}
+
+.cms_page_panel_content {
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
+}
+
 .cms_page_panel_template {
 	
 	overflow: hidden;
@@ -13,4 +23,32 @@
 		width: 130px;
 	}
 	
+}
+
+.cms_page_panel_info {
+	margin: 2.0rem auto 0 auto;
+	border-top: 0.1rem solid $colour_border;
+	text-align: center;
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
+	padding: 0.8rem 0 1.0rem;
+	width: calc(100% - 2.0rem);
+}
+
+.cms_page_panel_info_column {
+	display: inline;
+	font-size: 1.2rem;
+	line-height: 1.2rem;
+	padding: 0 0.8rem;
+}
+
+.cms_page_panel_info_label {
+	display: inline;
+	font-weight: normal;
+	padding-right: 0.6rem;
+}
+
+.cms_page_panel_info_value {
+	display: inline;
 }

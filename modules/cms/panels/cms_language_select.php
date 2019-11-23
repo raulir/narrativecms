@@ -12,8 +12,8 @@ class cms_language_select extends CI_Controller {
 			exit();
 		}
 		
-		$this->scss[] = ['script' => 'modules/cms/css/cms_page_panel_toolbar.scss', ];
-
+		add_css('modules/cms/css/cms_input.scss');
+		
 	}
 
 }

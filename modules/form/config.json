@@ -10,7 +10,14 @@
 			"parent":"forms",
 			"url":"form/admin/",
 			"access":"form_data"
-		}
+		},
+        {
+            "id": "form",
+            "name": "Forms default settings",
+            "parent": "forms",
+            "user": "1",
+            "url": "admin/panel_settings/form__basic/"
+        }
 	],
 	"panels":[
 		{

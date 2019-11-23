@@ -1,0 +1,33 @@
+{
+	"version":"2",
+	"label":"gtag.js settings",
+	"item":[
+	],
+	"settings":[
+		{
+			"type":"text",
+			"name":"delay",
+			"label":"Delay in ms",
+			"help":"[Delay]||Delay after pageload, when gtag.js fires||Allows avoid clashes with other scripts"
+		},
+		{
+			"type":"repeater",
+			"name":"ids",
+			"label":"Google Analytics/gtag.js ID-s",
+			"fields":[
+				{
+					"type":"text",
+					"name":"gtag_id",
+					"label":"ID",
+					"help":"[ID]||Eg: UA-12345678-1"
+				},
+				{
+					"type":"textarea",
+					"name":"comment",
+					"label":"Comment",
+					"help":"Please add comment, who and why added this ID. Unknown ID-s will be regularly removed."
+				}
+			]
+		}
+	]
+}

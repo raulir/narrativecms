@@ -112,7 +112,7 @@
 	// Note: The Router class automatically validates the controller path using the router->_validate_request().
 	// If this include fails it means that the default controller in the Routes.php file is not resolving to something valid.
 	$class = $RTR->fetch_class();
-	if (!file_exists(APPPATH.'controllers/'.$RTR->fetch_directory().$class.'.php')) {
+	if (!file_exists($GLOBALS['config']['base_path'].'system/core/controller_'.$RTR->fetch_directory().$class.'.php')) {
 		
 		$not_found = true;
 		
@@ -134,7 +134,7 @@
 		
 	} else {
 
-		include(APPPATH.'controllers/'.$RTR->fetch_directory().$class.'.php');
+		include($GLOBALS['config']['base_path'].'system/core/controller_'.$RTR->fetch_directory().$class.'.php');
 	
 	}
 	
@@ -161,12 +161,12 @@
 			$method = (isset($x[1]) ? $x[1] : 'index');
 			if ( ! class_exists($class))
 			{
-				if ( ! file_exists(APPPATH.'controllers/'.$class.'.php'))
+				if ( ! file_exists($GLOBALS['config']['base_path'].'system/core/controller_'.$class.'.php'))
 				{
 					show_404("{$class}/{$method}");
 				}
 
-				include_once(APPPATH.'controllers/'.$class.'.php');
+				include_once($GLOBALS['config']['base_path'].'system/core/controller_'.$class.'.php');
 			}
 		}
 		else
@@ -201,12 +201,12 @@
 				$method = (isset($x[1]) ? $x[1] : 'index');
 				if ( ! class_exists($class))
 				{
-					if ( ! file_exists(APPPATH.'controllers/'.$class.'.php'))
+					if ( ! file_exists($GLOBALS['config']['base_path'].'system/core/controller_'.$class.'.php'))
 					{
 						show_404("{$class}/{$method}");
 					}
 
-					include_once(APPPATH.'controllers/'.$class.'.php');
+					include_once($GLOBALS['config']['base_path'].'system/core/controller_'.$class.'.php');
 					unset($CI);
 					$CI = new $class();
 				}

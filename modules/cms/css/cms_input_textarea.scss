@@ -1,0 +1,22 @@
+.cms_input_textarea {
+
+	textarea {
+		box-sizing: border-box;
+		display: block;
+		border: 0.1rem solid $colour_border;
+		height: calc(100% - 2.5rem);
+		padding: 0.3rem 0.5rem;
+		width: 100%;
+		font-family: asap;
+		font-size: 1.7rem;
+		line-height: 2.1rem;
+	}
+	
+	& > .cms_input.cms_input_wide_textarea {
+		width: 940px;
+		textarea {
+			width: 940px;
+		}
+	}
+
+}

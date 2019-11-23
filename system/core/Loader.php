@@ -57,13 +57,7 @@ class CI_Loader {
 	 * @access protected
 	 */
 	protected $_ci_model_paths		= array();
-	/**
-	 * List of paths to load helpers from
-	 *
-	 * @var array
-	 * @access protected
-	 */
-	protected $_ci_helper_paths		= array();
+
 	/**
 	 * List of loaded base classes
 	 * Set by the controller class
@@ -124,15 +118,14 @@ class CI_Loader {
 	public function __construct()
 	{
 		$this->_ci_ob_level  = ob_get_level();
-		$this->_ci_library_paths = array(APPPATH, BASEPATH);
-		$this->_ci_helper_paths = array(APPPATH, BASEPATH);
-		
-		$this->_ci_model_paths = array(APPPATH);
+		$this->_ci_library_paths = array(BASEPATH);
+
+		$this->_ci_model_paths = [];
 		foreach($GLOBALS['config']['modules'] as $module){
     		$this->_ci_model_paths[] = $GLOBALS['config']['base_path'].'modules/'.$module.'/';
 		}
 
-		$this->_ci_view_paths = array(APPPATH.'views/'	=> TRUE);
+		$this->_ci_view_paths = [];
 
 		log_message('debug', "Loader Class Initialized");
 	}
@@ -475,60 +468,6 @@ class CI_Loader {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Load Helper
-	 *
-	 * This function loads the specified helper file.
-	 *
-	 * @param	mixed
-	 * @return	void
-	 */
-	public function helper($helpers = array())
-	{
-		foreach ($this->_ci_prep_filename($helpers, '_helper') as $helper)
-		{
-			if (isset($this->_ci_helpers[$helper]))
-			{
-				continue;
-			}
-
-			// Try to load the helper
-			foreach ($this->_ci_helper_paths as $path)
-			{
-				if (file_exists($path.'helpers/'.$helper.'.php'))
-				{
-					include_once($path.'helpers/'.$helper.'.php');
-
-					$this->_ci_helpers[$helper] = TRUE;
-					log_message('debug', 'Helper loaded: '.$helper);
-					break;
-				}
-			}
-
-			// unable to load the helper
-			if ( ! isset($this->_ci_helpers[$helper]))
-			{
-				show_error('Unable to load the requested file: helpers/'.$helper.'.php');
-			}
-		}
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Load Helpers
-	 *
-	 * This is simply an alias to the above function in case the
-	 * user has written the plural form of this function.
-	 *
-	 * @param	array
-	 * @return	void
-	 */
-	public function helpers($helpers = array())
-	{
-		$this->helper($helpers);
-	}
-
-	/**
 	 * Loads a config file
 	 *
 	 * @param	string
@@ -665,11 +604,11 @@ class CI_Loader {
 		}
 
 		// make sure the application default paths are still in the array
-		$this->_ci_library_paths = array_unique(array_merge($this->_ci_library_paths, array(APPPATH, BASEPATH)));
-		$this->_ci_helper_paths = array_unique(array_merge($this->_ci_helper_paths, array(APPPATH, BASEPATH)));
-		$this->_ci_model_paths = array_unique(array_merge($this->_ci_model_paths, array(APPPATH)));
-		$this->_ci_view_paths = array_merge($this->_ci_view_paths, array(APPPATH.'views/' => TRUE));
-		$config->_config_paths = array_unique(array_merge($config->_config_paths, array(APPPATH)));
+		$this->_ci_library_paths = array_unique(array_merge($this->_ci_library_paths, array(BASEPATH)));
+		$this->_ci_helper_paths = array_unique(array_merge($this->_ci_helper_paths, array(BASEPATH)));
+		$this->_ci_model_paths = array_unique(array_merge($this->_ci_model_paths, []));
+		$this->_ci_view_paths = array_merge($this->_ci_view_paths, []);
+		$config->_config_paths = array_unique(array_merge($config->_config_paths, []));
 	}
 
 	// --------------------------------------------------------------------
@@ -850,10 +789,6 @@ class CI_Loader {
 			} else {
 				return;
 			}
-		} else {
-
-			$class = str_replace($GLOBALS['config']['base_path'].'application/controllers/panels/', '../controllers/panels/', $class);
-		
 		}
 		
 		// Get the class name, and while we're at it trim any slashes.
@@ -1080,6 +1015,41 @@ class CI_Loader {
 		
 		return $buffer;
 	
+	}
+	
+	function helper($helpers = []){
+	
+		if (!is_array($helpers)){
+			$helpers = [$helpers];
+		}
+	
+		foreach ($helpers as $helper){
+				
+			if (isset($this->_ci_helpers[$helper])){
+				continue;
+			}
+				
+			if (stristr($helper, '/')){
+				list($_module, $_helper) = explode('/', $helper);
+				$filename = $GLOBALS['config']['base_path'].'modules/'.$_module.'/helpers/'.$_helper.'.php';
+			} else {
+				$filename = $GLOBALS['config']['base_path'].'system/helpers/'.$helper.'.php';
+			}
+				
+			if (file_exists($filename)){
+	
+				include_once($filename);
+					
+				$this->_ci_helpers[$helper] = TRUE;
+				log_message('debug', 'Helper loaded: '.$helper);
+				break;
+			}
+	
+			// unable to load the helper
+			if ( ! isset($this->_ci_helpers[$helper])) {
+				show_error('Unable to load the requested file: helpers/'.$helper.'.php');
+			}
+		}
 	}
 	
 }

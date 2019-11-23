@@ -1,8 +1,20 @@
 .cms_input_groups {
-	border-bottom: 0.1rem solid $colour_border;
 	font-size: 0;
 	line-height: 0;
 	letter-spacing: 0;
+	position: relative;
+	overflow: hidden;
+	height: 2.7rem;
+	&::after {
+		content: '';
+		position: absolute;
+		width: 100%;
+		height: 0.1rem;
+		background-color: $colour_border;
+		z-index: 20;
+		bottom: 0;
+		left: 0;
+	}
 }
 
 .cms_input_groups_values {
@@ -12,6 +24,7 @@
 	position: absolute;
 	right: 0;
 	top: 0;
+	overflow: hidden;
 }
 
 .cms_input_groups_value {
@@ -29,6 +42,7 @@
 	background-color: white;
 	color: $colour_border;
 	position: relative;
+	z-index: 10;
 		
 	&::before {
 		content: '';
@@ -55,11 +69,13 @@
 }
 
 .cms_input_groups_value_selected {
+	
 	border-bottom: 0 solid $colour_border;
 	color: black;
+	z-index: 30;
 	
 	&::before {
-		border: 0.1rem solid black;
+		border: 0.1rem solid $colour_black;
 		background-color: $colour_border;
 	}
 
@@ -67,6 +83,8 @@
 
 /* input group hidden */
 
-.cms_input_groups_hidden {
-	display: none;
+.cms_input_container_groups {
+	&.cms_input_groups_hidden {
+		display: none;
+	}
 }

@@ -12,9 +12,9 @@ function cms_page_panel_check_mandatory(colour){
 		$('label', $this).css({'color':''});
 		
 		// check if inside repeater
-		if ($this.closest('.admin_repeater_container').length){
+		if ($this.closest('.cms_repeater_area').length){
 			
-			label_extra = $this.closest('.admin_repeater_container').data('label') + ' &gt; ' + ($this.closest('.cms_repeater_block').prevAll('.cms_repeater_block').length + 1) + ': ';
+			label_extra = $this.closest('.cms_repeater_area').data('label') + ' &gt; ' + ($this.closest('.cms_repeater_block').prevAll('.cms_repeater_block').length + 1) + ': ';
 			
 		}
 		
@@ -72,22 +72,6 @@ function cms_page_panel_format_mandatory(mandatory_result, colour){
 
 }
 
-function init_cms_repeater_block_delete(){
-	
-	$('.cms_repeater_block_delete').off('click.cms').on('click.cms', function(){
-
-		// if repeater is target for repeater selects, repopulate repeater selects
-		if ($(this).closest('.cms_repeater_target').length){
-			cms_input_repeater_select_reinit();
-		}
-
-		// remove repeater block
-		$(this).closest('.cms_repeater_block_toolbar').parent().remove();
-		
-	});
-	
-}
-
 function cms_page_panel_set_title(title, after){
 	
 	if (title == '-- select block type --' || title == '-- shortcut to --'){
@@ -109,15 +93,6 @@ function cms_page_panel_set_title(title, after){
 
 function cms_page_panel_init(){
 
-	$('.admin_block,.admin_column').each(function(){
-		$this = $(this);
-		var label = $this.data('label')
-		if (label){
-			$this.children('.admin_block_label').remove();
-			$this.prepend('<div class="admin_block_label"><div class="admin_block_title">' + $this.data('label') + '</div></div>');
-		}
-	});
-	
 	var $title = $('input', '.cms_page_panel_title');
 	if ($title.val() == 'New block'){
 		$title.data('new_block', true);
@@ -151,54 +126,7 @@ function cms_page_panel_init(){
 	
 	})
 
-	$('.cms_repeater_button').on('click.r', function(){
-		
-		var block_html = String($(this).data('html'));
-		block_html = block_html.replace(/###random###/g, ('0000000'+Math.random().toString(36).replace('.', '')).substr(-8));
-		block_html = block_html.replace(/#/g, '"');
-		$(this).parent().children('.admin_repeater_line').before(block_html);
-		
-		if (typeof cms_input_textarea_init == 'function'){
-			cms_input_textarea_init();
-		}
-
-		init_cms_repeater_block_delete();
-		if (typeof cms_input_image_rename == 'function'){
-			cms_input_image_rename($(this).data('name') + '_image_');
-		}
-		
-		// init link inputs
-		if (typeof cms_input_link_init == 'function'){
-			cms_input_link_init();
-		}
-		
-		// init file inputs
-		if (typeof cms_input_file_init == 'function'){
-			cms_input_file_init();
-		}
-		
-		// init groups
-		if (typeof cms_input_groups_init == 'function'){
-			cms_input_groups_init();
-		}
-		
-		// init repeater selects
-		if (block_html.indexOf('repeater_select') > -1){
-			cms_input_repeater_select_init();
-		}
-		
-		// if repeater is target for repeater selects, repopulate repeater selects
-		if ($(this).closest('.cms_repeater_target').length){
-			cms_input_repeater_select_reinit();
-		}
-		
-		$('body').height('auto');
-		
-	})
-	
-	init_cms_repeater_block_delete();
-	
-	$('.admin_repeater_container').sortable().disableSelection();
+	$('.cms_repeater_area').sortable().disableSelection();
 	
 	var title_field = $('.admin_title_text').data('title_field');
 	var $title_field = $('textarea,input,select').filter('[name="panel_params[' + title_field + ']"]');

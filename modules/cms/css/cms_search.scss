@@ -5,6 +5,8 @@
     text-align: left;
     font-size: 18px;
     border-bottom: 1px solid $colour_border;
+    width: calc(100% - 2.0rem);
+    margin: 0 auto;
 }
 
 .cms_search_top_label {
@@ -36,7 +38,10 @@
 }
 
 .cms_search_result {
-	
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
+	padding-bottom: 1.5rem;
 }
 
 .cms_search_result_pages {

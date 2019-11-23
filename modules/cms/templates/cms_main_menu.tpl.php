@@ -1,11 +1,11 @@
 <div class="cms_toolbar">
 	<?php if(!empty($menu['menu_item_id'])): ?>
-		<a class="admin_tool_text" href="<?php print($GLOBALS['config']['base_url']); ?>admin/menu/">Main menu</a>
-		<div class="admin_tool_text">
-			&nbsp; &gt; &nbsp; <?php print(str_limit($menu['text'], 40)); ?>
+		<a class="cms_tool_text" href="<?php print($GLOBALS['config']['base_url']); ?>admin/menu/">Main menu</a>
+		<div class="cms_tool_text">
+			&nbsp; &gt; &nbsp; <?php print($menu['text']); ?>
 		</div>
 	<?php else: ?>
-		<div class="admin_tool_text">Main menu</div>
+		<div class="cms_tool_text">Main menu</div>
 	<?php endif ?>
 	<div class="cms_tool_button admin_right admin_main_menu_save_button">Save</div>
 	<div class="cms_tool_button admin_right admin_main_menu_add_button">Add item</div>

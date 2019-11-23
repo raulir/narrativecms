@@ -7,7 +7,7 @@
 
 				<div class="cms_page_panel_caching_toolbar cms_toolbar">
 					
-					<div class="admin_tool_text">Panel cache settings</div>
+					<div class="cms_tool_text">Panel cache settings</div>
 					
 					<a class="cms_page_panel_caching_save cms_tool_button admin_right popup_yes">Save</a>
 					

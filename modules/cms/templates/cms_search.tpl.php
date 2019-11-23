@@ -1,6 +1,6 @@
 <div class="cms_toolbar">
 
-	<div class="admin_tool_text">Content search</div>
+	<div class="cms_tool_text">Content search</div>
 
 </div>
 
@@ -11,7 +11,7 @@
 
 </div>
 
-<div class="cms_columns cms_search_result">
+<div class="cms_search_result">
 
 	<div class="cms_column">
 		<div class="cms_search_result_pages"></div>

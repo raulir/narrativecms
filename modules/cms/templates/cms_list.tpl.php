@@ -1,6 +1,6 @@
 <div class="cms_toolbar">
 	
-	<div class="admin_tool_text"><?php print($title); ?></div>
+	<div class="cms_tool_text"><?php print($title); ?></div>
 	
 	<?php if(empty($hide_new)): ?>
 
@@ -24,7 +24,7 @@
 	<div class="cms_tool_button admin_right cms_paging_last" <?php _ib('cms/cms_paging_last.png', ['height' => 12]) ?>></div>
 	<div class="cms_tool_button admin_right cms_paging_next" <?php _ib('cms/cms_paging_next.png', ['height' => 12]) ?>></div>
 
-	<div class="admin_tool_text admin_right">
+	<div class="cms_tool_text admin_right">
 		<span class="admin_paging_current">&nbsp;&nbsp;</span>/<span class="admin_paging_total">&nbsp;&nbsp;</span>
 	</div>
 
@@ -42,18 +42,12 @@
 	
 </div>
 
-<div class="admin_list_container <?php print(!empty($extra_class) ? $extra_class : ''); ?>" 
+<div class="<?php print(!empty($extra_class) ? $extra_class : ''); ?> cms_list_container" 
 		data-edit_base="<?php print($GLOBALS['config']['base_url'].$edit_base); ?>"
 		<?php if(!empty($filter['panel_name'])): ?>
 			data-panel_name="<?php print($filter['panel_name']); ?>" 
 		<?php else: ?>
 			data-source="<?php print($source['model'].'|'.$source['method']); ?>" 
-		<?php endif ?>
-		
-		<?php if(!empty($title_field)): ?>
-			data-title_field="<?php print($title_field); ?>"
-		<?php elseif (!empty($title_panel)): ?>
-			data-title_panel="<?php print($title_panel); ?>" 
 		<?php endif ?>
 		
 		<?php if(!empty($id_field)): ?>

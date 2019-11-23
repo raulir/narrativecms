@@ -26,6 +26,7 @@ if ( !function_exists('_i')) {
 				$image_data = _iw($image, $params);
 			} else if (!empty($params['data'])){
 				list($image_data['width'], $image_data['height']) = getimagesize($GLOBALS['config']['upload_path'].$image);
+				$image_data['size'] = filesize($GLOBALS['config']['upload_path'].$image);
 				$image_data['image'] = $image;
 			} else {
 				$image_data['image'] = $image;
@@ -108,9 +109,12 @@ if ( !function_exists('_i')) {
 		$extension = pathinfo($image, PATHINFO_EXTENSION);
 		
 		// if gif or svg
-		if (($extension == 'gif' || $extension == 'svg') && file_exists($GLOBALS['config']['upload_path'].$image) && !is_dir($GLOBALS['config']['upload_path'].$image)){
+		if (($extension == 'gif' || $extension == 'svg') && file_exists($GLOBALS['config']['upload_path'].$image) && 
+				!is_dir($GLOBALS['config']['upload_path'].$image)){
+			
 			print('style="background-image:  url('.$GLOBALS['config']['upload_url'].trim($image, '/').'); '.$params['css'].'"');
 			return ['image' => $image, 'height' => 0, 'width' => 0, ];
+			
 		}
 		
 		// if from module
@@ -133,13 +137,17 @@ if ( !function_exists('_i')) {
 					mkdir($GLOBALS['config']['upload_path'].$params['module'].'/');
 				}
 				
-				copy($original_path, $filepath);
-				
+				if (file_exists($original_path)){
+					copy($original_path, $filepath);
+				}
+
 				// add to db
 				$ci =& get_instance();
 				$ci->load->model('cms/cms_image_model');
 				
-				$ci->cms_image_model->create_cms_image($params['module'].'/', $image, $params['module']);
+				if (file_exists($original_path)){
+					$ci->cms_image_model->create_cms_image($params['module'].'/', $image, $params['module']);
+				}
 				
 			}
 			

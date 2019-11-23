@@ -3,6 +3,15 @@
 class cms_page_model extends CI_Model {
 	
 	function get_cms_pages(){
+		
+		// check structure
+		$sql = "show columns from `cms_page` like 'position'";
+		$query = $this->db->query($sql);
+		if (!$query->num_rows()){
+			$sql = "alter table `cms_page` add `position` varchar(20) character set ascii collate ascii_bin not null after `cms_page_id`";
+			$query = $this->db->query($sql);
+		}
+		
 		$sql = "select * from cms_page order by sort asc";
     	$query = $this->db->query($sql);
     	$result = $query->result_array();
@@ -144,7 +153,7 @@ class cms_page_model extends CI_Model {
 		unset($data['page_id']);
 				
 		foreach($data as $field => $value){
-			if (!in_array($field, array('sort', 'slug', ))){
+			if (!in_array($field, ['sort', 'slug', 'position'])){
 				
 				if ($language === false || !in_array($field, ['seo_title','description'])){
 					$meta[$field] = $value;
@@ -168,7 +177,7 @@ class cms_page_model extends CI_Model {
 	
 	function create_page($data){
 		
-		$sql = "insert into cms_page set slug = '', sort = 0, meta = '' ";
+		$sql = "insert into cms_page set slug = '', sort = 0, meta = '', position = '' ";
 		$this->db->query($sql);
 		$cms_page_id = $this->db->insert_id();
 		
@@ -224,6 +233,54 @@ class cms_page_model extends CI_Model {
 		}
 
 		return $return;
+		
+	}
+	
+	function get_positions(){
+		
+		$this->load->model('cms/cms_module_model');
+		
+		$return = [];
+		
+		foreach($this->cms_module_model->get_modules() as $module){
+			if ($module['active']){
+				$config = $this->cms_module_model->get_module_config($module['name']);
+				if (!empty($config['positions']) && is_array($config['positions'])){
+					foreach($config['positions'] as $key => $value){
+						if ($value['id'] !== 'main' || !empty($value['id'])){
+							$return[] = array_merge($value, ['module' => $module['name']]);
+						}
+					}
+				}
+			}
+		}
+		
+		return $return;
+		
+	}
+	
+	function get_layout_positions($layout){
+		
+		if (stristr($layout, '/')){
+			list($module, $layout) = explode('/', $layout);
+		} else {
+			$module = 'cms';
+		}
+		
+		$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/layouts/'.$layout.'.tpl.php';
+		
+		$data = '_collect';
+		$GLOBALS['_collect'] = [];
+		
+		if (file_exists($filename)){
+			
+			ob_start();
+			include($filename);
+			ob_end_clean();
+			
+		}
+
+		return $GLOBALS['_collect'];
 		
 	}
 	

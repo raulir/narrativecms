@@ -1,82 +1,36 @@
-.cms_input_image {
+.cms_input_image_area {
 	
-}
-
-.cms_input_image input {
-	box-sizing: border-box;
-	display: block;
-	width: 120px;
-	height: 26px;
-	float: left;
-	opacity: 0.0;
-	z-index: 10;
-	top: -25px;
-	position: relative;
-}
-
-.cms_input_image>.cms_input_button {
-	box-sizing: border-box;
-	display: block;
-	border: 1px solid #a0a0a0;
-	border-radius: 4px;
-	width: 120px;
-	height: 26px;
-	line-height: 23px;
-	font-size: 17px;
-	float: left;
-	padding: 1px 5px 0px 5px;
-	clear: left;
-	cursor: pointer;
-	text-align: center;
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
-	margin-bottom: 7px;
-}
-
-.cms_input_image .admin_image_container {
 	box-sizing: border-box;
 	display: inline-block;
-	border: 1px solid #a0a0a0;
-	width: 330px;
-	height: 248px;
+	border: 0.1rem solid $colour_border;
+	width: 33.0rem;
+	height: 23.5rem;
+	line-height: 23.3rem;
+	font-size: 0;
 	float: right;
 	background-position: center;
 	background-size: 40px auto;
+	
+	.cms_repeater_block & {
+		width: 31.0rem;
+	}
+
 }
 
-.cms_input_image .admin_image_content {
+.cms_input_image_content {
 	box-sizing: border-box;
-	display: table-cell;
-	width: 328px;
-	height: 246px;
+	display: inline-block;
 	text-align: center;
 	vertical-align: middle;
-	line-height: 0px;
-}
-
-.cms_input_image .admin_image_container img {
-	max-width: 328px;
-	max-height: 246px;
-}
-
-.admin_image_content {
 	position: relative;
-}
-
-.cms_input_image_error {
-	line-height: 20px;
-	color: red;
-	padding: 20px;
-	font-weight: 400;
+	font-size: 1.6rem;
+	width: 100%;
 }
 
 .cms_input_image_image {
-	
-	position: relative;
+
 	width: 100%;
-	height: 100%;
-	top: 0;
-	left: 0;
+	height: 23.3rem;
 	margin: 0 auto;
 	background-position: center;
 	background-repeat: no-repeat;
@@ -87,6 +41,85 @@
 
 	&.cms_images_lazy_waiting, &.cms_images_lazy_loading {
 		filter: grayscale(100%);
+	}
+
+}
+
+.cms_input_image .cms_input_button {
+	width: 120px;
+	float: left;
+	margin-bottom: 7px;
+}
+
+.cms_input_image_error {
+	line-height: 20px;
+	color: red;
+	padding: 20px;
+	font-weight: 400;
+}
+
+.cms_input_image_overlay {
+	
+}
+
+/* image input size */
+.cms_input_image_size_normal {
+	
+}
+
+.cms_input_image_size_small {
+	
+	.cms_input_image_input {
+		display: block;
+	}
+	
+	.cms_input_button {
+		float: none;
+		width: 57px;
+		position: absolute;
+		top: 0;
+	}
+
+	.cms_input_image_clear {
+		right: 0;
+	}
+
+	.cms_input_image_button {
+		right: 63px;
+	}
+
+	.cms_input_image_input {
+		position: absolute;
+		top: 0;
+		left: 130px;
+		width: calc(100% - 257px);
+		height: 26px;
+		margin: 0;
+		box-sizing: border-box;
+		line-height: 24px;
+		border: 1px solid #a0a0a0;
+	}
+
+	.cms_input_image_area {
+		display: none;
+		float: none;
+		position: absolute;
+		left: 130px;
+		width: 165px;
+		height: 124px;
+		top: 32px;
+	}
+
+	.cms_input_image_content_image {
+		height: 122px;
+		width: 163px;
+	}
+	
+	&.cms_input_image_hover {
+		z-index: 10;
+		.cms_input_image_area {
+			display: block;
+		}
 	}
 
 }

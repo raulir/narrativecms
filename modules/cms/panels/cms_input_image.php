@@ -12,14 +12,18 @@ class cms_input_image extends CI_Controller {
 			exit();
 		}
 		
-		$this->scss[] = ['script' => 'modules/cms/css/cms_input.scss', ];
-
+		add_css('modules/cms/css/cms_input.scss');
+		
 	}
 
 	function panel_params($params){
-
-		if (empty($params['name_clean'])) {
+		
+		if (empty($params['name_clean'])){
 			$params['name_clean'] = $params['name'];
+		}
+		
+		if (empty($params['category'])){
+			$params['category'] = '';
 		}
 
 		if(!file_exists($GLOBALS['config']['upload_path'].$params['value'])){

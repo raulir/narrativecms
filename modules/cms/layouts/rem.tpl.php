@@ -2,7 +2,7 @@
 <html<?= !empty($_COOKIE['rem']) ? ' style="font-size: '.$_COOKIE['rem'].'px; "' : '' ?>>
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=<?= !empty($_COOKIE['width']) ? $_COOKIE['width'] : '600' ?>,user-scalable=no">
+	<meta name="viewport" content="width=<?= !empty($_COOKIE['width']) ? $_COOKIE['width'] : $GLOBALS['config']['rem_m_px'] ?>,user-scalable=no">
 
 	<script type="text/javascript">
     	
@@ -14,11 +14,11 @@
 
 <body>
 
-	<?php print(get_position('header', $data)); ?>
+	<?= get_position('header', $data) ?>
 
-	<?php print(get_position('main', $data)); ?>
+	<?= get_position('main', $data) ?>
 
-	<?php print(get_position('footer', $data)); ?>
+	<?= get_position('footer', $data) ?>
 
 	<script type="text/javascript">
 
@@ -75,15 +75,54 @@
 		window.addEventListener('resize', _set_rem);
 
 		var _old_orientation = <?= isset($_COOKIE['orientation']) ? $_COOKIE['orientation'] : -1 ?>;
-		var _orientation = function(){ if (typeof window.orientation != 'undefined') { return (window.orientation == 0 || window.orientation == 180) ? 0 : 1; } else if (screen.width > screen.height ) { return 1; } else { return 0; } };
-    	var _orientationchange = function(){ var orientation = _orientation(); var viewport = document.querySelector('meta[name=viewport]'); var changed = (orientation != _old_orientation); if (changed || _old_orientation == -1){ var exp = new Date(); exp.setDate(exp.getDate() + 365); 
-    	exp = exp.toUTCString(); _old_orientation = orientation; document.cookie = 'orientation=' + encodeURIComponent(orientation) + '; path=/; expires=' + exp; if (changed) document.body.style.display='none'; viewport.setAttribute('content', ''); setTimeout(function(){ 
-        var width = orientation ? 900 : 600; if (screen.width >= 768){ width = 1024; } viewport.setAttribute('content', 'width=' + width + ',user-scalable=no'); document.body.offsetHeight; window.dispatchEvent(new Event('resize')); document.cookie = 'width=' + width + '; path=/; expires=' + exp;
-		setTimeout(function(){ if (changed) document.body.style.removeProperty('display'); }, 100); }, 100); } }; if (typeof screen.orientation != 'undefined' && typeof screen.orientation.addEventListener != 'undefined') screen.orientation.addEventListener('change', _orientationchange); 
-    	else window.addEventListener('orientationchange', _orientationchange); window.addEventListener('load', _orientationchange);
+		var _orientation = function(){ 
+			if (typeof window.orientation != 'undefined') { 
+				return (window.orientation == 0 || window.orientation == 180) ? 0 : 1; 
+			} else if (screen.width > screen.height ) { 
+				return 1; 
+			} else { 
+				return 0; 
+			} 
+		};
+		
+    	var _orientationchange = function(){ 
+        	
+        	var orientation = _orientation(); 
+        	var viewport = document.querySelector('meta[name=viewport]'); 
+        	var changed = (orientation != _old_orientation); 
+        	if (changed || _old_orientation == -1){ 
+            	
+            	var exp = new Date(); 
+            	exp.setDate(exp.getDate() + 365); 
+    			exp = exp.toUTCString(); 
+    			_old_orientation = orientation; 
+    			document.cookie = 'orientation=' + encodeURIComponent(orientation) + '; path=/; expires=' + exp; 
+    			if (changed) document.body.style.display='none'; 
+    			viewport.setAttribute('content', ''); 
 
-    	var cms_disable_zoom = function () { if (!(/iPad|iPhone|iPod/.test(navigator.userAgent))) return; $(document.head).append('<style>*{cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,0)}</style>'); $(window).on('gesturestart touchmove', function (evt) {
-    	if (evt.originalEvent.scale !== 1) { evt.originalEvent.preventDefault(); document.body.style.transform = 'scale(1)'; } }); }
+    			setTimeout(function(){
+        			
+        			var width = orientation ? 1200 : <?= $GLOBALS['config']['rem_m_px'] ?>; 
+            		viewport.setAttribute('content', 'width=' + width + ',user-scalable=no'); 
+            		document.body.offsetHeight; 
+            		window.dispatchEvent(new Event('resize')); 
+            		document.cookie = 'width=' + width + '; path=/; expires=' + exp;
+            		
+					setTimeout(function(){ 
+						if (changed) document.body.style.removeProperty('display'); 
+					}, 30);
+					
+				}, 30); 
+			} 
+		};
+
+		if (typeof screen.orientation != 'undefined' && typeof screen.orientation.addEventListener != 'undefined')
+			screen.orientation.addEventListener('change', _orientationchange); 
+    	else 
+        	window.addEventListener('orientationchange', _orientationchange);
+
+    	window.addEventListener('load', _orientationchange);
+
 
     </script>
 

@@ -2,17 +2,32 @@
 	"version":"2",
 	"label":"Analytics settings",
 	"item":[
-		{
-			"type":"text",
-			"name":"analytics_id",
-			"label":"Google Analytics ID",
-			"help":"[Google Analytics ID]||Eg: UA-12345678-1"
-		},
+	],
+	"settings":[
 		{
 			"type":"text",
 			"name":"delay",
 			"label":"Delay in ms",
 			"help":"[Delay]||Delay after pageload, when GA fires||Allows avoid clashes with GTM"
+		},
+		{
+			"type":"repeater",
+			"name":"ids",
+			"label":"Google Analytics ID-s",
+			"fields":[
+				{
+					"type":"text",
+					"name":"analytics_id",
+					"label":"ID",
+					"help":"[Google Analytics ID]||Eg: UA-12345678-1"
+				},
+				{
+					"type":"textarea",
+					"name":"comment",
+					"label":"Comment",
+					"help":"Please add comment, who and why added this ID. Unknown ID-s will be regularly removed."
+				}
+			]
 		}
 	]
 }

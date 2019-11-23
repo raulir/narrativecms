@@ -19,7 +19,7 @@ function cms_page_save(params){
 	params = params || {'success':function(){}};
 
 	get_ajax('cms/cms_page_operations', {
-		'page_id': $('.cms_page_id').val(),
+		'cms_page_id': $('.cms_page_id').val(),
 		'do': 'cms_page_save',
 		'language': $('.cms_language_select_current').data('language'),
 		'sort': $('.cms_page_sort').val(),
@@ -28,8 +28,10 @@ function cms_page_save(params){
 		'status': $('.cms_page_status').val(),
 		'seo_title': $('.cms_page_seo_title').val(),
 		'description': $('.cms_page_description').val(),
-		'image': $('.cms_page_image').val(),
+		'image': $('.cms_image_input_cms_page_image').val(),
 		'layout': $('.cms_page_layout').val(),
+		'position': $('.cms_page_position').val(),
+		'positions': $('.cms_page_positions > select').map((ok, ob) => {return {name:$(ob).attr('name'), value:$(ob).val()}}).get(),
 		'success': function(data){
 			
 			// update possible changes on form
@@ -60,7 +62,7 @@ function cms_page_delete(){
 				
 				// if empty, page doesn't exist in database
 				if (page_id > 0){ 
-					get_ajax('cms_page_operations', {
+					get_ajax('cms/cms_page_operations', {
 						'page_id': page_id,
 						'do': 'cms_page_delete',
 						'success': function(data){

@@ -65,7 +65,7 @@ class cms_page_panel_toolbar extends CI_Controller {
 					];
 
 					$params['breadcrumb'][] = [ // to page
-							'text' => str_limit(!empty($params['page']['title']) ? $params['page']['title'] : '[ no title ]', 30),
+							'text' => !empty($params['page']['title']) ? $params['page']['title'] : '[ no title ]',
 							'url' => 'admin/page/'.$params['page']['cms_page_id'].'/',
 					];
 
@@ -84,11 +84,11 @@ class cms_page_panel_toolbar extends CI_Controller {
 				}
 
 				$params['breadcrumb'][] = [ // parent block
-						'text' => str_limit($parent['title'], 30),
+						'text' => $parent['title'],
 						'url' => 'admin/cms_page_panel/'.$parent['cms_page_panel_id'].'/',
 				];
 				$params['breadcrumb'][] = [ // current block
-						'text' => $params['cms_page_panel_id'] ? str_limit($cms_page_panel['title'], 40) : 'New panel',
+						'text' => $params['cms_page_panel_id'] ? $cms_page_panel['title'] : 'New panel',
 						'url' => '',
 				];
 					
@@ -102,11 +102,11 @@ class cms_page_panel_toolbar extends CI_Controller {
 								'url' => 'admin/',
 						],
 						[ // to page
-								'text' => str_limit(!empty($params['page']['title']) ? $params['page']['title'] : '[ no title ]', 40),
+								'text' => !empty($params['page']['title']) ? $params['page']['title'] : '[ no title ]',
 								'url' => 'admin/page/'.$params['cms_page_id'].'/',
 						],
 						[ // current block
-								'text' => $params['cms_page_panel_id'] ? str_limit($cms_page_panel['title'], 40) : 'New panel',
+								'text' => $params['cms_page_panel_id'] ? $cms_page_panel['title'] : 'New panel',
 								'url' => '',
 						],
 				];
@@ -145,7 +145,7 @@ class cms_page_panel_toolbar extends CI_Controller {
 					}
 					
 					$params['breadcrumb'][] = [
-							'text' => str_limit(!empty($panel_config['list']['title_field']) ? $cms_page_panel[$panel_config['list']['title_field']] : $heading, 40),
+							'text' => $heading,
 							'url' => '',
 							'field' => !empty($panel_config['list']['title_field']) ? $panel_config['list']['title_field'] : 'heading', // title field
 					];

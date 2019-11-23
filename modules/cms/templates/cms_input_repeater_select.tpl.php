@@ -1,1 +1,1 @@
-<?php _panel('cms_input_select', $select_params) ?>
+<?php _panel('cms/cms_input_select', $select_params) ?>

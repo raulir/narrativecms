@@ -2,11 +2,14 @@ function cms_update_init(){
 	
 	$('.cms_update_button').on('click.cms', function(){
 		
+		var module = $(this).data('module');
+		
 		// do update
 		$('.cms_update_result').html('Getting list of files ...');
 
 		get_ajax('cms_update', {
 			'do': 'cms_update_list',
+			'module': module,
 			'success': function(data){
 				
 				// print out list of files
@@ -34,6 +37,7 @@ function cms_update_init(){
 							
 							get_ajax('cms_update', {
 								'do': 'cms_update_file',
+								'module': module,
 								'filename': value.filename,
 								'letter': value.letter,
 								'success': function(data){
@@ -54,8 +58,17 @@ function cms_update_init(){
 						// copy over
 						get_ajax('cms_update', {
 							'do': 'cms_update_copy',
+							'module': module,
 							'success': function(data){
-								cms_notification('CMS updated', 5);
+								
+								get_ajax('cms_update', {
+									'do': 'cms_update_cleanup',
+									'module': module,
+									'success': function(data){
+										cms_notification('CMS updated', 5);
+									}
+								});
+
 							}
 						});
 						

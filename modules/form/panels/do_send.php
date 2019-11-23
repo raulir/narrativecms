@@ -19,6 +19,11 @@ class do_send extends CI_Controller {
         	if (!empty($cms_page_panel_id)){
 				$params = array_merge($params, $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id));
         	}
+        		
+       		// try to load settings from basic form settings
+       		$default_params = $this->cms_page_panel_model->get_cms_page_panel_settings('form/basic');
+       		
+       		$params = array_merge($default_params, $params);
         	
         	unset($data['do']);
         	if (isset($data['id'])){
@@ -95,7 +100,7 @@ class do_send extends CI_Controller {
 			if (!empty($GLOBALS['config']['errors_visible']) && !empty($result)){
 				$return['result'] = $result;
 			}
-			
+
 			return $return;
         
         }

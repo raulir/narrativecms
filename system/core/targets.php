@@ -135,5 +135,7 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 		}
 
 	}
+	
+	$_SESSION['config']['targets']['hash'] = md5(serialize($_SESSION['targets']));
 
 }

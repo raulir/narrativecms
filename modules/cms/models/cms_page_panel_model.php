@@ -137,6 +137,7 @@ class cms_page_panel_model extends CI_Model {
 	function _insert_or_update_param($cms_page_panel_id, $name, $value, $search = 0){
 
 		if (is_array($value)){
+			
 			foreach($value as $_name => $_value){
 				
 				if (is_numeric($_name)){
@@ -157,7 +158,9 @@ class cms_page_panel_model extends CI_Model {
 				$this->_insert_or_update_param($cms_page_panel_id, ($name ? $name.'.' : '').$_name, $_value, $search_param);
 				
 			}
+			
 		} else {
+			
 			$sql = "select cms_page_panel_param_id from cms_page_panel_param where cms_page_panel_id = ? and name = ? limit 1 ";
 			$query = $this->db->query($sql, array($cms_page_panel_id, $name, ));
 			if ($query->num_rows()){
@@ -168,6 +171,7 @@ class cms_page_panel_model extends CI_Model {
 				$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = ? , value = ? , search = ? ";
 				$this->db->query($sql, array($cms_page_panel_id, $name, $value, $search, ));
 			}
+			
 		}
 		
 	}
@@ -182,27 +186,47 @@ class cms_page_panel_model extends CI_Model {
 		$query = $this->db->query($sql, array($cms_page_panel_id, '',));
 		$result = $query->result_array();
 		
-		$panel_params = array();
+		$panel_params = [];
 		foreach($result as $row){
-// print($row['name']."\n\n");
+			
 			$keys = explode('.', $row['name']);
-// print_r($keys);			
 			$arr = &$panel_params;
-// var_dump($arr);
 			foreach ($keys as $key) {
-// var_dump($panel_params);
 				if (!isset($arr[$key])){
-// var_dump($key);
 					$arr[$key] = [];
 				}
-// var_dump($arr[$key]);
 				$arr = &$arr[$key];
-// var_dump($arr);
+			}
+			
+			if ($row['value'] === '__ARRAY__'){
+				$row['value'] = [];
+				$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name = ? ";
+				$this->db->query($sql, [$cms_page_panel_id, $row['name']]);
 			}
 			$arr = $row['value'];
+			
 		}
-// print("---\n");		
-// print_r($panel_params);		
+		
+		// add empty arrays from panel definition
+		$sql = "select * from cms_page_panel where cms_page_panel_id = ? ";
+		$query = $this->db->query($sql, [$cms_page_panel_id]);
+		
+		$page_panel_base = $query->row_array();
+
+		$this->load->model('cms/cms_panel_model');
+		$panel_structure = $this->cms_panel_model->get_cms_panel_definition($page_panel_base['panel_name']);
+		
+		foreach($panel_structure as $struct){
+		
+			if ($struct['type'] == 'cms_page_panels' && empty($panel_params[$struct['name']])){
+				$panel_params[$struct['name']] = [];
+			}
+		
+			if ($struct['type'] == 'repeater' && empty($panel_params[$struct['name']])){
+				$panel_params[$struct['name']] = [];
+			}
+		
+		}
 		
 		$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = '' , value = ? , search = 0 ";
 		$this->db->query($sql, array($cms_page_panel_id, json_encode($panel_params), ));
@@ -210,19 +234,27 @@ class cms_page_panel_model extends CI_Model {
 	}
 	
 	function _purge_param($cms_page_panel_id){
-		$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? ";
+		$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name != 'create_cms_user_id' and name != 'create_time'";
 		$this->db->query($sql, array($cms_page_panel_id, ));
 	}
 	
-	function get_cms_page_panel_params($cms_page_panel_id){
+	function get_cms_page_panel_params($cms_page_panel_id, $retry = true){
 		
 		$sql = "select value from cms_page_panel_param where cms_page_panel_id = ? and name = ''";
-    	$query = $this->db->query($sql, array($cms_page_panel_id));
+    	$query = $this->db->query($sql, [$cms_page_panel_id]);
     	if ($query->num_rows()){
 	    	$row = $query->row_array();
     		return json_decode($row['value'], true);
     	} else {
-    		return array();
+    		
+    		// if empty result, try to update cache
+    		if ($retry){
+    			$this->_update_cached_params($cms_page_panel_id);
+    			$this->get_cms_page_panel_params($cms_page_panel_id, false);
+    		} else {
+    			return [];
+    		}
+    		
     	}
 		
 	}
@@ -248,7 +280,7 @@ class cms_page_panel_model extends CI_Model {
 		}
 		
 		// add settings if present
-		$return = array_merge($this->cms_page_panel_model->get_cms_page_panel_settings($return['panel_name']), $return);
+		$return = array_merge($this->get_cms_page_panel_settings($return['panel_name']), $return);
 	
 		return $return;
 	
@@ -276,7 +308,7 @@ class cms_page_panel_model extends CI_Model {
 	}
 	
 	function update_cms_page_panel($cms_page_panel_id, $data, $no_purge = false){
-// print_r($data);
+		
 		if (isset($data['search_params'])){
 			$search_params = $data['search_params'];
 			unset($data['search_params']);
@@ -288,6 +320,21 @@ class cms_page_panel_model extends CI_Model {
 
 		if (isset($data['panel_params'])){
 			unset($data['panel_params']);
+		}
+		
+		// check if update time and user needs update
+		$was_update = false;
+		$keys = array_keys($data);
+		$keys = array_diff($keys, ['show', 'sort', 'cms_page_panel_id', 'cms_page_id', 'parent_id', ]);
+		foreach($keys as $ckey => $cval){
+			if (substr($cval, 0, 1) == '_'){
+				unset($keys[$ckey]);
+			}
+		}
+		if (count($keys)){
+			$data['update_cms_user_id'] = !empty($_SESSION['cms_user']['cms_user_id']) ? $_SESSION['cms_user']['cms_user_id'] : 0;
+			$date = new DateTime();
+			$data['update_time'] = $date->getTimestamp();
 		}
 		
 		// new params stuff
@@ -361,6 +408,10 @@ class cms_page_panel_model extends CI_Model {
 	 */
 	function create_cms_page_panel($data){
 		
+		if (!empty($data['panel_params']) && is_array($data['panel_params'])){
+			$data = array_merge($data['panel_params'], $data);
+		}
+		
 		if (empty($data['cms_page_id'])){
 			$data['cms_page_id'] = isset($data['page_id']) ? $data['page_id'] : 0;
 		}
@@ -413,6 +464,13 @@ class cms_page_panel_model extends CI_Model {
 		
 		$insert_id = $this->db->insert_id();
 		
+		// creation data
+		$panel_params['create_cms_user_id'] = !empty($_SESSION['cms_user']['cms_user_id']) ? $_SESSION['cms_user']['cms_user_id'] : 0;
+		$date = new DateTime();
+		$panel_params['create_time'] = $date->getTimestamp();
+		$panel_params['update_cms_user_id'] = $panel_params['create_cms_user_id'];
+		$panel_params['update_time'] = $panel_params['create_time'];
+		
 		if (!empty($panel_params)){
 		
 			// detailed data
@@ -425,39 +483,7 @@ class cms_page_panel_model extends CI_Model {
 		return $insert_id;
 		
 	}
-	
-	/*
-	 * old stuff, but used still
-	 */
-	function create_block($data){
 		
-		if (!isset($data['show'])){
-			$data['show'] = 0;
-		}
-		
-		$panel_params = $data['panel_params'];
-		unset($data['panel_params']);
-		
-		$search_params = $data['search_params'];
-		unset($data['search_params']);
-		
-		$sql = "insert into cms_page_panel set `".implode('` = ? , `', array_keys($data))."` = ? ";
-		$this->db->query($sql, $data);
-		
-		$insert_id = $this->db->insert_id();
-		
-		if (!empty($panel_params)){
-		
-			// detailed data
-			$this->_insert_or_update_param($insert_id, '', $panel_params, $search_params);
-			$this->_update_cached_params($insert_id);
-			
-		}
-
-		return $insert_id;
-		
-	}
-	
 	/**
 	 * 
 	 * @param array $orders

@@ -35,7 +35,8 @@ class cms_page extends CI_Controller {
 		} else {
 				
 			$return['page'] = $this->cms_page_model->new_page();
-
+			$return['page']['position'] = !empty($params['position']) ? $params['position'] : 'main';
+			$return['page']['title'] = 'New '.(!empty($params['position']) ? $params['position'] : 'page');
 		}
 
 		// is page a list item page?
@@ -47,6 +48,9 @@ class cms_page extends CI_Controller {
 		
 		$return['is_list_item'] = in_array($return['page']['slug'], $lists_clean) ? 1 : 0;
 		
+		// layout
+		$return['cms_page_layout'] = !empty($return['page']['layout']) ? $return['page']['layout'] : 
+				(!empty($GLOBALS['config']['layout']) ? $GLOBALS['config']['layout'] : 'cms/rem');
 
 		return $return;
 

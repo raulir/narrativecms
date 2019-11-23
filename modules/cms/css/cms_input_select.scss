@@ -1,32 +1,15 @@
-$colour_border: #a0a0a0;
-
 .cms_input_select {
-	
-	margin-left: 20px;
 	z-index: 10;
-	display: inline-block;
-	
-	.cms_repeater_block & {
-    	margin-left: 0;
-    	width: 100%;
-    }
-    
-    .admin_column & {
-    	margin-left: 0;
-    	width: 100%;
-    }
-	
 }
 
-.cms_input_select > select {
+.cms_input_select_select {
 	box-sizing: border-box;
 	display: block;
-	border: 1px solid $colour_border;
-	width: 330px;
-	height: 26px;
-	line-height: 23px;
-	font-size: 17px;
+	border: 0.1rem solid $colour_border;
+	width: 33.0rem;
+	height: 2.5rem;
+	line-height: 2.2rem;
+	font-size: 1.7rem;
+	padding: 0.1rem 0.5rem 0 0.5rem;
 	float: right;
-	padding: 1px 5px 0px 5px;
 }
-

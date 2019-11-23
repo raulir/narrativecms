@@ -52,22 +52,34 @@
         				background_colour = '#000000';
         			}
         			
+	        		if ($this.data('cms_lightbox_close_opacity')){
+	        			cms_lightbox_close_opacity = $this.data('cms_lightbox_close_opacity');
+	        		} else {
+	        			cms_lightbox_close_opacity = 1;
+	        		}
+	        		
         			// make it to rgb
         			$('body').append('<div id="_cms_lightbox_temp" style="background-color: ' + background_colour + '; "></div>');
         			background_colour = $('#_cms_lightbox_temp').css('background-color');
         			$('#_cms_lightbox_temp').remove();
         			background_colour = background_colour.replace(')', ',0.9)').replace('rgb(','rgba(');
 
-    	        	$('body').append('<div class="cms_lightbox_overlay" style="height: 100vh; width: 100vw; position: fixed; top: 0px; left: 0px; padding: 20px; ' +
-    	        			'background-color: ' + background_colour + '; z-index: 1000; cursor: pointer; opacity: 0; box-sizing: border-box; ">' +
+    	        	$('body').append('<div class="cms_lightbox_overlay" style="height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; ' +
+    	        			'padding: 2rem; background-color: ' + background_colour + '; z-index: 1000; cursor: pointer; opacity: 0; ' + 
+    	        			'box-sizing: border-box; ">' +
     	        				'<div class="cms_lightbox_image" style="opacity: 0; background-repeat: no-repeat; background-position: center; ' +
-    	        				'background-size: contain; width: 100%; height: 100%; ' +
+    	        				'background-size: contain; width: 100%; height: 100%; position: relative; ' +
     	        				'background-image: url(' + $this.data('cms_lightbox_image') + '); "></div>' +
     	        			'</div>');
     	        	
     	        	if ($this.data('cms_lightbox_close')){
+    	        		
     	        		$('.cms_lightbox_overlay').append('<div class="cms_lightbox_close" ' + 
-    	        				'style="opacity: 0; background-image: url(' + $this.data('cms_lightbox_close') + '); "></div>');
+    	        				'style="position: absolute; top: 2rem; right: 2rem; background-size: contain; background-repeat: no-repeat; ' +
+    	        				'background-position: center; width: 5rem; height: 5rem; opacity: ' + cms_lightbox_close_opacity + '; ' +
+    	        				'transition: opacity 0.3s; background-image: url(' + $this.data('cms_lightbox_close') + '); " ' +
+    	        				'onMouseOver="this.style.opacity=1" onMouseOut="this.style.opacity=0.5"></div>');
+    	        		
     	        	}
     	        	
     	        	var $cms_lightbox_data = $('.cms_lightbox_data');
@@ -174,27 +186,27 @@
     	        			});
 
     	        		}
-    	        		
-    	        		// register arrows
-    	        		$(document).on('keydown.joberryman', function(e){
-    	        			if (e.keyCode == 37){ // left
-    	        				$('.cms_lightbox_arrow_left').click();
-    	        			}
-    	        			if (e.keyCode == 39){ // right
-    	        				$('.cms_lightbox_arrow_right').click();
-    	        			}
-    	        			if (e.keyCode == 27){ // right
-    	        				$('.cms_lightbox_image').click();
-    	        			}
-    	        		});
-    	        		
+    	        		    	        		
     	        	}
+    	        	
+	        		// register arrows
+	        		$(document).on('keydown.lightbox', function(e){
+	        			if (e.keyCode == 37){ // left
+	        				$('.cms_lightbox_arrow_left').click();
+	        			}
+	        			if (e.keyCode == 39){ // right
+	        				$('.cms_lightbox_arrow_right').click();
+	        			}
+	        			if (e.keyCode == 27){ // right
+	        				$('.cms_lightbox_image').click();
+	        			}
+	        		});
 
     	        	$('.cms_lightbox_overlay').animate({'opacity':'1'}, 400);
 
-    	        	$('.cms_lightbox_image').on('click.cms touchstart.cms', function(){
+    	        	$('.cms_lightbox_image,.cms_lightbox_close').on('click.cms touchstart.cms', function(){
     	        		
-    	        		$(document).off('keydown.joberryman');
+    	        		$(document).off('keydown.lightbox');
     	        		
     	        		$('.cms_lightbox_close').animate({'opacity':'0'}, 300);
     	        		
@@ -208,7 +220,8 @@
 
     	        	});
     	        	setTimeout(function(){
-    	        		$('.cms_lightbox_image,.cms_lightbox_close').animate({'opacity':'1'}, 400);
+    	        		$('.cms_lightbox_image').animate({'opacity':'1'}, 400);
+    	        		$('.cms_lightbox_close').css({'opacity': cms_lightbox_close_opacity});
     	        	}, 600);
     	        	
     	    	});

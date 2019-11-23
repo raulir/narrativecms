@@ -11,14 +11,27 @@ class cms_user_model extends CI_Model {
 	}
 
 	function get_cms_user($cms_user_id){
-		$sql = "select * from cms_user where cms_user_id = ? ";
-		$query = $this->db->query($sql, array($cms_user_id));
-		if ($query->num_rows()){
-			$row = $query->row_array();
-			return $row;
+		
+		$return = [];
+		
+		if ($cms_user_id > 1){
+		
+			$sql = "select * from cms_user where cms_user_id = ? ";
+			$query = $this->db->query($sql, array($cms_user_id));
+			
+			if ($query->num_rows()){
+				$row = $query->row_array();
+				$return = $row;
+			}
+		
 		} else {
-			return array();
+
+			$return['username'] = $GLOBALS['config']['admin_username'];
+			
 		}
+		
+		return $return;
+		
 	}
 
 	function new_cms_user(){
@@ -123,7 +136,7 @@ class cms_user_model extends CI_Model {
 				&& $username == $GLOBALS['config']['admin_username'] && $password == $GLOBALS['config']['admin_password']){
 
 					// check if in config file
-					$return['cms_user_id'] = 999999;
+					$return['cms_user_id'] = 1;
 					$return['access'] = ['*'];
 					$return['name'] = $username;
 					$return['username'] = $username;
@@ -131,7 +144,7 @@ class cms_user_model extends CI_Model {
 		} else {
 
 			// get user from database
-			$this->load->model('cms_user_model');
+			$this->load->model('cms/cms_user_model');
 			$user = $this->cms_user_model->get_cms_user_by_username($username);
 
 			if (!empty($user['username']) && $user['username'] == $username && $user['password'] == md5($username.$password)){

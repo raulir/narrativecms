@@ -16,7 +16,7 @@ class cms_images_operations extends CI_Controller {
 
 	function panel_action($params){
 
-		$this->load->model('cms_image_model');
+		$this->load->model('cms/cms_image_model');
 
 		$do = $this->input->post('do');
 		if ($do == 'cms_images_delete_by_filename'){
@@ -46,7 +46,6 @@ class cms_images_operations extends CI_Controller {
 			 
 			$filename = $this->input->post('filename');
 			$category = $this->input->post('category');
-			$keywords = $this->input->post('keywords');
 			$meta = array(
 					'author' => $this->input->post('author'),
 					'copyright' => $this->input->post('copyright'),
@@ -56,7 +55,6 @@ class cms_images_operations extends CI_Controller {
 			$this->cms_image_model->update_cms_image($filename, array(
 					'category' => empty($category) ? '' : $category,
 					'meta' => json_encode($meta),
-					'keyword' => $keywords,
 			));
 			 
 			$return = array();

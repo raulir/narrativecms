@@ -59,6 +59,9 @@ AddOutputFilterByType DEFLATE font/opentype
 
 RewriteEngine on
 
+RewriteCond %{REQUEST_URI} /_install [NC]
+RewriteRule .* - [F,L]
+
 # Protect cache
 RewriteCond %{REQUEST_URI} ^/cache [NC]
 RewriteCond %{REQUEST_URI} ^/_ [NC]

@@ -1,10 +1,6 @@
 {
 	"panels":[
 		{
-			"id":"analytics",
-			"name":"Analytics"
-		},
-		{
 			"id":"gtm",
 			"name":"GTM"
 		},
@@ -35,6 +31,10 @@
 		{
 			"id":"language",
 			"name":"Language"
+		},
+		{
+			"id":"gtag",
+			"name":"Analytics"
 		}
 	],
 	"cms_menu":[
@@ -43,9 +43,9 @@
 			"name":"CMS"
 		},
 		{
-			"id":"analytics",
+			"id":"gtag",
 			"name":"Analytics settings",
-			"url":"admin/panel_settings/basic__analytics/",
+			"url":"admin/panel_settings/basic__gtag/",
 			"parent":"cms",
 			"access":"basic_analytics"
 		},

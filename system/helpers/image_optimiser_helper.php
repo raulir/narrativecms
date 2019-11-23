@@ -247,14 +247,16 @@ if ( !function_exists('_iw')) {
 						rename($GLOBALS['config']['upload_path'].$png_image, $temp_name);
 						
 						$cmd = 'cwebp -z 9 '.$temp_name.' -o '.$GLOBALS['config']['upload_path'].$new_image;
-						
+
 						shell_exec($cmd);
 						
 						unlink($temp_name);
 						
 					}
 					
-					unlink($GLOBALS['config']['upload_path'].$png_image);
+					if (file_exists($GLOBALS['config']['upload_path'].$png_image)){
+						unlink($GLOBALS['config']['upload_path'].$png_image);
+					}
 				
 				} else { // if jpg
 					

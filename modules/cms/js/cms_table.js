@@ -31,6 +31,6 @@ $(document).ready(function() {
 	
 	init_cms_repeater_block_delete();
 	
-	$('.admin_repeater_container').sortable().disableSelection();
+	$('.cms_repeater_area').sortable().disableSelection();
 
 });

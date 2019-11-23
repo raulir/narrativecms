@@ -1,39 +1,64 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
+// static system config (CI heritage, deprecated)
+$config['system']['charset'] = 'UTF-8';
+$config['system']['allow_get_array'] = TRUE;
+$config['system']['log_threshold'] = 4;
+$config['system']['log_path'] = '';
+$config['system']['log_date_format'] = 'Y-m-d H:i:s';
+$config['system']['cookie_prefix'] = "";
+$config['system']['cookie_domain'] = "";
+$config['system']['cookie_path'] = "/";
+$config['system']['cookie_secure'] = FALSE;
+
 /*
  * LOAD CONFIG
- *
- * Filename for example for dev site hosted at http://project.localhost/
- * should be project.localhost.php
- *
- * Change contents of the file according your project
- *
  */
 
-$config['config_file'] = $working_directory.'config/'.strtolower($_SERVER['SERVER_NAME']).'.php';
-
+$config['config_file'] = $working_directory.'config/'.strtolower($_SERVER['SERVER_NAME']).'.json';
 if (file_exists($config['config_file'])){
-
-	// if config file for host exists, load config file
-	include_once($config['config_file']);
-
-} else if (file_exists($working_directory.'config/www.'.strtolower($_SERVER['SERVER_NAME']).'.php')) {
-
-	// if config file with www exists, go to site with www
-	header(trim('Location: http://www.'.strtolower($_SERVER['SERVER_NAME']).'/'.$_SERVER['REQUEST_URI'], '/ '));
-	die();
-
+	
+	$config = array_merge($config, json_decode(file_get_contents($config['config_file']), true));
+	
+	if ($config['base_path'] == '_auto_'){
+		$config['base_path'] = rtrim(str_replace("\\", "/", trim(getcwd(), " \\")), '/').'/';
+	}
+	
+	if (substr($config['upload_path'], 0, 1) !== '/' && substr($config['upload_path'], 1, 1) !== ':'){
+		$config['upload_path'] = $config['base_path'].$config['upload_path'];
+	}
+	
+	if (substr($config['upload_url'], 0, 2) !== '//' && substr($config['upload_path'], 1, 4) !== 'http'){
+		$config['upload_url'] = $config['base_url'].$config['upload_url'];
+	}
+	
 } else {
+	
+	$config['config_file'] = $working_directory.'config/'.strtolower($_SERVER['SERVER_NAME']).'.php';
+	if (file_exists($config['config_file'])){
 
-	print('No config file for this host found: '.$config['config_file']);
-	die();
+		// if config file for host exists, load config file
+		include_once($config['config_file']);
+		
+		// check if base_path is set correctly
+		if (!file_exists($config['base_path'].'config/'.strtolower($_SERVER['SERVER_NAME']).'.php')){
+			print('Bad config base path: "'.$config['base_path'].'"');
+			die();
+		}
+	
+	} else {
+			
+		// check if install script is present
+		if (file_exists($working_directory.'_install/install.php')){
+			include($working_directory.'_install/install.php');
+		} else {
+			print('No config file for this host found: '.$working_directory.'config/'.strtolower($_SERVER['SERVER_NAME']).'.json or '.$config['config_file']);
+		}
+		
+		die();
+	
+	}
 
-}
-
-// check if base_path is set correctly
-if (!file_exists($config['base_path'].'config/'.strtolower($_SERVER['SERVER_NAME']).'.php')){
-	print('Bad config base path: "'.$config['base_path'].'"');
-	die();
 }
 
 /*
@@ -44,7 +69,7 @@ if (!file_exists($config['base_path'].'config/'.strtolower($_SERVER['SERVER_NAME
 // TODO: to be refactored like css to cms cssjs settings
 $config['js'] = array(
 		array(
-				'script' => 'modules/cms/js/jquery/jquery-3.3.1.min.js',
+				'script' => 'modules/cms/js/jquery/jquery-3.4.1.min.js',
 				'no_pack' => 1,
 				'sync' => (!empty($config['jquery_blocks']) ? '' : 'defer'),
 		),
@@ -72,8 +97,16 @@ if ($GLOBALS['config']['database']['dbdriver'] = 'mysqli') {
 $db = $GLOBALS['dbconnections'][md5($GLOBALS['config']['database']['hostname'].$GLOBALS['config']['database']['username'].$GLOBALS['config']['database']['password'].$config['database']['database'])];
 
 if ($db === false){
-	print('Can\'t connect database!');
+	
+	// check if install script is present
+	if (file_exists($working_directory.'_install/install.php')){
+		include($working_directory.'_install/install.php');
+	} else {
+		print('Can\'t connect database!');
+	}
+	
 	die();
+
 }
 
 $sql = "select b.name, b.value from cms_page_panel a join cms_page_panel_param b on a.cms_page_panel_id = b.cms_page_panel_id where (a.panel_name = 'cms_settings' or a.panel_name = 'cms/cms_settings') and b.name != ''";

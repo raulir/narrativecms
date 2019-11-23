@@ -101,6 +101,13 @@
 			"default":"cms/rem"
 		},
 		{
+			"type":"text",
+			"name":"not_found_log",
+			"label":"Not found log",
+			"default":"404.log",
+			"help":"File to log not found requests data. Under cache folder."
+		},
+		{
 			"type":"modules",
 			"name":"modules",
 			"label":"Modules",
