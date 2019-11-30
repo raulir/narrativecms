@@ -1,6 +1,7 @@
 <div class="cms_input cms_input_link_container admin_input_link_container_<?php print($name_clean); ?> 
 		<?= !empty($extra_class) ? $extra_class : '' ?> <?= !empty($mandatory_class) ? $mandatory_class : '' ?>
-		<?= !empty($format) && $format == 'short' ? ' cms_input_link_short ' : '' ?>" data-cms_input_height="2">
+		<?= !empty($format) && $format == 'short' ? ' cms_input_link_short ' : '' ?>" 
+		data-cms_input_height="<?= !empty($format) && $format == 'short' ? '1' : '2' ?>">
 	
 	<label for="admin_input_link_<?php print($name_clean); ?>"><?php print($label); ?></label>
 	<?php _panel('cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
