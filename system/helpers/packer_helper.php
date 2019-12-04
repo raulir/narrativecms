@@ -177,21 +177,23 @@ if ( !function_exists('pack_css')) {
 		$css_string = '';
 	
 		// sort by top
-		function to_top($a, $b){
-			
-			if ($a['top'] > $b['top']){
-				return -1;
-			} elseif ($a['top'] < $b['top']){
-				return 1;
-			} else {
-				return 0;
+		if (!function_exists('_css_to_top')){
+			function _css_to_top($a, $b){
+				
+				if ($a['top'] > $b['top']){
+					return -1;
+				} elseif ($a['top'] < $b['top']){
+					return 1;
+				} else {
+					return 0;
+				}
+	
 			}
-
 		}
 
 		if (!empty($csss)){
 				
-			usort($csss, 'to_top');
+			usort($csss, '_css_to_top');
 			
 			if ($GLOBALS['config']['cache']['pack_css']){
 	
