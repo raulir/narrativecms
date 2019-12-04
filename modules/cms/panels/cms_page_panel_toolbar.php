@@ -139,7 +139,8 @@ class cms_page_panel_toolbar extends CI_Controller {
 					// current block
 					if ($cms_page_panel['sort']){
 						// not settings
-						$heading = $this->run_panel_method($cms_page_panel['panel_name'], 'panel_heading', $cms_page_panel);
+						$heading = $this->run_panel_method($cms_page_panel['panel_name'], 'panel_heading', 
+								array_merge($cms_page_panel, ['_heading_type' => 'short']));
 					} else {
 						$heading = (!empty($panel_config['label']) ? $panel_config['label'] : $cms_page_panel['panel_name']) . ' settings';
 					}

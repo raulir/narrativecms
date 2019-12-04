@@ -58,7 +58,7 @@
 				<div class="cms_pages_landing" <?php _ib('cms/cms_landing.png', 16) ?>></div>
 			<?php endif ?>
 
-			<div class="admin_list_sortable_div admin_text"><?php print(!empty($page['title']) ? $page['title'] : '[ no title ]'); ?></div>
+			<div class="cms_pages_label"><?= !empty($page['title']) ? $page['title'] : '[ no title ]' ?></div>
 			<a class="cms_list_item_button" <?php _lh('admin/page/' . $page['cms_page_id']) ?>>edit</a>
 		
 		</li>

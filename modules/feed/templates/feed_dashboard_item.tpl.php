@@ -26,8 +26,8 @@
 	
 </span>
 
-<a href="<?php print($edit_base.$id); ?>/" class="cms_list_item_link">edit</a>
+<a <?php _lh('/admin/cms_page_panel/'.$block['cms_page_panel_id'].'/') ?> class="cms_list_item_link">edit</a>
 
 <div class="cms_list_set" data-field="show" 
 		data-value="<?php print(empty($block['show']) ? '1' : '0'); ?>" 
-		data-id="<?php print($id); ?>"><?php print(empty($block['show']) ? 'show' : 'hide'); ?></div>
+		data-id="<?= $block['cms_page_panel_id'] ?>"><?php print(empty($block['show']) ? 'show' : 'hide'); ?></div>

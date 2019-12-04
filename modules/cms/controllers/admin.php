@@ -145,9 +145,7 @@ class admin extends CI_Controller {
 			$params['filter_fields'] = $item_config['list']['filter_fields'];
 		}
 			
-		if (!empty($item_config['list']['title_panel'])){
-			$params['title_panel'] = $item_config['list']['title_panel'];
-		} else if (!empty($item_config['list']['title_field'])){
+		if (!empty($item_config['list']['title_field'])){
 			$params['title_field'] = $item_config['list']['title_field'];
 		}
 

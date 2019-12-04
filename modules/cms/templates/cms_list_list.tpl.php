@@ -14,21 +14,15 @@
 			
 				<input type="hidden" class="block_id" value="<?php print($block[$id_field]); ?>">
 				
-				<div class="admin_list_sortable_div admin_text cms_list_list_item_heading">
-					<?php if(empty($title_panel)): ?>
-						<?= $block['_panel_heading'] ?>
-					<?php else: ?>
-						<?php _panel($title_panel, $block) ?>
-					<?php endif ?>
-				</div>
+				<div class="cms_list_list_item_heading"><?= $block['_panel_heading'] ?></div>
 				
 				<a class="cms_list_item_button" href="<?php print($edit_base.$block[$id_field]); ?>/">edit</a>
 
-				<div class="admin_list_sortable_div cms_list_item_button cms_page_panel_show" data-cms_page_panel_id="<?= $block['cms_page_panel_id'] ?>">
+				<div class="cms_list_item_button cms_page_panel_show" data-cms_page_panel_id="<?= $block['cms_page_panel_id'] ?>">
 					<?php print($block['show'] ? 'hide' : 'show'); ?>
 				</div>
 			
-				<div class="admin_list_sortable_div cms_list_item_button cms_page_panel_copy" data-cms_page_panel_id="<?= $block['cms_page_panel_id'] ?>">copy</div>
+				<div class="cms_list_item_button cms_page_panel_copy" data-cms_page_panel_id="<?= $block['cms_page_panel_id'] ?>">copy</div>
 
 			</li>
 		<?php endforeach ?>
@@ -36,6 +30,6 @@
 	
 <?php else: ?>
 	
-	<div class="admin_text cms_list_list_message">Nothing to show</div>
+	<div class="cms_list_list_message">Nothing to show</div>
 
 <?php endif ?>

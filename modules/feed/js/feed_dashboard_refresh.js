@@ -6,7 +6,7 @@ function feed_dashboard_refresh_init(){
 		get_ajax('feed/feed_dashboard_refresh', {
 			'do': 'feed_dashboard_refresh',
 			'success': function(){
-				cms_list_load($('.admin_list_container').data('start'), $('.admin_list_container').data('limit'), function(){
+				cms_list_load($('.cms_list_container').data('start'), $('.cms_list_container').data('limit'), function(){
 					$button.css({'opacity':'1'});
 				});
 			}

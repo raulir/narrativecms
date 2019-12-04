@@ -25,7 +25,7 @@
 					<div class="cms_input_page_panels_item_buttons">
 					
 						<?php if (!empty($block['_delete'])): ?>
-							<div class="admin_list_sortable_div cms_list_item_button cms_page_panel_delete" data-cms_page_panel_id="<?php print($block['cms_page_panel_id']); ?>">
+							<div class="cms_list_item_button cms_page_panel_delete" data-cms_page_panel_id="<?= $block['cms_page_panel_id'] ?>">
 								remove
 							</div>
 						<?php endif ?>
@@ -34,7 +34,7 @@
 							<a class="cms_list_item_button" <?php _lh('admin/cms_page_panel/'.$block['cms_page_panel_id'].'/'); ?>>edit</a>
 						<?php endif ?>
 						
-						<div class="admin_list_sortable_div cms_list_item_button cms_page_panel_show" data-cms_page_panel_id="<?php print($block['cms_page_panel_id']); ?>">
+						<div class="cms_list_item_button cms_page_panel_show" data-cms_page_panel_id="<?= $block['cms_page_panel_id'] ?>">
 							<?php print($block['show'] ? 'hide' : 'show'); ?>
 						</div>
 						

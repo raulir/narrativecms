@@ -5,6 +5,7 @@
 	height: calc(100vh - 14rem);
 	display: table;
 	max-height: 70rem;
+	table-layout: fixed;
 }
 
 .cms_user_login_content {

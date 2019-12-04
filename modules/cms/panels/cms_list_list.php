@@ -60,13 +60,9 @@ class cms_list_list extends CI_Controller {
 		$return['list'] = $this->cms_page_panel_model->get_cms_page_panels_by($filter);
 
 		// get page panel titles
-		if(!empty($config['list']['title_panel'])){
-			$return['title_panel'] = $config['list']['title_panel'];
-		}
-		
 		foreach($return['list'] as $key => $block){
 			
-			if (empty($block['_panel_heading']) && empty($return['title_panel'])){
+			if (empty($block['_panel_heading'])){
 				$return['list'][$key]['_panel_heading'] = $this->run_panel_method($block['panel_name'], 'panel_heading', $block);
 			}
 			
