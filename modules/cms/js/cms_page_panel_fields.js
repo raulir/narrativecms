@@ -117,7 +117,7 @@ function cms_page_panel_fields_init(){
 					hi = hi + ih
 					
 				})
-console.log(gr_starts)				
+
 				// inputs belonging to groups
 				$('.cms_input_container_groups .cms_input', $item).each(function(){
 					
@@ -137,9 +137,7 @@ console.log(gr_starts)
 			
 			$items.children('.cms_repeater_block_content').css({'height': hi * 3.5 + 1.0 + 'rem'})
 			
-			var h = (hi + (2.0/3.5)) * Math.ceil($items.length/2) // 2/3.5 = extra per line of blocks
-			
-			h = h + 1.7 // for repeater header
+			var h = (hi + (3.0/3.5)) * Math.ceil($items.length/2) // 2/3.5 = extra per line of blocks
 			
 			t = Math.max(left, right)
 			left = t + h + 3

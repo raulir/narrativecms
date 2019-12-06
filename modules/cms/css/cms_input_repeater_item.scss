@@ -4,9 +4,6 @@
 	display: inline-block;
 	vertical-align: top;
 	padding: 1.0rem;
-	background-repeat: no-repeat;
-	background-position: 1.6rem 1.6rem;
-	background-size: 1.4rem 1.4rem;
 	width: 50%;
 	
 	.cms_input {
@@ -29,6 +26,9 @@
 	line-height: 1.6rem;
 	background-color: $colour_white;
 	position: relative;
+	background-repeat: no-repeat;
+	background-position: 0.7rem 0.7rem;
+	background-size: 1.4rem 1.4rem;
 }
 
 .cms_repeater_block_toolbar {
