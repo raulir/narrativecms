@@ -15,20 +15,17 @@ class cms_page_panel_toolbar extends CI_Controller {
 	}
 
 	function panel_params($params){
-
-		// deprecate
-		if ($params['cms_page_id'] == 999999) $params['cms_page_id'] = 0;
-
+		
+//		print_r($params);
+			
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_page_model');
 		$this->load->model('cms/cms_panel_model');
 
-		$cms_page_panel = $this->cms_page_panel_model->get_cms_page_panel($params['cms_page_panel_id']);
-		// deprecate
-		if ($cms_page_panel['cms_page_id'] == 999999) $cms_page_panel['cms_page_id'] = 0;
+		$cms_page_panel = $this->cms_page_panel_model->get_cms_page_panel($params['target_id']);
 
-		if (!empty($params['parent_id'])) {
-			$cms_page_panel['parent_id'] = $params['parent_id'];
+		if (!empty($params['target_parent_id'])) {
+			$cms_page_panel['target_parent_id'] = $params['target_parent_id'];
 		}
 
 		// load panel config
@@ -37,130 +34,127 @@ class cms_page_panel_toolbar extends CI_Controller {
 		} else {
 			$panel_config = [];
 		}
-		
+
 		// breadcrumb
-		if (empty($params['breadcrumb']) || count($params['breadcrumb']) == 0){
+		$params['breadcrumb'] = [];
 
-			$params['breadcrumb'] = [];
+		if (!empty($cms_page_panel['parent_id'])){
 
-			if (!empty($cms_page_panel['parent_id'])){
+			$parent = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel['parent_id']);
 
-				$parent = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel['parent_id']);
+			// deprecate
+			if ($parent['cms_page_id'] == 999999){
+				$parent['cms_page_id'] = 0;
+			}
+			
+			if (empty($params['target_page_id'])){
+				$params['target_page_id'] = $parent['cms_page_id'];
+			}
 
-				// deprecate
-				if ($parent['cms_page_id'] == 999999){
-					$parent['cms_page_id'] = 0;
-				}
-				
-				if (empty($params['cms_page_id'])){
-					$params['cms_page_id'] = $parent['cms_page_id'];
-				}
+			if (!empty($parent['cms_page_id'])){
 
-				if (!empty($parent['cms_page_id'])){
-
-					$params['page'] = $this->cms_page_model->get_page($params['cms_page_id']);
-					$params['breadcrumb'][] = [ // root url to pages
-							'text' => 'Pages',
-							'url' => 'admin/',
-					];
-
-					$params['breadcrumb'][] = [ // to page
-							'text' => !empty($params['page']['title']) ? $params['page']['title'] : '[ no title ]',
-							'url' => 'admin/page/'.$params['page']['cms_page_id'].'/',
-					];
-
-				} else { // list item
-
-					// if this is list item
-					if (!empty($panel_config['list'])){
-							
-						$params['breadcrumb'][] = [ // url to list root
-								'text' => $panel_config['list']['list_title'],
-								'url' => 'admin/cms_list/'.$parent['panel_name'].'/',
-						];
-
-					}
-
-				}
-
-				$params['breadcrumb'][] = [ // parent block
-						'text' => $parent['title'],
-						'url' => 'admin/cms_page_panel/'.$parent['cms_page_panel_id'].'/',
-				];
-				$params['breadcrumb'][] = [ // current block
-						'text' => $params['cms_page_panel_id'] ? $cms_page_panel['title'] : 'New panel',
-						'url' => '',
-				];
-					
-			} else if (!empty($params['cms_page_id'])){ // normal panel on page
-
-				$params['page'] = $this->cms_page_model->get_page($params['cms_page_id']);
-
-				$params['breadcrumb'] = [
-						[ // root url to pages
-								'text' => 'Pages',
-								'url' => 'admin/',
-						],
-						[ // to page
-								'text' => !empty($params['page']['title']) ? $params['page']['title'] : '[ no title ]',
-								'url' => 'admin/page/'.$params['cms_page_id'].'/',
-						],
-						[ // current block
-								'text' => $params['cms_page_panel_id'] ? $cms_page_panel['title'] : 'New panel',
-								'url' => '',
-						],
+				$params['page'] = $this->cms_page_model->get_page($params['target_page_id']);
+				$params['breadcrumb'][] = [ // root url to pages
+						'text' => 'Pages',
+						'url' => 'admin/',
 				];
 
-			} else {
+				$params['breadcrumb'][] = [ // to page
+						'text' => !empty($params['page']['title']) ? $params['page']['title'] : '[ no title ]',
+						'url' => 'admin/page/'.$params['page']['cms_page_id'].'/',
+				];
+
+			} else { // list item
 
 				// if this is list item
 				if (!empty($panel_config['list'])){
-
-					if (empty($panel_config['parent'])){
 						
-						$params['breadcrumb'] = [
-								[ // url to list root
-										'text' => $panel_config['list']['list_title'],
-										'url' => 'admin/cms_list/'.str_replace('/', '__', $cms_page_panel['panel_name']).'/',
-								],
-						];
-						
-					} else {
-						
-						$params['breadcrumb'] = [
-								[ // url to list root
-										'text' => $panel_config['parent']['label'],
-										'url' => $panel_config['parent']['url'],
-								],
-						];
-						
-					}
-					
-					// current block
-					if ($cms_page_panel['sort']){
-						// not settings
-						$heading = $this->run_panel_method($cms_page_panel['panel_name'], 'panel_heading', 
-								array_merge($cms_page_panel, ['_heading_type' => 'short']));
-					} else {
-						$heading = (!empty($panel_config['label']) ? $panel_config['label'] : $cms_page_panel['panel_name']) . ' settings';
-					}
-					
-					$params['breadcrumb'][] = [
-							'text' => $heading,
-							'url' => '',
-							'field' => !empty($panel_config['list']['title_field']) ? $panel_config['list']['title_field'] : 'heading', // title field
-					];
-
-				} else { // must be global settings panel
-
-					$params['breadcrumb'] = [
-							[ // url to list root
-									'text' => !empty($panel_config['label']) ? $panel_config['label'] : $cms_page_panel['title'],
-									'url' => '',
-							],
+					$params['breadcrumb'][] = [ // url to list root
+							'text' => $panel_config['list']['list_title'],
+							'url' => 'admin/cms_list/'.$parent['panel_name'].'/',
 					];
 
 				}
+
+			}
+
+			$params['breadcrumb'][] = [ // parent block
+					'text' => $parent['title'],
+					'url' => 'admin/cms_page_panel/'.$parent['cms_page_panel_id'].'/',
+			];
+			
+			$params['breadcrumb'][] = [ // current block
+					'text' => $params['target_id'] ? $cms_page_panel['title'] : 'New panel',
+					'url' => '',
+			];
+				
+		} else if (!empty($params['target_page_id'])){ // normal panel on page
+
+			$params['page'] = $this->cms_page_model->get_page($params['target_page_id']);
+
+			$params['breadcrumb'] = [
+					[ // root url to pages
+							'text' => 'Pages',
+							'url' => 'admin/',
+					],
+					[ // to page
+							'text' => !empty($params['page']['title']) ? $params['page']['title'] : '[ no title ]',
+							'url' => 'admin/page/'.$params['target_page_id'].'/',
+					],
+					[ // current block
+							'text' => $params['target_id'] ? $cms_page_panel['title'] : 'New panel',
+							'url' => '',
+					],
+			];
+
+		} else {
+
+			// if this is list item
+			if (!empty($panel_config['list'])){
+
+				if (empty($panel_config['parent'])){
+					
+					$params['breadcrumb'] = [
+							[ // url to list root
+									'text' => $panel_config['list']['list_title'],
+									'url' => 'admin/cms_list/'.str_replace('/', '__', $cms_page_panel['panel_name']).'/',
+							],
+					];
+					
+				} else {
+					
+					$params['breadcrumb'] = [
+							[ // url to list root
+									'text' => $panel_config['parent']['label'],
+									'url' => $panel_config['parent']['url'],
+							],
+					];
+					
+				}
+				
+				// current block
+				if ($cms_page_panel['sort']){
+					// not settings
+					$heading = $this->run_panel_method($cms_page_panel['panel_name'], 'panel_heading', 
+							array_merge($cms_page_panel, ['_heading_type' => 'short']));
+				} else {
+					$heading = (!empty($panel_config['label']) ? $panel_config['label'] : $cms_page_panel['panel_name']) . ' settings';
+				}
+				
+				$params['breadcrumb'][] = [
+						'text' => $heading,
+						'url' => '',
+						'field' => !empty($panel_config['list']['title_field']) ? $panel_config['list']['title_field'] : 'heading', // title field
+				];
+
+			} else { // must be global settings panel
+
+				$params['breadcrumb'] = [
+						[ // url to list root
+								'text' => !empty($panel_config['label']) ? $panel_config['label'] : '[unknown]',
+								'url' => '',
+						],
+				];
 
 			}
 
@@ -188,7 +182,8 @@ class cms_page_panel_toolbar extends CI_Controller {
 		}
 		
 		// if panel has global settings
-		if (!empty($panel_config['settings']) && empty($panel_config['list']) && (!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']) || !empty($cms_page_panel['sort']))){
+		if (!empty($panel_config['settings']) && empty($panel_config['list']) && 
+				(!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']) || !empty($cms_page_panel['sort']))){
 			
 			$params['buttons'][] = ['name' => 'cms_page_panel_button_settings', 'position' => 'hidden', ];
 			$params['hidden_section'] = 1;
@@ -196,7 +191,8 @@ class cms_page_panel_toolbar extends CI_Controller {
 		}
 
 		// if panel can have target groups assigned
-		if (!empty($_SESSION['config']['targets']) && empty($panel_config['list']) && (!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']))){
+		if (!empty($_SESSION['config']['targets']) && empty($panel_config['list']) && 
+				(!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']))){
 				
 			$params['buttons'][] = ['name' => 'cms_page_panel_button_targets', 'position' => 'hidden', ];
 			$params['hidden_section'] = 1;

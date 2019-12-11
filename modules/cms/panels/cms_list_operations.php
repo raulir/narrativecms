@@ -24,7 +24,7 @@ class cms_list_operations extends CI_Controller {
 			$field = $this->input->post('field');
 			$value = $this->input->post('value');
 			 
-			$this->load->model('cms_page_panel_model');
+			$this->load->model('cms/cms_page_panel_model');
 
 			// save data
 			$this->cms_page_panel_model->update_cms_page_panel($cms_page_panel_id, array( $field => $value, ), true);

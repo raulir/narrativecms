@@ -73,13 +73,10 @@ class admin extends CI_Controller {
 	/**
 	 * Edit page panel
 	 */
-	function cms_page_panel($cms_page_panel_id, $cms_page_id = 0, $parent_id = 0, $parent_field_name = ''){
+	function cms_page_panel($cms_page_panel_id){
 		
 		$params = [
 				'cms_page_panel_id' => $cms_page_panel_id,
-				'cms_page_id' => $cms_page_id,
-				'parent_id' => $parent_id,
-				'parent_field_name' => $parent_field_name,
 		];
 		
 		// set page config

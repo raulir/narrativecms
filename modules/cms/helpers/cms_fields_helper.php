@@ -124,6 +124,7 @@ if (!function_exists('print_fields')){
 						'block_id' => $block_id,
 						'_return' => true, 
 						'help' => !empty($field['help']) ? $field['help'] : '',
+						'size' => !empty($field['size']) ? $field['size'] : '4',
 				));
 				
 			} elseif ($field['type'] == 'select'){

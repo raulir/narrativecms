@@ -2,6 +2,13 @@
 
 }
 
+.cms_input_page_panels_list {
+	margin-bottom: 0.6rem;
+	height: calc(100% - 7.0rem);
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
 .cms_input_page_panels_message {
     font-size: 16px;
     line-height: 25px;

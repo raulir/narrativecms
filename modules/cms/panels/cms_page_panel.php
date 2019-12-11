@@ -18,36 +18,54 @@ class cms_page_panel extends CI_Controller {
 	}
 
 	function panel_params($params){
-
+		
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_page_model');
 		$this->load->model('cms/cms_panel_model');
 		$this->load->model('cms/cms_module_model');
 		$this->load->model('cms/cms_user_model');
 		
+		$return = [];
+		
+		// set up new page panel
+		$params['target_type'] = $this->input->post('target_type');
+		$params['panel_name'] = $this->input->post('panel_name');
+
+		// if page
+		if (empty($params['cms_page_panel_id']) && empty($params['cms_page_id']) && $params['target_type'] == 'page'){
+			
+			$params['cms_page_id'] = $this->input->post('target_id');
+			$params['cms_page_panel_id'] = 0;
+
+			list($params['module'], $params['module_panel_name']) = explode('/', $params['panel_name']);
+			
+		} else if (empty($params['cms_page_panel_id']) && empty($params['cms_page_id']) && $params['target_type'] == 'panel'){
+
+			$params['parent_id'] = $this->input->post('target_id');
+			$params['parent_input_name'] = $this->input->post('target_input_name');
+			
+			$return['parent_name'] = $params['parent_input_name'];
+			
+			$params['cms_page_panel_id'] = 0;
+			$params['cms_page_id'] = 0;
+
+		}
+
 		// if preset panel name (panel type) for new panel
 		if (!is_numeric($params['cms_page_panel_id'])){
 			$params['panel_name'] = str_replace('__', '/', trim($params['cms_page_panel_id']));
 			$params['cms_page_panel_id'] = 0;
 			$params['cms_page_id'] = 0;
+		} else if (!empty($params['cms_page_panel_id'])){
+			$return['block'] = $this->cms_page_panel_model->get_cms_page_panel($params['cms_page_panel_id']);
 		}
-		
-		$return = array();
 
-		if (!empty($params['breadcrumb'])){
+		if (!empty($params['base_url'])){
+			$return['base_url'] = $params['base_url'];
+		}
 
-			$return['breadcrumb'] = $params['breadcrumb'];
-
-		} else {
-
-			if (!empty($params['base_url'])){
-				$return['base_url'] = $params['base_url'];
-			}
-
-			if (!empty($params['base_title'])){
-				$return['base_title'] = $params['base_title'];
-			}
-
+		if (!empty($params['base_title'])){
+			$return['base_title'] = $params['base_title'];
 		}
 
 		if (!empty($params['title_field'])){
@@ -58,43 +76,53 @@ class cms_page_panel extends CI_Controller {
 			$return['_mode'] = $params['_mode'];
 		}
 
-		// if filter, then get by filter
-		if (isset($params['filter'])){
-			
-			$blocks = $this->cms_page_panel_model->get_cms_page_panels_by($params['filter']);
-			
-			if (!empty($blocks[0])){
-			
-				$return['block'] = $blocks[0];
-				$return['block']['panel_params'] = $blocks[0];
-					
-			}
-			
-		}
-		
 		// if no filtered block returned but has panel name
 		if (empty($return['block']['cms_page_panel_id']) && isset($params['panel_name'])){
 			
-			// new block of type
 			$return['block'] = $this->cms_page_panel_model->new_cms_page_panel();
+			
+			// new panel name
+			$title = ucfirst(trim(!empty($params['module_panel_name']) ? $params['module_panel_name'] : $params['panel_name']));
+			
+			$title_needed = true;
+			$i = 0;
+				
+			while ($title_needed){
+			
+				if ($i == 0){
+					$new_title = $title;
+				} else {
+					$new_title = $title . ' (' . $i . ')';
+				}
+			
+				$i++;
+			
+				$page_panels = $this->cms_page_panel_model->get_cms_page_panels_by(['title' => $new_title, ]);
+			
+				if (!count($page_panels)){
+					$title_needed = false;
+				}
+			
+			}
+				
+			$return['block']['title'] = $new_title;
+			
+			// new block of type
 			$return['block']['panel_params'] = array();
-			$return['block']['cms_page_id'] = $params['cms_page_id'];
+			$return['block']['cms_page_id'] = 0; // $params['cms_page_id'];
+			
+			if ($params['target_type'] == 'page'){
+				$return['block']['cms_page_id'] = $params['cms_page_id'];
+			}
 			
 			$return['block']['panel_name'] = $params['panel_name'];
-			$return['block']['title'] = 'New ' . $params['panel_name'];
 			
 			// get new sort too as this is should be real block
 			$return['block']['sort'] = $this->cms_page_panel_model->get_max_cms_page_panel_id($params['panel_name']) + 1;
 
 		}
 
-		// if block id, get by this
-		if (empty($return['block']) && !empty($params['cms_page_panel_id'])){
-
-			$return['block'] = $this->cms_page_panel_model->get_cms_page_panel($params['cms_page_panel_id']);
-
-		}
-
+		/*
 		// if still empty, create a new empty
 		if (empty($return['block'])) {
 
@@ -114,7 +142,7 @@ class cms_page_panel extends CI_Controller {
 			}
 
 		}
-
+		*/
 		// no page page_id -> 0
 		if ($return['block']['cms_page_id'] == 999999) $return['block']['cms_page_id'] = 0;
 
@@ -128,45 +156,10 @@ class cms_page_panel extends CI_Controller {
 
 		// this is where panel definition comes from
 		$return['block']['panel_definition'] = $return['block']['panel_name'];
-
-		$return['panel_types'] = [];
-		$return['panel_replaced'] = [];
-
-		foreach($GLOBALS['config']['modules'] as $module){
-			
-			$config = $this->cms_module_model->get_module_config($module);
-
-			if (!empty($config['panels'])){
-				foreach($config['panels'] as $panel){
-
-					// add panel type to the dropdown of panel types
-					$panel_id = $module.'/'.$panel['id'];
-					if (!in_array($panel_id, $return['panel_replaced'])){
-						
-						$return['panel_types'][$panel_id] = ucfirst($module) . ' / ' . $panel['name'];
-						
-						// if showing the panel type hides some other panel type, like when extending the panel for project
-						if (!empty($panel['hides'])){
-							if (!empty($return['panel_types'][$panel['hides']])){
-								unset($return['panel_types'][$panel['hides']]);
-							}
-							$return['panel_replaced'][$panel['hides']] = $panel['hides'];
-						}
-						
-					}
-
-					// definition for this panel comes from elsewhere
-					if (($panel_id == $return['block']['panel_name'] || $panel_id == $module . '/' . $return['block']['panel_name']) && empty($return['independent_block']) && !empty($panel['definition'])){
-						$return['block']['panel_definition'] = stristr($panel['definition'], '/') ? $panel['definition'] : $module.'/'.$panel['definition'];
-					}
-
-				}
-			}
-		}
 		
 		// check if panel is list item on the same named page
 		$panel_definition = $this->cms_panel_model->get_cms_panel_config($return['block']['panel_definition']);
-// print_r($panel_definition);
+
 		if (!empty($panel_definition['list']) && !empty($return['cms_page_id']) && $return['block']['panel_name'] == $panel_definition['module'].'/'.$return['cms_page']['slug']){
 			if (empty($panel_definition['settings'])){
 				$panel_structure = [];
@@ -202,71 +195,9 @@ class cms_page_panel extends CI_Controller {
 		
 		$return['panel_params_structure'] = $panel_structure; // $this->cms_panel_model->get_cms_panel_definition($return['block']['panel_definition']);
 
-		if ((empty($return['independent_block']) || !empty($return['block']['parent_id'])) && $return['block']['panel_name'] === ''){
-
-			$return['shortcuts'] = array();
-			// get all possible panels on pages
-			$pages = $this->cms_page_model->get_cms_pages();
-
-			foreach($pages as $page){
-				$blocks = $this->cms_page_panel_model->get_cms_page_panels_by(array('cms_page_id' => $page['cms_page_id'], ));
-				foreach ($blocks as $block){
-					if ($block['title'] !== ''){
-						$return['shortcuts'][$block['cms_page_panel_id']] = $page['title'].' > '.$block['title'];
-					}
-				}
-			}
-
-		}
-
 		if (empty($return['block']['parent_id'])){
 			$return['block']['parent_id'] = !empty($params['parent_id']) ? $params['parent_id'] : 0;
 		}
-
-		if (!empty($return['block']['parent_id']) && !empty($params['parent_field_name'])){
-
-			// if has parent, check parent config - get parent type
-			$parent = $this->cms_page_panel_model->get_cms_page_panel($return['block']['parent_id']);
-			$parent_structure = $this->cms_panel_model->get_cms_panel_definition($parent['panel_name']);
-
-			foreach($parent_structure as $key => $field){
-				if (!empty($field['name']) && $field['name'] == $params['parent_field_name']){
-
-					$params['allowed_panels'] = $field['panels'];
-
-				}
-			}
-
-			$return['parent_field_name'] = $params['parent_field_name'];
-
-		}
-
-		if (!empty($params['allowed_panels'])){
-			$allowed_panels = explode(',', $params['allowed_panels']);
-
-			foreach ($return['panel_types'] as $key => $value){
-
-				$allowed = false;
-
-				if (in_array($key, $allowed_panels)){
-					$allowed =  true;
-				}
-
-				if (stristr($key, '/')){
-					list($kmodule, $kpanel) = explode('/', $key);
-					if (in_array($kpanel, $allowed_panels)){
-						$allowed =  true;
-					}
-				}
-
-				if (!$allowed){
-					unset($return['panel_types'][$key]);
-				}
-
-			}
-		}
-
-		asort($return['panel_types']);
 		
 		// creation and update
 		if (!empty($return['block']['create_cms_user_id'])){

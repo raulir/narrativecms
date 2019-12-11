@@ -2,9 +2,13 @@ $colour_background: white;
 $colour_border: #a0a0a0;
 $colour_shadow: #606060;
 $colour_light_shadow: #e0e0e0;
+$colour_extralight_shadow: #f7f7f7;
 $colour_grey: #606060;
 $colour_white: white;
 $colour_black: black;
+$colour_green: green;
+$colour_green_background: #efffef;
+$colour_hover: #efefef;
 $cms_orange: #f7a034;
 
 $cms_orange_button_border: #884825;
@@ -144,7 +148,7 @@ ul {
 	box-sizing: border-box;
 	border-bottom: 0.1rem solid $colour_border;
 	padding: 0 0 1.0rem 0;
-	margin: 0 auto 2.0rem auto;
+	margin: 0 auto 1.5rem auto;
 	position: relative;
 	z-index: 20;
 	width: calc(100% - 2.0rem);

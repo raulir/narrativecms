@@ -72,25 +72,6 @@ function cms_page_panel_format_mandatory(mandatory_result, colour){
 
 }
 
-function cms_page_panel_set_title(title, after){
-	
-	if (title == '-- select block type --' || title == '-- shortcut to --'){
-		after('New block');
-		return;
-	}
-
-	title = title.replace(/ \(([0-9]*)\)$/g, '');
-
-	get_ajax('cms_page_panel_operations', {
-		'do': 'cms_page_panel_title',
-		'title': title,
-		'success': function(data){
-			after(data.result.title);
-		}
-	});
-
-}
-
 function cms_page_panel_init(){
 
 	var $title = $('input', '.cms_page_panel_title');
@@ -98,34 +79,6 @@ function cms_page_panel_init(){
 		$title.data('new_block', true);
 	}
 	
-	$('.admin_block_shortcut_to').on('change.cms', function(){
-		
-		$('.cms_page_panel_panel_name').val('');
-	
-		if ($title.data('new_block')){
-			
-			cms_page_panel_set_title($('option:selected', this).text().split('>').pop().trim(), function(title){
-				$title.val(title);
-			});
-
-		}
-
-	})
-	
-	$('.cms_page_panel_panel_name').on('change.cms', function(){
-		
-		$('.admin_block_shortcut_to').val('');
-		
-		if ($title.data('new_block')){
-			
-			cms_page_panel_set_title($('option:selected', this).text().split('/').pop().trim(), function(title){
-				$title.val(title);
-			});
-			
-		}
-	
-	})
-
 	$('.cms_repeater_area').sortable().disableSelection();
 	
 	var title_field = $('.admin_title_text').data('title_field');

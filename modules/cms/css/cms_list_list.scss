@@ -13,3 +13,20 @@
 	line-height: 16px;
 	text-align: left;
 }
+
+.cms_list_list_container {
+	
+	.cms_page_panel_show {
+		height: 2.0rem;
+		line-height: 1.8rem;
+		padding: 0 1.0rem;
+		border-radius: 0.3rem;
+		margin: 0.3rem 0 0 0.4rem;
+		font-size: 1.4rem;
+		min-width: 5.2rem;
+		text-align: center;
+		text-transform: initial;
+		background-color: $colour_white;
+	}
+
+}

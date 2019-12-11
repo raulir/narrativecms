@@ -109,7 +109,7 @@ function cms_input_textarea_init(){
 					toolbar = toolbar + 'h2 ';
 					valid_elements = valid_elements + ',h2';
 					setup.push(function(ed){
-						ed.addButton('h2', {
+						ed.ui.registry.addButton('h2', {
 			    			title : 'Subheader',
 			    			image : config_url + 'modules/cms/img/tinymce_h_icon.png',
 			    			onclick : function() {

@@ -4,12 +4,20 @@
 	left: 0;
 	top: 0;
 	height: 100vh;
-	width: 100vw;
+	width: 100%;
 	background-color: rgba(0,0,0,0.5);
 	opacity: 0;
 	transition: opacity 0.3s;
 	table-layout: fixed;
 	z-index: 1000;
+}
+
+.cms_popup_table {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	display: table;
+	table-layout: fixed;
 }
 
 .cms_popup_cell {
@@ -41,4 +49,15 @@
 
 .cms_popup_cancel {
 	
+}
+
+.cms_popup_overlay {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	opacity: 0.4;
+	background-color: #303030;
+	z-index: 19994;
 }

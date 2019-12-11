@@ -34,9 +34,6 @@ class cms_input_page_panels extends CI_Controller {
 			$panel = $this->cms_page_panel_model->get_cms_page_panel($block_id);
 			if (is_array($panel)){
 				$params['cms_page_panels'][] = $panel;
-				$good_ids[] = $block_id;
-			} else {
-				$bad_ids[] = $block_id;
 			}
 		}
 
@@ -58,6 +55,13 @@ class cms_input_page_panels extends CI_Controller {
 			}
 		}
 
+		if (!isset($params['cms_page_id']) && isset($params['page_id'])){
+			$params['cms_page_id'] = $params['page_id'];
+		}
+		if (!isset($params['cms_page_panel_id']) && isset($params['block_id'])){
+			$params['cms_page_panel_id'] = $params['block_id'];
+		}
+		
 		return $params;
 
 	}

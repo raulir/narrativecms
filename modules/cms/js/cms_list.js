@@ -153,7 +153,6 @@ function cms_list_load(start, limit, after){
 		
 		// activate list buttons
 		setTimeout(function(){
-			activate_cms_page_panel_show();
 			activate_cms_page_panel_copy({'after':function(){
 				cms_list_load(start, limit, after);
 			}});
