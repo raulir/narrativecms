@@ -47,7 +47,10 @@
 					<?php foreach($buttons as $button): ?>
 					
 						<?php if($button['position'] == 'visible'): ?>
-							<?php _panel($button['name'], array('cms_page_panel_id' => $cms_page_panel_id, )); ?>
+							<?php _panel(
+									$button['name'], 
+									!empty($button['cms_page_panel_id']) ? ['cms_page_panel_id' => $button['cms_page_panel_id'], ] : []
+							) ?>
 						<?php endif ?>
 					
 					<?php endforeach ?>

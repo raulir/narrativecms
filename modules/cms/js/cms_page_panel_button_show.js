@@ -1,6 +1,6 @@
 function cms_page_panel_button_show_activate(){
 	$('.cms_page_panel_show').off('click.cms').on('click.cms', function(){
-		
+
 		var action = function($this){
 			var cms_page_panel_id = $this.data('cms_page_panel_id');
 			get_ajax_panel('cms_page_panel_operations', {

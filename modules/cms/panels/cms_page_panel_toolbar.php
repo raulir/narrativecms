@@ -173,10 +173,30 @@ class cms_page_panel_toolbar extends CI_Controller {
 		// delete,caching,hide = except not on page && list item == settings
 		if (!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']) || !empty($panel_config['list'])){
 			
-			$params['buttons'][] = ['name' => 'cms_page_panel_button_delete', 'position' => 'hidden', ];
-			$params['buttons'][] = ['name' => 'cms_page_panel_button_caching', 'position' => 'hidden', ];
-			$params['buttons'][] = ['name' => 'cms_page_panel_button_show', 'position' => 'visible', ];
-			$params['buttons'][] = ['name' => 'cms_page_panel_button_export', 'position' => 'hidden', ];
+			$params['buttons'][] = [
+					'name' => 'cms_page_panel_button_delete', 
+					'position' => 'hidden', 
+					'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
+			];
+			
+			$params['buttons'][] = [
+					'name' => 'cms_page_panel_button_caching', 
+					'position' => 'hidden', 
+					'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
+			];
+			
+			$params['buttons'][] = [
+					'name' => 'cms_page_panel_button_show', 
+					'position' => 'visible', 
+					'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
+			];
+			
+			$params['buttons'][] = [
+					'name' => 'cms_page_panel_button_export', 
+					'position' => 'hidden', 
+					'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
+			];
+			
 			$params['hidden_section'] = 1;
 		
 		}

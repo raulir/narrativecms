@@ -14,6 +14,8 @@ class cms_input_page_panels extends CI_Controller {
 
 		add_css('modules/cms/css/cms_input.scss');
 		
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_page_panel_button_show.js';
+		
 	}
 
 	function panel_params($params){

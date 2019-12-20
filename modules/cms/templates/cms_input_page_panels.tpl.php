@@ -37,7 +37,7 @@
 							<?php endif ?>
 							
 							<div class="cms_list_item_button cms_page_panel_show" data-cms_page_panel_id="<?= $block['cms_page_panel_id'] ?>">
-								<?php print($block['show'] ? 'hide' : 'show'); ?>
+								<?= $block['show'] ? 'hide' : 'show' ?>
 							</div>
 							
 							<?php if (!empty($block['_goto'])): ?>
