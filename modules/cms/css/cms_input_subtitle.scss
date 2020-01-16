@@ -19,7 +19,9 @@
 	position: relative;
 	box-sizing: border-box;
 	border-bottom: 0.1rem solid $colour_border;
-	top: 3.5rem;
+	.cms_page_panel_fields & {
+//		top: 3.5rem;
+	}
 }
 
 .cms_input_subtitle_label {

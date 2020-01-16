@@ -3,7 +3,7 @@
 	height: 16px;
 	width: 16px;
 	position: absolute;
-	left: 122px;
+	left: 107px;
 	top: 0;
 	box-sizing: border-box;
 	background-color: white;
@@ -23,6 +23,18 @@
 			transition: max-height 0.3s, opacity 0.3s, top 0.1s;
 		}
 		
+	}
+
+	.cms_page_panel_container & {
+		left: 12.7rem;
+	}
+
+	.cms_input_textarea & {
+		left: auto;
+		right: 0;
+		.cms_page_panel_container & {
+			right: 0.7rem;
+		}
 	}
 	
 }

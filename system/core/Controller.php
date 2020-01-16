@@ -298,7 +298,7 @@ class CI_Controller {
 				(!empty($params['_extends']['panel']) && empty($params['_extends']['no_wrapper']) ? 
 						'<span class="cms_wrapper cms_wrapper_'.$files['module'].'_'.$files['name'].'">'."\n" : '').
 				$return .
-				(!empty($files['template_extends']) && empty($params['_extends']['no_wrapper']) ? "\n</span>" : '').
+				(!empty($params['_extends']['panel']) && empty($params['_extends']['no_wrapper']) ? "\n</span>" : '').
 				"\n".'<!-- panel "' . $files['module'] . '/' . $files['name'] . 
 						'" ( '.(!empty($controller_timer_start) ? ' controller: '.($controller_timer_end - $controller_timer_start).'ms ' : '').
 				(!empty($template_timer_start) ? ' template: '.($template_timer_end - $template_timer_start).'ms' : ''). ' ) end -->'."\n";
