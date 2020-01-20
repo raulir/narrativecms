@@ -71,6 +71,10 @@ if ( !function_exists('_iw')) {
 	 * returns link to resized image
 	 */
 	function _iw($image, $params){
+		
+		if (empty($image)){
+			return ['image' => '', 'width' => '', 'height' => '', ];
+		}
 
 		$name_a = pathinfo($image);
 		

@@ -2,6 +2,7 @@
 .DS_Store
 
 /cache/*
+!/cache/.gitkeep
 !/cache/index.html
 !/system/libraries/Cache/
 
@@ -16,7 +17,9 @@ _db/*
 _feed
 
 /img/*
+!/img/.gitkeep
 !/img/index.html
 
 /config/*
+!/config/.gitkeep
 !/config/bccms.dev.php

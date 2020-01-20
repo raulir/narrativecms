@@ -8,13 +8,13 @@
 					data-<?= $data_key ?>="<?= $data_data ?>"
 				<?php endforeach ?>
 			<?php endif ?>
-			>
+			data-cms_input_height="1">
 	
-		<label for="select_<?php print($name_clean); ?>"><?php print($label); ?></label> 
+		<label for="select_<?= $name_clean ?>"><?= $label ?></label> 
 	
 		<?php _panel('cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
 	
-		<select class="<?= $name ?>" name="<?= $name ?>" id="select_<?= $name_clean ?>">
+		<select class="cms_input_select_select <?= $name ?>" name="<?= $name ?>" id="select_<?= $name_clean ?>">
 			<?php foreach($values as $key => $val): ?>
 				<option value="<?= $key ?>"<?= $key == $value ? ' selected="selected"' : '' ?>><?= $val ?></option>
 			<?php endforeach ?>
