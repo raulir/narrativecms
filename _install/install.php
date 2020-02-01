@@ -325,7 +325,7 @@ INSERT INTO cms_page_panel_param VALUES
 ("418","1","targets_enabled","0","0"),
 ("419","1","cron_trigger","visits","0"),
 ("420","1","cms_update_url","http://cms.bytecrackers.com/cms/updater/","0"),
-("421","1","layout","rem","0"),
+("421","1","layout","cms/rem","0"),
 ("422","1","modules.000","cms","0"),
 ("424","1","rem_px","1400","0"),
 ("425","1","rem_ratio","1.0","0"),
