@@ -1,0 +1,20 @@
+{
+	"cms_menu":[
+		{
+			"id":"stock",
+			"name":"Stock"
+		},
+		{
+			"id":"products",
+			"name":"Products",
+			"parent":"stock",
+			"url":"admin/cms_list/stock__product/"
+		},
+		{
+			"id":"product_categories",
+			"name":"Product categories",
+			"parent":"stock",
+			"url":"admin/cms_list/stock__product_category/"
+		}
+	]
+}

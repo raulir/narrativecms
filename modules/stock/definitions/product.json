@@ -1,0 +1,47 @@
+{
+	"version":"2",
+	"list":{
+		"list_title":"Products",
+		"item_title":"Product",
+		"title_field":"heading",
+		"filter_fields":{
+			"show":"-- show --",
+			"product_category_id":"-- product category --"
+		},
+		"link_target":"0"
+	},
+	"item":[ 
+		{
+			"type":"textarea",
+			"name":"heading",
+			"label":"Heading",
+			"lines":"2"
+		},
+		{
+			"type":"fk",
+			"list":"stock/product_category",
+			"name":"product_category_id",
+			"label":"Product category",
+			"add_empty":"0"
+		},
+		{
+			"type":"text",
+			"name":"price",
+			"label":"Price",
+			"help":"If a special price is set, this price is used as a default for not set special prices"
+		},
+		{
+			"type":"textarea",
+			"name":"text",
+			"label":"Description",
+			"lines":"6"
+		},
+		{
+			"type":"image",
+			"name":"image",
+			"label":"Image",
+			"category":"product",
+			"help":"Main image used for the product"
+		}
+	]
+}
