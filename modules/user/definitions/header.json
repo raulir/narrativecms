@@ -1,0 +1,32 @@
+{
+	"version":"2",
+	"label":"User header",
+	"image":"user/panel_header.png",
+	"settings":[
+		{
+			"type":"image",
+			"name":"icon",
+			"label":"Icon",
+			"category":"icon",
+			"default":"user/user_icon.png"
+		},
+		{
+			"type":"link",
+			"name":"login_link",
+			"label":"Link to login",
+			"help":"Link to login page"
+		},
+		{
+			"type":"link",
+			"name":"user_link",
+			"label":"Link to user",
+			"help":"Link to user dashboard"
+		},
+		{
+			"type":"text",
+			"name":"login_text",
+			"label":"Login label",
+			"default":"Login"
+		}
+	]
+}

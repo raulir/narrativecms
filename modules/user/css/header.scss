@@ -1,0 +1,54 @@
+.header_container {
+	font-size: 1.2rem;
+	line-height: 2.0rem;
+	background-color: $colour_black;
+	color: $colour_white;
+}
+
+.header_content {
+	box-sizing: border-box;
+	padding: 0.2rem;
+	text-align: center;
+}
+
+.header_loggedin {
+	border: 0.1rem solid $colour_white;
+}
+
+.header_loggedin_link {
+	
+}
+
+.header_loggedin_image {
+	
+}
+
+.header_loggedin_label {
+	
+}
+
+.header_loggedout {
+	border: 0.02rem solid $colour_white;
+	position: relative;
+	display: inline-block;
+}
+
+.header_loggedout_link {
+	display: block;
+	
+}
+
+.header_loggedout_image {
+	position: absolute;
+	left: 0.2rem;
+	top: 0.2rem;
+	height: 1.6rem;
+	width: 1.6rem;
+	background-size: 60% auto;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.header_loggedout_label {
+	padding: 0 0.5rem 0 2.0rem;
+}

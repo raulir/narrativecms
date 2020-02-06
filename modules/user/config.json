@@ -10,6 +10,13 @@
 			"parent":"users",
 			"url":"admin/cms_list/user__user/",
 			"access":"user_users"
+		},
+		{
+			"id":"users",
+			"name":"User header settings",
+			"parent":"users",
+			"url":"admin/panel_settings/user__header/",
+			"access":"user_settings"
 		}
 	],
 	"access":[
@@ -34,6 +41,14 @@
 		{
 			"id":"user_settings",
 			"name":"User settings"
+		},
+		{
+			"id":"header",
+			"name":"Header"
+		},
+		{
+			"id":"register",
+			"name":"Register"
 		}
 	]
 }

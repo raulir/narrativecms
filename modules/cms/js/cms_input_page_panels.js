@@ -7,13 +7,13 @@ function cms_input_page_panels_init(){
 		
 		var $this = $(this);
 		
-		var page_id = $this.data('page_id')
+		// var page_id = $this.data('page_id')
 		var parent_id = $this.data('parent_id')
 
 		var cms_page_id = $('.cms_page_id').val();
 		var cms_page_panel_id = $('.cms_page_panel_id').val();
 
-		if ($('.cms_page_panel_id').length == 0 && page_id == 0){
+		if ($('.cms_page_panel_id').length == 0 && cms_page_id == 0){
 
 			// if no block id field, then must be on the page admin
 			
@@ -81,7 +81,7 @@ function cms_input_page_panels_init(){
 		} else if (cms_page_id && cms_page_id != 0){
 			console.log('3')
 				
-			cms_input_page_panel_selector('page', $this.data('page_id'))
+			cms_input_page_panel_selector('page', cms_page_id)
 			
 		} else {
 		
