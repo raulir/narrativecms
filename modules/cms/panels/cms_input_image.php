@@ -25,6 +25,37 @@ class cms_input_image extends CI_Controller {
 		if (empty($params['category'])){
 			$params['category'] = '';
 		}
+		
+		// default image from module
+		if (substr_count($params['value'], '/') == 1){
+			
+			list($module, $image) = explode('/', $params['value']);
+
+			$filepath = $GLOBALS['config']['upload_path'].$module.'/'.$image;
+
+			// if not in uploads, copy over
+			if (!file_exists($filepath)){
+			
+				$original_path = $GLOBALS['config']['base_path'].'modules/'.$module.'/img/'.$image;
+			
+				if (!file_exists($GLOBALS['config']['upload_path'].$module.'/')){
+					mkdir($GLOBALS['config']['upload_path'].$module.'/');
+				}
+			
+				if (file_exists($original_path)){
+					copy($original_path, $filepath);
+				}
+			
+				// add to db
+				$this->load->model('cms/cms_image_model');
+			
+				if (file_exists($original_path)){
+					$this->cms_image_model->create_cms_image($module.'/', $image, $params['category']);
+				}
+			
+			}
+
+		}
 
 		if(!file_exists($GLOBALS['config']['upload_path'].$params['value'])){
 			$params['error'] = 'Missing image file<br>Update resources or database<br>or select a different image';
