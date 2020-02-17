@@ -11,9 +11,15 @@
 		},
 		{
 			"type":"text",
-			"name":"register_fullname",
-			"label":"Full name label",
-			"default": "full name"
+			"name":"register_first_name",
+			"label":"First name label",
+			"default": "first name"
+		},
+		{
+			"type":"text",
+			"name":"register_last_name",
+			"label":"Last name label",
+			"default": "last name"
 		},
 		{
 			"type":"text",
@@ -34,11 +40,14 @@
 			"help": "Redirect to this URL after successful login"
 		},
 		{
-			"type":"textarea",
-			"name":"loggedin_text",
-			"label":"Logged in message",
-			"lines":"2",
-			"default": "You are currently logged in. Please log out to register a new account."
+			"type":"select",
+			"label":"Log in after",
+			"name":"log_in_after",
+			"values":{
+				"1":"Yes",
+				"0":"No"
+			},
+			"default":"0"
 		},
 		{
 			"type":"subtitle",
@@ -85,6 +94,59 @@
 			"name":"register_password2",
 			"label":"Password x2 label",
 			"default": "new password again"
+		},
+		{
+			"type":"subtitle",
+			"label":"Messages"
+		},
+		{
+			"type":"textarea",
+			"name":"loggedin_text",
+			"label":"Logged in message",
+			"lines":"2",
+			"default": "You are currently logged in. Please log out to register a new account."
+		},
+		{
+			"type":"textarea",
+			"name":"message_password_mismatch",
+			"label":"Password mismatch",
+			"lines":"2",
+			"default": "Your entered passwords didn't match"
+		},
+		{
+			"type":"textarea",
+			"name":"message_bademail",
+			"label":"Bad email",
+			"lines":"2",
+			"default": "Email missing or not properly formed"
+		},
+		{
+			"type":"textarea",
+			"name":"message_usernamelength",
+			"label":"Username length",
+			"lines":"2",
+			"default": "Your username is too short"
+		},
+		{
+			"type":"textarea",
+			"name":"message_usernameexists",
+			"label":"Username exists",
+			"lines":"2",
+			"default": "Your selected username exists"
+		},
+		{
+			"type":"textarea",
+			"name":"message_emailexists",
+			"label":"Email exists",
+			"lines":"2",
+			"default": "This email already is registered"
+		},
+		{
+			"type":"textarea",
+			"name":"message_password_missing",
+			"label":"Password missing",
+			"lines":"2",
+			"default": "Password has to be filled in"
 		}
 	]
 }

@@ -11,18 +11,29 @@
 	"item":[ 
 		{
 			"type":"text",
+			"name":"email",
+			"label":"Email"
+		},
+		{
+			"type":"image",
+			"name":"image",
+			"label":"Image",
+			"category":"user"
+		},
+		{
+			"type":"text",
 			"name":"username",
 			"label":"Username"
 		},
 		{
 			"type":"text",
-			"name":"fullname",
-			"label":"Full name"
+			"name":"first_name",
+			"label":"First name"
 		},
 		{
 			"type":"text",
-			"name":"email",
-			"label":"Email"
+			"name":"last_name",
+			"label":"Last name"
 		},
 		{
 			"type":"text",

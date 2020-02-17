@@ -114,6 +114,13 @@
 			"help":"[modules]||Which modules and in what order to load from modules installed to the server||{cms} is always automatically loaded as the first"
 		},
 		{
+			"type":"text",
+			"name":"salt",
+			"label":"Salt",
+			"default":"cms",
+			"help":"Salt for hash functions. Do not change when you don't know about this."
+		},
+		{
 			"type":"subtitle",
 			"label":"Sizing",
 			"width":"wide",
