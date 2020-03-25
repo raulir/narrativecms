@@ -1,6 +1,9 @@
 .cms_input_subtitle_container {
 	
-	padding-top: 3.9rem;
+	&.cms_input {
+		padding-top: 3.9rem;
+	}
+
 	clear: both;
 	
 	&.cms_input_subtitle_wide {

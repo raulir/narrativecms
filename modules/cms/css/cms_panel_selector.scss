@@ -91,6 +91,8 @@
 	line-height: 2.6rem;
 	text-shadow: 0 0 0.3rem $colour_white;
 	font-family: asap;
+	position: relative;
+	z-index: 20;
 }
 
 .cms_panel_selector_preview_image {
