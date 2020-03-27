@@ -1,6 +1,7 @@
 {
     "version": "2",
-	"label": "Landing",
+	"label": "Login",
+	"image":"user/panel_login.png",
     "item": [
 		{
 			"type":"text",
@@ -10,9 +11,10 @@
 		},
 		{
 			"type":"text",
-			"name":"email_label",
-			"label":"Email label",
-			"default":"email"
+			"name":"username_label",
+			"label":"Username label",
+			"default":"username",
+			"help": "Label for username input.||If email is used as username, change accordingly"
 		},
 		{
 			"type":"text",
@@ -27,83 +29,84 @@
 			"default":"log in"
 		},
 		{
+			"type":"link",
+			"name":"redirect_link",
+			"label":"Success URL",
+			"help": "Redirect to this URL after successful login"
+		},
+		{
 			"type":"text",
 			"name":"bad_username",
 			"label":"Bad login message",
-			"default": "Your email or password was incorrect"
+			"default": "Your username or password was incorrect"
+		},
+		{
+			"type":"text",
+			"name":"loggedin_text",
+			"label":"Logged in text",
+			"default": "You are already logged in"
 		},
 		{
 			"type":"subtitle",
 			"label":"Forgot password"
 		},
 		{
+			"type":"select",
+			"label":"Show forgot CTA",
+			"name":"show_forgot",
+			"values":{
+				"yes":"Yes",
+				"no":"No"
+			},
+			"default":"yes"
+		},
+		{
+			"type":"link",
+			"name":"forgot_link",
+			"label":"Forgot URL"
+		},
+		{
 			"type":"text",
-			"name":"forgotten_text",
-			"label":"Forgotten text",
+			"name":"forgot_text",
+			"label":"Forgot text",
 			"default":"forgotten your login details?"
 		},
 		{
 			"type":"text",
-			"name":"link_text",
-			"label":"Link text",
-			"default":"contact us"
-		},
-		{
-			"type":"link",
-			"name":"link_url",
-			"label":"Link URL"
-		},
-		{
-			"type":"text",
-			"name":"extra_text",
-			"label":"Extra text",
-			"default": "and we'll provide you with new details"
+			"name":"forgot_cta",
+			"label":"Forgot CTA",
+			"default":"Click here for reminder"
 		},
 		{
 			"type":"subtitle",
-			"label":"Registration"
+			"label":"Register"
+		},
+		{
+			"type":"select",
+			"label":"Show register CTA",
+			"name":"show_register",
+			"values":{
+				"yes":"Yes",
+				"no":"No"
+			},
+			"default":"yes"
+		},
+		{
+			"type":"link",
+			"name":"register_link",
+			"label":"Register URL"
 		},
 		{
 			"type":"text",
-			"name":"register_heading",
-			"label":"Register heading",
-			"default": "register here"
+			"name":"register_text",
+			"label":"Register text",
+			"default":"not registered?"
 		},
 		{
 			"type":"text",
-			"name":"register_username",
-			"label":"Username label",
-			"default": "visible name"
-		},
-		{
-			"type":"text",
-			"name":"register_fullname",
-			"label":"Full name label",
-			"default": "full name"
-		},
-		{
-			"type":"text",
-			"name":"register_email",
-			"label":"Email label",
-			"default": "email"
-		},
-		{
-			"type":"text",
-			"name":"register_password",
-			"label":"Password label",
-			"default": "new password"
-		},
-		{
-			"type":"text",
-			"name":"register_password2",
-			"label":"Password x2 label",
-			"default": "new password again"
-		},
-		{
-			"type":"text",
-			"name":"register_submit",
-			"label":"Submit label",
-			"default": "register"
+			"name":"register_cta",
+			"label":"Register CTA",
+			"default":"Click here to register"
 		}
 	]
 }

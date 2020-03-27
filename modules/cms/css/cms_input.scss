@@ -17,20 +17,26 @@
 		padding-right: 0;
 	}
 
-}
+	label {
+	
+		box-sizing: border-box;
+		display: inline-block;
+		width: 12.0rem;
+		line-height: 2.5rem;
+		max-height: 2.5rem;
+		letter-spacing: -0.04rem;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		font-size: 1.6rem;
+		vertical-align: top;
+		
+		.cms_input_textarea& {
+			width: 100%;
+		}
+		
+	}
 
-.cms_input label {
-	box-sizing: border-box;
-	display: inline-block;
-	width: 12.0rem;
-	line-height: 2.5rem;
-	max-height: 2.5rem;
-	letter-spacing: -0.04rem;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	font-size: 1.6rem;
-	vertical-align: top;
 }
 
 .admin_input_error {
