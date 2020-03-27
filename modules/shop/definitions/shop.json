@@ -1,0 +1,36 @@
+{
+	"version":"2",
+	"label":"Shop settings",
+	"settings":[ 
+		{
+			"type":"text",
+			"name":"dimension_prefix",
+			"label":"Dimension prefix"
+		},
+		{
+			"type":"text",
+			"name":"dimension_suffix",
+			"label":"Dimension suffix"
+		},
+		{
+			"type":"text",
+			"name":"price_prefix",
+			"label":"Price prefix"
+		},
+		{
+			"type":"text",
+			"name":"price_suffix",
+			"label":"Price suffix"
+		},
+		{
+			"type":"text",
+			"name":"dimension_extra",
+			"label":"Dimension extra"
+		},
+		{
+			"type":"text",
+			"name":"dimension_rounding",
+			"label":"Dimension rounding"
+		}
+	]
+}

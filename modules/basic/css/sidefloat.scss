@@ -2,11 +2,9 @@
 	position: fixed;
 	top: 0;
 	right: 0;
-	width: 20.0rem;
-	box-sizing: border-box;
-	padding: 0 2.0rem;
 	opacity: 0;
 	height: 0;
+	width: 100%;
 	overflow: hidden;
 	transition: opacity 0.1s;
 	z-index: 100;
@@ -19,6 +17,15 @@
 
 .sidefloat_content {
 	position: relative;
+	width: 100rem;
+	margin: 0 auto;
+	box-sizing: border-box;
+	padding: 0 2.0rem;
+}
+
+.sidefloat_area {
+	width: 16.0rem;
+	float: right;
 }
 
 .sidefloat_item {

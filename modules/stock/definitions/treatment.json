@@ -1,0 +1,105 @@
+{
+	"version":"2",
+	"list":{
+		"list_title":"Treatments",
+		"item_title":"Treatment",
+		"title_field":"heading",
+		"title_panel":"treatmenttitle",
+		"filter_fields":{
+			"show":"-- show --",
+			"service_id":"-- service --"
+		},
+		"link_target":"0"
+	},
+	"item":[ 
+		{
+			"type":"textarea",
+			"name":"heading",
+			"label":"Heading",
+			"lines":"2"
+		},
+		{
+			"type":"fk",
+			"target":"block",
+			"name":"service_id",
+			"label":"Service",
+			"add_empty":"0"
+		},
+		{
+			"type":"fk",
+			"target":"block",
+			"name":"treatment_category_id",
+			"label":"Treatment category",
+			"add_empty":"1"
+		},
+		{
+			"type":"text",
+			"name":"duration",
+			"label":"Duration"
+		},
+		{
+			"type":"text",
+			"name":"price",
+			"label":"Price",
+			"help":"If a special price is set, this price is used as a default for not set special prices"
+		},
+		{
+			"type":"textarea",
+			"name":"text",
+			"label":"Description",
+			"lines":"8",
+			"width":"wide",
+			"html":"PB"
+		},
+		{
+			"type":"repeater",
+			"name":"subtreatments",
+			"label":"Subtreatments",
+			"fields":[
+				{
+					"type":"text",
+					"name":"heading",
+					"label":"Heading"
+				},
+				{
+					"type":"text",
+					"name":"duration",
+					"label":"Duration"
+				},
+				{
+					"type":"text",
+					"name":"price",
+					"label":"Price",
+					"help":"If a special price is set, this price is used as a default for not set special prices"
+				}
+			]
+		},
+		{
+			"type":"repeater",
+			"name":"prices",
+			"label":"Special prices",
+			"fields":[
+				{
+					"type":"repeater_select",
+					"target":"subtreatments",
+					"field":"heading",
+					"name":"subtreatment",
+					"label":"Applies to",
+					"add_empty":"1",
+					"help":"Leave empty when applies to main price"
+				},
+				{
+					"type":"text",
+					"name":"label",
+					"label":"Label",
+					"help":"Label for a special price category, eg 'Ladies', 'Men', 'Child' etc"
+				},
+				{
+					"type":"text",
+					"name":"price",
+					"label":"Price"
+				}
+			]
+		}
+	]
+}

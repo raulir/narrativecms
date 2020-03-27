@@ -29,7 +29,7 @@ function sidefloat_add(element_id, $element, params){
 	
 	var params = $.extend({'delay': 0, 'close': false }, params);
 
-	$('.sidefloat_content').append('<div class="sidefloat_item sidefloat_item_hidden sidefloat_item_' + element_id +'"></div>');
+	$('.sidefloat_area').append('<div class="sidefloat_item sidefloat_item_hidden sidefloat_item_' + element_id +'"></div>');
 	
 	var $sidefloat_item = $('.sidefloat_item_' + element_id);
 	

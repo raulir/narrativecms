@@ -1,0 +1,102 @@
+{
+	"version":"2",
+	"label":"Mini basket",
+	"item":[
+		{
+			"type":"subtitle",
+			"label":"Empty"
+		},
+		{
+			"type":"text",
+			"name":"empty_label",
+			"label":"Empty label"
+		},
+		{
+			"type":"text",
+			"name":"empty_cta_text",
+			"label":"Empty CTA text"
+		},
+		{
+			"type":"subtitle",
+			"label":"Closed"
+		},
+		{
+			"type":"text",
+			"name":"closed_heading",
+			"label":"Closed heading"
+		},
+		{
+			"type":"text",
+			"name":"closed_text_singular",
+			"label":"Closed text singular"
+		},
+		{
+			"type":"text",
+			"name":"closed_text_plural",
+			"label":"Closed text plural"
+		},
+		{
+			"type":"text",
+			"name":"closed_button_text",
+			"label":"Closed button text"
+		},
+		{
+			"type":"subtitle",
+			"label":"Open"
+		},
+		{
+			"type":"link",
+			"name":"checkout_link",
+			"label":"Checkout link"
+		},
+		{
+			"type":"text",
+			"name":"checkout_text",
+			"label":"Checkout text"
+		},
+		{
+			"type":"link",
+			"name":"cta_link",
+			"label":"CTA link"
+		},
+		{
+			"type":"text",
+			"name":"cta_text",
+			"label":"CTA text"
+		},
+		{
+			"type":"text",
+			"name":"open_heading",
+			"label":"Open heading"
+		},
+		{
+			"type":"text",
+			"name":"dimension_label",
+			"label":"Dimension label"
+		},
+		{
+			"type":"text",
+			"name":"price_label",
+			"label":"Price label"
+		},
+		{
+			"type":"subtitle",
+			"label":"Open"
+		},
+		{
+			"type":"text",
+			"name":"modal_text",
+			"label":"Modal text"
+		},
+		{
+			"type":"text",
+			"name":"modal_yes",
+			"label":"Modal yes"
+		},
+		{
+			"type":"text",
+			"name":"modal_cancel",
+			"label":"Modal cancel"
+		}
+	]
+}

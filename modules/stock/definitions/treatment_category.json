@@ -1,0 +1,19 @@
+{
+	"version":"2",
+	"list":{
+		"list_title":"Treatment categories",
+		"item_title":"Treatment category",
+		"title_field":"heading",
+		"filter_fields":{
+			"show":"-- show --"
+		},
+		"link_target":"0"
+	},
+	"item":[ 
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Heading"
+		}
+	]
+}
