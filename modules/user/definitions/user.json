@@ -39,6 +39,11 @@
 			"type":"text",
 			"name":"password",
 			"label":"Password hash"
+		},
+		{
+			"type":"text",
+			"name":"phone",
+			"label":"Phone"
 		}
 	]
 }

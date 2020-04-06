@@ -29,6 +29,12 @@
 		},
 		{
 			"type":"text",
+			"name":"register_phone",
+			"label":"Phone label",
+			"default": "phone"
+		},
+		{
+			"type":"text",
 			"name":"register_submit",
 			"label":"Submit label",
 			"default": "register"

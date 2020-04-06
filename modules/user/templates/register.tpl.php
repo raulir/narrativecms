@@ -36,6 +36,12 @@
 					<input id="register_last_name" class="register_input register_last_name" type="text" name="register_last_name" autocomplete="nope"
 							value="<?= !empty($register_data_last_name) ? $register_data_last_name : '' ?>">
 				</div>
+				
+				<div class="register_row">
+					<label for="register_phone" class="register_label"><?= $register_phone ?></label>
+					<input id="register_phone" class="register_input register_phone" type="text" name="register_phone" autocomplete="nope"
+							value="<?= !empty($register_data_phone) ? $register_data_phone : '' ?>">
+				</div>
 
 				<?php if($show_password == 'yes'): ?>
 					<div class="register_row">

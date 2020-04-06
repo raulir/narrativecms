@@ -35,18 +35,6 @@
 			"help": "Redirect to this URL after successful login"
 		},
 		{
-			"type":"text",
-			"name":"bad_username",
-			"label":"Bad login message",
-			"default": "Your username or password was incorrect"
-		},
-		{
-			"type":"text",
-			"name":"loggedin_text",
-			"label":"Logged in text",
-			"default": "You are already logged in"
-		},
-		{
 			"type":"subtitle",
 			"label":"Forgot password"
 		},
@@ -107,6 +95,38 @@
 			"name":"register_cta",
 			"label":"Register CTA",
 			"default":"Click here to register"
+		},
+		{
+			"type":"subtitle",
+			"label":"Messages"
+		},
+		{
+			"type":"textarea",
+			"name":"message_bad_username",
+			"label":"Missing username",
+			"lines":"2",
+			"default": "No such username"
+		},
+		{
+			"type":"textarea",
+			"name":"message_bad_password",
+			"label":"Bad password",
+			"lines":"2",
+			"default": "Bad password for this user"
+		},
+		{
+			"type":"textarea",
+			"lines":"2",
+			"name":"loggedin_text",
+			"label":"Logged in text",
+			"default": "You are already logged in"
+		},
+		{
+			"type":"textarea",
+			"lines":"2",
+			"name":"message_missing_credential",
+			"label":"Empty username or password",
+			"default": "Empty username or password submitted"
 		}
 	]
 }

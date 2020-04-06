@@ -16,7 +16,8 @@ class register extends CI_Controller{
 			$username = $this->input->post('username');
 			$password = $this->input->post('password');
 			$password2 = $this->input->post('password2');
-			
+			$phone = $this->input->post('phone');
+				
 			if ($password !== $password2){
 				$error = 'password_mismatch';
 			}
@@ -29,6 +30,7 @@ class register extends CI_Controller{
 						'first_name' => $first_name,
 						'last_name' => $last_name,
 						'password' => $password,
+						'phone' => $phone,
 				]);
 				
 				if (!empty($user['error'])){
@@ -48,12 +50,6 @@ class register extends CI_Controller{
 	}
 	
 	function panel_params($params){
-		
-		
-		print('<pre>');
-		print_r($params);
-		print('</pre>');
-		
 
 		// check if logged in
 		$params['loggedin'] = 0;

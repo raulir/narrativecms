@@ -1,4 +1,4 @@
-<div class="login_container">
+<div class="login_container" <?php if($redirect_link['target'] != '_none'): ?> data-success="<?= _l($redirect_link) ?>" <?php endif ?>>
 	<div class="login_content">
 	
 		<div class="login_heading"><?= $heading ?></div>
@@ -9,18 +9,21 @@
 		
 				<div class="login_row">
 					<label for="login_login_username" class="login_label"><?= $username_label ?></label>
-					<input id="login_login_username" class="login_input" type="text" name="login">
+					<input id="login_login_username" class="login_input login_input_username" type="text" name="login">
 				</div>
 				<div class="login_row">
 					<label for="login_login_password" class="login_label"><?= $password_label ?></label>
-					<input id="login_login_password" class="login_input" type="password" name="password" autocomplete="new-password">
+					<input id="login_login_password" class="login_input login_input_password" type="password" name="password">
 				</div>
 				<div class="login_row">
-					<input type="hidden" name="do" value="login">
-					<input type="submit" class="login_submit login_login" value="<?= $button_label ?>">
+					<div class="login_submit login_login"><?= $button_label ?></div>
 				</div>
 		
 			</form>
+			
+			<div class="login_error login_error_bad_username"><?= $message_bad_username ?></div>
+			<div class="login_error login_error_bad_password"><?= $message_bad_password ?></div>
+			<div class="login_error login_error_missing_credential"><?= $message_missing_credential ?></div>
 			
 			<?php if(!empty($message)): ?>
 				<div class="login_message"><?= $message ?></div>
