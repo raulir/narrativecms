@@ -19,13 +19,17 @@
 					
 					var $this = $(this);
 					
+					var speed = params.speed || 500;
+					
 					var delta = 0;
 					if (params.$space === false){
 						delta = 0;
 					} else if (params.$space){
 						delta = params.$space.height();
-					} else if ($('.cms_header').length){
-						delta = $('.cms_header').height();
+					}
+					
+					if ($('.cms_header').length){
+						$('.cms_header').each((i, el) => delta += $(el).outerHeight());
 					}
 
 					if ($this.attr('href')){
@@ -42,11 +46,11 @@
 
 						var elementtop = $('#' + name).offset().top;
 					
-						$('html, body').animate({ scrollTop: elementtop - delta }, 800);
+						$('html, body').animate({ scrollTop: elementtop - delta }, params.speed);
 					
 					} else if (name == '_top'){
 						
-						$('html, body').animate({ scrollTop: 0 }, 800);
+						$('html, body').animate({ scrollTop: 0 }, params.speed);
 						
 					}
 					

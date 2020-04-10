@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php 
 
-class header extends CI_Controller{
+namespace user;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class header extends \CI_Controller{
 	
 	function panel_params($params){
 
