@@ -620,6 +620,11 @@ class cms_page_panel_model extends CI_Model {
 		$sql_arrays = array();
 		$sql_filter_str = '';
 		
+		if (!is_array($filter)){
+			error_log('Bad filter in cms_page_panel_model!');
+			$filter = [];
+		}
+
 		foreach($filter as $key => $value){
 			$tkey = str_replace('!', '', $key);
 			if (in_array($tkey, array('cms_page_panel', 'cms_page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title', ))){
