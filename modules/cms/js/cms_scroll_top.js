@@ -3,7 +3,7 @@
 	
     $.fn.cms_scroll_top = function(params) {
 
-    	params = params || {};
+    	params = params || {'speed':800};
     	
     	$(this).each(function(){
     		
@@ -14,7 +14,7 @@
     			$(this).on('click.cms', function(){
 	    			$('html, body').animate({ 
 	    				scrollTop: 0
-	    			}, 800);
+	    			}, params.speed);
 	    		});
 	    		
     			$this.data('cms_scroll_top', '1');
