@@ -15,9 +15,7 @@ class cms_page_panel_toolbar extends CI_Controller {
 	}
 
 	function panel_params($params){
-		
-//		print_r($params);
-			
+
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_page_model');
 		$this->load->model('cms/cms_panel_model');
@@ -218,7 +216,7 @@ class cms_page_panel_toolbar extends CI_Controller {
 			$params['hidden_section'] = 1;
 		
 		}
-		
+
 		return $params;
 
 	}

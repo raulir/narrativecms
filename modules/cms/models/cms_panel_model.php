@@ -92,6 +92,14 @@ class cms_panel_model extends CI_Model {
 		$return['module'] = !empty($default_module) ? $default_module : '';
 		$return['filename'] = $filename;
 		
+		if (!empty($return['version']) && is_array($return['version'])){
+			$return['version'] = end($return['version']);
+		}
+		
+		if (!empty($return['label']) && is_array($return['label'])){
+			$return['label'] = end($return['label']);
+		}
+		
 		return $return;
 
 	}

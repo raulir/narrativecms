@@ -14,7 +14,7 @@
 		
 		<input id="<?= $name_clean ?>" type="text" 
 				class="cms_input_text_input <?= !empty($max_chars_class) ? $max_chars_class : '' ?> <?= !empty($meta_class) ? $meta_class : '' ?>"
-				<?= !empty($extra_data) ? $extra_data : '' ?> name="<?= $name ?>" value="<?= $value ?>">
+				<?= !empty($extra_data) ? $extra_data : '' ?> name="<?= $name ?>" value="<?= !is_array($value) ? $value : '' ?>">
 	
 	</div>
 	
