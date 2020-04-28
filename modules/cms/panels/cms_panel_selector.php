@@ -122,6 +122,16 @@ class cms_panel_selector extends CI_Controller {
 		}
 		
 		// get main module
+		if (! function_exists('array_key_last')) {
+			function array_key_last($array) {
+				if (!is_array($array) || empty($array)) {
+					return NULL;
+				}
+				 
+				return array_keys($array)[count($array)-1];
+			}
+		}
+		
 		$params['main_module'] = $GLOBALS['config']['modules'][array_key_last($GLOBALS['config']['modules'])];
 		
 		// shortcuts
