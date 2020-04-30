@@ -47,6 +47,8 @@
 			
 			var height = cms_window_height_get();
 			
+			var scroll = document.documentElement.scrollTop + $(window).height()/2
+			
 			$set.each(function(){
 				
 				var $this = $(this);
@@ -56,8 +58,15 @@
 					var new_height = Math.round(height * $this.data('cms_window_height')) / 100;
 					if ($this.data('cms_window_height_current') != new_height){
 						
-						$this.data('cms_window_height_current', new_height);
-						$this.height(new_height);
+						var top = $this.offset().top
+						
+						// check if element is in viewport
+						if (scroll > top && scroll < (top + $this.height())){
+						
+							$this.data('cms_window_height_current', new_height);
+							$this.height(new_height);
+							
+						}
 					
 					}
 
