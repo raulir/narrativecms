@@ -184,7 +184,7 @@ class Index extends CI_Controller {
     	
     	// add headers, footers, etc
     	if($cms_page_id && !empty($page['positions'])){
-    		
+
     		foreach($page['positions'] as $position){
     			
     			if (!empty($position['value'])){
@@ -197,6 +197,7 @@ class Index extends CI_Controller {
 		    					'position' => $position['name'],
 		    					'panel' => $block['panel_name'],
 		    					'params' => $block,
+		    					'_cms_page_id' => $cms_page_id,
 		    			);
 		    		
 		    		}

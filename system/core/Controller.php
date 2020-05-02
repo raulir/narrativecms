@@ -738,7 +738,12 @@ class CI_Controller {
 	
 			$params = !empty($panel_config['params']) ? $panel_config['params'] : array();
 			if (empty($params['cms_page_panel_id'])) $params['cms_page_panel_id'] = 0;
-	
+			
+			// add _page_id for real page id
+			if (empty($params['_cms_page_id'])) $params['_cms_page_id'] = 
+					(!empty($panel_config['_cms_page_id']) ? $panel_config['_cms_page_id'] : 
+							(!empty($panel_config['params']['cms_page_id']) ? $panel_config['params']['cms_page_id'] : 0));
+
 			// meta images
 			if (!empty($params['_images'])){
 				$GLOBALS['_panel_images'] = array_merge(array_values($GLOBALS['_panel_images']), array_values($params['_images']));
