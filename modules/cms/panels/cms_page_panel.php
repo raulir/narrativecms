@@ -189,7 +189,9 @@ class cms_page_panel extends CI_Controller {
 			$return['list_templates'] = [];
 			foreach($panel_definition['list']['templates'] as $page_slug => $list_template_name){
 				$list_template_page = $this->cms_page_model->get_page_by_slug($page_slug); 
-				$return['list_templates'][$list_template_page['cms_page_id']] = $list_template_name;
+				if (!empty($list_template_page['cms_page_id'])){
+					$return['list_templates'][$list_template_page['cms_page_id']] = $list_template_name;
+				}
 			}
 		}
 		

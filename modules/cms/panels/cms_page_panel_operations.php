@@ -368,18 +368,6 @@ class cms_page_panel_operations extends CI_Controller {
 
 			}
 			 
-			if (!empty($params['on_save'])){
-				$this->load->model($params['on_save']['model']);
-				// should support more params, ok for now
-				$params['on_save']['params'][0] = str_replace('_block_id', $block_id, $params['on_save']['params'][0]);
-				$params['on_save']['params'][1] = str_replace('_heading', $data['panel_params'][$params['title_field']], $params['on_save']['params'][1]);
-				if (count($params['on_save']['params']) == 1){
-					$this->$params['on_save']['model']->$params['on_save']['function']($params['on_save']['params'][0]);
-				} else {
-					$this->$params['on_save']['model']->$params['on_save']['function']($params['on_save']['params'][0], $params['on_save']['params'][1]);
-				}
-			}
-			
 			$params['cms_page_panel_id'] = $block_id;
 
 		} elseif ($do == 'cms_page_panel_delete'){
