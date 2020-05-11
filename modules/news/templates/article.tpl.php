@@ -32,7 +32,7 @@
             <?php if( ! empty($article_images)): ?>
                 <?php foreach($article_images as $i): ?>
 	                <div class="article_image">
-	                	<img class="article_image_image" src="<?php _i($i['image'], array('width' => 600, )); ?>">
+	                	<img class="article_image_image" src="<?php _i($i['image'], array('width' => 480, )); ?>">
 	                   <?php if(!empty($i['caption'])): ?>
 	                        <div class="article_image_caption"><?php print($i['caption']); ?></div>
 	                    <?php endif; ?>

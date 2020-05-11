@@ -223,7 +223,7 @@ if ( !function_exists('_i')) {
 				}
 				
 				// webp
-				if ($_SESSION['webp'] && in_array($params['output'], ['png', 'jpg'])){
+				if ($_SESSION['webp'] && !empty($GLOBALS['config']['images_webp']) && in_array($params['output'], ['png', 'jpg'])){
 					$params['output'] = 'webp';
 				}
 				

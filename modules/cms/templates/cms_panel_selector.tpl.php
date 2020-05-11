@@ -25,7 +25,9 @@
 
 							<div class="cms_panel_selector_preview_item cms_panel_selector_preview_item_<?= md5($panel_type) ?>">
 							
-								<div class="cms_panel_selector_preview_heading"><?= $panel_type_data['label'] ?></div>
+								<div class="cms_panel_selector_preview_heading">
+									<div class="cms_panel_selector_preview_heading_inner"><?= $panel_type_data['label'] ?></div>
+								</div>
 							
 								<?php if(!empty($panel_type_data['image'])): ?>
 									<div class="cms_panel_selector_preview_image" <?php _ib($panel_type_data['image'], 600) ?>></div>
