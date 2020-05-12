@@ -11,6 +11,27 @@ class cms_page_model extends CI_Model {
 			$sql = "alter table `cms_page` add `position` varchar(20) character set ascii collate ascii_bin not null after `cms_page_id`";
 			$query = $this->db->query($sql);
 		}
+
+		$sql = "show columns from `cms_page` like 'title'";
+		$query = $this->db->query($sql);
+		if ($query->num_rows()){
+			$sql = "alter table `cms_page` drop column `title`";
+			$query = $this->db->query($sql);
+		}
+		
+		$sql = "show columns from `cms_page` like 'description'";
+		$query = $this->db->query($sql);
+		if ($query->num_rows()){
+			$sql = "alter table `cms_page` drop column `description`";
+			$query = $this->db->query($sql);
+		}
+		
+		$sql = "show columns from `cms_page` like 'type'";
+		$query = $this->db->query($sql);
+		if ($query->num_rows()){
+			$sql = "alter table `cms_page` drop column `type`";
+			$query = $this->db->query($sql);
+		}
 		
 		$sql = "select * from cms_page order by sort asc";
     	$query = $this->db->query($sql);
@@ -176,13 +197,13 @@ class cms_page_model extends CI_Model {
 	}
 	
 	function create_page($data){
-		
+
 		$sql = "insert into cms_page set slug = '', sort = 0, meta = '', position = '' ";
 		$this->db->query($sql);
 		$cms_page_id = $this->db->insert_id();
-		
+
 		$this->update_page($cms_page_id, $data);
-		
+
 		return $cms_page_id;
 	
 	}
