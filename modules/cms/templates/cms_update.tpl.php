@@ -1,4 +1,15 @@
-<?php if(empty($ajax)): ?>
+<?php if(empty($GLOBALS['config']['update']['allow'])): ?>
+	<div class="cms_toolbar">
+		<div class="cms_tool_text">System modules update</div>
+	</div>
+	<div class="cms_update_message">
+		Updates for this installation are disabled.<br>
+		In case you need to update, please use other means or contact webmaster.
+		<?php if(!empty($GLOBALS['config']['email'])): ?>
+			<br><?= $GLOBALS['config']['email'] ?>
+		<?php endif ?>
+	</div>
+<?php elseif(empty($ajax)): ?>
 	<div class="cms_toolbar">
 	
 		<div class="cms_tool_text">System modules update</div>
@@ -14,7 +25,7 @@
 				<div class="cms_update_head">Master</div>
 				<div class="cms_update_head cms_update_cell_right"></div>
 			</div>
-			
+
 			<?php foreach($data as $row): ?>
 				<div class="cms_update_row">
 					<div class="cms_update_cell"><?= !empty($row['module']) ? $row['module'] : 'BC CMS' ?></div>
@@ -40,8 +51,8 @@
 						<?php endif ?>
 					</div>
 					<div class="cms_update_cell cms_update_cell_right">
-						<?php if(((!empty($GLOBALS['config']['update']['allow']) && (in_array($row['module'], $GLOBALS['config']['update']['allow']))) 
-								|| empty($GLOBALS['config']['update']['allow']) )
+						<?php if((!empty($GLOBALS['config']['update']['allow'])
+								&& (in_array($row['module'], $GLOBALS['config']['update']['allow']) || ($GLOBALS['config']['update']['allow'][0] == '*') ))
 								&& !empty($row['master_hash'])
 								&& $row['local_current_hash'] !== $row['master_hash']): ?>
 								

@@ -1,7 +1,3 @@
-.cms_update_result {
-	padding-top: 20px;
-}
-
 .cms_update_table {
 	display: table;
 	width: calc(100% - 2.0rem);
@@ -31,5 +27,9 @@
 }
 
 .cms_udate_result {
-	padding: 1.0rem;
+	padding: 2.0rem 1.0rem 1.0rem 1.0rem;
+}
+
+.cms_update_message {
+	padding: 0 1.0rem 2.0rem 1.0rem;
 }

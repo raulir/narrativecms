@@ -16,6 +16,10 @@ class cms_update extends CI_Controller {
 
 	function panel_action($params){
 		
+		if (empty($GLOBALS['config']['update']['allow'])){
+			return $params;
+		}
+		
 		$this->load->model('cms/cms_update_model');
 
 		$do = $this->input->post('do');
@@ -26,7 +30,7 @@ class cms_update extends CI_Controller {
 			 
 			$params['result'] = $this->cms_update_model->get_needed_files($module);
 			 
-		} else if ($do == 'cms_update' && !empty($GLOBALS['config']['update']['allow_updates'])){
+		} else if ($do == 'cms_update' && !empty($GLOBALS['config']['update']['allow'])){
 
 			$params['result'] = $this->cms_update_model->update();
 			$params['ajax'] = true;
@@ -144,7 +148,7 @@ class cms_update extends CI_Controller {
 				}
 
 			}
-		
+
 		}
 
 		return $params;
