@@ -109,8 +109,27 @@ if ($db === false){
 
 }
 
-$sql = "select b.name, b.value from cms_page_panel a join cms_page_panel_param b on a.cms_page_panel_id = b.cms_page_panel_id where (a.panel_name = 'cms_settings' or a.panel_name = 'cms/cms_settings') and b.name != ''";
+$sql = "select b.name, b.value from cms_page_panel a join cms_page_panel_param b on a.cms_page_panel_id = b.cms_page_panel_id where a.panel_name = 'cms/cms_settings' and b.name != ''";
 $query = mysqli_query($db, $sql);
+
+// if empty result, rename old settings
+if (!mysqli_num_rows($query)){
+	
+	$sql = "select * from cms_page_panel where panel_name = 'cms_settings'";
+	$query = mysqli_query($db, $sql);
+	
+	if (mysqli_num_rows($query)){
+		
+		$sql = "update cms_page_panel set panel_name = 'cms/cms_settings' where panel_name = 'cms_settings'";
+		$query = mysqli_query($db, $sql);
+		
+		// try to load again
+		$sql = "select b.name, b.value from cms_page_panel a join cms_page_panel_param b on a.cms_page_panel_id = b.cms_page_panel_id where a.panel_name = 'cms/cms_settings' and b.name != ''";
+		$query = mysqli_query($db, $sql);
+		
+	}
+	
+}
 
 while($result = mysqli_fetch_assoc($query)){
 	

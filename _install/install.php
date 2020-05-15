@@ -378,7 +378,7 @@ INSERT INTO cms_slug VALUES
 						'pack_css' => ($_POST['environment'] == 'DEV' ? 0 : 1),
 				],
 				'update' => [
-						'allow_updates' => ($_POST['environment'] == 'DEV' ? 1 : 0),
+						'allow' => ($_POST['environment'] == 'DEV' ? ['*'] : 0),
 				],
 				'images_webp' => extension_loaded('gd') ? 'gd' : '',
 				'database' => [
