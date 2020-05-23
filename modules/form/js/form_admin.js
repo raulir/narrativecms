@@ -1,6 +1,6 @@
 function admin_form_init(){
 
-	$('.admin_form_data').on('click.crl', function(){
+	$('.admin_form_data').on('click.cms', function(){
 
 		window.location = window.location.href + $(this).data('id') + '/';
 		

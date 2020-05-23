@@ -1,3 +1,80 @@
+function form_basic_submit(){
+	
+	var $container = $(this).closest('.form_basic_container')
+
+	var $form = $(this).closest('form');
+	
+	var missing = 0;
+	$('.form_basic_mandatory', $form).each(function(){
+		var $this = $(this);
+		if ($this.val() == '' || ($this.attr('name') == 'email' && !($this.val().indexOf('@') >= 0) )){
+			missing = missing + 1;
+			$this.parent().addClass('form_basic_error');
+			setTimeout(function(){
+				$this.parent().removeClass('form_basic_error');
+			}, 5000);
+		}
+	});
+	
+	if (missing == 0){
+		
+		$('.form_basic_input_input', $container).blur();
+		
+		$('.form_basic_message', $container).addClass('form_basic_message_active');
+		setTimeout(function(){
+			$('.form_basic_message', $container).addClass('form_basic_message_status_sending');
+		}, 50);
+		
+		var fa = $form.serializeArray();
+		var fo = {};
+		$.each(fa,
+		    function(i, v) {
+		        fo[v.name] = v.value;
+		    });
+		
+		get_ajax('form/do_send', $.extend({ 'success': function(data){
+			
+			// register google analytics event
+			if (typeof analytics_trackers !== 'undefined'){
+				analytics_send('event', 'Form', 'submit', $("input[name='id']", $form).val(), 10);
+			}
+
+			// register gtag event
+			if (typeof gtag !== 'undefined'){
+			
+				gtag('event', 'form', {
+			    	'event_category': 'submit',
+			    	'event_label': $("input[name='id']", $form).val(),
+			    	'transport_type': 'beacon',
+			    	'value': 10
+				})
+
+			}
+			
+			setTimeout(function(){
+				setTimeout(function(){
+					$('.form_basic_message', $container).removeClass('form_basic_message_status_sending').addClass('form_basic_message_status_active');
+				}, 50);
+				
+			}, 500);
+		
+			setTimeout(function(){
+				$('.form_basic_message', $container).removeClass('form_basic_message_status_active').removeClass('form_basic_message_active');
+				$('.form_basic_input_input', $form).val('');
+				$('.form_basic_close', $container).click();
+			}, 300000);
+			
+		}}, fo));
+		
+		// do after event
+		if ($container.data('success_url')){
+			window.location = $container.data('success_url');
+		}
+		
+	}
+
+}
+
 function form_basic_init(){
 	
 	$('.form_basic_container').each(function(){
@@ -15,85 +92,12 @@ function form_basic_init(){
 			return false;
 		});
 		
-		$('.form_basic_submit', $container).on('click.crl', function(){
-
-			var $form = $(this).closest('form');
-			
-			var missing = 0;
-			$('.form_basic_mandatory', $form).each(function(){
-				var $this = $(this);
-				if ($this.val() == '' || ($this.attr('name') == 'email' && !($this.val().indexOf('@') >= 0) )){
-					missing = missing + 1;
-					$this.parent().addClass('form_basic_error');
-					setTimeout(function(){
-						$this.parent().removeClass('form_basic_error');
-					}, 5000);
-				}
-			});
-			
-			if (missing == 0){
-				
-				$('.form_basic_input_input', $container).blur();
-				
-				$('.form_basic_message', $container).addClass('form_basic_message_active');
-				setTimeout(function(){
-					$('.form_basic_message', $container).addClass('form_basic_message_status_sending');
-				}, 50);
-				
-				var fa = $form.serializeArray();
-				var fo = {};
-				$.each(fa,
-				    function(i, v) {
-				        fo[v.name] = v.value;
-				    });
-				
-				get_ajax('form/do_send', $.extend({ 'success': function(data){
-					
-					// register google analytics event
-					if (typeof analytics_trackers !== 'undefined'){
-						analytics_send('event', 'Form', 'submit', $("input[name='id']", $form).val(), 10);
-					}
-	
-					// register gtag event
-					if (typeof gtag !== 'undefined'){
-					
-						gtag('event', 'form', {
-					    	'event_category': 'submit',
-					    	'event_label': $("input[name='id']", $form).val(),
-					    	'transport_type': 'beacon',
-					    	'value': 10
-						})
-
-					}
-					
-					setTimeout(function(){
-						setTimeout(function(){
-							$('.form_basic_message', $container).removeClass('form_basic_message_status_sending').addClass('form_basic_message_status_active');
-						}, 50);
-						
-					}, 500);
-	    		
-					setTimeout(function(){
-						$('.form_basic_message', $container).removeClass('form_basic_message_status_active').removeClass('form_basic_message_active');
-						$('.form_basic_input_input', $form).val('');
-						$('.form_basic_close', $container).click();
-					}, 300000);
-					
-				}}, fo));
-				
-				// do after event
-				if ($container.data('success_url')){
-					window.location = $container.data('success_url');
-				}
-				
-			}
-
-		});
+		$('.form_basic_submit', $container).on('click.cms', form_basic_submit);
 		
 		$('.form_basic_input_input', $container).each(function(){
 			var $this = $(this);
 			if (parseInt($this.data('limit'))){
-				$this.on('change.crl keyup.crl', function(){
+				$this.on('change.cms keyup.cms', function(){
 					while( $this.val().length > parseInt($this.data('limit')) ){
 						$this.val($this.val().slice(0, - 1));
 					}
