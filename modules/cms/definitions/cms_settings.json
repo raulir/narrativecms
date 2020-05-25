@@ -173,6 +173,17 @@
 			"help":"{Rem mobile divider} height of 1 rem to mobile viewport size"
 		},
 		{
+			"type":"select",
+			"name":"mobile_zoom",
+			"label":"Mobile zoom",
+			"values":{
+				"0":"Disabled",
+				"1":"Enabled"
+			},
+			"default":"0",
+			"help":"{Mobile zoom} enables pinch zoom for {rem} layout on mobile devices. [Disabled] is ignored by iOS."
+		},
+		{
 			"type":"subtitle",
 			"label":"Image optimisation",
 			"width":"wide",

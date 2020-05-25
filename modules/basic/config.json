@@ -35,6 +35,10 @@
 		{
 			"id":"gtag",
 			"name":"Analytics"
+		},
+		{
+			"id":"debug",
+			"name":"Debug"
 		}
 	],
 	"cms_menu":[

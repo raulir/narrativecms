@@ -2,13 +2,11 @@
 <html<?= !empty($_COOKIE['rem']) ? ' style="font-size: '.$_COOKIE['rem'].'px; "' : '' ?>>
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=<?= !empty($_COOKIE['width']) ? $_COOKIE['width'] : $GLOBALS['config']['rem_m_px'] ?>,user-scalable=no">
-
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=<?= 
+			!empty($GLOBALS['config']['mobile_zoom']) ? 'yes' : 'no' ?>">
 	<script type="text/javascript">
-    	
-		var config_url = '<?php print($GLOBALS['config']['base_url']); ?>';
+		var config_url = '<?= $GLOBALS['config']['base_url'] ?>';
 		<?php if(!empty($_SESSION['cms_user']['cms_user_id'])): ?>var admin_logged_in = 1;<?php endif ?>
-
 	</script>
 </head>
 
@@ -28,12 +26,12 @@
 		function _set_rem(){
 	
 			<?php if(empty($GLOBALS['config']['rem_switched'])): ?>
-				var width = window.innerWidth;
-				var height = window.innerHeight;
+				var width = document.documentElement.clientWidth;
+				var height = document.documentElement.clientHeight;
 				var real_width = width;
 			<?php else: ?>
-				var width = window.innerHeight;
-				var height = window.innerWidth;
+				var width = document.documentElement.clientHeight;
+				var height = document.documentElement.clientWidth;
 				var real_width = height;
 			<?php endif ?>
 	
@@ -70,7 +68,10 @@
 		_set_rem();
 		
 		setTimeout(_set_rem, 500);
-		setTimeout(_set_rem, 1500);
+		setTimeout(function(){
+			_set_rem()
+			setInterval(_set_rem, 10000);
+		}, 1500);
 	
 		window.addEventListener('resize', _set_rem);
 
@@ -88,7 +89,6 @@
     	var _orientationchange = function(){ 
         	
         	var orientation = _orientation(); 
-        	var viewport = document.querySelector('meta[name=viewport]'); 
         	var changed = (orientation != _old_orientation); 
         	if (changed || _old_orientation == -1){ 
             	
@@ -97,20 +97,29 @@
     			exp = exp.toUTCString(); 
     			_old_orientation = orientation; 
     			document.cookie = 'orientation=' + encodeURIComponent(orientation) + '; path=/; expires=' + exp; 
-    			if (changed) document.body.style.display='none'; 
-    			viewport.setAttribute('content', ''); 
+    			if (changed) {
+    				document.body.parentNode.style.fontSize = '1px';
+        			document.body.style.display='none';
+					setTimeout(function(){ 
+						document.body.style.display='block';
+					}, 500);
+        			
+    			} 
 
     			setTimeout(function(){
         			
-        			var width = orientation ? 1200 : <?= $GLOBALS['config']['rem_m_px'] ?>; 
-            		viewport.setAttribute('content', 'width=' + width + ',user-scalable=no'); 
             		document.body.offsetHeight; 
             		window.dispatchEvent(new Event('resize')); 
-            		document.cookie = 'width=' + width + '; path=/; expires=' + exp;
             		
+					_set_rem();
+
+					setTimeout(_set_rem, 500);
+					setTimeout(_set_rem, 1500);
+					
+					document.getElementById('debug_event').innerHTML = document.getElementById('debug_event').innerHTML + ' orientation: ' + orientation;
 					setTimeout(function(){ 
-						if (changed) document.body.style.removeProperty('display'); 
-					}, 30);
+						document.getElementById('debug_event').innerHTML = '';
+					}, 5000);
 					
 				}, 30); 
 			} 
@@ -123,8 +132,7 @@
 
     	window.addEventListener('load', _orientationchange);
 
-
-    </script>
-
+	</script>
+	
 </body>
 </html>
