@@ -24,18 +24,24 @@
 		var _cms_mobile = false;
 	
 		function _set_rem(){
+
+			if (typeof window.orientation == 'undefined'){
+				var a_width = window.innerWidth;
+				var a_height = window.innerHeight;
+			} else {
+				var a_width = document.documentElement.clientWidth;
+				var a_height = document.documentElement.clientHeight;
+			}
 	
 			<?php if(empty($GLOBALS['config']['rem_switched'])): ?>
-				var width = document.documentElement.clientWidth;
-				var height = document.documentElement.clientHeight;
-				var real_width = width;
+				var width = a_width;
+				var height = a_height;
 			<?php else: ?>
-				var width = document.documentElement.clientHeight;
-				var height = document.documentElement.clientWidth;
-				var real_width = height;
+				var width = a_height;
+				var height = a_width;
 			<?php endif ?>
 	
-			if (real_width > <?= !empty($GLOBALS['config']['rem_m_px']) ? $GLOBALS['config']['rem_m_px'] : '0' ?>){
+			if (a_width > <?= !empty($GLOBALS['config']['rem_m_px']) ? $GLOBALS['config']['rem_m_px'] : '0' ?>){
 	
 				var rem_ratio = <?= !empty($GLOBALS['config']['rem_ratio']) ? $GLOBALS['config']['rem_ratio'] : '100' ?>;
 				var rem_px = <?= !empty($GLOBALS['config']['rem_px']) ? $GLOBALS['config']['rem_px'] : '1000000' ?>;
@@ -53,7 +59,7 @@
 				
 			} else {
 				
-				var rem = Math.round(real_width/<?= !empty($GLOBALS['config']['rem_m_k']) ? $GLOBALS['config']['rem_m_k'] : '50' ?> * 100)/100;
+				var rem = Math.round(a_width/<?= !empty($GLOBALS['config']['rem_m_k']) ? $GLOBALS['config']['rem_m_k'] : '50' ?> * 100)/100;
 				_cms_mobile = true;
 	
 			}

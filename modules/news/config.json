@@ -6,6 +6,12 @@
 			"url":"admin/cms_list/article/"
 		},
 		{
+			"id":"article_list",
+			"name":"Articles",
+			"parent":"articles",
+			"url":"admin/cms_list/article/"
+		},
+		{
 			"id":"article_thumbnail_settings",
 			"name":"Article settings",
 			"parent":"articles",
