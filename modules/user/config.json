@@ -1,20 +1,21 @@
 {
+	"name":"User",
 	"cms_menu":[
 		{
-			"id":"users",
-			"name":"Users"
+			"id":"user",
+			"name":"User"
 		},
 		{
 			"id":"users",
 			"name":"Users",
-			"parent":"users",
+			"parent":"user",
 			"url":"admin/cms_list/user__user/",
 			"access":"user_users"
 		},
 		{
 			"id":"users",
 			"name":"User header settings",
-			"parent":"users",
+			"parent":"user",
 			"url":"admin/panel_settings/user__header/",
 			"access":"user_settings"
 		}

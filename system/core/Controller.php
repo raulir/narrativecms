@@ -714,11 +714,29 @@ class CI_Controller {
 	 * for main controller to generate panels output as texts
 	 */
 	function render($page_config){
+		
+		$this->load->model('cms/cms_page_panel_model');
 
 		foreach($page_config as $key => $panel_config){
 			if (stristr($panel_config['panel'], '/')){
 				list($module, $panel_name) = explode('/', $panel_config['panel']);
 				$page_config[$key]['module'] = $module;
+			}
+		}
+		
+		// load module configs
+		foreach($page_config as $key => $panel_config){
+			if (!empty($panel_config['module'])){
+
+				if (!isset($GLOBALS['config']['module'][$panel_config['module']]['config'])){
+					
+					$GLOBALS['config']['module'][$panel_config['module']]['config'] = 
+							$this->cms_page_panel_model->get_cms_page_panel_settings($panel_config['module'].'/'.$panel_config['module']);
+					
+				}
+				
+				$page_config[$key]['params']['config'] = $GLOBALS['config']['module'][$panel_config['module']]['config'];
+				
 			}
 		}
 	
@@ -729,7 +747,7 @@ class CI_Controller {
 			}
 			$action_result = $this->run_action($panel_config['panel'], (!empty($panel_config['params']) ? $panel_config['params'] : array()));
 			$page_config[$key]['params'] =
-			(!empty($action_result) && is_array($action_result) ? array_merge($panel_config['params'], $action_result) : $panel_config['params']);
+					(!empty($action_result) && is_array($action_result) ? array_merge($panel_config['params'], $action_result) : $panel_config['params']);
 		}
 	
 		$return = array();

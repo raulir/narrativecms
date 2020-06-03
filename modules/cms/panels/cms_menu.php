@@ -16,8 +16,9 @@ class cms_menu extends CI_Controller {
 
 	function panel_params($params){
 		
-		$this->load->model('cms_module_model');
-
+		$this->load->model('cms/cms_module_model');
+		$this->load->model('cms/cms_panel_model');
+		
 		$menu_items = array();
 		foreach($GLOBALS['config']['modules'] as $module){
 			
@@ -25,6 +26,38 @@ class cms_menu extends CI_Controller {
 
 			if (!empty($config['cms_menu'])){
 				$menu_items = array_merge($menu_items, $config['cms_menu']);
+			}
+
+			// add module variables
+			if (file_exists($GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/'.$module.'.json')){
+				
+				$panel_config = $this->cms_panel_model->get_cms_panel_config($module.'/'.$module);
+				
+				if (!empty($panel_config['settings'])){
+				
+					$menu_items[] = [
+							'id' => $module.'_settings',
+							'name' => 'Settings',
+							'parent' => $module,
+							'access' => $module.'_'.$module,
+							'url' => 'admin/panel_settings/'.$module.'__'.$module,
+					];
+					// check if parent exists
+					$exists = false;
+					foreach($menu_items as $item){
+						if ($item['id'] === $module){
+							$exists = true;
+						}
+					}
+					if (!$exists){
+						$menu_items[] = [
+								'id' => $module,
+								'name' => !empty($config['name']) ? $config['name'] : ucfirst($module),
+						];
+					}
+				
+				}
+			
 			}
 
 		}

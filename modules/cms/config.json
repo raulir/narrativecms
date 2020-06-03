@@ -1,4 +1,5 @@
 {
+	"name":"CMS",
 	"cms_menu":[
 		{
 			"id":"pages",
@@ -18,15 +19,15 @@
 			"url":"admin/search/"
 		},
 		{
-			"id":"cms_settings",
-			"name":"Settings",
+			"id":"cms_site_settings",
+			"name":"Site settings",
 			"parent":"cms",
 			"access":"cms_cms",
 			"url":"admin/panel_settings/cms__cms_settings/"
 		},
 		{
 			"id":"cms_user_settings",
-			"name":"Users",
+			"name":"Admin users",
 			"parent":"cms",
 			"access":"cms_users",
 			"url":"admin/users/"

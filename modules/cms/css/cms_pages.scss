@@ -9,11 +9,22 @@
 }
 
 .cms_pages_list {
-	padding-bottom: 4.5rem;
+	padding: 1.0rem 0 4.5rem 0;
 }
 
 .cms_pages_label {
 	display: inline-block;
+}
+
+.cms_pages_link {
+	display: block;
+	position: absolute;
+	left: 2.6rem;
+	top: 0;
+	width: calc(100% - 8.7rem);
+	height: 100%;
+	z-index: 10;
+	cursor: pointer;
 }
 
 .cms_pages_landing {

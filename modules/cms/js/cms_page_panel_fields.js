@@ -2,6 +2,8 @@ function cms_page_panel_fields_init(){
 	
 	var left = 0;
 	var right = 0;
+	
+	var top_extra = 0;
 
 	$('.cms_page_panel_fields > div').each(function(){
 		
@@ -41,7 +43,7 @@ function cms_page_panel_fields_init(){
 				
 			}
 			
-			$input.css({'height':h * 3.5 + 'rem', 'top': t * 3.5 + 1.5 + 'rem', 'left': pos + '%'})
+			$input.css({'height':h * 3.5 + 'rem', 'top': t * 3.5 + top_extra + 'rem', 'left': pos + '%'})
 		
 		} else if ($this.hasClass('cms_repeater_container')){
 			
@@ -144,7 +146,7 @@ function cms_page_panel_fields_init(){
 			right = t + h + 3
 			pos = 0
 			
-			$this.css({'top': t * 3.5 + 1.5 + 'rem', 'left': pos + '%'})
+			$this.css({'top': t * 3.5 + top_extra + 'rem', 'left': pos + '%'})
 			$this.children('.cms_repeater_area').css({'height':h * 3.5 + 'rem'})
 
 		}
