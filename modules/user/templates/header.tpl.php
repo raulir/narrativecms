@@ -20,8 +20,10 @@
 				
 					<div class="user_header_loggedout_image" <?php _ib($icon, 30) ?>></div>
 					
-					<div class="user_header_loggedout_label"><?= $login_text ?></div>
-				
+					<?php if(!empty($login_text)): ?>
+						<div class="user_header_loggedout_label"><?= $login_text ?></div>
+					<?php endif ?>
+								
 				</a>
 			</div>
 		

@@ -57,6 +57,9 @@ class cms_input_link extends CI_Controller {
 			$params['value']['target'] = '_none';
 		}
 
+		// get lists
+		$lists = $this->cms_page_panel_model->get_lists();
+
 		// possible targets
 		$params['targets'] = array();
 
@@ -73,56 +76,43 @@ class cms_input_link extends CI_Controller {
 		}
 
 		if (in_array('lists', $targets) || $special_targets){
-				
-			// get lists
-			// get all no page blocks
-			$block_types = array();
-			$blocks = $this->cms_page_panel_model->get_cms_page_panels_by(array('cms_page_id' => [999999,0], ));
-			foreach($blocks as $block){
-				$block_types[$block['panel_name']] = $block['panel_name'];
-			}
 
 			// check definitions and leave only list ones - IMPORTANT link target has to be 1 in list definition
 			$params['cms_page_panels'] = array();
 			$block_lists = array();
-			foreach($block_types as $block_type){
+			foreach($lists as $list){
 
-				$block_config = $this->cms_panel_model->get_cms_panel_config($block_type);
+				$block_config = $this->cms_panel_model->get_cms_panel_config($list);
 
-				if((!$special_targets && !empty($block_config['list']) && !empty($block_config['list']['link_target'])) // if normal lists only
-						|| ($special_targets && in_array($block_type, $targets))){										// if special targets
+				if((!$special_targets && !empty($block_config['list']['link_target'])) 	// if normal lists only
+						|| ($special_targets && in_array($list, $targets))){		// if special targets
 								
-							$params['targets'][$block_type] = $block_config['list']['item_title'];
-							if (empty($block_config['list']['title_field'])){
-								$block_config['list']['title_field'] = 'heading';
-							}
+					$params['targets'][$list] = $block_config['list']['item_title'];
+					if (empty($block_config['list']['title_field'])){
+						$block_config['list']['title_field'] = 'heading';
+					}
+					
+					$list_pages = $this->cms_page_panel_model->get_list($list);
+						
+					// put together list select data
+					foreach($list_pages as $list_page){
+
+						// if no title field, use title
+						if (empty($list_page[$block_config['list']['title_field']])){
+							$block_title = $list_page['title'];
+						} else {
+							$block_title = $list_page[$block_config['list']['title_field']];
+						}
+
+						$params['lists'][$list][$list_page['cms_page_panel_id']] = substr($block_title, 0, 80);
+
+						// slug data
+						$block_target = $list.'='.$list_page['cms_page_panel_id'];
+						$block_slug = $this->cms_slug_model->get_cms_slug_by_target($block_target);
+						$params['slugs'][$list][$list_page['cms_page_panel_id']] = !empty($block_slug) ? $block_slug.'/' : $block_target;
 								
-							// put together list select data
-							foreach($blocks as $block){
-								if ($block['panel_name'] == $block_type){
-										
-									// if no title field, use title
-									if (empty($block[$block_config['list']['title_field']])){
-										$block_title = $block['title'];
-									} else {
-										$block_title = $block[$block_config['list']['title_field']];
-									}
-
-									$params['lists'][$block_type][$block['cms_page_panel_id']] = substr($block_title, 0, 80);
-
-									// slug data
-									$block_target = $block_type.'='.$block['cms_page_panel_id'];
-									$block_slug = $this->cms_slug_model->get_cms_slug_by_target($block_target);
-									$params['slugs'][$block_type][$block['cms_page_panel_id']] = !empty($block_slug) ? $block_slug.'/' : $block_target;
-										
-								}
-							}
+					}
 								
-				}
-
-				// collect lists for excluding from pages
-				if(!empty($block_config['list'])){
-					$block_lists[$block_type] = $block_type;
 				}
 
 			}
@@ -130,17 +120,22 @@ class cms_input_link extends CI_Controller {
 		}
 
 		if (!empty($GLOBALS['config']['input_link_order'])){
-			foreach($params['lists'] as &$list){
-				natcasesort($list);
+			foreach($params['lists'] as &$l){
+				natcasesort($l);
 			}
 		}
 
 		$params['pages'] = $this->cms_page_model->get_cms_pages();
-		if (!empty($block_lists)){
-			foreach($params['pages'] as $key => $page){
-				if (in_array($page['slug'], $block_lists)){
-					unset($params['pages'][$key]);
-				}
+
+		$lists_old = [];
+		foreach($lists as $list){
+			list($module, $list_name) = explode('/', $list);
+			$lists_old[] = $list_name;
+		}
+
+		foreach($params['pages'] as $key => $page){
+			if (in_array($page['slug'], $lists) || in_array($page['slug'], $lists_old) || !in_array($page['position'], ['main','']) ){
+				unset($params['pages'][$key]);
 			}
 		}
 

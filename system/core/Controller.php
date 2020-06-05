@@ -87,6 +87,10 @@ class CI_Controller {
 	
 	function panel_heading($params){
 		
+		if (!is_array($params)){
+			return $params;
+		}
+
 		$this->load->model('cms/cms_panel_model');
 		
 		$config = $this->cms_panel_model->get_cms_panel_config($params['panel_name']);
@@ -151,7 +155,7 @@ class CI_Controller {
 		}
 	
 		// if there is a normal controller, do this
-		if (!empty($files['controller'])){
+		if (!empty($files['controller']) && is_array($params)){
 	
 			// temporarily create new ci sandbox for panel
 			$this->panel_ci =& get_instance();

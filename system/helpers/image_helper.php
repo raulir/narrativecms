@@ -65,16 +65,21 @@ if ( !function_exists('_i')) {
 	/**
 	 * prints out bg image style parameter with image
 	 */
-	function _ib($image, $params = array()){
+	function _ib($image, $params = []){
 
 		if (!is_array($params)){
-			$params = array('width' => (int)$params);
+			$params = ['width' => (int)$params];
 		}
 		
 		if (empty($params['css'])){
 			$params['css'] = '';
 		}
-		
+
+		// if image is array
+		if (is_array($image)) {
+			$image = end($image);
+		}
+
 		// if no image, print only image when needed
 		if (empty($image)){
 			

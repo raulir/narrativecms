@@ -9,13 +9,13 @@
 		
 				<div class="login_row">
 					<label for="login_login_username" class="login_label"><?= $username_label ?></label>
-					<input id="login_login_username" class="login_input login_input_username" type="text" name="login">
+					<input id="login_login_username" class="login_input login_input_username" type="text" name="login" placeholder="<?= $username_label ?>">
 				</div>
 				<div class="login_row">
 					<label for="login_login_password" class="login_label"><?= $password_label ?></label>
-					<input id="login_login_password" class="login_input login_input_password" type="password" name="password">
+					<input id="login_login_password" class="login_input login_input_password" type="password" name="password" placeholder="<?= $password_label ?>">
 				</div>
-				<div class="login_row">
+				<div class="login_row login_submit_row">
 					<div class="login_submit login_login"><?= $button_label ?></div>
 				</div>
 		

@@ -100,6 +100,10 @@ class cms_panel_model extends CI_Model {
 			$return['label'] = end($return['label']);
 		}
 		
+		if (!empty($return['image']) && is_array($return['image'])){
+			$return['image'] = end($return['image']);
+		}
+		
 		return $return;
 
 	}
