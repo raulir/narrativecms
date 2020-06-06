@@ -50,7 +50,6 @@ class user_model extends CI_Controller {
 			return $return;
 		
 		}
-		
 
 		$user = [
 				'panel_name' => 'user/user',
@@ -96,6 +95,28 @@ class user_model extends CI_Controller {
 		} else {
 			return [];
 		}
+
+	}
+	
+	function set_user_password($user_id, $password){
+		
+		$this->load->model('cms/cms_page_panel_model');
+		
+		$this->cms_page_panel_model->update_cms_page_panel($user_id, [
+				'password' => sha1((!empty($GLOBALS['settings']['salt']) ? $GLOBALS['settings']['salt'] : 'cms').$password)
+		], true);
+		
+		$user = [
+				'panel_name' => 'user/user',
+				'show' => 1,
+				'sort' => 'first',
+				'username' => $data['username'],
+				'first_name' => $data['first_name'],
+				'last_name' => $data['last_name'],
+				'email' => $data['email'],
+				'phone' => $data['phone'],
+				'password' => sha1((!empty($GLOBALS['settings']['salt']) ? $GLOBALS['settings']['salt'] : 'cms').$data['password']),
+		];
 
 	}
 

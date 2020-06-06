@@ -50,6 +50,10 @@
 		{
 			"id":"register",
 			"name":"Register"
+		},
+		{
+			"id":"reminder",
+			"name":"Reminder"
 		}
 	]
 }

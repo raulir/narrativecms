@@ -1,0 +1,126 @@
+{
+    "version": "2",
+	"label": "Reminder",
+	"image":"user/panel_reminder.png",
+    "item": [
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Heading",
+			"default":"password reminder"
+		},
+		{
+			"type":"text",
+			"name":"username_label",
+			"label":"Username label",
+			"default":"username",
+			"help": "Label for username input.||If email is used as username, change accordingly"
+		},
+		{
+			"type":"text",
+			"name":"button_label",
+			"label":"Button label",
+			"default":"send reminder"
+		},
+		{
+			"type":"text",
+			"name":"password_label",
+			"label":"Password label",
+			"default":"new password",
+			"help": "New password input label"
+		},
+		{
+			"type":"text",
+			"name":"password2_label",
+			"label":"Password x2 label",
+			"default":"new password x2",
+			"help": "New password confirmation input label"
+		},
+		{
+			"type":"text",
+			"name":"save_label",
+			"label":"Save label",
+			"default":"save password"
+		},
+		{
+			"type":"text",
+			"name":"login_cta",
+			"label":"Login CTA",
+			"default":"Sign in here"
+		},
+		{
+			"type":"link",
+			"name":"login_link",
+			"label":"Login link"
+		},
+		{
+			"type":"subtitle",
+			"label":"Messages"
+		},
+		{
+			"type":"textarea",
+			"name":"message_bad_username",
+			"label":"Bad username",
+			"lines":"2",
+			"default": "Not a proper username entered"
+		},
+		{
+			"type":"textarea",
+			"name":"message_success",
+			"label":"Success",
+			"lines":"2",
+			"default": "Password reminder sent"
+		},
+		{
+			"type":"textarea",
+			"name":"loggedin_text",
+			"label":"Logged in text",
+			"lines":"2",
+			"default": "Password reminder is not available when signed in"
+		},
+		{
+			"type":"textarea",
+			"name":"message_passwords_mismatch",
+			"label":"Passwords mismatch",
+			"lines":"2",
+			"default": "Passwords don't match"
+		},
+		{
+			"type":"textarea",
+			"name":"message_bad_save",
+			"label":"Bad save",
+			"lines":"2",
+			"default": "Problem with update"
+		},
+		{
+			"type":"textarea",
+			"name":"message_save_success",
+			"label":"Save success",
+			"lines":"2",
+			"default": "Password updated. You can now sign in"
+		},
+		{
+			"type":"subtitle",
+			"label":"Timeout"
+		},
+		{
+			"type":"textarea",
+			"name":"message_timeout",
+			"label":"Token timeout",
+			"lines":"2",
+			"default": "Reminder link is invalid or older than 30 minutes"
+		},
+		{
+			"type":"text",
+			"name":"timeout_cta",
+			"label":"Timeout CTA",
+			"default":"Request a new link"
+		},
+		{
+			"type":"link",
+			"name":"timeout_link",
+			"label":"Timeout link"
+		}
+	]
+}
+	
