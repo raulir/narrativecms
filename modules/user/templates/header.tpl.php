@@ -8,7 +8,9 @@
 				
 					<div class="user_header_loggedin_image" <?php _ib($user_image, 30) ?>></div>
 					
-					<div class="user_header_loggedin_label"><?= $user_name ?></div>
+					<?php if($show_labels): ?>
+						<div class="user_header_loggedin_label"><?= $user_name ?></div>
+					<?php endif ?>
 				
 				</a>
 			</div>
@@ -20,7 +22,7 @@
 				
 					<div class="user_header_loggedout_image" <?php _ib($icon, 30) ?>></div>
 					
-					<?php if(!empty($login_text)): ?>
+					<?php if($show_labels): ?>
 						<div class="user_header_loggedout_label"><?= $login_text ?></div>
 					<?php endif ?>
 								

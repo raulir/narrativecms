@@ -105,19 +105,21 @@ class user_model extends CI_Controller {
 		$this->cms_page_panel_model->update_cms_page_panel($user_id, [
 				'password' => sha1((!empty($GLOBALS['settings']['salt']) ? $GLOBALS['settings']['salt'] : 'cms').$password)
 		], true);
-		
-		$user = [
-				'panel_name' => 'user/user',
-				'show' => 1,
-				'sort' => 'first',
-				'username' => $data['username'],
-				'first_name' => $data['first_name'],
-				'last_name' => $data['last_name'],
-				'email' => $data['email'],
-				'phone' => $data['phone'],
-				'password' => sha1((!empty($GLOBALS['settings']['salt']) ? $GLOBALS['settings']['salt'] : 'cms').$data['password']),
-		];
 
+	}
+	
+	function get_current(){
+		
+		if (empty($_SESSION['user'])){
+			return false;
+		}
+		
+		$return = $_SESSION['user'];
+		
+		$return['user_id'] = $return['cms_page_panel_id'];
+		
+		return $return;
+		
 	}
 
 }
