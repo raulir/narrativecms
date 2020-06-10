@@ -24,7 +24,7 @@
  * @author		ExpressionEngine Dev Team
  * @link		http://codeigniter.com/user_guide/libraries/security.html
  */
-class CI_Security {
+class Security {
 
 	/**
 	 * Random Hash for protecting URLs

@@ -43,8 +43,6 @@ class cms_search_operations extends CI_Controller {
 					list($panel_name, $cms_page_panel_id) = explode('=', $page_id);
 
 					// get heading
-					$this->load->model('cms_page_panel_model'); // TODO: bug here - on second round this model disappears
-					
 					$data = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
 
 					$title = $this->run_panel_method($panel_name, 'panel_heading', $data);
@@ -98,13 +96,12 @@ class cms_search_operations extends CI_Controller {
 					];
 				
 				} else if (in_array($result['panel_data'][$cms_page_panel_id]['panel_name'], $lists) || !empty($result['panel_data'][$cms_page_panel_id]['parent_id'])) { // list panels
-				
-					$this->load->model('cms/cms_page_panel_model'); // TODO: bug here - on second round this model disappears
+
 					$data = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
 					
 					// get main heading
 					if (!empty($result['panel_data'][$cms_page_panel_id]['parent_id'])){
-						$this->load->model('cms/cms_page_panel_model'); // TODO: bug here - on second round this model disappears
+
 						$parent_data = $this->cms_page_panel_model->get_cms_page_panel($result['panel_data'][$cms_page_panel_id]['parent_id']);
 						if (empty($parent_data['_panel_heading'])){
 							$parent_title = $this->run_panel_method($result['panel_data'][$cms_page_panel_id]['panel_name'], 'panel_heading', $parent_data);
@@ -116,16 +113,17 @@ class cms_search_operations extends CI_Controller {
 						}
 						$parent_title .= ' &gt; ';
 						$title = $parent_data['panel_name'] . ' - ' . $parent_title.$data['title'];
+						
 					} else {
-						$this->load->model('cms/cms_page_panel_model'); // TODO: bug here - on second round this model disappears
+
 						if (empty($data['_panel_heading'])){
 							$title = $this->run_panel_method($result['panel_data'][$cms_page_panel_id]['panel_name'], 'panel_heading', $data);
 						} else {
 							$title = $data['_panel_heading'];
 						}
 						$title = $result['panel_data'][$cms_page_panel_id]['panel_name'] . ' - ' . $title;
+						
 					}
-					
 								
 					$return['result']['page_panels']['lists'][$cms_page_panel_id] = [
 							'title' => $title,

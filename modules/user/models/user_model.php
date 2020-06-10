@@ -1,7 +1,7 @@
 <?php
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class user_model extends CI_Controller {
+class user_model extends Model {
 	
 	function create_user($data){
 		

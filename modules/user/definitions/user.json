@@ -44,6 +44,11 @@
 			"type":"text",
 			"name":"phone",
 			"label":"Phone"
+		},
+		{
+			"type":"textarea",
+			"name":"meta",
+			"label":"Meta"
 		}
 	]
 }

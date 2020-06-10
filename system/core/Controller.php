@@ -36,7 +36,7 @@ class CI_Controller {
 	 */
 	public function __construct()
 	{
-		
+
 		self::$instance =& $this;
 
 		// Assign all the class objects that were instantiated by the
@@ -48,13 +48,14 @@ class CI_Controller {
 		}
 
 		$this->load =& load_class('Loader', 'core');
+		$this->load->parent =& $this;
 
 		$this->load->initialize();
 		/**
 		 * past in MY Controller
 		 */
-		$this->load->model('cms/cms_update_model');
-		$this->cms_update_model->up();
+		// $this->load->model('cms/cms_update_model');
+		// $this->cms_update_model->up();
 		
 		$this->load->helper('panel_helper');
 		$this->load->helper('image_helper');

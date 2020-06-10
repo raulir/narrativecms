@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_search_model extends CI_Model {
+class cms_search_model extends Model {
 	
 	/*
 	 * 

@@ -26,7 +26,7 @@
  * @category	Loader
  * @link		http://codeigniter.com/user_guide/libraries/loader.html
  */
-class CI_Loader {
+class Loader {
 
 	// All these are set automatically. Don't mess with them.
 	/**
@@ -50,13 +50,6 @@ class CI_Loader {
 	 * @access protected
 	 */
 	protected $_ci_library_paths	= array();
-	/**
-	 * List of paths to load models from
-	 *
-	 * @var array
-	 * @access protected
-	 */
-	protected $_ci_model_paths		= array();
 
 	/**
 	 * List of loaded base classes
@@ -119,12 +112,6 @@ class CI_Loader {
 	{
 		$this->_ci_ob_level  = ob_get_level();
 		$this->_ci_library_paths = array(BASEPATH);
-
-		$this->_ci_model_paths = [];
-		foreach($GLOBALS['config']['modules'] as $module){
-    		$this->_ci_model_paths[] = $GLOBALS['config']['base_path'].'modules/'.$module.'/';
-		}
-
 		$this->_ci_view_paths = [];
 
 		log_message('debug', "Loader Class Initialized");
@@ -144,7 +131,7 @@ class CI_Loader {
 	{
 		$this->_ci_classes = array();
 		$this->_ci_loaded_files = array();
-		$this->_ci_models = array();
+		$this->_ci_models = [];
 		$this->_base_classes =& is_loaded();
 
 		$this->database();
@@ -177,6 +164,50 @@ class CI_Loader {
 	}
 
 	// --------------------------------------------------------------------
+
+	function model($model, $name = ''){
+
+		if (stristr($model, '/')) {
+			list($module, $model) = explode('/', $model, 2);
+		} else {
+			$module = 'cms';
+		}
+
+		$model = strtolower($model);
+	
+		if ($name == '') {
+			$name = $model;
+		}
+
+		$CI =& $this->parent;
+		if (in_array($name, $this->_ci_models, true) && isset($CI->$name)) {
+			return;
+		}
+
+		if (isset($CI->$name)) {
+
+			show_error('The model name you are loading is the name of a resource that is already being used: '.$name);
+		}
+
+		if (file_exists($GLOBALS['config']['base_path'].'modules/'.$module.'/models/'.$model.'.php')){
+			
+			if ( ! class_exists('Model'))				{
+				load_class('Model');
+			}
+			
+			require_once($GLOBALS['config']['base_path'].'modules/'.$module.'/models/'.$model.'.php');
+			
+			$CI->$name = new $model();
+			
+			$this->_ci_models[] = $name;
+
+			return;
+			
+		}
+
+		// couldn't find the model
+		show_error('Unable to locate the model you have specified: '.$module.'/'.$model);
+	}
 
 	/**
 	 * Class Loader
@@ -212,86 +243,6 @@ class CI_Loader {
 		}
 
 		$this->_ci_load_class($library, $params, $object_name);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Model Loader
-	 *
-	 * This function lets users load and instantiate models.
-	 *
-	 * @param	string	the name of the class
-	 * @param	string	name for the model
-	 * @return	void
-	 */
-	public function model($model, $name = ''){
-
-		// is this in specified module
-		if (($last_slash = strrpos($model, '/')) !== false) {
-			$module = substr($model, 0, $last_slash + 1);
-			$model = substr($model, $last_slash + 1);
-		} else {
-			$module = '';
-		}
-
-		if ($name == '') {
-			$name = $model;
-		}
-
-		if (in_array($name, $this->_ci_models, true)) {
-			return;
-		}
-
-		$CI =& get_instance();
-		if (isset($CI->$name)) {
-			show_error('The model name you are loading is the name of a resource that is already being used: '.$name);
-		}
-
-		$model = strtolower($model);
-		
-		if ($module == ''){
-			
-			foreach ($this->_ci_model_paths as $mod_path){
-				if ( ! file_exists($mod_path.'models/'.$model.'.php'))
-				{
-					continue;
-				}
-	
-				if ( ! class_exists('CI_Model'))
-				{
-					load_class('Model', 'core');
-				}
-	
-				require_once($mod_path.'models/'.$model.'.php');
-	
-				$CI->$name = new $model();
-	
-				$this->_ci_models[] = $name;
-				return;
-			}
-			
-		} else {
-		
-			if (file_exists($GLOBALS['config']['base_path'].'modules/'.$module.'/models/'.$model.'.php')){
-				
-				if ( ! class_exists('CI_Model'))				{
-					load_class('Model', 'core');
-				}
-				
-				require_once($GLOBALS['config']['base_path'].'modules/'.$module.'/models/'.$model.'.php');
-				
-				$CI->$name = new $model();
-				
-				$this->_ci_models[] = $name;
-
-				return;
-			}
-		
-		}
-
-		// couldn't find the model
-		show_error('Unable to locate the model you have specified: '.$module.'/'.$model);
 	}
 
 	// --------------------------------------------------------------------
@@ -532,7 +483,6 @@ class CI_Loader {
 		$path = rtrim($path, '/').'/';
 
 		array_unshift($this->_ci_library_paths, $path);
-		array_unshift($this->_ci_model_paths, $path);
 		array_unshift($this->_ci_helper_paths, $path);
 
 		$this->_ci_view_paths = array($path.'views/' => $view_cascade) + $this->_ci_view_paths;
@@ -554,7 +504,7 @@ class CI_Loader {
 	 */
 	public function get_package_paths($include_base = FALSE)
 	{
-		return $include_base === TRUE ? $this->_ci_library_paths : $this->_ci_model_paths;
+		return $this->_ci_library_paths;
 	}
 
 	// --------------------------------------------------------------------
@@ -576,7 +526,6 @@ class CI_Loader {
 		if ($path == '')
 		{
 			$void = array_shift($this->_ci_library_paths);
-			$void = array_shift($this->_ci_model_paths);
 			$void = array_shift($this->_ci_helper_paths);
 			$void = array_shift($this->_ci_view_paths);
 			$void = array_shift($config->_config_paths);
@@ -584,7 +533,7 @@ class CI_Loader {
 		else
 		{
 			$path = rtrim($path, '/').'/';
-			foreach (array('_ci_library_paths', '_ci_model_paths', '_ci_helper_paths') as $var)
+			foreach (array('_ci_library_paths', '_ci_helper_paths') as $var)
 			{
 				if (($key = array_search($path, $this->{$var})) !== FALSE)
 				{
@@ -606,7 +555,6 @@ class CI_Loader {
 		// make sure the application default paths are still in the array
 		$this->_ci_library_paths = array_unique(array_merge($this->_ci_library_paths, array(BASEPATH)));
 		$this->_ci_helper_paths = array_unique(array_merge($this->_ci_helper_paths, array(BASEPATH)));
-		$this->_ci_model_paths = array_unique(array_merge($this->_ci_model_paths, []));
 		$this->_ci_view_paths = array_merge($this->_ci_view_paths, []);
 		$config->_config_paths = array_unique(array_merge($config->_config_paths, []));
 	}

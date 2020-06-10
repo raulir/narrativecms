@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_slug_model extends CI_Model {
+class cms_slug_model extends Model {
 	
 	function generate_page_slug($page_id, $slug_string){
 		

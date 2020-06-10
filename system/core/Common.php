@@ -27,7 +27,7 @@ if ( ! function_exists('config_item')) {
 */
 if ( ! function_exists('load_class'))
 {
-	function &load_class($class, $directory = 'libraries', $prefix = 'CI_')
+	function &load_class($class, $directory = 'core', $prefix = '')
 	{
 		static $_classes = array();
 
@@ -107,7 +107,7 @@ if ( ! function_exists('show_error'))
 {
 	function show_error($message, $status_code = 500, $heading = 'An Error Was Encountered')
 	{
-		$_error =& load_class('Exceptions', 'core');
+		$_error =& load_class('Exceptions');
 		echo $_error->show_error($heading, $message, 'error_general', $status_code);
 		exit;
 	}
@@ -129,7 +129,7 @@ if ( ! function_exists('show_404'))
 {
 	function show_404($page = '')
 	{
-		$_error =& load_class('Exceptions', 'core');
+		$_error =& load_class('Exceptions');
 		$_error->show_404($page);
 		exit;
 	}
@@ -157,7 +157,7 @@ if ( ! function_exists('log_message'))
 			return;
 		}
 
-		$_log =& load_class('Log');
+		$_log =& load_class('Log', 'libraries', 'CI_');
 		$_log->write_log($level, $message, $php_error);
 	}
 }
@@ -287,7 +287,7 @@ if ( ! function_exists('_exception_handler'))
 			return false;
 		}
 
-		$_error =& load_class('Exceptions', 'core');
+		$_error =& load_class('Exceptions');
 
 		// Should we display the error? We'll get the current error_reporting
 		// level and add its bits with the severity bits to find out.

@@ -26,7 +26,7 @@
  * @category	Libraries
  * @link		http://codeigniter.com/user_guide/general/routing.html
  */
-class CI_Router {
+class Router {
 
 	/**
 	 * List of routes
@@ -78,7 +78,7 @@ class CI_Router {
 	 */
 	function __construct()
 	{
-		$this->uri =& load_class('URI', 'core');
+		$this->uri =& load_class('URI');
 		log_message('debug', "Router Class Initialized");
 	}
 

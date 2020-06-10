@@ -1161,7 +1161,7 @@ class CI_DB_driver {
 	 */
 	function display_error($error = '', $swap = '', $native = FALSE)
 	{
-		$LANG =& load_class('Lang', 'core');
+		$LANG =& load_class('Lang');
 		$LANG->load('db');
 
 		$heading = $LANG->line('db_error_heading');
@@ -1193,7 +1193,7 @@ class CI_DB_driver {
 			}
 		}
 
-		$error =& load_class('Exceptions', 'core');
+		$error =& load_class('Exceptions');
 		echo $error->show_error($heading, $message, 'error_db');
 		exit;
 	}

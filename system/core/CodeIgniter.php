@@ -38,21 +38,21 @@
  *
  */
 
-	$UNI =& load_class('Utf8', 'core');
+	$UNI =& load_class('Utf8');
 
 /*
  * ------------------------------------------------------
  *  Instantiate the URI class
  * ------------------------------------------------------
  */
-	$URI =& load_class('URI', 'core');
+	$URI =& load_class('URI');
 
 /*
  * ------------------------------------------------------
  *  Instantiate the routing class and set the routing
  * ------------------------------------------------------
  */
-	$RTR =& load_class('Router', 'core');
+	$RTR =& load_class('Router');
 	$RTR->_set_routing();
 
 	// Set any routing overrides that may exist in the main index file
@@ -66,7 +66,7 @@
  *  Instantiate the output class
  * ------------------------------------------------------
  */
-	$OUT =& load_class('Output', 'core');
+	$OUT =& load_class('Output');
 
 /*
  * ------------------------------------------------------
@@ -84,14 +84,14 @@
  * Load the security class for xss and csrf support
  * -----------------------------------------------------
  */
-	$SEC =& load_class('Security', 'core');
+	$SEC =& load_class('Security');
 
 /*
  * ------------------------------------------------------
  *  Load the Input class and sanitize globals
  * ------------------------------------------------------
  */
-	$IN	=& load_class('Input', 'core');
+	$IN	=& load_class('Input');
 
 /*
  * ------------------------------------------------------

@@ -26,7 +26,7 @@
  * @author		ExpressionEngine Dev Team
  * @link		http://codeigniter.com/user_guide/libraries/output.html
  */
-class CI_Output {
+class Output {
 
 	/**
 	 * Current output string
