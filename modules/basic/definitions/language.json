@@ -1,6 +1,6 @@
 {
 	"version":"2",
-	"label":"GTM settings",
+	"label":"Language settings",
 	"item":[
 		{
 			"type":"text",
@@ -9,6 +9,30 @@
 			"default":"Select language:",
 			"translate":"1",
 			"help":"Label for language selection dropdown"
+		},
+		{
+			"type":"image",
+			"name":"icon",
+			"label":"Icon",
+			"category":"icon"
+		},
+		{
+			"type":"repeater",
+			"name":"language_settings",
+			"label":"Language settings",
+			"fields":[
+				{
+					"type":"text",
+					"name":"language_id",
+					"label":"Language id"
+				},
+				{
+					"type":"image",
+					"name":"icon",
+					"label":"Icon",
+					"category":"icon"
+				}
+			]
 		}
 	]
 }

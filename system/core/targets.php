@@ -16,6 +16,8 @@ while($result = mysqli_fetch_assoc($query)){
 
 if(!empty($_SESSION['config']['targets']['groups'])){
 	
+	$_SESSION['targets'] = [];
+	
 	foreach($_SESSION['config']['targets']['groups'] as $group){
 
 		if ($group['strategy'] == 'random' && !isset($_SESSION['targets'][$group['heading']])){
@@ -127,6 +129,8 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 				$GLOBALS[$group['heading']]['languages'][$language_id] = $ug_labels[$key];
 				
 			}
+			
+			$_SESSION['targets']['language'] = $GLOBALS[$group['heading']]['language_id'];
 			
 			if (empty($_SESSION['cms_language'])){
 				$_SESSION['cms_language'] = $GLOBALS[$group['heading']]['default'];

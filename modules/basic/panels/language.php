@@ -32,6 +32,10 @@ class language extends CI_Controller {
 		
 		$params['language'] = $GLOBALS['language'];
 		
+		foreach($params['language_settings'] as $setting){
+			$params['settings'][$setting['language_id']] = $setting;
+		}
+		
 		return $params;
 		
 	}

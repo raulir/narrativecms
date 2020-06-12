@@ -1,3 +1,6 @@
+$colour_border: #a0a0a0;
+$colour_white: white;
+
 .cms_page_panel_toolbar_container {
 	padding-bottom: 1.0rem;
 }
@@ -82,7 +85,7 @@
 	max-width: 50px;
 	transition: opacity 0.2s, max-height 0s, max-width 0s;
 	position: absolute;
-	top: 2.9rem;
+	top: 3.0rem;
     right: -4px;
     z-index: 20;
     padding: 6px 3px 1px 5px;

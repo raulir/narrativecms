@@ -61,11 +61,18 @@
 			"access":"basic_analytics"
 		},
 		{
-			"id":"gtm",
+			"id":"pixel",
 			"name":"FB pixel settings",
 			"url":"admin/panel_settings/basic__pixel/",
 			"parent":"cms",
 			"access":"basic_analytics"
+		},
+		{
+			"id":"language",
+			"name":"Language settings",
+			"url":"admin/panel_settings/basic__language/",
+			"parent":"cms",
+			"access":"basic_language"
 		}
 	],
 	"access":[

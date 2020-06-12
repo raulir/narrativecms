@@ -1,4 +1,3 @@
-
 <div class="cms_toolbar">
 	
 	<a class="cms_tool_text" <?php _lh('admin/pages/') ?>><?= (empty($page['position']) || $page['position'] == 'main') ? 'Pages' : $page['position'] ?></a>
