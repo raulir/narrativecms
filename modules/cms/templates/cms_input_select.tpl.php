@@ -15,8 +15,8 @@
 		<?php _panel('cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
 	
 		<select class="cms_input_select_select <?= !empty($name) ? $name : '' ?>" name="<?= !empty($name) ? $name : '' ?>" id="select_<?= $name_clean ?>">
-			<?php foreach($values as $key => $val): ?>
-				<option value="<?php print($key); ?>"<?php print($key == $value ? ' selected="selected"' : ''); ?>><?php print($val); ?></option>
+			<?php foreach($values as $key => $key_label): ?>
+				<option value="<?= $key ?>"<?= $key == $value ? ' selected="selected"' : '' ?>><?= $key_label ?></option>
 			<?php endforeach ?>
 		</select>
 	

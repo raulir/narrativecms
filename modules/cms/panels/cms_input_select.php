@@ -17,11 +17,14 @@ class cms_input_select extends CI_Controller {
 	}
 	
 	function panel_params($params){
-
-		if (!empty($params['params']['add_empty']) && empty($params['values']['']) && empty($params['values'][0])){
-			$params['values'] = array_merge(['' => '-- not specified --'], $params['values']);
+		
+		if(!empty($params['params']['add_empty'])){
+			$params['add_empty'] = $params['params']['add_empty'];
 		}
-
+		if (!empty($params['add_empty']) && empty($params['values']['']) && empty($params['values'][0])){
+			$params['values'] = ['' => '-- not specified --'] + $params['values'];
+		}
+		
 		return $params;
 	
 	}
