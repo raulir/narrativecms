@@ -594,7 +594,13 @@ class CI_Controller {
 	function ajax_panel($name, $params = []){
 	
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_panel_model');
 		
+		$panel_config = $this->cms_panel_model->get_cms_panel_config($name);
+		if (!empty($panel_config['extends'])){
+			$params['_extends'] = $panel_config['extends'];
+		}
+
 		if (is_numeric($name)){
 			$params_db = $this->cms_page_panel_model->get_cms_page_panel($name);
 			if ($params_db['show']){
@@ -602,24 +608,7 @@ class CI_Controller {
 				$name = $params['panel_name'];
 			}
 		}
-	
-		// new method for w/o html
-		if (!empty($params['no_html']) && stristr($name, '/')){
-	
-			$this->load->model('cms/cms_panel_model');
-	
-			// get config if exists
-			$panel_config = $this->cms_panel_model->get_cms_panel_config($name);
-			if (!empty($panel_config['extends'])){
-				$params['_extends'] = $panel_config['extends'];
-			}
-	
-			$params = $this->run_action($name, $params);
-	
-			return $params;
-	
-		}
-			 
+
 		$return = array();
 		 
 		if (!is_array($params)){
@@ -628,11 +617,18 @@ class CI_Controller {
 		 
 		// get page panel settings
 		$params = array_merge($this->cms_page_panel_model->get_cms_page_panel_settings($name), $params);
-		 
+
 		// do panel action
 		$action_result = $this->run_action($name, $params);
 		if (is_array($action_result)){
 			$params = array_merge($params, $action_result);
+		}
+		
+		// leave after action when no html needed
+		if (!empty($params['no_html']) && stristr($name, '/')){
+		
+			return $params;
+		
 		}
 		 
 		// get panel
@@ -848,7 +844,7 @@ class CI_Controller {
 	}
 	
 	function get_panel_filenames($panel_name, $params = [], $extends = []){
-	
+			
 		if (!empty($GLOBALS['_panel_files'][$panel_name])){
 			return $GLOBALS['_panel_files'][$panel_name];
 		}
@@ -898,7 +894,7 @@ class CI_Controller {
 		if (!empty($extends_files['controller'])){
 			$return['extends_controller'] = $extends_files['controller'];
 		}
-		 
+
 		if (!empty($template_filename) && file_exists($template_filename)){
 			$return['template'] = $template_filename;
 		} else if (!empty($extends_files['template'])){ // if no template, but has extends template, use this

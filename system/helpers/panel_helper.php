@@ -86,7 +86,6 @@ if ( !function_exists('get_position')) {
     	$params['embed'] = 1;
     	
     	if (empty($params['cms_page_panel_id'])) $params['cms_page_panel_id'] = 1;
-    	// if (empty($params['cms_page_id'])) $params['cms_page_id'] = 1;
     	
     	$ci =& get_instance();
 

@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_page_panel_model extends CI_Model {
+class cms_page_panel_model extends Model {
 	
 	/**
 	 * get visible normal list members
@@ -746,26 +746,53 @@ class cms_page_panel_model extends CI_Model {
 	 */
 	function get_cms_page_panel_settings($cms_panel_name){
 		
+		if (!stristr($cms_panel_name, '/')){
+			html_error('Can\'t load cms panel settings, module not specified.');
+			return [];
+		}
+		
+		$this->load->model('cms/cms_panel_model');
+		$config = $this->cms_panel_model->get_cms_panel_config($cms_panel_name);
+
+		$return = [];
+		
 		$settings_a = $this->get_cms_page_panels_by(['panel_name' => $cms_panel_name, 'cms_page_id' => 0, 'parent_id' => 0, 'sort' => 0, ]);
-		 
+
 		if (!empty($settings_a[0])){
-			return $settings_a[0];
+			$return = $settings_a[0];
 		}
 		
-		// deprecated: fallback to name without module
-		if (stristr($cms_panel_name, '/')){
-		
-			list($module, $cms_panel_name) = explode('/', $cms_panel_name);
-		
-			$settings_a = $this->get_cms_page_panels_by(['panel_name' => $cms_panel_name, 'cms_page_id' => 0, 'parent_id' => 0, 'sort' => 0, ]);
-		 
-			if (!empty($settings_a[0])){
-				return $settings_a[0];
+		if (!empty($config['extends'])){
+			
+			if (!function_exists('array_merge_recursive_ex')){
+
+				function array_merge_recursive_ex(array $array1, array $array2){
+					
+					$merged = $array1;
+				
+					foreach ($array2 as $key => & $value) {
+						if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
+							$merged[$key] = array_merge_recursive_ex($merged[$key], $value);
+						} else if (is_numeric($key)) {
+							if (!in_array($value, $merged)) {
+								$merged[] = $value;
+							}
+						} else {
+							$merged[$key] = $value;
+						}
+					}
+				
+					return $merged;
+					
+				}
+
 			}
-		
+			
+			$extends_settings = $this->get_cms_page_panel_settings($config['extends']['panel']);
+			$return = array_merge_recursive_ex($extends_settings, $return);
 		}
 		
-		return [];
+		return $return;
 		
 	}
 	
