@@ -33,6 +33,23 @@ class cms_page_model extends CI_Model {
 			$query = $this->db->query($sql);
 		}
 		
+		// page panel params for language
+		$sql = "show columns from `cms_page_panel_param` like 'language'";
+		$query = $this->db->query($sql);
+		if (!$query->num_rows()){
+			
+			$sql = "alter table `cms_page_panel_param` add `language` varchar(2) ".
+					"character set ascii collate ascii_bin not null default '' after `cms_page_panel_id`";
+			$query = $this->db->query($sql);
+			
+			$sql = "ALTER TABLE cms_page_panel_param DROP INDEX cms_page_panel_idx";
+			$query = $this->db->query($sql);
+			
+			$sql = "ALTER TABLE `cms_page_panel_param` ADD UNIQUE KEY `cms_page_panel_idx` (`cms_page_panel_id`,`language`,`name`)";
+			$query = $this->db->query($sql);
+			
+		}
+		
 		$sql = "select * from cms_page order by sort asc";
     	$query = $this->db->query($sql);
     	$result = $query->result_array();

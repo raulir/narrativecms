@@ -9,7 +9,7 @@
 		<?php _panel('cms/cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
 		
 		<?php if (!empty($translate) && !empty($GLOBALS['language'])): ?>
-			<div class="cms_translate_icon" <?php _ib('cms/cms_translate.png', 20) ?>></div>
+			<div class="cms_translate_icon" <?php _ib('cms/cms_translate.png', 12) ?>></div>
 		<?php endif ?>
 
 		<textarea name="<?php print($name); ?>" class="<?= $name ?> <?php print(!empty($tinymce) ? ' admin_tinymce ' : ''); ?>

@@ -121,5 +121,20 @@ class user_model extends Model {
 		return $return;
 		
 	}
+	
+	function get_user($user_id){
+		
+		$this->load->model('cms/cms_page_panel_model');
+		
+		$return = $this->cms_page_panel_model->get_cms_page_panel($user_id);
+		
+		if (!empty($return['cms_page_panel_id'])){
+			$return['user_id'] = $return['cms_page_panel_id'];
+			return $return;
+		} else {
+			return [];
+		}
+		
+	}
 
 }

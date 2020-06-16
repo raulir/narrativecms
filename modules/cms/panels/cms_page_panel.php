@@ -24,6 +24,7 @@ class cms_page_panel extends CI_Controller {
 		$this->load->model('cms/cms_panel_model');
 		$this->load->model('cms/cms_module_model');
 		$this->load->model('cms/cms_user_model');
+		$this->load->model('cms/cms_language_model');
 		
 		$return = [];
 		
@@ -57,7 +58,7 @@ class cms_page_panel extends CI_Controller {
 			$params['cms_page_panel_id'] = 0;
 			$params['cms_page_id'] = 0;
 		} else if (!empty($params['cms_page_panel_id'])){
-			$return['block'] = $this->cms_page_panel_model->get_cms_page_panel($params['cms_page_panel_id']);
+			$return['block'] = $this->cms_page_panel_model->get_cms_page_panel($params['cms_page_panel_id'], $this->cms_language_model->get_cms_language());
 		}
 
 		if (!empty($params['base_url'])){
@@ -122,27 +123,6 @@ class cms_page_panel extends CI_Controller {
 
 		}
 
-		/*
-		// if still empty, create a new empty
-		if (empty($return['block'])) {
-
-			if (!empty($params['parent_id'])){ // panel in panel
-
-				$return['block'] = $this->cms_page_panel_model->new_cms_page_panel();
-				$return['block']['panel_params'] = array();
-				$return['block']['cms_page_id'] = 0;
-				$return['block']['parent_id'] = $params['parent_id'];
-
-			} else {
-					
-				$return['block'] = $this->cms_page_panel_model->new_cms_page_panel();
-				$return['block']['panel_params'] = array();
-				$return['block']['cms_page_id'] = $params['cms_page_id'];
-
-			}
-
-		}
-		*/
 		// no page page_id -> 0
 		if ($return['block']['cms_page_id'] == 999999) $return['block']['cms_page_id'] = 0;
 

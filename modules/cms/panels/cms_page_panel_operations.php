@@ -145,7 +145,6 @@ class cms_page_panel_operations extends CI_Controller {
 			$data['sort'] = $this->input->post('sort');
 			$data['title'] = $this->input->post('title');
 			$data['submenu_anchor'] = $this->input->post('submenu_anchor');
-			$data['submenu_title'] = $this->input->post('submenu_title');
 			$data['panel_name'] = $this->input->post('panel_name');
 			$data['panel_params'] = $this->input->post('panel_params');
 			 
@@ -196,17 +195,24 @@ class cms_page_panel_operations extends CI_Controller {
 				}
 			}
 			
-			$data['search_params'] = array();
-			
-			$panel_structure = !empty($panel_config['item']) ? $panel_config['item'] : array();
+			$data['search_params'] = [];
+			$data['translate_params'] = [];
+				
+			$panel_structure = !empty($panel_config['item']) ? $panel_config['item'] : [];
 			foreach($panel_structure as $struct){
 				if (!empty($struct['search'])){
 					$data['search_params'][$struct['name']] = $struct['search'];
+				}
+				if (!empty($struct['translate'])){
+					$data['translate_params'][$struct['name']] = $language;
 				}
 				if ($struct['type'] == 'repeater'){
 					foreach ($struct['fields'] as $r_struct){
 						if (!empty($r_struct['search'])){
 							$data['search_params'][$struct['name']][$r_struct['name']] = $r_struct['search'];
+						}
+						if (!empty($r_struct['translate'])){
+							$data['translate_params'][$struct['name']][$r_struct['name']] = $language;
 						}
 					}
 				}

@@ -9,7 +9,7 @@
 		<?php if (!empty($help)) _panel('cms_help', ['help' => $help, ]); ?>
 		
 		<?php if (!empty($translate) && !empty($GLOBALS['language'])): ?>
-			<div class="cms_translate_icon" style="background-image: url('<?= $GLOBALS['config']['base_url'] ?>modules/cms/img/cms_translate.png'); "></div>
+			<div class="cms_translate_icon" <?php _ib('cms/cms_translate.png', 12) ?>></div>
 		<?php endif ?>
 		
 		<input id="<?= $name_clean ?>" type="text" 
