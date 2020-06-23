@@ -108,8 +108,8 @@ class admin extends CI_Controller {
 
 	function panel_settings($panel_name, $title = ''){
 		
-		$this->load->model('cms_page_panel_model');
-		$this->load->model('cms_panel_model');
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_panel_model');
 		
 		// with module name
 		if (stristr($panel_name, '__')){
@@ -151,9 +151,9 @@ class admin extends CI_Controller {
 
 		// set page config
 		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms_page_panel', 'module' => 'cms', 'params' => [
+				array('position' => 'header', 'panel' => 'cms/cms_user', 'module' => 'cms', ),
+				array('position' => 'header', 'panel' => 'cms/cms_menu', 'module' => 'cms', ),
+				array('position' => 'main', 'panel' => 'cms/cms_page_panel', 'module' => 'cms', 'params' => [
 						'cms_page_panel_id' => $cms_page_panel_id,
 				], ),
 		);
@@ -169,9 +169,9 @@ class admin extends CI_Controller {
 
 		// set page config
 		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms_update', 'module' => 'cms', 'params' => array(
+				array('position' => 'header', 'panel' => 'cms/cms_user', 'module' => 'cms', ),
+				array('position' => 'header', 'panel' => 'cms/cms_menu', 'module' => 'cms', ),
+				array('position' => 'main', 'panel' => 'cms/cms_update', 'module' => 'cms', 'params' => array(
 						'do' => $param,
 				), ),
 		);
@@ -187,8 +187,8 @@ class admin extends CI_Controller {
 
 		// set page config
 		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
+				array('position' => 'header', 'panel' => 'cms/cms_user', 'module' => 'cms', ),
+				array('position' => 'header', 'panel' => 'cms/cms_menu', 'module' => 'cms', ),
 				array('position' => 'main', 'panel' => 'cms/cms_user_settings', ),
 		);
 
@@ -204,8 +204,8 @@ class admin extends CI_Controller {
 	
 		// set page config
 		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
+				array('position' => 'header', 'panel' => 'cms/cms_user', 'module' => 'cms', ),
+				array('position' => 'header', 'panel' => 'cms/cms_menu', 'module' => 'cms', ),
 				array('position' => 'main', 'panel' => 'cms/cms_cssjs_settings', ),
 		);
 	
@@ -273,8 +273,8 @@ class admin extends CI_Controller {
 		
 		// set page config
 		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
+				array('position' => 'header', 'panel' => 'cms/cms_user', 'module' => 'cms', ),
+				array('position' => 'header', 'panel' => 'cms/cms_menu', 'module' => 'cms', ),
 				array('position' => 'main', 'panel' => 'cms/cms_dump', 'params' => ['do' => $param, 'what' => $what, ]),
 		);
 		
@@ -291,9 +291,9 @@ class admin extends CI_Controller {
 	
 		// set page config
 		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms_table', 'module' => 'cms', 'params' => array('table' => $table, ), ),
+				array('position' => 'header', 'panel' => 'cms/cms_user', 'module' => 'cms', ),
+				array('position' => 'header', 'panel' => 'cms/cms_menu', 'module' => 'cms', ),
+				array('position' => 'main', 'panel' => 'cms/cms_table', 'module' => 'cms', 'params' => array('table' => $table, ), ),
 		);
 	
 		// render panels
