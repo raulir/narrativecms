@@ -9,7 +9,7 @@ function cms_page_panel_button_targets_init(){
 			
 			$('.cms_popup_area', '.cms_popup_targets').html('loading ... ');
 			
-			get_ajax_panel('cms_page_panel_targets', {
+			get_ajax_panel('cms/cms_page_panel_targets', {
 				'targets_id': cms_page_panel_id,
 				'do': 'cms_page_panel_targets'
 			}, function(data){
@@ -28,7 +28,7 @@ function cms_page_panel_button_targets_init(){
 					
 					});
 					
-					get_ajax('cms_page_panel_targets', {
+					get_ajax('cms/cms_page_panel_targets', {
 							'targets_id': cms_page_panel_id,
 							'do': 'cms_page_panel_targets',
 							'data': '',

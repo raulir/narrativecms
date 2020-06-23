@@ -166,31 +166,31 @@ class cms_page_panel_toolbar extends CI_Controller {
 		}
 
 		// all page panels can be saved
-		$params['buttons'][] = ['name' => 'cms_page_panel_button_save', 'position' => 'visible', ];
+		$params['buttons'][] = ['name' => 'cms/cms_page_panel_button_save', 'position' => 'visible', ];
 
 		// delete,caching,hide = except not on page && list item == settings
 		if (!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']) || !empty($panel_config['list'])){
 			
 			$params['buttons'][] = [
-					'name' => 'cms_page_panel_button_delete', 
+					'name' => 'cms/cms_page_panel_button_delete', 
 					'position' => 'hidden', 
 					'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
 			];
 			
 			$params['buttons'][] = [
-					'name' => 'cms_page_panel_button_caching', 
+					'name' => 'cms/cms_page_panel_button_caching', 
 					'position' => 'hidden', 
 					'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
 			];
 			
 			$params['buttons'][] = [
-					'name' => 'cms_page_panel_button_show', 
+					'name' => 'cms/cms_page_panel_button_show', 
 					'position' => 'visible', 
 					'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
 			];
 			
 			$params['buttons'][] = [
-					'name' => 'cms_page_panel_button_export', 
+					'name' => 'cms/cms_page_panel_button_export', 
 					'position' => 'hidden', 
 					'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
 			];
@@ -203,7 +203,7 @@ class cms_page_panel_toolbar extends CI_Controller {
 		if (!empty($panel_config['settings']) && empty($panel_config['list']) && 
 				(!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']) || !empty($cms_page_panel['sort']))){
 			
-			$params['buttons'][] = ['name' => 'cms_page_panel_button_settings', 'position' => 'hidden', ];
+			$params['buttons'][] = ['name' => 'cms/cms_page_panel_button_settings', 'position' => 'hidden', ];
 			$params['hidden_section'] = 1;
 		
 		}
@@ -212,7 +212,7 @@ class cms_page_panel_toolbar extends CI_Controller {
 		if (!empty($_SESSION['config']['targets']) && empty($panel_config['list']) && 
 				(!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']))){
 				
-			$params['buttons'][] = ['name' => 'cms_page_panel_button_targets', 'position' => 'hidden', ];
+			$params['buttons'][] = ['name' => 'cms/cms_page_panel_button_targets', 'position' => 'hidden', ];
 			$params['hidden_section'] = 1;
 		
 		}

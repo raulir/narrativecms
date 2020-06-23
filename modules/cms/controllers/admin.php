@@ -18,95 +18,37 @@ class admin extends CI_Controller {
 		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms.js';
 
 		$GLOBALS['_panel_titles'][] = 'ADMIN';
+
+	}
+	
+	function _output($panel, $params = []){
 		
+		$page_config = [
+				['position' => 'header', 'panel' => 'cms/cms_user', ],
+				['position' => 'header', 'panel' => 'cms/cms_menu', ],
+		];
+		
+		$page_config[] = ['position' => 'main', 'panel' => $panel, 'params' => $params, ];
+		
+		$panel_data = $this->render($page_config);
+		$this->output('cms/admin', $panel, $panel_data);
+
 	}
 
 	function index(){
-
-		// set page config
-		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms_welcome', 'module' => 'cms', ),
-		);
-
-		// render panels
-		$panel_data = $this->render($page_config);
-
-		$this->output('cms/admin', 'admin', $panel_data);
-
+		$this->_output('cms/cms_welcome');
 	}
 
 	function pages(){
-		 
-		// set page config
-		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms_pages', 'module' => 'cms', ),
-		);
-
-		// render panels
-		$panel_data = $this->render($page_config);
-
-		$this->output('cms/admin', 'admin/pages', $panel_data);
-
+		$this->_output('cms/cms_pages');
 	}
 
 	function page($page_id, $position = 0){
-		 
-		// set page config
-		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms_page', 'module' => 'cms', 
-						'params' => ['cms_page_id' => $page_id, 'position' => $position, ], ),
-		);
-
-		// render panels
-		$panel_data = $this->render($page_config);
-
-		$this->output('cms/admin', 'admin/page', $panel_data);
-
+		$this->_output('cms/cms_page', ['cms_page_id' => $page_id, 'position' => $position, ]);
 	}
 
-	/**
-	 * Edit page panel
-	 */
 	function cms_page_panel($cms_page_panel_id){
-		
-		$params = [
-				'cms_page_panel_id' => $cms_page_panel_id,
-		];
-		
-		// set page config
-		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms_page_panel', 'module' => 'cms', 'params' => $params, ),
-		);
-
-		// render panels
-		$page_panel_data = $this->render($page_config);
-
-		$this->output('cms/admin', false, $page_panel_data);
-
-	}
-
-	function table($table){
-
-		// set page config
-		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms_table', 'module' => 'cms', 'params' => array('table' => $table, ), ),
-		);
-
-		// render panels
-		$panel_data = $this->render($page_config);
-
-		$this->output('cms/admin', 'admin/table', $panel_data);
-
+		$this->_output('cms/cms_page_panel', ['cms_page_panel_id' => $cms_page_panel_id, ]);
 	}
 
 	function cms_list($list_item = ''){
@@ -119,7 +61,7 @@ class admin extends CI_Controller {
 		$list_item = str_replace('__', '/', $list_item);
 
 		// get list item params
-		$this->load->model('cms_panel_model');
+		$this->load->model('cms/cms_panel_model');
 		$item_config = $this->cms_panel_model->get_cms_panel_config($list_item);
 
 		if (empty($item_config['list'])){
@@ -135,7 +77,7 @@ class admin extends CI_Controller {
 		$params = array(
 				'title' => $item_config['list']['list_title'],
 				'edit_base' => 'admin/cms_page_panel/',
-				'filter' => array('panel_name' => $list_item, 'cms_page_id' => [999999,0], ),
+				'filter' => array('panel_name' => $list_item, 'cms_page_id' => 0, ),
 		);
 			
 		if (!empty($item_config['list']['filter_fields'])){
@@ -148,12 +90,11 @@ class admin extends CI_Controller {
 
 		// set page config
 		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
+				array('position' => 'header', 'panel' => 'cms/cms_user', ),
+				array('position' => 'header', 'panel' => 'cms/cms_menu', ),
 				array(
 						'position' => 'main',
-						'panel' => 'cms_list',
-						'module' => 'cms',
+						'panel' => 'cms/cms_list',
 						'params' => $params,
 				),
 		);
@@ -161,7 +102,7 @@ class admin extends CI_Controller {
 		// render panels
 		$panel_data = $this->render($page_config);
 		 
-		$this->output('cms/admin', 'admin/cms_list', $panel_data);
+		$this->output('cms/admin', 'cms/cms_list', $panel_data);
 
 	}
 
@@ -343,6 +284,23 @@ class admin extends CI_Controller {
 		// output to layout
 		$this->output('cms/admin', 'admin/dump', $panel_data);
 		
+	}
+	
+	// deprecated
+	function table($table){
+	
+		// set page config
+		$page_config = array(
+				array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
+				array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
+				array('position' => 'main', 'panel' => 'cms_table', 'module' => 'cms', 'params' => array('table' => $table, ), ),
+		);
+	
+		// render panels
+		$panel_data = $this->render($page_config);
+	
+		$this->output('cms/admin', 'admin/table', $panel_data);
+	
 	}
 
 }

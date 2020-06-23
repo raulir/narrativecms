@@ -121,11 +121,12 @@
 
 					setTimeout(_set_rem, 500);
 					setTimeout(_set_rem, 1500);
-					
-					document.getElementById('debug_event').innerHTML = document.getElementById('debug_event').innerHTML + ' orientation: ' + orientation;
-					setTimeout(function(){ 
-						document.getElementById('debug_event').innerHTML = '';
-					}, 5000);
+					if(document.getElementById('debug_event')){
+						document.getElementById('debug_event').innerHTML = document.getElementById('debug_event').innerHTML + ' orientation: ' + orientation;
+						setTimeout(function(){ 
+							document.getElementById('debug_event').innerHTML = '';
+						}, 5000);
+					}
 					
 				}, 30); 
 			} 

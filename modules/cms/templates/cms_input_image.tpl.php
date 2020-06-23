@@ -5,7 +5,7 @@
 	
 		<label><?= $label ?><?= !empty($mandatory) ? ' *' : '' ?></label>
 		
-		<?php _panel('cms_help', ['help' => $help]) ?>
+		<?php _panel('cms/cms_help', ['help' => $help]) ?>
 		
 		<div class="cms_input_image_area" <?php _ib('cms/cms_opacity.png', 40) ?>>
 			<div class="cms_input_image_content cms_input_image_content_<?= $name_clean ?>">

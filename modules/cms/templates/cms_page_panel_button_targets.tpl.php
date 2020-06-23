@@ -5,4 +5,4 @@
 
 </div>
 
-<?php _panel('cms_popup', ['heading' => 'Page panel target groups', 'name' => 'targets', ]) ?>
+<?php _panel('cms/cms_popup', ['heading' => 'Page panel target groups', 'name' => 'targets', ]) ?>

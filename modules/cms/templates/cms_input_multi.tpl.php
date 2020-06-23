@@ -2,7 +2,7 @@
 		data-bg="<?= $GLOBALS['config']['base_url'] ?>modules/cms/img/cms_drag.png" data-cms_input_height="3">
 
 	<label for="<?= $name_clean ?>"><?= $label ?></label>
-	<?php if (!empty($help)) _panel('cms_help', ['help' => $help, ]); ?>
+	<?php if (!empty($help)) _panel('cms/cms_help', ['help' => $help, ]); ?>
 
 	<div class="cms_input_multi_values">
 		<?php foreach($value as $key): ?>

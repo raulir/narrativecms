@@ -5,7 +5,7 @@
 
 		<div class="cms_input_label"><?= $label ?></div>
 		
-		<?php _panel('cms_help', ['help' => $help, ]); ?>
+		<?php _panel('cms/cms_help', ['help' => $help, ]); ?>
 		
 		<div class="cms_input_groups_values">
 			<?php foreach($values as $key => $val): ?>

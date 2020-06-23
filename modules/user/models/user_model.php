@@ -114,7 +114,7 @@ class user_model extends Model {
 			return false;
 		}
 		
-		$return = $_SESSION['user'];
+		$return = $this->get_user($_SESSION['user']['cms_page_panel_id']);
 		
 		$return['user_id'] = $return['cms_page_panel_id'];
 		

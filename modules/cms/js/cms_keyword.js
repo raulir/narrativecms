@@ -13,7 +13,7 @@ function cms_keyword_init(){
 		
 		e.stopPropagation();
 		
-		get_ajax('cms_keyword', {
+		get_ajax('cms/cms_keyword', {
 			'do': 'cms_keyword_delete',
 			'cms_keyword_id': $('#cms_keyword_id').val(),
 			'success': function(){

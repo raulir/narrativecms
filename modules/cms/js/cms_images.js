@@ -35,11 +35,11 @@ function cms_images_activate() {
 							'<div class="cms_images_warning_extra">Deleting this image may cause missing images in the front end.</div>';
 				}
 				
-				get_ajax_panel('cms_popup_yes_no', {'text':text}, function(data){
+				get_ajax_panel('cms/cms_popup_yes_no', {'text':text}, function(data){
 					panels_display_popup(data.result.html, {
 						'yes': function(){
 							$('.cms_images_image_cell', $that).animate({'opacity':'0'}, 100);
-							get_ajax_panel('cms_images_operations', {
+							get_ajax_panel('cms/cms_images_operations', {
 								'filename': $that.data('filename'), 
 								'do': 'cms_images_delete_by_filename' 
 							}, function(){
@@ -60,7 +60,7 @@ function cms_images_activate() {
 			
 			$('.cms_images_image_edit', this).on('click.r', function(e){
 				e.stopPropagation();
-				get_ajax_panel('cms_image', {'filename': $that.data('filename')}, function(data){
+				get_ajax_panel('cms/cms_image', {'filename': $that.data('filename')}, function(data){
 					// display image edit popup
 					$('body').append('<div class="cms_image_overlay"></div>');
 					$('body').append(data.result.html);
@@ -72,7 +72,7 @@ function cms_images_activate() {
 					
 					$('.cms_image_save').on('click.cms', function(){
 						
-						get_ajax_panel('cms_images_operations', {
+						get_ajax_panel('cms/cms_images_operations', {
 							'filename': $(this).data('filename'), 
 							'do': 'cms_images_save',
 							'author': $('.cms_image_author').val(),
@@ -135,7 +135,7 @@ function cms_image_replace($image){
 	}
 	text = text + '<div class="cms_images_warning_extra">The old data will be overwritten.</div>';
 	
-	get_ajax_panel('cms_popup_yes_no', {'text':text}, function(data){
+	get_ajax_panel('cms/cms_popup_yes_no', {'text':text}, function(data){
 		panels_display_popup(data.result.html, {
 			'yes': function(){
 				
@@ -312,7 +312,7 @@ function cms_images_load_images(page, limit, filename){
 	$('.cms_images_paging_enabled').addClass('cms_images_paging_disabled').removeClass('cms_images_paging_enabled').off('click.cms');
 	$('.cms_images_image').css({'opacity':'0.5'});
 	
-	get_ajax_panel('cms_images_page', cms_images_load_parameters, function(data){
+	get_ajax_panel('cms/cms_images_page', cms_images_load_parameters, function(data){
 		
 		$('.cms_images_area').html(data.result.html).data('page', page);
 		

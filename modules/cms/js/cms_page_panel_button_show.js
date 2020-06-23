@@ -3,7 +3,7 @@ function cms_page_panel_button_show_activate(){
 
 		var action = function($this){
 			var cms_page_panel_id = $this.data('cms_page_panel_id');
-			get_ajax_panel('cms_page_panel_operations', {
+			get_ajax_panel('cms/cms_page_panel_operations', {
 				'cms_page_panel_id': cms_page_panel_id,
 				'do': 'cms_page_panel_show'
 			}, function(data){
@@ -37,7 +37,7 @@ function cms_page_panel_button_show_activate(){
 			} else {
 
 				// ask are you sure
-				get_ajax_panel('cms_popup_yes_no', {}, function(data){
+				get_ajax_panel('cms/cms_popup_yes_no', {}, function(data){
 					panels_display_popup(data.result.html, {
 						'yes': function(){
 							

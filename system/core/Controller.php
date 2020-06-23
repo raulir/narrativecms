@@ -198,12 +198,11 @@ class CI_Controller {
 		return $params;
 	
 	}
-	
-	
+
 	/*
 	 * controller as panel stuff
 	 */
-	function panel($name, $params = array()){
+	function panel($name, $params = []){
 
 		if (!empty($params['_extends'])){
 			$files = $this->get_panel_filenames($name, $params, $params['_extends']);
@@ -214,7 +213,7 @@ class CI_Controller {
 		$panel_js = $files['js'];
 		$panel_css = $files['css'];
 		$panel_scss = $files['scss'];
-	
+
 		// if controller found, rework params
 		if(!empty($files['controller']) || !empty($files['extends_controller'])){
 	
@@ -271,7 +270,7 @@ class CI_Controller {
 			$controller_timer_end = round(microtime(true) * 1000);
 	
 		}
-		 
+		
 		// render view when needed only
 		if(!empty($files['template'])) {
 	
@@ -287,6 +286,8 @@ class CI_Controller {
 			$template_timer_end = round(microtime(true) * 1000);
 	
 		} else if (empty($params['panel_id']) && !empty($GLOBALS['config']['errors_visible'])){
+print_r($files);
+				
 			$return = html_error('Missing panel template: '.$name);
 		} else {
 			$return = '';
@@ -715,13 +716,15 @@ class CI_Controller {
 	 * for main controller to generate panels output as texts
 	 */
 	function render($page_config){
-		
+
 		$this->load->model('cms/cms_page_panel_model');
 
 		foreach($page_config as $key => $panel_config){
 			if (stristr($panel_config['panel'], '/')){
 				list($module, $panel_name) = explode('/', $panel_config['panel']);
 				$page_config[$key]['module'] = $module;
+			} else {
+				_html_error('Bad panel name in render: '.$panel_config['panel']);
 			}
 		}
 		
@@ -844,7 +847,7 @@ class CI_Controller {
 	}
 	
 	function get_panel_filenames($panel_name, $params = [], $extends = []){
-			
+
 		if (!empty($GLOBALS['_panel_files'][$panel_name])){
 			return $GLOBALS['_panel_files'][$panel_name];
 		}
@@ -853,38 +856,28 @@ class CI_Controller {
 	
 		if (!empty($extends['panel'])){
 			if (!stristr($extends['panel'], '/') && !empty($GLOBALS['config']['errors_visible'])){
-				_html_error('Bad panel extension panel name (definition has to be "module/panel", save page panel in CMS after fixing)');
+				_html_error('Bad panel extension panel name '.$extends['panel'].' (definition has to be "module/panel", save page panel in CMS after fixing)');
 			} else {
 				$extends_files = $this->get_panel_filenames($extends['panel']);
 				list($return['extends_module'], $return['extends_name']) = explode('/', $extends['panel']);
 			}
 		}
-	
+
 		$module = '';
-	
-		if (stristr($panel_name, '/')){
-	
-			// search for controller, when name has slash
+
+		if (empty($params['module']) && stristr($panel_name, '/')){
 			list($module, $name) = explode('/', $panel_name);
-			$controller_filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/panels/'.$name.'.php';
-			$template_filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/templates/'.$name.'.tpl.php';
-	
+		} else if(!empty($params['module'])){
+			$module = $params['module'];
+			$name = str_replace($module.'/', '', $panel_name);
 		} else {
-	
-			// check if any of modules has panel with this name
-			foreach ($GLOBALS['config']['modules'] as $hmodule){
-				if (file_exists($GLOBALS['config']['base_path'].'modules/'.$hmodule.'/panels/'.$panel_name.'.php')){
-					$controller_filename = $GLOBALS['config']['base_path'].'modules/'.$hmodule.'/panels/'.$panel_name.'.php';
-					$module = $hmodule;
-				}
-				if (file_exists($GLOBALS['config']['base_path'].'modules/'.$hmodule.'/templates/'.$panel_name.'.tpl.php')){
-					$template_filename = $GLOBALS['config']['base_path'].'modules/'.$hmodule.'/templates/'.$panel_name.'.tpl.php';
-					$module = $hmodule;
-				}
-			}
-			 
+			_html_error('Bad panel name '.$panel_name.' (definition has to be "module/panel" or module has to be specified in parameters)');
+			die();
 		}
-	
+		
+		$controller_filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/panels/'.$name.'.php';
+		$template_filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/templates/'.$name.'.tpl.php';
+
 		if (!empty($controller_filename) && file_exists($controller_filename)){
 			$return['controller'] = $controller_filename;
 		} else {

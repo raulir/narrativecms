@@ -2,7 +2,7 @@ function cms_page_panel_button_caching_init(){
 	
 	$('.cms_page_panel_caching').on('click.cms', function(){
 
-		get_ajax_panel('cms_page_panel_caching', {'target_id':$(this).data('cms_page_panel_id')}, function(data){
+		get_ajax_panel('cms/cms_page_panel_caching', {'target_id':$(this).data('cms_page_panel_id')}, function(data){
 
 			panels_display_popup(data.result.html, {
 				'yes': function(after){

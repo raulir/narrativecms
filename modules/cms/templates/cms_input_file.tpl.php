@@ -3,7 +3,7 @@
 	
 	<label for="cms_input_file_<?php print($name_clean); ?>"><?php print($label); ?></label>
 
-	<?php if (!empty($help)) _panel('cms_help', ['help' => $help, ]); ?>
+	<?php if (!empty($help)) _panel('cms/cms_help', ['help' => $help, ]); ?>
 
 	<div class="cms_file_container">
 	

@@ -6,7 +6,7 @@
 	
 		<label for="<?= $name_clean ?>"><?= $label ?></label>
 		
-		<?php if (!empty($help)) _panel('cms_help', ['help' => $help, ]); ?>
+		<?php if (!empty($help)) _panel('cms/cms_help', ['help' => $help, ]); ?>
 		
 		<?php if (!empty($translate) && !empty($GLOBALS['language'])): ?>
 			<div class="cms_translate_icon" <?php _ib('cms/cms_translate.png', 12) ?>></div>

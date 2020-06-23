@@ -12,7 +12,7 @@
 	
 		<label for="select_<?= $name_clean ?>"><?= $label ?></label> 
 	
-		<?php _panel('cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
+		<?php _panel('cms/cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
 	
 		<select class="cms_input_select_select <?= $name ?>" name="<?= $name ?>" id="select_<?= $name_clean ?>">
 			<?php foreach($values as $key => $val): ?>

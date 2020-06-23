@@ -2,7 +2,7 @@
 		<?= !empty($mandatory) ? ' cms_input_mandatory ' : '' ?>" <?= !empty($default) ? ' data-default="'.$default.'" ' : '' ?>>
 		
 	<label for="<?= $name_clean ?>"><?= $label ?></label>
-	<?php if (!empty($help)) _panel('cms_help', ['help' => $help, ]); ?>
+	<?php if (!empty($help)) _panel('cms/cms_help', ['help' => $help, ]); ?>
 	
 	<input id="<?= $name_clean ?>" type="hidden" name="<?= $name ?>" value="<?= $value ?>" class="cms_input_datetime_value">
 	

@@ -2,4 +2,4 @@
 	Export
 </a>
 
-<?php _panel('cms_popup', ['heading' => 'Export page panel', 'name' => 'export', ]) ?>
+<?php _panel('cms/cms_popup', ['heading' => 'Export page panel', 'name' => 'export', ]) ?>

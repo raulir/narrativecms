@@ -83,12 +83,12 @@ function cms_input_image_load_images(params){
 		original_filename = original_filename.replace(path, '');
 	}
 
-	get_ajax_panel('cms_images', {'filename': original_filename, 'category': params.category}, function(data){
+	get_ajax_panel('cms/cms_images', {'filename': original_filename, 'category': params.category}, function(data){
 		panels_display_popup(data.result.html, {
 			'select': function(after){
 				// just before closing (select), check, if selected value is still a valid image
 				$(document).off('keyup.cms');
-				get_ajax_panel('cms_images_operations', {
+				get_ajax_panel('cms/cms_images_operations', {
 					'filename': $('.popup_select').data('value'),
 					'do': 'cms_images_check_by_filename'
 				}, function(data){
@@ -128,7 +128,7 @@ function cms_input_image_load_images(params){
 			'cancel': function(after){
 				// check if currently in input image still ok?
 				$(document).off('keyup.cms');
-				get_ajax_panel('cms_images_operations', {
+				get_ajax_panel('cms/cms_images_operations', {
 					'filename': original_filename,
 					'do': 'cms_images_check_by_filename'
 				}, function(data){

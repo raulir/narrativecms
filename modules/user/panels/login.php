@@ -53,7 +53,7 @@ class login extends CI_Controller{
 	
 	function panel_params($params){
 		
-		print_r($_SESSION['user']);
+		// print_ r($_SESSION['user']);
 
 		// check if logged in
 		$params['loggedin'] = !empty($_SESSION['user']);

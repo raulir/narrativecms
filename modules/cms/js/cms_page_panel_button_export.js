@@ -9,7 +9,7 @@ function cms_page_panel_button_export_init(){
 			
 			$('.cms_popup_area', '.cms_popup_export').html('Exporting ... ');
 			
-			get_ajax_panel('cms_page_panel_export', {
+			get_ajax_panel('cms/cms_page_panel_export', {
 				'export_id': cms_page_panel_id,
 				'do': 'cms_page_panel_export'
 			}, function(data){

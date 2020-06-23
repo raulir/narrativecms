@@ -260,7 +260,7 @@ class cms_search_model extends Model {
     	
     	usort($final_result, 'scoresort');
     	
-// print_r($final_result);
+// print_ r($final_result);
 
    		return $final_result;
 

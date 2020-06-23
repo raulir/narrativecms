@@ -51,7 +51,7 @@ function activate_cms_page_panel_copy(params){
 	$('.cms_page_panel_copy').off('click.cms').on('click.cms', function(){
 		var $this = $(this);
 		var cms_page_panel_id = $this.data('cms_page_panel_id');
-		get_ajax_panel('cms_page_panel_operations', {
+		get_ajax_panel('cms/cms_page_panel_operations', {
 			'cms_page_panel_id': cms_page_panel_id,
 			'do': 'cms_page_panel_copy' 
 		}, function(data){
@@ -73,7 +73,7 @@ function cms_list_load(start, limit, after){
 	var panel_name = $('.cms_list_container').data('panel_name');
 	var source = $('.cms_list_container').data('source');
 	
-	get_ajax_panel('cms_list_list', {
+	get_ajax_panel('cms/cms_list_list', {
 		start: start, 
 		limit: limit, 
 		edit_base: $('.cms_list_container').data('edit_base'),
@@ -122,7 +122,7 @@ function cms_list_load(start, limit, after){
 						$('.cms_list_sortable_item').each(function(index, value){
 							list_order[index] = $(this).data('block_id');
 						});
-						get_ajax('cms_list_save_order', {'do': 'cms_list_save_order', list_order: list_order});
+						get_ajax('cms/cms_list_save_order', {'do': 'cms_list_save_order', list_order: list_order});
 					}
 				}
 	
@@ -131,7 +131,7 @@ function cms_list_load(start, limit, after){
 		
 		// any set buttons
 		$('.cms_list_set').on('click.cms', function(){
-			get_ajax('cms_list_operations', {
+			get_ajax('cms/cms_list_operations', {
 				'do': 'cms_list_set', 
 				'id': $(this).data('id'), 
 				'field': $(this).data('field'), 
@@ -183,7 +183,7 @@ $(document).ready(function() {
 	    	tolerance: 'pointer',
 	    	drop: function( event, ui ) {
 	    		$('.admin_list_sortable').addClass('admin_list_sortable_cancelled');
-				get_ajax('cms_list_move', {
+				get_ajax('cms/cms_list_move', {
 					'do': 'cms_list_move', 
 					target: 'first',
 					block_id: $(ui.draggable).data('block_id'), 
@@ -210,7 +210,7 @@ $(document).ready(function() {
 				$('.cms_list_sortable_item').each(function(index, value){
 					list_order[index] = $(this).data('block_id');
 				});
-				get_ajax('cms_list_move', {
+				get_ajax('cms/cms_list_move', {
 					'do': 'cms_list_move', 
 					target: 'previous',
 					block_id: $(ui.draggable).data('block_id'),
@@ -241,7 +241,7 @@ $(document).ready(function() {
 				$('.cms_list_sortable_item').each(function(index, value){
 					list_order[index] = $(this).data('block_id');
 				});
-				get_ajax('cms_list_move', {
+				get_ajax('cms/cms_list_move', {
 					'do': 'cms_list_move', 
 					target: 'next',
 					block_id: $(ui.draggable).data('block_id'),
@@ -262,7 +262,7 @@ $(document).ready(function() {
 	    	tolerance: 'pointer',
 	    	drop: function( event, ui ) {
 	    		$('.admin_list_sortable').addClass('admin_list_sortable_cancelled');
-				get_ajax('cms_list_move', {
+				get_ajax('cms/cms_list_move', {
 					'do': 'cms_list_move', 
 					target: 'last',
 					block_id: $(ui.draggable).data('block_id'),
@@ -278,7 +278,7 @@ $(document).ready(function() {
 	$('.cms_list_import').on('click.cms', function(){
 		
 		// create import popup for this list type
-		get_ajax_panel('cms_page_panel_import', {}, function(data){
+		get_ajax_panel('cms/cms_page_panel_import', {}, function(data){
 			
 			$('.cms_popup_area', '.cms_popup_import').html(data.result.html);
 			

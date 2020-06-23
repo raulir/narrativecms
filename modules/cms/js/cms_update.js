@@ -7,7 +7,7 @@ function cms_update_init(){
 		// do update
 		$('.cms_update_result').html('Getting list of files ...');
 
-		get_ajax('cms_update', {
+		get_ajax('cms/cms_update', {
 			'do': 'cms_update_list',
 			'module': module,
 			'success': function(data){
@@ -35,7 +35,7 @@ function cms_update_init(){
 							
 							// TODO: check if in cache already?
 							
-							get_ajax('cms_update', {
+							get_ajax('cms/cms_update', {
 								'do': 'cms_update_file',
 								'module': module,
 								'filename': value.filename,
@@ -56,12 +56,12 @@ function cms_update_init(){
 						clearInterval(interval);
 						
 						// copy over
-						get_ajax('cms_update', {
+						get_ajax('cms/cms_update', {
 							'do': 'cms_update_copy',
 							'module': module,
 							'success': function(data){
 								
-								get_ajax('cms_update', {
+								get_ajax('cms/cms_update', {
 									'do': 'cms_update_cleanup',
 									'module': module,
 									'success': function(data){

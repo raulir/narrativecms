@@ -82,7 +82,7 @@ function cms_user_settings_user_save($this, after){
 		return;
 	}
 	
-	get_ajax_panel('cms_user_operations', {
+	get_ajax_panel('cms/cms_user_operations', {
 		'do': 'cms_user_save',
 		'rights': rights,
 		'cms_user_id': cms_user_id,
@@ -108,10 +108,10 @@ function cms_user_settings_user_delete($this, after){
 	var cms_user_id = $('.cms_user_settings_cms_user_id', $parent).val();
 	
 	// ask are you sure
-	get_ajax_panel('cms_popup_yes_no', {}, function(data){
+	get_ajax_panel('cms/cms_popup_yes_no', {}, function(data){
 		panels_display_popup(data.result.html, {
 			'yes': function(){
-				get_ajax_panel('cms_user_operations', {
+				get_ajax_panel('cms/cms_user_operations', {
 					'do': 'cms_user_delete',
 					'cms_user_id': cms_user_id
 				}, function(data){

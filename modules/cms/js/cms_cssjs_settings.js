@@ -37,7 +37,7 @@ function cms_cssjs_settings_init(){
 		});
 		
 		// send to server
-		get_ajax_panel('cms_cssjs_operations', {
+		get_ajax_panel('cms/cms_cssjs_operations', {
 			'do': 'cms_cssjs_save',
 			'panels': panels
 		}, function(data){
