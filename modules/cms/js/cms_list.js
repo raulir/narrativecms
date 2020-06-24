@@ -287,7 +287,7 @@ $(document).ready(function() {
 				$('.cms_page_panel_import_input').on('change.cms', function(){
 					
 					var data = new FormData( $('.cms_page_panel_import_form').get(0) );
-					data.append('panel_id', 'cms_page_panel_import');
+					data.append('panel_id', 'cms/cms_page_panel_import');
 					data.append('do', 'cms_page_panel_import');
 					
 					$.ajax( {

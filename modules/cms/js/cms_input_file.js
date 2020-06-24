@@ -51,7 +51,7 @@ function cms_input_file_rename(input_name){
 function cms_input_file_upload(params){
 	
 	var data = new FormData( $('.cms_input_file_form').get(0) );
-	data.append('panel_id', 'cms_input_file_upload');
+	data.append('panel_id', 'cms/cms_input_file_upload');
 	
 	$.ajax( {
 		url: config_url + 'ajax_api/get_panel',

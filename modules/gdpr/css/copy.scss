@@ -1,0 +1,69 @@
+.copy_container {
+	background-color: $colour_white;
+	font-family: source, Arial, Helvetica, sans-serif;
+	text-align: left;
+}
+
+.copy_content {
+	padding: 10.0rem 1.5rem;
+	max-width: 52.0rem;
+	margin: 0 auto;
+	box-sizing: border-box;
+}
+
+.copy_heading {
+	color: $colour_black;
+	font-size: 2.5rem;
+	line-height: 2.5rem;
+	padding: 0 0 2.5rem 0;
+	text-transform: uppercase;
+}
+
+.copy_text {
+	
+	font-size: 1.5rem;
+	line-height: 1.85rem;
+	
+	p {
+		padding: 0.5rem 0;
+	}
+
+	b {
+		color: $colour_black;
+		font-weight: bold;
+		line-height: 2.0rem;
+	}
+
+	a {
+		display: inline-block;
+		box-shadow: 0 0.1rem $colour_black;
+	}
+
+	i {
+		font-size: 1.1rem;
+		font-style: inherit;
+	}
+
+	h2 {
+		font-size: 1.9rem;
+		line-height: 2.5rem;
+		padding-top: 3.0rem;
+		font-weight: bold;
+	}
+
+	ul {
+		
+	}
+
+	li {
+		position: relative;
+		padding: 0.5rem 0 0.5rem 2.0rem;
+		&::before {
+			content: '-';
+			position: absolute;
+			left: 0;
+			top: 0.5rem;
+		}
+	}
+
+}

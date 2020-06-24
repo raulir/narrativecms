@@ -1,18 +1,20 @@
 {
     "version": "2",
+    "label":"GDPR popup",
+    "image":"gdpr/panel_popup.png",
     "item": [
 		{
             "type": "textarea",
             "lines":"4",
             "name": "text",
             "label": "Text",
-            "default": "Please follow the links for more information about this website."
+            "default": "Please follow the links below for more\ninformation about this website."
         },
         {
             "type": "text",
             "name": "heading",
             "label": "Heading",
-            "default": "Website information"
+            "default": "Website data policies"
         },
         {
             "type": "text",

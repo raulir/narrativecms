@@ -1,11 +1,12 @@
 .popup_container {
 	position: fixed;
+	bottom: 0;
+	right: 1.0rem;
 	width: 25.0rem;
 	height: 0;
 	z-index: 100;
 	color: $colour_white;
-	bottom: 0.4rem;
-    right: 1.0rem;
+	font-family: source, Arial, Helvetica, sans-serif;
 }
 
 .popup_content {
@@ -44,6 +45,7 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     line-height: 1.0rem;
+    letter-spacing: 0.05rem;
 }
 
 .popup_close {
@@ -103,6 +105,7 @@
 	padding: 1.0rem 0;
 	font-size: 1.1rem;
 	line-height: 1.2rem;
+	white-space: pre-line;
 }
 
 .popup_link {

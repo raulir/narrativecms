@@ -1,2 +1,11 @@
 $colour_white: white;
+$colour_black: black;
 $popup_background: rgba(0,0,0,0.6);
+
+@font-face {
+    font-family: source;
+    src: url('source/source.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: fallback;
+}

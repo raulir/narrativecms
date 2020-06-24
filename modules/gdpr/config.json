@@ -3,6 +3,10 @@
 		{
 			"id":"popup",
 			"name":"Popup"
+		},
+		{
+			"id":"copy",
+			"name":"Copy"
 		}
 	]
 }

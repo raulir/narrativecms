@@ -1,0 +1,22 @@
+{
+    "version": "2",
+    "item": [
+        {
+            "type": "textarea",
+            "name": "heading",
+            "label": "Heading",
+            "lines": "3",
+            "width": "wide",
+            "help": "Keeps line breaks, capitalised"
+        },
+        {
+            "type": "textarea",
+            "name": "text",
+            "label": "Text",
+            "lines": "24",
+            "width": "wide",
+            "html": "PBIALH",
+            "help": "bold - red text, italic - smaller text"
+        }
+    ]
+}
