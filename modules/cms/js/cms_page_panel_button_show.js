@@ -7,6 +7,11 @@ function cms_page_panel_button_show_activate(){
 				'cms_page_panel_id': cms_page_panel_id,
 				'do': 'cms_page_panel_show'
 			}, function(data){
+				
+				if (data.result.message){
+					cms_notification(data.result.message)
+				}
+				
 				if (data.result.show == 1){
 					$this.closest('li').removeClass('cms_item_hidden');
 					$this.html('hide');

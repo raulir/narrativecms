@@ -32,7 +32,7 @@ class cms_input_fk extends CI_Controller {
 			$list = $this->cms_page_panel_model->get_list($params['list'], ['show' => [0,1]]);
 			
 			if (empty($definition['list']['title_field'])){
-				$title_field = 'heading';
+				$title_field = '_panel_heading';
 			} else {
 				$title_field = $definition['list']['title_field'];
 			}

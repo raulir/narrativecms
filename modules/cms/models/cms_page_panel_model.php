@@ -922,9 +922,9 @@ class cms_page_panel_model extends Model {
 	
 	}
 	
-	function get_fk_data($panel_name, $filter = array(), $label_field = 'title'){
+	function get_fk_data($panel_name, $filter = [], $label_field = 'title'){
 
-		$panels = $this->get_cms_page_panels_by(array('panel_name' => $panel_name, 'cms_page_id' => [999999,0], ) + $filter);
+		$panels = $this->get_cms_page_panels_by(['panel_name' => $panel_name, 'cms_page_id' => 0] + $filter);
     	
     	$return = array();
     	

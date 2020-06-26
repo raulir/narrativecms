@@ -64,11 +64,18 @@ class cms_page_panel_operations extends CI_Controller {
 			 
 			// save data
 			if (!empty($block['show'])){
+			
 				$this->cms_page_panel_model->update_cms_page_panel($cms_page_panel_id, array('show' => 0, ));
 				$params['show'] = 0;
+			
 			} else {
+				
+				// show hook
+				$params['message'] = $this->run_panel_method($block['panel_name'], 'on_show', $block);
+				
 				$this->cms_page_panel_model->update_cms_page_panel($cms_page_panel_id, array('show' => 1, ));
 				$params['show'] = 1;
+
 			}
 			
 			// slug hiding

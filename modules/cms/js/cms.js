@@ -12,6 +12,9 @@ function strip_tags(input, allowed) {
     });
 }
 
+/*
+ * if timer 0, then doesn't hide
+ */
 function cms_notification(text, timer, type){
 	
 	if (!type){
