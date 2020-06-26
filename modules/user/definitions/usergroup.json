@@ -1,0 +1,18 @@
+{
+	"version":"2",
+	"list":{
+		"list_title":"Site user groups",
+		"item_title":"Site user group",
+		"filter_fields":{
+			"show":"-- show --"
+		},
+		"link_target":"0"
+	},
+	"item":[ 
+		{
+			"type":"text",
+			"name":"name",
+			"label":"Name"
+		}
+	]
+}

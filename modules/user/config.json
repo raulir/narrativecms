@@ -13,6 +13,13 @@
 			"access":"user_users"
 		},
 		{
+			"id":"usergroups",
+			"name":"User groups",
+			"parent":"user",
+			"url":"admin/cms_list/user__usergroup/",
+			"access":"user_usergroups"
+		},
+		{
 			"id":"users",
 			"name":"User header settings",
 			"parent":"user",

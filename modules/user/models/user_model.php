@@ -136,5 +136,36 @@ class user_model extends Model {
 		}
 		
 	}
+	
+	function get_users(){
+	
+		$this->load->model('cms/cms_page_panel_model');
+		return $this->cms_page_panel_model->get_list('user/user');
+	
+	}
+	
+	function get_users_by_group($usergroup_id){
+		
+		$this->load->model('cms/cms_page_panel_model');
+		$users = $this->cms_page_panel_model->get_list('user/user');
+		
+		foreach($users as $user_id => $user){
+			
+			$delete = true;
+			foreach($user['usergroups'] as $usergroup){
+				if($usergroup['usergroup_id'] == $usergroup_id){
+					$delete = false;
+				}
+			}
+			
+			if ($delete){
+				unset($users[$user_id]);
+			}
+			
+		}
+		
+		return $users;
+		
+	}
 
 }

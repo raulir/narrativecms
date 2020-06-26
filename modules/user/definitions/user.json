@@ -46,6 +46,20 @@
 			"label":"Phone"
 		},
 		{
+			"type":"repeater",
+			"name":"usergroups",
+			"label":"User groups",
+			"fields":[
+				{
+					"type":"fk",
+					"name":"usergroup_id",
+					"label":"User group",
+					"list":"user/usergroup",
+					"add_empty":"1"
+				}
+			]
+		},
+		{
 			"type":"textarea",
 			"name":"meta",
 			"label":"Meta"
