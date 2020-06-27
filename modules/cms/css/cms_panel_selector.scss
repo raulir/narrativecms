@@ -54,7 +54,7 @@
 	width: calc(64% - 0.5rem);
 	height: 100%;
 	position: absolute;
-	top: 0;
+	top: 1.0rem;
 	left: 0;
 	border: 0.1rem solid $colour_border;
 	box-sizing: border-box;
@@ -137,7 +137,7 @@
 	width: calc(36% - 0.5rem);
 	height: calc(100% - 7.2rem);
 	position: absolute;
-	bottom: 4.0rem;
+	top: 8.2rem;
 	right: 0;
 	overflow-y: auto;
 	overflow-x: hidden;
@@ -146,7 +146,7 @@
 .cms_panel_selector_list_heading {
 	width: calc(36% - 0.5rem);
 	position: absolute;
-	top: -0.2rem;
+	top: 5.0rem;
 	right: 0;
 	line-height: 2.6rem;
     letter-spacing: -0.04rem;
@@ -184,11 +184,11 @@
 
 .cms_panel_selector_filter {
 	width: calc(36% - 0.5rem);
-	height: 3.2rem;
+	height: 4.0rem;
 	position: absolute;
-	bottom: 0;
+	top: 0;
 	right: 0;
-	border-top: 0.1rem solid $colour_border;
+	border-bottom: 0.1rem solid $colour_border;
 }
 
 .cms_panel_selector_filter_label {
@@ -200,7 +200,7 @@
     letter-spacing: -0.04rem;
     font-size: 1.6rem;
     position: relative;
-    top: 0.7rem;
+    top: 0.9rem;
 }
 
 .cms_panel_selector_filter_select {
@@ -214,7 +214,7 @@
     padding: 0.1rem 0.5rem 0 0.5rem;
     position: absolute;
     right: 0;
-    bottom: 0;
+    bottom: 0.5rem;
 }
 
 .cms_panel_selector_shortcut {

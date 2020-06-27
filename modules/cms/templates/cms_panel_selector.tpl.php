@@ -63,7 +63,7 @@
 					</div>
 					
 					<div class="cms_panel_selector_filter">
-						<div class="cms_panel_selector_filter_label">Filter by module</div>
+						<div class="cms_panel_selector_filter_label">Module</div>
 						<select class="cms_panel_selector_filter_select">
 						
 							<option class="cms_panel_selector_filter_option" value="">-- select module --</option>

@@ -303,5 +303,18 @@ if ( !function_exists('get_position')) {
     	];
 
     }
+    
+    function _print_r($item){
+    	
+    	if (!$GLOBALS['config']['errors_visible']){
+    		return;
+    	}
+    	
+    	print('<pre style="background-color: white; color: black; display: block; border: 0.1rem solid orange; padding: 1.0rem; '.
+    			'font-size: 0.8rem; line-height: 0.9rem; letter-spacing: 0; font-family: monospace; ">');
+    	print_r($item);
+    	print('</pre>');
+    	 
+    }
 
 }
