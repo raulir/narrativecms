@@ -9,7 +9,7 @@ function cms_page_panel_button_show_activate(){
 			}, function(data){
 				
 				if (data.result.message){
-					cms_notification(data.result.message)
+					cms_notification(data.result.notification)
 				}
 				
 				if (data.result.show == 1){

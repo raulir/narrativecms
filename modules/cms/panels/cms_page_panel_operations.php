@@ -19,6 +19,7 @@ class cms_page_panel_operations extends CI_Controller {
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_panel_model');
 		$this->load->model('cms/cms_slug_model');
+		$this->load->model('cms/cms_page_model');
 		
 		$do = $this->input->post('do');
 
@@ -71,7 +72,7 @@ class cms_page_panel_operations extends CI_Controller {
 			} else {
 				
 				// show hook
-				$params['message'] = $this->run_panel_method($block['panel_name'], 'on_show', $block);
+				$params['notification'] = $this->run_panel_method($block['panel_name'], 'on_show', $block);
 				
 				$this->cms_page_panel_model->update_cms_page_panel($cms_page_panel_id, array('show' => 1, ));
 				$params['show'] = 1;
@@ -79,8 +80,12 @@ class cms_page_panel_operations extends CI_Controller {
 			}
 			
 			// slug hiding
-			$this->cms_slug_model->update_slug_status($block['panel_name'].'='.$cms_page_panel_id, empty($params['show']) ? 1 : 0);
-			 
+			if (!empty($block['cms_page_id'])){
+				$this->cms_page_model->update_page_visibility($block['cms_page_id']);
+			} else {
+				$this->cms_slug_model->update_slug_status($block['panel_name'].'='.$cms_page_panel_id, empty($params['show']) ? 1 : 0);
+			}
+			
 		} elseif ($do == 'cms_page_panel_copy'){
 			 
 			$cms_page_panel_id = $this->input->post('cms_page_panel_id');

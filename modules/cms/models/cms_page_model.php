@@ -322,4 +322,49 @@ class cms_page_model extends CI_Model {
 		
 	}
 	
+	function update_page_visibility($cms_page_id){
+		
+		$this->load->model('cms/cms_slug_model');
+		$this->load->model('cms/cms_page_panel_model');
+		
+		$data = $this->get_page($cms_page_id);
+		
+		if ($data['position'] !== 'main'){
+			return false;
+		}
+		
+		// get slug for page
+		$slug = $this->cms_slug_model->generate_page_slug($cms_page_id, $data['slug']);
+		
+		// if page is list item page
+		$lists = $this->cms_page_panel_model->get_lists();
+		$lists_clean = array_map(function($list_item){
+			list($m, $b) = explode('/', $list_item);
+			return $b;
+		}, $lists);
+		
+		$is_list_item = in_array($slug, $lists_clean);
+	
+		// get number of panels on page
+		$panels = $this->cms_page_panel_model->get_cms_page_panels_by(['cms_page_id' => $cms_page_id, 'show' => 1, ]);
+		$number_panels = count($panels);
+	
+		if (empty($data['status']) && !$is_list_item && $number_panels > 0){
+				
+			// normal active slug
+			$this->cms_slug_model->set_page_slug($cms_page_id, $slug, 0);
+				
+		} else {
+	
+			// hidden slug
+			$this->cms_slug_model->set_page_slug($cms_page_id, $slug, 1);
+				
+		}
+	
+		$this->update_page($cms_page_id, ['slug' => $slug]);
+		
+		return $slug;
+
+	}
+	
 }
