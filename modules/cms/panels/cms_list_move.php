@@ -61,14 +61,14 @@ class cms_list_move extends CI_Controller {
 					}
 					 
 					// update moving block to prev page last sort
-					$this->cms_page_panel_model->update_cms_page_panel($block_id, array('sort' => $old_block_a[0]['sort'], ), true);
+					$this->cms_page_panel_model->update_cms_page_panel($block_id, array('sort' => $old_block_a[0]['sort'], ));
 
 					// resort current page
 					sort($previous_sort);
 					 
 					// update panels referencing sorted previous sorts
 					foreach($new_list_sort as $index => $block_id){
-						$this->cms_page_panel_model->update_cms_page_panel($block_id, array('sort' => $previous_sort[$index], ), true);
+						$this->cms_page_panel_model->update_cms_page_panel($block_id, array('sort' => $previous_sort[$index], ));
 					}
 
 				}
@@ -103,14 +103,14 @@ class cms_list_move extends CI_Controller {
 					$new_list_sort[] = $old_block_a[0]['cms_page_panel_id']; // old block goes to the end of page
 					 
 					// update moving block to next page first sort found before
-					$this->cms_page_panel_model->update_cms_page_panel($block_id, array('sort' => $old_block_a[0]['sort'], ), true);
+					$this->cms_page_panel_model->update_cms_page_panel($block_id, array('sort' => $old_block_a[0]['sort'], ));
 
 					// resort current page
 					sort($previous_sort);
 					 
 					// update panels referencing sorted previous sorts
 					foreach($new_list_sort as $index => $block_id){
-						$this->cms_page_panel_model->update_cms_page_panel($block_id, array('sort' => $previous_sort[$index], ), true);
+						$this->cms_page_panel_model->update_cms_page_panel($block_id, array('sort' => $previous_sort[$index], ));
 					}
 
 				}
@@ -119,7 +119,7 @@ class cms_list_move extends CI_Controller {
 
 				// get max sort and count
 				$sort_stats = $this->cms_page_panel_model->get_sort_stats($block['panel_name']);
-				$this->cms_page_panel_model->update_cms_page_panel($block_id, array('sort' => $sort_stats['max_sort'] + 1, ), true);
+				$this->cms_page_panel_model->update_cms_page_panel($block_id, array('sort' => $sort_stats['max_sort'] + 1, ));
 
 			}
 

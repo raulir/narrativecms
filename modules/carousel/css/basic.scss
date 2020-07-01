@@ -1,18 +1,25 @@
 .carousel_basic_container {
 	background-color: $colour_black;
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
 }
 
 .carousel_basic_content {
 	position: relative;
+	height: 100%;
+	width: 100%;
 }
 
 .carousel_basic_items {
-	height: calc(100vh - 2.0rem);
+	height: 100%;
 	position: relative;
 	overflow: hidden;
-	max-height: 65vw;
 	opacity: 1;
 	transition: opacity 0.2s;
+	z-index: 10;
 }
 
 .carousel_basic_carousel_hidden {
@@ -145,17 +152,29 @@
 	transition: background-color 0.5s, color 0.5s;
 }
 
-.carousel_basic_arrow_left {
+.carousel_basic_arrow {
 	cursor: pointer;
+	position: absolute;
+	width: 10%;
+	height: 100%;
+	top: 0;
+	z-index: 20;
+	background-size: 25% auto;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.carousel_basic_arrow_left {
+	left: 0;
 }
 
 .carousel_basic_arrow_right {
-	cursor: pointer;
+	right: 0;
 }
 
 .carousel_basic_buttons {
 	position: absolute;
-	bottom: 3.5rem;
+	bottom: 2.5rem;
 	left: 0;
 	width: 100%;
 	z-index: 100;
@@ -163,18 +182,28 @@
 }
 
 .carousel_basic_button {
-	height: 0.2rem;
+	height: 2.2rem;
 	width: 4.0rem;
+	max-width: 6%;
 	margin: 0 0.3rem;
 	opacity: 0.5;
 	transition: opacity 0.5s, background-color 0.5s;
-	background-color: $colour_white;
 	display: inline-block;
 	cursor: pointer;
+	position: relative;
 	&.carousel_basic_active {
 		opacity: 1;
 	}
-	.carousel_basic_black & {
+	&::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 1.0rem;
+		height: 0.2rem;
+		width: 100%;
+		background-color: $colour_white;
+	}
+	.carousel_basic_black &::before {
 		background-color: $colour_black;
 	}
 }

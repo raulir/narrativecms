@@ -27,7 +27,7 @@ class cms_list_operations extends CI_Controller {
 			$this->load->model('cms/cms_page_panel_model');
 
 			// save data
-			$this->cms_page_panel_model->update_cms_page_panel($cms_page_panel_id, array( $field => $value, ), true);
+			$this->cms_page_panel_model->update_cms_page_panel($cms_page_panel_id, array( $field => $value, ));
 			 
 		}
 

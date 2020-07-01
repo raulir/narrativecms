@@ -14,6 +14,8 @@ $cms_orange: #f7a034;
 $cms_orange_button_border: #884825;
 $cms_orange_button_background: #e1c05f;
 
+$cms_header_active: rgba(124,80,26,0.9);
+
 @font-face {
     font-family: source;
     src: url('source/source_light.ttf') format('truetype');
@@ -104,13 +106,12 @@ ul {
 	width: 100%;
 	top: 0;
 	left: 0;
-	border-bottom: 0.1rem solid transparent;
 	box-sizing: border-box;
 	background-color: transparent;
 	transition: border 0.5s, background-color 0.5s;
 	.cms_header_active & {
-		background-color: rgba(124,80,26,0.6);
-		border-color: rgba(124,80,26,0.8);
+		background-color: $cms_header_active;
+		border-color: $cms_header_active;
 	}
 }
 

@@ -115,7 +115,7 @@ $colour_white: white;
 	
 	.cms_page_panel_toolbar_content {
 		position: fixed;
-		background-color: rgba(255,255,255,0.8);
+		background-color: rgba(255,255,255,0.9);
     	top: 6.0rem;
     	z-index: 1000;
     	left: 0;
@@ -130,13 +130,13 @@ $colour_white: white;
 	}
 
 	.cms_page_panel_toolbar_side_left {
-		background-color: rgba(124,80,26,0.6);
-		border-bottom: 0.1rem solid rgba(124,80,26,0.8);
+		background-color: $cms_header_active;
+		border-bottom: 0.1rem solid $cms_header_active;
 	}
 
 	.cms_page_panel_toolbar_side_right {
-		background-color: rgba(124,80,26,0.6);
-		border-bottom: 0.1rem solid rgba(124,80,26,0.8);
+		background-color: $cms_header_active;
+		border-bottom: 0.1rem solid $cms_header_active;
 	}
 
 	.cms_page_panel_toolbar_area {

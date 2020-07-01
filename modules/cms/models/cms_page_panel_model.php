@@ -167,14 +167,18 @@ class cms_page_panel_model extends Model {
 	}
 
 	function _insert_or_update_param($cms_page_panel_id, $name, $value, $search = 0, $translate = 0){
-
+		
 		if (is_array($value)){
 			
+			if (isset($value['panel_params'])){
+				unset($value['panel_params']);
+			}
+
 			foreach($value as $_name => $_value){
 				
-				if (is_numeric($_name)){
-					$_name = str_pad($_name, 3, 0, STR_PAD_LEFT);
-				}
+//				if (is_numeric($_name)){
+//					$_name = str_pad($_name, 3, 0, STR_PAD_LEFT);
+//				}
 
 				if (is_array($search) && !empty($search[$_name])){
 					// isnt numeric and has appropriate search param key
@@ -306,11 +310,6 @@ class cms_page_panel_model extends Model {
 
 	}
 	
-	function _purge_param($cms_page_panel_id){
-		$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name != 'create_cms_user_id' and name != 'create_time'";
-		$this->db->query($sql, array($cms_page_panel_id, ));
-	}
-	
 	function get_cms_page_panel_params($cms_page_panel_id, $language, $retry = true){
 
 		$sql = "select value from cms_page_panel_param where cms_page_panel_id = ? and name = ''";
@@ -385,7 +384,7 @@ class cms_page_panel_model extends Model {
 		
 	}
 	
-	function update_cms_page_panel($cms_page_panel_id, $data, $deprecated = false){
+	function update_cms_page_panel($cms_page_panel_id, $data, $purge = false){
 
 		if (isset($data['search_params'])){
 			$search_params = $data['search_params'];
@@ -424,7 +423,7 @@ class cms_page_panel_model extends Model {
 		
 		// new params stuff
 		foreach($data as $key => $value){
-			if (!in_array($key, array('cms_page_panel_id', 'cms_page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title', ))){
+			if (!in_array($key, ['cms_page_panel_id', 'cms_page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title'])){
 				$params[$key] = $value;
 				unset($data[$key]);
 			}
@@ -433,10 +432,37 @@ class cms_page_panel_model extends Model {
 		// params data
 		if (!empty($params)){
 			
-			// purge deprecation
-			// if (!$no_purge){
-			//	$this->_purge_param($cms_page_panel_id);
-			// }
+			if ($purge){
+
+				// remove keys not existing in new value array
+				function recursive_keys($array, $prefix = ''){
+					
+					$return = [];
+					
+					foreach($array as $k => $v){
+						
+						if (!is_array($v)){
+							$return[] = $prefix.$k;
+						} else {
+							$return = array_merge($return, recursive_keys($v, $prefix.$k.'.'));
+						}
+						
+					}
+					
+					return $return;
+					
+				}
+				
+				// build keys
+				$recursive_keys = recursive_keys($params);
+				$recursive_keys = array_unique(array_merge($recursive_keys, ['', 'create_cms_user_id', 'create_time', 'update_cms_user_id', 'update_time']));
+
+// 				_print_r($recursive_keys);
+
+				$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name not in ('".implode("','", $recursive_keys)."') ";
+				$this->db->query($sql, [(int)$cms_page_panel_id]);
+
+			}
 			
 			$this->_insert_or_update_param($cms_page_panel_id, '', $params, $search_params, $translate_params);
 			$this->_update_cached_params($cms_page_panel_id);
@@ -624,7 +650,7 @@ class cms_page_panel_model extends Model {
 							
 							if(($key = array_search($cms_page_panel_id, $children)) !== false) {
     							unset($children[$key]);
-    							$this->update_cms_page_panel($cms_page_panel['parent_id'], array($item['name'] => $children, ), true);
+    							$this->update_cms_page_panel($cms_page_panel['parent_id'], array($item['name'] => $children, ));
 							}
 						}
 					}
@@ -872,7 +898,7 @@ class cms_page_panel_model extends Model {
 		
 		// move first
 		$this->shift_sort($block['panel_name'], 0, 1); // panel name, start, amount
-		$this->update_cms_page_panel($cms_page_panel_id, array('sort' => 1, ), true);
+		$this->update_cms_page_panel($cms_page_panel_id, ['sort' => 1]);
 		
 	}
 	

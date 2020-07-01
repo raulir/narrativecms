@@ -45,13 +45,13 @@ class cms_page_panel_operations extends CI_Controller {
 			$params['_caching'] = 0;
 			 
 			if (!empty($lists) && is_array($lists)){
-				$this->cms_page_panel_model->update_cms_page_panel($target_id, array('_cache_lists' => implode(',', $lists), ), true);
+				$this->cms_page_panel_model->update_cms_page_panel($target_id, array('_cache_lists' => implode(',', $lists), ));
 				$params['_caching'] = 1;
 			} else {
-				$this->cms_page_panel_model->update_cms_page_panel($target_id, array('_cache_lists' => '', ), true);
+				$this->cms_page_panel_model->update_cms_page_panel($target_id, array('_cache_lists' => '', ));
 			}
 
-			$this->cms_page_panel_model->update_cms_page_panel($target_id, array('_cache_time' => $caching, ), true);
+			$this->cms_page_panel_model->update_cms_page_panel($target_id, array('_cache_time' => $caching, ));
 			if (!empty($caching)){
 				$params['_caching'] = 1;
 			}
@@ -143,7 +143,7 @@ class cms_page_panel_operations extends CI_Controller {
 			 
 			// update children with parent id
 			foreach($all_children as $new_child_id){
-				$this->cms_page_panel_model->update_cms_page_panel($new_child_id, array('parent_id' => $new_block_id, ), true);
+				$this->cms_page_panel_model->update_cms_page_panel($new_child_id, array('parent_id' => $new_block_id, ));
 			}
 			 
 		} elseif ($do == 'cms_page_panel_save'){
@@ -322,7 +322,7 @@ class cms_page_panel_operations extends CI_Controller {
 			// save data
 			if($block_id){
 
-				$this->cms_page_panel_model->update_cms_page_panel($block_id, $data);
+				$this->cms_page_panel_model->update_cms_page_panel($block_id, $data, true);
 				 
 			} else {
 
@@ -381,7 +381,7 @@ class cms_page_panel_operations extends CI_Controller {
 				if (!in_array($block_id, $field_data)){
 					$field_data[] = $block_id;
 					$field_data = array_values($field_data); // renum array
-					$this->cms_page_panel_model->update_cms_page_panel($data['parent_id'], [$params['parent_name'] => $field_data, ], true);
+					$this->cms_page_panel_model->update_cms_page_panel($data['parent_id'], [$params['parent_name'] => $field_data, ]);
 				}
 
 			}

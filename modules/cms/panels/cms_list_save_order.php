@@ -34,7 +34,7 @@ class cms_list_save_order extends CI_Controller {
 			 
 			// update panels referencing sorted previous sorts
 			foreach($list_order as $list_sort => $cms_page_panel_id){
-				$this->cms_page_panel_model->update_cms_page_panel($cms_page_panel_id, array('sort' => $previous_sort[$list_sort], ), true);
+				$this->cms_page_panel_model->update_cms_page_panel($cms_page_panel_id, array('sort' => $previous_sort[$list_sort], ));
 			}
 
 		}
