@@ -15,7 +15,7 @@ class cms_update extends CI_Controller {
 	}
 
 	function panel_action($params){
-		
+
 		if (empty($GLOBALS['config']['update']['allow'])){
 			return $params;
 		}
@@ -23,12 +23,15 @@ class cms_update extends CI_Controller {
 		$this->load->model('cms/cms_update_model');
 
 		$do = $this->input->post('do');
-
+		
+		$area = $this->input->post('area');
+		if (empty($area) && $area !== ''){
+			$area = $this->input->post('module');
+		}
+		
 		if ($do == 'cms_update_list'){
-			
-			$module = $this->input->post('module');
-			 
-			$params['result'] = $this->cms_update_model->get_needed_files($module);
+
+			$params['result'] = $this->cms_update_model->get_needed_files($area);
 			 
 		} else if ($do == 'cms_update' && !empty($GLOBALS['config']['update']['allow'])){
 
@@ -44,9 +47,8 @@ class cms_update extends CI_Controller {
 		} else if ($do == 'cms_update_file'){ // updates file
 			 
 			$filename = $this->input->post('filename');
-			$module = $this->input->post('module');
 				
-			$this->cms_update_model->update_file($filename, $module);
+			$this->cms_update_model->update_file($filename, $area);
 			 
 			$params['result']['filename'] = $filename;
 			$params['result']['fn_hash'] = md5($filename);
@@ -54,19 +56,17 @@ class cms_update extends CI_Controller {
 			 
 		} else if ($do == 'cms_update_copy'){
 
-			$module = $this->input->post('module');
-			
-			$this->cms_update_model->update_copy($module);
+			$this->cms_update_model->update_copy($area);
 			
 			// check and update version information
-			$master_data = $this->cms_update_model->get_master_version($module);
+			$master_data = $this->cms_update_model->get_master_version($area);
 			$this->cms_update_model->rebuild();
-			$local_data = $this->cms_update_model->get_version($module);
+			$local_data = $this->cms_update_model->get_version($area);
 			
 			$master_hash = !empty($master_data['version_hash']) ? $master_data['version_hash'] : 'error';
 			if ($local_data['current_hash'] == $master_hash){
 				// update local json
-				$this->cms_update_model->update_version_cache($module, [
+				$this->cms_update_model->update_version_cache($area, [
 						'version' => !empty($master_data['version']) ? $master_data['version'] : '',
 						'version_hash' => !empty($master_data['version_hash']) ? $master_data['version_hash'] : '',
 						'version_time' => !empty($master_data['version_time']) ? $master_data['version_time'] : '',
@@ -75,19 +75,17 @@ class cms_update extends CI_Controller {
 			}
 
 		} else if ($do == 'cms_update_cleanup'){
-			
-			$module = $this->input->post('module');
-			
-			while ($this->cms_update_model->update_cleanup($module));
+
+			while ($this->cms_update_model->update_cleanup($area));
 			
 		}
-
+		
 		return $params;
 
 	}
 
 	function panel_params($params){
-
+		
 		if (!empty($params['ajax'])){
 			return $params;
 		}
@@ -108,30 +106,30 @@ class cms_update extends CI_Controller {
 		}
 
 		// get master version
-		foreach($params['data'] as $key => $module){
+		foreach($params['data'] as $key => $area){
 			
-			if (!in_array($module['module'], $GLOBALS['config']['update']['master'])){
+			if (!in_array($area['area'], $GLOBALS['config']['update']['master'])){
 				
-				$version_data = $this->cms_update_model->get_master_version($module['module']);
+				$version_data = $this->cms_update_model->get_master_version($area['area']);
 // print('<pre>');
 // print_r($version_data);
 // print('</pre>');
 				$params['data'][$key]['master_version'] = !empty($version_data['version']) ? $version_data['version'] : '';
 				$params['data'][$key]['master_hash'] = !empty($version_data['current_hash']) ? $version_data['current_hash'] : '';
 				$params['data'][$key]['master_time'] = !empty($version_data['version_time']) ? $version_data['version_time'] : 0;
-				if ($params['data'][$key]['master_hash'] != $module['local_current_hash']){
+				if ($params['data'][$key]['master_hash'] != $area['local_current_hash']){
 					$params['data'][$key]['can_update'] = true;
 				}
 				
 			} else {
 				
 				// check if to increment master version
-				if (!empty($GLOBALS['config']['update']['master']) && in_array($module['module'], $GLOBALS['config']['update']['master'])){
+				if (!empty($GLOBALS['config']['update']['master']) && in_array($area['area'], $GLOBALS['config']['update']['master'])){
 
-					if ($module['local_current_hash'] !== $module['local_version_hash']){
+					if ($area['local_current_hash'] !== $area['local_version_hash']){
 
-						$this->cms_update_model->increment_master_version($module['module']);
-						$local_data = $this->cms_update_model->get_version($module['module']);
+						$this->cms_update_model->increment_master_version($area['area']);
+						$local_data = $this->cms_update_model->get_version($area['area']);
 						
 //						print_r($local_data);
 						

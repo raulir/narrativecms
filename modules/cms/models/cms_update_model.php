@@ -2,10 +2,10 @@
 
 class cms_update_model extends CI_Model {
 
-	// rebuilds module hash caches
-	function rebuild_module($module, $folders = []){
+	// rebuilds area hash caches
+	function rebuild_area($area, $folders = []){
 		
-		if (empty($module)){
+		if (empty($area)){
 
 			// system and cms
 			$folders = [
@@ -17,7 +17,7 @@ class cms_update_model extends CI_Model {
 
 		}
 
-		$return = ['module' => $module];
+		$return = ['area' => $area];
 		
 		$extensions = [
 				'',
@@ -82,7 +82,7 @@ class cms_update_model extends CI_Model {
 		}
 		
 		// special case for system and cms
-		if (empty($module)){
+		if (empty($area)){
 		
 			// index.php
 			$cms_md5 = md5_file(str_replace("\\", '/', $GLOBALS['config']['base_path']).'index.php');
@@ -108,7 +108,7 @@ class cms_update_model extends CI_Model {
 
 		} else {
 			
-			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$module.'.json';
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$area.'.json';
 			
 		}
 		
@@ -153,21 +153,21 @@ class cms_update_model extends CI_Model {
 		
 	}
 
-	// rebuild all modules
+	// rebuild all areas
 	function rebuild(){
 		
 		$return = [];		
-		$return[] = $this->rebuild_module('');
+		$return[] = $this->rebuild_area('');
 		
-		// other modules
+		// other areas
 		$this->load->model('cms/cms_module_model');
 		
-		$modules = $this->cms_module_model->get_modules();
+		$areas = $this->cms_module_model->get_modules();
 		
-		foreach($modules as $module){
-			if ($module['name'] !== 'cms'){
+		foreach($areas as $area){
+			if ($area['name'] !== 'cms'){
 				
-				$return[] = $this->rebuild_module($module['name'], ['modules/'.$module['name'].'/']);
+				$return[] = $this->rebuild_area($area['name'], ['modules/'.$area['name'].'/']);
 				
 			}
 		}
@@ -176,12 +176,12 @@ class cms_update_model extends CI_Model {
 
 	}
 	
-	function increment_master_version($module){
+	function increment_master_version($area){
 		
-		if (empty($module)){
+		if (empty($area)){
 			$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
 		} else {
-			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$module.'.json';
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$area.'.json';
 		}
 		
 		// load cache file
@@ -189,7 +189,7 @@ class cms_update_model extends CI_Model {
 		
 		list($maj, $min, $num) = explode('.', $data['version']);
 		
-		// TODO: get maj and min from module config
+		// TODO: get maj and min from area config
 		
 		if ($maj != $maj){ // from config
 			$min = 0;
@@ -211,26 +211,26 @@ class cms_update_model extends CI_Model {
 		
 	}
 	
-	function get_version($module){
+	function get_version($area){
 		
-		if (empty($module)){
+		if (empty($area)){
 			$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
 		} else {
-			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$module.'.json';
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$area.'.json';
 		}
 		
 		// load current version data, if exists
 		if (!file_exists($filename)){
 
-			if (!empty($module)){
-				if (file_exists($GLOBALS['config']['base_path'].'modules/'.$module['name'].'/')){
+			if (!empty($area)){
+				if (file_exists($GLOBALS['config']['base_path'].'modules/'.$area['name'].'/')){
 					
-					$this->rebuild_module($module, ['modules/'.$module['name'].'/']);
+					$this->rebuild_area($area, ['modules/'.$area['name'].'/']);
 					
 				}
 			} else {
 				
-				$this->rebuild_module('');
+				$this->rebuild_area('');
 				
 			}
 
@@ -249,7 +249,7 @@ class cms_update_model extends CI_Model {
 		
 	}
 	
-	function get_master_version($module = ''){
+	function get_master_version($area = ''){
 		
 	    if (empty($GLOBALS['config']['cms_update_url'])){
     		return false;
@@ -261,7 +261,8 @@ class cms_update_model extends CI_Model {
 
 		$postdata = http_build_query([
 				'do' => 'version',
-				'module' => $module,
+				'module' => $area,
+				'area' => $area,
 		]);
     	
     	// check url
@@ -289,12 +290,12 @@ class cms_update_model extends CI_Model {
 		
 	}
 	
-	function get_files($module){
+	function get_files($area){
 		
-		if (empty($module)){
+		if (empty($area)){
 			$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
 		} else {
-			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$module.'.json';
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$area.'.json';
 		}
 		
 		// load current version data, if exists
@@ -314,7 +315,7 @@ class cms_update_model extends CI_Model {
 
 	}
 	
-	function get_master_files($module){
+	function get_master_files($area){
 		
 		if (empty($GLOBALS['config']['cms_update_url'])){
 			return false;
@@ -326,7 +327,8 @@ class cms_update_model extends CI_Model {
 		
 		$postdata = http_build_query([
 				'do' => 'files',
-				'module' => $module,
+				'module' => $area,
+				'area' => $area,
 		]);
 		 
 		// check url
@@ -354,12 +356,12 @@ class cms_update_model extends CI_Model {
 		
 	}
 
-	function get_file($needed_filename, $module){
+	function get_file($needed_filename, $area){
 		
-		if (empty($module)){
+		if (empty($area)){
 			$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
 		} else {
-			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$module.'.json';
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$area.'.json';
 		}
 		
 		// load current version data, if exists
@@ -398,7 +400,7 @@ class cms_update_model extends CI_Model {
 		
 	}
 	
-	function get_master_file($needed_filename, $module){
+	function get_master_file($needed_filename, $area){
 		
 		if (empty($GLOBALS['config']['cms_update_url'])){
 			return false;
@@ -410,7 +412,8 @@ class cms_update_model extends CI_Model {
 		
 		$postdata = http_build_query([
 				'do' => 'file',
-				'module' => $module,
+				'area' => $area,
+				'module' => $area,
 				'filename' => $needed_filename,
 		]);
 			
@@ -435,13 +438,13 @@ class cms_update_model extends CI_Model {
 
 	}
 	
-	function get_needed_files($module){
+	function get_needed_files($area){
 		
 		// get master list
-		$master_files = $this->get_master_files($module);
+		$master_files = $this->get_master_files($area);
 
 		// get local list
-		$local_files = $this->get_files($module);
+		$local_files = $this->get_files($area);
 		
 		$return = array();
 
@@ -505,10 +508,10 @@ class cms_update_model extends CI_Model {
 	}
 	
 	// copies files from server to local cache
-	function update_file($filename, $module){
+	function update_file($filename, $area){
 		
 		// get remote file
-		$master_file_data = $this->get_master_file($filename, $module);
+		$master_file_data = $this->get_master_file($filename, $area);
 
 		// create cache folder if not exists
 		$pathinfo = pathinfo($GLOBALS['config']['base_path'] . 'cache/update/' . $filename);
@@ -540,33 +543,37 @@ class cms_update_model extends CI_Model {
 		
 	}
 	
-	function update_copy($module){
+	function update_copy($area){
 
 		// go over all cache files recursively
 		$folder = $GLOBALS['config']['base_path']. 'cache/update/';
 		
-		if (!empty($module)){
-			$folder_module = $folder.'modules/'.$module.'/';
+		if (!empty($area)){
+			$folder_area = $folder.'modules/'.$area.'/';
 		} else {
-			$folder_module = $folder;
+			$folder_area = $folder;
 		}
 
-		if (file_exists($folder_module)){
+		if (file_exists($folder_area)){
 			
 			$it = new RecursiveDirectoryIterator($folder);
 			foreach (new RecursiveIteratorIterator($it) as $filename => $file) {
-			
+				
 				$from_filename = $folder . str_replace($folder, '', str_replace("\\", '/', $filename));
-				
+
 				if (!is_dir($from_filename)){
-				
+						
 					$to_filename = $GLOBALS['config']['base_path'] . str_replace($folder, '', str_replace("\\", '/', $filename));
 
+					print($from_filename.' '.$to_filename."\n");
+					
 					// check whats inside
 					$contents = file_get_contents($from_filename);
 
 					if ($contents == '_DELETE_'){
-						unlink($to_filename);
+						if (file_exists($to_filename)){
+							unlink($to_filename);
+						}
 					} else {
 						copy($from_filename, $to_filename);
 					}
@@ -576,7 +583,7 @@ class cms_update_model extends CI_Model {
 				}
 	
 			}
-			
+
 			// delete directory in cache
 			function rrmdir($dir) {
 				if (is_dir($dir)) {
@@ -593,18 +600,18 @@ class cms_update_model extends CI_Model {
 				}
 			}
 			rrmdir($folder);
-		
+
 		}
 
 	}
 	
-	function update_version_cache($module, $params){
+	function update_version_cache($area, $params){
 
 		// load cache file
-		if (empty($module)){
+		if (empty($area)){
 			$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
 		} else {
-			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$module.'.json';
+			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$area.'.json';
 		}
 		
 		$data = json_decode(file_get_contents($filename), true);

@@ -28,7 +28,7 @@
 
 			<?php foreach($data as $row): ?>
 				<div class="cms_update_row">
-					<div class="cms_update_cell"><?= !empty($row['module']) ? $row['module'] : 'BC CMS' ?></div>
+					<div class="cms_update_cell"><?= !empty($row['area']) ? $row['area'] : 'BC CMS' ?></div>
 					<div class="cms_update_cell">
 						
 						<?php if($row['local_version'] !== '0.0.0'): ?>
@@ -45,18 +45,18 @@
 
 					</div>
 					<div class="cms_update_cell">
-						<?php if(!in_array($row['module'], $GLOBALS['config']['update']['master'])): ?>
+						<?php if(!in_array($row['area'], $GLOBALS['config']['update']['master'])): ?>
 							<?= $row['master_version'] ?> <?= !empty($row['master_time']) ? date('(Y-m-d H:i)', $row['master_time']) : '' ?>
 							#<?= substr($row['master_hash'], 0, 16) ?>
 						<?php endif ?>
 					</div>
 					<div class="cms_update_cell cms_update_cell_right">
 						<?php if((!empty($GLOBALS['config']['update']['allow'])
-								&& (in_array($row['module'], $GLOBALS['config']['update']['allow']) || ($GLOBALS['config']['update']['allow'][0] == '*') ))
+								&& (in_array($row['area'], $GLOBALS['config']['update']['allow']) || ($GLOBALS['config']['update']['allow'][0] == '*') ))
 								&& !empty($row['master_hash'])
 								&& $row['local_current_hash'] !== $row['master_hash']): ?>
 								
-							<div class="cms_update_button cms_tool_button" data-module="<?= $row['module'] ?>">Update</div>
+							<div class="cms_update_button cms_tool_button" data-area="<?= $row['area'] ?>">Update</div>
 						
 						<?php endif ?>
 					</div>

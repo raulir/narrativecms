@@ -165,22 +165,9 @@ class admin extends CI_Controller {
 
 	}
 
-	function update($param = ''){
 
-		// set page config
-		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms/cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms/cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms/cms_update', 'module' => 'cms', 'params' => array(
-						'do' => $param,
-				), ),
-		);
-
-		// render panels
-		$panel_data = $this->render($page_config);
-
-		$this->output('cms/admin', 'admin/update', $panel_data);
-		 
+	function update(){
+		$this->_output('cms/cms_update');
 	}
 
 	function users($param = ''){
