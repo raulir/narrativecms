@@ -777,6 +777,12 @@ class cms_page_panel_model extends Model {
 		$sql = str_replace('!` =', '` !=', $sql); // not query
 
 		$query = $this->db->query($sql, $sql_filter);
+		
+		if (!$query){
+			_html_error('Missing field or table: cms_page_panel or cms_page_panel_param');
+			die();
+		}
+		
     	if ($query->num_rows()){
 	    	$return = $query->result_array();
     	} else {
