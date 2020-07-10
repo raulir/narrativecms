@@ -56,7 +56,7 @@ if ( !function_exists('get_position')) {
     	}
 
     	$ci =& get_instance();
-    	$ci->load->model('cms_page_panel_model');
+    	$ci->load->model('cms/cms_page_panel_model');
     	
     	$params = $ci->cms_page_panel_model->get_cms_page_panel($block_id);
     	

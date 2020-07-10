@@ -176,9 +176,10 @@ class cms_page_panel_model extends Model {
 
 			foreach($value as $_name => $_value){
 				
-//				if (is_numeric($_name)){
-//					$_name = str_pad($_name, 3, 0, STR_PAD_LEFT);
-//				}
+				// for array order preserving, save with extra padded zeroes
+				if (is_numeric($_name)){
+					$_name = str_pad($_name, 6, '0', STR_PAD_LEFT);
+				}
 
 				if (is_array($search) && !empty($search[$_name])){
 					// isnt numeric and has appropriate search param key
@@ -259,7 +260,7 @@ class cms_page_panel_model extends Model {
 		
 		$panel_params = [];
 		foreach($result as $row){
-			
+
 			if ($row['value'] === '__ARRAY__'){
 				$row['value'] = [];
 				$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name = ? ";
@@ -274,10 +275,19 @@ class cms_page_panel_model extends Model {
 			$keys = explode('.', $row['name']);
 			$arr = &$panel_params;
 			foreach ($keys as $key) {
+				
+				// turn numeric keys back to numbers
+				
+				if (is_numeric($key)){
+					$key = (int)$key;
+				}
+				
 				if (!isset($arr[$key])){
 					$arr[$key] = [];
 				}
+				
 				$arr = &$arr[$key];
+				
 			}
 			
 			
@@ -304,7 +314,7 @@ class cms_page_panel_model extends Model {
 			}
 		
 		}
-		
+
 		$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = '' , value = ? , search = 0 ";
 		$this->db->query($sql, [$cms_page_panel_id, json_encode($panel_params, JSON_PRETTY_PRINT)]);
 
@@ -318,9 +328,10 @@ class cms_page_panel_model extends Model {
 		if ($query->num_rows()){
     		
 	    	$row = $query->row_array();
-    		$return = json_decode($row['value'], true);
-    		
-    		if($language && !empty($return['_translations'][$language])){
+
+	    	$return = json_decode($row['value'], true);
+
+	    	if($language && !empty($return['_translations'][$language])){
     			$return = array_merge_recursive_ex($return, $return['_translations'][$language]);
     		}
 
