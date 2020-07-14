@@ -73,6 +73,13 @@
 			"url":"admin/panel_settings/basic__language/",
 			"parent":"cms",
 			"access":"basic_language"
+		},
+		{
+			"id":"pageshare",
+			"name":"Sharing settings",
+			"parent":"cms",
+			"user":"1",
+			"url":"admin/panel_settings/basic__pageshare/"
 		}
 	],
 	"access":[

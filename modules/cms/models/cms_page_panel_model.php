@@ -112,7 +112,7 @@ class cms_page_panel_model extends Model {
 		
 		// get last and next events
 		$items = $this->cms_page_panel_model->get_list($panel_name);
-		
+
 		$found = false;
 		foreach($items as $item){
 			if ($cms_page_panel_id == $item['cms_page_panel_id']){
@@ -142,7 +142,7 @@ class cms_page_panel_model extends Model {
 		
 		}
 		
-		$return = array_merge($return, array_values($return));
+		$return = array_merge($return);
 		
 		return $return;
 		

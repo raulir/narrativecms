@@ -1,0 +1,52 @@
+{
+	"version":"2",
+	"label":"Social sharing settings",
+	"settings":[
+		{
+			"type":"text",
+			"name":"hashtags",
+			"label":"Hashtags",
+			"help":"Comma separated list of hashtags"
+		},
+		{
+			"type":"textarea",
+			"name":"body",
+			"label":"Email body"
+		},
+		{
+			"type":"textarea",
+			"name":"content",
+			"label":"Twitter content"
+		},
+		{
+			"type":"repeater",
+			"name":"channels",
+			"label":"Channels",
+			"fields":[
+				{
+					"type":"image",
+					"name":"image",
+					"label":"Image",
+					"category":"icon"
+				},
+				{
+					"type":"select",
+					"name":"type",
+					"label":"Type",
+					"values":{
+						"email":"Email",
+						"facebook":"Facebook",
+						"twitter":"Twitter",
+						"linkedin":"LinkedIn"
+					},
+					"default":"facebook"
+				},
+				{
+					"type":"text",
+					"name":"text",
+					"label":"Text"
+				}
+			]
+		}
+	]
+}
