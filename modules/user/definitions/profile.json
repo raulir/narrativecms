@@ -1,0 +1,149 @@
+{
+    "version": "2",
+	"label": "Profile",
+	"image":"user/panel_profile.png",
+    "item": [
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Heading",
+			"default": "User profile"
+		},
+		{
+			"type":"text",
+			"name":"profile_email",
+			"label":"Email label",
+			"default": "email"
+		},
+		{
+			"type":"text",
+			"name":"profile_username",
+			"label":"Username label",
+			"default": "username"
+		},
+		{
+			"type":"text",
+			"name":"fixed_text",
+			"label":"Fixed text",
+			"default": "To change this, please contact us."
+		},
+		{
+			"type":"subtitle",
+			"label":"Editable fields"
+		},
+		{
+			"type":"text",
+			"name":"profile_first_name",
+			"label":"First name label",
+			"default": "first name"
+		},
+		{
+			"type":"text",
+			"name":"profile_last_name",
+			"label":"Last name label",
+			"default": "last name"
+		},
+		{
+			"type":"text",
+			"name":"profile_phone",
+			"label":"Phone label",
+			"default": "phone"
+		},
+		{
+			"type":"text",
+			"name":"profile_submit",
+			"label":"Save label",
+			"default": "save"
+		},
+		{
+			"type":"subtitle",
+			"label":"Password fields"
+		},
+		{
+			"type":"text",
+			"name":"password_heading",
+			"label":"Change password",
+			"default": "Change password"
+		},
+		{
+			"type":"text",
+			"name":"profile_old_password",
+			"label":"Old password label",
+			"default": "old password"
+		},
+		{
+			"type":"text",
+			"name":"profile_password",
+			"label":"Password label",
+			"default": "new password"
+		},
+		{
+			"type":"text",
+			"name":"profile_password2",
+			"label":"Password x2 label",
+			"default": "new password again"
+		},
+		{
+			"type":"text",
+			"name":"password_submit",
+			"label":"Password submit label",
+			"default": "change"
+		},
+		{
+			"type":"subtitle",
+			"label":"Messages"
+		},
+		
+		
+		{
+			"type":"textarea",
+			"name":"loggedin_text",
+			"label":"Logged in message",
+			"lines":"2",
+			"default": "You are currently logged in. Please log out to profile a new account."
+		},
+		{
+			"type":"textarea",
+			"name":"message_password_mismatch",
+			"label":"Password mismatch",
+			"lines":"2",
+			"default": "Your entered passwords didn't match"
+		},
+		{
+			"type":"textarea",
+			"name":"message_bademail",
+			"label":"Bad email",
+			"lines":"2",
+			"default": "Email missing or not properly formed"
+		},
+		{
+			"type":"textarea",
+			"name":"message_usernamelength",
+			"label":"Username length",
+			"lines":"2",
+			"default": "Your username is too short"
+		},
+		{
+			"type":"textarea",
+			"name":"message_usernameexists",
+			"label":"Username exists",
+			"lines":"2",
+			"default": "Your selected username exists"
+		},
+		{
+			"type":"textarea",
+			"name":"message_emailexists",
+			"label":"Email exists",
+			"lines":"2",
+			"default": "This email already is profileed"
+		},
+		{
+			"type":"textarea",
+			"name":"message_password_missing",
+			"label":"Password missing",
+			"lines":"2",
+			"default": "Password has to be filled in"
+		}
+	]
+}
+	

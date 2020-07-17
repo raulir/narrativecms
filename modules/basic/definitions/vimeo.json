@@ -1,0 +1,20 @@
+{
+	"version":"2",
+	"label":"Vimeo settings",
+	"settings":[
+		{
+			"type":"image",
+			"name":"sound_on",
+			"label":"Sound on",
+			"category":"icon",
+			"default":"basic/sound_on.png"
+		},
+		{
+			"type":"image",
+			"name":"sound_off",
+			"label":"Sound off",
+			"category":"icon",
+			"default":"basic/sound_off.png"
+		}
+	]
+}

@@ -62,7 +62,20 @@
 		{
 			"type":"textarea",
 			"name":"meta",
-			"label":"Meta"
+			"label":"Meta",
+			"lines":"12"
+		}
+	],
+	"settings":[
+		{
+			"type":"select",
+			"name":"show_username",
+			"label":"Separate username",
+			"values":{
+				"0":"No, email is username",
+				"1":"Yes, separate username"
+			},
+			"default":"0"
 		}
 	]
 }

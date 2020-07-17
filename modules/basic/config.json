@@ -43,43 +43,50 @@
 	],
 	"cms_menu":[
 		{
-			"id":"cms",
-			"name":"CMS"
+			"id":"tools",
+			"name":"Tools"
 		},
 		{
 			"id":"gtag",
 			"name":"Analytics settings",
 			"url":"admin/panel_settings/basic__gtag/",
-			"parent":"cms",
+			"parent":"tools",
 			"access":"basic_analytics"
 		},
 		{
 			"id":"gtm",
 			"name":"GTM settings",
 			"url":"admin/panel_settings/basic__gtm/",
-			"parent":"cms",
+			"parent":"tools",
 			"access":"basic_analytics"
 		},
 		{
 			"id":"pixel",
 			"name":"FB pixel settings",
 			"url":"admin/panel_settings/basic__pixel/",
-			"parent":"cms",
+			"parent":"tools",
 			"access":"basic_analytics"
 		},
 		{
 			"id":"language",
 			"name":"Language settings",
 			"url":"admin/panel_settings/basic__language/",
-			"parent":"cms",
+			"parent":"tools",
 			"access":"basic_language"
 		},
 		{
 			"id":"pageshare",
 			"name":"Sharing settings",
-			"parent":"cms",
+			"parent":"tools",
 			"user":"1",
 			"url":"admin/panel_settings/basic__pageshare/"
+		},
+		{
+			"id":"vimeo",
+			"name":"Vimeo settings",
+			"parent":"tools",
+			"user":"1",
+			"url":"admin/panel_settings/basic__vimeo/"
 		}
 	],
 	"access":[

@@ -16,22 +16,8 @@ function cms_page_panel_save(params){
 				var mandatory_extra = cms_page_panel_format_mandatory(mandatory_result, 'orange');
 			}
 		}
-
-		var data = $('.admin_form').serializeArray();
-		var data_to_submit = {};
-		$.each(data, function(key, value){
-			var re = value.name.slice(-2);
-			if (re == '[]') {
-				var name = value.name.replace('[]', '');
-				if(typeof data_to_submit[name] == 'undefined' || !$.isArray(data_to_submit[name])){
-					data_to_submit[name] = [value.value];
-				} else {
-					data_to_submit[name].push(value.value);
-				}
-			} else {
-				data_to_submit[value.name] = value.value;
-			}
-		});
+		
+		var data_to_submit = serialize_form('.admin_form')
 		
 		// add do and language
 		data_to_submit['do'] = 'cms_page_panel_save';
