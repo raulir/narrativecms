@@ -4,5 +4,17 @@
 			"id":"basic",
 			"name":"Basic carousel"
 		}
+	],
+	"cms_menu":[
+		{
+			"id":"tools",
+			"name":"Tools"
+		},
+		{
+            "id":"carousel_settings",
+            "name":"Carousel settings",
+            "parent":"tools",
+            "url":"admin/panel_settings/carousel__basic/"
+		}
 	]
 }

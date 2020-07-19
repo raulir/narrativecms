@@ -107,27 +107,9 @@
 					"groups":["copy"]
 				}
 			]
-		},
-		{
-			"type": "subtitle",
-			"label": "Design"
-		},
-		{
-			"type":"image",
-			"name":"arrow_left",
-			"label":"Arrow left",
-			"category":"icon"
-		},
-		{
-			"type":"image",
-			"name":"arrow_right",
-			"label":"Arrow right",
-			"category":"icon"
-		},
-		{
-			"type": "subtitle",
-			"label": "Settings"
-		},
+		}
+	],
+	"settings":[
 		{
 			"type": "text",
 			"name": "delay",
@@ -152,6 +134,24 @@
 			},
 			"default": "1",
 			"help": "Should carousel continue over the ends?"
+		},
+		{
+			"type": "subtitle",
+			"label": "Design"
+		},
+		{
+			"type":"image",
+			"name":"arrow_left",
+			"label":"Arrow left",
+			"category":"icon",
+			"default":"carousel/arrow_left.png"
+		},
+		{
+			"type":"image",
+			"name":"arrow_right",
+			"label":"Arrow right",
+			"category":"icon",
+			"default":"carousel/arrow_right.png"
 		}
 	]
 }

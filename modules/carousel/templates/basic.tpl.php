@@ -58,8 +58,8 @@
 
 		</div>
 	
-		<div class="carousel_basic_arrow carousel_basic_arrow_left" <?php !empty($arrow_left) ? _ib($arrow_left, 100) : '' ?>></div>
-		<div class="carousel_basic_arrow carousel_basic_arrow_right" <?php !empty($arrow_right) ? _ib($arrow_right, 100) : '' ?>></div>
+		<div class="carousel_basic_arrow carousel_basic_arrow_left" <?php !empty($arrow_left) ? _ib($arrow_left, 30) : '' ?>></div>
+		<div class="carousel_basic_arrow carousel_basic_arrow_right" <?php !empty($arrow_right) ? _ib($arrow_right, 30) : '' ?>></div>
 
 	</div>
 </div>

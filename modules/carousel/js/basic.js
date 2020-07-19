@@ -58,7 +58,7 @@ function carousel_basic_user_show($this){
 		carousel_basic_video_play($video).then(() => {
 			
 			$video.on('ended.cms', function(){
-console.log('video ended');
+// con sole.log('video ended');
 //				carousel_basic_play($this, 100);
 				carousel_basic_next($this);
 				
@@ -77,7 +77,7 @@ console.log('video ended');
 function carousel_basic_video_play($video){
 	
 	'use strict'
-console.log('video play');
+// con sole.log('video play');
 	return new Promise((resolve, reject) => {
 		
 		var i = 0;
@@ -93,8 +93,8 @@ console.log('video play');
 				$video.get(0).currentTime = 0
 
 				$video.get(0).play().then(() => {
-console.log('play success')
-setTimeout(() => {console.log($video.get(0).currentTime)}, 1000)
+// con sole.log('play success')
+// setTimeout(() => {con sole.log($video.get(0).currentTime)}, 1000)
 					clearInterval(interval)
 					resolve()
 					
@@ -204,7 +204,7 @@ function carousel_basic_init(){
 			
 			carousel_basic_cycle_arrows($this, 0)
 			
-console.log('show init')
+// con sole.log('show init')
 			carousel_basic_show($this);
 
 		}, 200);
@@ -437,7 +437,7 @@ function carousel_basic_play($this, delay){
 
 	if (!delay) delay = $this.data('delay'); // slider autoadvance delay
 	
-console.log('set handler - play', delay);
+// con sole.log('set handler - play', delay);
 	clearTimeout($this.data('play_handler'))
 	$this.data('play_handler', setTimeout(function(){
 //		carousel_basic_play($this);
@@ -449,9 +449,9 @@ console.log('set handler - play', delay);
 function carousel_basic_pause($this, delay){
 	
 	'use strict'
-console.log($this.data());
+// con sole.log($this.data());
 	if (!delay) delay = $this.data('delay') * 4;
-console.log('set handler - pause', delay);
+// con sole.log('set handler - pause', delay);
 
 	clearTimeout($this.data('play_handler'))
 	$this.data('play_handler', setTimeout(function(){
@@ -490,7 +490,7 @@ function carousel_basic_next($this, delay){
 	if ($this.data('animating')){
 		return;
 	}
-console.log('next requested');	
+// con sole.log('next requested');	
 	$this.data('animating', true);
 	setTimeout(function(){
 		$this.data('animating', false);
@@ -559,7 +559,7 @@ function carousel_basic_cycle_arrows($this, number){
 function carousel_basic_show($this, number, reverse, speed, delay){
 	
 	'use strict'
-console.log('show clear handlers')
+// con sole.log('show clear handlers')
 	carousel_basic_clear_progress_handlers($this)
 
 	if (!number) number = 0
@@ -567,7 +567,7 @@ console.log('show clear handlers')
 	if (!speed) speed = parseInt($this.data('animation_speed'))
 	if (!delay) delay = parseInt($this.data('delay'))
 
-console.log('show: number ' + number + ' reverse ' + reverse + ' speed ' + speed + ' delay ' + delay);
+// con sole.log('show: number ' + number + ' reverse ' + reverse + ' speed ' + speed + ' delay ' + delay);
 	
 	$this.data('drag_disabled', 'on');
 	setTimeout(function(){
@@ -619,14 +619,14 @@ console.log('show: number ' + number + ' reverse ' + reverse + ' speed ' + speed
 	var $video = $('.carousel_basic_item_video_video', $('.carousel_basic_item_' + new_number, $this));
 	if ($video.length){
 		$video.get(0).muted = true; // false;
-console.log('show - has video');
+// con sole.log('show - has video');
 	}
 
 	carousel_basic_user_show($this)
 	
 	if (!$video.length){
 
-console.log('set handler - show', delay);
+// con sole.log('set handler - show', delay);
 
 		$this.data('play_handler', setTimeout(function(){
 			carousel_basic_next($this);
