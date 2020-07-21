@@ -5,11 +5,13 @@
 			"id":"pages",
 			"name":"Pages",
 			"access":"cms_pages",
-			"url":"admin/pages/"
+			"url":"admin/pages/",
+			"ctrl":"1"
 		},
 		{
 			"id":"cms",
-			"name":"CMS"
+			"name":"CMS",
+			"ctrl":"2"
 		},
 		{
 			"id":"cms_search",
@@ -66,6 +68,16 @@
 			"parent":"cms",
 			"access":"cms_cms",
 			"url":"admin/update/"
+		},
+		{
+			"id":"tools",
+			"name":"Tools",
+			"ctrl":"3"
+		},
+		{
+			"id":"content",
+			"name":"Content",
+			"ctrl":"4"
 		}
 	],
 	"layouts":[

@@ -14,6 +14,9 @@ $cms_orange: #f7a034;
 $cms_orange_button_border: #884825;
 $cms_orange_button_background: #e1c05f;
 
+$cms_hint_red: #FF4500;
+$cms_hint_bg: #ffeedd;
+
 $cms_header_active: rgba(124,80,26,0.9);
 
 @font-face {
@@ -566,15 +569,17 @@ ul {
 
 .cms_ctrl_hint {
 	position: absolute;
-	left: -5px;
-	top: -5px;
+	left: -0.5rem;
+	top: -0.5rem;
 	display: none;
-	padding: 3px 4px 1px 4px;
-    color: #FF4500;
-    border: 1px solid #FF4500;
-    font-size: 13px;
-    line-height: 13px;
-    background-color: #ffeedd;
+	padding: 0.2rem 0.4rem;
+    color: $cms_hint_red;
+    border: 0.1rem solid $cms_hint_red;
+    font-size: 1.1rem;
+    line-height: 1.2rem;
+    background-color: $cms_hint_bg;
+    text-transform: uppercase;
+    font-weight: bold;
 }
 
 .cms_ctrl_hint_active {

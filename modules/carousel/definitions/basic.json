@@ -1,5 +1,6 @@
 {
 	"version":"2",
+	"label":"Carousel",
     "js": [
     	"cms/cms_video_resize"
     ],

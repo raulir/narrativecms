@@ -5,7 +5,7 @@
 				<?= !empty($_SESSION['cms_user']['name']) ? $_SESSION['cms_user']['name'] : $_SESSION['cms_user']['username'] ?>
 			</div>
 		</div>
-		<div class="cms_user_button">log out</div>
+		<div class="cms_user_button" data-cms_ctrl="q">log out</div>
 	</div>
 </div>
 

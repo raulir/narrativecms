@@ -8,25 +8,41 @@ function cms_page_panel_button_show_activate(){
 				'do': 'cms_page_panel_show'
 			}, function(data){
 				
+				var message = ''
+				
 				if (data.result.message){
-					cms_notification(data.result.notification)
+					message = message + data.result.notification
+				}
+				
+				if ($this.children('.cms_page_panel_show_label').length){
+					var $o = $this.children('.cms_page_panel_show_label')
+				} else {
+					var $o = $this
 				}
 				
 				if (data.result.show == 1){
 					$this.closest('li').removeClass('cms_item_hidden');
-					$this.html('hide');
+					$o.html('hide');
+					cms_notification('Page panel published' + message, 3)
 				} else {
 					$this.closest('li').addClass('cms_item_hidden');
-					$this.html('show');
+					$o.html('show');
+					cms_notification('Page panel unpublished' + message, 3)
 				}
 			});
 			
 		}
 		
 		var $this = $(this);
+		
+		if ($this.children('.cms_page_panel_show_label').length){
+			var $o = $this.children('.cms_page_panel_show_label')
+		} else {
+			var $o = $this
+		}
 
-		if ($this.html().trim() == 'show'){
-			
+		if ($o.html().trim() == 'show'){
+
 			// check if all mandatory is filled in
 			if (typeof cms_page_panel_check_mandatory == 'function'){
 				var mandatory_result = cms_page_panel_check_mandatory('red');

@@ -35,7 +35,20 @@ function basic_vimeo_init(){
 					player.setVolume(0)
 				}
 			})
-
+			
+			if ($this.hasClass('basic_vimeo_cover')){
+				
+				Promise.all([player.getVideoWidth(), player.getVideoHeight()]).then(function(dimensions) {
+					
+					var width = dimensions[0]
+					var height = dimensions[1]
+					
+					$this.data({'width':width,'height':height})
+					basic_vimeo_resize()
+					
+				});
+			}
+			
 		})
 
 	}, 1000)
@@ -43,7 +56,35 @@ function basic_vimeo_init(){
 
 function basic_vimeo_resize(){
 	
-	// $('.basic_vimeo_iframe').css({'height': $(window).innerWidth() * 360 / 640 + 'px'})
+	$('.basic_vimeo_cover').each(function(){
+		
+		var $this = $(this)
+		
+		if($this.data('width') && $this.data('height')){
+			
+			var video_ratio = $this.data('width')/$this.data('height')
+			
+			var container_width = $this.width()
+			var container_height = $this.height()
+			var container_ratio = container_width/container_height
+			
+			var $iframe = $('.basic_vimeo_iframe', $this)
+			
+			if (video_ratio > container_ratio){ 
+				$iframe.css({'height':container_height, 'width': container_width * (video_ratio/container_ratio)})
+			} else {
+				$iframe.css({'width':container_width, 'height': container_height * (container_ratio/video_ratio)})
+			}
+			
+			$iframe.css({'position':'absolute', 'top':'50%', 'left':'50%', 'transform':'translate(-50%,-50%)'})
+			
+			if($iframe.parent().css('position') == 'static'){
+				$iframe.parent().css({'position':'relative'})
+			}
+			
+		}
+		
+	})
 
 }
 

@@ -85,31 +85,6 @@ function cms_page_panel_button_save_init(){
 		cms_page_panel_save();
 	});
 	
-	$(window).on('keydown.cms', function(event) {
-		
-		if (event.ctrlKey || event.metaKey) {
-			$('.cms_ctrl_hint').addClass('cms_ctrl_hint_active');
-		}
-		
-	    if (event.ctrlKey || event.metaKey) {
-	        switch (String.fromCharCode(event.which).toLowerCase()) {
-		        case 's':
-		            event.preventDefault();
-		            $('.cms_page_panel_save').click();
-		        break;
-	        }
-	    }
-
-	});
-
-	$(window).on('keyup.cms', function(event) {
-
-		if (event.ctrlKey || event.metaKey || event.which == 17) {
-			$('.cms_ctrl_hint_active').removeClass('cms_ctrl_hint_active');
-		}
-
-	});
-	
 }
 
 function cms_page_panel_button_save_resize(){

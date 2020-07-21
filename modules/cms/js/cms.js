@@ -63,6 +63,55 @@ function cms_scroll(){
 
 function cms_init(){
 	
+	// ctrl keybindings
+	var $cms_ctrl = $('*[data-cms_ctrl]')
+	$cms_ctrl.each(function(){
+		
+		var $this = $(this)
+		
+		if ($this.hasClass('cms_ctrl_ok')) return
+		
+		$this.append('<div class="cms_ctrl_hint">' + $this.data('cms_ctrl') + '</div>')
+				.addClass('cms_ctrl_key_' + $this.data('cms_ctrl').toString().toLowerCase())
+				.addClass('cms_ctrl_ok')
+
+	})
+	
+	if ($cms_ctrl.length){
+	
+		$(window).off('keydown.cms_ctrl').on('keydown.cms_ctrl', function(event) {
+		
+			if (event.key == 'Control') {
+				$('.cms_ctrl_hint').addClass('cms_ctrl_hint_active');
+			}
+
+		    if (event.ctrlKey) {
+		    	
+		    	var event_key = event.key.toLowerCase()
+
+		    	if($('.cms_ctrl_key_' + event_key).length){
+		    		event.preventDefault()
+		    		if($('body > .cms_popup_container').length){
+		    			$('.cms_ctrl_key_' + event_key, $('body > .cms_popup_container')).first()[0].click()
+		    		} else {
+		    			$('.cms_ctrl_key_' + event_key).first()[0].click()
+		    		}
+		    	}
+
+		    }
+
+		});
+	
+		$(window).off('keyup.cms_ctrl').on('keyup.cms_ctrl', function(event) {
+	
+			if (event.key == 'Control') {
+				$('.cms_ctrl_hint_active').removeClass('cms_ctrl_hint_active');
+			}
+	
+		})
+	
+	}
+
 }
 
 $(document).ready(function() {

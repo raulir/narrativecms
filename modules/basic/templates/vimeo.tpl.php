@@ -1,4 +1,4 @@
-<div class="basic_vimeo_container">
+<div class="basic_vimeo_container <?= !empty($cover) ? ' basic_vimeo_cover ' : '' ?>">
 	<div class="basic_vimeo_content" <?php !empty($image) ? _ib($image, 500) : '' ?>>
 
 		<iframe class="basic_vimeo_iframe" src="https://player.vimeo.com/video/<?= $vimeo_id ?>?background=1" width="640" height="360" frameborder="0" 

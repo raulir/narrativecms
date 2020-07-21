@@ -3,10 +3,14 @@
 		<div class="cms_menu_items">
 			<?php foreach($menu_items as $menu_item): ?>
 		
-				<div class="cms_menu_item <?= !empty($children[$menu_item['id']]) ? 'cms_menu_parent ' : '' ?>" <?php _ib('cms/cms_triangle.png', 14) ?>>
+				<div class="cms_menu_item <?= !empty($children[$menu_item['id']]) ? 'cms_menu_parent ' : '' ?>" <?php _ib('cms/cms_triangle.png', 14) ?>
+					<?php if(!empty($children[$menu_item['id']]) && isset($menu_item['ctrl'])): ?> data-cms_ctrl="<?= $menu_item['ctrl'] ?>" <?php endif ?>>
 		
-					<a class="cms_menu_link" <?php (!empty($menu_item['url']) ? _lh($menu_item['url']) : ''); ?>>
-						<?php print($menu_item['name']); ?>
+					<a class="cms_menu_link" <?php (!empty($menu_item['url']) ? _lh($menu_item['url']) : ''); ?> 
+						<?php if(isset($menu_item['ctrl']) && !empty($menu_item['url'])): ?> data-cms_ctrl="<?= $menu_item['ctrl'] ?>" <?php endif ?>>
+						
+						<?= $menu_item['name'] ?>
+					
 					</a>
 					
 					<?php if(!empty($children[$menu_item['id']])): ?>
