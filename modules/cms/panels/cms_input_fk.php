@@ -36,9 +36,13 @@ class cms_input_fk extends CI_Controller {
 			} else {
 				$title_field = $definition['list']['title_field'];
 			}
-
+			
 			foreach($list as $item_id => $item){
-				$params['values'][$item_id] = $item[$title_field];
+				if (!empty($item[$title_field])){
+					$params['values'][$item_id] = $item[$title_field];
+				} else {
+					$params['values'][$item_id] = $this->run_panel_method($item['panel_name'], 'panel_heading', $item);
+				}
 			}
 			
 			if(empty($params['values'])){
