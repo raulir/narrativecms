@@ -104,7 +104,7 @@ class user_model extends Model {
 		
 		$this->cms_page_panel_model->update_cms_page_panel($user_id, [
 				'password' => sha1((!empty($GLOBALS['settings']['salt']) ? $GLOBALS['settings']['salt'] : 'cms').$password)
-		], true);
+		]);
 
 	}
 	

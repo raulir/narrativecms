@@ -39,6 +39,10 @@
 		{
 			"id":"debug",
 			"name":"Debug"
+		},
+		{
+			"id":"lightbox",
+			"name":"Lightbox"
 		}
 	],
 	"cms_menu":[
@@ -87,6 +91,13 @@
 			"parent":"tools",
 			"user":"1",
 			"url":"admin/panel_settings/basic__vimeo/"
+		},
+		{
+			"id":"lightbox",
+			"name":"Lightbox settings",
+			"parent":"tools",
+			"user":"1",
+			"url":"admin/panel_settings/basic__lightbox/"
 		}
 	],
 	"access":[

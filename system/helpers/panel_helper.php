@@ -311,7 +311,7 @@ if ( !function_exists('get_position')) {
     	}
     	
     	print('<pre style="background-color: white; color: black; display: block; border: 0.1rem solid orange; padding: 1.0rem; '.
-    			'font-size: 0.8rem; line-height: 0.9rem; letter-spacing: 0; font-family: monospace; ">');
+    			'font-size: 0.8rem; line-height: 0.9rem; letter-spacing: 0; font-family: monospace; text-align: left; ">');
     	print_r($item);
     	print('</pre>');
     	 
