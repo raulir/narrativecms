@@ -401,15 +401,8 @@ class CI_Controller {
 			$_description = substr($_description, 0, strrpos($_description, ' '));
 		}
 	
-		if (!empty($GLOBALS['_panel_titles'])){
-			$_title = trim(implode(' '.(!empty($GLOBALS['config']['site_title_delimiter']) ? $GLOBALS['config']['site_title_delimiter'] : '-').
-					' ', $GLOBALS['_panel_titles']), ' -');
-		} else {
-			$_title = '';
-		}
-		$_title = (!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '') .
-		str_replace('#page#', $_title, (!empty($GLOBALS['config']['site_title']) ? $GLOBALS['config']['site_title'] : 'New website - #page#'));
-	
+		$_title = $this->compile_page_title();
+		
 		print(str_replace(
 	
 				'</head>',
@@ -431,6 +424,21 @@ class CI_Controller {
 	
 				));
 	
+	}
+	
+	function compile_page_title(){
+		
+		if (!empty($GLOBALS['_panel_titles'])){
+			$_title = trim(implode(' '.(!empty($GLOBALS['config']['site_title_delimiter']) ? $GLOBALS['config']['site_title_delimiter'] : '-').
+					' ', $GLOBALS['_panel_titles']), ' -');
+		} else {
+			$_title = '';
+		}
+		$_title = (!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '') .
+		str_replace('#page#', $_title, (!empty($GLOBALS['config']['site_title']) ? $GLOBALS['config']['site_title'] : 'New website - #page#'));
+		
+		return $_title;
+		
 	}
 	
 	function get_page_css($page_id){
@@ -832,8 +840,8 @@ class CI_Controller {
 				}
 	
 			}
-	
-			$return[$panel_config['position'].$key] = $panel_data['html'];
+
+			$return[$panel_config['position'].'_'.$key.'_'.(!empty($params['cms_page_id']) ? $params['cms_page_id'] : '0')] = $panel_data['html'];
 	
 			unset($panel_data);
 	

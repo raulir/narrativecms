@@ -8,7 +8,7 @@ class cms_helper_model extends CI_Model {
 		
 		// check if run less than 5 mins ago
 		if (file_exists($cron_data_filename) && (time() - filemtime($cron_data_filename)) < 240){
-			print('less than 240 s');
+			print('less than 240 s'."\n");
 			return;
 		}
 		

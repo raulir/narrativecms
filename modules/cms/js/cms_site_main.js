@@ -559,6 +559,31 @@ function get_ajax_page(url, params, action_on_success){
 	
 }
 
+function get_ajax_positions(url, params, action_on_success){
+	
+//	params = $.extend({ '_positions': ['main'] }, params)
+
+	var data = false;
+
+	if (!data){
+		params._url = url;
+		params._ajax = 1;
+		$.ajax({
+			type: 'POST',
+		  	url: params._url,
+		  	data: params,
+		  	dataType: 'json',
+		  	context: this,
+		  	success: function( returned_data ) {
+
+		  		action_on_success(returned_data);
+
+		  	}
+		});
+	}
+	
+}
+
 function panels_display_popup(html, params){
 	
 	$('body').append(html);

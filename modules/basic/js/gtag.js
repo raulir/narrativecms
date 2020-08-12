@@ -9,15 +9,21 @@ function gtag_init(){
 	gtag('js', new Date());
 	
 	var $gtag_container = $('.basic_gtag_container');
-	
 	if ($gtag_container.length){
+	
+		var $items = $('.basic_gtag_item');
+
+		if ($items.length == 0) return;
 		
-		var ids = $gtag_container.data('ids').split(',')
-		
-		if (ids.length == 0) return;
-		
-		ids.forEach(id => gtag('config', id))
-		
+		$items.each(function(){
+			var $this = $(this)
+			if($this.data('domains')){
+				gtag('config', $this.data('id'), {'linker': {'domains': $this.data('domains').split(',') }})
+			} else {
+				gtag('config', $this.data('id'))
+			}
+		})
+
 		setTimeout(function(){
 			
 			injectScript('https://www.googletagmanager.com/gtag/js?id=' + ids[0])

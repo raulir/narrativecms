@@ -316,7 +316,7 @@ if ( !function_exists('_i')) {
 	 */
 	function _ii($image){
 		 
-		if (file_exists($GLOBALS['config']['upload_path'].$image)){
+		if (!empty($image) && file_exists($GLOBALS['config']['upload_path'].$image)){
 			$name_a = pathinfo($image);
 			if ($name_a['extension'] == 'svg'){
 				print(file_get_contents($GLOBALS['config']['upload_path'].$image));

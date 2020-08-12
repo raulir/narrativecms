@@ -45,34 +45,7 @@ class Index extends CI_Controller {
     	
     	// set page static config
     	if (!empty($GLOBALS['config']['static_panels'])){
-    		foreach($GLOBALS['config']['static_panels'] as $position => $panel_name ){
-    			if (!is_array($panel_name)){
-    				$panel_name = array($panel_name);
-    			}
-    			foreach($panel_name as $pn){
-    				
-	    			// get static panel settings data
-	    			$panel_a = $this->cms_page_panel_model->get_cms_page_panels_by(array('panel_name' => $pn, 'cms_page_id' => [999999,0], ));
-	    			if (!empty($panel_a[0])){
-	    				$params = array_merge($panel_a[0], array('page_id' => $page_id, ));
-	    			} else {
-	    				$params = array('page_id' => $page_id, );
-	    			}
-	    			
-	    			if (stristr($page_id, '=')){
-	    				
-    					list($panel_name, $cms_page_panel_id) = explode('=', $page_id);
-    					$params[$panel_name] = $cms_page_panel_id;
-    					$params['_panel_name'] = $panel_name;
-    					$params['_cms_page_panel_id'] = $cms_page_panel_id;
-    					$params['_page_id'] = $page_id;
-    					
-	    			}
-
-	    			$page_config[] = array('position' => $position, 'panel' => $pn, 'params' => $params, );
-	    			
-    			}
-    		}
+    		_html_error('Config contains static panels. This is not supported anymore.');
     	}
 
     	// get panels on page
@@ -97,6 +70,7 @@ class Index extends CI_Controller {
 						'position' => 'main',
 						'panel' => $block['panel_name'],
 						'params' => $block,
+						'_cms_layout' => $page['layout'],
 				);
 				
 			}
@@ -162,6 +136,7 @@ class Index extends CI_Controller {
 							'panel' => $block['panel_name'],
 							'params' => array_merge($block, $extra_params_2, // keep submenu details from settings ->
 									array('submenu_anchor' => $block['submenu_anchor'], 'submenu_title' =>  $block['submenu_title'], )),
+							'_cms_layout' => $page['layout'],
 					);
 					
 				}
@@ -175,6 +150,7 @@ class Index extends CI_Controller {
 							'position' => 'main',
 							'panel' => $panel_name,
 							'params' => array_merge($list_item_data, $extra_params),
+							'_cms_layout' => $page['layout'],
 					);
 	    		}
 	    		
@@ -198,6 +174,7 @@ class Index extends CI_Controller {
 		    					'panel' => $block['panel_name'],
 		    					'params' => $block,
 		    					'_cms_page_id' => $cms_page_id,
+								'_cms_layout' => $page['layout'],
 		    			);
 		    		
 		    		}
@@ -239,34 +216,70 @@ class Index extends CI_Controller {
 			$this->output($page['layout'], $page_id, $panel_data);
 		
 		} else {
-		
-			$return = '';
-
-			$_positions = $this->input->post('_positions');
-			foreach($page_config as $key => $panel_config){
-				if (in_array($panel_config['position'], $_positions)) {
-					$panel_data = $this->ajax_panel($panel_config['panel'], $panel_config['params']);
-					$return .= $panel_data['html'];
-				}
-			}
 			
-			// top level menu item id if exists
-			$menu_item = $this->cms_menu_model->get_menu_items_by(array('link' => $page['slug'].'/', ));
-			if (!empty($menu_item[0]['menu_id'])){
-				$menu_item = $this->cms_menu_model->get_menu_items_by(array('menu_item_id' => $menu_item[0]['menu_id'], ));
-			}
+			$positions = $this->input->post('cms_positions');
 			
-			if (empty($menu_item[0]['menu_item_id'])){
-				$menu_item_id = 0;
-			} else {
-				$menu_item_id = $menu_item[0]['menu_item_id'];
-			}
+			if (!empty($positions)){
 				
-			print(json_encode(array(
-					'html' => $return, 
-					'menu_item_id' => $menu_item_id, 
-					'title' => !empty($GLOBALS['_panel_titles']) ? trim(implode(' - ', $GLOBALS['_panel_titles']), ' -') : '',
-			)));
+				// new position_links functionality
+				$return = [];
+				
+//				_print_r($positions);
+				
+//				_print_r($page_config);
+				
+				$positions_needed = array_keys($positions);
+
+				foreach($page_config as $key => $panel_config){
+					if (in_array($panel_config['position'], $positions_needed)
+							&& ($panel_config['params']['cms_page_id'] != $positions[$panel_config['position']])) {
+						
+						$panel_data = $this->ajax_panel($panel_config['panel'], $panel_config['params']);
+						
+						if (empty($return[$panel_config['position']])){
+							$return[$panel_config['position']]['html'] = '';
+						}
+						$return[$panel_config['position']]['html'] .= $panel_data['html'];
+						$return[$panel_config['position']]['cms_page_id'] = $panel_config['params']['cms_page_id'];
+					}
+				}
+
+				print(json_encode(array(
+						'positions' => $return,
+						'title' => $this->compile_page_title(),
+				)));
+
+			} else {
+		
+				$return = '';
+	
+				$_positions = $this->input->post('_positions');
+				foreach($page_config as $key => $panel_config){
+					if (in_array($panel_config['position'], $_positions)) {
+						$panel_data = $this->ajax_panel($panel_config['panel'], $panel_config['params']);
+						$return .= $panel_data['html'];
+					}
+				}
+				
+				// top level menu item id if exists
+				$menu_item = $this->cms_menu_model->get_menu_items_by(array('link' => $page['slug'].'/', ));
+				if (!empty($menu_item[0]['menu_id'])){
+					$menu_item = $this->cms_menu_model->get_menu_items_by(array('menu_item_id' => $menu_item[0]['menu_id'], ));
+				}
+				
+				if (empty($menu_item[0]['menu_item_id'])){
+					$menu_item_id = 0;
+				} else {
+					$menu_item_id = $menu_item[0]['menu_item_id'];
+				}
+					
+				print(json_encode(array(
+						'html' => $return, 
+						'menu_item_id' => $menu_item_id, 
+						'title' => !empty($GLOBALS['_panel_titles']) ? trim(implode(' - ', $GLOBALS['_panel_titles']), ' -') : '',
+				)));
+			
+			}
 				
 		}
 		

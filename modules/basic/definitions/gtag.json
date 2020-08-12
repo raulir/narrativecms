@@ -1,6 +1,6 @@
 {
 	"version":"2",
-	"label":"gtag.js settings",
+	"label":"Google Analytics settings",
 	"item":[
 	],
 	"settings":[
@@ -26,6 +26,12 @@
 					"name":"comment",
 					"label":"Comment",
 					"help":"Please add comment, who and why added this ID. Unknown ID-s will be regularly removed."
+				},
+				{
+					"type":"text",
+					"name":"linked",
+					"label":"Linked domains",
+					"help":"[Linked domains]||Autolinked domains comma separated list||Eg {first.com,second.co.uk,etc.com}"
 				}
 			]
 		}

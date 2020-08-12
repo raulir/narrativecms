@@ -16,14 +16,28 @@ if ( !function_exists('get_position')) {
     	}
     	
     	$return = '';
-    	
+
     	foreach($data as $key => $pdata){
-    		if (!strncmp($key, $name, strlen($name))){
+    		
+    		list($position_name, $number, $_cms_page_id) = explode('_', $key);
+    		
+    		if ($position_name == $name){
+    			$cms_page_id = $_cms_page_id;
     			$return .= $pdata;
     		}
+
+    	}
+
+    	if (!empty($GLOBALS['config']['position_wrappers'])){
+    		$return = "\n".'<div class="cms_position cms_position_'.$name.
+    				'" data-position="'.$name.'" data-cms_page_id="'.$cms_page_id.'">'.$return.'</div>'."\n";
     	}
     	
-		return "\n\n".'<!-- layout position '.$name.' start -->'."\n\n".$return."\n\n".'<!-- layout position '.$name.' end -->'."\n\n";
+    	if (!empty($GLOBALS['config']['debug_visible'])){
+    		$return = "\n".'<!-- layout position '.$name.' start -->'."\n".$return."\n".'<!-- layout position '.$name.' end -->'."\n";
+    	}
+    	
+		return $return;
     	
     }
     
@@ -233,6 +247,8 @@ if ( !function_exists('get_position')) {
      */
     function _lh($url, $params = []){
     	
+    	$params_url = $url;
+    	
         if (is_array($url)){
     		if(!empty($url['url'])){
 	    		$url = $url['url'];
@@ -249,6 +265,18 @@ if ( !function_exists('get_position')) {
     		return;
     	}
     	
+    	$data = '';
+    	if (!empty($GLOBALS['config']['position_wrappers']) && !empty($GLOBALS['config']['position_links']) && !stristr($url, 'admin/')){
+    		
+    		if (is_array($params_url) && !in_array($params_url['target'], ['_none', '_manual'])){
+    		
+    			$data = ' data-_pl="1" ';
+				$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_position_link.js';
+    		
+    		}
+    		
+    	}
+    	
     	if ($url || $url === ''){
     	
 	    	$href = _l($url, false);
@@ -256,8 +284,9 @@ if ( !function_exists('get_position')) {
 	    	$target = '';
 	    	if (substr($url, 0, 4) == 'http'){
 		   		$target = 'target="_blank"';
+		   		$data = '';
 	    	}
-	    	print(' href="'.$href.'" '.$target.' ');
+	    	print(' href="'.$href.'" '.$target.' '.$data);
 	    	
     	}
     	

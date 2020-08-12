@@ -109,7 +109,7 @@ class user_model extends Model {
 	}
 	
 	function get_current(){
-		
+
 		if (empty($_SESSION['user'])){
 			return false;
 		}
@@ -129,10 +129,20 @@ class user_model extends Model {
 		$return = $this->cms_page_panel_model->get_cms_page_panel($user_id);
 		
 		if (!empty($return['cms_page_panel_id'])){
+			
 			$return['user_id'] = $return['cms_page_panel_id'];
+			
+			if (empty($return['_panel_heading'])){
+				$c = &get_instance();
+				$return['_panel_heading'] = $c->run_panel_method('user/user', 'panel_heading', $return);
+			}
+			
 			return $return;
+		
 		} else {
+			
 			return [];
+		
 		}
 		
 	}
@@ -166,6 +176,40 @@ class user_model extends Model {
 		
 		return $users;
 		
+	}
+
+	function get_current_tempuser(){
+		
+		$user = [];
+	
+		// check if in file
+		$filename = $GLOBALS['config']['base_path'].'cache/user_tempuser.json';
+		if (file_exists($filename)){
+			$tempusers = json_decode(file_get_contents($filename), true);
+		} else {
+			$tempusers = [];
+		}
+			
+		$token = $this->input->get('token');
+			
+		foreach($tempusers as $key => $row){
+				
+			if ($token == $row['token'] && (time() - $row['time']) < 80000){
+					
+				$user = $this->user_model->get_user($row['user_id']);
+					
+			}
+				
+			if((time() - $row['time']) >= 100000) {
+					
+				unset($tempusers[$key]);
+					
+			}
+				
+		}
+		
+		return $user;
+	
 	}
 
 }
