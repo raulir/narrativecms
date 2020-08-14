@@ -876,7 +876,7 @@ class CI_Controller {
 			$original = $this->cms_page_panel_model->get_cms_page_panel($panel_name);
 			$panel_name = $original['panel_name'];
 		}
-		
+
 		if (empty($params['module']) && stristr($panel_name, '/')){
 			list($module, $name) = explode('/', $panel_name);
 		} else if(!empty($params['module'])){

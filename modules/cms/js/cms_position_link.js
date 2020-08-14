@@ -19,7 +19,7 @@ function cms_position_link_init(){
 					
 						return new Promise(resolve => {
 							$('.cms_position_main').css({'opacity':'0'})
-							setTimeout(() => resolve($this), 300)
+							setTimeout(() => resolve($(this)), 300)
 						})
 					
 					})
@@ -31,7 +31,7 @@ function cms_position_link_init(){
 
 						return new Promise(resolve => {
 							setTimeout(() => $('.cms_position_main').css({'opacity':''}), 300)
-							resolve($this)
+							resolve($(this))
 						})
 						
 					})
@@ -52,6 +52,8 @@ function cms_position_link_init(){
 				})
 				
 				var update_page = before_result => new Promise ( resolve => {
+				
+					let $backup_this = before_result[0].clone(true, true)
 
 					$.each(before_result[1].positions, function(i, posdata){
 						$('.cms_position_' + i).html(posdata.html).data('cms_page_id', posdata.cms_page_id)
@@ -62,8 +64,8 @@ function cms_position_link_init(){
 
 					if (typeof gtag != 'undefined'){
 							
-						var $a = $('<a href="' + $this.attr('href') + '"></a>');
-						var page = $a[0].pathname + $a[0].hash
+						let $a = $('<a href="' + $this.attr('href') + '"></a>');
+						let page = $a[0].pathname + $a[0].hash
 
 						gtag('event', 'page_view', {
 							page_title: before_result[1].title,
@@ -74,7 +76,7 @@ function cms_position_link_init(){
 					}
 
 					setTimeout(() => {
-						resolve()
+						resolve($backup_this)
 					}, 100)
 
 				})
@@ -82,7 +84,8 @@ function cms_position_link_init(){
 				Promise
 					.all([$this.triggerHandler('before'), download_page])
 					.then(update_page)
-					.then(() => $this.triggerHandler('after'))
+					.then($bu => $bu.triggerHandler('after'))
+					.then($bu => $bu.remove())
 
 				return false;
 				

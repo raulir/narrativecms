@@ -268,7 +268,8 @@ if ( !function_exists('get_position')) {
     	$data = '';
     	if (!empty($GLOBALS['config']['position_wrappers']) && !empty($GLOBALS['config']['position_links']) && !stristr($url, 'admin/')){
     		
-    		if (is_array($params_url) && !in_array($params_url['target'], ['_none', '_manual'])){
+    		if ((is_array($params_url) && !in_array($params_url['target'], ['_none', '_manual']) 
+    				|| (!is_array($params_url) && stristr($params_url, '/') && stristr($params_url, '=') ))){
     		
     			$data = ' data-_pl="1" ';
 				$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_position_link.js';
