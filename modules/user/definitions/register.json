@@ -56,6 +56,16 @@
 			"default":"0"
 		},
 		{
+			"type":"select",
+			"label":"Add to mailinglists",
+			"name":"mailinglists",
+			"values":{
+				"1":"Yes",
+				"0":"No"
+			},
+			"default":"1"
+		},
+		{
 			"type":"subtitle",
 			"label":"Username"
 		},

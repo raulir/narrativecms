@@ -194,13 +194,16 @@ class user_model extends Model {
 			
 		foreach($tempusers as $key => $row){
 				
-			if ($token == $row['token'] && (time() - $row['time']) < 80000){
+			if ($token == $row['token'] && (time() - $row['time']) < 604800){
 					
 				$user = $this->user_model->get_user($row['user_id']);
+				if(!empty($row['topic_id'])){
+					$_SESSION['userchat_topic_id'] = $row['topic_id'];
+				}
 					
 			}
 				
-			if((time() - $row['time']) >= 100000) {
+			if((time() - $row['time']) >= 1000000) {
 					
 				unset($tempusers[$key]);
 					

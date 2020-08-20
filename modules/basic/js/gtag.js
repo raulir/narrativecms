@@ -15,8 +15,11 @@ function gtag_init(){
 
 		if ($items.length == 0) return;
 		
+		ids = [];
+		
 		$items.each(function(){
 			var $this = $(this)
+			ids.push($this.data('id'))
 			if($this.data('domains')){
 				gtag('config', $this.data('id'), {'linker': {'domains': $this.data('domains').split(',') }})
 			} else {

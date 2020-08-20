@@ -19,7 +19,7 @@ function basic_lightbox_init(){
 	
 	}, 3000);
 	
-	$('.userchat_messages').on('click.cms', '.basic_lightbox', function(){
+	$('body').on('click.cms', '.basic_lightbox', function(){
     	
 		var $this = $(this)
 		
@@ -27,7 +27,7 @@ function basic_lightbox_init(){
     	
     	$this.addClass('basic_lightbox_current')
 
-    	$('.basic_lightbox_container').css({'display':'block'})
+    	$('.basic_lightbox_container').css({'display':'block'}).addClass('basic_lightbox_active')
     	$('.basic_lightbox_content').css({'background-image': 'url(' + $this.data('basic_lightbox') + ')'})
     	
     	setTimeout(() => {
@@ -53,7 +53,12 @@ function basic_lightbox_init(){
     		}
     	});
     	
-    	if (!$this.siblings('.basic_lightbox').length){
+    	var $parent = $this.closest('.basic_lightbox_parent')
+    	if (!$parent.length){
+    		$parent = $this.parent()
+    	}
+    	
+    	if ($('.basic_lightbox', $parent).length <= 1){
     		$('.basic_lightbox_previous,.basic_lightbox_next').css({'display':'none'})
     	} else {
     		$('.basic_lightbox_previous,.basic_lightbox_next').css({'display':''})
@@ -72,7 +77,7 @@ function basic_lightbox_init(){
 		
 		$('.basic_lightbox_content').animate({'opacity':'0'}, 500, function(){
     		$('.basic_lightbox_container').animate({'opacity':'0'}, 300, function(){
-        		$('.basic_lightbox_container').css({'display':'none'});
+        		$('.basic_lightbox_container').css({'display':'none'}).removeClass('basic_lightbox_active');
         		cms_unlock_scroll();
         		$('.basic_lightbox_current').removeClass('basic_lightbox_current');
         	});
@@ -89,10 +94,23 @@ function basic_lightbox_init(){
 			return
 		}
 		
-		var $new = $current.prevAll('.basic_lightbox').first()
-		if (!$new.length){
-			$new = $current.nextAll('.basic_lightbox').last()
-		}
+		var $parent = $current.closest('.basic_lightbox_parent')
+    	if (!$parent.length){
+    		$parent = $this.parent()
+    	}
+    	
+    	var $items = $('.basic_lightbox', $parent)
+    	var $new = false
+    	var $temp = false
+    	$items.each(function(){
+    		if ($(this).is($current)){
+    			$new = $temp
+    			if ($new === false){
+    				$new = $items.last()
+    			}
+    		}
+    		$temp = $(this)
+    	})
 		
 		if (!$new.length){
 			return
@@ -116,9 +134,24 @@ function basic_lightbox_init(){
 			return
 		}
 		
-		var $new = $current.nextAll('.basic_lightbox').first()
-		if (!$new.length){
-			$new = $current.prevAll('.basic_lightbox').last()
+		var $parent = $current.closest('.basic_lightbox_parent')
+    	if (!$parent.length){
+    		$parent = $current.parent()
+    	}
+    	
+    	var $items = $('.basic_lightbox', $parent)
+    	var $new = false
+    	var flag = false
+    	$items.each(function(){
+    		if (flag === true && $new === false){
+    			$new = $(this)
+    		}
+    		if ($(this).is($current)){
+    			flag = true
+    		}
+    	})
+    	if ($new === false){
+			$new = $items.first()
 		}
 		
 		if (!$new.length){

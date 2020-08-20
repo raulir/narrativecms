@@ -37,6 +37,27 @@ class register extends CI_Controller{
 					$error = $user['error'];
 				}
 				
+				if (!empty($mailinglists) && in_array('form', $GLOBALS['config']['modules'])){
+					
+					$this->load->model('form/form_model');
+					
+					$fparams = $this->cms_page_panel_model->get_cms_page_panel_settings('form/basic');
+					
+					$subscription_data = [
+							'email' => $email,
+							'name' => $first_name.' '.$last_name,
+					];
+					
+					if (!empty($fparams['add_mailchimp']) && !empty($fparams['mailchimp_api_key']) && !empty($fparams['mailchimp_list_id'])){
+						$result = $this->form_model->create_mailchimp_subscriber($data, $fparams);
+					}
+						
+					if (!empty($fparams['add_cm']) && !empty($fparams['cm_api_key']) && !empty($fparams['cm_api_url']) && !empty($fparams['cm_list_id'])){
+						$result = $this->form_model->create_cm_subscriber($data, $fparams);
+					}
+
+				}
+			
 			}
 			
 		}
