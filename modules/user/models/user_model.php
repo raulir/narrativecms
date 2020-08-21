@@ -131,6 +131,11 @@ class user_model extends Model {
 		if (!empty($return['cms_page_panel_id'])){
 			
 			$return['user_id'] = $return['cms_page_panel_id'];
+
+			$config = $this->cms_page_panel_model->get_cms_page_panel_settings('user/user');
+			if (empty($config['show_username'])){
+				$return['username'] = $return['email'];
+			}
 			
 			if (empty($return['_panel_heading'])){
 				$c = &get_instance();

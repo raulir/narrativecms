@@ -270,7 +270,7 @@ class CI_Controller {
 			$controller_timer_end = round(microtime(true) * 1000);
 	
 		}
-		
+
 		// render view when needed only
 		if(!empty($files['template'])) {
 	

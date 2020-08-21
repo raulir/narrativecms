@@ -30,12 +30,13 @@ class cms_input extends CI_Controller {
 			
 			// module panel
 			$params['panel_name'] = $params['type'];
+			list($params['module'], $rest) = explode('/', $params['panel_name']);
 			
 		}
 		
 		$params['label'] = !empty($params['label']) ? $params['label'] : '[no label]';
 		$params['help'] = !empty($params['help']) ? $params['help'] : '';
-		
+
 		// copy params to params for easier manipulation
 		$params['params'] = $params;
 		

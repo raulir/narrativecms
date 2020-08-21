@@ -46,6 +46,12 @@
 			"label":"Phone"
 		},
 		{
+			"type":"user/loginlink",
+			"name":"loginlink",
+			"label":"Magic login link",
+			"help":"Magic login link for log in without password. Send this to user, user has to know the email."
+		},
+		{
 			"type":"repeater",
 			"name":"usergroups",
 			"label":"User groups",

@@ -11,27 +11,31 @@
 			
 					<div class="reminder_row">
 						<label for="reminder_reminder_username" class="reminder_label"><?= $username_label ?></label>
-						<input id="reminder_reminder_username" class="reminder_input reminder_input_username" type="text">
+						<input id="reminder_reminder_username" class="reminder_input reminder_input_username" 
+								type="text" autocomplete="off" value="<?= $autofill ?>">
 					</div>
 					
 					<?php if(!empty($success)): ?>
 						<div class="reminder_row">
+						
 							<label for="reminder_reminder_password" class="reminder_label"><?= $password_label ?></label>
-							<input id="reminder_reminder_password" class="reminder_input reminder_input_password" type="password">
+							<input id="reminder_reminder_password" class="reminder_input reminder_input_password" 
+									type="password" autocomplete="new-password">
+									
 						</div>
 						<div class="reminder_row">
+						
 							<label for="reminder_reminder_password2" class="reminder_label"><?= $password2_label ?></label>
-							<input id="reminder_reminder_password2" class="reminder_input reminder_input_password2" type="password">
+							<input id="reminder_reminder_password2" class="reminder_input reminder_input_password2" 
+									type="password" autocomplete="new-password">
+									
 						</div>
-					<?php endif ?>
-					
-					<?php if(empty($success)): ?>
 						<div class="reminder_row reminder_submit_row">
-							<div class="reminder_submit"><?= $button_label ?></div>
+							<div class="reminder_save" data-token="<?= $token ?>"><?= $save_label ?></div>
 						</div>
 					<?php else: ?>
 						<div class="reminder_row reminder_submit_row">
-							<div class="reminder_save" data-token="<?= $token ?>"><?= $save_label ?></div>
+							<div class="reminder_submit"><?= $button_label ?></div>
 						</div>
 					<?php endif ?>
 			

@@ -109,9 +109,15 @@ class reminder extends CI_Controller{
 				file_put_contents($filename, json_encode($reminders, JSON_PRETTY_PRINT));
 				
 				$title = trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), $GLOBALS['config']['site_title_delimiter'].' ');
-				$title = (!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').$title;
 				
-				mail($user['email'], 'Password update at '.$title, 'Password associated with this email updated.');
+				mail(
+						$user['email'],
+						(!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').
+						'Password update at '.$title,
+						'Password associated with this email updated.',
+						'From: Caroline Groves <noreply@bytecrackers.com>' . "\r\n" .
+						'Sender: Caroline Groves <enquiries@carolinegroves.com>' . "\r\n" .
+						'Reply-To: Caroline Groves <enquiries@carolinegroves.com>' . "\r\n");
 
 			}
 			
@@ -121,6 +127,7 @@ class reminder extends CI_Controller{
 		$token = $this->input->get('token');
 		
 		$params['success'] = 0;
+		$params['autofill'] = '';
 		if (!empty($token)){
 			
 			if (file_exists($filename)){
@@ -132,11 +139,13 @@ class reminder extends CI_Controller{
 			$params['timeout'] = true;
 			foreach($reminders as $key => $item){
 				
-				if ($item['token'] == $token && (time() - $item['time']) < 1800){
-					
+				if ($item['token'] == $token && (time() - $item['time']) < 100000){
+
 					$params['success'] = 1;
 					$params['token'] = $token;
 					$params['timeout'] = false;
+					
+					$params['autofill'] = !empty($item['autofill']) ? $item['username'] : '';
 					
 				}
 				
