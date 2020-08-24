@@ -47,7 +47,7 @@ class cms_page_panel_model extends Model {
 		$return = [];
 		
 		$list = $this->get_cms_page_panels_by(array_merge(['panel_name' => $panel_name, 'cms_page_id' => 0, 'show' => '1', 'sort!' => 0, ], $filter));
-		
+
 		foreach($list as $item){
 			$return[$item['cms_page_panel_id']] = $item;
 		}

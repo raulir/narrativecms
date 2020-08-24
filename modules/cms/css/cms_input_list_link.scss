@@ -1,0 +1,24 @@
+.cms_input_list_link_container {
+	
+}
+
+.cms_input_list_link_content {
+	
+}
+
+.cms_input_list_link_link {
+	display: block;
+	position: absolute;
+	right: 1.0rem;
+	top: 0.5rem;
+	width: 33rem;
+    height: 6.0rem;
+    line-height: 1.8rem;
+    font-size: 1.7rem;
+    border: 0.1rem solid $colour_border;
+    padding: 0.2rem;
+    box-sizing: border-box;
+    &:hover {
+    	text-decoration: underline;
+    }
+}
