@@ -49,9 +49,9 @@ if ( !function_exists('get_position')) {
     }
     
     function _html_error($error){
-    	 
+
     	print(html_error($error));
-    	 
+
     }
     
     /**
@@ -246,7 +246,7 @@ if ( !function_exists('get_position')) {
      * prints out a href and target with full site path and opening in new window where needed
      */
     function _lh($url, $params = []){
-    	
+
     	$params_url = $url;
     	
         if (is_array($url)){
@@ -257,8 +257,8 @@ if ( !function_exists('get_position')) {
     		}
     	}
     	
-    	if (!empty($params['hash'])){
-    		$url .= '#'.trim($params['hash'], ' #');
+    	if (!empty($params['anchor'])){
+    		$url .= '#'.trim($params['anchor'], ' #');
     	}
     	
     	if(empty($url)){
@@ -345,6 +345,23 @@ if ( !function_exists('get_position')) {
     	print_r($item);
     	print('</pre>');
     	 
+    }
+    
+    function _backtrace(){
+    	
+    	$backtrace = debug_backtrace();
+    	
+    	$return = [];
+    	
+    	foreach($backtrace as $line){
+    		$return[] = [
+    				'location' => $line['file'].':'.$line['line'],
+    				'function' => (!empty($line['class']) ? $line['class'].'::' : '').$line['function'],
+    		]; 
+    	}
+    	
+    	_print_r($return);
+    	
     }
 
 }

@@ -1,32 +1,5 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-/**
- * CodeIgniter
- *
- * An open source application development framework for PHP 5.1.6 or newer
- *
- * @package		CodeIgniter
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc.
- * @license		http://codeigniter.com/user_guide/license.html
- * @link		http://codeigniter.com
- * @since		Version 1.0
- * @filesource
- */
 
-// ------------------------------------------------------------------------
-
-/**
- * CodeIgniter Application Controller Class
- *
- * This class object is the super class that every library in
- * CodeIgniter will be assigned to.
- *
- * @package		CodeIgniter
- * @subpackage	Libraries
- * @category	Libraries
- * @author		ExpressionEngine Dev Team
- * @link		http://codeigniter.com/user_guide/general/controllers.html
- */
 class CI_Controller {
 
 	static $instance;
@@ -782,40 +755,40 @@ class CI_Controller {
 					&& (!empty($GLOBALS['config']['panel_cache']) || (isset($params['_cache_time']) && $params['_cache_time'] > 0))
 					&& empty($GLOBALS['config']['cache']['force_download'])){
 	
-						$params['module'] = !empty($panel_config['module']) ? $panel_config['module'] : '';
-				
-						// if cache file exists
-						$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.str_replace('/', '__', $panel_config['panel']).
-								'_'.substr(md5($panel_config['panel'].serialize($params).$_SESSION['config']['targets']['hash'].
-								$_SESSION['webp']), 0, 6).'.txt';
-								
-						if (is_file($filename)){
-	
-							// if panel cache time is different from empty, keep it, else use global cache time setting
-							if (empty($params['_cache_time'])) {
-								$params['_cache_time'] = 0;
-							}
-							
-							$cache_time = $params['_cache_time'] != 0 ? $params['_cache_time'] : (!empty($GLOBALS['config']['panel_cache']) ? $GLOBALS['config']['panel_cache'] : 0);
-	
-							if ((time() - filemtime($filename)) < $cache_time){
-								 
-								$panel_data = unserialize(file_get_contents($filename));
-	
-								// add js, css, scss to global page files
-								$this->js = array_merge($this->js, $panel_data['js']);
+				$params['module'] = !empty($panel_config['module']) ? $panel_config['module'] : '';
+		
+				// if cache file exists
+				$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.str_replace('/', '__', $panel_config['panel']).
+						'_'.substr(md5($panel_config['panel'].serialize($params).$_SESSION['config']['targets']['hash'].
+						$_SESSION['webp']), 0, 6).'.txt';
+						
+				if (is_file($filename)){
 
-								foreach($panel_data['scss'] as $scss_file){
-									add_css($scss_file);
-								}
-								 
-							} else {
-								
-								unlink($filename);
-								
-							}
-	
+					// if panel cache time is different from empty, keep it, else use global cache time setting
+					if (empty($params['_cache_time'])) {
+						$params['_cache_time'] = 0;
+					}
+					
+					$cache_time = $params['_cache_time'] != 0 ? $params['_cache_time'] : (!empty($GLOBALS['config']['panel_cache']) ? $GLOBALS['config']['panel_cache'] : 0);
+
+					if ((time() - filemtime($filename)) < $cache_time){
+						 
+						$panel_data = unserialize(file_get_contents($filename));
+
+						// add js, css, scss to global page files
+						$this->js = array_merge($this->js, $panel_data['js']);
+
+						foreach($panel_data['scss'] as $scss_file){
+							add_css($scss_file);
 						}
+						 
+					} else {
+						
+						unlink($filename);
+						
+					}
+
+				}
 	
 			}
 

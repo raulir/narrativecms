@@ -9,7 +9,8 @@
 			
 			<div class="cms_toolbar_buttons_hidden_container cms_language_select_options">
 				<?php foreach($GLOBALS['language']['languages'] as $language_id => $language_label): ?>
-					<div class="cms_tool_button cms_language_select_option" data-language="<?= $language_id ?>"><?= $language_id.' - '.$language_label ?></div>
+					<div class="cms_tool_button cms_language_select_option" data-language="<?= $language_id ?>"
+							<?= $selected == $language_id ? ' selected="selected" ' : '' ?>><?= $language_id.' - '.$language_label ?></div>
 				<?php endforeach ?>
 			</div>
 			

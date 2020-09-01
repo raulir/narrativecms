@@ -11,12 +11,6 @@
 			"help":"Label for language selection dropdown"
 		},
 		{
-			"type":"image",
-			"name":"icon",
-			"label":"Icon",
-			"category":"icon"
-		},
-		{
 			"type":"repeater",
 			"name":"language_settings",
 			"label":"Language settings",
@@ -25,6 +19,12 @@
 					"type":"text",
 					"name":"language_id",
 					"label":"Language id"
+				},
+				{
+					"type":"text",
+					"name":"label",
+					"label":"Label",
+					"translate":"1"
 				},
 				{
 					"type":"image",

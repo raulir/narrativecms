@@ -115,6 +115,13 @@
 			"help":"Salt for hash functions. Do not change when you don't know about this."
 		},
 		{
+			"type":"text",
+			"name":"language",
+			"label":"Site default language",
+			"default":"en",
+			"help":"Default language for the site"
+		},
+		{
 			"type":"subtitle",
 			"label":"Layout",
 			"width":"wide",

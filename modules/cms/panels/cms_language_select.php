@@ -16,5 +16,15 @@ class cms_language_select extends CI_Controller {
 		add_css('modules/cms/css/cms_page_panel_toolbar.scss');
 		
 	}
+	
+	function panel_params($params){
+		
+		$this->load->model('cms/cms_page_panel_model');
+		
+		$params['selected'] = $this->cms_page_panel_model->get_cms_language();
+		
+		return $params;
+		
+	}
 
 }

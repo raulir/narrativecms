@@ -31,7 +31,7 @@ class cms_page_panel_model extends Model {
 		$this->load->model('cms/cms_language_model');
 		
 		$this->default_language = $this->cms_language_model->get_default();
-		
+
 	}
 	
 	/**
@@ -166,8 +166,8 @@ class cms_page_panel_model extends Model {
 		}
 	}
 
-	function _insert_or_update_param($cms_page_panel_id, $name, $value, $search = 0, $translate = 0){
-		
+	function _insert_or_update_param($cms_page_panel_id, $name, $value, $search = 0, $translate = ''){
+
 		if (is_array($value)){
 			
 			if (isset($value['panel_params'])){
@@ -193,42 +193,51 @@ class cms_page_panel_model extends Model {
 				}
 				
 				if (is_array($translate) && !empty($translate[$_name])){
-					// isnt numeric and has appropriate search param key
+					// isnt numeric and has appropriate translate param key
 					$translate_param = $translate[$_name];
-				} else if ((!is_numeric($_name) && (string)(int)$_name !== $_name) && is_array($translate) && empty($translate[$_name])){
-					// isnt numeric and doesnt have key = defaults to zero
-					$translate_param = 0;
+				} else if (is_numeric($_name)) { 
+					// if numeric - give over to repeater elements unchanged
+					$translate_param = $translate;
+				} else if (is_array($translate) && empty($translate[$_name])) {
+					$translate_param = '';
 				} else {
-					// if numeric, give search param forward unchanged
+					// if string, give translate param value
 					$translate_param = $translate;
 				}
-				
+
 				$this->_insert_or_update_param($cms_page_panel_id, ($name ? $name.'.' : '').$_name, $_value, $search_param, $translate_param);
 				
 			}
 			
 		} else {
 
-			if (empty($translate) || $translate == $this->default_language){
 				
-				if (empty($translate)){
-					$translate = '';
-				}
+			if (empty($translate)){
+				$translate = '';
+			}
 				
-				$sql = "select cms_page_panel_param_id from cms_page_panel_param where cms_page_panel_id = ? and name = ? ".
-						"and (language = ? or language = ?) limit 1 ";
-				$query = $this->db->query($sql, [$cms_page_panel_id, $name, '', $this->default_language]);
-				if ($query->num_rows()){
+			$sql = "select cms_page_panel_param_id from cms_page_panel_param where cms_page_panel_id = ? and name = ? ".
+					"and language = ? limit 1 ";
+			$query = $this->db->query($sql, [$cms_page_panel_id, $name, '']);
+			
+			// if not to translate or default language, update in main
+			if ($query->num_rows()){
+				
+				if (empty($translate) || $translate == $this->default_language){
 					$row = $query->row_array();
 					$sql = "update cms_page_panel_param set value = ? , search = ? where cms_page_panel_param_id = ? ";
 					$this->db->query($sql, [$value, $search, $row['cms_page_panel_param_id']]);
-				} else {
-					$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = ? , value = ? , search = ? , language = ? ";
-					$this->db->query($sql, [$cms_page_panel_id, $name, $value, $search, $translate]);
 				}
 				
 			} else {
 				
+				$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = ? , value = ? , search = ? , language = ? ";
+				$this->db->query($sql, [$cms_page_panel_id, $name, $value, $search, '']);
+				
+			}
+			
+			// always add to translations too
+			if (!empty($translate)){
 				$sql = "select cms_page_panel_param_id from cms_page_panel_param where cms_page_panel_id = ? and name = ? and language = ? limit 1 ";
 				$query = $this->db->query($sql, [$cms_page_panel_id, $name, $translate]);
 				if ($query->num_rows()){
@@ -239,9 +248,8 @@ class cms_page_panel_model extends Model {
 					$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = ? , value = ? , search = ? , language = ? ";
 					$this->db->query($sql, [$cms_page_panel_id, $name, $value, $search, $translate]);
 				}
-				
 			}
-			
+
 		}
 		
 	}
@@ -268,7 +276,7 @@ class cms_page_panel_model extends Model {
 				continue;
 			}
 			
-			if(!empty($row['language']) && $row['language'] != $this->default_language){
+			if(!empty($row['language'])){
 				$row['name'] = '_translations.'.$row['language'].'.'.$row['name'];
 			}
 
@@ -320,7 +328,7 @@ class cms_page_panel_model extends Model {
 
 	}
 	
-	function get_cms_page_panel_params($cms_page_panel_id, $language, $retry = true){
+	function get_cms_page_panel_params($cms_page_panel_id, $language = '', $retry = true){
 
 		$sql = "select value from cms_page_panel_param where cms_page_panel_id = ? and name = ''";
 		$query = $this->db->query($sql, [$cms_page_panel_id]);
@@ -347,10 +355,13 @@ class cms_page_panel_model extends Model {
 		
 	}
 	
-	function get_cms_page_panel($cms_page_panel_id, $language = false){
+	function get_cms_page_panel($cms_page_panel_id, $language = false, $settings = true){
 		
 		// defaults to frontend language
-	
+		if ($language === false){
+			$language = $this->get_current_language();
+		}
+
 		$sql = "select * from cms_page_panel where cms_page_panel_id = ? ";
 		$query = $this->db->query($sql, array($cms_page_panel_id));
 		$row = $query->row_array();
@@ -366,10 +377,12 @@ class cms_page_panel_model extends Model {
 		} else {
 			$return = $row;
 		}
-		
+
 		// add settings if present
-		$return = array_merge($this->get_cms_page_panel_settings($return['panel_name'], $language), $return);
-	
+		if ($settings){
+			$return = array_merge($this->get_cms_page_panel_settings($return['panel_name'], $language), $return);
+		}
+		
 		return $return;
 	
 	}
@@ -418,7 +431,6 @@ class cms_page_panel_model extends Model {
 		}
 		
 		// check if update time and user needs update
-		$was_update = false;
 		$keys = array_keys($data);
 		$keys = array_diff($keys, ['show', 'sort', 'cms_page_panel_id', 'cms_page_id', 'parent_id', ]);
 		foreach($keys as $ckey => $cval){
@@ -452,6 +464,10 @@ class cms_page_panel_model extends Model {
 					
 					foreach($array as $k => $v){
 						
+						if (is_numeric($k)){
+							$k = str_pad($k, 6, '0', STR_PAD_LEFT);
+						}
+						
 						if (!is_array($v)){
 							$return[] = $prefix.$k;
 						} else {
@@ -468,7 +484,7 @@ class cms_page_panel_model extends Model {
 				$recursive_keys = recursive_keys($params);
 				$recursive_keys = array_unique(array_merge($recursive_keys, ['', 'create_cms_user_id', 'create_time', 'update_cms_user_id', 'update_time']));
 
-// 				_print_r($recursive_keys);
+// 				_print _r($recursive_keys);
 
 				$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name not in ('".implode("','", $recursive_keys)."') ";
 				$this->db->query($sql, [(int)$cms_page_panel_id]);
@@ -800,7 +816,12 @@ class cms_page_panel_model extends Model {
     		$return = array();
     	}
     	
-    	// unpack params    	  	
+    	// replace with translated versions
+    	foreach($return as $key => $page_panel){
+    		$return[$key] = $this->get_cms_page_panel($page_panel['cms_page_panel_id'], $this->get_current_language(), false);
+    	}
+    	
+    	// unpack params - not needed
     	foreach ($return as $key => $row){
     		if(!empty($row['_params'])){
     			$_params = json_decode($row['_params'], true);
@@ -852,7 +873,7 @@ class cms_page_panel_model extends Model {
     	} else {
     		$return = array_values($return);
     	}
-    	
+
     	foreach($return as $key => $cms_page_panel){
     		if (!isset($cms_page_panel['cms_page_id'])){
     			$return[$key]['cms_page_id'] = $cms_page_panel['page_id'];
@@ -1021,6 +1042,40 @@ class cms_page_panel_model extends Model {
 			$this->_update_cached_params($row['cms_page_panel_id']);
 		}
 
+	}
+	
+	/**
+	 * get site default language
+	 */
+	function get_default_language(){
+		
+		return !empty($GLOBALS['config']['language']) ? $GLOBALS['config']['language'] : 'en';
+		
+	}
+	
+	/**
+	 * get cms working language
+	 */
+	function get_cms_language(){
+		
+		if (!empty($_SESSION['cms_language'])){
+			$return = $_SESSION['cms_language'];
+ 		} else {
+ 			$return = $this->get_default_language();
+ 		}
+ 		
+ 		return $return;
+		
+	}
+	
+	function get_current_language(){
+		
+		if (!empty($_COOKIE['language'])){
+			return $_COOKIE['language'];
+		}
+		
+		return $this->get_default_language();
+		
 	}
 	
 }
