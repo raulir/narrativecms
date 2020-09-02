@@ -912,7 +912,7 @@ class cms_page_panel_model extends Model {
 		if (!empty($settings_a[0])){
 			$return = $settings_a[0];
 		}
-		
+
 		if (!empty($config['extends'])){
 			
 			$extends_settings = $this->get_cms_page_panel_settings($config['extends']['panel']);

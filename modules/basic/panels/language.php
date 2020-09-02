@@ -30,12 +30,22 @@ class language extends CI_Controller {
 	
 	function panel_params($params){
 		
-		$params['language'] = $GLOBALS['language'];
+		foreach($GLOBALS['language']['languages'] as $language_id => $language_name){
+			$params['languages'][$language_id] = [
+					'label' => $language_name,
+					'icon' => '',
+					'language_id' => $language_id,
+			];
+		}
 		
 		// reorder language settings
 		foreach($params['language_settings'] as $setting){
-			$params['languages'][$setting['language_id']] = $setting;
+			if (!empty($params['languages'][$setting['language_id']])){
+				$params['languages'][$setting['language_id']] = $setting;
+			}
 		}
+		
+		$params['active_language'] = $GLOBALS['language']['language_id'];
 
 		return $params;
 

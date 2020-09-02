@@ -3,20 +3,14 @@
 	
 		<div class="language_label"><?= $select_label ?></div>
 		
-		<div class="language_button" <?php !empty($languages[$language['language_id']]['icon']) ? _ib($languages[$language['language_id']]['icon'], 20) : '' ?>>
+		<div class="language_button" <?php !empty($languages[$active_language]['icon']) ? _ib($languages[$active_language]['icon'], 30) : '' ?>>
 
-			<div class="language_button_label"
-					<?php !empty($languages[$language['language_id']]) ? _ib($languages[$language['language_id']]['icon'], 30) : '' ?>>
-			
-				<?= $language['label'] ?>
-			
-			</div>
+			<div class="language_button_label"><?= $languages[$active_language]['label'] ?></div>
 
 			<div class="language_languages">
-				<?php foreach($language['languages'] as $language_id => $language_label): ?>
-					<div class="language_language" data-language_id="<?= $language_id ?>" 
-							<?php !empty($settings[$language_id]) ? _ib($settings[$language_id]['icon'], 30) : '' ?>>
-						<?= !empty($settings[$language_id]['label']) ? $settings[$language_id]['label'] : $language_label ?>
+				<?php foreach($languages as $language_id => $language_data): ?>
+					<div class="language_language" data-language_id="<?= $language_id ?>" <?php _ib($language_data['icon'], 30) ?>>
+						<?= $language_data['label'] ?>
 					</div>
 				<?php endforeach ?>
 			</div>
