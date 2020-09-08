@@ -30,9 +30,13 @@ class Index extends CI_Controller {
 	
    	}
 
-    function index($page_id = 1, $extra = ''){
+    function index($page_id = 0, $extra = ''){
     	
-	    $this->load->model('cms/cms_page_panel_model');
+    	if (empty($page_id)){
+    		$page_id = $GLOBALS['config']['landing_page']['_value'];
+    	}
+
+    	$this->load->model('cms/cms_page_panel_model');
     	$this->load->model('cms/cms_page_model');
     	$this->load->model('cms/cms_menu_model');
     	
@@ -52,7 +56,7 @@ class Index extends CI_Controller {
     	$cms_page_id = 0;
     	if (!stristr($page_id, '=')){ // direct page id
 
-			$page = $this->cms_page_model->get_page($page_id, 'auto');
+    		$page = $this->cms_page_model->get_page($page_id, 'auto');
 
 			if (!empty($page['seo_title'])){
     			$GLOBALS['_panel_titles'][] = $page['seo_title'];
