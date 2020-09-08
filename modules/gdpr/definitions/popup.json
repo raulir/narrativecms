@@ -44,6 +44,20 @@
                     "label": "Link"
                 }
             ]
-        }
+        },
+        {
+        	"type":"subtitle",
+        	"label":"Design"
+        },
+		{
+			"type":"select",
+			"name":"type",
+			"label":"Type",
+			"values":{
+				"corner":"Corner",
+				"blocking":"Blocking"
+			},
+			"default":"corner"
+		}
     ]
 }

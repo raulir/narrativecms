@@ -1,18 +1,18 @@
 function popup_init(){
 	
-	$('.popup_upper').on('click.popup', function(){
+	$('.gdpr_popup_upper').on('click.popup', function(){
 		
-		if (!$('.popup_active').length){
-			$('.popup_container').addClass('popup_active');
+		if (!$('.gdpr_popup_active').length){
+			$('.gdpr_popup_container').addClass('popup_active');
 		} else {
-			$('.popup_active').removeClass('popup_active');
+			$('.gdpr_popup_active').removeClass('popup_active');
 		}
 		
 	});
 	
-	$('.popup_close').on('click.popup', function(){
+	$('.gdpr_popup_close').on('click.popup', function(){
 		
-		$('.popup_container').remove();
+		$('.gdpr_popup_container').remove();
 		
 		cookie_create('gdpr', 1, 180);
 

@@ -5,7 +5,7 @@
 			allow="autoplay; fullscreen" allowfullscreen></iframe>
 		
 		<?php if(!empty($soundcontrols)): ?>
-			<div class="basic_vimeo_sound basic_vimeo_sound_is_off">
+			<div class="basic_vimeo_sound basic_vimeo_sound_is_off basic_vimeo_sound_align_<?= !empty($soundalign) ? $soundalign : 'right' ?>">
 				<div class="basic_vimeo_sound_off" <?php _ib($sound_off, 20) ?>></div>
 				<div class="basic_vimeo_sound_on" <?php _ib($sound_on, 20) ?>></div>
 			</div>

@@ -1,4 +1,4 @@
-.popup_container {
+.gdpr_popup_container {
 	position: fixed;
 	bottom: 0;
 	right: 1.0rem;
@@ -9,7 +9,7 @@
 	font-family: source, Arial, Helvetica, sans-serif;
 }
 
-.popup_content {
+.gdpr_popup_content {
 	position: absolute;
 	width: 100%;
 	box-sizing: border-box;
@@ -21,7 +21,7 @@
     padding: 0.5rem;
 }
 
-.popup_upper {
+.gdpr_popup_upper {
     text-align: left;
     position: relative;
     transition: border 0.5s, height 0.5s;
@@ -30,14 +30,14 @@
 	cursor: pointer;
 }
 
-.popup_heading {
+.gdpr_popup_heading {
 	width: 13.5rem;
 	position: absolute;
 	left: 0.1rem;
 	top: 0;
 }
 
-.popup_cta {
+.gdpr_popup_cta {
 	position: absolute;
 	border-bottom: 0.12rem solid $colour_white;
 	right: 4.2rem;
@@ -48,7 +48,7 @@
     letter-spacing: 0.05rem;
 }
 
-.popup_close {
+.gdpr_popup_close {
 	
 	position: absolute;
 	right: 0;
@@ -84,7 +84,7 @@
 	
 }
 
-.popup_close_text {
+.gdpr_popup_close_text {
 	position: absolute;
 	border-bottom: 0.12rem solid $colour_white;
 	right: 0.4rem;
@@ -94,28 +94,28 @@
     line-height: 1.0rem;
 }
 
-.popup_lower {
+.gdpr_popup_lower {
 	text-align: center;
 	max-height: 0;
 	overflow: hidden;
 	transition: max-height 0.5s;
 }
 
-.popup_text {
+.gdpr_popup_text {
 	padding: 1.0rem 0;
 	font-size: 1.1rem;
 	line-height: 1.2rem;
 	white-space: pre-line;
 }
 
-.popup_link {
+.gdpr_popup_link {
 	font-size: 1.1rem;
 	line-height: 1.2rem;
 	display: block;
 	padding-bottom: 0.2rem;
 }
 
-.popup_link_inner {
+.gdpr_popup_link_inner {
 	
 	display: inline-block;
 	border-bottom: 0.12rem solid transparent;
@@ -127,25 +127,164 @@
 	
 }
 
-.popup_active {
+.gdpr_popup_active {
 	
-	.popup_upper {
+	.gdpr_popup_upper {
 		border-bottom: 0.12rem solid transparent; // $colour_white;
 		height: 2.0rem;
 	}
 	
-	.popup_lower {
+	.gdpr_popup_lower {
 		max-height: 10rem;
 	}
 	
 }
 
+.gdpr_popup_type_blocking {
+	
+	&.gdpr_popup_container {
+		right: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 1000;
+		background-color: rgba(0,0,0,0.8);
+	}
+	
+	.gdpr_popup_content {
+		bottom: 0;
+		background-color: $colour_black;
+		padding: 2.0rem 0;
+	}
+
+	.gdpr_popup_upper {
+		width: 90.0rem;
+		background-color: $colour_white;
+		border: none;
+		margin: 0 auto;
+		height: auto;
+		position: static;
+	}
+
+	.gdpr_popup_heading {
+		color: $colour_black;
+		position: relative;
+		width: 100%;
+		left: 0;
+		top: 0;
+		text-align: center;
+		line-height: 2.6rem;
+		font-size: 1.7rem;
+		padding-top: 2.0rem;
+	}
+
+	.gdpr_popup_cta {
+		display: none;
+	}
+
+	.gdpr_popup_close {
+		right: auto;
+		left: 50%;
+		transform: translate(-50%);
+		top: auto;
+		bottom: 4.2rem;
+		font-size: 1.4rem;
+		line-height: 2.6rem;
+		border: none;
+		background-color: #007000;
+		border: 0.1rem solid #007000;
+		border-radius: 0.3rem;
+		width: auto;
+		height: auto;
+		transition: background-color 0.3s, color 0.3s;
+		&:hover {
+			background-color: #e0ffe0;
+			color: #007000;
+		}
+	}
+
+	.gdpr_popup_close_text {
+		display: inline-block;
+		border: none;
+		position: static;
+		font-size: inherit;
+		line-height: inherit;
+		padding: 0 2.0rem;
+	}
+
+	.gdpr_popup_lower {
+		width: 90.0rem;
+		background-color: $colour_white;
+		border: none;
+		margin: 0 auto;
+		padding-bottom: 6.6rem;
+		position: static;
+		max-height: 100.0rem;
+		color: $colour_black;
+	}
+
+	.gdpr_popup_text {
+    	font-size: 1.2rem;
+    	line-height: 1.6rem;
+    }
+   
+    .gdpr_popup_link {
+    	font-size: 1.2rem;
+    	line-height: 1.4rem;
+    	padding: 0.2rem 0;
+    }
+    
+   	.gdpr_popup_link_inner {
+   		&:hover {
+   			border-bottom: 0.12rem solid $colour_black;
+   		}
+   	}
+
+}
+
 @media only screen and (max-width: 750px) {
 
-	.popup_container {
+	.gdpr_popup_container {
 		bottom: -0.1rem;
     	right: 7.3rem;
     	transform: scale(1.5);
     }
+   
+	.gdpr_popup_type_blocking {
+		
+		&.gdpr_popup_container {
+			bottom: 0;
+    		right: 0;
+    		transform: scale(1.0);
+		}
+	
+		.gdpr_popup_upper,.gdpr_popup_lower {
+			width: 40.0rem;
+		}
+	
+		.gdpr_popup_lower {
+			padding-bottom: 6.9rem;
+		}
+	
+		.gdpr_popup_text {
+		    font-size: 1.4rem;
+		    line-height: 1.8rem;
+		}
+	
+		.gdpr_popup_link {
+		    font-size: 1.4rem;
+		    line-height: 1.8rem;
+		    padding: 0.4rem 0;
+		}
+	
+		.gdpr_popup_close {
+	    	font-size: 1.8rem;
+	   		line-height: 3.0rem;
+	    }
+	    	
+	    .gdpr_popup_close_text {
+			padding: 0 3.0rem;
+	    }
+	
+	}
 
 }

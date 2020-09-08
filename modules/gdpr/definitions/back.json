@@ -1,0 +1,17 @@
+{
+    "version": "2",
+    "label":"GDPR back button",
+    "image":"gdpr/panel_back.png",
+    "item": [
+        {
+            "type": "text",
+            "name": "text",
+            "label": "Text"
+        },
+        {
+            "type": "link",
+            "name": "link",
+            "label": "Link"
+        }
+    ]
+}

@@ -7,6 +7,10 @@
 		{
 			"id":"copy",
 			"name":"Copy"
+		},
+		{
+			"id":"back",
+			"name":"Back"
 		}
 	]
 }

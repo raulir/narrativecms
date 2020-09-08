@@ -1,0 +1,69 @@
+.gdpr_back_container {
+	position: fixed;
+	bottom: 0;
+	color: $colour_white;
+	font-family: source, Arial, Helvetica, sans-serif;
+	right: 0;
+	width: 100%;
+	height: auto;
+	z-index: 1000;
+	background-color: rgba(0,0,0,0.8);
+}
+
+.gdpr_back_content {
+	position: absolute;
+	width: 100%;
+	box-sizing: border-box;
+	line-height: 1.5rem;
+    font-size: 1.1rem;
+    left: 0;
+	bottom: 0;
+	background-color: $colour_white;
+	padding: 0.7rem 0;
+	border-top: 0.12rem solid #ece9e4;
+}
+
+.gdpr_back_lower {
+	text-align: center;
+	overflow: hidden;
+	width: 30.0rem;
+	background-color: $colour_white;
+	border: none;
+	margin: 0 auto;
+	position: static;
+	color: $colour_black;
+}
+
+.gdpr_back_link {
+	display: block;
+	font-size: 1.0rem;
+	line-height: 1.4rem;
+	padding: 0.2rem 0;
+	text-transform: uppercase;
+	letter-spacing: 0.07rem;
+}
+
+.gdpr_back_link_inner {
+	
+	display: inline-block;
+	border-bottom: 0.12rem solid transparent;
+	transition: border 0.2s;
+	
+	&:hover {
+		border-bottom: 0.12rem solid $colour_black;
+	}
+	
+}
+
+@media only screen and (max-width: 750px) {
+
+	.gdpr_back_content {
+		padding: 1.5rem 0;
+	}
+
+	.gdpr_back_link {
+		line-height: 2.0rem;
+		font-size: 1.4rem;
+	}
+
+}
