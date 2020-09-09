@@ -12,5 +12,17 @@
 			"id":"back",
 			"name":"Back"
 		}
+	],
+	"cms_menu":[
+		{
+			"id":"tools",
+			"name":"Tools"
+		},
+		{
+			"id":"gdpr",
+			"name":"GDPR settings",
+			"url":"admin/panel_settings/gdpr__gdpr/",
+			"parent":"tools"
+		}
 	]
 }

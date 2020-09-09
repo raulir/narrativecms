@@ -1,0 +1,16 @@
+{
+    "version": "2",
+    "label":"GDPR module settings",
+    "item": [
+		{
+			"type":"select",
+			"name":"notracking",
+			"label":"No tracking option",
+			"values":{
+				"0":"No - only accept",
+				"1":"Yes - user can use website without tracking"
+			},
+			"default":"0"
+		}
+    ]
+}

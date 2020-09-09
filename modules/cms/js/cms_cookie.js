@@ -23,5 +23,5 @@ function cms_cookie_read(name) {
 }
 
 function cms_cookie_erase(name) {
-	cookie_create(name, "", -1);
+	cms_cookie_create(name, '', -1);
 }

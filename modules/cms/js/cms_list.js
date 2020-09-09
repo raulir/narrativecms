@@ -1,7 +1,7 @@
 
 function cms_list_init_filters(){
 	
-	var filters_str = cookie_read($('.cms_list_container').data('panel_name'));
+	var filters_str = cms_cookie_read($('.cms_list_container').data('panel_name'));
 	
 	if (!filters_str){
 		return {};
@@ -34,7 +34,7 @@ function cms_list_save_filters(){
 		}
 	});
 	
-	cookie_create($('.cms_list_container').data('panel_name'), JSON.stringify(filters));
+	cms_cookie_create($('.cms_list_container').data('panel_name'), JSON.stringify(filters));
 	
 	return filters;
 	

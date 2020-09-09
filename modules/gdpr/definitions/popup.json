@@ -2,6 +2,9 @@
     "version": "2",
     "label":"GDPR popup",
     "image":"gdpr/panel_popup.png",
+    "js": [
+    	"cms/cms_cookie"
+    ],
     "item": [
 		{
             "type": "textarea",
@@ -27,6 +30,12 @@
             "name": "close",
             "label": "Close label",
             "default": "Accept"
+        },
+        {
+            "type": "text",
+            "name": "notracking_label",
+            "label": "Notracking label",
+            "default": "Continue without tracking"
         },
         {
             "type": "repeater",

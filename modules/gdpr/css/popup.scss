@@ -48,7 +48,7 @@
     letter-spacing: 0.05rem;
 }
 
-.gdpr_popup_close {
+.gdpr_popup_close,.gdpr_popup_notracking {
 	
 	position: absolute;
 	right: 0;
@@ -84,7 +84,7 @@
 	
 }
 
-.gdpr_popup_close_text {
+.gdpr_popup_close_text,.gdpr_popup_notracking_label {
 	position: absolute;
 	border-bottom: 0.12rem solid $colour_white;
 	right: 0.4rem;
@@ -202,6 +202,10 @@
 		}
 	}
 
+	&.gdpr_popup_notracking_true .gdpr_popup_close {
+		bottom: 6.0rem;
+	}
+
 	.gdpr_popup_close_text {
 		display: inline-block;
 		border: none;
@@ -209,6 +213,31 @@
 		font-size: inherit;
 		line-height: inherit;
 		padding: 0 2.0rem;
+	}
+
+	.gdpr_popup_notracking {
+		right: auto;
+		left: 50%;
+		transform: translate(-50%);
+		top: auto;
+		bottom: 4.0rem;
+		font-size: 0.8rem;
+		line-height: 1.1rem;
+		border-bottom: 0.10rem solid #999999;
+		width: auto;
+		height: auto;
+		color: #555555;
+		&:hover {
+			color: $colour_black;
+		}
+	}
+
+	.gdpr_popup_notracking_label {
+		display: inline-block;
+		border: none;
+		position: static;
+		font-size: inherit;
+		line-height: inherit;
 	}
 
 	.gdpr_popup_lower {
@@ -220,6 +249,10 @@
 		position: static;
 		max-height: 100.0rem;
 		color: $colour_black;
+	}
+
+	&.gdpr_popup_notracking_true .gdpr_popup_lower {
+		padding-bottom: 8.6rem;
 	}
 
 	.gdpr_popup_text {

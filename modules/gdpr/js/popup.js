@@ -14,7 +14,16 @@ function popup_init(){
 		
 		$('.gdpr_popup_container').remove();
 		
-		cookie_create('gdpr', 1, 180);
+		cms_cookie_create('gdpr', 1, 180);
+
+	});
+	
+	$('.gdpr_popup_notracking').on('click.popup', function(){
+		
+		$('.gdpr_popup_container').remove();
+		
+		cms_cookie_create('gdpr', 1, 7);
+		cms_cookie_create('gdpr_notrack', 1, 7);
 
 	});
 	
