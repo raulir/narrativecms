@@ -286,6 +286,10 @@ if ( !function_exists('_i')) {
 			$dataprops = '';
 		}
 		
+		if (!empty($params['pb'])){
+			$params['css'] .= ' padding-bottom: '.round($image_data['height']/$image_data['width']*100, 2).'%; ';
+		}
+		
 		if (!empty($needs_lazy_loading)){
 			
 			$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_images_lazy.js';
