@@ -51,7 +51,14 @@ class reminder extends CI_Controller{
 				
 				$content = $url.'?token='.$token;
 				
-				mail($user['email'], 'Password reminder from '.$title, $content);
+				mail($user['email'],
+						(!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').
+						'Password reminder from '.$title,
+						$content,
+						'From: '.$GLOBALS['config']['from_name'].' <'.$GLOBALS['config']['from_email'].'>' . "\r\n" .
+						( !empty($GLOBALS['config']['sender_email']) ?
+								('Sender: '.$GLOBALS['config']['sender_name'].' <'.$GLOBALS['config']['sender_email'].'>' . "\r\n") : '').
+						'Reply-To: '.$GLOBALS['config']['reply_name'].' <'.$GLOBALS['config']['reply_email'].'>' . "\r\n");
 
 			}
 			

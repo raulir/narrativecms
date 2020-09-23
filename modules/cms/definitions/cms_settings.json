@@ -291,6 +291,47 @@
 				"1":"Alphabetical"
 			},
 			"default":"0"
+		},
+		{
+			"type":"subtitle",
+			"label":"Email",
+			"width":"wide",
+			"help":"Settings related to CMS system email"
+		},
+		{
+			"type":"text",
+			"name":"from_name",
+			"label":"From name",
+			"default":"Noreply"
+		},
+		{
+			"type":"text",
+			"name":"from_email",
+			"label":"From email",
+			"default":"noreply@bytecrackers.com",
+			"help":"Do not change, as may go to spam"
+		},
+		{
+			"type":"text",
+			"name":"reply_name",
+			"label":"Reply to name",
+			"default":"Noreply"
+		},
+		{
+			"type":"text",
+			"name":"reply_email",
+			"label":"Reply to email",
+			"default":"noreply@bytecrackers.com"
+		},
+		{
+			"type":"text",
+			"name":"sender_name",
+			"label":"Sender name"
+		},
+		{
+			"type":"text",
+			"name":"sender_email",
+			"label":"Sender email"
 		}
 	]
 }

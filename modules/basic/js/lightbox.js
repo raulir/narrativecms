@@ -16,6 +16,12 @@ function basic_lightbox_init(){
 		cms_preloader.preload({
 			'images': images
 		});
+		
+		var $container = $('.basic_lightbox_container').first().detach()
+		
+		$('.basic_lightbox_container').remove()
+		
+		$container.appendTo('body')
 	
 	}, 3000);
 	

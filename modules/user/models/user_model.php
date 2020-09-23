@@ -61,6 +61,8 @@ class user_model extends Model {
 				'email' => $data['email'],
 				'phone' => $data['phone'],
 				'password' => sha1((!empty($GLOBALS['settings']['salt']) ? $GLOBALS['settings']['salt'] : 'cms').$data['password']),
+				'image' => '',
+				'meta' => '',
 		];
 		 
 		$user_id = $this->cms_page_panel_model->create_cms_page_panel($user);
@@ -140,6 +142,7 @@ class user_model extends Model {
 			if (empty($return['_panel_heading'])){
 				$c = &get_instance();
 				$return['_panel_heading'] = $c->run_panel_method('user/user', 'panel_heading', $return);
+				$this->load->model('cms/cms_page_panel_model');
 			}
 			
 			return $return;

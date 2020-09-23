@@ -220,10 +220,9 @@ class Loader {
 	 * @param	string	an optional object name
 	 * @return	void
 	 */
-	public function library($library = '', $params = NULL, $object_name = NULL)
-	{
-		if (is_array($library))
-		{
+	public function library($library = '', $params = NULL, $object_name = NULL){
+
+		if (is_array($library)){
 			foreach ($library as $class)
 			{
 				$this->library($class, $params);
@@ -243,6 +242,7 @@ class Loader {
 		}
 
 		$this->_ci_load_class($library, $params, $object_name);
+
 	}
 
 	// --------------------------------------------------------------------
@@ -705,7 +705,7 @@ class Loader {
 		if (!empty($params['module']) && !empty($params['name'])){
 
 			if (!in_array($class, $this->_ci_loaded_files)){
-				
+
 				$filepath = $GLOBALS['config']['base_path'].'modules/'.$params['module'].'/panels/'.$params['name'].'.php';
 				include_once($filepath);
 				$this->_ci_loaded_files[] = $filepath;
@@ -873,6 +873,8 @@ class Loader {
 		// Save the class name and object name
 		$this->_ci_classes[$class] = $classvar;
 
+// if ($params['name'] == 'user') _pri nt_r($this);
+// _pri nt_r(class_parents($name));	
 		// Instantiate the class
 		$CI =& get_instance();
 		if ($config !== NULL)
@@ -883,7 +885,9 @@ class Loader {
 		{
 			$CI->$classvar = new $name;
 		}
-
+		
+//		if ($params['name'] == 'user') _pri nt_r($this);
+		
 	}
 
 	// --------------------------------------------------------------------

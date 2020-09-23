@@ -102,63 +102,55 @@ class CI_Controller {
 			$files = $this->get_panel_filenames($panel_name_param, $params);
 		}
 	
+		$ci =& get_instance();
+		
 		// if extended, run extended controller first
 		if (!empty($files['extends_controller'])){
-			 
-			// temporarily create new ci sandbox for panel
-			$this->panel_ci =& get_instance();
-	
+
 			$extends_panel_name = $files['extends_module'].'_'.$files['extends_name'].'_panel';
-			$this->panel_ci->load->library(
+			$ci->load->library(
 					$files['extends_controller'],
 					['module' => $files['extends_module'], 'name' => $files['extends_name'], ],
 					$extends_panel_name
 					);
 	
-			if (method_exists($this->panel_ci->{$extends_panel_name}, $panel_method)){
-				$this->panel_ci->{$extends_panel_name}->init_panel(array('name' => $files['extends_name'], 'controller' => $files['extends_controller'], ));
-				$params = $this->panel_ci->{$extends_panel_name}->{$panel_method}($params);
+			if (method_exists($ci->{$extends_panel_name}, $panel_method)){
+				$ci->{$extends_panel_name}->init_panel(array('name' => $files['extends_name'], 'controller' => $files['extends_controller'], ));
+				$params = $ci->{$extends_panel_name}->{$panel_method}($params);
 				if (is_array($params)){
 					$params['_no_cache'] = 1;
 				}
 			}
-	
-			// clear temporary resource
-			unset($this->panel_ci);
-	
+
 		}
 	
 		// if there is a normal controller, do this
 		if (!empty($files['controller']) && is_array($params)){
-	
-			// temporarily create new ci sandbox for panel
-			$this->panel_ci =& get_instance();
-	
+
 			// load panel stuff into this sandbox - it will be the same as sandbox is singleton for itself
 			$panel_name = $files['module'].'_'.$files['name'].'_panel';
-	
-			$this->panel_ci->load->library(
+
+			$ci->load->library(
 					$files['controller'],
 					['module' => $files['module'], 'name' => $files['name'], ],
 					$panel_name
 					);
-	
-			if (method_exists($this->panel_ci->$panel_name, $panel_method)){
+			
+			// _pri nt_r($ci->load);
+				
+			if (method_exists($ci->$panel_name, $panel_method)){
 	
 				// define this controller as panel
-				$this->panel_ci->{$panel_name}->init_panel(array('name' => $files['name'], 'controller' => $files['controller'], ));
+				$ci->{$panel_name}->init_panel(array('name' => $files['name'], 'controller' => $files['controller'], ));
 	
 				// get params through panel controller
-				$params = $this->panel_ci->{$panel_name}->{$panel_method}($params);
+				$params = $ci->{$panel_name}->{$panel_method}($params);
 				if (is_array($params)){
 					$params['_no_cache'] = 1;
 				}
 		   
 			}
-	
-			// clear temporary resource
-			unset($this->panel_ci);
-	
+
 		} else if ($panel_method != 'panel_action' && method_exists($this, $panel_method)){
 	
 			$params = $this->{$panel_method}($params);
