@@ -308,7 +308,7 @@ class cms_page_panel_operations extends CI_Controller {
 			}
 			
 			// panel heading for cms
-			if (($data['cms_page_id'] == 999999 || $data['cms_page_id'] == 0) && !empty($data['panel_params']['heading'])){
+			if ($data['cms_page_id'] == 0 && !empty($data['panel_params']['heading'])){
 				$data['title'] = $data['panel_params']['heading'];
 			}
 
@@ -317,16 +317,19 @@ class cms_page_panel_operations extends CI_Controller {
 			$data_merged = array_merge($data['panel_params'], $data_merged);
 			$data_merged['cms_page_panel_id'] = $block_id;
 			
-			$data['panel_params']['_panel_heading'] = $this->run_panel_method($data['panel_name'], 'panel_heading', $data_merged);
-
+			$data_merged['_panel_heading'] = $this->run_panel_method($data_merged['panel_name'], 'panel_heading', $data_merged);
+			
+			// on_update hook
+			$data_merged = $this->run_panel_method($data_merged['panel_name'], 'on_update', $data_merged);
+			
 			// save data
 			if($block_id){
-
-				$this->cms_page_panel_model->update_cms_page_panel($block_id, $data, true);
+				
+				$this->cms_page_panel_model->update_cms_page_panel($block_id, $data_merged, true);
 				 
 			} else {
 
-				$block_id = $this->cms_page_panel_model->create_cms_page_panel($data);
+				$block_id = $this->cms_page_panel_model->create_cms_page_panel($data_merged);
 
 				// if list and add to top, move to top
 				if (!empty($panel_config['list']['new_first'])){
@@ -337,7 +340,7 @@ class cms_page_panel_operations extends CI_Controller {
 
 			// delete files
 			$old_filenames = $this->cms_page_panel_model->get_page_panel_data_filenames($panel_structure, $old_data);
-			$new_filenames = $this->cms_page_panel_model->get_page_panel_data_filenames($panel_structure, $data['panel_params']);
+			$new_filenames = $this->cms_page_panel_model->get_page_panel_data_filenames($panel_structure, $data_merged);
 				
 			$filenames_diff = array_diff($old_filenames, $new_filenames);
 			foreach($filenames_diff as $filename){
@@ -349,24 +352,24 @@ class cms_page_panel_operations extends CI_Controller {
 			// if link target, update slug
 			if (!empty($panel_config['list']['link_target'])){
 				
-				if (!empty($panel_config['list']['title_field']) && !empty($data['panel_params'][$panel_config['list']['title_field']])){
-					$slug_string = $data['panel_params'][$panel_config['list']['title_field']];
-				} else if (!empty($data['panel_params']['heading'])){
-					$slug_string = $data['panel_params']['heading'];
+				if (!empty($panel_config['list']['title_field']) && !empty($data_merged[$panel_config['list']['title_field']])){
+					$slug_string = $data_merged[$panel_config['list']['title_field']];
+				} else if (!empty($data_merged['heading'])){
+					$slug_string = $data_merged['heading'];
 				} else {
-					$slug_string = $data['panel_name'].' '.$block_id;
+					$slug_string = $data_merged['panel_name'].' '.$block_id;
 				}
 				
-				$slug = $this->cms_slug_model->generate_list_item_slug($data['panel_name'].'='.$block_id, $slug_string);
+				$slug = $this->cms_slug_model->generate_list_item_slug($data_merged['panel_name'].'='.$block_id, $slug_string);
 				
-				$this->cms_slug_model->set_page_slug($data['panel_name'].'='.$block_id, $slug, empty($old_data['show']) ? '1' : '0');
+				$this->cms_slug_model->set_page_slug($data_merged['panel_name'].'='.$block_id, $slug, empty($old_data['show']) ? '1' : '0');
 			
 			}
 
 			// save to parents children list
-			if (!empty($data['parent_id']) && !empty($params['parent_name'])){
+			if (!empty($data_merged['parent_id']) && !empty($params['parent_name'])){
 
-				$parent = $this->cms_page_panel_model->get_cms_page_panel($data['parent_id']);
+				$parent = $this->cms_page_panel_model->get_cms_page_panel($data_merged['parent_id']);
 
 				if (empty($parent[$params['parent_name']])){
 					$field_data = array();
@@ -381,7 +384,7 @@ class cms_page_panel_operations extends CI_Controller {
 				if (!in_array($block_id, $field_data)){
 					$field_data[] = $block_id;
 					$field_data = array_values($field_data); // renum array
-					$this->cms_page_panel_model->update_cms_page_panel($data['parent_id'], [$params['parent_name'] => $field_data, ]);
+					$this->cms_page_panel_model->update_cms_page_panel($data_merged['parent_id'], [$params['parent_name'] => $field_data, ]);
 				}
 
 			}

@@ -32,7 +32,7 @@
 	<div class="cms_tool_button admin_right cms_paging_first" <?php _ib('cms/cms_paging_first.png', ['height' => 12]) ?>></div>
 	
 	<?php if(!empty($filter_fields)) foreach($filter_fields as $filter_field => $filter_field_label): ?>
-		<select class="admin_tool_select admin_right admin_tool_filter" data-field="<?php print($filter_field); ?>">
+		<select class="admin_tool_select admin_right admin_tool_filter cms_list_filter" data-field="<?php print($filter_field); ?>">
 			<option value="_empty_"><?php print($filter_field_label); ?></option>
 			<?php foreach($filter_fields_values[$filter_field] as $key => $val): ?>
 				<option value="<?php print($key); ?>"><?php print($val); ?></option>

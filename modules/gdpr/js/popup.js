@@ -3,9 +3,9 @@ function popup_init(){
 	$('.gdpr_popup_upper').on('click.popup', function(){
 		
 		if (!$('.gdpr_popup_active').length){
-			$('.gdpr_popup_container').addClass('popup_active');
+			$('.gdpr_popup_container').addClass('gdpr_popup_active');
 		} else {
-			$('.gdpr_popup_active').removeClass('popup_active');
+			$('.gdpr_popup_active').removeClass('gdpr_popup_active');
 		}
 		
 	});
