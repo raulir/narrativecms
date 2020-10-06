@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class login extends CI_Controller{
+namespace user;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class login extends \CI_Controller{
 	
 	function panel_action($params){
 		
@@ -53,8 +57,6 @@ class login extends CI_Controller{
 	
 	function panel_params($params){
 		
-		// print_ r($_SESSION['user']);
-
 		// check if logged in
 		$params['loggedin'] = !empty($_SESSION['user']);
 

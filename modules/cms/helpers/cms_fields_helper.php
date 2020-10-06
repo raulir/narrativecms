@@ -179,6 +179,7 @@ if (!function_exists('print_fields')){
 				$field['name_clean'] = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
 				$field['name'] = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
 				$field['panel_structure'] = $structure;
+				$field['base_id'] = (!empty($data['cms_page_panel_id']) ? $data['cms_page_panel_id'] : '');
 				
 				// add field
 				$return .= _panel('cms/cms_input', $field);

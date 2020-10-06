@@ -308,23 +308,31 @@ class cms_page_panel_model extends Model {
 		$query = $this->db->query($sql, [$cms_page_panel_id]);
 		
 		$page_panel_base = $query->row_array();
-
-		$panel_structure = $this->cms_panel_model->get_cms_panel_definition($page_panel_base['panel_name']);
 		
-		foreach($panel_structure as $struct){
-		
-			if ($struct['type'] == 'cms_page_panels' && empty($panel_params[$struct['name']])){
-				$panel_params[$struct['name']] = [];
+		if(!empty($page_panel_base['panel_name'])){
+			
+			$panel_structure = $this->cms_panel_model->get_cms_panel_definition($page_panel_base['panel_name']);
+			
+			foreach($panel_structure as $struct){
+			
+				if ($struct['type'] == 'cms_page_panels' && empty($panel_params[$struct['name']])){
+					$panel_params[$struct['name']] = [];
+				}
+			
+				if ($struct['type'] == 'repeater' && empty($panel_params[$struct['name']])){
+					$panel_params[$struct['name']] = [];
+				}
+			
 			}
-		
-			if ($struct['type'] == 'repeater' && empty($panel_params[$struct['name']])){
-				$panel_params[$struct['name']] = [];
-			}
+			
+			$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = '' , value = ? , search = 0 ";
+			$this->db->query($sql, [$cms_page_panel_id, json_encode($panel_params, JSON_PRETTY_PRINT)]);
+				
+		} else {
+			
+			html_error('Cant cache non-existant panel id: '.$cms_page_panel_id);
 		
 		}
-
-		$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = '' , value = ? , search = 0 ";
-		$this->db->query($sql, [$cms_page_panel_id, json_encode($panel_params, JSON_PRETTY_PRINT)]);
 
 	}
 	

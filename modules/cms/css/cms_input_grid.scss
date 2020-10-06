@@ -1,0 +1,139 @@
+/* grid */
+.cms_input.cms_grid_container {
+    position: relative;
+    text-align: left;
+    padding-bottom: 1.0rem;
+    width: 100%;
+}
+
+.cms_grid_label {
+	padding: 0 1.6rem;
+    z-index: 20;
+    box-sizing: border-box;
+    line-height: 2.6rem;
+    font-size: 1.8rem;
+    transform: translateZ(0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+	position: relative;
+	background-color: white;
+	display: inline-block;
+	top: 1.1rem;
+	left: 3.3rem;
+}
+
+.cms_grid_line {
+    border-top: 0.16rem dashed $colour_border;
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    &::before,&::after {
+    	content: '';
+    	position: absolute;
+    	width: 0;
+    	height: 0.5rem;
+    	border-left: 0.16rem dashed $colour_border;
+    }
+}
+
+.cms_grid_line_top {
+	&::before {
+		top: 0;
+		left: 0;
+	}
+	&::after {
+		top: 0;
+		right: 0;
+	}
+}
+
+.cms_grid_line_bottom {
+	&::before {
+		bottom: 0;
+		left: 0;
+	}
+	&::after {
+		bottom: 0;
+		right: 0;
+	}
+}
+
+.cms_grid_area {
+    padding: 1.0rem 0 4.5rem 0;
+    font-size: 0;
+    letter-spacing: 0;
+    line-height: 0;
+}
+
+.cms_grid_field {
+	height: 3.5rem;
+	box-sizing: border-box;
+	border-bottom: 0.12rem solid $colour_border;
+	display: inline-block;
+	font-size: 1.5rem;
+	line-height: 1.55rem;
+	padding: 0.2rem 0.5rem;
+	position: relative;
+	&::after {
+		content: '';
+		height: 3.38rem;
+		position: absolute;
+		display: block;
+		width: 0.12rem;
+		background-color: $colour_border;
+		right: 0;
+		top: 0;
+		opacity: 0.5;
+	}
+	&:last-child::after {
+		display: none;
+	}
+	.cms_grid_header & {
+		font-size: 1.5rem;
+		&::after {
+			display: none;
+		}
+	}
+}
+
+.cms_grid_field_inner {
+	max-width: calc(100% - 2.0rem);
+	max-height: 3.5rem;
+	position: absolute;
+	overflow: hidden;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	.cms_grid_field_left & {
+		left: 1.0rem;
+		transform: translate(0, -50%);
+		text-align: left;
+	}
+	.cms_grid_field_right & {
+		right: 1.0rem;
+		transform: translate(0, -50%);
+		text-align: right;
+	}
+	.cms_grid_field_center & {
+		text-align: center;
+		max-width: 100%;
+		width: 100%;
+	}
+}
+
+.cms_grid_ids {
+	
+}
+
+.cms_grid_id {
+	border-bottom: 0.1rem solid $colour_border;
+	display: inline-block;
+}
+
+.cms_grid_button {
+	position: absolute;
+	right: 1.0rem;
+	bottom: 1.5rem;
+	float: none;
+}

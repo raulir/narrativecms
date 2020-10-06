@@ -16,7 +16,7 @@ class cms_input extends CI_Controller {
 	}
 	
 	function panel_params($params){
-		
+
 		// find correct panel to display
 		if (!stristr($params['type'], '/')){
 			
