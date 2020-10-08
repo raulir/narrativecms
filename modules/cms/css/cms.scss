@@ -245,17 +245,15 @@ ul {
 .admin_small_button {
 	box-sizing: border-box;
 	display: inline-block;
-	height: 27px;
+	height: 2.7rem;
 	line-height: 26px;
 	font-size: 16px;
-	border: 0.1rem solid $colour_border;
+	border: 0.12rem solid $colour_border;
 	border-radius: 4px;
 	text-decoration: none;
 	color: #404040;
 	padding: 0px 10px;
 	margin-bottom: 10px;
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
 	cursor: pointer;
 }
 

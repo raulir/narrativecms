@@ -1,0 +1,20 @@
+.cms_grid_editable_container {
+	width: 100%;
+	height: 2.0rem;
+	box-sizing: border-box;
+}
+
+.cms_grid_editable_input {
+	border: 0.1rem solid $colour_border;
+	padding: 0 0.5rem;
+	margin: 0;
+	line-height: 1.8rem;
+	font-size: 1.5rem;
+	font-family: inherit;
+	width: 100%;
+	box-sizing: border-box;
+	height: 2.0rem;
+	&:focus {
+		outline: 0.1rem solid $colour_border;
+	}
+}

@@ -60,16 +60,21 @@
 }
 
 .cms_grid_area {
-    padding: 1.0rem 0 4.5rem 0;
+    padding: 1.0rem 0 5.0rem 0;
     font-size: 0;
     letter-spacing: 0;
     line-height: 0;
 }
 
-.cms_grid_field {
+.cms_grid_row,.cms_grid_header {
 	height: 3.5rem;
-	box-sizing: border-box;
 	border-bottom: 0.12rem solid $colour_border;
+	box-sizing: border-box;
+}
+
+.cms_grid_field {
+	height: 3.38rem;
+	box-sizing: border-box;
 	display: inline-block;
 	font-size: 1.5rem;
 	line-height: 1.55rem;
@@ -98,6 +103,7 @@
 }
 
 .cms_grid_field_inner {
+	width: 100rem;
 	max-width: calc(100% - 2.0rem);
 	max-height: 3.5rem;
 	position: absolute;
@@ -131,7 +137,7 @@
 	display: inline-block;
 }
 
-.cms_grid_button {
+.cms_grid_new {
 	position: absolute;
 	right: 1.0rem;
 	bottom: 1.5rem;

@@ -15,6 +15,30 @@ class cms_input_grid extends CI_Controller {
 		add_css('modules/cms/css/cms_input.scss');
 		
 	}
+	
+	function panel_action($params){
+		
+		if(!empty($params['do'])){
+			if ($params['do'] == 'create_row'){
+				
+				$this->load->model('cms/cms_page_panel_model');
+				
+				$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
+				$params['data'] = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [
+						'do' => 'C',
+						'id' => $params['base_id'],
+				]);
+				
+				print(json_encode($params['data'], JSON_PRETTY_PRINT));
+				
+				die();
+				
+			}
+		}
+		
+		return $params;
+		
+	}
 
 	function panel_params($params){
 		
@@ -26,6 +50,8 @@ class cms_input_grid extends CI_Controller {
 				'id' => $params['base_id'],
 		]);
 		unset($params['data']['_no_cache']);
+		
+		$params['_params'] = &$params;
 
 		return $params;
 

@@ -140,7 +140,7 @@ if ( !function_exists('get_position')) {
     	if(!empty($data['_panel_description'])){
 	    	$GLOBALS['_panel_descriptions'][] = $data['_panel_description'];
     	}
-    	
+
     	if (!$params['_return']){
 			print('<!-- embed start -->'.$data['html'].'<!-- embed end -->');
     	} else {

@@ -626,8 +626,11 @@ class CI_Controller {
 			if (empty($params['_no_css'])){
 				
 				$scss = array_merge($return['scss'], $return['css']);
-				$scss = array_merge($scss, $GLOBALS['_panel_scss']);
-
+				
+				if(!empty($GLOBALS['_panel_scss'])){
+					$scss = array_merge($scss, $GLOBALS['_panel_scss']);
+				}
+				
 				// prepare css for onpage loading
 				$css_arr = pack_css($scss);
 	
