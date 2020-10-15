@@ -15,32 +15,33 @@
 	background-size: 16px auto;
 	background-repeat: no-repeat;
 	position: absolute;
-	left: 130px;
-	top: 0;
+	left: 15.0rem;
+	top: 0.5rem;
 }
 
 .cms_input_datetime_time {
 	box-sizing: border-box;
-	border: 1px solid $colour_border;
-	width: 122px;
+	width: 13.0rem;
 	height: 26px;
-	line-height: 23px;
-	font-size: 17px;
-	padding: 1px 5px 0px 5px;
-	background-position: right 5px center;
-	background-size: 16px auto;
-	background-repeat: no-repeat;
+	line-height: 0;
+	font-size: 0;
 	position: absolute;
-	left: 258px;
-	top: 0;
+	left: 27.8rem;
+	top: 0.5rem;
 }
 
-.cms_input_datetime_hour {
-	width: 43px;
-}
-
-.cms_input_datetime_minute {
-	width: 43px;
+.cms_input_datetime_hour,.cms_input_datetime_minute {
+	border: 1px solid $colour_border;
+	width: 6.0rem;
+	height: 100%;
+	height: 2.5rem;
+    line-height: 2.2rem;
+    font-size: 1.7rem;
+    padding: 0.1rem 0.5rem 0 0.5rem;
+	vertical-align: top;
+	display: inline-block;
+	box-sizing: border-box;
+	margin-right: 0.2rem;
 }
 
 .cms_repeater_block .cms_input_datetime_input {
@@ -62,8 +63,8 @@
 	border: 1px solid $colour_border;
 	border-radius: 4px;
 	position: absolute;
-	right: 40px;
-	top: 0;
+	right: 5.0rem;
+	top: 0.5rem;
 	background-size: 10px auto;
 	background-position: center;
 	background-repeat: no-repeat;
@@ -77,8 +78,8 @@
 	border: 1px solid $colour_border;
 	border-radius: 4px;
 	position: absolute;
-	right: 0;
-	top: 0;
+	right: 1.0rem;
+	top: 0.5rem;
 	background-size: 16px auto;
 	background-position: center;
 	background-repeat: no-repeat;

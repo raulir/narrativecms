@@ -55,7 +55,7 @@
 
 	</div>
 	
-	<?php if(stristr($operations, 'C')): ?>
+	<?php if(!empty($operations) && stristr($operations, 'C') && !empty($base_id)): ?>
 		<div class="admin_small_button cms_grid_new" data-ds="<?= $ds ?>" data-base_id="<?= $base_id ?>">
 			Add row
 		</div>

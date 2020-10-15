@@ -9,6 +9,15 @@ function cms_input_datetime_init(){
 		}
 
 		var value = $('.cms_input_datetime_value', $this).val();
+		
+		if ($this.data('format') == 'timestamp'){
+
+			var value = new Date(value * 1000).toISOString()
+				.replace(/T/, ' ')
+				.replace(/\..+/, '')
+
+		}
+		
 		var initial = $this.data('default'); 
 		
 		// init datepicker
@@ -28,7 +37,6 @@ function cms_input_datetime_init(){
 		if (value){
 			$('.cms_input_datetime_hour', $this).val(value.substring(11, 13));
 			$('.cms_input_datetime_minute', $this).val(value.substring(14, 16));
-			console.log(value.substring(11, 2));
 		} else if (initial && initial !== ''){
 			$('.cms_input_datetime_hour', $this).val(initial.substring(11, 13));
 			$('.cms_input_datetime_minute', $this).val(initial.substring(14, 16));
@@ -60,8 +68,19 @@ function cms_input_datetime_init(){
 					$('.cms_input_datetime_hour', $this).val() === null){
 				$('.cms_input_datetime_value', $this).val('');
 			} else {
-				$('.cms_input_datetime_value', $this).val($('.cms_input_datetime_date', $this).val() + ' ' + 
-						$('.cms_input_datetime_hour', $this).val() + ':' + $('.cms_input_datetime_minute', $this).val());
+				if ($this.data('format') != 'timestamp'){
+					
+					$('.cms_input_datetime_value', $this).val($('.cms_input_datetime_date', $this).val() + ' ' + 
+							$('.cms_input_datetime_hour', $this).val() + ':' + $('.cms_input_datetime_minute', $this).val());
+					
+				} else {
+					
+					var date = new Date($('.cms_input_datetime_date', $this).val() + ' ' + 
+							$('.cms_input_datetime_hour', $this).val() + ':' + $('.cms_input_datetime_minute', $this).val() + ':00.000Z')
+					
+					$('.cms_input_datetime_value', $this).val(Math.round(date.getTime()/1000))
+
+				}
 			}
 			
 		}

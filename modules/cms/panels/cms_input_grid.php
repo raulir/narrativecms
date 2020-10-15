@@ -42,14 +42,21 @@ class cms_input_grid extends CI_Controller {
 
 	function panel_params($params){
 		
-		$this->load->model('cms/cms_page_panel_model');
-		$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
+		$params['data'] = [];
+		
+		if(!empty($params['base_id'])){
+		
+			$this->load->model('cms/cms_page_panel_model');
+			$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
 
-		$params['data'] = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [
-				'do' => 'L',
-				'id' => $params['base_id'],
-		]);
-		unset($params['data']['_no_cache']);
+			$params['data'] = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [
+					'do' => 'L',
+					'id' => $params['base_id'],
+			]);
+			
+			unset($params['data']['_no_cache']);
+		
+		}
 		
 		$params['_params'] = &$params;
 
