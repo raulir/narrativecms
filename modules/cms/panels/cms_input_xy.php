@@ -4,12 +4,12 @@ class cms_input_xy extends CI_Controller {
 
 	function panel_params($params){
 		
-		print_r($params);
+		$this->load->model('cms/cms_page_panel_model');
+
+		$cms_page_panel = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
 		
-		// $this->load->model('cms/cms_page_model');
-		
-		// $params['values'] = $this->cms_page_model->get_cms_pages();
-		
+		$params['target_image'] = $cms_page_panel[$params['target']];
+
 		return $params;
 		
 	}

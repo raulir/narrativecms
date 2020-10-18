@@ -53,7 +53,23 @@ function cms_input_image_popup($element){
 	cms_input_image_load_images({
 		'input_selector': '.cms_image_input_' + input_name, 
 		'container_selector': '.cms_input_image_content_' + input_name,
-		'category': $element.data('category')
+		'category': $element.data('category'),
+		'after': function(){
+			// update xy inputs
+			if ($('.cms_input_xy_target_' + input_name).length){
+				
+				var $container = $('.cms_input_image_content_' + input_name).closest('.cms_input_image');
+				
+				$('.cms_input_xy_image_inner', $('.cms_input_xy_target_' + input_name)).data('w', $container.data('w'))
+				$('.cms_input_xy_image_inner', $('.cms_input_xy_target_' + input_name)).data('h', $container.data('h'))
+				$('.cms_input_xy_image_inner', $('.cms_input_xy_target_' + input_name))
+						.css({'background-image': 'url(' + config_url + 'img/' + $('.cms_input_image_input', $container).val()})
+				$('.cms_input_xy_target_' + input_name).data('target_image', $('.cms_input_image_input', $container).val())
+				
+				cms_input_xy_init()
+				
+			}
+		}
 	});
 	
 }
@@ -69,7 +85,6 @@ function cms_input_image_clear($element){
 function cms_input_image_load_images(params){
 	
 	params = $.extend(true, {
-		'after': function(){},
 		'path_type': 'img', // could be 'root'
 		'category': ''
 	}, params);
@@ -103,9 +118,9 @@ function cms_input_image_load_images(params){
 							$(params.container_selector).html(data.result.html);
 						}
 					}
-					
+
 					// update meta fields
-					$container = $(params.container_selector).closest('.cms_input_image');
+					var $container = $(params.container_selector).closest('.cms_input_image');
 					$container.siblings('.cms_input').each(function(){
 						$('.cms_meta', this).each(function(){
 							var $this = $(this);
@@ -117,9 +132,11 @@ function cms_input_image_load_images(params){
 						});
 					});
 					
+					$container.data('h', data.result.original_height)
+					$container.data('w', data.result.original_width)
 					
 					$(params.container_selector).data('name');
-				
+
 					params.after({'name':data.result.filename});
 					after();
 					
