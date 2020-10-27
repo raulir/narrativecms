@@ -43,18 +43,36 @@ class cms_input_grid extends CI_Controller {
 	function panel_params($params){
 		
 		$params['data'] = [];
-		
+
 		if(!empty($params['base_id'])){
 		
 			$this->load->model('cms/cms_page_panel_model');
 			$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
+			
+			if (!empty($params['operations']) && stristr($params['operations'], 'S')){
+				
+				$params['fields'] = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [
+					'do' => 'S',
+					'id' => $params['base_id'],
+					'fields' => $params['fields'],
+				]);
+				
+				if (!empty($params['fields']['_no_cache'])) unset($params['fields']['_no_cache']);
 
+			}
+			
+			usort($params['fields'], function($a, $b){
+				if (empty($a['order'])) $a['order'] = 20;
+				if (empty($b['order'])) $b['order'] = 20;
+				return $a['order'] > $b['order'];
+			});
+					
 			$params['data'] = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [
 					'do' => 'L',
 					'id' => $params['base_id'],
 			]);
 			
-			unset($params['data']['_no_cache']);
+			if (!empty($params['data']['_no_cache'])) unset($params['data']['_no_cache']);
 		
 		}
 		

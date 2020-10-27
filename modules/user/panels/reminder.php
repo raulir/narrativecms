@@ -146,7 +146,7 @@ class reminder extends CI_Controller{
 			$params['timeout'] = true;
 			foreach($reminders as $key => $item){
 				
-				if ($item['token'] == $token && (time() - $item['time']) < 100000){
+				if ($item['token'] == $token && (time() - $item['time']) < 2592000){
 
 					$params['success'] = 1;
 					$params['token'] = $token;

@@ -118,6 +118,7 @@
 	}
 	.cms_grid_field_right & {
 		right: 1.0rem;
+		left: auto;
 		transform: translate(0, -50%);
 		text-align: right;
 	}
@@ -142,4 +143,11 @@
 	right: 1.0rem;
 	bottom: 1.5rem;
 	float: none;
+}
+
+.cms_grid_not_available {
+	font-size: 1.5rem;
+	line-height: 1.5rem;
+	padding: 3.5rem 0;
+	text-align: center;
 }
