@@ -25,9 +25,30 @@ class dim_value_select extends CI_Controller{
 			$value = $this->input->post('value');
 		
 			$this->load->model('cms/cms_page_panel_model');
+			
+			$item = $this->cms_page_panel_model->get_cms_page_panel($item_id);
+			
+			$new_dims = [];
+			$updated = false;
+			foreach($item['dimensions'] as $dim_k => $dim_v){
+				if (!is_string($dim_v['value'])){
+					$dim_v['value'] = '=';
+				}
+				list($dim_str, $dim_value_str) = explode('=', $dim_v['value']);
+				if ($dim_str == $dimension){
+					$new_dims[$dim_k] = ['value' => $dimension.'='.$value];
+					$updated = true;
+				} else {
+					$new_dims[$dim_k] = $dim_v;
+				}
+			}
+			
+			if (!$updated){
+				$new_dims[] = ['value' => $dimension.'='.$value];
+			}
 		
 			// save data
-			$this->cms_page_panel_model->update_cms_page_panel($item_id, ['dimensions' => [0 => ['value' => $dimension.'='.$value]]]);
+			$this->cms_page_panel_model->update_cms_page_panel($item_id, ['dimensions' => $new_dims]);
 		
 		}
 		
@@ -40,13 +61,15 @@ class dim_value_select extends CI_Controller{
 		$this->load->model('cms/cms_page_panel_model');
 		
 		$item = $this->cms_page_panel_model->get_cms_page_panel($params['item_id']);
-		
+//_print_r($item['dimensions']);		
 		$params['current'] = '';
 		foreach($item['dimensions'] as $dim){
-			if (stristr($dim['value'], $params['dimension'].'=')){
-				$params['current'] = str_replace($params['dimension'].'=', '', $dim['value']);
+			if (is_string($dim['value']) && stristr($dim['value'], $params['dimension'].'=')){
+				$params['current'] = $dim['value'];
 			}
 		}
+		
+		$params['current'] = str_replace($params['dimension'].'=', '', $params['current']);
 		
 		$params['available'] = [];
 		

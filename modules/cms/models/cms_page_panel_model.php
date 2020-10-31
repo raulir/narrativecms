@@ -268,7 +268,7 @@ class cms_page_panel_model extends Model {
 		
 		$panel_params = [];
 		foreach($result as $row){
-
+// _print_r($row);
 			if ($row['value'] === '__ARRAY__'){
 				$row['value'] = [];
 				$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name = ? ";
@@ -289,8 +289,13 @@ class cms_page_panel_model extends Model {
 				if (is_numeric($key)){
 					$key = (int)$key;
 				}
+// _print_r($arr);	
 				
-				if (!isset($arr[$key])){
+				if (is_string($arr)){
+					$arr = [];
+				}
+
+				if (!isset($arr[$key]) || is_string($arr)){
 					$arr[$key] = [];
 				}
 				
