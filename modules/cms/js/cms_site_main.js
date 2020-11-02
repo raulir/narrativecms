@@ -496,6 +496,12 @@ function get_ajax_panel(name, params, action_on_success){
 		  			returned_data.storage_timestamp = new Date().getTime();
 		  			localStorage.setItem(key, JSON.stringify(returned_data));
 		  		}
+
+		  		$.each(returned_data.result, (key, value) => {
+		  			if (typeof value == 'string' || typeof value == 'number'|| typeof value == 'bigint'){
+		  				$('.__' + name.replace('/', '__') + '__' + key).html(value)
+		  			}
+		  		})
 		  		
 		  		action_on_success(returned_data);
 				
