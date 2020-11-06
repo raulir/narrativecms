@@ -1,29 +1,14 @@
 .cms_help {
 	
-	height: 16px;
-	width: 16px;
+	height: 1.6rem;
+	width: 1.6rem;
 	position: absolute;
-	left: 107px;
+	left: 10.7rem;
 	top: 0;
 	box-sizing: border-box;
 	background-color: white;
-	border-radius: 8px;
+	border-radius: 0.8rem;
 	z-index: 100;
-	
-	&:hover {
-	
-		z-index: 110;
-		
-		.cms_help_text {
-			width: 240px;
-			opacity: 1;
-			height: auto;
-			max-height: 500px;
-			top: 17px;
-			transition: max-height 0.3s, opacity 0.3s, top 0.1s;
-		}
-		
-	}
 
 	.cms_page_panel_container & {
 		left: 12.7rem;
@@ -40,45 +25,38 @@
 			right: 0.7rem;
 		}
 	}
-	
+
+	.admin_block_label & {
+		left: auto;
+		right: 0;
+		top: 0.2rem;
+	}
+
 }
 
 .cms_help_icon {
 	position: absolute;
-	left: 2px;
-	top: 2px;
-	height: calc(100% - 4px);
-	width: calc(100% - 4px);
-	background-size: contain;
+	left: 0;
+	top: 0;
+	height: 100%;
+	width: 100%;
+	background-size: 1.2rem auto;
 	background-repeat: no-repeat;
 	background-position: center;
 }
 
 .cms_help_text {
-	position: absolute;
-	top: 0;
+	display: none;
+	position: fixed;
 	left: 0;
-	opacity: 0;
-	height: 0px;
-	width: 10px;
+	width: 30.0rem;
 	overflow: hidden;
 	background-color: white;
-	max-height: 0px;
-	transition: max-height 0.3s, opacity 0.3s, top 0.1s 0.3s;
-	padding: 12px;
-	border: 1px solid grey;
+	padding: 1.2rem;
+	border: 0.1rem solid $colour_border;
 	box-sizing: border-box;
-	font-size: 15px;
-    line-height: 19px;
-    letter-spacing: 0.3px;
-}
-
-.admin_block_label {
-	
-	.cms_help {
-		left: auto;
-		right: 0;
-		top: 2px;
-	}
-	
+	font-size: 1.5rem;
+    line-height: 1.9rem;
+    letter-spacing: 0.03rem;
+    z-index: 1000;
 }
