@@ -1,7 +1,7 @@
 <div class="cms_input cms_input_multi <?= !empty($mandatory) ? ' cms_input_mandatory ' : '' ?>" data-name="<?= $name ?>"
-		data-bg="<?= $GLOBALS['config']['base_url'] ?>modules/cms/img/cms_drag.png" data-cms_input_height="3">
+		data-bg="<?= $GLOBALS['config']['base_url'] ?>modules/cms/img/cms_drag.png" data-cms_input_height="4">
 
-	<label for="<?= $name_clean ?>"><?= $label ?></label>
+	<label><?= $label ?></label>
 	<?php if (!empty($help)) _panel('cms/cms_help', ['help' => $help, ]); ?>
 
 	<div class="cms_input_multi_values">

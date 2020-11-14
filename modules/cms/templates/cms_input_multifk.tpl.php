@@ -1,0 +1,1 @@
+<?php _panel('cms/cms_input_multi', ['name' => $name, 'label' => $label, 'help' => $help, 'value' => $value, 'values' => $values]);

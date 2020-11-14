@@ -99,12 +99,12 @@ class cms_input_link extends CI_Controller {
 
 						// if no title field, use title
 						if (empty($list_page[$block_config['list']['title_field']])){
-							$block_title = $list_page['title'];
+							$block_title = $list_page['_panel_heading'];
 						} else {
-							$block_title = $list_page[$block_config['list']['title_field']];
+							$block_title = !empty($list_page['heading']) ? $list_page['heading'] : ($list.'='.$list_page['cms_page_panel_id']);
 						}
 
-						$params['lists'][$list][$list_page['cms_page_panel_id']] = substr($block_title, 0, 80);
+						$params['lists'][$list][$list_page['cms_page_panel_id']] = substr($block_title, 0, 40);
 
 						// slug data
 						$block_target = $list.'='.$list_page['cms_page_panel_id'];
