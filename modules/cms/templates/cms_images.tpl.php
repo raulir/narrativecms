@@ -14,7 +14,7 @@
 				
 				<form id="new_image_form" class="cms_images_new_image_form" method="post" enctype="multipart/form-data" style="display: inline; ">
 					<input type="hidden" name="do" value="cms_images_upload">
-					<input type="file" name="new_image[]" class="cms_images_new_image" style="display: none; " multiple>
+					<input type="file" name="new_image[]" class="cms_images_new_image" multiple>
 				</form>
 				
 				<form id="replace_image_form" class="cms_images_replace_image_form" method="post" enctype="multipart/form-data" style="display: inline; ">

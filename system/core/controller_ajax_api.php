@@ -44,7 +44,8 @@ class Ajax_api extends CI_Controller {
 		}
    		
 		$data = $this->ajax_panel($this->params['panel_id'], $this->params);
-		print(json_encode(array('result' => $data, )));
+
+		print(json_encode(['result' => $data]));
    	}
     
 }

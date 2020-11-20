@@ -35,9 +35,6 @@ function cms_input_xy_init(){
 	$('.cms_input_xy_x').off('change.cms keyup.cms').on('change.cms keyup.cms', function(){
 		cms_input_xy_init()
 	})
-	$('.cms_input_xy_y').off('change.cms keyup.cms').on('change.cms keyup.cms', function(){
-		cms_input_xy_init()
-	})
 
 }
 
@@ -72,12 +69,6 @@ function cms_input_xy_picker($input){
 	});
 	
 }
-
-
-
-
-
-
 
 function cms_input_xy_resize(){
 	

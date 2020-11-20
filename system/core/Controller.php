@@ -394,12 +394,22 @@ class CI_Controller {
 	function compile_page_title(){
 		
 		if (!empty($GLOBALS['_panel_titles'])){
+			
 			$_title = trim(implode(' '.(!empty($GLOBALS['config']['site_title_delimiter']) ? $GLOBALS['config']['site_title_delimiter'] : '-').
 					' ', $GLOBALS['_panel_titles']), ' -');
+			
+			if (!mb_detect_encoding($_title, 'UTF-8', true)){
+				$_title = utf8_encode($_title);
+			}
+		
 		} else {
+			
 			$_title = '';
+		
 		}
+		
 		$_title = (!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '') .
+		
 		str_replace('#page#', $_title, (!empty($GLOBALS['config']['site_title']) ? $GLOBALS['config']['site_title'] : 'New website - #page#'));
 		
 		return $_title;

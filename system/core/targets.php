@@ -95,11 +95,11 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 			} else if (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])){
 				
 				$languages = explode(',', str_replace(';', ',', $_SERVER['HTTP_ACCEPT_LANGUAGE']));
-
-				foreach($languages as $lang){
-
-					if (empty($GLOBALS[$group['heading']]) && (false !== $key = array_search($lang, $ug_matches))){
-
+				
+				foreach($ug_matches as $key => $lang){
+					
+					if (in_array($lang, $languages)){
+						
 						$GLOBALS[$group['heading']] = [
 								'label' => $ug_labels[$key],
 								'language_id' => $ug_matches[$key],
@@ -108,9 +108,12 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 						
 						setcookie('language', $GLOBALS[$group['heading']]['language_id'], time() + 10000000, '/');
 						
+						break;
+						
 					}
+
 				}
-				
+
 			} else {
 				
 				$GLOBALS[$group['heading']] = [

@@ -92,7 +92,7 @@ if ( !function_exists('get_position')) {
     }
     
     function _panel($name, $params = []){
-
+    	 
     	if (!isset($params['_return'])){
     		$params['_return'] = false;
     	}

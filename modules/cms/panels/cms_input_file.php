@@ -28,7 +28,7 @@ class cms_input_file extends CI_Controller {
 			
 			$_extension = explode('.', $full_filename);
 			$extension = array_pop($_extension);
-			$filename = substr($full_filename, 0, -(strlen('.'.$extension)));
+			$filename = mb_substr($full_filename, 0, -(strlen('.'.$extension)));
 			
 			$new_short_name = $params['new_name'].'.'.$extension;
 			$new_short_name = $this->cms_file_model->sanitize_filename($new_short_name);

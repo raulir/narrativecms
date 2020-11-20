@@ -2,6 +2,10 @@
 if (!function_exists('print_fields')){
 
 	function print_fields($structure, $data = array(), $prefix = '', $key = ''){
+		
+		if (empty($data)){
+			$data = [];
+		}
 
 		$block_id = !empty($data['block_id']) ? $data['block_id'] : 0;
 
@@ -61,7 +65,7 @@ if (!function_exists('print_fields')){
 				$mandatory_class = '';
 				$mandatory_label = '';
 			}
-			
+
 			if ($field['type'] == 'repeater' && $prefix == ''){ // only one sublevel
 
 				$return .= _panel('cms/cms_input_repeater', [

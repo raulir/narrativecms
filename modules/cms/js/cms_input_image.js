@@ -69,6 +69,20 @@ function cms_input_image_popup($element){
 				cms_input_xy_init()
 				
 			}
+			// update mask inputs
+			if ($('.cms_input_mask_target_' + input_name).length){
+				
+				var $container = $('.cms_input_image_content_' + input_name).closest('.cms_input_image');
+				
+				$('.cms_input_mask_image_inner', $('.cms_input_mask_target_' + input_name)).data('w', $container.data('w'))
+				$('.cms_input_mask_image_inner', $('.cms_input_mask_target_' + input_name)).data('h', $container.data('h'))
+				$('.cms_input_mask_image_inner', $('.cms_input_mask_target_' + input_name))
+						.css({'background-image': 'url(' + config_url + 'img/' + $('.cms_input_image_input', $container).val()})
+				$('.cms_input_mask_target_' + input_name).data('target_image', $('.cms_input_image_input', $container).val())
+				
+				cms_input_mask_init()
+				
+			}
 		}
 	});
 	

@@ -30,6 +30,22 @@
 	position: relative;
 }
 
+.cms_images_upload {
+	position: relative;
+	z-index: 10;
+}
+
+.cms_images_new_image {
+	position: absolute;
+	right: 15.7rem;
+	width: 8.5rem;
+	height: 3.4rem;
+	top: 0.3rem;
+	z-index: 20;
+	opacity: 0;
+	cursor: pointer;
+}
+
 .cms_images_3 {
 	height: 555px;
 }

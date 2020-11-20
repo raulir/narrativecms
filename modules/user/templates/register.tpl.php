@@ -54,7 +54,7 @@
 					</div>
 				<?php endif ?>
 				
-				<div class="register_row">
+				<div class="register_row register_submit_row">
 					<div class="register_submit"><?= $register_submit ?></div>
 				</div>
 	

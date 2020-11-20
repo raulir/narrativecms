@@ -89,12 +89,17 @@ $GLOBALS['config'] = $config;
 
 // connect to db (if mysqli)
 if ($GLOBALS['config']['database']['dbdriver'] = 'mysqli') {
-	$conn_hash = md5($GLOBALS['config']['database']['hostname'].$GLOBALS['config']['database']['username'].$GLOBALS['config']['database']['password'].$GLOBALS['config']['database']['database']);
-	$GLOBALS['dbconnections'][$conn_hash] = @mysqli_connect($GLOBALS['config']['database']['hostname'], $GLOBALS['config']['database']['username'], $GLOBALS['config']['database']['password'], $GLOBALS['config']['database']['database']);
+	
+	$conn_hash = md5($GLOBALS['config']['database']['hostname'].$GLOBALS['config']['database']['username'].
+			$GLOBALS['config']['database']['password'].$GLOBALS['config']['database']['database']);
+	
+	$GLOBALS['dbconnections'][$conn_hash] = @mysqli_connect($GLOBALS['config']['database']['hostname'], 
+			$GLOBALS['config']['database']['username'], $GLOBALS['config']['database']['password'], $GLOBALS['config']['database']['database']);
 }
 
 // load config from db
-$db = $GLOBALS['dbconnections'][md5($GLOBALS['config']['database']['hostname'].$GLOBALS['config']['database']['username'].$GLOBALS['config']['database']['password'].$config['database']['database'])];
+$db = $GLOBALS['dbconnections'][md5($GLOBALS['config']['database']['hostname'].$GLOBALS['config']['database']['username'].
+		$GLOBALS['config']['database']['password'].$config['database']['database'])];
 
 if ($db === false){
 	
@@ -109,7 +114,8 @@ if ($db === false){
 
 }
 
-$sql = "select b.name, b.value from cms_page_panel a join cms_page_panel_param b on a.cms_page_panel_id = b.cms_page_panel_id where a.panel_name = 'cms/cms_settings' and b.name != ''";
+$sql = "select b.name, b.value from cms_page_panel a join cms_page_panel_param b on a.cms_page_panel_id = b.cms_page_panel_id ".
+		" where a.panel_name = 'cms/cms_settings' and b.name != ''";
 $query = mysqli_query($db, $sql);
 
 // if empty result, rename old settings

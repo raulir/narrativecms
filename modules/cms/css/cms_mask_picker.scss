@@ -1,0 +1,111 @@
+.cms_mask_picker_container {
+	
+}
+
+.cms_mask_picker_content {
+	box-sizing: border-box;
+	border: 0.1rem solid $colour_border;
+	padding: 1.0rem;
+	width: 96.0rem;
+	height: 60.0rem;
+	box-shadow: 0.2rem 0.4rem 1.0rem rgba(0, 0, 0, 0.3);
+	background-color: $colour_white;
+	display: inline-block;
+	text-align: left;
+	position: relative;
+}
+
+.cms_mask_picker_select {
+	
+}
+
+.cms_mask_picker_cancel {
+	
+}
+
+.cms_mask_picker_area {
+	width: calc(100% - 4.0rem);
+	margin: 0 auto;
+	height: 52.0rem;
+	position: absolute;
+	top: 6.0rem;
+	left: 2.0rem;
+}
+
+.cms_mask_picker_image {
+	width: 100%;
+	height: 100%;
+	border: 0.1rem solid $colour_border;
+	background-position: center;
+	background-size: 4.0rem auto;
+	position: absolute;
+	left: 0;
+	top: 0;
+	box-sizing: border-box;
+}
+
+.cms_mask_picker_image_inner {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	background-position: center;
+	background-size: contain;
+	background-repeat: no-repeat;
+	cursor: crosshair;
+	overflow: hidden;
+}
+
+.cms_mask_picker_current {
+	font-size: 1.6rem;
+	letter-spacing: -0.04rem;
+	font-family: source;
+	padding-right: 2.0rem;
+}
+
+.cms_mask_picker_current_value {
+	min-width: 8.0rem;
+	display: inline-block;
+}
+
+.cms_mask_picker_cursor {
+	font-size: 1.6rem;
+	letter-spacing: -0.04rem;
+	font-family: source;
+}
+
+.cms_mask_picker_cursor_value {
+	min-width: 8.0rem;
+	display: inline-block;
+}
+
+.cms_mask_picker_pointer {
+	opacity: 0;
+	position: absolute;
+	left: -1.0rem;
+	top: -1.0rem;
+	border: 0.2rem solid $colour_black;
+	box-shadow: 0.2rem 0 0.3rem $colour_white, -0.2rem 0 0.3rem $colour_white, 0 0.2rem 0.3rem $colour_white, 0 -0.2rem 0.3rem $colour_white;
+	width: 0.7rem;
+	height: 0.7rem;
+	border-radius: 0.7rem;
+	transform: translate(-50%, -50%);
+}
+
+.cms_mask_picker_square {
+	box-sizing: border-box;
+	border: 0.1rem solid $colour_border;
+	position: absolute;
+	opacity: 0.75;
+}
+
+.cms_mask_picker_square_active {
+	background-color: rgba(128, 63, 0, 0.5);
+	border-color: red;
+}
+
+.cms_mask_picker_button_active {
+	color: green;
+	border-color: green;
+	background-color: #ddffdd;
+}

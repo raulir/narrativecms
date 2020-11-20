@@ -7,26 +7,30 @@
 			"type":"text",
 			"name":"heading",
 			"label":"Heading",
-			"default":"user login"
+			"default":"user login",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"username_label",
 			"label":"Username label",
 			"default":"username",
-			"help": "Label for username input.||If email is used as username, change accordingly"
+			"help": "Label for username input.||If email is used as username, change accordingly",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"password_label",
 			"label":"Password label",
-			"default":"password"
+			"default":"password",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"button_label",
 			"label":"Button label",
-			"default":"log in"
+			"default":"log in",
+			"translate":"1"
 		},
 		{
 			"type":"link",
@@ -57,13 +61,15 @@
 			"type":"text",
 			"name":"forgot_text",
 			"label":"Forgot text",
-			"default":"forgotten your login details?"
+			"default":"forgotten your login details?",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"forgot_cta",
 			"label":"Forgot CTA",
-			"default":"Click here for reminder"
+			"default":"Click here for reminder",
+			"translate":"1"
 		},
 		{
 			"type":"subtitle",
@@ -88,13 +94,15 @@
 			"type":"text",
 			"name":"register_text",
 			"label":"Register text",
-			"default":"not registered?"
+			"default":"not registered?",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"register_cta",
 			"label":"Register CTA",
-			"default":"Click here to register"
+			"default":"Click here to register",
+			"translate":"1"
 		},
 		{
 			"type":"subtitle",
@@ -105,28 +113,32 @@
 			"name":"message_bad_username",
 			"label":"Missing username",
 			"lines":"2",
-			"default": "No such username"
+			"default": "No such username",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
 			"name":"message_bad_password",
 			"label":"Bad password",
 			"lines":"2",
-			"default": "Bad password for this user"
+			"default": "Bad password for this user",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
 			"lines":"2",
 			"name":"loggedin_text",
 			"label":"Logged in text",
-			"default": "You are already logged in"
+			"default": "You are already logged in",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
 			"lines":"2",
 			"name":"message_missing_credential",
 			"label":"Empty username or password",
-			"default": "Empty username or password submitted"
+			"default": "Empty username or password submitted",
+			"translate":"1"
 		}
 	]
 }

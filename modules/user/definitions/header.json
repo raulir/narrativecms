@@ -17,16 +17,11 @@
 			"default":"user/user_icon.png"
 		},
 		{
-			"type":"link",
-			"name":"user_link",
-			"label":"Link to user",
-			"help":"Link to user dashboard"
-		},
-		{
 			"type":"text",
 			"name":"login_text",
 			"label":"Login label",
-			"default":"Login"
+			"default":"Login",
+			"translate":"1"
 		},
 		{
 			"type":"select",
@@ -38,6 +33,16 @@
 			},
 			"default":"0",
 			"help":"Show login and username as labels, vs only icons"
+		},
+		{
+			"type":"subtitle",
+			"label":"Logged in"
+		},
+		{
+			"type":"link",
+			"name":"user_link",
+			"label":"Link to user",
+			"help":"Link to user dashboard"
 		},
 		{
 			"type":"image",
