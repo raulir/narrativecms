@@ -14,14 +14,27 @@
 	text-align: left;
 }
 
-.cms_list_list_container {
+.cms_list_list_item_buttons {
+
+	position: absolute;
+	right: 0;
+	padding: 0.3rem 0.2rem;
+	top: 0;
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
 	
+	.cms_list_item_button, .cms_page_panel_show {
+		float: none;
+		display: inline-block;
+		margin: 0 0.2rem;
+	}
+
 	.cms_page_panel_show {
 		height: 2.0rem;
 		line-height: 1.8rem;
 		padding: 0 1.0rem;
 		border-radius: 0.3rem;
-		margin: 0.3rem 0 0 0.4rem;
 		font-size: 1.4rem;
 		min-width: 5.2rem;
 		text-align: center;

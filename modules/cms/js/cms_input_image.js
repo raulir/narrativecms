@@ -72,6 +72,10 @@ function cms_input_image_popup($element){
 			// update mask inputs
 			if ($('.cms_input_mask_target_' + input_name).length){
 				
+				if ($('.cms_input_mask_image_inner', $('.cms_input_mask_target_' + input_name)).length == 0){
+					$('.cms_input_mask_image', $('.cms_input_mask_target_' + input_name)).append('<div class="cms_input_mask_image_inner"></div>')
+				}
+				
 				var $container = $('.cms_input_image_content_' + input_name).closest('.cms_input_image');
 				
 				$('.cms_input_mask_image_inner', $('.cms_input_mask_target_' + input_name)).data('w', $container.data('w'))

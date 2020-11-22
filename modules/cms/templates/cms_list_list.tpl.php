@@ -16,11 +16,15 @@
 					
 					<div class="cms_list_list_item_heading"><?= $block['_panel_heading'] ?></div>
 					
-					<a class="cms_list_item_button" href="<?php print($edit_base.$block[$id_field]); ?>/">edit</a>
+					<div class="cms_list_list_item_buttons">
 					
-					<?php _panel('cms/cms_page_panel_button_show', ['cms_page_panel_id' => $block['cms_page_panel_id'], ]) ?>
+						<div class="cms_list_item_button cms_page_panel_copy" data-cms_page_panel_id="<?= $block['cms_page_panel_id'] ?>">copy</div>
 	
-					<div class="cms_list_item_button cms_page_panel_copy" data-cms_page_panel_id="<?= $block['cms_page_panel_id'] ?>">copy</div>
+						<?php _panel('cms/cms_page_panel_button_show', ['cms_page_panel_id' => $block['cms_page_panel_id'], ]) ?>
+		
+						<a class="cms_list_item_button" href="<?= $edit_base.$block[$id_field] ?>/">edit</a>
+						
+					</div>
 	
 				</li>
 			<?php endforeach ?>

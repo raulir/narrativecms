@@ -91,7 +91,12 @@ function cms_input_mask_display($this){
 	
 	if ($('.cms_input_mask_value', $this).val()){
 		
-		var value = JSON.parse($('.cms_input_mask_value', $this).val())
+		var value_json = $('.cms_input_mask_value', $this).val()
+		if (!value_json){
+			return
+		}
+		
+		var value = JSON.parse(value_json)
 
 		$image = $('.cms_input_mask_image_inner', $this)
 		

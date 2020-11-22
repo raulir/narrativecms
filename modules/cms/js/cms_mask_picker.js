@@ -41,10 +41,20 @@ function cms_mask_picker_init(){
 					var px_y = pic_y/units_y
 					
 					// calculate translated scales
-					var value = JSON.parse($('.cms_input_mask_value', $('.cms_input_mask_active')).val())
+					var value_json = $('.cms_input_mask_value', $('.cms_input_mask_active')).val()
+					
+					if (!value_json){
+						var value = {
+							'values': ['0'],
+							'width': 1,
+							'height': 1
+						}
+					} else {
+						var value = JSON.parse(value_json)
+					}
 					
 					var kx = units_x/value.width
-					console.log(kx)
+
 					var tx = {}
 					for (var i = 0; i < units_x; i++){
 						tx[i] = Math.floor(i / kx)
