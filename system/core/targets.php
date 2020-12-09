@@ -79,42 +79,96 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 
 		} else if ($group['strategy'] == 'language' && $group['heading'] == 'language'){
 			
-			$GLOBALS[$group['heading']] = [];
+			$GLOBALS['language'] = [];
 			
 			$ug_labels = explode('|',$group['labels']);
 			$ug_matches = explode('|',$group['settings']);
 
-			if (!empty($_COOKIE['language']) && (false !== $key = array_search($_COOKIE['language'], $ug_matches))){
+			// 1. if cookie language set and in allowed languages
+			if (!empty($_COOKIE['language']) && in_array($_COOKIE['language'], $ug_matches)){
 				
-				$GLOBALS[$group['heading']] = [
+				$key = array_search($_COOKIE['language'], $ug_matches);
+				$GLOBALS['language'] = [
 						'label' => $ug_labels[$key],
 						'language_id' => $ug_matches[$key],
 						'default' => $ug_matches[0],
 				];
 				
-			} else if (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])){
+			}
+			
+			// 2. if mandatory language is set
+			if (empty($GLOBALS['language']) && !empty($GLOBALS['config']['language']) && in_array($GLOBALS['config']['language'], $ug_matches)){
 				
-				$languages = explode(',', str_replace(';', ',', $_SERVER['HTTP_ACCEPT_LANGUAGE']));
+				$key = array_search($GLOBALS['language'], $ug_matches);
+				$GLOBALS['language'] = [
+						'label' => $ug_labels[$key],
+						'language_id' => $ug_matches[$key],
+						'default' => $ug_matches[0],
+				];
 				
-				foreach($ug_matches as $key => $lang){
+				setcookie('language', $ug_matches[$key], time() + 10000000, '/');
+				
+			}
+
+			// 3. if not mandatory language, select suitable from settings
+			if (empty($GLOBALS['language'])){
+				
+				// polyfill
+				if (!function_exists('array_key_first')) {
+					function array_key_first(array $arr) {
+						foreach($arr as $key => $unused) {
+							return $key;
+						}
+						return NULL;
+					}
+				}
+				
+				// en-GB,en;q=0.9,et;q=0.8,es;q=0.7,la;q=0.6
+				
+				if(!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])){
+			
+					$languages_accepted = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+					$language_a = [];
 					
-					if (in_array($lang, $languages)){
+					foreach($languages_accepted as $language_accepted){
 						
-						$GLOBALS[$group['heading']] = [
+						$lang_e = explode(';', $language_accepted);
+						if (empty($lang_e['1'])){
+							$lang_e['1'] = 'q=1.0';
+						}
+						
+						$lang_id = substr($lang_e['0'], 0, 2);
+						$lang_val = str_replace('q=', '', $lang_e['1']);
+	
+						if (empty($language_a[$lang_id]) || $language_a[$lang_id] < $lang_val){
+							$language_a[$lang_id] = $lang_val;
+						}
+						
+					}
+					
+					arsort($language_a);
+					
+					$language_id = array_key_first($language_a);
+	
+					$key = array_search($language_id, $ug_matches);
+					
+					if ($key !== false){
+
+						$GLOBALS['language'] = [
 								'label' => $ug_labels[$key],
 								'language_id' => $ug_matches[$key],
 								'default' => $ug_matches[0],
 						];
 						
-						setcookie('language', $GLOBALS[$group['heading']]['language_id'], time() + 10000000, '/');
-						
-						break;
+						setcookie('language', $ug_matches[$key], time() + 10000000, '/');
 						
 					}
-
+					
 				}
+			
+			}
 
-			} else {
+			if (empty($GLOBALS['language'])) {
 				
 				$GLOBALS[$group['heading']] = [
 						'label' => $ug_labels[0],
@@ -122,21 +176,21 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 						'default' => $ug_matches[0],
 				];
 				
-				setcookie('language', $GLOBALS[$group['heading']]['language_id'], time() + 10000000, '/');
+				setcookie('language', $GLOBALS['language']['language_id'], time() + 10000000, '/');
 				
 			}
 
-			$GLOBALS[$group['heading']]['languages'] = [];
+			$GLOBALS['language']['languages'] = [];
 			foreach($ug_matches as $key => $language_id){
 				
-				$GLOBALS[$group['heading']]['languages'][$language_id] = $ug_labels[$key];
+				$GLOBALS['language']['languages'][$language_id] = $ug_labels[$key];
 				
 			}
 			
-			$_SESSION['targets']['language'] = $GLOBALS[$group['heading']]['language_id'];
+			$_SESSION['targets']['language'] = $GLOBALS['language']['language_id'];
 			
 			if (empty($_SESSION['cms_language'])){
-				$_SESSION['cms_language'] = $GLOBALS[$group['heading']]['default'];
+				$_SESSION['cms_language'] = $GLOBALS['language']['default'];
 			}
 
 		}

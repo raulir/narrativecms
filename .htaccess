@@ -59,6 +59,8 @@ AddOutputFilterByType DEFLATE font/opentype
 
 RewriteEngine on
 
+RedirectMatch 404 \.git
+
 RewriteCond %{REQUEST_URI} /_install [NC]
 RewriteRule .* - [F,L]
 
