@@ -191,7 +191,7 @@ class Index extends CI_Controller {
 
     	if (extension_loaded('newrelic') && !empty($page_config)) {
 
-			newrelic_set_appname($GLOBALS['config']['title']);
+			newrelic_set_appname(trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), ' '.$GLOBALS['config']['site_title_delimiter']));
 			
     		$newrelic_name = '';
     		foreach($page_config as $config_item){

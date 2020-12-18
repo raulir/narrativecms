@@ -15,7 +15,7 @@ class language extends CI_Controller {
 				$GLOBALS['language']['label'] = $GLOBALS['language']['languages'][$language_id];
 				$GLOBALS['language']['language_id'] = $language_id;
 
-				setcookie('language', $language_id, time() + 10000000, '/');
+				header('Set-Cookie: language='.$language_id.'; expires='.(time() + 10000000).'; path=/; samesite=none; secure');
 				
 				print(json_encode(['result' => 'ok'], JSON_PRETTY_PRINT));
 				die();

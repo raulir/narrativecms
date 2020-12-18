@@ -4,15 +4,15 @@ function cms_cookie_create(name, value, days) {
     if (days) {
         var date = new Date();
         date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = "; expires=" + date.toGMTString();
+        expires = '; expires=' + date.toGMTString();
     } else {
-        expires = "";
+        expires = '';
     }
-    document.cookie = encodeURIComponent(name) + "=" + encodeURIComponent(value) + expires + "; path=/";
+    document.cookie = encodeURIComponent(name) + '=' + encodeURIComponent(value) + expires + '; path=/; samesite=none; secure';
 }
 
 function cms_cookie_read(name) {
-    var nameeq = encodeURIComponent(name) + "=";
+    var nameeq = encodeURIComponent(name) + '=';
     var ca = document.cookie.split(';');
     for (var i = 0; i < ca.length; i++) {
         var c = ca[i];

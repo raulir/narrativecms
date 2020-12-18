@@ -7,7 +7,8 @@
  */
 
 // load target groups configuration
-$sql = "select b.name, b.value from cms_page_panel a join cms_page_panel_param b on a.cms_page_panel_id = b.cms_page_panel_id where a.panel_name = 'cms/cms_targets' and b.name = ''";
+$sql = "select b.name, b.value from cms_page_panel a join cms_page_panel_param b on a.cms_page_panel_id = b.cms_page_panel_id "
+		." where a.panel_name = 'cms/cms_targets' and b.name = ''";
 $query = mysqli_query($db, $sql);
 
 while($result = mysqli_fetch_assoc($query)){
@@ -106,7 +107,7 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 						'default' => $ug_matches[0],
 				];
 				
-				setcookie('language', $ug_matches[$key], time() + 10000000, '/');
+				header('Set-Cookie: language='.$ug_matches[$key].'; expires='.(time() + 10000000).'; path=/; samesite=none; secure');
 				
 			}
 
@@ -160,7 +161,7 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 								'default' => $ug_matches[0],
 						];
 						
-						setcookie('language', $ug_matches[$key], time() + 10000000, '/');
+						header('Set-Cookie: language='.$ug_matches[$key].'; expires='.(time() + 10000000).'; path=/; samesite=none; secure');
 						
 					}
 					
@@ -176,7 +177,7 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 						'default' => $ug_matches[0],
 				];
 				
-				setcookie('language', $GLOBALS['language']['language_id'], time() + 10000000, '/');
+				header('Set-Cookie: language='.$GLOBALS['language']['language_id'].'; expires='.(time() + 10000000).'; path=/; samesite=none; secure');
 				
 			}
 

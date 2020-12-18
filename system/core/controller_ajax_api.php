@@ -16,8 +16,8 @@ class Ajax_api extends CI_Controller {
 
    		if (extension_loaded('newrelic')) {
     		
-			newrelic_set_appname($GLOBALS['config']['title']);
-			newrelic_name_transaction('/ajax_api/'.$this->params['panel_id']);
+			newrelic_set_appname(trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), ' '.$GLOBALS['config']['site_title_delimiter']));
+   			newrelic_name_transaction('/ajax_api/'.$this->params['panel_id']);
 
 		}
 		
