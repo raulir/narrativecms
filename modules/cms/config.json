@@ -9,9 +9,19 @@
 			"ctrl":"1"
 		},
 		{
+			"id":"content",
+			"name":"Content",
+			"ctrl":"2"
+		},
+		{
 			"id":"cms",
 			"name":"CMS",
-			"ctrl":"2"
+			"ctrl":"3"
+		},
+		{
+			"id":"tools",
+			"name":"Tools",
+			"ctrl":"4"
 		},
 		{
 			"id":"cms_search",
@@ -68,16 +78,6 @@
 			"parent":"cms",
 			"access":"cms_cms",
 			"url":"admin/update/"
-		},
-		{
-			"id":"tools",
-			"name":"Tools",
-			"ctrl":"3"
-		},
-		{
-			"id":"content",
-			"name":"Content",
-			"ctrl":"4"
 		}
 	],
 	"layouts":[

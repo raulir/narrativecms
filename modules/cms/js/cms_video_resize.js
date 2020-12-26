@@ -33,8 +33,8 @@
     			'height': ''
     		});
     		
-    		var video_width = $target.width();
-    		var video_height = $target.height();
+       		var video_width = $target.get(0).videoWidth;
+       		var video_height = $target.get(0).videoHeight;
     		
     		if ($target.data('retry') <= params.retry && ($target[0].readyState < 1 || video_width == 0 || video_height == 0)){
 
@@ -46,7 +46,7 @@
     		}
 
     		var $parent = $target.parent();
-    			
+
     		var parent_width = $parent.width();
     		var parent_height = $parent.height();
     		

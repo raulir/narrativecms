@@ -1,6 +1,6 @@
 <div class="cms_toolbar">
 	
-	<div class="admin_tool_text"><?php print($title); ?></div>
+	<div class="cms_tool_text"><?= $title ?></div>
 	
 	<div class="admin_tool_button admin_right feed_instagram_user_button">Add user</div>
 	
