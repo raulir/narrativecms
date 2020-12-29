@@ -43,7 +43,10 @@ class cms_helper_model extends CI_Model {
 					
 					// run the task
 					$panel_ci =& get_instance();
-					$panel_ci->run_panel_method($task['panel'], 'panel_action');
+					$result = $panel_ci->run_panel_method($task['panel'], 'panel_action');
+					if (!empty($result['message'])){
+						print($result['message']."\n\n");
+					}
 					unset($panel_ci);
 					
 				}

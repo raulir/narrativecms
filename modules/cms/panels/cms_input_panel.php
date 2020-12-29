@@ -12,6 +12,11 @@ class cms_input_panel extends CI_Controller {
 			$params['values'] = $this->cms_panel_model->get_cms_panels();
 		}
 		
+		foreach($params['values'] as $key => $value){
+			list($p1, $p2) = explode('/', $key);
+			$params['values'][$key] = ucfirst($p1).' / '.$value;
+		}
+		
 		return $params;
 		
 	}

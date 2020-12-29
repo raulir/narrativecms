@@ -11,13 +11,12 @@
 	z-index: 100;
 	transition: opacity 0.3s;
 	background-color: rgba(255, 255, 255, 0.5);
+	&.form_basic_message_active {
+		height: 100%;
+		opacity: 0.9;
+	}
 }
 
-.form_basic_message_active {
-	height: 100%;
-	opacity: 0.8;
-	background-color: rgba(255, 255, 255, 0.5);
-}
 
 .form_basic_message_table {
 	display: table;
