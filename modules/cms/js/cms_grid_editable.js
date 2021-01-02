@@ -19,7 +19,7 @@ function cms_grid_editable_init(){
 	
 			get_ajax_panel('cms/cms_grid_editable', data, function(result){
 	
-				$this.closest('.cms_grid_field_inner').html(result.result.html)
+				$this.closest('.cms_grid_field_inner').html(result.result._html)
 				cms_notification('Field ' + $this.data('name') + ' updated', 2)
 	
 			})

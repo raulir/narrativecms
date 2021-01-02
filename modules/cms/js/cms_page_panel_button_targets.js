@@ -14,7 +14,7 @@ function cms_page_panel_button_targets_init(){
 				'do': 'cms_page_panel_targets'
 			}, function(data){
 				
-				$('.cms_popup_area', '.cms_popup_targets').html(data.result.html);
+				$('.cms_popup_area', '.cms_popup_targets').html(data.result._html);
 				
 				$('.cms_page_panel_targets_close').on('click.cms', function(){
 					

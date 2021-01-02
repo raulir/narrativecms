@@ -1,11 +1,12 @@
 .cms_input_page_panels_inline_container {
-	width: 98.0rem;
 	background-color: #ffeeee;
 	overflow: hidden;
+	&.cms_input {
+		width: 98.0rem;
+	}
 }
 
 .cms_input_page_panels_inline_content {
-	width: 94.0rem;
 	margin: 0 auto;
 	padding-top: 1.4rem;
 }
@@ -24,7 +25,7 @@
 		height: 3.5rem;
 		border: 0.2rem dashed $colour_border;
 		border-bottom: 0;
-		width: 94.0rem;
+		width: 96.0rem;
 		box-sizing: border-box;
 		z-index: 10;
 	}
@@ -57,7 +58,6 @@
 	border: 0.2rem dashed $colour_border;
 	border-top: 0;
 	padding: 0 1rem 1rem 1rem;
-	width: 94rem;
     margin: 0 auto;
     box-sizing: border-box;
     overflow: hidden;

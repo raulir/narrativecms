@@ -286,7 +286,7 @@ class CI_Controller {
 		$this->view_params = $params;
 
 		return [
-				'html' => $return,
+				'_html' => $return,
 				'js' => $panel_js,
 				'css' => $panel_css,
 				'scss' => $panel_scss,
@@ -672,7 +672,7 @@ class CI_Controller {
 		}
 		 
 		if (empty($params['no_html'])){
-			$return['html'] .= "\n".$css_str."\n".$js_str;
+			$return['_html'] .= "\n".$css_str."\n".$js_str;
 		}
 	
 		return $return;
@@ -812,14 +812,14 @@ class CI_Controller {
 									str_replace('/', '__', $panel_config['panel']).'_'.substr(md5($panel_config['panel'].serialize($params).
 									$_SESSION['config']['targets']['hash'].$_SESSION['webp']), 0, 6).'.txt';
 										
-							$panel_data['html'] .= '<!-- cached: '.date('Y-m-d H:i:s').' -->'."\n";
+							$panel_data['_html'] .= '<!-- cached: '.date('Y-m-d H:i:s').' -->'."\n";
 							file_put_contents($filename, serialize($panel_data));
 							 
 				}
 	
 			}
 
-			$return[$panel_config['position'].'_'.$key.'_'.(!empty($params['cms_page_id']) ? $params['cms_page_id'] : '0')] = $panel_data['html'];
+			$return[$panel_config['position'].'_'.$key.'_'.(!empty($params['cms_page_id']) ? $params['cms_page_id'] : '0')] = $panel_data['_html'];
 	
 			unset($panel_data);
 	

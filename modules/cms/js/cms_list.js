@@ -85,7 +85,7 @@ function cms_list_load(start, limit, after){
 		// _no_css: true
 	}, function(data){
 		
-		$('.cms_list_container').html(data.result.html).data({start: start, limit: limit, total: data.result.total });
+		$('.cms_list_container').html(data.result._html).data({start: start, limit: limit, total: data.result.total });
 		
 		after();
 
@@ -280,7 +280,7 @@ $(document).ready(function() {
 		// create import popup for this list type
 		get_ajax_panel('cms/cms_page_panel_import', {}, function(data){
 			
-			$('.cms_popup_area', '.cms_popup_import').html(data.result.html);
+			$('.cms_popup_area', '.cms_popup_import').html(data.result._html);
 			
 			cms_popup_run('import', function(){
 				

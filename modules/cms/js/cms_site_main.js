@@ -491,6 +491,10 @@ function get_ajax_panel(name, params, action_on_success){
 		  	context: this,
 		  	success: function( returned_data ) {
 		  		
+		  		if (returned_data.result._html && !returned_data.result.html){
+		  			returned_data.result.html = returned_data.result._html
+		  		}
+		  		
 		  		// save to local storage
 		  		if (_cms_test_localstorage() && cache > 0){
 		  			returned_data.storage_timestamp = new Date().getTime();

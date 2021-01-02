@@ -21,7 +21,7 @@ function cms_input_page_panels_init(){
 			get_ajax_panel('cms/cms_popup_yes_no', {
 				'text': 'The page is not saved.<br>Save this page?'
 			}, function(data){
-				panels_display_popup(data.result.html, {
+				panels_display_popup(data.result._html, {
 					'yes': function(){
 						
 						cms_page_save({
@@ -49,7 +49,7 @@ function cms_input_page_panels_init(){
 				get_ajax_panel('cms/cms_popup_yes_no', {
 					'text': 'Page panel is not saved. Save the panel?'
 				}, function(data){
-					panels_display_popup(data.result.html, {
+					panels_display_popup(data.result._html, {
 						'yes': function(){
 							
 							cms_page_panel_save({
@@ -106,7 +106,7 @@ function cms_input_page_panel_selector(target_type, target_id, target_name, filt
 	
 	}, function(data){
 
-		panels_display_popup(data.result.html, {
+		panels_display_popup(data.result._html, {
 			'select': function(data){
 				
 				// if shortcut

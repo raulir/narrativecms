@@ -39,7 +39,7 @@ class cms_input extends CI_Controller {
 
 		// copy params to params for easier manipulation
 		$params['params'] = $params;
-		
+
 		return $params;
 		
 	}

@@ -36,7 +36,7 @@ function cms_images_activate() {
 				}
 				
 				get_ajax_panel('cms/cms_popup_yes_no', {'text':text}, function(data){
-					panels_display_popup(data.result.html, {
+					panels_display_popup(data.result._html, {
 						'yes': function(){
 							$('.cms_images_image_cell', $that).animate({'opacity':'0'}, 100);
 							get_ajax_panel('cms/cms_images_operations', {
@@ -63,7 +63,7 @@ function cms_images_activate() {
 				get_ajax_panel('cms/cms_image', {'filename': $that.data('filename')}, function(data){
 					// display image edit popup
 					$('body').append('<div class="cms_image_overlay"></div>');
-					$('body').append(data.result.html);
+					$('body').append(data.result._html);
 
 					// activate buttons
 					$('.cms_image_cancel').on('click.cms', function(){
@@ -136,7 +136,7 @@ function cms_image_replace($image){
 	text = text + '<div class="cms_images_warning_extra">The old data will be overwritten.</div>';
 	
 	get_ajax_panel('cms/cms_popup_yes_no', {'text':text}, function(data){
-		panels_display_popup(data.result.html, {
+		panels_display_popup(data.result._html, {
 			'yes': function(){
 				
 				// activate file input change event
@@ -183,7 +183,7 @@ function cms_image_replace($image){
 				    				'module': 'cms'
 				    			}, function(data){
 				    				
-				    				var $new_input = $(data.result.html).replaceAll($container);
+				    				var $new_input = $(data.result._html).replaceAll($container);
 				    				
 				    				$('.cms_input_image_button', $new_input).off('click.r').on('click.r', function(){
 				    					cms_input_image_popup($(this));
@@ -314,7 +314,7 @@ function cms_images_load_images(page, limit, filename){
 	
 	get_ajax_panel('cms/cms_images_page', cms_images_load_parameters, function(data){
 		
-		$('.cms_images_area').html(data.result.html).data('page', page);
+		$('.cms_images_area').html(data.result._html).data('page', page);
 		
 		// update buttons etc - first
 		if (parseInt(data.result.cms_images_max_page) >= 1 && parseInt(data.result.cms_images_current) > 0){

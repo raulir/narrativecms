@@ -48,7 +48,7 @@ function cms_input_xy_picker($input){
 	
 	}, function(data){
 
-		panels_display_popup(data.result.html, {
+		panels_display_popup(data.result._html, {
 			'select': function(data){
 			
 				$('.cms_input_xy_x', $('.cms_input_xy_active')).val($('.cms_xy_picker_container').data('x').toFixed(2))

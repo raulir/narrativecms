@@ -241,9 +241,9 @@ class Index extends CI_Controller {
 						$panel_data = $this->ajax_panel($panel_config['panel'], $panel_config['params']);
 						
 						if (empty($return[$panel_config['position']])){
-							$return[$panel_config['position']]['html'] = '';
+							$return[$panel_config['position']]['_html'] = '';
 						}
-						$return[$panel_config['position']]['html'] .= $panel_data['html'];
+						$return[$panel_config['position']]['_html'] .= $panel_data['_html'];
 						$return[$panel_config['position']]['cms_page_id'] = $panel_config['params']['cms_page_id'];
 					}
 				}
@@ -261,7 +261,7 @@ class Index extends CI_Controller {
 				foreach($page_config as $key => $panel_config){
 					if (in_array($panel_config['position'], $_positions)) {
 						$panel_data = $this->ajax_panel($panel_config['panel'], $panel_config['params']);
-						$return .= $panel_data['html'];
+						$return .= $panel_data['_html'];
 					}
 				}
 				
@@ -278,7 +278,7 @@ class Index extends CI_Controller {
 				}
 					
 				print(json_encode(array(
-						'html' => $return, 
+						'_html' => $return, 
 						'menu_item_id' => $menu_item_id, 
 						'title' => !empty($GLOBALS['_panel_titles']) ? trim(implode(' - ', $GLOBALS['_panel_titles']), ' -') : '',
 				)));

@@ -45,7 +45,7 @@ function cms_input_textarea_init(){
 		// go over all tinymce elements
 		var i = $('.cms_tinymce_formatted').length;
 		
-		$('.admin_tinymce').each(function(){
+		$('.cms_tinymce').each(function(){
 			
 			var $this = $(this);
 
@@ -53,7 +53,7 @@ function cms_input_textarea_init(){
 
 				$this.addClass('cms_tinymce_formatted');
 
-				$this.addClass('admin_tinymce_' + i);
+				$this.addClass('cms_tinymce_' + i);
 				
 				// get buttons
 				var buttons = '' + $this.data('html');
@@ -164,13 +164,13 @@ function cms_input_textarea_init(){
 				}
 				
 				tinymce.init($.extend({
-					selector: '.admin_tinymce_' + i, 
+					selector: '.cms_tinymce_' + i, 
 					valid_elements: valid_elements, 
 					toolbar: toolbar,
 					mode : 'textareas',
 					theme: 'silver',
 					content_css: config_url + $this.data('html_css'),
-					body_class: $this.data('html_class') + ' admin_tinymce_body',
+					body_class: $this.data('html_class') + ' cms_tinymce_body',
 				    forced_root_block : '',
 				    menubar: false,
 				    statusbar: false,

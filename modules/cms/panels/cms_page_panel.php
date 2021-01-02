@@ -11,9 +11,6 @@ class cms_page_panel extends CI_Controller {
 			header('Location: '.$GLOBALS['config']['base_url'].'cms_login/', true, 302);
 			exit();
 		}
-		
-		// for type select
-		add_css('cms/cms_input_select.scss');
 
 	}
 

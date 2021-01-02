@@ -142,9 +142,9 @@ if ( !function_exists('get_position')) {
     	}
 
     	if (!$params['_return']){
-			print('<!-- embed start -->'.$data['html'].'<!-- embed end -->');
+			print('<!-- embed start -->'.$data['_html'].'<!-- embed end -->');
     	} else {
-    		return $data['html'];
+    		return $data['_html'];
     	}
     }
     

@@ -55,7 +55,7 @@ function cms_page_save(params){
 function cms_page_delete(){
 
 	get_ajax_panel('cms/cms_popup_yes_no', {}, function(data){
-		panels_display_popup(data.result.html, {
+		panels_display_popup(data.result._html, {
 			'yes': function(){
 				
 				var page_id = $('.cms_page_id').val();
@@ -96,7 +96,7 @@ function cms_page_init(){
 		var $this = $(this);
 		var cms_page_panel_id = $this.data('cms_page_panel_id');
 		get_ajax_panel('cms/cms_popup_yes_no', {'text':'Delete block shortcut?'}, function(data){
-			panels_display_popup(data.result.html, {
+			panels_display_popup(data.result._html, {
 				'yes': function(){
 					get_ajax_panel('cms/cms_page_panel_operations', {
 						'cms_page_panel_id': cms_page_panel_id,

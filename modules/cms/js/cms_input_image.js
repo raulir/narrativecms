@@ -117,7 +117,7 @@ function cms_input_image_load_images(params){
 	}
 
 	get_ajax_panel('cms/cms_images', {'filename': original_filename, 'category': params.category}, function(data){
-		panels_display_popup(data.result.html, {
+		panels_display_popup(data.result._html, {
 			'select': function(after){
 				// just before closing (select), check, if selected value is still a valid image
 				$(document).off('keyup.cms');
@@ -133,7 +133,7 @@ function cms_input_image_load_images(params){
 						if (data.result.filename == ''){
 							$(params.container_selector).html('-- no image --');
 						} else {
-							$(params.container_selector).html(data.result.html);
+							$(params.container_selector).html(data.result._html);
 						}
 					}
 

@@ -15,7 +15,7 @@ function init_cms_input_repeater(){
 			
 			var $area = $this.closest('.cms_repeater_container').find('.cms_repeater_area');
 
-			var $span = $('<span></span>').html(data.result.html)
+			var $span = $('<span></span>').html(data.result._html)
 			var scripts = [];
 			
 			$span.children('script').each(function(){

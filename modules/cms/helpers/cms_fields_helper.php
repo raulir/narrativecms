@@ -94,29 +94,6 @@ if (!function_exists('print_fields')){
 						'params' => $field,
 				]);
 										
-			} elseif ($field['type'] == 'textarea'){
-				
-				$return .= _panel('cms/cms_input_textarea', array(
-						'label' => $field['label'].$mandatory_label,
-						'value' => ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) ),
-						'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'),
-						'lines' => (!empty($field['lines']) ? $field['lines'] : '3' ),
-						'width' => !empty($field['width']) ? $field['width'] : 'narrow',
-						'extra_data' => $max_chars_data.' '.$meta_data.' '
-								.' data-html="'.(!empty($field['html']) ? $field['html'] : '').'" '
-								.' data-html_class="'.(!empty($field['html_class']) ? $field['html_class'] : '').'" '
-								.' data-html_css="'.(!empty($field['html_css']) ? $field['html_css'] : '').'" '
-								.(!empty($field['styles']) ? ' data-styles="'.str_replace('"','~',json_encode($field['styles'])).'"' : ''),
-						'max_chars_class' => $max_chars_class,
-						'meta_class' => $meta_class,
-						'mandatory_class' => $mandatory_class,
-						'tinymce' => !empty($field['html']),
-						'_return' => true,
-						'help' => !empty($field['help']) ? $field['help'] : '',
-						'translate' => !empty($field['translate']) ? 1 : 0,
-						'params' => $field,
-				));
-
 			} elseif ($field['type'] == 'cms_page_panels' || $field['type'] == 'panels'){
 				
 				$return .= _panel('cms/cms_input_page_panels', array(

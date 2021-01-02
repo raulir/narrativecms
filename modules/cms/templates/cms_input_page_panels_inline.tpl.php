@@ -1,4 +1,4 @@
-<div class="cms_input_page_panels_inline_container">
+<div class="cms_input cms_input_page_panels_inline_container" data-cms_input_height="50" data-cms_input_width="2">
 	
 	<div class="cms_input_page_panels_inline_content">
 
@@ -15,7 +15,7 @@
 			<?php if (!empty($cms_page_panels)): ?>
 
 				<?php foreach($cms_page_panels as $cms_page_panel): ?>
-					<?php _panel('cms/cms_page_panel_inline', ['cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'], ]) ?>
+					<?php _panel('cms/cms_page_panels_panel', ['cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'], ]) ?>
 				<?php endforeach ?>
 
 			<?php else: ?>

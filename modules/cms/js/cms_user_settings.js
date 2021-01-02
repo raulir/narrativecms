@@ -109,7 +109,7 @@ function cms_user_settings_user_delete($this, after){
 	
 	// ask are you sure
 	get_ajax_panel('cms/cms_popup_yes_no', {}, function(data){
-		panels_display_popup(data.result.html, {
+		panels_display_popup(data.result._html, {
 			'yes': function(){
 				get_ajax_panel('cms/cms_user_operations', {
 					'do': 'cms_user_delete',

@@ -59,7 +59,7 @@ function cms_page_panel_button_show_activate(){
 
 				// ask are you sure
 				get_ajax_panel('cms/cms_popup_yes_no', {}, function(data){
-					panels_display_popup(data.result.html, {
+					panels_display_popup(data.result._html, {
 						'yes': function(){
 							
 							// if save button, save 

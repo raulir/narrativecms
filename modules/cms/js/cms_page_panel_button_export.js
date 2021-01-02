@@ -14,7 +14,7 @@ function cms_page_panel_button_export_init(){
 				'do': 'cms_page_panel_export'
 			}, function(data){
 				
-				$('.cms_popup_area', '.cms_popup_export').html(data.result.html);
+				$('.cms_popup_area', '.cms_popup_export').html(data.result._html);
 				
 				$('.cms_page_panel_export_close').on('click.cms', function(){
 					$('.cms_popup_cancel').click();
