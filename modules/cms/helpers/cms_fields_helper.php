@@ -91,6 +91,7 @@ if (!function_exists('print_fields')){
 						'_return' => true,
 						'help' => !empty($field['help']) ? $field['help'] : '',
 						'translate' => !empty($field['translate']) ? 1 : 0,
+						'base_id' => (!empty($data['cms_page_panel_id']) ? $data['cms_page_panel_id'] : ''),
 						'params' => $field,
 				]);
 										

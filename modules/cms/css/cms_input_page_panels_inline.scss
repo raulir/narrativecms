@@ -1,9 +1,15 @@
 .cms_input_page_panels_inline_container {
-	background-color: #ffeeee;
+	
 	overflow: hidden;
+	
 	&.cms_input {
-		width: 98.0rem;
+		width: 100%;
 	}
+
+	.cms_input_image .cms_input_button {
+		width: 10.8rem;
+	}
+
 }
 
 .cms_input_page_panels_inline_content {
@@ -13,7 +19,7 @@
 
 .cms_input_page_panels_inline_label {
 	
-	padding: 0 2.6rem 1.0rem 2.6rem;
+	padding: 0 2.6rem 1.5rem 2.6rem;
 	box-sizing: border-box;
 	position: relative;
 	
@@ -22,7 +28,7 @@
 		position: absolute;
 		left: 0;
 		top: 0.9rem;
-		height: 3.5rem;
+		height: 0.5rem;
 		border: 0.2rem dashed $colour_border;
 		border-bottom: 0;
 		width: 96.0rem;
@@ -54,18 +60,19 @@
 }
 
 .cms_input_page_panels_inline_footer {
-	
 	border: 0.2rem dashed $colour_border;
 	border-top: 0;
-	padding: 0 1rem 1rem 1rem;
-    margin: 0 auto;
+	padding: 0 1.0rem 0.5rem 1.0rem;
+    margin: 4.0rem auto 0 auto;
     box-sizing: border-box;
-    overflow: hidden;
-	
-	.admin_right {
-		margin: 0;
-	}
-	
+    height: 0.5rem;
+	text-align: right;
+}
+
+.cms_input_page_panels_inline_add {
+	position: relative;
+	bottom: 3.5rem;
+	right: -1.1rem;
 }
 
 .cms_input_page_panels_inline_message {

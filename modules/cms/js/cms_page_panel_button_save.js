@@ -1,3 +1,25 @@
+function cms_page_panel_serialise_selector($set){
+
+	var data = $set.serializeArray();
+	var data_to_submit = {};
+	$.each(data, function(key, value){
+		var re = value.name.slice(-2);
+		if (re == '[]') {
+			var name = value.name.replace('[]', '');
+			if(typeof data_to_submit[name] == 'undefined' || !$.isArray(data_to_submit[name])){
+				data_to_submit[name] = [value.value];
+			} else {
+				data_to_submit[name].push(value.value);
+			}
+		} else {
+			data_to_submit[value.name] = value.value;
+		}
+	});
+	
+	return data_to_submit
+
+}
+
 function cms_page_panel_save(params){
 	
 	params = $.extend({'no_mandatory_check':false}, params);
@@ -17,7 +39,39 @@ function cms_page_panel_save(params){
 			}
 		}
 		
-		var data_to_submit = serialize_form('.admin_form')
+		var $admin_form = $('.admin_form')
+		var $panels_inputs = $('.cms_input_page_panels_inline_container', $admin_form)
+		
+		var datasets = []
+		
+		$panels_inputs.each(function(){
+			
+			var $child_panels = $('.cms_page_panels_panel_container', $(this))
+			var sort = 0;
+			
+			$child_panels.each(function(){
+				
+				var dataset = cms_page_panel_serialise_selector($('input, select, textarea', $(this)))
+				
+				dataset.cms_page_id = '0'
+				dataset.cms_page_panel_id = $(this).data('cms_page_panel_id')
+				dataset.panel_name = $(this).data('panel_name')
+				dataset.parent_id = $('.cms_page_panel_id').val()
+				dataset.sort = sort++
+				dataset.title = $('.cms_page_panels_panel_title', $(this)).html()
+					
+				datasets.push(dataset)
+				$('input, select, textarea', $(this)).addClass('cms_page_panel_serialise_ok')
+			
+			})
+		
+		})
+		
+		datasets.push(cms_page_panel_serialise_selector($('input, select, textarea', $admin_form).not('.cms_page_panel_serialise_ok')))
+
+		console.log(datasets)
+		
+		return
 		
 		// add do and language
 		data_to_submit['do'] = 'cms_page_panel_save';

@@ -3,6 +3,8 @@ $colour_white: white;
 
 .cms_page_panel_toolbar_container {
 	padding-bottom: 1.0rem;
+	height: 4.6rem;
+	box-sizing: border-box;
 }
 
 .cms_page_panel_toolbar_content {
@@ -12,10 +14,10 @@ $colour_white: white;
 
 .cms_page_panel_toolbar_side_left {
 		position: fixed;
-		left: 0;
-		width: calc(50% - 50rem);
+		right: 100%;
+		width: calc(50vw - 50rem);
 		height: 4.0rem;
-		top: 6.0rem;
+		top: 0;
 		background-color: rgba(124,80,26,0);
 		border-bottom: 0.1rem solid rgba(124,80,26,0);
 		transition: top 0.5s, height 0.5s, background-color 0.5s, border 0.5s;
@@ -24,10 +26,10 @@ $colour_white: white;
 
 .cms_page_panel_toolbar_side_right {
 		position: fixed;
-		right: 0;
-		width: calc(50% - 50rem);
+		left: 100%;
+		width: calc(50vw - 50rem);
 		height: 4.0rem;
-		top: 6.0rem;
+		top: 0;
 		background-color: rgba(124,80,26,0);
 		border-bottom: 0.1rem solid rgba(124,80,26,0);
 		transition: top 0.5s, height 0.5s, background-color 0.5s, border 0.5s;
@@ -37,6 +39,7 @@ $colour_white: white;
 .cms_page_panel_toolbar_area {
 	overflow: visible;
 	z-index: 20;
+	padding-bottom: 0.5rem;
 }
 
 .cms_page_panel_toolbar_breadcrumb {

@@ -21,7 +21,7 @@
 	
 		box-sizing: border-box;
 		display: inline-block;
-		width: 12.0rem;
+		width: calc(100% - 35.0rem);
 		line-height: 2.5rem;
 		max-height: 2.5rem;
 		letter-spacing: -0.04rem;

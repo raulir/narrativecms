@@ -12,11 +12,8 @@
 		line-height: 2.1rem;
 	}
 	
-	& > .cms_input.cms_input_wide_textarea {
-		width: 94.0rem;
-		textarea {
-			width: 94.0rem;
-		}
+	&.cms_input.cms_input_wide_textarea {
+		width: 100%;
 	}
 
 }

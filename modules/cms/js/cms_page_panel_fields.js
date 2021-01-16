@@ -1,18 +1,18 @@
-function cms_page_panel_fields_init(){
-	
+function cms_page_panel_fields_height($target){
+
 	var left = 0;
 	var right = 0;
 	
 	var top_extra = 0;
 
-	$('.cms_page_panel_fields > div').each(function(){
+	$target.children('div').each(function(){
 		
 		var $this = $(this);
 		var t = 0
 		
 		if ($this.hasClass('cms_input_container')){
 			
-			var $input = $('.cms_input', $this)
+			var $input = $this.children('.cms_input')
 		
 			var h = $input.data('cms_input_height')
 			if (!h) h = 1
@@ -153,8 +153,29 @@ function cms_page_panel_fields_init(){
 		
 	})
 	
-	$('.cms_page_panel_fields').css({'height': Math.max(left, right)*3.5 + 'rem'}).removeClass('cms_page_panel_fields_hidden')
+	$target.css({'height': Math.max(left, right)*3.5 + 'rem'}).removeClass('cms_page_panel_fields_hidden')
 	
+	return Math.max(left, right)
+
+}
+
+function cms_page_panel_fields_init(){
+	
+	$('.cms_page_panels_panel_area').each(function(){
+		
+		var h = cms_page_panel_fields_height($(this))
+		
+		var $container = $(this).closest('.cms_input_page_panels_inline_container')
+		
+		var old_h = $container.data('cms_input_height')
+		
+		$container.data('cms_input_height', old_h + h + 2)
+		
+	})
+	
+	cms_page_panel_fields_height($('.cms_page_panel_fields'))
+	
+
 }
 
 function cms_page_panel_fields_resize(){

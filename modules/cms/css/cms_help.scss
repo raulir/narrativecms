@@ -11,7 +11,7 @@
 	z-index: 100;
 
 	.cms_page_panel_container & {
-		left: 12.7rem;
+		left: calc(100% - 36.3rem);
 	}
 
 	.cms_repeater_block & {

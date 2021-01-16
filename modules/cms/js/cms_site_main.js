@@ -1008,28 +1008,6 @@ var injectScript = function(src, id) {
 	
 }
 
-var serialize_form = function(form_selector){
-
-	var data = $(form_selector).serializeArray();
-	var data_to_submit = {};
-	$.each(data, function(key, value){
-		var re = value.name.slice(-2);
-		if (re == '[]') {
-			var name = value.name.replace('[]', '');
-			if(typeof data_to_submit[name] == 'undefined' || !$.isArray(data_to_submit[name])){
-				data_to_submit[name] = [value.value];
-			} else {
-				data_to_submit[name].push(value.value);
-			}
-		} else {
-			data_to_submit[value.name] = value.value;
-		}
-	});
-	
-	return data_to_submit
-
-}
-
 $(document).ready(function() {
 	
 	cms_hover_init();

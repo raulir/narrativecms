@@ -60,9 +60,9 @@
 		
 		</div>
 		
-	</div>
+		<div class="cms_page_panel_toolbar_side_left"></div>
+		<div class="cms_page_panel_toolbar_side_right"></div>
 
-	<div class="cms_page_panel_toolbar_side_left"></div>
-	<div class="cms_page_panel_toolbar_side_right"></div>
+	</div>
 
 </div>
