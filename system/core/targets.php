@@ -107,8 +107,9 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 						'default' => $ug_matches[0],
 				];
 				
-				header('Set-Cookie: language='.$ug_matches[$key].'; expires='.(time() + 10000000).'; path=/; samesite=none; secure');
-				
+				include_once('../helpers/cookie_helper.php');
+				cms_cookie_create('language', $ug_matches[$key], 90);
+
 			}
 
 			// 3. if not mandatory language, select suitable from settings
@@ -161,8 +162,9 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 								'default' => $ug_matches[0],
 						];
 						
-						header('Set-Cookie: language='.$ug_matches[$key].'; expires='.(time() + 10000000).'; path=/; samesite=none; secure');
-						
+						include_once('../helpers/cookie_helper.php');
+						cms_cookie_create('language', $ug_matches[$key], 90);
+
 					}
 					
 				}
@@ -177,7 +179,8 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 						'default' => $ug_matches[0],
 				];
 				
-				header('Set-Cookie: language='.$GLOBALS['language']['language_id'].'; expires='.(time() + 10000000).'; path=/; samesite=none; secure');
+				include_once('../helpers/cookie_helper.php');
+				cms_cookie_create('language', $GLOBALS['language']['language_id'], 90);
 				
 			}
 

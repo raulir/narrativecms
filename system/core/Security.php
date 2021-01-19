@@ -33,35 +33,7 @@ class Security {
 	 * @access protected
 	 */
 	protected $_xss_hash			= '';
-	/**
-	 * Random Hash for Cross Site Request Forgery Protection Cookie
-	 *
-	 * @var string
-	 * @access protected
-	 */
-	protected $_csrf_hash			= '';
-	/**
-	 * Expiration time for Cross Site Request Forgery Protection Cookie
-	 * Defaults to two hours (in seconds)
-	 *
-	 * @var int
-	 * @access protected
-	 */
-	protected $_csrf_expire			= 7200;
-	/**
-	 * Token name for Cross Site Request Forgery Protection Cookie
-	 *
-	 * @var string
-	 * @access protected
-	 */
-	protected $_csrf_token_name		= 'ci_csrf_token';
-	/**
-	 * Cookie name for Cross Site Request Forgery Protection Cookie
-	 *
-	 * @var string
-	 * @access protected
-	 */
-	protected $_csrf_cookie_name	= 'ci_csrf_token';
+
 	/**
 	 * List of never allowed strings
 	 *
@@ -115,124 +87,13 @@ class Security {
 				}
 			}
 
-			// Append application specific cookie prefix
-			if (config_item('cookie_prefix'))
-			{
-				$this->_csrf_cookie_name = config_item('cookie_prefix').$this->_csrf_cookie_name;
-			}
-
 			// Set the CSRF hash
 			$this->_csrf_set_hash();
 		}
 
 		log_message('debug', "Security Class Initialized");
 	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Verify Cross Site Request Forgery Protection
-	 *
-	 * @return	object
-	 */
-	public function csrf_verify()
-	{
-		// If it's not a POST request we will set the CSRF cookie
-		if (strtoupper($_SERVER['REQUEST_METHOD']) !== 'POST')
-		{
-			return $this->csrf_set_cookie();
-		}
-
-		// Do the tokens exist in both the _POST and _COOKIE arrays?
-		if ( ! isset($_POST[$this->_csrf_token_name], $_COOKIE[$this->_csrf_cookie_name]))
-		{
-			$this->csrf_show_error();
-		}
-
-		// Do the tokens match?
-		if ($_POST[$this->_csrf_token_name] != $_COOKIE[$this->_csrf_cookie_name])
-		{
-			$this->csrf_show_error();
-		}
-
-		// We kill this since we're done and we don't want to
-		// polute the _POST array
-		unset($_POST[$this->_csrf_token_name]);
-
-		// Nothing should last forever
-		unset($_COOKIE[$this->_csrf_cookie_name]);
-		$this->_csrf_set_hash();
-		$this->csrf_set_cookie();
-
-		log_message('debug', 'CSRF token verified');
-
-		return $this;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Set Cross Site Request Forgery Protection Cookie
-	 *
-	 * @return	object
-	 */
-	public function csrf_set_cookie()
-	{
-		$expire = time() + $this->_csrf_expire;
-		$secure_cookie = (config_item('cookie_secure') === TRUE) ? 1 : 0;
-
-		if ($secure_cookie && (empty($_SERVER['HTTPS']) OR strtolower($_SERVER['HTTPS']) === 'off'))
-		{
-			return FALSE;
-		}
-
-		setcookie($this->_csrf_cookie_name, $this->_csrf_hash, $expire, config_item('cookie_path'), config_item('cookie_domain'), $secure_cookie);
-
-		log_message('debug', "CRSF cookie Set");
-
-		return $this;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Show CSRF Error
-	 *
-	 * @return	void
-	 */
-	public function csrf_show_error()
-	{
-		show_error('The action you have requested is not allowed.');
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Get CSRF Hash
-	 *
-	 * Getter Method
-	 *
-	 * @return 	string 	self::_csrf_hash
-	 */
-	public function get_csrf_hash()
-	{
-		return $this->_csrf_hash;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Get CSRF Token Name
-	 *
-	 * Getter Method
-	 *
-	 * @return 	string 	self::csrf_token_name
-	 */
-	public function get_csrf_token_name()
-	{
-		return $this->_csrf_token_name;
-	}
-
+	
 	// --------------------------------------------------------------------
 
 	/**
@@ -842,34 +703,4 @@ class Security {
 		return $str;
 	}
 
-	// --------------------------------------------------------------------
-
-	/**
-	 * Set Cross Site Request Forgery Protection Cookie
-	 *
-	 * @return	string
-	 */
-	protected function _csrf_set_hash()
-	{
-		if ($this->_csrf_hash == '')
-		{
-			// If the cookie exists we will use it's value.
-			// We don't necessarily want to regenerate it with
-			// each page load since a page could contain embedded
-			// sub-pages causing this feature to fail
-			if (isset($_COOKIE[$this->_csrf_cookie_name]) &&
-				preg_match('#^[0-9a-f]{32}$#iS', $_COOKIE[$this->_csrf_cookie_name]) === 1)
-			{
-				return $this->_csrf_hash = $_COOKIE[$this->_csrf_cookie_name];
-			}
-
-			return $this->_csrf_hash = md5(uniqid(rand(), TRUE));
-		}
-
-		return $this->_csrf_hash;
-	}
-
 }
-
-/* End of file Security.php */
-/* Location: ./system/libraries/Security.php */
