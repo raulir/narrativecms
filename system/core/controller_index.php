@@ -40,16 +40,11 @@ class Index extends CI_Controller {
     	$this->load->model('cms/cms_page_model');
     	$this->load->model('cms/cms_menu_model');
     	
-    	$page_config = array();
+    	$page_config = [];
     		
         // if module list item module/item=XX then / causes second parameter
     	if (!empty($extra)){
     		$page_id = $page_id . '/' . $extra;
-    	}
-    	
-    	// set page static config
-    	if (!empty($GLOBALS['config']['static_panels'])){
-    		_html_error('Config contains static panels. This is not supported anymore.');
     	}
 
     	// get panels on page

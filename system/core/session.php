@@ -8,6 +8,10 @@
 
 if (!session_id()){
 
+	if($GLOBALS['config']['base_url'] !== '/'){
+		session_name('s_'.md5($GLOBALS['config']['base_url']));
+	}
+	
 	session_start();
 
 	if (!empty($_SESSION['timezone'])){

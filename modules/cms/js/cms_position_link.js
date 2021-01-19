@@ -56,7 +56,7 @@ function cms_position_link_init(){
 					let $backup_this = before_result[0].clone(true, true)
 
 					$.each(before_result[1].positions, function(i, posdata){
-						$('.cms_position_' + i).html(posdata.html).data('cms_page_id', posdata.cms_page_id)
+						$('.cms_position_' + i).html(posdata._html).data('cms_page_id', posdata.cms_page_id)
 					})
 					
 					change_url($this.attr('href'))
