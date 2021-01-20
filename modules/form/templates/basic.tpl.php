@@ -1,4 +1,8 @@
-<div class="form_basic_container" <?php if (!empty($brochure)): ?> data-success_url="<?php _lfd($brochure, false) ?>" <?php endif ?>>
+<div class="form_basic_container form_basic_recaptcha_<?= !empty($recaptcha) ? 'on' : 'off' ?>"
+		<?php if (!empty($recaptcha)): ?>data-recaptcha_key="<?= $recaptcha_client_key ?>" <?php endif ?>
+		<?php if (!empty($brochure)): ?> data-success_url="<?php _lfd($brochure, false) ?>" <?php endif ?>
+		<?php if (!empty($virtual_success_url)): ?>data-virtual_success_url="<?= $virtual_success_url ?>"<?php endif ?>>
+		
 	<div class="form_basic_content">
 
 		<?php if(!empty($heading)): ?>

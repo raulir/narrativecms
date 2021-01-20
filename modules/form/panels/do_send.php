@@ -26,9 +26,6 @@ class do_send extends CI_Controller {
        		$params = array_merge($default_params, $params);
         	
         	unset($data['do']);
-        	if (isset($data['id'])){
-	        	unset($data['id']);
-        	}
             if (isset($data['panel_id'])){
 	        	unset($data['panel_id']);
         	}
@@ -37,6 +34,43 @@ class do_send extends CI_Controller {
         	}
         	if (isset($data['cache'])){
         		unset($data['cache']);
+        	}
+        	
+        	$captcha_verified = true;
+        	if (isset($data['recaptcha_token'])){
+        		
+        		$captcha_verified = false;
+        		
+        		$panel = $this->cms_page_panel_model->get_cms_page_panel($data['id']);
+        		
+        		// recaptcha check
+        		$context = stream_context_create([
+					'http' => [
+        				'method' => 'POST',
+        				'content'=> http_build_query([
+        					'secret' => $panel['recaptcha_server_key'],
+        					'response' => $data['recaptcha_token'],
+        				]),
+        			],
+        		]);
+        		
+        		if (isset($data['id'])){
+        			unset($data['id']);
+        		}
+        		
+        		@$response = json_decode(file_get_contents('https://www.google.com/recaptcha/api/siteverify', 0, $context), true);
+        		
+        		if ($response['success'] == 1 && $response['action'] == 'form'){
+        			$captcha_verified = true;
+        			$data['captcha'] = $response['score'].'|'.$response['challenge_ts'];
+        		}
+
+        		unset($data['recaptcha_token']);
+        	
+        	}
+        	
+        	if (!$captcha_verified){
+        		$return['result'] = ['error' => $panel['recaptcha_error_message']];
         	}
         	
         	// page title for email

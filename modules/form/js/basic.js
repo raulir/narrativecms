@@ -1,8 +1,8 @@
-function form_basic_submit(){
+function form_basic_submit($this){
 	
-	var $container = $(this).closest('.form_basic_container')
+	var $container = $this.closest('.form_basic_container')
 
-	var $form = $(this).closest('form');
+	var $form = $this.closest('form');
 	
 	var missing = 0;
 	$('.form_basic_mandatory', $form).each(function(){
@@ -71,6 +71,17 @@ function form_basic_submit(){
 			window.location = $container.data('success_url');
 		}
 		
+		// if needs to send success pageview
+		if ($container.data('virtual_success_url') && typeof gtag !== 'undefined'){
+			
+			gtag('event', 'page_view', {
+				'page_title': 'Form success',
+				'page_path': $container.data('virtual_success_url'),
+				'transport_type': 'beacon'
+			})
+
+		}
+		
 	}
 
 }
@@ -92,7 +103,22 @@ function form_basic_init(){
 			return false;
 		});
 		
-		$('.form_basic_submit', $container).on('click.cms', form_basic_submit);
+		$('.form_basic_submit', $container).on('click.cms', function(){
+			
+			var $this = $(this)
+			
+			if (!$('#recaptcha').length){
+				form_basic_submit($this)
+			} else {
+				grecaptcha.ready(function() {
+					grecaptcha.execute($('#recaptcha').data('key'), {action: 'form'}).then(function(token) {
+						$('.form_basic_form>form', $container).append('<input type="hidden" name="recaptcha_token" value="' + token + '">')
+						form_basic_submit($this)
+					})
+			    })
+			}
+			
+		})
 		
 		$('.form_basic_input_input', $container).each(function(){
 			var $this = $(this);
@@ -123,7 +149,15 @@ function form_basic_init(){
 			
 			$container.remove();
 			
-		});		
+		});
+		
+		if ($container.hasClass('form_basic_recaptcha_on') && !$('#recaptcha').length){
+			
+			$('body').append('<script id="recaptcha" src="https://www.google.com/recaptcha/api.js?render=' + 
+					$container.data('recaptcha_key') + '" data-key="' + $container.data('recaptcha_key') + '"></script>')
+			
+		}
+		
 	})
 
 }

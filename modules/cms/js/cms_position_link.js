@@ -69,7 +69,6 @@ function cms_position_link_init(){
 
 						gtag('event', 'page_view', {
 							page_title: before_result[1].title,
-  							// page_location: '<Page Location>',
   							page_path: page
 						})
 

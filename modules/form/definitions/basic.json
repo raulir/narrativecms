@@ -48,6 +48,13 @@
 			"help":"Message covering the form area while form data is being sent"
 		},
 		{
+			"type":"text",
+			"name":"virtual_success_url",
+			"label":"Success GA URL",
+			"default":"/form_success/",
+			"help":"Pageview to register when sending success"
+		},
+		{
 			"type":"subtitle",
 			"label":"Notification"
 		},
@@ -244,6 +251,36 @@
 					"label":"Value"
 				}
 			]
+		},
+		{
+			"type":"subtitle",
+			"label":"Recaptcha"
+		},
+		{
+			"type":"select",
+			"name":"recaptcha",
+			"label":"Use recaptcha",
+			"values":{
+				"1":"Yes",
+				"0":"No"
+			},
+			"default":"0",
+			"help":"Use Google reCAPTCHA v3"
+		},
+		{
+			"type":"text",
+			"name":"recaptcha_server_key",
+			"label":"Server secret key"
+		},
+		{
+			"type":"text",
+			"name":"recaptcha_client_key",
+			"label":"Client site key"
+		},
+		{
+			"type":"text",
+			"name":"recaptcha_error_message",
+			"label":"Error message"
 		}
 	]
 }
