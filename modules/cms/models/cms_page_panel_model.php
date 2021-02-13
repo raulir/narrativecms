@@ -1057,6 +1057,8 @@ class cms_page_panel_model extends Model {
 
 	}
 	
+	/* DEPRECATED */
+	
 	/**
 	 * get site default language
 	 */

@@ -19,6 +19,7 @@ class language extends CI_Controller {
 				cms_cookie_create('language', $language_id, 90);
 
 				print(json_encode(['result' => 'ok'], JSON_PRETTY_PRINT));
+				
 				die();
 			
 			}

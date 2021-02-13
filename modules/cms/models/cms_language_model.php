@@ -18,8 +18,22 @@ class cms_language_model extends Model {
 			return array_key_first($GLOBALS['language']['languages']);
 		}
 		
+		if (!empty($GLOBALS['config']['language'])){
+			return $GLOBALS['config']['language'];
+		}
+		
 		return 'en';
 		
+	}
+	
+	function get_current_language(){
+	
+		if (!empty($_COOKIE['language'])){
+			return $_COOKIE['language'];
+		}
+	
+		return $this->get_default();
+	
 	}
 	
 	function get_cms_language(){
@@ -37,5 +51,5 @@ class cms_language_model extends Model {
 		return 'en';
 	
 	}
-	
+
 }

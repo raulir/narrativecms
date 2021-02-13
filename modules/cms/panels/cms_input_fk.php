@@ -13,6 +13,7 @@ class cms_input_fk extends CI_Controller {
 		}
 
 		add_css('modules/cms/css/cms_input.scss');
+		add_css('modules/cms/css/cms_input_select.scss');
 		
 	}
 	

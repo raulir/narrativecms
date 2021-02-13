@@ -79,7 +79,7 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 			}
 
 		} else if ($group['strategy'] == 'language' && $group['heading'] == 'language'){
-			
+
 			$GLOBALS['language'] = [];
 			
 			$ug_labels = explode('|',$group['labels']);
@@ -94,7 +94,7 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 						'language_id' => $ug_matches[$key],
 						'default' => $ug_matches[0],
 				];
-				
+
 			}
 			
 			// 2. if mandatory language is set
@@ -107,7 +107,7 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 						'default' => $ug_matches[0],
 				];
 				
-				include_once('../helpers/cookie_helper.php');
+				include_once($GLOBALS['config']['base_path'].'system/helpers/cookie_helper.php');
 				cms_cookie_create('language', $ug_matches[$key], 90);
 
 			}

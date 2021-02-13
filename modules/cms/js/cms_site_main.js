@@ -433,11 +433,22 @@ String.prototype.to_title_case = function () {
  */
 
 function get_ajax(name, params){
-
-	var ext_params = $.extend({'no_html': '1', 'success': function(){} }, params)
-	var action_on_success = ext_params.success;
-	delete ext_params.success;
-	get_ajax_panel(name, ext_params, action_on_success);
+	
+	return new Promise((resolve, reject) => {
+		
+		var ext_params = $.extend({
+			'no_html': '1', 
+			'success': data => {
+				resolve(data)
+			} 
+		}, params)
+		
+		var action_on_success = ext_params.success
+		delete ext_params.success
+		
+		get_ajax_panel(name, ext_params, action_on_success)
+		
+	})
 
 }
 
