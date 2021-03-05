@@ -1,5 +1,29 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+if (!function_exists('array_merge_recursive_ex')){
+
+	function array_merge_recursive_ex(array $array1, array $array2){
+			
+		$merged = $array1;
+
+		foreach ($array2 as $key => & $value) {
+			if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
+				$merged[$key] = array_merge_recursive_ex($merged[$key], $value);
+			} else if (is_numeric($key)) {
+				if (!in_array($value, $merged)) {
+					$merged[] = $value;
+				}
+			} else {
+				$merged[$key] = $value;
+			}
+		}
+
+		return $merged;
+			
+	}
+
+}
+
 class cms_panel_model extends Model {
 	
 	/**
@@ -72,35 +96,21 @@ class cms_panel_model extends Model {
 			
 			// if extends
 			if(!empty($return['extends']['panel'])){
-				
-				if (!function_exists('array_merge_recursive_ex')){
-				
-					function array_merge_recursive_ex(array $array1, array $array2){
-							
-						$merged = $array1;
-				
-						foreach ($array2 as $key => & $value) {
-							if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
-								$merged[$key] = array_merge_recursive_ex($merged[$key], $value);
-							} else if (is_numeric($key)) {
-								if (!in_array($value, $merged)) {
-									$merged[] = $value;
-								}
-							} else {
-								$merged[$key] = $value;
-							}
-						}
-				
-						return $merged;
-							
-					}
-				
-				}
 
 				$extends_config = $this->get_cms_panel_config($return['extends']['panel']);
 
-				// join structures
+				// join structures, do not overwrite item elements
+				$items = $return['item'];
+				
+				if (empty($extends_config['item'])){
+					$extends_config['item'] = [];
+				}
+				
+				array_push($items, ...$extends_config['item']);
+
 				$return = array_merge_recursive_ex($extends_config, $return);
+				
+				$return['item'] = $items;
 				
 			}
 			
@@ -113,8 +123,12 @@ class cms_panel_model extends Model {
 			$return['version'] = end($return['version']);
 		}
 		
-		if (!empty($return['label']) && is_array($return['label'])){
+			if (!empty($return['label']) && is_array($return['label'])){
 			$return['label'] = end($return['label']);
+		}
+		
+		if (!empty($return['description']) && is_array($return['description'])){
+			$return['description'] = end($return['description']);
 		}
 		
 		if (!empty($return['image']) && is_array($return['image'])){
