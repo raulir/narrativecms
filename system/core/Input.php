@@ -268,7 +268,7 @@ class Input {
 					$flag = FILTER_FLAG_IPV6;
 					break;
 				default:
-					$flag = '';
+					$flag = FILTER_DEFAULT;
 					break;
 			}
 
