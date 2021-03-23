@@ -114,6 +114,11 @@ if ( !function_exists('_iw')) {
 			trigger_error('Not enough memory to compress image: needed='.$needed.' memory_limit='.$limit, E_USER_NOTICE);
 
 		} else {
+			
+			if (!function_exists('imagecreatetruecolor')){
+				print('PHP module gd not present, please enable!');
+				die();
+			}
 
 			$tmp = imagecreatetruecolor($width, $height);
 			

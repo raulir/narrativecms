@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-use Leafo\ScssPhp\Compiler;
+use ScssPhp\ScssPhp\Compiler;
 use MatthiasMullie\Minify;
 
 if ( !function_exists('pack_css')) {
@@ -91,7 +91,8 @@ if ( !function_exists('pack_css')) {
 				$scss_compiler = new Compiler();
 		   
 				try {
-					$compiled = $scss_compiler->compile($scss_string);
+					
+					$compiled = $scss_compiler->compileString($scss_string)->getCss();
 
 					list($throwaway, $css_string) = explode('/* CUT HERE */', $compiled);
 
