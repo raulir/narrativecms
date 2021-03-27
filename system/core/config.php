@@ -113,6 +113,11 @@ $sql = "select b.name, b.value from cms_page_panel a join cms_page_panel_param b
 		" where a.panel_name = 'cms/cms_settings' and b.name != ''";
 $query = mysqli_query($db, $sql);
 
+if ($query === false){
+	print('Database error: '.$db->error);
+	die();
+}
+
 // if empty result, rename old settings
 if (!mysqli_num_rows($query)){
 	
