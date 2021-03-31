@@ -1,0 +1,16 @@
+{
+	"name":"Localisation",
+	"panels":[
+
+	],
+	"cms_menu":[
+		{
+			"id":"regionselector",
+			"name":"Region selector",
+			"url":"admin/panel_settings/localisation__regionselector/",
+			"parent":"content",
+			"access":"localisation_regionselector"
+		}
+	]
+}
+			

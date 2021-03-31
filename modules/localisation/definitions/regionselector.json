@@ -1,0 +1,30 @@
+{
+	"version":"2",
+	"label":"Region selector settings",
+	"settings":[
+		{
+			"type":"repeater",
+			"name":"regions",
+			"label":"Regions",
+			"fields":[
+				{
+					"type":"text",
+					"name":"region_id",
+					"label":"Region id"
+				},
+				{
+					"type":"text",
+					"name":"label",
+					"label":"Label",
+					"translate":"1"
+				}
+			]
+		},
+		{
+			"type":"image",
+			"label":"Arrow",
+			"name":"arrow",
+			"category":"icon"
+		}
+	]
+}
