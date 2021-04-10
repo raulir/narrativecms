@@ -467,6 +467,10 @@ var _cms_test_localstorage = function() {
 
 function get_ajax_panel(name, params, action_on_success){
 	
+	if (typeof params == 'undefined'){
+		var params = {}
+	}
+	
 	// TODO: cms_page_panel.js:144-163 - use script running from there to activate external javascripts
 	
 	var data = false;
