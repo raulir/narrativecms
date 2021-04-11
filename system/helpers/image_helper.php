@@ -160,7 +160,13 @@ if ( !function_exists('_i')) {
 
 		} 
 		
-		if (!(file_exists($GLOBALS['config']['upload_path'].$image) && !is_dir($GLOBALS['config']['upload_path'].$image))){
+		// get data about image from db
+		$ci =& get_instance();
+		$ci->load->model('cms/cms_image_model');
+		$image_db_data = $ci->cms_image_model->get_cms_image_by_filename($image);
+
+		if (!(file_exists($GLOBALS['config']['upload_path'].$image) && !is_dir($GLOBALS['config']['upload_path'].$image)) 
+				|| empty($image_db_data['original_width'])){
 			
 			$fileurl = $GLOBALS['config']['base_url'].'modules/cms/img/cms_no_image.png';
 			$image_data['width'] = 2800;
@@ -172,11 +178,6 @@ if ( !function_exists('_i')) {
 				
 		} else {
 		
-			// get data about image from db
-			$ci =& get_instance();
-			$ci->load->model('cms/cms_image_model');
-			$image_db_data = $ci->cms_image_model->get_cms_image_by_filename($image);
-
 			// if no resizing
 			if((empty($params['width']) && empty($params['height'])) || empty($image_db_data['name'])){
 				
