@@ -1,5 +1,4 @@
-
-<div class="cms_input_area">
+<div class="cms_input cms_input_content cms_input_select" data-cms_input_height="1">
 	
 	<div class="cms_input_content cms_input_select">
 
@@ -7,7 +6,8 @@
 		
 		<?php _panel('cms/cms_help', ['help' => $help, ]); ?>
 		
-		<select name="<?= $name ?>">
+		<select class="cms_input_select_select" name="<?= $name ?>">
+		<option value="">-- page --</option>
 			<?php foreach($values as $val): ?>
 				<option value="<?= $val['cms_page_id'] ?>"<?= $val['cms_page_id'] == $value ? ' selected="selected" ' : '' ?>><?= $val['title'] ?></option>
 			<?php endforeach ?>
