@@ -6,7 +6,7 @@
 
 		<?php if (!empty($data)): ?>
 			<?php foreach($data as $repeater_key => $repeater_data): ?>
-			
+
 				<?php _panel('cms/cms_input_repeater_item', [
 						'fields' => $fields,
 						'repeater_data' => $repeater_data,

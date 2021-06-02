@@ -1,0 +1,36 @@
+{
+	"version":"2",
+	"label":"Mockup image",
+	"item":[
+		{
+			"type":"image",
+			"name":"image",
+			"label":"Image",
+			"category":"content"
+		},
+		{
+			"type":"text",
+			"name":"colour",
+			"label":"Background colour"
+		},
+		{
+			"type":"repeater",
+			"name":"links",
+			"label":"Links",
+			"fields":[
+		        { 
+		            "type": "link",
+		            "name": "link",
+		            "label": "Link"
+		        },
+		        {
+		        	"type":"mask",
+		        	"name":"area",
+		        	"label":"Area",
+		        	"target":"image",
+		        	"definition":"40"
+		        }
+		    ]
+		}
+	]
+}

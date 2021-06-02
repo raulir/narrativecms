@@ -43,6 +43,10 @@
 		{
 			"id":"lightbox",
 			"name":"Lightbox"
+		},
+		{
+			"id":"mimage",
+			"name":"Mockup image"
 		}
 	],
 	"cms_menu":[

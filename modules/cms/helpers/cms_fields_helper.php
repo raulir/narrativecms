@@ -67,6 +67,10 @@ if (!function_exists('print_fields')){
 			}
 
 			if ($field['type'] == 'repeater' && $prefix == ''){ // only one sublevel
+				
+				foreach($field['fields'] as $kf => $vf){
+					$field['fields'][$kf]['base_id'] = (!empty($data['cms_page_panel_id']) ? $data['cms_page_panel_id'] : '');
+				}
 
 				$return .= _panel('cms/cms_input_repeater', [
 						'label' => $field['label'],
@@ -160,7 +164,9 @@ if (!function_exists('print_fields')){
 				$field['name_clean'] = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
 				$field['name'] = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
 				$field['panel_structure'] = $structure;
-				$field['base_id'] = (!empty($data['cms_page_panel_id']) ? $data['cms_page_panel_id'] : '');
+				if (empty($field['base_id'])){
+					$field['base_id'] = (!empty($data['cms_page_panel_id']) ? $data['cms_page_panel_id'] : '');
+				}
 				
 				// add field
 				$return .= _panel('cms/cms_input', $field);
