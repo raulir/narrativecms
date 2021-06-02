@@ -6,14 +6,29 @@ function form_basic_submit($this){
 	
 	var missing = 0;
 	$('.form_basic_mandatory', $form).each(function(){
-		var $this = $(this);
-		if ($this.val() == '' || ($this.attr('name') == 'email' && !($this.val().indexOf('@') >= 0) )){
-			missing = missing + 1;
-			$this.parent().addClass('form_basic_error');
-			setTimeout(function(){
-				$this.parent().removeClass('form_basic_error');
-			}, 5000);
+		
+		var $this = $(this)
+		
+		var value = ''
+		var $target = $this.parent()
+		
+		if ($this.hasClass('form_basic_input_radio')){
+			if($('.form_basic_input_radio_input:checked', $this).length){
+				value = $('.form_basic_input_radio_input:checked', $this).val()
+			}
+			$target = $this
+		} else {
+			value = $this.val()
 		}
+
+		if (value == '' || ($this.attr('name') == 'email' && !(value.indexOf('@') >= 0) )){
+			missing = missing + 1;
+			$target.addClass('form_basic_error');
+			setTimeout(function(){
+				$target.removeClass('form_basic_error');
+			}, 5000)
+		}
+		
 	});
 	
 	if (missing == 0){

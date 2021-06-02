@@ -1,14 +1,12 @@
 <div class="form_basic_container form_basic_recaptcha_<?= !empty($recaptcha) ? 'on' : 'off' ?>"
 		<?php if (!empty($recaptcha)): ?>data-recaptcha_key="<?= $recaptcha_client_key ?>" <?php endif ?>
-		<?php if (!empty($brochure)): ?> data-success_url="<?php _lfd($brochure, false) ?>" <?php endif ?>
+		<?php if (!empty($brochure)): ?>data-success_url="<?php _lfd($brochure, false) ?>" <?php endif ?>
 		<?php if (!empty($virtual_success_url)): ?>data-virtual_success_url="<?= $virtual_success_url ?>"<?php endif ?>>
 		
 	<div class="form_basic_content">
 
 		<?php if(!empty($heading)): ?>
-			<div class="form_basic_title">
-				<?= $heading ?>
-			</div>
+			<div class="form_basic_title"><?= $heading ?></div>
 		<?php endif ?>
 
 		<div class="form_basic_form">
@@ -62,8 +60,40 @@
 						
 							<div class="form_basic_input_checkbox" data-target="form_basic_<?= $element['name'] ?>"></div>
 
+						<?php elseif ($element['type'] == 'radio'): ?>
+						
+							<div class="form_basic_input_radio <?= $element['mandatory'] ? 'form_basic_mandatory' : '' ?>">
+								<div class="form_basic_input_radio_label"><?= $element['label'] ?></div>
+								<?php foreach($values as $value): ?>
+									<?php if ($value['element'] == $element['name']): ?>
+									
+										<input type="radio" class="form_basic_input_radio_input"
+												value="<?= $value['value'] ?>" name="<?= $element['name'] ?>"
+												id="form_basic_<?= md5($element['name'].$value['value']) ?>">
+									
+									
+										<label class="form_basic_input_radio_label_area" for="form_basic_<?= md5($element['name'].$value['value']) ?>">
+											<div class="form_basic_input_radio_label_heading"><?= $value['label'] ?></div>
+											<div class="form_basic_input_radio_label_text"><?= $value['text'] ?></div>
+										</label>
+										
+									<?php endif ?>
+								<?php endforeach ?>
+							</div>
+
 						<?php elseif ($element['type'] == 'spacer'): ?>
 														
+						<?php elseif ($element['type'] == 'copy'): ?>
+						
+							<div class="form_basic_input_copy_area">
+								<?php foreach($values as $value): ?>
+									<?php if ($value['element'] == $element['name']): ?>
+										<div class="form_basic_input_copy_heading"><?= $value['label'] ?></div>
+										<div class="form_basic_input_copy_text"><?= $value['text'] ?></div>
+									<?php endif ?>
+								<?php endforeach ?>
+							</div>
+
 						<?php endif ?>
 
 					</div>

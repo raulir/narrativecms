@@ -206,7 +206,9 @@
 						"textarea":"Textarea",
 						"select":"Select",
 						"checkbox": "Checkbox",
-						"spacer":"Spacer"
+						"spacer":"Spacer",
+						"copy": "Copy",
+						"radio":"Radio"
 					},
 					"default":"text"
 				},
@@ -249,6 +251,12 @@
 					"type":"text",
 					"name":"value",
 					"label":"Value"
+				},
+				{
+					"type":"textarea",
+					"name":"text",
+					"label":"Text",
+					"lines":"2"
 				}
 			]
 		},
@@ -261,8 +269,8 @@
 			"name":"recaptcha",
 			"label":"Use recaptcha",
 			"values":{
-				"1":"Yes",
-				"0":"No"
+				"0":"No",
+				"1":"Yes"
 			},
 			"default":"0",
 			"help":"Use Google reCAPTCHA v3"
