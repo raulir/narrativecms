@@ -1,6 +1,6 @@
 <div class="cms_container mimage_container" <?= !empty($colour) ? ('style="background-color: '.$colour.';"') : '' ?>>
 	<div class="mimage_content">
-		<div class="mimage_image" <?php _ib($image, ['width' => 1600, 'pb' => 1]) ?>>
+		<div class="mimage_image" <?php _ib($image, ['width' => 2000, 'pb' => 1]) ?>>
 			<?php foreach($links as $link): ?>
 
 				<?php $area = json_decode($link['area'], true) ?>

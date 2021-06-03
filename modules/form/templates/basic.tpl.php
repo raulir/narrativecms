@@ -16,10 +16,10 @@
 				<input type="hidden" name="id" value="<?= $cms_page_panel_id ?>">
 
 				<?php foreach($elements as $element): ?>
-					<div class="form_basic_input form_basic_input_<?= $element['name'] ?>">
+					<div class="form_basic_input form_basic_input_type_<?= $element['type'] ?> form_basic_input_<?= $element['name'] ?>">
 
-						<?php if (empty($label_as_placeholder)): ?>
-							<label for="form_basic_<?php print($element['name']); ?>"><?= $element['label'] ?></label>
+						<?php if (!empty($element['label']) && empty($label_as_placeholder) && $element['type'] != 'radio'): ?>
+							<label for="form_basic_<?= $element['name'] ?>"><?= $element['label'] ?></label>
 						<?php endif ?>
 
 						<?php if ($element['type'] == 'text'): ?>
@@ -27,14 +27,14 @@
 							<input class="form_basic_input_input <?php print($element['mandatory'] ? 'form_basic_mandatory' : ''); ?>" 
 									id="form_basic_<?php print($element['name']); ?>" type="text" name="<?php print($element['name']); ?>"
 									placeholder="<?= empty($label_as_placeholder) ? str_replace('[name]', $element['name'], $placeholder) : $element['label'] ?>"
-									<?php _p(!empty($element['limit']) ? ' data-limit="'.$element['limit'].'" ' : ''); ?> >
+									<?php _p(!empty($element['limit']) ? ' data-limit="'.$element['limit'].'" ' : '') ?> >
 						
 						<?php elseif ($element['type'] == 'textarea'): ?>
 							
-							<textarea class="form_basic_input_input <?php print($element['mandatory'] ? 'form_basic_mandatory' : ''); ?>"
-									id="form_basic_<?php print($element['name']); ?>" name="<?php print($element['name']); ?>"
+							<textarea class="form_basic_input_input <?= $element['mandatory'] ? 'form_basic_mandatory' : '' ?>"
+									id="form_basic_<?= $element['name'] ?>" name="<?= $element['name'] ?>"
 									placeholder="<?= empty($label_as_placeholder) ? str_replace('[name]', $element['name'], $placeholder) : $element['label'] ?>"
-									<?php _p(!empty($element['limit']) ? ' data-limit="'.$element['limit'].'" ' : ''); ?>></textarea>
+									<?php _p(!empty($element['limit']) ? ' data-limit="'.$element['limit'].'" ' : '') ?>></textarea>
 						
 						<?php elseif ($element['type'] == 'select'): ?>
 						

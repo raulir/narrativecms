@@ -187,9 +187,10 @@
 			"label":"Fields",
 			"fields":[
 				{
-					"type":"text",
+					"type":"textarea",
 					"name":"label",
-					"label":"Label"
+					"label":"Label",
+					"lines":"2"
 				},
 				{
 					"type":"text",
@@ -232,7 +233,7 @@
 		{
 			"type":"repeater",
 			"name":"values",
-			"label":"Select values",
+			"label":"Select and radio values, copy texts",
 			"fields":[
 				{
 					"type":"repeater_select",

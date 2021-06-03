@@ -16,7 +16,8 @@
             "name": "Forms default settings",
             "parent": "forms",
             "user": "1",
-            "url": "admin/panel_settings/form__basic/"
+            "url": "admin/panel_settings/form__basic/",
+			"access":"form_settings"
         }
 	],
 	"panels":[
@@ -33,6 +34,10 @@
 		{
 			"access":"form_data",
 			"name":"Forms data"
+		},
+		{
+			"access":"form_settings",
+			"name":"Forms settings"
 		}
 	]
 }

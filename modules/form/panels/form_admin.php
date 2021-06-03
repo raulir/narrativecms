@@ -7,7 +7,9 @@ class form_admin extends CI_Controller {
         if ($params['cms_page_panel_id'] !== ''){
         	
         	// get page panel data 
-        	$this->load->model('cms_page_panel_model');
+        	$this->load->model('cms/cms_page_panel_model');
+			$this->load->model('form/form_model');
+			
         	$page_panel = $this->cms_page_panel_model->get_cms_page_panel($params['cms_page_panel_id']);
 
         	// diacritics
@@ -20,7 +22,6 @@ class form_admin extends CI_Controller {
 			// add dashes
 			$filename = substr(preg_replace('/[ ]+/', '-', trim($filename)), 0, 40);
         	
-			$this->load->model('form_model');
 			$this->form_model->file_form_data($params['cms_page_panel_id'], $filename);
         
         }
@@ -29,7 +30,7 @@ class form_admin extends CI_Controller {
 	
 	function panel_params($params){
 		
-		$this->load->model('form_model');
+		$this->load->model('form/form_model');
 		$params['forms'] = $this->form_model->get_forms();
 		
 		return $params;

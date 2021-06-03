@@ -148,9 +148,11 @@ function form_basic_init(){
 		
 		$('.form_basic_input_checkbox', $container).on('click.cms', function(){
 			
-			var $target = $('#' + $(this).data('target'));
+			var $target = $('#' + $(this).data('target'))
 			
-			if ($target.val()){
+			var val = parseInt($target.val())
+
+			if (val){
 				$target.val(0);
 				$(this).removeClass('form_basic_input_checkbox_active');
 			} else {

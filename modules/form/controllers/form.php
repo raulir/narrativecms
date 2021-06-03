@@ -27,11 +27,11 @@ class form extends CI_Controller {
    		
         // set page config
         $page_config = array(
-        		array('position' => 'header', 'panel' => 'cms_user', 'module' => 'cms', ),
-        		array('position' => 'header', 'panel' => 'cms_menu', 'module' => 'cms', ),
+        		array('position' => 'header', 'panel' => 'cms/cms_user', 'module' => 'cms', ),
+        		array('position' => 'header', 'panel' => 'cms/cms_menu', 'module' => 'cms', ),
    				array(
 					'position' => 'main', 
-					'panel' => 'form_admin',
+					'panel' => 'form/form_admin',
    					'module' => 'form',
 					'params' => ['cms_page_panel_id' => $cms_page_panel_id, ],
 				),
