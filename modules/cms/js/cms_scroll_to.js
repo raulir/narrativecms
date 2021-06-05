@@ -26,6 +26,8 @@
 						delta = 0;
 					} else if (params.$space){
 						delta = params.$space.height();
+					} else if (params.delta){
+						delta = params.delta
 					}
 					
 					if ($('.cms_header').length){
