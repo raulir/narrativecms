@@ -1,8 +1,8 @@
 {
 	"version":"2",
 	"list":{
-		"list_title":"Product categories",
-		"item_title":"Product category",
+		"list_title":"Product subcategories",
+		"item_title":"Product subcategory",
 		"title_field":"heading",
 		"filter_fields":{
 			"show":"-- show --"
@@ -14,13 +14,22 @@
 			"type":"textarea",
 			"name":"heading",
 			"label":"Heading",
-			"lines":"2"
+			"lines":"2",
+			"translate":"1"
+		},
+		{
+			"type":"fk",
+			"list":"stock/category",
+			"name":"category_id",
+			"label":"Parent category"
 		},
 		{
 			"type":"textarea",
 			"name":"description",
 			"label":"Description",
-			"lines":"6"
+			"lines":"2",
+			"translate":"1",
+			"help":"Optional"
 		}
 	]
 }

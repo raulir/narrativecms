@@ -1,0 +1,29 @@
+{
+	"version":"2",
+	"list":{
+		"list_title":"Product categories",
+		"item_title":"Product category",
+		"title_field":"heading",
+		"filter_fields":{
+			"show":"-- show --"
+		},
+		"link_target":"0"
+	},
+	"item":[ 
+		{
+			"type":"textarea",
+			"name":"heading",
+			"label":"Heading",
+			"lines":"2",
+			"translate":"1"
+		},
+		{
+			"type":"textarea",
+			"name":"description",
+			"label":"Description",
+			"lines":"2",
+			"translate":"1",
+			"help":"Optional"
+		}
+	]
+}

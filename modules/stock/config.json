@@ -14,7 +14,25 @@
 			"id":"product_categories",
 			"name":"Product categories",
 			"parent":"stock",
-			"url":"admin/cms_list/stock__product_category/"
+			"url":"admin/cms_list/stock__category/"
+		},
+		{
+			"id":"product_subcategories",
+			"name":"Product subcategories",
+			"parent":"stock",
+			"url":"admin/cms_list/stock__subcategory/"
+		},
+		{
+			"id":"product_brands",
+			"name":"Product brands",
+			"parent":"stock",
+			"url":"admin/cms_list/stock__brand/"
+		},
+		{
+			"id":"product_lines",
+			"name":"Product lines",
+			"parent":"stock",
+			"url":"admin/cms_list/stock__line/"
 		}
 	]
 }

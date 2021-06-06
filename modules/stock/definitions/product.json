@@ -8,7 +8,7 @@
 			"show":"-- show --",
 			"product_category_id":"-- product category --"
 		},
-		"link_target":"0"
+		"link_target":"1"
 	},
 	"item":[ 
 		{
@@ -19,22 +19,37 @@
 		},
 		{
 			"type":"fk",
-			"list":"stock/product_category",
-			"name":"product_category_id",
-			"label":"Product category",
-			"add_empty":"0"
+			"list":"stock/category",
+			"name":"category_id",
+			"label":"Category",
+			"add_empty":"1"
 		},
 		{
-			"type":"text",
-			"name":"price",
-			"label":"Price",
-			"help":"If a special price is set, this price is used as a default for not set special prices"
+			"type":"fk",
+			"list":"stock/subcategory",
+			"name":"subcategory_id",
+			"label":"Subcategory",
+			"add_empty":"1"
+		},
+		{
+			"type":"fk",
+			"list":"stock/brand",
+			"name":"brand_id",
+			"label":"Brand",
+			"add_empty":"1"
 		},
 		{
 			"type":"textarea",
 			"name":"text",
 			"label":"Description",
 			"lines":"6"
+		},
+		{
+			"type":"fk",
+			"list":"stock/line",
+			"name":"line_id",
+			"label":"Line",
+			"add_empty":"1"
 		},
 		{
 			"type":"image",
