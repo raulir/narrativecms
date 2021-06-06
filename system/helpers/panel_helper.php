@@ -101,6 +101,8 @@ if ( !function_exists('get_position')) {
     	
     	if (empty($params['cms_page_panel_id'])) $params['cms_page_panel_id'] = 1;
     	
+    	list($params['module'], $rest) = explode('/', $name);
+    	
     	$ci =& get_instance();
 
     	// check if json defined js
