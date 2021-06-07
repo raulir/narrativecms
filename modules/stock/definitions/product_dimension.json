@@ -1,0 +1,60 @@
+{
+	"version":"2",
+	"label":"Product dimension",
+	"list":{
+		"list_title":"Product dimensions",
+		"item_title":"Product dimension",
+		"title_field":"heading",
+		"filter_fields":{
+			"show":"-- show --"
+		},
+		"link_target":"0"
+	},
+	"item":[ 
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Label",
+			"help":"Visible text for dimension||Examples: {Shoe size}, {Finish}",
+			"mandatory":"1"
+		},
+		{
+			"type":"text",
+			"name":"id",
+			"label":"ID",
+			"help":"Lowercase only letters and numbers, no spaces, less than 10 characters||Examples: {size}, {colour}",
+			"mandatory":"1"
+		},
+		{
+			"type":"textarea",
+			"name":"description",
+			"label":"Description",
+			"lines":"6"
+		},
+		{
+			"type":"repeater",
+			"name":"values",
+			"label":"Values",
+			"fields":[
+				{
+					"type":"text",
+					"name":"label",
+					"label":"Label"
+				},
+				{
+					"type":"text",
+					"name":"id",
+					"label":"ID",
+					"help":"Lowercase only letters and numbers, no spaces, less than 10 characters"
+				},
+				{
+					"type":"textarea",
+					"name":"description",
+					"label":"Description",
+					"lines":"2",
+					"help":"Description for this value to help customer decide||Example for shoe size - {UK 12, US 15, Australia 33}"
+				}
+			]
+		}
+	]
+}

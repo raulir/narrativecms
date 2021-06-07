@@ -1,0 +1,65 @@
+{
+	"version":"2",
+	"label":"Product stock group",
+	"list":{
+		"list_title":"Product stock group",
+		"item_title":"Product stock groups",
+		"title_field":"heading",
+		"filter_fields":{
+			"show":"-- show --"
+		},
+		"link_target":"0"
+	},
+	"item":[ 
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Heading"
+		},
+		{
+			"type":"textarea",
+			"name":"description",
+			"label":"Description",
+			"lines":"4"
+		},
+		{
+			"type":"select",
+			"name":"stock_control",
+			"label":"Stock control",
+			"values":{
+				"individual":"Sold individually",
+				"count":"Amount available in stock",
+				"none":"No limit",
+				"request":"Opens request form"
+			},
+			"default":"count",
+			"help":"Sold by:||Individual - by each item||Amount - number of items in stock||None - no limit||Request - to buy, user has to fill in a contact form"
+		},
+		{
+			"type":"fk",
+			"name":"delivery_set_id",
+			"label":"Delivery set",
+			"list":"stock/delivery_set",
+			"add_empty":"1"
+		},
+		{
+			"type":"panel",
+			"name":"panel",
+			"label":"Custom buy panel",
+			"help":"Optional custom buy panel"
+		},
+		{
+			"type":"repeater",
+			"name":"dimensions",
+			"label":"Dimensions",
+			"fields":[
+				{
+					"type":"fk",
+					"name":"dimension",
+					"label":"Dimension",
+					"list":"stock/product_dimension"
+				}
+			]
+		}
+	]
+}

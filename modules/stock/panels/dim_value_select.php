@@ -73,7 +73,7 @@ class dim_value_select extends CI_Controller{
 		
 		$params['available'] = [];
 		
-		$dimension_a = $this->cms_page_panel_model->get_list('cg/product_dimension', ['id' => $params['dimension']]);
+		$dimension_a = $this->cms_page_panel_model->get_list('stock/product_dimension', ['id' => $params['dimension']]);
 		$dimension = array_pop($dimension_a);
 		foreach($dimension['values'] as $value){
 			$params['available'][$value['id']] = $value['label'];

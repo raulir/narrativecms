@@ -29,7 +29,7 @@ class cms_input_grid extends CI_Controller {
 						'id' => $params['base_id'],
 				]);
 				
-				print(json_encode($params['data'], JSON_PRETTY_PRINT));
+				print(json_encode(['result' => $params['data']], JSON_PRETTY_PRINT));
 				
 				die();
 				
@@ -64,7 +64,7 @@ class cms_input_grid extends CI_Controller {
 			usort($params['fields'], function($a, $b){
 				if (empty($a['order'])) $a['order'] = 20;
 				if (empty($b['order'])) $b['order'] = 20;
-				return $a['order'] > $b['order'];
+				return ((int)$a['order'] > $b['order'])*2 - 1;
 			});
 					
 			$params['data'] = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [

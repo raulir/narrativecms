@@ -15,7 +15,8 @@
 			"type":"textarea",
 			"name":"heading",
 			"label":"Heading",
-			"lines":"2"
+			"lines":"2",
+			"translate":"1"
 		},
 		{
 			"type":"fk",
@@ -42,7 +43,8 @@
 			"type":"textarea",
 			"name":"text",
 			"label":"Description",
-			"lines":"6"
+			"lines":"6",
+			"translate":"1"
 		},
 		{
 			"type":"fk",
@@ -52,11 +54,100 @@
 			"add_empty":"1"
 		},
 		{
+			"type":"fk",
+			"list":"stock/product_stock",
+			"name":"product_stock_id",
+			"label":"Stock group",
+			"add_empty":"1"
+		},
+		{
 			"type":"image",
 			"name":"image",
 			"label":"Image",
 			"category":"product",
 			"help":"Main image used for the product"
+		},
+		{
+			"type":"textarea",
+			"name":"specification",
+			"label":"Specification text",
+			"lines":"6",
+			"translate":"1"
+		},
+		{
+			"type":"grid",
+			"name":"product_items",
+			"label":"Product items",
+			"ds":"product_items",
+			"operations":"CLS",
+			"fields":[
+				{
+					"type":"id",
+					"name":"id",
+					"label":"ID",
+					"width":"5",
+					"order":"10"
+				},
+				{
+					"type":"cms/cms_grid_editable",
+					"name":"sku",
+					"label":"SKU",
+					"width":"15",
+					"align":"center",
+					"order":"20"
+				}
+			]
+		},
+		{
+			"type":"repeater",
+			"name":"details",
+			"label":"Details",
+			"fields":[
+				{
+					"type":"text",
+					"name":"label",
+					"label":"Label",
+					"mandatory":"1",
+					"translate":"1"
+				},
+				{
+					"type":"text",
+					"name":"value",
+					"label":"Value",
+					"mandatory":"1",
+					"translate":"1"
+				}
+			]
+		},
+		{
+			"type":"repeater",
+			"name":"documents",
+			"label":"Documents",
+			"fields":[
+				{
+					"type":"text",
+					"name":"label",
+					"label":"Label",
+					"mandatory":"1",
+					"translate":"1"
+				},
+				{
+					"type":"file",
+					"name":"file",
+					"label":"File",
+					"mandatory":"1",
+					"translate":"1"
+				}
+			]
+		}
+	],
+	"settings":[
+		{
+			"type":"panel",
+			"name":"display_panel",
+			"label":"Panel",
+			"add_empty":"1",
+			"help":"Panel to show product in"
 		}
 	]
 }

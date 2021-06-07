@@ -1,0 +1,1 @@
+<?php _panel($display_panel, $params) ?>

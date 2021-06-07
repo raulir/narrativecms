@@ -33,6 +33,30 @@
 			"name":"Product lines",
 			"parent":"stock",
 			"url":"admin/cms_list/stock__line/"
+		},
+		{
+			"id":"product_stock",
+			"name":"Product stock groups",
+			"parent":"stock",
+			"url":"admin/cms_list/stock__product_stock/"
+		},
+		{
+			"id":"product_dimension",
+			"name":"Product dimensions",
+			"parent":"stock",
+			"url":"admin/cms_list/stock__product_dimension/"
+		},
+		{
+			"id":"product_items",
+			"name":"Product items",
+			"parent":"stock",
+			"url":"admin/cms_list/stock__product_item/"
+		}
+	],
+	"panels":[
+		{
+			"id":"product",
+			"name":"Product"
 		}
 	]
 }
