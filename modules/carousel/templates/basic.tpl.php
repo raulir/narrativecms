@@ -1,11 +1,13 @@
-<div class="carousel_basic_container">
+<div class="carousel_basic_container carousel_basic_count_<?= count($items) ?>">
 	<div class="carousel_basic_content">
 	
 		<div class="carousel_basic_items carousel_basic_carousel_hidden" data-animation_speed="<?= $speed?>" data-delay="<?= $delay ?>" data-cycle="<?= $cycle ?>">
 
 			<?php foreach($items as $item): ?>
 			
-				<div class="carousel_basic_item <?= !empty($item['colour_scheme']) ? ' carousel_basic_item_scheme_'.$item['colour_scheme'] : '' ?>">
+				<div class="carousel_basic_item <?= !empty($item['colour_scheme']) ? ' carousel_basic_item_scheme_'.$item['colour_scheme'] : '' ?>
+						<?= !empty($item['id']) ? ' carousel_basic_item_id_'.$item['id'].' ' : '' ?>" 
+						<?= !empty($item['id']) ? ' data-id="'.$item['id'].'" ' : '' ?>>
 
 					<div class="carousel_basic_item_image" <?php _ib($item['image'], ['width' => 1100, 'output' => 'jpg']) ?>></div>
 					<div class="carousel_basic_item_mobile_image" <?php _ib(!empty($item['mobile_image']) ? $item['mobile_image'] : $item['image'], 700) ?>>

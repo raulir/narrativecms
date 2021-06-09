@@ -31,6 +31,8 @@ class product extends CI_Controller{
 	}
 	
 	function panel_params($params){
+		
+		$this->load->model('cms/cms_page_panel_model');
 
 		foreach($params['documents'] as $key => $document){
 			$params['documents'][$key]['size'] = makesize(filesize($GLOBALS['config']['upload_path'].$document['file']));
@@ -39,6 +41,52 @@ class product extends CI_Controller{
 				$params['documents'][$key]['icon'] = 'stock/icon_'.$params['documents'][$key]['extension'].'.png';
 			}
 		}
+		
+		$params['image'] = '';
+		if (!empty($params['images'][0]['image'])){
+			$params['image'] = $params['images'][0]['image'];
+		}
+		
+		// add dimension images
+		$dimensions = $this->cms_page_panel_model->get_list('stock/product_dimension');
+		
+		$params['dimension_labels'] = [];
+		foreach($dimensions as $dimension){
+			foreach($dimension['values'] as $value){
+				$params['dimension_labels'][$dimension['id'].'='.$value['id']] = strtolower($dimension['heading'].' - '.$value['label']);
+			}
+		}
+		
+		$product_items = $this->cms_page_panel_model->get_list('stock/product_item', ['product_id' => $params['cms_page_panel_id']]);
+		
+		$params['image_buttons'] = [];
+		foreach($product_items as $product_item){
+			
+			$ids = [];
+			$image_texts = [];
+			foreach($product_item['dimensions'] as $dimension){
+				$ids[] = $dimension['value'];
+				list($did, $dval) = explode(' - ', $params['dimension_labels'][$dimension['value']]);
+				$image_texts[] = trim($dval);
+			}
+			sort($ids);
+			$id = md5(implode('', $ids));
+			
+			foreach($product_item['images'] as $image){
+				$params['images'][] = [
+					'image' => $image['image'],
+					'id' => $id,
+					'text' => implode(', ', $image_texts),
+				];
+				$params['image_buttons'][] = [
+					'id' => $id,
+					'text' => implode("\n", $image_texts),
+				];
+			}
+			
+			$image_ids[$id] = $ids;
+			
+		}		
 		
 		$params['params'] = $params;
 		

@@ -177,7 +177,9 @@ function carousel_basic_init(){
 		$('.carousel_basic_item', $this).each(function(){
 			
 			$(this).css({'z-index': 50 - i}).addClass('carousel_basic_item_' + i);
-			$('.carousel_basic_buttons', $this).append('<div class="carousel_basic_button carousel_basic_button_' + i + '" data-carousel_basic_number="' + i + '"></div>');
+			$('.carousel_basic_buttons', $this).append('<div class="carousel_basic_button carousel_basic_button_' + i + ' ' +
+					($(this).data('id') ? (' carousel_basic_button_id_' + $(this).data('id')) : '') + '" ' +
+					' data-carousel_basic_number="' + i + '" ' + '></div>');
 			i = i + 1;
 
 		});

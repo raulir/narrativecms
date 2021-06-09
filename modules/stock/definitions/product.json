@@ -61,13 +61,6 @@
 			"add_empty":"1"
 		},
 		{
-			"type":"image",
-			"name":"image",
-			"label":"Image",
-			"category":"product",
-			"help":"Main image used for the product"
-		},
-		{
 			"type":"textarea",
 			"name":"specification",
 			"label":"Specification text",
@@ -115,6 +108,26 @@
 					"name":"value",
 					"label":"Value",
 					"mandatory":"1",
+					"translate":"1"
+				}
+			]
+		},
+		{
+			"type":"repeater",
+			"name":"images",
+			"label":"Images",
+			"fields":[
+				{
+					"type":"image",
+					"name":"image",
+					"label":"Image",
+					"category":"product",
+					"help":"General images used for the product"
+				},
+				{
+					"type":"text",
+					"name":"text",
+					"label":"Label",
 					"translate":"1"
 				}
 			]
