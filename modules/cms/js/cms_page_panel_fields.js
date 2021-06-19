@@ -43,7 +43,12 @@ function cms_page_panel_fields_init(){
 				
 			}
 			
-			$input.css({'height':h * 3.5 + 'rem', 'top': t * 3.5 + top_extra + 'rem', 'left': pos + '%'})
+			$input.css({
+				'height':h * 3.5 + 'rem', 
+				'top': t * 3.5 + top_extra + 'rem', 
+				'left': pos + '%',
+				'width': 50 * w + '%'
+			})
 		
 		} else if ($this.hasClass('cms_repeater_container')){
 			
