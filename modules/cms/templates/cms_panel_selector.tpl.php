@@ -38,7 +38,9 @@
 								<?php endif ?>
 								
 								<?php if(!empty($panel_type_data['description'])): ?>
-									<div class="cms_panel_selector_preview_description"><?= $panel_type_data['description'] ?></div>
+									<div class="cms_panel_selector_preview_description">
+										<div class="cms_panel_selector_preview_heading_inner"><?= $panel_type_data['description'] ?></div>
+									</div>
 								<?php endif ?>
 								
 							</div>

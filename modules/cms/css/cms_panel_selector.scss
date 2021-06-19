@@ -97,7 +97,8 @@
 .cms_panel_selector_preview_heading_inner {
 	display: inline-block;
 	background-color: rgba(224,224,224,0.6);
-	padding: 0 0.8rem;
+	padding: 0.2rem 1.4rem;
+	border: 0.15rem solid rgba(224,224,224,1);
 }
 
 .cms_panel_selector_preview_image {
@@ -130,7 +131,13 @@
 	font-size: 1.4rem;
 	text-align: center;
 	line-height: 1.6rem;
-	text-shadow: 0 0 0.3rem $colour_light_shadow;
+}
+
+.cms_panel_selector_preview_description_inner {
+	display: inline-block;
+	background-color: rgba(224,224,224,0.6);
+	padding: 0.4rem 1.4rem;
+	border: 0.15rem solid rgba(224,224,224,1);
 }
 
 .cms_panel_selector_list {
