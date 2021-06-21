@@ -34,14 +34,6 @@ class product extends CI_Controller{
 		
 		$this->load->model('cms/cms_page_panel_model');
 
-		foreach($params['documents'] as $key => $document){
-			$params['documents'][$key]['size'] = makesize(filesize($GLOBALS['config']['upload_path'].$document['file']));
-			$params['documents'][$key]['extension'] = pathinfo($document['file'], PATHINFO_EXTENSION);
-			if (in_array($params['documents'][$key]['extension'], ['pdf'])){
-				$params['documents'][$key]['icon'] = 'stock/icon_'.$params['documents'][$key]['extension'].'.png';
-			}
-		}
-		
 		$params['image'] = '';
 		if (!empty($params['images'][0]['image'])){
 			$params['image'] = $params['images'][0]['image'];

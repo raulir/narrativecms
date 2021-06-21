@@ -131,27 +131,6 @@
 					"translate":"1"
 				}
 			]
-		},
-		{
-			"type":"repeater",
-			"name":"documents",
-			"label":"Documents",
-			"fields":[
-				{
-					"type":"text",
-					"name":"label",
-					"label":"Label",
-					"mandatory":"1",
-					"translate":"1"
-				},
-				{
-					"type":"file",
-					"name":"file",
-					"label":"File",
-					"mandatory":"1",
-					"translate":"1"
-				}
-			]
 		}
 	],
 	"settings":[
