@@ -32,8 +32,8 @@ class CI_DB_mysqli_result extends CI_DB_result {
 	 * @access	public
 	 * @return	integer
 	 */
-	function num_rows()
-	{
+	function num_rows()	{
+		if ($this->result_id === true) return 1;
 		return @mysqli_num_rows($this->result_id);
 	}
 
@@ -132,8 +132,8 @@ class CI_DB_mysqli_result extends CI_DB_result {
 	 * @access	private
 	 * @return	array
 	 */
-	function _data_seek($n = 0)
-	{
+	function _data_seek($n = 0)	{
+		if ($this->result_id === true) return 1;
 		return mysqli_data_seek($this->result_id, $n);
 	}
 
@@ -147,8 +147,8 @@ class CI_DB_mysqli_result extends CI_DB_result {
 	 * @access	private
 	 * @return	array
 	 */
-	function _fetch_assoc()
-	{
+	function _fetch_assoc()	{
+		if ($this->result_id === true) return [];
 		return mysqli_fetch_assoc($this->result_id);
 	}
 
@@ -162,8 +162,8 @@ class CI_DB_mysqli_result extends CI_DB_result {
 	 * @access	private
 	 * @return	object
 	 */
-	function _fetch_object()
-	{
+	function _fetch_object()	{
+		if ($this->result_id === true) return new stdClass();
 		return mysqli_fetch_object($this->result_id);
 	}
 
