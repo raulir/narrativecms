@@ -162,6 +162,10 @@ foreach($GLOBALS['config']['modules'] as $module_name){
 	$filename = $GLOBALS['config']['base_path'].'modules/'.$module_name.'/config.json';
 	if (file_exists($filename)){
 		$GLOBALS['config']['module'][$module_name] = json_decode(file_get_contents($filename), true);
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			print('Module config bad json: '.$filename);
+			die();
+		}
 	} else {
 		$GLOBALS['config']['module'][$module_name] = [];
 	}
