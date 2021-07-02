@@ -73,12 +73,20 @@ class cms_panel_model extends Model {
 
 		}
 		
+		$return = [
+				'item' => [], 
+				'version' => 2, 
+		];
 		
-		$return = array('item' => array(), 'version' => 1, );
-
+		$return['module'] = !empty($default_module) ? $default_module : 'cms';
+		
 		if ($filename){
 
 			$json_data = file_get_contents($filename);
+
+			// images // replace
+			$json_data = str_replace('"//', '"'.$return['module'].'/', $json_data);
+			
 			$panel_params_structure = json_decode($json_data, true);
 			
 			if( json_last_error() ){
@@ -116,7 +124,6 @@ class cms_panel_model extends Model {
 			
 		}
 		
-		$return['module'] = !empty($default_module) ? $default_module : '';
 		$return['filename'] = $filename;
 		
 		if (!empty($return['version']) && is_array($return['version'])){
