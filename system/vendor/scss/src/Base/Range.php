@@ -1,15 +1,16 @@
 <?php
+
 /**
  * SCSSPHP
  *
- * @copyright 2015-2018 Leaf Corcoran
+ * @copyright 2015-2020 Leaf Corcoran
  *
  * @license http://opensource.org/licenses/MIT MIT
  *
- * @link http://leafo.github.io/scssphp
+ * @link http://scssphp.github.io/scssphp
  */
 
-namespace Leafo\ScssPhp\Base;
+namespace ScssPhp\ScssPhp\Base;
 
 /**
  * Range
@@ -18,7 +19,14 @@ namespace Leafo\ScssPhp\Base;
  */
 class Range
 {
+    /**
+     * @var float|int
+     */
     public $first;
+
+    /**
+     * @var float|int
+     */
     public $last;
 
     /**

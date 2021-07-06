@@ -471,33 +471,33 @@ class cms_page_panel_model extends Model {
 			if ($purge){
 
 				// remove keys not existing in new value array
-				function recursive_keys($array, $prefix = ''){
-					
-					$return = [];
-					
-					foreach($array as $k => $v){
+				if (!function_exists('recursive_keys')){
+					function recursive_keys($array, $prefix = ''){
 						
-						if (is_numeric($k)){
-							$k = str_pad($k, 6, '0', STR_PAD_LEFT);
+						$return = [];
+						
+						foreach($array as $k => $v){
+							
+							if (is_numeric($k)){
+								$k = str_pad($k, 6, '0', STR_PAD_LEFT);
+							}
+							
+							if (!is_array($v)){
+								$return[] = $prefix.$k;
+							} else {
+								$return = array_merge($return, recursive_keys($v, $prefix.$k.'.'));
+							}
+							
 						}
 						
-						if (!is_array($v)){
-							$return[] = $prefix.$k;
-						} else {
-							$return = array_merge($return, recursive_keys($v, $prefix.$k.'.'));
-						}
+						return $return;
 						
 					}
-					
-					return $return;
-					
 				}
 				
 				// build keys
 				$recursive_keys = recursive_keys($params);
 				$recursive_keys = array_unique(array_merge($recursive_keys, ['', 'create_cms_user_id', 'create_time', 'update_cms_user_id', 'update_time']));
-
-// 				_print _r($recursive_keys);
 
 				$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name not in ('".implode("','", $recursive_keys)."') ";
 				$this->db->query($sql, [(int)$cms_page_panel_id]);
@@ -1056,6 +1056,241 @@ class cms_page_panel_model extends Model {
 		}
 
 	}
+	
+	function save_cms_page_panel($cms_page_panel_id, $language, $data){		
+
+		$ci =& get_instance();
+
+/*		
+		$data['cms_page_id'] = $this->input->post('cms_page_id');
+		$data['parent_id'] = $this->input->post('parent_id');
+		$data['sort'] = $this->input->post('sort');
+		$data['title'] = $this->input->post('title');
+		$data['submenu_anchor'] = $this->input->post('submenu_anchor');
+		$data['panel_name'] = $this->input->post('panel_name');
+		$data['panel_params'] = $this->input->post('panel_params');
+*/
+		
+		// load existing data and save some of it
+		$old_data = $this->get_cms_page_panel($cms_page_panel_id, $language);
+		if (!empty($old_data['_cache_lists'])){
+			$data['_cache_lists'] = $old_data['_cache_lists'];
+		}
+		if (!empty($old_data['_cache_time'])){
+			$data['_cache_time'] = $old_data['_cache_time'];
+		}
+
+		// put together search values against definition
+		$panel_config = $ci->cms_panel_model->get_cms_panel_config($data['panel_name']);
+		
+		// if panel extends, save the fact as well
+		if (!empty($panel_config['extends'])){
+			$data['_extends'] = $panel_config['extends'];
+		}
+		
+		// search time bonus points
+		if (!empty($panel_config['list']['search_time_extra']) && is_array($panel_config['list']['search_time_extra']) && !empty($data['date'])){
+			$data['_search_time_extra'] = serialize($panel_config['list']['search_time_extra']);
+			$data['_search_time_timestamp_day'] = strtotime($data['date'])/86400;
+		}
+		
+		// js and css from config
+		if (!empty($panel_config['js']) && is_array($panel_config['js'])){
+			foreach($panel_config['js'] as $_js){
+				list($_js_module, $_js_panel) = explode('/', $_js);
+				$data['_js'][] = 'modules/'.$_js_module.'/js/'.$_js_panel.'.js';
+			}
+		}
+		if (!empty($panel_config['css']) && is_array($panel_config['css'])){
+			foreach($panel_config['css'] as $_css){
+				list($_css_module, $_css_panel) = explode('/', $_css);
+				$data['_css'][] = 'modules/'.$_css_module.'/css/'.$_css_panel.'.scss';
+			}
+		}
+			
+		$data['search_params'] = [];
+		$data['translate_params'] = [];
+		
+		$panel_structure = !empty($panel_config['item']) ? $panel_config['item'] : [];
+		foreach($panel_structure as $struct){
+			if (!empty($struct['search'])){
+				$data['search_params'][$struct['name']] = $struct['search'];
+			}
+			if (!empty($struct['translate'])){
+				$data['translate_params'][$struct['name']] = $language;
+			}
+			if ($struct['type'] == 'repeater'){
+				foreach ($struct['fields'] as $r_struct){
+					if (!empty($r_struct['search'])){
+						$data['search_params'][$struct['name']][$r_struct['name']] = $r_struct['search'];
+					}
+					if (!empty($r_struct['translate'])){
+						$data['translate_params'][$struct['name']][$r_struct['name']] = $language;
+					}
+				}
+			}
+		}
+		
+		// are there any meta images
+		foreach($panel_structure as $struct){
+		
+			if ($struct['type'] == 'image'){
+				if (!empty($struct['meta']) && $struct['meta'] == 'image' && !empty($data[$struct['name']])){
+		
+					$data['_images'][] = $data[$struct['name']];
+		
+				}
+			}
+		
+			if ($struct['type'] == 'repeater'){
+				foreach ($struct['fields'] as $r_struct){
+					if ($r_struct['type'] == 'image'){
+						if (!empty($r_struct['meta']) && $r_struct['meta'] == 'image' && !empty($data[$struct['name']])){
+		
+							if (empty($data['_images'])){
+								$data['_images'] = [];
+							}
+		
+							array_merge($data['_images'], $data[$struct['name']]);
+		
+						}
+					}
+				}
+			}
+		
+		}
+		
+		// todo: is this needed?
+		foreach ($data as $key => $value){
+		
+			// if repeater with something in it - collect values to records
+			if (is_array($value) && is_array(reset($value))){
+				$temp_result = array();
+				foreach($value as $skey => $kvalues){
+		
+					foreach ($kvalues as $nkey => $nvalue){
+		
+						if (!is_array($nvalue)){
+							if (empty($temp_result[$nkey])){
+								$temp_result[$nkey] = array();
+							}
+							$temp_result[$nkey][$skey] = $nvalue;
+						} else {
+							foreach($nvalue as $nnkey => $nnvalue){
+								if (empty($temp_result[$nnkey][$skey])){
+									$temp_result[$nnkey][$skey] = array();
+								}
+								$temp_result[$nnkey][$skey][$nkey] = $nnvalue;
+							}
+						}
+		
+					}
+		
+				}
+				$data[$key] = $temp_result;
+			}
+		
+		}
+		
+		// if it contains cms_page_panels (panel_in_panel) fields which are empty
+		foreach($panel_structure as $struct){
+		
+			if (in_array($struct['type'], ['cms_page_panels','cms_page_panel_inline']) && empty($data[$struct['name']])){
+		
+				$data[$struct['name']] = [];
+		
+			}
+		
+			if ($struct['type'] == 'repeater' && empty($data[$struct['name']])){
+		
+				$data[$struct['name']] = [];
+		
+			}
+		
+		}
+			
+		$data_merged = $data;
+		$data_merged['cms_page_panel_id'] = $cms_page_panel_id;
+		
+		$data_merged['_panel_heading'] = $ci->run_panel_method($data_merged['panel_name'], 'panel_heading', $data_merged);
+			
+		// on_update hook
+		$data_merged = $ci->run_panel_method($data_merged['panel_name'], 'on_update', $data_merged);
+			
+		// save data
+		if($cms_page_panel_id){
+		
+			$this->update_cms_page_panel($cms_page_panel_id, $data_merged, true);
+				
+		} else {
+		
+			$cms_page_panel_id = $this->create_cms_page_panel($data_merged);
+		
+			// if list and add to top, move to top
+			if (!empty($panel_config['list']['new_first'])){
+				$this->move_first($cms_page_panel_id);
+			}
+		
+		}
+		
+		// delete files
+		$old_filenames = $this->get_page_panel_data_filenames($panel_structure, $old_data);
+		$new_filenames = $this->get_page_panel_data_filenames($panel_structure, $data_merged);
+		
+		$filenames_diff = array_diff($old_filenames, $new_filenames);
+		foreach($filenames_diff as $filename){
+			if (file_exists($GLOBALS['config']['upload_path'].$filename)){
+				unlink($GLOBALS['config']['upload_path'].$filename);
+			}
+		}
+		
+		// if link target, update slug
+		if (!empty($panel_config['list']['link_target'])){
+		
+			if (!empty($panel_config['list']['title_field']) && !empty($data_merged[$panel_config['list']['title_field']])){
+				$slug_string = $data_merged[$panel_config['list']['title_field']];
+			} else if (!empty($data_merged['heading'])){
+				$slug_string = $data_merged['heading'];
+			} else {
+				$slug_string = $data_merged['panel_name'].' '.$cms_page_panel_id;
+			}
+		
+			$slug = $ci->cms_slug_model->generate_list_item_slug($data_merged['panel_name'].'='.$cms_page_panel_id, $slug_string);
+		
+			$ci->cms_slug_model->set_page_slug($data_merged['panel_name'].'='.$cms_page_panel_id, $slug, empty($old_data['show']) ? '1' : '0');
+				
+		}
+		
+		// save to parents children list
+		if (!empty($data['parent_field_name'])){
+			$data['parent_name'] = $data['parent_field_name'];
+		}
+
+		if (!empty($data_merged['parent_id']) && !empty($data['parent_name'])){
+		
+			$parent = $this->get_cms_page_panel($data_merged['parent_id']);
+
+			if (empty($parent[$data['parent_name']])){
+				$field_data = [];
+			} else if (!is_array($parent[$data['parent_name']])){
+				$field_data = explode(',', $parent[$data['parent_name']]);
+			} else {
+				$field_data = $parent[$data['parent_name']];
+			}
+
+			if (!in_array($cms_page_panel_id, $field_data)){
+				$field_data[] = $cms_page_panel_id;
+				$field_data = array_values($field_data); // renum array
+				$this->update_cms_page_panel($data_merged['parent_id'], [$data['parent_name'] => $field_data, ]);
+			}
+		
+		}
+		
+		return $cms_page_panel_id;
+		
+	}
+	
+	/* DEPRECATED */
 	
 	/**
 	 * get site default language

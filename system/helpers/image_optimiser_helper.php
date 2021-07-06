@@ -114,6 +114,11 @@ if ( !function_exists('_iw')) {
 			trigger_error('Not enough memory to compress image: needed='.$needed.' memory_limit='.$limit, E_USER_NOTICE);
 
 		} else {
+			
+			if (!function_exists('imagecreatetruecolor')){
+				print('PHP module gd not present, please enable!');
+				die();
+			}
 
 			$tmp = imagecreatetruecolor($width, $height);
 			
@@ -228,11 +233,11 @@ if ( !function_exists('_iw')) {
 							rename($GLOBALS['config']['upload_path'].$png_image, $temp_name);
 							
 							$cmd = (empty($GLOBALS['config']['images_pngquant_executable']) ? $GLOBALS['config']['base_path'].'system/vendor/pngquant/bin/pngquant.bin' : $GLOBALS['config']['images_pngquant_executable'])
-									.' '.$temp_name.' --strip --speed 1 --quality=0-'.(!empty($GLOBALS['config']['images_quality']) ? $GLOBALS['config']['images_quality'] : 85).' -o '.$GLOBALS['config']['upload_path'].$new_image;
+									.' '.$temp_name.' --strip --speed 1 --quality=0-'.(!empty($GLOBALS['config']['images_quality']) ? $GLOBALS['config']['images_quality'] : 90).' -o '.$GLOBALS['config']['upload_path'].$new_image;
 		
 							shell_exec($cmd);
 							
-							unlink($temp_name);
+//							unlink($temp_name);
 							
 						}
 					

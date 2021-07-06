@@ -43,7 +43,12 @@ function cms_page_panel_fields_height($target){
 				
 			}
 			
-			$input.css({'height':h * 3.5 + 'rem', 'top': t * 3.5 + top_extra + 'rem', 'left': pos + '%'})
+			$input.css({
+				'height':h * 3.5 + 'rem', 
+				'top': t * 3.5 + top_extra + 'rem', 
+				'left': pos + '%',
+				'width': 50 * w + '%'
+			})
 		
 		} else if ($this.hasClass('cms_repeater_container')){
 			
@@ -162,19 +167,29 @@ function cms_page_panel_fields_height($target){
 function cms_page_panel_fields_init(){
 	
 	$('.cms_page_panels_panel_area').each(function(){
+		$container = $(this).closest('.cms_input_page_panels_inline_container')
+		if (!$container.data('cms_input_original_height')){
+			$container.data('cms_input_original_height', $container.data('cms_input_height'))
+		}
+	})
+
+	$('.cms_page_panels_panel_area').each(function(){
 		
 		var h = cms_page_panel_fields_height($(this))
 		
 		var $container = $(this).closest('.cms_input_page_panels_inline_container')
-		
+
 		var old_h = $container.data('cms_input_height')
-		
 		$container.data('cms_input_height', old_h + h + 2)
-		
+
 	})
 	
 	cms_page_panel_fields_height($('.cms_page_panel_fields'))
 	
+	$('.cms_page_panels_panel_area').each(function(){
+		$container = $(this).closest('.cms_input_page_panels_inline_container')
+		$container.data('cms_input_height', $container.data('cms_input_original_height'))
+	})
 
 }
 

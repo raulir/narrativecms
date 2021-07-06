@@ -14,6 +14,8 @@ class cms_input_page_panels_inline extends CI_Controller{
 
 		add_css('modules/cms/css/cms_input.scss');
 		
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_input_page_panels.js';
+		
 	}
 
 	function panel_params($params){
@@ -58,10 +60,6 @@ class cms_input_page_panels_inline extends CI_Controller{
 			}
 		}
 
-		print('<pre>');
-		print_r($params);
-		print('</pre>');
-		
 		return $params;
 
 	}

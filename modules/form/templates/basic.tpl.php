@@ -1,10 +1,12 @@
-<div class="form_basic_container" <?php if (!empty($brochure)): ?> data-success_url="<?php _lfd($brochure, false) ?>" <?php endif ?>>
+<div class="form_basic_container form_basic_recaptcha_<?= !empty($recaptcha) ? 'on' : 'off' ?>"
+		<?php if (!empty($recaptcha)): ?>data-recaptcha_key="<?= $recaptcha_client_key ?>" <?php endif ?>
+		<?php if (!empty($brochure)): ?>data-success_url="<?php _lfd($brochure, false) ?>" <?php endif ?>
+		<?php if (!empty($virtual_success_url)): ?>data-virtual_success_url="<?= $virtual_success_url ?>"<?php endif ?>>
+		
 	<div class="form_basic_content">
 
 		<?php if(!empty($heading)): ?>
-			<div class="form_basic_title">
-				<?= $heading ?>
-			</div>
+			<div class="form_basic_title"><?= $heading ?></div>
 		<?php endif ?>
 
 		<div class="form_basic_form">
@@ -14,10 +16,10 @@
 				<input type="hidden" name="id" value="<?= $cms_page_panel_id ?>">
 
 				<?php foreach($elements as $element): ?>
-					<div class="form_basic_input form_basic_input_<?= $element['name'] ?>">
+					<div class="form_basic_input form_basic_input_type_<?= $element['type'] ?> form_basic_input_<?= $element['name'] ?>">
 
-						<?php if (empty($label_as_placeholder)): ?>
-							<label for="form_basic_<?php print($element['name']); ?>"><?= $element['label'] ?></label>
+						<?php if (!empty($element['label']) && empty($label_as_placeholder) && $element['type'] != 'radio'): ?>
+							<label for="form_basic_<?= $element['name'] ?>"><?= $element['label'] ?></label>
 						<?php endif ?>
 
 						<?php if ($element['type'] == 'text'): ?>
@@ -25,14 +27,14 @@
 							<input class="form_basic_input_input <?php print($element['mandatory'] ? 'form_basic_mandatory' : ''); ?>" 
 									id="form_basic_<?php print($element['name']); ?>" type="text" name="<?php print($element['name']); ?>"
 									placeholder="<?= empty($label_as_placeholder) ? str_replace('[name]', $element['name'], $placeholder) : $element['label'] ?>"
-									<?php _p(!empty($element['limit']) ? ' data-limit="'.$element['limit'].'" ' : ''); ?> >
+									<?php _p(!empty($element['limit']) ? ' data-limit="'.$element['limit'].'" ' : '') ?> >
 						
 						<?php elseif ($element['type'] == 'textarea'): ?>
 							
-							<textarea class="form_basic_input_input <?php print($element['mandatory'] ? 'form_basic_mandatory' : ''); ?>"
-									id="form_basic_<?php print($element['name']); ?>" name="<?php print($element['name']); ?>"
+							<textarea class="form_basic_input_input <?= $element['mandatory'] ? 'form_basic_mandatory' : '' ?>"
+									id="form_basic_<?= $element['name'] ?>" name="<?= $element['name'] ?>"
 									placeholder="<?= empty($label_as_placeholder) ? str_replace('[name]', $element['name'], $placeholder) : $element['label'] ?>"
-									<?php _p(!empty($element['limit']) ? ' data-limit="'.$element['limit'].'" ' : ''); ?>></textarea>
+									<?php _p(!empty($element['limit']) ? ' data-limit="'.$element['limit'].'" ' : '') ?>></textarea>
 						
 						<?php elseif ($element['type'] == 'select'): ?>
 						
@@ -58,8 +60,40 @@
 						
 							<div class="form_basic_input_checkbox" data-target="form_basic_<?= $element['name'] ?>"></div>
 
+						<?php elseif ($element['type'] == 'radio'): ?>
+						
+							<div class="form_basic_input_radio <?= $element['mandatory'] ? 'form_basic_mandatory' : '' ?>">
+								<div class="form_basic_input_radio_label"><?= $element['label'] ?></div>
+								<?php foreach($values as $value): ?>
+									<?php if ($value['element'] == $element['name']): ?>
+									
+										<input type="radio" class="form_basic_input_radio_input"
+												value="<?= $value['value'] ?>" name="<?= $element['name'] ?>"
+												id="form_basic_<?= md5($element['name'].$value['value']) ?>">
+									
+									
+										<label class="form_basic_input_radio_label_area" for="form_basic_<?= md5($element['name'].$value['value']) ?>">
+											<div class="form_basic_input_radio_label_heading"><?= $value['label'] ?></div>
+											<div class="form_basic_input_radio_label_text"><?= $value['text'] ?></div>
+										</label>
+										
+									<?php endif ?>
+								<?php endforeach ?>
+							</div>
+
 						<?php elseif ($element['type'] == 'spacer'): ?>
 														
+						<?php elseif ($element['type'] == 'copy'): ?>
+						
+							<div class="form_basic_input_copy_area">
+								<?php foreach($values as $value): ?>
+									<?php if ($value['element'] == $element['name']): ?>
+										<div class="form_basic_input_copy_heading"><?= $value['label'] ?></div>
+										<div class="form_basic_input_copy_text"><?= $value['text'] ?></div>
+									<?php endif ?>
+								<?php endforeach ?>
+							</div>
+
 						<?php endif ?>
 
 					</div>

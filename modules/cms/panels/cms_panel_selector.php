@@ -23,7 +23,7 @@ class cms_panel_selector extends CI_Controller {
 	}
 
 	function panel_params($params){
-		
+
 		$this->load->model('cms/cms_module_model');
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_panel_model');

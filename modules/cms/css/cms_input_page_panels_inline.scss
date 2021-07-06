@@ -14,7 +14,10 @@
 
 .cms_input_page_panels_inline_content {
 	margin: 0 auto;
-	padding-top: 1.4rem;
+	padding: 1.4rem 0 0 0;
+	position: relative;
+	height: calc(100% - 0.5rem);
+	box-sizing: border-box;
 }
 
 .cms_input_page_panels_inline_label {
@@ -63,10 +66,13 @@
 	border: 0.2rem dashed $colour_border;
 	border-top: 0;
 	padding: 0 1.0rem 0.5rem 1.0rem;
-    margin: 4.0rem auto 0 auto;
+    width: 100%;
     box-sizing: border-box;
     height: 0.5rem;
 	text-align: right;
+	position: absolute;
+	left: 0;
+	bottom: 0;
 }
 
 .cms_input_page_panels_inline_add {
@@ -78,6 +84,6 @@
 .cms_input_page_panels_inline_message {
 	font-size: 1.6rem;
 	line-height: 2.5rem;
-	padding: 2.5rem 0 2.0rem 0;
+	padding: 3.0rem 0 0.6rem 0;
 	text-align: center;
 }

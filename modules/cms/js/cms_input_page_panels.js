@@ -95,75 +95,101 @@ function cms_input_page_panels_init(){
 	
 }
 
-function cms_input_page_panel_selector(target_type, target_id, target_name, filter_panels){
-	
-	get_ajax_panel('cms/cms_panel_selector', {
-		
-		'target_type':target_type,
-		'target_id':target_id,
-		'target_name':target_name,
-		'filter_panels':filter_panels
-	
-	}, function(data){
+function cms_input_page_panel_selector(target_type, target_id, target_name, filter_panels, return_promise){
 
-		panels_display_popup(data.result._html, {
-			'select': function(data){
-				
-				// if shortcut
-				if (target_type == 'page' && $('.cms_panel_selector_shortcut_select').val() !== ''){
+	if (!return_promise){
+		return_promise = false
+	}
+
+	return new Promise(resolve => {
+	
+		get_ajax_panel('cms/cms_panel_selector', {
+			
+			'target_type':target_type,
+			'target_id':target_id,
+			'target_name':target_name,
+			'filter_panels':filter_panels
+		
+		}, function(data){
+	
+			panels_display_popup(data.result._html, {
+				'select': function(callback){
 					
-					var shortcut_target_id = $('.cms_panel_selector_shortcut_select').val()
+					// if shortcut
+					if (target_type == 'page' && $('.cms_panel_selector_shortcut_select').val() !== ''){
+						
+						var shortcut_target_id = $('.cms_panel_selector_shortcut_select').val()
+						
+						get_ajax('cms/cms_page_panel_operations', {
+							'do': 'cms_page_panel_shortcut',
+							'cms_page_id': target_id,
+							'cms_page_panel_id': shortcut_target_id,
+							'success': function(){
+								cms_notification('Shortcut created', 3)
+								setTimeout(() => window.location.href = config_url + 'admin/page/' + $('.cms_page_id').val() + '/', 1000)
+							}
+						})
+						
+						$('.cms_popup_container').remove()
+						
+						return
+						
+					}
 					
-					get_ajax('cms/cms_page_panel_operations', {
-						'do': 'cms_page_panel_shortcut',
-						'cms_page_id': target_id,
-						'cms_page_panel_id': shortcut_target_id,
-						'success': function(){
-							cms_notification('Shortcut created', 3)
-							setTimeout(() => window.location.href = config_url + 'admin/page/' + $('.cms_page_id').val() + '/', 1000)
+					// if on page
+					if(target_type == 'page'){
+					
+						$('body').append('<form class="cms_params_form" action="' + config_url + 'admin/cms_page_panel/0/" method="post"></form>')
+						
+						$('.cms_params_form').append('<input name="target_type" value="' + target_type + '">')
+						$('.cms_params_form').append('<input name="target_id" value="' + target_id + '">')
+						$('.cms_params_form').append('<input name="panel_name" value="' + $('.cms_panel_selector_item_selected').data('panel_name') + '">')
+						
+						// open cms page panel editor with this panel
+						$('.cms_params_form').submit()
+						
+						return
+					
+					}
+					
+					if (return_promise){
+					
+						// collect data
+						var result = {
+							'panel_name': $('.cms_panel_selector_item_selected').data('panel_name'),
+							'target_type': target_type,
+							'parent_id': target_id,
+							'parent_field_name': target_name,
 						}
-					})
+
+						$('.cms_popup_container').remove()
+						
+						resolve(result)
+						
+						return
+						
+					}
 					
-					$('.cms_popup_container').remove()
+					// if on panel
 					
-					return
-					
-				}
-				
-				// if on page
-				if(target_type == 'page'){
-				
 					$('body').append('<form class="cms_params_form" action="' + config_url + 'admin/cms_page_panel/0/" method="post"></form>')
 					
 					$('.cms_params_form').append('<input name="target_type" value="' + target_type + '">')
 					$('.cms_params_form').append('<input name="target_id" value="' + target_id + '">')
+					$('.cms_params_form').append('<input name="target_input_name" value="' + target_name + '">')
 					$('.cms_params_form').append('<input name="panel_name" value="' + $('.cms_panel_selector_item_selected').data('panel_name') + '">')
 					
 					// open cms page panel editor with this panel
 					$('.cms_params_form').submit()
-					
-					return
-				
+	
+				},
+				'cancel': function(data){
+					$('.cms_popup_container').remove()
 				}
-				
-				// if on panel
-				
-				$('body').append('<form class="cms_params_form" action="' + config_url + 'admin/cms_page_panel/0/" method="post"></form>')
-				
-				$('.cms_params_form').append('<input name="target_type" value="' + target_type + '">')
-				$('.cms_params_form').append('<input name="target_id" value="' + target_id + '">')
-				$('.cms_params_form').append('<input name="target_input_name" value="' + target_name + '">')
-				$('.cms_params_form').append('<input name="panel_name" value="' + $('.cms_panel_selector_item_selected').data('panel_name') + '">')
-				
-				// open cms page panel editor with this panel
-				$('.cms_params_form').submit()
-
-			},
-			'cancel': function(data){
-				$('.cms_popup_container').remove()
-			}
-		}); 			
-	});
+			}); 			
+		})
+		
+	})
 	
 }
 

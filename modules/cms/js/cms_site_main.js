@@ -433,11 +433,22 @@ String.prototype.to_title_case = function () {
  */
 
 function get_ajax(name, params){
-
-	var ext_params = $.extend({'no_html': '1', 'success': function(){} }, params)
-	var action_on_success = ext_params.success;
-	delete ext_params.success;
-	get_ajax_panel(name, ext_params, action_on_success);
+	
+	return new Promise((resolve, reject) => {
+		
+		var ext_params = $.extend({
+			'no_html': '1', 
+			'success': data => {
+				resolve(data)
+			} 
+		}, params)
+		
+		var action_on_success = ext_params.success
+		delete ext_params.success
+		
+		get_ajax_panel(name, ext_params, action_on_success)
+		
+	})
 
 }
 
@@ -455,6 +466,10 @@ var _cms_test_localstorage = function() {
 };
 
 function get_ajax_panel(name, params, action_on_success){
+	
+	if (typeof params == 'undefined'){
+		var params = {}
+	}
 	
 	// TODO: cms_page_panel.js:144-163 - use script running from there to activate external javascripts
 	
@@ -571,15 +586,16 @@ function get_ajax_page(url, params, action_on_success){
 	
 }
 
+// currently only used in cms_position_link.js
 function get_ajax_positions(url, params, action_on_success){
-	
-//	params = $.extend({ '_positions': ['main'] }, params)
 
 	var data = false;
 
 	if (!data){
+
 		params._url = url;
 		params._ajax = 1;
+
 		$.ajax({
 			type: 'POST',
 		  	url: params._url,
@@ -591,7 +607,8 @@ function get_ajax_positions(url, params, action_on_success){
 		  		action_on_success(returned_data);
 
 		  	}
-		});
+		})
+
 	}
 	
 }
@@ -1006,6 +1023,28 @@ var injectScript = function(src, id) {
 	
 	})
 	
+}
+
+var serialize_form = function(form_selector){
+
+	var data = $(form_selector).serializeArray();
+	var data_to_submit = {};
+	$.each(data, function(key, value){
+		var re = value.name.slice(-2);
+		if (re == '[]') {
+			var name = value.name.replace('[]', '');
+			if(typeof data_to_submit[name] == 'undefined' || !$.isArray(data_to_submit[name])){
+				data_to_submit[name] = [value.value];
+			} else {
+				data_to_submit[name].push(value.value);
+			}
+		} else {
+			data_to_submit[value.name] = value.value;
+		}
+	});
+	
+	return data_to_submit
+
 }
 
 $(document).ready(function() {

@@ -147,11 +147,34 @@ class cms_page_panel_operations extends CI_Controller {
 			}
 			 
 		} elseif ($do == 'cms_page_panel_save'){
+			
+			$language = $this->input->post('language');
+			
+			// new save
+			if (!empty($params['datasets'])){
+				
+				$datasets = json_decode($params['datasets'], true);
+				
+				foreach($datasets as $dataset){
+					
+					if (!empty($parent_id) && empty($dataset['parent_id'])){
+						$dataset['parent_id'] = $parent_id;
+					}
+					
+					$cms_page_panel_id = $this->cms_page_panel_model->save_cms_page_panel($dataset['cms_page_panel_id'], $language, $dataset);
+					
+					if (empty($parent_id)){
+						$parent_id = $cms_page_panel_id;
+					}
+					
+				}
+				
+				return $params;
+				
+			}
 			 
 			// collect data
 			$block_id = $this->input->post('cms_page_panel_id');
-			$language = $this->input->post('language');
-			
 			$data['cms_page_id'] = $this->input->post('cms_page_id');
 			$data['parent_id'] = $this->input->post('parent_id');
 			$data['sort'] = $this->input->post('sort');

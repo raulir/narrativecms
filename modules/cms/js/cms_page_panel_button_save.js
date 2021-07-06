@@ -15,8 +15,19 @@ function cms_page_panel_serialise_selector($set){
 			data_to_submit[value.name] = value.value;
 		}
 	});
-	
-	return data_to_submit
+
+	var result = {}
+	$.each(data_to_submit, function(key, value){
+		
+		if (key.startsWith('panel_params[')){
+			result[key.substring(13,(key.length - 1))] = value
+		} else {
+			result[key] = value
+		}
+		
+	})
+
+	return result
 
 }
 
@@ -52,13 +63,14 @@ function cms_page_panel_save(params){
 			$child_panels.each(function(){
 				
 				var dataset = cms_page_panel_serialise_selector($('input, select, textarea', $(this)))
-				
+
 				dataset.cms_page_id = '0'
 				dataset.cms_page_panel_id = $(this).data('cms_page_panel_id')
 				dataset.panel_name = $(this).data('panel_name')
 				dataset.parent_id = $('.cms_page_panel_id').val()
 				dataset.sort = sort++
 				dataset.title = $('.cms_page_panels_panel_title', $(this)).html()
+				dataset.parent_field_name = $(this).data('parent_field_name')
 					
 				datasets.push(dataset)
 				$('input, select, textarea', $(this)).addClass('cms_page_panel_serialise_ok')
@@ -67,13 +79,12 @@ function cms_page_panel_save(params){
 		
 		})
 		
-		datasets.push(cms_page_panel_serialise_selector($('input, select, textarea', $admin_form).not('.cms_page_panel_serialise_ok')))
+		datasets.unshift(cms_page_panel_serialise_selector($('input, select, textarea', $admin_form).not('.cms_page_panel_serialise_ok')))
+// console.log(datasets)		
+		var data_to_submit = {}
 
-		console.log(datasets)
+		data_to_submit['datasets'] = JSON.stringify(datasets)
 		
-		return
-		
-		// add do and language
 		data_to_submit['do'] = 'cms_page_panel_save';
 		data_to_submit['language'] = $('.cms_language_select_current').data('language');
 		

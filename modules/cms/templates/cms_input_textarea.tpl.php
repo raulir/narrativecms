@@ -1,5 +1,7 @@
 <div class="cms_input cms_input_textarea <?= !empty($width) && $width == 'wide' ? 'cms_input_wide_textarea' : '' ?>
-		<?= !empty($mandatory_class) ? $mandatory_class : '' ?>" data-cms_input_height="<?= ceil((21 * (!empty($lines) ? $lines : 3 ) + 32)/35) ?>">
+		<?= !empty($mandatory_class) ? $mandatory_class : '' ?>" 
+		data-cms_input_height="<?= ceil((21 * (!empty($lines) ? $lines : 3 ) + 32)/35) ?>"
+		data-cms_input_width="<?= !empty($width) && $width == 'wide' ? '2' : '1' ?>">
 
 	<label><?= $label ?></label>
 	

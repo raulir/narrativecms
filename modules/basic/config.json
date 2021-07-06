@@ -43,6 +43,10 @@
 		{
 			"id":"lightbox",
 			"name":"Lightbox"
+		},
+		{
+			"id":"mimage",
+			"name":"Mockup image"
 		}
 	],
 	"cms_menu":[
@@ -83,21 +87,24 @@
 			"name":"Sharing settings",
 			"parent":"tools",
 			"user":"1",
-			"url":"admin/panel_settings/basic__pageshare/"
+			"url":"admin/panel_settings/basic__pageshare/",
+			"access":"basic_sharing"
 		},
 		{
 			"id":"vimeo",
 			"name":"Vimeo settings",
 			"parent":"tools",
 			"user":"1",
-			"url":"admin/panel_settings/basic__vimeo/"
+			"url":"admin/panel_settings/basic__vimeo/",
+			"access":"basic_media"
 		},
 		{
 			"id":"lightbox",
 			"name":"Lightbox settings",
 			"parent":"tools",
 			"user":"1",
-			"url":"admin/panel_settings/basic__lightbox/"
+			"url":"admin/panel_settings/basic__lightbox/",
+			"access":"basic_media"
 		}
 	],
 	"access":[
@@ -108,6 +115,14 @@
 		{
 			"access":"basic_analytics",
 			"name":"Basic analytics"
+		},
+		{
+			"access":"basic_media",
+			"name":"Basic media"
+		},
+		{
+			"access":"basic_sharing",
+			"name":"Basic sharing"
 		}
 	]
 }

@@ -24,5 +24,5 @@
 
 <div class="cms_user_login_copyright">
 	<a class="cms_user_login_cms" <?php _lh('https://www.bytecrackers.com/') ?> <?php _ib('cms/cms_icon.png', 15) ?>>BC CMS</a> &nbsp; - &nbsp; 
-	<a <?php _lh('https://github.com/raulir/bccms/') ?>>&copy; 2012-2020 Rauli Rajande</a>
+	<a <?php _lh('https://github.com/raulir/bccms/') ?>>&copy; 2012-2021 Rauli Rajande</a>
 </div>

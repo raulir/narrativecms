@@ -3,13 +3,8 @@
 // static system config (CI heritage, deprecated)
 $config['system']['charset'] = 'UTF-8';
 $config['system']['allow_get_array'] = TRUE;
-$config['system']['log_threshold'] = 4;
 $config['system']['log_path'] = '';
 $config['system']['log_date_format'] = 'Y-m-d H:i:s';
-$config['system']['cookie_prefix'] = "";
-$config['system']['cookie_domain'] = "";
-$config['system']['cookie_path'] = "/";
-$config['system']['cookie_secure'] = FALSE;
 
 /*
  * LOAD CONFIG
@@ -118,6 +113,11 @@ $sql = "select b.name, b.value from cms_page_panel a join cms_page_panel_param b
 		" where a.panel_name = 'cms/cms_settings' and b.name != ''";
 $query = mysqli_query($db, $sql);
 
+if ($query === false){
+	print('Database error: '.$db->error);
+	die();
+}
+
 // if empty result, rename old settings
 if (!mysqli_num_rows($query)){
 	
@@ -162,6 +162,10 @@ foreach($GLOBALS['config']['modules'] as $module_name){
 	$filename = $GLOBALS['config']['base_path'].'modules/'.$module_name.'/config.json';
 	if (file_exists($filename)){
 		$GLOBALS['config']['module'][$module_name] = json_decode(file_get_contents($filename), true);
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			print('Module config bad json: '.$filename);
+			die();
+		}
 	} else {
 		$GLOBALS['config']['module'][$module_name] = [];
 	}

@@ -53,19 +53,13 @@ class Input {
 	 */
 	var $_standardize_newlines	= TRUE;
 	/**
-	 * Determines whether the XSS filter is always active when GET, POST or COOKIE data is encountered
+	 * Determines whether the XSS filter is always active when GET, POST data is encountered
 	 * Set automatically based on config setting
 	 *
 	 * @var bool
 	 */
 	var $_enable_xss			= FALSE;
-	/**
-	 * Enables a CSRF cookie token to be set.
-	 * Set automatically based on config setting
-	 *
-	 * @var bool
-	 */
-	var $_enable_csrf			= FALSE;
+
 	/**
 	 * List of all HTTP request headers
 	 *
@@ -213,82 +207,6 @@ class Input {
 	// --------------------------------------------------------------------
 
 	/**
-	* Fetch an item from the COOKIE array
-	*
-	* @access	public
-	* @param	string
-	* @param	bool
-	* @return	string
-	*/
-	function cookie($index = '', $xss_clean = FALSE)
-	{
-		return $this->_fetch_from_array($_COOKIE, $index, $xss_clean);
-	}
-
-	// ------------------------------------------------------------------------
-
-	/**
-	* Set cookie
-	*
-	* Accepts six parameter, or you can submit an associative
-	* array in the first parameter containing all the values.
-	*
-	* @access	public
-	* @param	mixed
-	* @param	string	the value of the cookie
-	* @param	string	the number of seconds until expiration
-	* @param	string	the cookie domain.  Usually:  .yourdomain.com
-	* @param	string	the cookie path
-	* @param	string	the cookie prefix
-	* @param	bool	true makes the cookie secure
-	* @return	void
-	*/
-	function set_cookie($name = '', $value = '', $expire = '', $domain = '', $path = '/', $prefix = '', $secure = FALSE)
-	{
-		if (is_array($name))
-		{
-			// always leave 'name' in last place, as the loop will break otherwise, due to $$item
-			foreach (array('value', 'expire', 'domain', 'path', 'prefix', 'secure', 'name') as $item)
-			{
-				if (isset($name[$item]))
-				{
-					$$item = $name[$item];
-				}
-			}
-		}
-
-		if ($prefix == '' AND config_item('cookie_prefix') != '')
-		{
-			$prefix = config_item('cookie_prefix');
-		}
-		if ($domain == '' AND config_item('cookie_domain') != '')
-		{
-			$domain = config_item('cookie_domain');
-		}
-		if ($path == '/' AND config_item('cookie_path') != '/')
-		{
-			$path = config_item('cookie_path');
-		}
-		if ($secure == FALSE AND config_item('cookie_secure') != FALSE)
-		{
-			$secure = config_item('cookie_secure');
-		}
-
-		if ( ! is_numeric($expire))
-		{
-			$expire = time() - 86500;
-		}
-		else
-		{
-			$expire = ($expire > 0) ? time() + $expire : 0;
-		}
-
-		setcookie($prefix.$name, $value, $expire, $path, $domain, $secure);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	* Fetch an item from the SERVER array
 	*
 	* @access	public
@@ -350,7 +268,7 @@ class Input {
 					$flag = FILTER_FLAG_IPV6;
 					break;
 				default:
-					$flag = '';
+					$flag = FILTER_DEFAULT;
 					break;
 			}
 
@@ -563,7 +481,7 @@ class Input {
 		// Sanitize PHP_SELF
 		$_SERVER['PHP_SELF'] = strip_tags($_SERVER['PHP_SELF']);
 
-		log_message('debug', "Global POST and COOKIE data sanitized");
+		log_message('debug', "Global POST data sanitized");
 	}
 
 	// --------------------------------------------------------------------

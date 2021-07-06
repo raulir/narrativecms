@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-use Leafo\ScssPhp\Compiler;
+use ScssPhp\ScssPhp\Compiler;
 use MatthiasMullie\Minify;
 
 if ( !function_exists('pack_css')) {
@@ -91,7 +91,8 @@ if ( !function_exists('pack_css')) {
 				$scss_compiler = new Compiler();
 		   
 				try {
-					$compiled = $scss_compiler->compile($scss_string);
+					
+					$compiled = $scss_compiler->compileString($scss_string)->getCss();
 
 					list($throwaway, $css_string) = explode('/* CUT HERE */', $compiled);
 
@@ -125,7 +126,9 @@ if ( !function_exists('pack_css')) {
 
 				} catch (Exception $e) {
 					if (!empty($GLOBALS['config']['errors_visible'])){
+						
 						$error_str = $e->getMessage();
+						
 						if (stristr($error_str, ': line: ')){
 							list($error, $line_no) = explode(': line: ', $error_str);
 						} else if (stristr($error_str, ' on line ')){
@@ -134,7 +137,17 @@ if ( !function_exists('pack_css')) {
 							$error = $error_str;
 							$line_no = 0;
 						}
-						_html_error('SCSS error:<br>Message: '.$error.'<br>Filename: '.$scsss_item['script'].'<br>Line number: '.($line_no > 0 ? $line_no - $prelines_count : $line_no));
+						
+						$line_no_number = (int)$line_no;
+						
+						$line_no_extra = '';
+						if ($line_no_number != $line_no){
+							$line_no_extra = str_replace('#'.$line_no_number, '', '#'.$line_no); 
+						}
+						
+						_html_error('SCSS error:<br>Message: '.$error.'<br>Filename: '.$scsss_item['script'].
+								'<br>Line number: '.($line_no_number > 0 ? $line_no_number - $prelines_count : $line_no).$line_no_extra);
+						
 					}
 				}
 

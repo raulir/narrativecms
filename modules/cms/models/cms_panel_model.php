@@ -1,5 +1,29 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+if (!function_exists('array_merge_recursive_ex')){
+
+	function array_merge_recursive_ex(array $array1, array $array2){
+			
+		$merged = $array1;
+
+		foreach ($array2 as $key => & $value) {
+			if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
+				$merged[$key] = array_merge_recursive_ex($merged[$key], $value);
+			} else if (is_numeric($key)) {
+				if (!in_array($value, $merged)) {
+					$merged[] = $value;
+				}
+			} else {
+				$merged[$key] = $value;
+			}
+		}
+
+		return $merged;
+			
+	}
+
+}
+
 class cms_panel_model extends Model {
 	
 	/**
@@ -49,12 +73,20 @@ class cms_panel_model extends Model {
 
 		}
 		
+		$return = [
+				'item' => [], 
+				'version' => 2, 
+		];
 		
-		$return = array('item' => array(), 'version' => 1, );
-
+		$return['module'] = !empty($default_module) ? $default_module : 'cms';
+		
 		if ($filename){
 
 			$json_data = file_get_contents($filename);
+
+			// images // replace
+			$json_data = str_replace('"//', '"'.$return['module'].'/', $json_data);
+			
 			$panel_params_structure = json_decode($json_data, true);
 			
 			if( json_last_error() ){
@@ -72,49 +104,38 @@ class cms_panel_model extends Model {
 			
 			// if extends
 			if(!empty($return['extends']['panel'])){
-				
-				if (!function_exists('array_merge_recursive_ex')){
-				
-					function array_merge_recursive_ex(array $array1, array $array2){
-							
-						$merged = $array1;
-				
-						foreach ($array2 as $key => & $value) {
-							if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
-								$merged[$key] = array_merge_recursive_ex($merged[$key], $value);
-							} else if (is_numeric($key)) {
-								if (!in_array($value, $merged)) {
-									$merged[] = $value;
-								}
-							} else {
-								$merged[$key] = $value;
-							}
-						}
-				
-						return $merged;
-							
-					}
-				
-				}
 
 				$extends_config = $this->get_cms_panel_config($return['extends']['panel']);
 
-				// join structures
+				// join structures, do not overwrite item elements
+				$items = $return['item'];
+				
+				if (empty($extends_config['item'])){
+					$extends_config['item'] = [];
+				}
+				
+				array_push($items, ...$extends_config['item']);
+
 				$return = array_merge_recursive_ex($extends_config, $return);
+				
+				$return['item'] = $items;
 				
 			}
 			
 		}
 		
-		$return['module'] = !empty($default_module) ? $default_module : '';
 		$return['filename'] = $filename;
 		
 		if (!empty($return['version']) && is_array($return['version'])){
 			$return['version'] = end($return['version']);
 		}
 		
-		if (!empty($return['label']) && is_array($return['label'])){
+			if (!empty($return['label']) && is_array($return['label'])){
 			$return['label'] = end($return['label']);
+		}
+		
+		if (!empty($return['description']) && is_array($return['description'])){
+			$return['description'] = end($return['description']);
 		}
 		
 		if (!empty($return['image']) && is_array($return['image'])){

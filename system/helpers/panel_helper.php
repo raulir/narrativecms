@@ -101,6 +101,8 @@ if ( !function_exists('get_position')) {
     	
     	if (empty($params['cms_page_panel_id'])) $params['cms_page_panel_id'] = 1;
     	
+    	list($params['module'], $rest) = explode('/', $name);
+    	
     	$ci =& get_instance();
 
     	// check if json defined js
@@ -363,5 +365,35 @@ if ( !function_exists('get_position')) {
     	_print_r($return);
     	
     }
-
+    
+    function makesize($size){
+    
+    	if ($size < 512){
+    
+    		return $size.' B';
+    
+    	}
+    		
+    	$size = $size / 1024;
+    
+    	if ($size < 100){
+    		return round($size, 1).' kB';
+    	} else if ($size < 512){
+    		return round($size).' kB';
+    	}
+    
+    	$size = $size / 1024;
+    
+    	if ($size < 100){
+    		return round($size, 1).' MB';
+    	} else if ($size < 512){
+    		return round($size).' MB';
+    	}
+    
+    	$size = $size / 1024;
+    
+    	return round($size, 1).' GB';
+    
+    }
+    
 }

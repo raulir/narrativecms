@@ -152,11 +152,6 @@ if ( ! function_exists('log_message'))
 	{
 		static $_log;
 
-		if (config_item('log_threshold') == 0)
-		{
-			return;
-		}
-
 		$_log =& load_class('Log', 'libraries', 'CI_');
 		$_log->write_log($level, $message, $php_error);
 	}
@@ -268,38 +263,22 @@ if ( ! function_exists('set_status_header'))
 */
 if ( ! function_exists('_exception_handler'))
 {
-	function _exception_handler($severity, $message, $filepath, $line)
-	{
+	function _exception_handler($severity, $message, $filepath, $line){
 		ini_set('display_errors', '0');
 		
 		if (!empty($GLOBALS['config']['errors_log'])){
 			ini_set('error_log', $GLOBALS['config']['errors_log']);
 		}
-		
-		if (empty($GLOBALS['config']['errors_visible'])){
-			return false;
-		}
-		
-		 // We don't bother with "strict" notices since they tend to fill up
-		 // the log file with excess information that isn't normally very helpful.
-		if ($severity == E_STRICT)
-		{
+
+		// We don't bother with "strict" notices
+		if ($severity == E_STRICT) {
 			return false;
 		}
 
 		$_error =& load_class('Exceptions');
 
-		// Should we display the error? We'll get the current error_reporting
-		// level and add its bits with the severity bits to find out.
-		if (($severity & error_reporting()) == $severity)
-		{
+		if (!empty($GLOBALS['config']['errors_visible'])){
 			$_error->show_php_error($severity, $message, $filepath, $line);
-		}
-
-		// Should we log the error?  No?  We're done...
-		if (config_item('log_threshold') == 0)
-		{
-			return false;
 		}
 
 		$_error->log_exception($severity, $message, $filepath, $line);

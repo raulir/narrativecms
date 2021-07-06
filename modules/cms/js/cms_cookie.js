@@ -1,27 +1,38 @@
 function cms_cookie_create(name, value, days) {
-    var expires;
+	
+    var expires = ''
+    var secure = ''
 
     if (days) {
         var date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = '; expires=' + date.toGMTString();
-    } else {
-        expires = '';
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000))
+        expires = '; expires=' + date.toGMTString()
     }
-    document.cookie = encodeURIComponent(name) + '=' + encodeURIComponent(value) + expires + '; path=/; samesite=none; secure';
+    
+    if (location.protocol === 'https:') {
+        secure = '; SameSite=None; Secure'
+    }
+    
+    document.cookie = encodeURIComponent(name) + '=' + encodeURIComponent(value) + expires + '; path=' + encodeURIComponent(config_url) + secure
+
 }
 
 function cms_cookie_read(name) {
-    var nameeq = encodeURIComponent(name) + '=';
-    var ca = document.cookie.split(';');
+	
+    var nameeq = encodeURIComponent(name) + '='
+    var ca = document.cookie.split(';')
     for (var i = 0; i < ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameeq) === 0) return decodeURIComponent(c.substring(nameeq.length, c.length));
+        var c = ca[i]
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length)
+        if (c.indexOf(nameeq) === 0) return decodeURIComponent(c.substring(nameeq.length, c.length))
     }
-    return null;
+    
+    return null
+
 }
 
 function cms_cookie_erase(name) {
-	cms_cookie_create(name, '', -1);
+
+	cms_cookie_create(name, '', -1)
+
 }
