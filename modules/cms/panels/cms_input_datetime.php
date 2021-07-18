@@ -12,7 +12,8 @@ class cms_input_datetime extends CI_Controller {
 			exit();
 		}
 
-		add_css('system/vendor/flatpickr/flatpickr.min.css');
+		$this->load->model('cms/cms_css_model');
+		$this->cms_css_model->add_css('system/vendor/flatpickr/flatpickr.min.css');
 		$GLOBALS['_panel_js'][] = 'system/vendor/flatpickr/flatpickr.min.js';
 		
 	}

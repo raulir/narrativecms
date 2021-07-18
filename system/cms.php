@@ -45,12 +45,6 @@ if (!empty($landing_uri) && $landing_uri === $request_uri){
 	exit();
 }
 
-if (!empty($GLOBALS['config']['landing_page']['_value']) && empty($request_uri)){
-	$landing_route = '/index/'.$GLOBALS['config']['landing_page']['_value'];
-} else {
-	$landing_route = '';
-}
-
 // check if cron needs to run
 if (!empty($GLOBALS['config']['cron_trigger']) && $GLOBALS['config']['cron_trigger'] == 'visits'){
 	
@@ -72,4 +66,6 @@ if (!empty($GLOBALS['config']['targets_enabled'])){
 	
 }
 
-require_once BASEPATH.'core/CodeIgniter.php';
+require_once(BASEPATH.'core/Common.php');
+require_once(BASEPATH.'core/Controller.php');
+require_once(BASEPATH.'core/bootstrap.php');

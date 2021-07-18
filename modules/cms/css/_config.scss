@@ -1,0 +1,70 @@
+/* 
+	_config.scss is used for scss compilation
+	this is included in resulting css only when this module is the main module 
+*/
+
+$colour_background: white;
+$colour_border: #a0a0a0;
+$colour_shadow: #606060;
+$colour_light_shadow: #e0e0e0;
+$colour_extralight_shadow: #f7f7f7;
+$colour_grey: #606060;
+$colour_white: white;
+$colour_black: black;
+$colour_green: green;
+$colour_green_background: #efffef;
+$colour_hover: #efefef;
+$cms_orange: #f7a034;
+
+$cms_orange_button_border: #884825;
+$cms_orange_button_background: #e1c05f;
+
+$cms_hint_red: #FF4500;
+$cms_hint_bg: #ffeedd;
+
+$cms_header_active: rgba(124,80,26,0.9);
+
+html {
+    min-height: 100%;
+    font-size: 10px;
+}
+
+body {
+	font-family: source,Helvetica,Verdana,sans-serif !important;
+	font-weight: normal !important;
+	font-smoothing: antialiased;
+	-webkit-font-smoothing: antialiased;
+	min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    color: $colour_black !important;
+    background-position: center top;
+    background-size: 100% auto;
+    font-size: 1.6rem;
+    background-color: $cms_orange;
+}
+
+input {
+	font-family: asap,Arial,Verdana,sans-serif;
+	font-smoothing: antialiased;
+	text-shadow: rgba(0,0,0,.01) 0 0 1rem;
+	-webkit-font-smoothing: antialiased;
+	-webkit-text-stroke: 0.1rem transparent;
+	transform: translateZ(0);
+	-webkit-transform: translateZ(0);
+}
+
+b {
+	font-weight: bold;
+}
+
+i {
+	font-style: italic;
+}
+
+ul {
+	margin: 0;
+	padding: 0;
+}
+

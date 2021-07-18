@@ -13,12 +13,22 @@ if ( !function_exists('pack_css')) {
 				
 			list($m_start, $m_path) = explode('modules/', $scss_filename);
 			list($m_module, $m_rest) = explode('/', $m_path, 2);
-				
-			$module_scss = $m_start.'modules/'.$m_module.'/'.$m_module.'.scss';
-			if (file_exists($module_scss)){
-				$return['module_scss'] = $module_scss;
-			}
 			
+			$module_scss = $m_start.'modules/'.$m_module.'/css/_config.scss';
+
+			if (file_exists($GLOBALS['config']['base_path'].$module_scss)){
+				$return['module_config_scss'] = $module_scss;
+				$return['module_scss'] = $m_start.'modules/'.$m_module.'/css/_module.scss';
+			} else {
+				
+				$module_scss = $m_start.'modules/'.$m_module.'/css/'.$m_module.'.scss';
+				
+				if (file_exists($GLOBALS['config']['base_path'].$module_scss)){
+					$return['module_scss'] = $module_scss;
+				}
+				
+			}
+
 			$return['css_cache'] = 'cache/'.$m_module.'__'.pathinfo($scss_filename, PATHINFO_FILENAME).'.css';
 				
 		}
@@ -28,7 +38,7 @@ if ( !function_exists('pack_css')) {
 	}
 	
 	function pack_css($scsss){
-		
+
 		$csss = [];
 
 		// compile scss
@@ -37,7 +47,7 @@ if ( !function_exists('pack_css')) {
 			if (!is_array($scsss_item)){
 				$scsss_item = ['script' => $scsss_item];
 			}
-	
+
 			// put together related scss files
 			if (!empty($scsss_item['related'])){
 				$scss_set = array_merge($scsss_item['related'], array($scsss_item['script']));
@@ -48,6 +58,10 @@ if ( !function_exists('pack_css')) {
 				
 				// get module name and check if module scss exists
 				$m_path = pack_get_scss_path($scsss_item['script']);
+				if (!empty($m_path['module_config_scss'])){
+					$scsss_item['related'][] = $m_path['module_config_scss'];
+					$scss_set[] = $m_path['module_config_scss'];
+				}
 				if (!empty($m_path['module_scss'])){
 					$scsss_item['related'][] = $m_path['module_scss'];
 					$scss_set[] = $m_path['module_scss'];
@@ -74,7 +88,7 @@ if ( !function_exists('pack_css')) {
 					$css_file_update_needed = true;
 				}
 			}
-	
+
 			if ($css_file_update_needed){
 
 				// load files
@@ -386,41 +400,6 @@ if ( !function_exists('pack_css')) {
 	
 		return implode("\n", $js_strs)."\n".$js_cache;
 	
-	}
-	
-	function add_css($file){
-
-		if (!empty($file['script'])){
-			$filename = $file['script'];
-		} else {
-			$filename = $file;
-		}
-		
-		// for module/file.scss format
-		if (!is_array($file) && substr_count($filename, '/') == 1){
-			
-			$file = [
-					'script' => 'modules/'.str_replace('/', '/css/', $filename),
-			];
-			
-			list($module, $file_short) = explode('/', $filename);
-			
-			if (file_exists($GLOBALS['config']['base_path'].'modules/'.$module.'/css/'.$module.'.scss')){
-				$file['related'] = ['modules/'.$module.'/css/'.$module.'.scss'];
-			}
-			
-		}
-		
-		if (empty($GLOBALS['_panel_scss'])){
-			$GLOBALS['_panel_scss'] = [];
-			$GLOBALS['_panel_scss_names'] = [];
-		}
-		
-		if (!in_array($file, $GLOBALS['_panel_scss_names'])){
-			$GLOBALS['_panel_scss'][] = $file;
-			$GLOBALS['_panel_scss_names'][] = $filename;
-		}
-		
 	}
 	
 }

@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_file_model extends CI_Model {
+class cms_file_model extends model {
 	
 	function get_cms_file_by_name($name){
 

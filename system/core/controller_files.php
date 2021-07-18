@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Files extends CI_Controller {
+class Files extends Controller {
 	
     function download($file_id){
 

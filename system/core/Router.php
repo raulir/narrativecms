@@ -85,89 +85,45 @@ class Router {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Set the route mapping
-	 *
 	 * This function determines what should be served based on the URI request,
 	 * as well as any "routes" that have been set in the routing config file.
-	 *
-	 * @access	private
-	 * @return	void
 	 */
-	function _set_routing()
-	{
-		
-		global $landing_route;
+	function _set_routing()	{
 
+		if (!empty($GLOBALS['config']['landing_page']['_value'])){
+			$route[''] = 'index/index/'.$GLOBALS['config']['landing_page']['_value'];
+		} else {
+			$route[''] = 'index/index/';
+		}
+		
 		// load the routes.php file.
 		if (file_exists($GLOBALS['config']['base_path'] . 'cache/routes.php')){
 			include_once $GLOBALS['config']['base_path'] . 'cache/routes.php';
 		} else {
-			$route['(:any)'] = 'cms_operations/update_routes/';
+			$route[''] = 'cms_operations/update_routes/';
 		}
-
-		$route['default_controller'] = 'index'.$landing_route;
-		$route['404_override'] = '';
-
-		$this->routes = ( ! isset($route) OR ! is_array($route)) ? array() : $route;
-		unset($route);
-
-		// Set the default controller so we can display it in the event
-		// the URI doesn't correlated to a valid controller.
-		$this->default_controller = ( ! isset($this->routes['default_controller']) OR $this->routes['default_controller'] == '') ? FALSE : strtolower($this->routes['default_controller']);
 
 		// Fetch the complete URI string
 		$this->uri->_fetch_uri_string();
+		
+		$bad	= array('$',		'(',		')',		'%28',		'%29');
+		$good	= array('&#36;',	'&#40;',	'&#41;',	'&#40;',	'&#41;');
+		
+		$uri = $this->uri->uri_string;
 
-		// Is there a URI string? If not, the default controller specified in the "routes" file will be shown.
-		if ($this->uri->uri_string == '')
-		{
-			return $this->_set_default_controller();
+		if (!empty($route[$uri])){
+			list($this->class, $this->method, $this->params) = explode('/', str_replace($bad, $good, $route[$uri]), 3);
+		} else if(!stristr($uri, '/')){
+			$this->class = str_replace($bad, $good, trim($uri));
+			$this->method = 'index';
+			$this->params = '';
+		} else if (substr_count($uri, '/') == 1){
+			list($this->class, $this->method) = explode('/', str_replace($bad, $good, $route[$uri]));
+			$this->params = '';
+		} else {
+			list($this->class, $this->method, $this->params) = explode('/', str_replace($bad, $good, $uri), 3);
 		}
 
-		// Compile the segments into an array
-		$this->uri->_explode_segments();
-
-		// Parse any custom routing that may exist
-		$this->_parse_routes();
-
-		// Re-index the segment array so that it starts with 1 rather than 0
-		$this->uri->_reindex_segments();
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Set the default controller
-	 *
-	 * @access	private
-	 * @return	void
-	 */
-	function _set_default_controller()
-	{
-		if ($this->default_controller === FALSE)
-		{
-			show_error("Unable to determine what should be displayed. A default route has not been specified in the routing file.");
-		}
-		// Is the method being specified?
-		if (strpos($this->default_controller, '/') !== FALSE)
-		{
-			$x = explode('/', $this->default_controller);
-
-			$this->set_class($x[0]);
-			$this->set_method($x[1]);
-			$this->_set_request($x);
-		}
-		else
-		{
-			$this->set_class($this->default_controller);
-			$this->set_method('index');
-			$this->_set_request(array($this->default_controller, 'index'));
-		}
-
-		// re-index the routed segments array so it starts with 1 rather than 0
-		$this->uri->_reindex_segments();
-
-		log_message('debug', "No URI present. Default controller set.");
 	}
 
 	// --------------------------------------------------------------------
@@ -238,18 +194,6 @@ class Router {
 					return $segments;
 				}
 			}
-		}
-
-		// If we've gotten this far it means that the URI does not correlate to a valid
-		// controller class.  We will now see if there is an override
-		if ( ! empty($this->routes['404_override']))
-		{
-			$x = explode('/', $this->routes['404_override']);
-
-			$this->set_class($x[0]);
-			$this->set_method(isset($x[1]) ? $x[1] : 'index');
-
-			return $x;
 		}
 
 		// Nothing else to do at this point but show a 404

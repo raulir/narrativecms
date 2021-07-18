@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms extends CI_Controller {
+class cms extends Controller {
 		
    	function updater($param = '', $second = ''){
 

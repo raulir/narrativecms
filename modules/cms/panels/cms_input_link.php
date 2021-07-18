@@ -12,7 +12,8 @@ class cms_input_link extends CI_Controller {
 			exit();
 		}
 
-		add_css('modules/cms/css/cms_input.scss');
+		$this->load->model('cms/cms_css_model');
+		$this->cms_css_model->add_css('modules/cms/css/cms_input.scss');
 		
 	}
 

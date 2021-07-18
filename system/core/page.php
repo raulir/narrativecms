@@ -1,14 +1,19 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Index extends CI_Controller {
+require_once($GLOBALS['config']['base_path'].'system/core/load.php');
+
+class page {
 	
-    public function __construct() {
-    	
-        parent::__construct();
-             
-        $this->params = $this->input->post();
-                 
-   	}
+    function __construct() {
+    	 
+		$this->load = new load();
+		$this->load->parent =& $this;
+		
+		$this->input =& load_class('Input', 'core');
+		
+		$this->params = $this->input->post();
+		
+    }
    	
    	/**
    	 *  get cms_page_panels data and check for shortcuts 
@@ -31,15 +36,15 @@ class Index extends CI_Controller {
    	}
 
     function index($page_id = 0, $extra = ''){
-    	
+
     	if (empty($page_id)){
     		$page_id = $GLOBALS['config']['landing_page']['_value'];
     	}
-
+    	 
     	$this->load->model('cms/cms_page_panel_model');
     	$this->load->model('cms/cms_page_model');
     	$this->load->model('cms/cms_menu_model');
-    	
+
     	$page_config = [];
     		
         // if module list item module/item=XX then / causes second parameter
@@ -206,13 +211,9 @@ class Index extends CI_Controller {
 		if (empty($_ajax)){
 
 			// render panels
-			$panel_data = $this->render($page_config);
-
-			//  output to the template, deprecated - layout without module name
-			if (!stristr($page['layout'], '/')){
-				$page['layout'] = 'cms/'.$page['layout'];
-			}
-			$this->output($page['layout'], $page_id, $panel_data);
+			$controller =& get_instance();
+			$panel_data = $controller->render($page_config);
+			$controller->output($page['layout'], $page_id, $panel_data);
 		
 		} else {
 			

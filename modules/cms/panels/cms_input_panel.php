@@ -12,8 +12,9 @@ class cms_input_panel extends CI_Controller {
 			exit();
 		}
 
-		add_css('modules/cms/css/cms_input.scss');
-		add_css('modules/cms/css/cms_input_select.scss');
+		$this->load->model('cms/cms_css_model');
+		$this->cms_css_model->add_css('modules/cms/css/cms_input.scss');
+		$this->cms_css_model->add_css('modules/cms/css/cms_input_select.scss');
 		
 	}
 	

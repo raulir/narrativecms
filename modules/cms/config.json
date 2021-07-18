@@ -166,6 +166,10 @@
 				"hidden",
 				"cron"
 			]
+		},
+		{
+			"id":"cms_rem",
+			"name":"CMS rem"
 		}
 	],
 	"api":[

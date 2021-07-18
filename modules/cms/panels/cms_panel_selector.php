@@ -12,8 +12,9 @@ class cms_panel_selector extends CI_Controller {
 			exit();
 		}
 		
-		add_css('cms/cms_input.scss');
-		add_css('cms/cms_popup.scss');
+		$this->load->model('cms/cms_css_model');
+		$this->cms_css_model->add_css('cms/cms_input.scss');
+		$this->cms_css_model->add_css('cms/cms_popup.scss');
 		
 		$GLOBALS['_panel_js'][] = [
 				'script' => 'modules/cms/js/cms_popup.js',

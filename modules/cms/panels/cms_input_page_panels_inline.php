@@ -12,7 +12,8 @@ class cms_input_page_panels_inline extends CI_Controller{
 			exit();
 		}
 
-		add_css('modules/cms/css/cms_input.scss');
+		$this->load->model('cms/cms_css_model');
+		$this->cms_css_model->add_css('modules/cms/css/cms_input.scss');
 		
 		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_input_page_panels.js';
 		

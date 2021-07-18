@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_helper_model extends CI_Model {
+class cms_helper_model extends model {
 	
 	function run_cron(){
 		

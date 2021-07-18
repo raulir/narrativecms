@@ -7,20 +7,12 @@ if ( !function_exists('_iw')) {
 		
 		include_once($GLOBALS['config']['base_path'] . 'system/core/Common.php');
 		include($GLOBALS['config']['base_path'] . 'system/core/Controller.php');
-		
-		function &get_instance(){
-			return CI_Controller::get_instance();
-		}
 
 	}
 	
 	function _get_iw_size($image, $params){
 		
 		$ci =& get_instance();
-		if ($ci === null) {
-			new CI_Controller();
-			$ci =& get_instance();
-		}
 		
 		$ci->load->model('cms/cms_image_model');
 

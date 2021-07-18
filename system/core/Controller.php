@@ -1,35 +1,48 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class CI_Controller {
+require_once($GLOBALS['config']['base_path'].'system/core/load.php');
 
-	static $instance;
+function &get_instance(){
+
+	if (empty($GLOBALS['controller'])){
+		$GLOBALS['controller'] = new Controller();
+	}
+	
+	$GLOBALS['controller']->init_panel();
+
+	return $GLOBALS['controller'];
+
+}
+
+class Controller {
 
 	/**
 	 * Constructor
 	 */
-	public function __construct()
-	{
-
-		self::$instance =& $this;
-
+	public function __construct(){
+//		_backtrace();
+/*
+		$GLOBALS['counter'] = !empty($GLOBALS['counter']) ? ($GLOBALS['counter'] + 1) : 1;
+		print($GLOBALS['counter']);
+		if ($GLOBALS['counter'] > 10){
+			die();
+		}
+*/
+		
 		// Assign all the class objects that were instantiated by the
 		// bootstrap file (CodeIgniter.php) to local class variables
 		// so that CI can run as one big super object.
-		foreach (is_loaded() as $var => $class)
-		{
+		foreach (is_loaded() as $var => $class)	{
 			$this->$var =& load_class($class);
 		}
 
-		$this->load =& load_class('Loader', 'core');
-		$this->load->parent =& $this;
-
-		$this->load->initialize();
+		$this->load = new load();
+   		$this->load->parent =& $this;
+		
 		/**
 		 * past in MY Controller
 		 */
-		// $this->load->model('cms/cms_update_model');
-		// $this->cms_update_model->up();
-		
+
 		$this->load->helper('panel_helper');
 		$this->load->helper('image_helper');
 		$this->load->helper('packer_helper');
@@ -53,12 +66,6 @@ class CI_Controller {
 		
 	}
 
-	static function &get_instance(){
-
-		return self::$instance;
-		
-	}
-	
 	function panel_heading($params){
 		
 		if (!is_array($params)){
@@ -214,7 +221,7 @@ class CI_Controller {
 				 
 				// load panel stuff into this sandbox - it will be the same as sandbox is singleton for itself
 				$panel_name = $files['module'].'_'.$files['name'].'_panel';
-	
+// print($files['controller']);	
 				$this->panel_ci->load->library(
 						$files['controller'],
 						['module' => $files['module'], 'name' => $files['name'], ],
@@ -246,7 +253,7 @@ class CI_Controller {
 				$params = array();
 			}
 	
-			$return = $this->load->view($files['template'], $params, true);
+			$return = $this->view($files['template'], $params);
 	
 			$template_timer_end = round(microtime(true) * 1000);
 	
@@ -275,11 +282,13 @@ class CI_Controller {
 		// add js, css, scss to global page files
 		$GLOBALS['_panel_js'] = array_merge($GLOBALS['_panel_js'], $panel_js);
 		
+		$this->load->model('cms/cms_css_model');
+// _print_r($this->cms_css_model);		
 		foreach($panel_css as $css_file){
-			add_css($css_file);
+			$this->cms_css_model->add_css($css_file);
 		}
 		foreach($panel_scss as $css_file){
-			add_css($css_file);
+			$this->cms_css_model->add_css($css_file);
 		}
 
 		// save panel result params for returning them when ajax panel is requested
@@ -299,6 +308,23 @@ class CI_Controller {
 		return $params;
 	}
 	
+	function layout($layout, $data){
+	
+		list($layout_module, $layout_file) = explode('/', $layout);
+		$layout_filename = $GLOBALS['config']['base_path'].'modules/'.$layout_module.'/layouts/'.$layout_file.'.tpl.php';
+	
+		ob_start();
+	
+		include($layout_filename); // include() vs include_once() allows for multiple views with the same name
+	
+		$buffer = ob_get_contents();
+	
+		@ob_end_clean();
+	
+		return $buffer;
+	
+	}
+
 	/**
 	 * 
 	 * puts together and outputs page html
@@ -310,7 +336,7 @@ class CI_Controller {
 	 */
 	function output($layout_name, $page_id, $panel_data = array()){
 		
-		$page = $this->load->layout($layout_name, $panel_data);
+		$page = $this->layout($layout_name, $panel_data);
 
 		// get css part of page head
 		$css_str = $this->get_page_css($page_id);
@@ -487,10 +513,12 @@ class CI_Controller {
 			 
 		}
 
+		$this->load->model('cms/cms_css_model');
+
 		if (!empty($global_css) && is_array($global_css)){
 			foreach($global_css as $css_item){
 				
-				add_css(['script' => $css_item, 'top' => 2, ]);
+				$this->cms_css_model->add_css(['script' => $css_item, 'top' => 2, ]);
 		
 			}
 		}
@@ -702,6 +730,7 @@ class CI_Controller {
 	function render($page_config){
 
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_css_model');
 
 		foreach($page_config as $key => $panel_config){
 			if (stristr($panel_config['panel'], '/')){
@@ -784,7 +813,7 @@ class CI_Controller {
 						$this->js = array_merge($this->js, $panel_data['js']);
 
 						foreach($panel_data['scss'] as $scss_file){
-							add_css($scss_file);
+							$this->cms_css_model->add_css($scss_file);
 						}
 						 
 					} else {
@@ -964,9 +993,23 @@ class CI_Controller {
 		return $return;
 	
 	}
+	
+	function view($name, $params = []){
+		
+		extract($params);
+
+		ob_start();
+
+		include($name);
+	
+		$buffer = ob_get_contents();
+		
+		@ob_end_clean();
+
+		return $buffer;
+
+	}
 
 }
-// END Controller class
 
-/* End of file Controller.php */
-/* Location: ./system/core/Controller.php */
+class_alias('Controller', 'CI_Controller');

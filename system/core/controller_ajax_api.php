@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Ajax_api extends CI_Controller {
+class Ajax_api extends Controller {
 	
     public function __construct() {
     	

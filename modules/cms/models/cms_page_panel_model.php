@@ -28,8 +28,10 @@ class cms_page_panel_model extends Model {
 	
 	function __construct(){
 		
-		$this->load->model('cms/cms_language_model');
+		parent::__construct();
 		
+		$this->load->model('cms/cms_language_model');
+
 		$this->default_language = $this->cms_language_model->get_default();
 
 	}
@@ -829,9 +831,14 @@ class cms_page_panel_model extends Model {
     		$return = array();
     	}
     	
+    	// replace numeric panel names - shortcuts - with real data
     	// replace with translated versions
     	foreach($return as $key => $page_panel){
-    		$return[$key] = $this->get_cms_page_panel($page_panel['cms_page_panel_id'], $this->get_current_language(), false);
+    		if(is_numeric($page_panel['panel_name'])){
+    			$return[$key] = $this->get_cms_page_panel($page_panel['panel_name'], $this->get_current_language(), false);
+    		} else {
+	    		$return[$key] = $this->get_cms_page_panel($page_panel['cms_page_panel_id'], $this->get_current_language(), false);
+    		}
     	}
     	
     	// unpack params - not needed
@@ -892,7 +899,7 @@ class cms_page_panel_model extends Model {
     			$return[$key]['cms_page_id'] = $cms_page_panel['page_id'];
     		}
     	}
-    	
+
     	// check for page panel settings
     	foreach($return as $key => $cms_page_panel){
     		if ($cms_page_panel['cms_page_id']){
@@ -911,7 +918,9 @@ class cms_page_panel_model extends Model {
 	function get_cms_page_panel_settings($cms_panel_name){
 		
 		if (!stristr($cms_panel_name, '/')){
-			html_error('Can\'t load cms panel settings, module not specified.');
+			print('<pre>');
+			print($cms_panel_name);
+			html_error('Can\'t load cms panel settings, module not specified: '.$cms_panel_name);
 			return [];
 		}
 		

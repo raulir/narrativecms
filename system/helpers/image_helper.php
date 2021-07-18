@@ -161,9 +161,9 @@ if ( !function_exists('_i')) {
 		} 
 		
 		// get data about image from db
-		$ci =& get_instance();
-		$ci->load->model('cms/cms_image_model');
-		$image_db_data = $ci->cms_image_model->get_cms_image_by_filename($image);
+		$controller =& get_instance();
+		$controller->load->model('cms/cms_image_model');
+		$image_db_data = $controller->cms_image_model->get_cms_image_by_filename($image);
 
 		if (!(file_exists($GLOBALS['config']['upload_path'].$image) && !is_dir($GLOBALS['config']['upload_path'].$image)) 
 				|| empty($image_db_data['original_width'])){
