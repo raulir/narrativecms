@@ -23,6 +23,7 @@ class cms_update_model extends CI_Model {
 				'',
 				'bin',
 				'css',
+				'dist',
 				'eot',
 				'gif',
 				'htaccess',

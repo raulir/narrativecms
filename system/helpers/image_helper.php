@@ -291,12 +291,17 @@ if ( !function_exists('_i')) {
 			$params['css'] .= ' padding-bottom: '.round($image_data['height']/$image_data['width']*100, 2).'%; ';
 		}
 		
+		if (!empty($GLOBALS['config']['base_site'])){
+			$fileurl_lq = trim($GLOBALS['config']['base_site'],'/').$fileurl_lq;
+			$fileurl_hq = trim($GLOBALS['config']['base_site'],'/').$fileurl_hq;
+		}
+		
 		if (!empty($needs_lazy_loading)){
 			
 			$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_images_lazy.js';
 			
-			print(' style="background-image: url('.$GLOBALS['config']['upload_url'].$image.'); '.$params['css'].
-					'" data-cms_images_lazy="'.$image.'" data-output="'.$params['output'].'" '.
+			print(' style="background-image: url('.trim(($GLOBALS['config']['base_site']??''),'/').$GLOBALS['config']['upload_url'].$image.'); '.
+					$params['css'].'" data-cms_images_lazy="'.$image.'" data-output="'.$params['output'].'" '.
 					' data-w1="'.$params['width_1'].'" '.(!empty($params['width_2']) ? ' data-w2="'.$params['width_2'].'" ' : '').$dataprops);
 		
 		} elseif ($_SESSION['mobile']){

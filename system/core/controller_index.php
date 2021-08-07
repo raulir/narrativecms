@@ -204,7 +204,7 @@ class Index extends CI_Controller {
 		//
 		$_ajax = $this->input->post('_ajax');
 		if (empty($_ajax)){
-
+			
 			// render panels
 			$panel_data = $this->render($page_config);
 
@@ -216,17 +216,20 @@ class Index extends CI_Controller {
 		
 		} else {
 			
+			header('Access-Control-Allow-Origin: *');
+
 			$positions = $this->input->post('cms_positions');
+			
+			$_url = $this->input->post('_url');
+			if ($_url){
+				$GLOBALS['config']['base_site'] = $_url;
+			}
 			
 			if (!empty($positions)){
 				
 				// new position_links functionality
 				$return = [];
-				
-//				_print_r($positions);
-				
-//				_print_r($page_config);
-				
+
 				$positions_needed = array_keys($positions);
 
 				foreach($page_config as $key => $panel_config){

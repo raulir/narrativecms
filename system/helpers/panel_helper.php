@@ -20,12 +20,16 @@ if ( !function_exists('get_position')) {
     	foreach($data as $key => $pdata){
     		
     		list($position_name, $number, $_cms_page_id) = explode('_', $key);
-    		
+
     		if ($position_name == $name){
     			$cms_page_id = $_cms_page_id;
     			$return .= $pdata;
     		}
 
+    	}
+    	
+    	if(empty($cms_page_id)){
+    		$cms_page_id = 0;
     	}
 
     	if (!empty($GLOBALS['config']['position_wrappers'])){
@@ -273,16 +277,16 @@ if ( !function_exists('get_position')) {
     		if ((is_array($params_url) && !in_array($params_url['target'], ['_none', '_manual']) 
     				|| (!is_array($params_url) && stristr($params_url, '/') && stristr($params_url, '=') ))){
     		
-    			$data = ' data-_pl="1" ';
-				$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_position_link.js';
+    			$data = ' data-_pl="1" data-_url="'.($GLOBALS['config']['base_site']??'').'" ';
+//				$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_position_link.js';
     		
     		}
     		
     	}
     	
     	if ($url || $url === ''){
-    	
-	    	$href = _l($url, false);
+    		
+ 	    	$href = _l($url, false);
 	    	
 	    	$target = '';
 	    	if (substr($url, 0, 4) == 'http'){

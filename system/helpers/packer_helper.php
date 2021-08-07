@@ -311,7 +311,7 @@ if ( !function_exists('pack_css')) {
 			if ($_js['sync'] == 'defer' && $GLOBALS['config']['cache']['pack_js'] && empty($_js['no_pack']) && substr($_js['script'], 0, 4) !== 'http'){
 				$js_to_cache[] = $_js['script'];
 			} else if (substr($_js['script'], 0, 4) !== 'http'){ // local script
-				$js_strs[] = '<script type="text/javascript" src="'.$GLOBALS['config']['base_url'].$_js['script'].
+				$js_strs[] = '<script type="text/javascript" src="'.($GLOBALS['config']['base_site']??'').$GLOBALS['config']['base_url'].$_js['script'].
 				(!empty($GLOBALS['config']['cache']['force_download']) ? '?v='.time() : '').'" '.$_js['sync'].'></script>';
 			} else { // outside script
 				$js_strs[] = '<script type="text/javascript" src="'.$_js['script'].'" '.$_js['sync'].'></script>';
@@ -325,7 +325,7 @@ if ( !function_exists('pack_css')) {
 			$hash = substr(md5(implode(' ', $js_to_cache)), 0, 8);
 			// check if any of files is changed
 			$filename = $GLOBALS['config']['base_path'].'cache/'.$hash.'.js';
-			$fileurl = $GLOBALS['config']['base_url'].'cache/'.$hash.'.js';
+			$fileurl = ($GLOBALS['config']['base_site']??'').$GLOBALS['config']['base_url'].'cache/'.$hash.'.js';
 				
 			if (file_exists($filename)){
 				$filetime = filemtime($filename);
