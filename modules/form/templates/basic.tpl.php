@@ -8,6 +8,10 @@
 		<?php if(!empty($heading)): ?>
 			<div class="form_basic_title"><?= $heading ?></div>
 		<?php endif ?>
+		
+		<?php if(!empty($text)): ?>
+			<div class="form_basic_text"><?= $text ?></div>
+		<?php endif ?>
 
 		<div class="form_basic_form">
 			<form style="display: inline; " method="post">
