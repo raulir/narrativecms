@@ -101,7 +101,7 @@ function cms_mask_picker_init(){
 						$('.cms_mask_picker_square_active').removeClass('cms_mask_picker_square_active')
 					})
 					
-					$('.cms_mask_picker_square').on('mouseenter.cms', function(){
+					$('.cms_mask_picker_square').on('mouseenter.cms mousemove.cms', function(){
 						if (cms_mask_mousedown){
 							if (cms_mask_mode){
 								$(this).removeClass('cms_mask_picker_square_active')

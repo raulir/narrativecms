@@ -87,7 +87,7 @@ function cms_input_mask_picker($input){
 
 function cms_input_mask_display($this){
 	
-	$('.cms_input_mask_mask').remove()
+	$('.cms_input_mask_mask', $this).remove()
 	
 	if ($('.cms_input_mask_value', $this).val()){
 		

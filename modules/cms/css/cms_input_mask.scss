@@ -1,5 +1,7 @@
 .cms_input_mask_container {
-	
+	.cms_input_button {
+		width: 12.0rem;
+	}
 }
 
 .cms_input_mask_content {
@@ -8,14 +10,12 @@
 }
 
 .cms_input_mask_set {
-	width: 12.0rem;
 	top: 3.3rem;
 	left: 0rem;
 	position: absolute;
 }
 
 .cms_input_mask_clear {
-	width: 12.0rem;
 	top: 6.6rem;
 	left: 0;
 	position: absolute;
