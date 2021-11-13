@@ -52,6 +52,9 @@
     line-height: 2.2rem;
     font-size: 1.7rem;
     padding: 0.1rem 0.5rem 0 0.5rem;
+    .cms_repeater_block & {
+    	width: 5.7rem;
+    }
 }
 
 .cms_input_xy_y {
@@ -67,6 +70,9 @@
     line-height: 2.2rem;
     font-size: 1.7rem;
     padding: 0.1rem 0.5rem 0 0.5rem;
+    .cms_repeater_block & {
+    	width: 5.7rem;
+    }
 }
 
 .cms_input_xy_image {

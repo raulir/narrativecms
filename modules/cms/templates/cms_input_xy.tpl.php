@@ -8,10 +8,12 @@
 		<div class="cms_input_button cms_input_xy_clear">Clear</div>
 	
 		<div class="cms_input_xy_x_label">X</div>
-		<input class="cms_input_xy_x" name="<?= $name ?>[x]" value="<?= !empty($value['x']) ? $value['x'] : '' ?>">
+		<input class="cms_input_xy_x" name="<?= stristr($name, '[]') ? str_replace('[]', '[x][]', $name) : $name.'[x]' ?>" 
+				value="<?= !empty($value['x']) ? $value['x'] : '' ?>">
 		
 		<div class="cms_input_xy_y_label">Y</div>
-		<input class="cms_input_xy_y" name="<?= $name ?>[y]" value="<?= !empty($value['y']) ? $value['y'] : '' ?>">
+		<input class="cms_input_xy_y" name="<?= stristr($name, '[]') ? str_replace('[]', '[y][]', $name) : $name.'[y]' ?>" 
+				value="<?= !empty($value['y']) ? $value['y'] : '' ?>">
 		
 		<div class="cms_input_xy_image cms_input_xy_set_button" <?php _ib('cms/cms_opacity.png', 40) ?>>
 			<?php if(!empty($target_image)): ?>
