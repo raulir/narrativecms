@@ -5,76 +5,117 @@ function cms_preloader_class(){
 	
 	this.preloaded_videos = [];
 	this.important_videos = [];
+	
+	this.preloaded_sounds = [];
+
+	this.images_ok = false
+	this.videos_ok = false
+	this.sounds_ok = false
 
 	this.preload = function(params) {
-		
-		if (typeof params.images != 'undefined'){
+
+		return new Promise ((resolve, reject) => {
+
+			var ok_interval = setInterval(() => {
+
+				if (this.images_ok && this.videos_ok && this.sounds_ok){
+					clearInterval(ok_interval)
+					resolve()
+				}
+				
+			}, 100)
 			
-			for (var i = 0; i < params.images.length; i++) {
-				this.preloaded_images[i] = new Image();
-				this.preloaded_images[i].src = params.images[i];
-			}
-			
-			if (typeof params.after != 'undefined'){
+			if (typeof params.images == 'undefined'){
+				this.images_ok = true
+			} else {
+				
+				for (var i = 0; i < params.images.length; i++) {
+					this.preloaded_images[i] = new Image();
+					this.preloaded_images[i].src = params.images[i];
+				}
+				
 				var that = this;
 				var interval = setInterval(function(){
 					if (that.count_not_complete() == 0){
 						clearInterval(interval);
-						params.after(that.preloaded_images);
+						that.images_ok = true
 					}
 				}, 100);
+	
 			}
-			
-			if (typeof params.after_each != 'undefined'){
-				var that = this;
-				var interval_each = setInterval(function(){
-
-					if (that.count_not_complete() == 0){
-						setTimeout(function(){
-							clearInterval(interval_each);
-						}, 1000)
-					}
-
-					for (var i = 0; i < that.preloaded_images.length; i++) {
-						if (that.preloaded_images[i].complete && typeof that.preloaded_images[i].cms_after == 'undefined'){
-							that.preloaded_images[i].cms_after = 1;
-							params.after_each(that.preloaded_images[i]);
+	
+			if (typeof params.videos != 'undefined'){
+				
+				var _this = this;
+				
+				// add to videos to load
+				$(params.videos).each(function(key, video){
+					// check if this video is in preloaded videos
+					var is = 0;
+					for (var i = 0; i < _this.preloaded_videos.length; i++) {
+						if (_this.preloaded_videos[i].src == video.src){
+							is = 1;
 						}
 					}
-
-				}, 500);
-			}
-
-		}
-
-		if (typeof params.videos != 'undefined'){
-			
-			var _this = this;
-			
-			// add to videos to load
-			$(params.videos).each(function(key, video){
-				// check if this video is in preloaded videos
-				var is = 0;
-				for (var i = 0; i < _this.preloaded_videos.length; i++) {
-					if (_this.preloaded_videos[i].src == video.src){
-						is = 1;
+					// add
+					if (is == 0){
+						_this.preloaded_videos.push({'src':video.src, 'target':video.target, 'type':video.type, 'complete':0})
 					}
-				}
-				// add
-				if (is == 0){
-					_this.preloaded_videos.push({'src':video.src, 'target':video.target, 'type':video.type, 'complete':0})
+					
+				});
+	
+				if (typeof this.video_interval == 'undefined'){
+					var _this = this;
+					_this.video_interval = setInterval(function(){
+						var ret = _this.check_videos()
+						if (!ret) {
+							clearInterval(_this.video_interval)
+							_this.videos_ok = true
+						}
+					}, 200);
 				}
 				
-			});
-			
-			if (typeof this.video_interval == 'undefined'){
-				var _this = this;
-				_this.video_interval = setInterval(function(){
-					_this.check_videos();
-				}, 100);
+			} else {
+				_this.videos_ok = true
 			}
+
+			if (typeof params.sounds != 'undefined'){
+				
+				var _this = this;
+				
+				// add to sounds to load
+				$(params.sounds).each(function(key, sound){
+					// check if this sound is in preloaded sounds
+					var is = 0;
+					for (var i = 0; i < _this.preloaded_sounds.length; i++) {
+						if (_this.preloaded_sounds[i].src == sound){
+							is = 1;
+						}
+					}
+					// add
+					if (is == 0){
+						_this.preloaded_sounds.push({'src':sound, 'complete':0})
+					}
+					
+				});
+	
+				if (typeof this.sound_interval == 'undefined'){
+					var _this = this;
+					_this.sound_interval = setInterval(function(){
+						var ret = _this.check_sounds()
+						if (!ret) {
+							clearInterval(_this.sound_interval)
+							_this.sounds_ok = true
+						}
+					}, 100);
+				}
+				
+			} else {
+				_this.sounds_ok = true
+			}
+
+		})
 			
-		}
 	}
 	
 	this.check_videos = function(){
@@ -93,48 +134,86 @@ function cms_preloader_class(){
 		});
 		
 		if (loading < 2 && next_key != -1){
-			// start loading next - create video in background and start playing
-			var _video = document.createElement('video');
-			this.preloaded_videos[next_key].complete = -1;
-			_video.src = this.preloaded_videos[next_key].src;
-			_video.muted = true; 
-
-			_video.addEventListener('canplaythrough', function() {
-	        	
-//				document.body.appendChild(this);
-//                this.parentNode.removeChild(this);
-                _preloader.preloaded_videos[next_key].complete = 1;
-                
-console.log('loaded ' + next_key + ' ' + _preloader.preloaded_videos[next_key].target + ' ' + _preloader.preloaded_videos[next_key].src);
-
-				var $video_element = $(_preloader.preloaded_videos[next_key].target).children('video');
-// console.log('target ' + $video_element.length);
-				
-				if($video_element.length > 0){
-					$video_element.html($video_element.html() + '<source src="' + _preloader.preloaded_videos[next_key].src + 
-							'" type="video/' + _preloader.preloaded_videos[next_key].type + '"></source>');
- //					$video_element[0].load();
-					
-					if($video_element[0].readyState > 0){
-						$video_element[0].currentTime = 0;
-					} else {
-						$video_element.off('loadedmetadata.cms').on('loadedmetadata.cms', function(){
-							$(this).get(0).currentTime = 0;
-						});
-					}
-//					$video_element[0].currentTime = 0;
-				}
-				
-			}, false);
-
-			_video.addEventListener('timeupdate', function() {
-			    if (this.currentTime > 0) {
-			        this.pause();
-			    }
-			});
-	        
-			_video.play();
 			
+			this.preloaded_videos[next_key].complete = -1;
+			this.preloaded_videos[next_key].req = new XMLHttpRequest()
+			
+			this.preloaded_videos[next_key].req.open('GET', this.preloaded_videos[next_key].src, true);
+			this.preloaded_videos[next_key].req.responseType = 'blob';
+
+			this.preloaded_videos[next_key].req.onload = function() {
+			   if (this.status === 200) {
+
+				   _preloader.preloaded_videos[next_key].complete = 1
+
+				   var videoBlob = this.response;
+				   
+				   var vid = URL.createObjectURL(videoBlob)
+
+				   var $video_element = $(_preloader.preloaded_videos[next_key].target).children('video')
+				   
+				   $video_element.get(0).src = _preloader.preloaded_videos[next_key].src
+				   // vid
+			   }
+			}
+			this.preloaded_videos[next_key].req.onerror = function() {
+
+			}
+
+			this.preloaded_videos[next_key].req.send()
+
+		}
+
+		if (loading == 0 && next_key == -1) {
+			return false
+		} else {
+			return true
+		}
+		
+	}
+
+	this.check_sounds = function(){
+		
+		var _preloader = this;
+		
+		var loading = 0;
+		var next_key = -1;
+		$(this.preloaded_sounds).each(function(key, sound){
+			if (sound.complete == -1){
+				loading = loading + 1;
+			}
+			if (next_key == -1 && sound.complete == 0){
+				next_key = key;
+			}
+		});
+		
+		if (loading < 2 && next_key != -1){
+			
+			this.preloaded_sounds[next_key].complete = -1;
+			this.preloaded_sounds[next_key].req = new XMLHttpRequest()
+			
+			this.preloaded_sounds[next_key].req.open('GET', this.preloaded_sounds[next_key].src, true);
+			this.preloaded_sounds[next_key].req.responseType = 'blob';
+
+			this.preloaded_sounds[next_key].req.onload = function() {
+			   if (this.status === 200) {
+
+				   _preloader.preloaded_sounds[next_key].complete = 1
+
+			   }
+			}
+			this.preloaded_sounds[next_key].req.onerror = function() {
+
+			}
+
+			this.preloaded_sounds[next_key].req.send()
+
+		}
+
+		if (loading == 0 && next_key == -1) {
+			return false
+		} else {
+			return true
 		}
 		
 	}
