@@ -28,6 +28,11 @@ class location_model extends Model {
 		
 		$data = json_decode(file_get_contents($filename), true);
 		
+		if (empty($data['country_code'])){
+			$_SESSION['targets']['region'] = 'GB';
+			return 'GB';
+		}
+		
 		$_SESSION['targets']['region'] = $data['country_code'];
 		
 		return $data['country_code'];
