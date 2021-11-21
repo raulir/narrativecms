@@ -79,7 +79,7 @@ class cms_panel_model extends Model {
 		];
 		
 		$return['module'] = !empty($default_module) ? $default_module : 'cms';
-		
+
 		if ($filename){
 
 			$json_data = file_get_contents($filename);
@@ -88,13 +88,13 @@ class cms_panel_model extends Model {
 			$json_data = str_replace('"//', '"'.$return['module'].'/', $json_data);
 			
 			$panel_params_structure = json_decode($json_data, true);
-			
+				
 			if( json_last_error() ){
 				
 				_html_error('Problem loading json: '.json_last_error_msg().' in '.str_replace($GLOBALS['config']['base_path'], '', $filename));
 				
 			}
-
+				
 			if (empty($panel_params_structure['version']) || $panel_params_structure['version'] < 2){
 				$return['item'] = $panel_params_structure;
 				$return['version'] = 1;
@@ -125,6 +125,10 @@ class cms_panel_model extends Model {
 		}
 		
 		$return['filename'] = $filename;
+		
+		if(empty($return['module'])){
+			$return['module'] = !empty($default_module) ? $default_module : 'cms';
+		}
 		
 		if (!empty($return['version']) && is_array($return['version'])){
 			$return['version'] = end($return['version']);
