@@ -4,26 +4,30 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=600,user-scalable=no">
 	<script type="text/javascript">
-		var _orientation = function(){if (typeof window.orientation != 'undefined') return (window.orientation == 0 || window.orientation == 180) ? 900 : 1024;
-				else return screen.width > 768 ? 1024 : 900;}
-    	document.write('<meta name="viewport" content="width='+(screen.width>=768?_orientation():'600')+',user-scalable=no">');
-    	var _orientationchange = function(){
-        	var viewport = document.querySelector('meta[name=viewport]');
-        	var orientation = _orientation();
-        	document.body.style.display='none';
-        	viewport.setAttribute('content', '');
-			setTimeout(function(){
-				viewport.setAttribute('content', 'width='+(screen.width>=768?orientation:'600')+',user-scalable=no');
-				setTimeout(function(){
-				    document.body.offsetHeight;
-				    document.body.style.removeProperty('display');
-				}, 20);
-			}, 500);
-		};
-    	if (typeof screen.orientation != 'undefined' && typeof screen.orientation.addEventListener != 'undefined') screen.orientation.addEventListener('change', _orientationchange); 
-    	else window.addEventListener('orientationchange', _orientationchange);
+
+		setTimeout(() => {
+
+			const _cms_rem = Number(window.getComputedStyle(document.body).getPropertyValue('font-size').match(/\d+/)[0])
+
+			if (typeof window.orientation == 'undefined'){
+				var a_width = window.innerWidth;
+				var a_height = window.innerHeight;
+			} else {
+				var a_width = document.documentElement.clientWidth;
+				var a_height = document.documentElement.clientHeight;
+			}
+			
+			if (a_width > <?= !empty($GLOBALS['config']['rem_m_px']) ? $GLOBALS['config']['rem_m_px'] : '0' ?>){
+				_cms_mobile = false;
+			} else {
+				_cms_mobile = true;
+			}
+			
+		}, 0)
+
 		var config_url = '<?php print($GLOBALS['config']['base_url']); ?>';
 		<?php if(!empty($_SESSION['cms_user']['cms_user_id'])): ?>var admin_logged_in = 1;<?php endif ?>
+
 	</script>
 </head>
 
