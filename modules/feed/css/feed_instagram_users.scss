@@ -9,6 +9,7 @@
 	opacity: 0;
 	transition: opacity 0.3s;
 	table-layout: fixed;
+	z-index: 30;
 }
 
 .feed_instagram_popup_cell {
@@ -31,7 +32,7 @@
 }
 
 .feed_instagram_popup_toolbar {
-	
+	text-align: left;
 }
 
 .feed_instagram_popup_title {
@@ -43,10 +44,10 @@
 }
 
 .feed_instagram_popup_confirmation {
-	max-width: 360px;
+	max-width: 40.0rem;
 	margin: 0 auto;
-	line-height: 1.4em;
-	padding: 25px 0 35px 0;
+	line-height: 2.2rem;
+	padding: 3.0rem 0 3.5rem 0;
 }
 
 .feed_instagram_popup_ok {
@@ -55,8 +56,9 @@
 
 .feed_instagram_table {
 	display: table;
-	table-ayout: fixed;
-	width: 100%;
+	table-layout: fixed;
+	width: calc(100% - 2.0rem);
+	margin: 0 auto;
 }
 
 .feed_instagram_row {
@@ -75,8 +77,8 @@
 }
 
 .feed_instagram_picture {
-	width: 120px;
-	background-size: contain;
+	width: 100px;
+	background-size: 8.0rem auto;
 	background-position: left center;
 	background-repeat: no-repeat;
 }
@@ -103,4 +105,8 @@
 
 .feed_instagram_privacy {
 	border-bottom: 1px solid #d0d0d0;
+}
+
+.feed_instagram_message {
+	padding: 2.0rem 1.0rem;
 }

@@ -1,4 +1,6 @@
 function feed_instagram_users_init(){
+	
+	location.hash = ''
 
 	$('.feed_instagram_user_button').on('click.cms', function(){
 		
@@ -18,11 +20,18 @@ function feed_instagram_users_init(){
 	});
 	
 	$('.feed_instagram_popup_ok').on('click.cms', function(){
-		window.location = 'http://cms.bytecrackers.com/_feed/instagram.php?src=' + encodeURIComponent(window.location);
-	});
+		
+		var uri = window.location.toString()
+		if (uri.indexOf('#') > 0) {
+            uri = uri.substring(0, uri.indexOf('#'))
+		}
+		
+		window.location = 'https://www.bytecrackers.com/_feed/instagram.php?src=' + encodeURIComponent(uri)
+		
+	})
 	
 	$('.feed_instagram_remove_button').on('click.cms', function(){
-		get_ajax('feed_instagram_users', {
+		get_ajax('feed/feed_instagram_users', {
 			'do': 'feed_instagram_remove',
 			'cms_page_panel_id': $(this).data('cms_page_panel_id'),
 			'success': function(){

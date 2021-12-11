@@ -93,8 +93,10 @@ class feed_model extends CI_Model {
 	   				} else {
 	   					
 	   					$instagrams = $this->get_instagram_by_username(str_replace('@', '', $feed_setting['filter']));
-	   						
+
 	   				}
+	   				
+	   				$instagrams = array_reverse($instagrams, true);
 	
 			   		foreach($instagrams as $instagram){
 			   			
@@ -225,7 +227,7 @@ class feed_model extends CI_Model {
 		$item['username'] = iconv('UTF-8', 'UTF-8//IGNORE', $instagram['username']);
 
 		// instagram specific
-		$item['profile_image'] = $this->cms_image_model->scrape_image($instagram['profile_picture'], 'instagram', 'feed');
+		$item['profile_image'] = $instagram['profile_picture'];
 		$item['likes_count'] = $instagram['likes_count'];
 		$item['comments_count'] = $instagram['comments_count'];
 
@@ -497,11 +499,14 @@ class feed_model extends CI_Model {
 		}
 
 		// get user instagram token
-		$users = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => ['feed_instagram_user','feed/feed_instagram_user'], 'username' => $username, ]);
-		$instagram_token = !empty($users[0]['access_token']) ? $users[0]['access_token'] : false;
+		$users = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'feed/feed_instagram_user', 'username' => $username, ]);
+		if (count($users)){
+			$user = array_values($users)[0];
+			$instagram_token = $user['access_token'];
+		}
 
 		if (empty($instagram_token)){
-			return array();
+			return [];
 		}
 
 		$filename = $GLOBALS['config']['base_path'] . 'cache/instagram_' . $username . '.json';
@@ -514,10 +519,9 @@ class feed_model extends CI_Model {
 				touch($filename);
 			}
 
-			$url = 'https://api.instagram.com/v1/users/self/media/recent/?access_token='.$instagram_token;
-
+			$url = 'https://graph.instagram.com/'.$user['user_id'].'?fields=media&access_token='.$user['access_token'];
 			$data = file_get_contents($url);
-			
+
 			file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
 			
 		} else {
@@ -527,36 +531,73 @@ class feed_model extends CI_Model {
 		}
 
 		$data = json_decode($data, true);
-
+		
 		$count = 0;
 		$return = array();
-		if (!empty($data['data'])){
-			foreach($data['data'] as $image){
+		if (!empty($data['media']['data'])){
+			foreach($data['media']['data'] as $item){
+
 				if ($count < $limit){
+
+					$filename = $GLOBALS['config']['base_path'] . 'cache/ig_id_' . $item['id'] . '.json';
+					if (!file_exists($filename) || time()-filemtime($filename) > $interval * 60) {
 					
-					$return_item = array(
-						'image_full' => $image['images']['standard_resolution']['url'],
-						'link' => $image['link'],
-						'likes_count' => $image['likes']['count'],
-						'comments_count' => $image['comments']['count'],
-						'id' => $image['id'],
-						'created_time' => $image['created_time'],
-						'username' => $image['user']['username'],
-						'profile_picture' => $image['user']['profile_picture'],
-					);
-					
-					if (!empty($image['caption']) && is_array($image['caption'])){
-						$return_item['text'] = !empty($image['caption']['text']) ? $image['caption']['text'] : '';
+						$url = 'https://graph.instagram.com/'.$item['id'].'?fields=caption,media_type,media_url,permalink,thumbnail_url,timestamp,children&'.
+								'access_token='.$user['access_token'];
+						
+						$image_data = file_get_contents($url);
+						
+						file_put_contents($filename, json_encode($image_data, JSON_PRETTY_PRINT));
+							
 					} else {
-						$return_item['text'] = '';
+								
+						$image_data = file_get_contents($filename);
+								
+					}
+
+					$image = json_decode($image_data, true);
+					
+					if($image['media_type'] == 'IMAGE'){
+
+						$return_item = array(
+							'image_full' => $image['media_url'],
+							'link' => $image['permalink'],
+							'likes_count' => 0, // $image['likes']['count'],
+							'comments_count' => 0, // $image['comments']['count'],
+							'id' => $image['id'],
+							'created_time' => strtotime($image['timestamp']),
+							'username' => $user['username'],
+							'profile_picture' => $user['profile_picture'],
+						);
+						
+						$return_item['text'] = !empty($image['caption']) ? $image['caption'] : '';
+	
+						$return[] = $return_item;
+						
+						$count = $count + 1;
+					
 					}
 					
-					$return[] = $return_item;
-					
 				}
-				$count = $count + 1;
 			}
 		}
+		
+		/*
+		
+		Array
+		(
+				[image_full] => https://scontent-man2-1.cdninstagram.com/v/t51.2885-15/26068185_147086512735596_2172550382809513984_n.jpg?_nc_cat=111&ccb=1-5&_nc_sid=8ae9d6&_nc_ohc=bFcFMC_fZZEAX8UQr_1&_nc_ht=scontent-man2-1.cdninstagram.com&edm=ANQ71j8EAAAA&oh=e04464db8b15256f078f0d84f7ad8b9d&oe=61B4C2C8
+				[link] => https://www.instagram.com/p/BdL_OWgAnsD/
+				[likes_count] => 0
+				[comments_count] => 0
+				[id] => 17897993383086890
+				[created_time] => 2017-12-27T01:30:47+0000
+				[username] => raulir
+				[profile_picture] => 2021/12/instagram_11335134_70960297583.jpg
+				[text] => #gingerbread #nighttime #christmas #toomuch #eat #london #bermondsey
+				)
+				
+				*/
 		
 		// cleanup
 		foreach($return as $key => $tweet){
