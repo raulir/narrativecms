@@ -2,7 +2,7 @@ function pageshare_init(){
 	
     window.fbAsyncInit = function() {
     	FB.init({
-    		appId      : '1605902019498993',
+    		appId      : $('.basic_pageshare_container').data('fb_app_id'),
     		xfbml      : false,
     		version    : 'v2.5'
     	});
@@ -17,9 +17,9 @@ function pageshare_init(){
 		var url = location.href;
 		
 		if ($this.data('url')){
-			var url = location.protocol + '//' + location.host + $button.data('url');
+			var url = location.protocol + '//' + location.host + $this.data('url');
 		}
-		
+
 		e.stopPropagation();
 		var type = $this.data('type');
 		

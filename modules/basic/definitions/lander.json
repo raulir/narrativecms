@@ -1,0 +1,23 @@
+{
+	"version":"2",
+	"description":"Landing placeholder for social media subpage shares",
+	"item":[
+		{
+			"type":"link",
+			"name":"target_page",
+			"label":"Target page",
+			"targets":"page",
+			"format":"short"
+		},
+		{
+			"type":"select",
+			"name":"hash_needed",
+			"label":"Add anchor",
+			"values": {
+				"0":"No",
+				"1":"Yes"
+			},
+			"default":"0"
+		}
+	]
+}

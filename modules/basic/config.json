@@ -47,6 +47,10 @@
 		{
 			"id":"mimage",
 			"name":"Mockup image"
+		},
+		{
+			"id":"lander",
+			"name":"Lander"
 		}
 	],
 	"cms_menu":[

@@ -19,6 +19,12 @@
 			"label":"Twitter content"
 		},
 		{
+			"type":"text",
+			"name":"fb_app_id",
+			"label":"FB app ID",
+			"help":"From FB dev console"
+		},
+		{
 			"type":"repeater",
 			"name":"channels",
 			"label":"Channels",
@@ -37,7 +43,8 @@
 						"email":"Email",
 						"facebook":"Facebook",
 						"twitter":"Twitter",
-						"linkedin":"LinkedIn"
+						"linkedin":"LinkedIn",
+						"instagram":"Instagram"
 					},
 					"default":"facebook"
 				},
