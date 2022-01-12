@@ -11,9 +11,10 @@ function cms_help_init(){
 		var $clone;
 		
 		$(this).on('mouseenter.cms', function(){
+		    var scrollTop = ($('html').scrollTop()) ? $('html').scrollTop() : $('body').scrollTop()
 			$clone = $('.cms_help_text', $(this)).clone().css({
 				'left': $(this).offset().left / _cms_rem + 'rem',
-				'top': ($(this).offset().top / _cms_rem) + 1.6 + 'rem',
+				'top': (($(this).offset().top - scrollTop) / _cms_rem) + 1.6 + 'rem',
 				'display': 'block'
 			}).appendTo('body')
 		})

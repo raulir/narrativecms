@@ -465,71 +465,83 @@ var _cms_test_localstorage = function() {
 
 };
 
-function get_ajax_panel(name, params, action_on_success){
-	
-	if (typeof params == 'undefined'){
-		var params = {}
-	}
-	
-	// TODO: cms_page_panel.js:144-163 - use script running from there to activate external javascripts
-	
-	var data = false;
-	
-	var cache = 0;
-	if (typeof params.cache != 'undefined'){
-		cache = parseInt(params.cache);
-	}
-	params.cache = '';
-	
-	// try to read from storage
-	if (_cms_test_localstorage() && cache > 0 && !admin_logged_in){
-		var key = hex_md5(config_url + name + JSON.stringify(params));
-		var local_data = localStorage.getItem(key);
-		if (local_data){
-			data = $.parseJSON(local_data);
-			if (data.storage_timestamp > +new Date() - (cache * 1000)){
-				action_on_success(data);
-			} else {
-				data = false;
-				localStorage.removeItem(key);
+function get_ajax_panel(name, args, action_on_success){
+
+	var params = $.extend({
+		'cache': ''
+	}, args)
+
+	return new Promise ((resolve, reject) => {
+
+		// TODO: cms_page_panel.js:144-163 - use script running from there to activate external javascripts
+		
+		var data = false;
+		
+		var cache = 0;
+		if (typeof params.cache != 'undefined'){
+			cache = parseInt(params.cache);
+		}
+		params.cache = '';
+		
+		// try to read from storage
+		if (_cms_test_localstorage() && cache > 0 && !admin_logged_in){
+			var key = hex_md5(config_url + name + JSON.stringify(params));
+			var local_data = localStorage.getItem(key);
+			if (local_data){
+				data = $.parseJSON(local_data);
+				if (data.storage_timestamp > +new Date() - (cache * 1000)){
+					if (action_on_success){
+						action_on_success(data);
+					} else {
+						resolve(data)
+					}
+				} else {
+					data = false;
+					localStorage.removeItem(key);
+				}
 			}
 		}
-	}
 
-	if (!data){
-		params.panel_id = name;
-		$.ajax({
-			type: 'POST',
-		  	url: config_url + 'ajax_api/get_panel/',
-		  	data: params,
-		  	dataType: 'json',
-		  	context: this,
-		  	success: function( returned_data ) {
-		  		
-		  		if (returned_data.result._html && !returned_data.result.html){
-		  			returned_data.result.html = returned_data.result._html
-		  		}
-		  		
-		  		// save to local storage
-		  		if (_cms_test_localstorage() && cache > 0){
-		  			returned_data.storage_timestamp = new Date().getTime();
-		  			localStorage.setItem(key, JSON.stringify(returned_data));
-		  		}
-
-				if (typeof data.result == 'object'){
-			  		$.each(returned_data.result, (key, value) => {
-			  			if (typeof value == 'string' || typeof value == 'number'|| typeof value == 'bigint'){
-			  				$('.__' + name.replace('/', '__') + '__' + key).html(value)
-			  			}
-			  		})
-		  		}
-		  		
-		  		action_on_success(returned_data);
-				
-			}
-		});
-	}
+		if (!data){
+			params.panel_id = name;
+			$.ajax({
+				type: 'POST',
+			  	url: config_url + 'ajax_api/get_panel/',
+			  	data: params,
+			  	dataType: 'json',
+			  	context: this,
+			  	success: function( returned_data ) {
+			  		
+			  		if (returned_data.result._html && !returned_data.result.html){
+			  			returned_data.result.html = returned_data.result._html
+			  		}
+			  		
+			  		// save to local storage
+			  		if (_cms_test_localstorage() && cache > 0){
+			  			returned_data.storage_timestamp = new Date().getTime();
+			  			localStorage.setItem(key, JSON.stringify(returned_data));
+			  		}
+	
+					if (typeof data.result == 'object'){
+				  		$.each(returned_data.result, (key, value) => {
+				  			if (typeof value == 'string' || typeof value == 'number'|| typeof value == 'bigint'){
+				  				$('.__' + name.replace('/', '__') + '__' + key).html(value)
+				  			}
+				  		})
+			  		}
+			  		
+					if (action_on_success){
+						action_on_success(returned_data);
+					} else {
+						resolve(returned_data)
+					}
+					
+				}
+			});
+		}
 		
+	})
+			
 }
 
 function get_ajax_page(url, params, action_on_success){
