@@ -23,13 +23,13 @@
 					<div class="form_basic_input form_basic_input_type_<?= $element['type'] ?> form_basic_input_<?= $element['name'] ?>">
 
 						<?php if (!empty($element['label']) && empty($label_as_placeholder) && $element['type'] != 'radio'): ?>
-							<label for="form_basic_<?= $element['name'] ?>"><?= $element['label'] ?></label>
+							<label class="form_basic_input_label" for="form_basic_<?= $element['name'] ?>"><?= $element['label'] ?></label>
 						<?php endif ?>
 
 						<?php if ($element['type'] == 'text'): ?>
 						
-							<input class="form_basic_input_input <?php print($element['mandatory'] ? 'form_basic_mandatory' : ''); ?>" 
-									id="form_basic_<?php print($element['name']); ?>" type="text" name="<?php print($element['name']); ?>"
+							<input class="form_basic_input_input <?= $element['mandatory'] ? 'form_basic_mandatory' : '' ?>" 
+									id="form_basic_<?= $element['name'] ?>" type="text" name="<?= $element['name'] ?>"
 									placeholder="<?= empty($label_as_placeholder) ? str_replace('[name]', $element['name'], $placeholder) : $element['label'] ?>"
 									<?php _p(!empty($element['limit']) ? ' data-limit="'.$element['limit'].'" ' : '') ?> >
 						

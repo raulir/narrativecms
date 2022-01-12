@@ -77,15 +77,21 @@ function form_basic_submit($this){
 				$('.form_basic_message', $container).removeClass('form_basic_message_status_active').removeClass('form_basic_message_active');
 				$('.form_basic_input_input', $form).val('');
 				$('.form_basic_close', $container).click();
-			}, 300000);
+			}, 300000)
+			
+			if (typeof form_basic_after !== 'undefined'){
+				setTimeout(function(){
+					form_basic_after()
+				}, 1000)
+			}
+			
+			// do after event
+			if ($container.data('success_url')){
+				window.location = $container.data('success_url')
+			}
 			
 		}}, fo));
-		
-		// do after event
-		if ($container.data('success_url')){
-			window.location = $container.data('success_url');
-		}
-		
+				
 		// if needs to send success pageview
 		if ($container.data('virtual_success_url') && typeof gtag !== 'undefined'){
 			
