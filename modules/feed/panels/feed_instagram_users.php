@@ -79,11 +79,13 @@ class feed_instagram_users extends CI_Controller{
 				$url = 'https://graph.instagram.com/'.$user['user_id'].'?fields=username%2Caccount_type%2Cmedia&access_token='.$user['access_token'];
   				$data = json_decode(file_get_contents($url), true);
 
-  				$url = 'https://www.instagram.com/'.$data['username'];
-				$content = file_get_contents($url);
-
 				$profile_picture = '';
 				$content_name = '';
+  				
+				/*
+				$url = 'https://www.instagram.com/'.$data['username'];
+				$content = file_get_contents($url);
+
 				if (!empty(explode('og:image" content="', $content)[1])){
 					$content_image = explode('og:image" content="', $content)[1];
 					$content_image = explode('" />', $content)[0];
@@ -92,13 +94,14 @@ class feed_instagram_users extends CI_Controller{
 					$content_name = explode('og:title" content="', $content)[1];
 					$content_name = explode(' (@', $content)[0];
 				}
+				*/
 				
   				$this->cms_page_panel_model->update_cms_page_panel($user['cms_page_panel_id'],[
   						'profile_picture' => $profile_picture,
   						'full_name' => $content_name,
   						'username' => $data['username'],
   				]);
-  				
+
   				$params['users'][$key] = $this->cms_page_panel_model->get_cms_page_panel($user['cms_page_panel_id']);
   				
   			}

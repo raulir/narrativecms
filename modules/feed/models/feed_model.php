@@ -28,7 +28,7 @@ class feed_model extends CI_Model {
 	
 					$stats['projects'] = 0;
 					$projects = $this->cms_page_panel_model->get_cms_page_panels_by(
-							array('_limit' => 20, 'panel_name' => $feed_setting['source'], 'page_id' => ['999999','0'], 'show' => '1', ));
+							array('_limit' => 20, 'panel_name' => $feed_setting['source'], 'page_id' => '0', 'show' => '1', ));
 			   		
 			   		foreach($projects as $project){
 			   			
@@ -36,7 +36,7 @@ class feed_model extends CI_Model {
 						
 						// check if this item is already there?
 						$project_check_a = $this->cms_page_panel_model->get_cms_page_panels_by(
-								array('_limit' => 1, 'panel_name' => ['feed','feed/feed'], 'page_id' => ['999999','0'], 'hash' => $hash, ));
+								array('_limit' => 1, 'panel_name' => ['feed','feed/feed'], 'page_id' => '0', 'hash' => $hash, ));
 								
 						if(!count($project_check_a)){
 				   			$item = $this->parse_cms_list_item($project, $feed_setting);
@@ -93,6 +93,11 @@ class feed_model extends CI_Model {
 	   				} else {
 	   					
 	   					$instagrams = $this->get_instagram_by_username(str_replace('@', '', $feed_setting['filter']));
+	   					
+	   					if (!is_array($instagrams)){
+	   						$GLOBALS['feed_error'] = $instagrams;
+	   						continue;
+	   					}
 
 	   				}
 	   				
@@ -230,6 +235,19 @@ class feed_model extends CI_Model {
 		$item['profile_image'] = $instagram['profile_picture'];
 		$item['likes_count'] = $instagram['likes_count'];
 		$item['comments_count'] = $instagram['comments_count'];
+		
+		if (!empty($instagram['images'])){
+			
+			$item['images'] = [];
+			
+			foreach($instagram['images'] as $i){
+				$image_local = $this->cms_image_model->scrape_image($i, 'instagram', 'feed');
+				$item['images'][] = [
+					'image' => $image_local,
+				];
+			}
+			
+		}
 
 		return $item;
 		
@@ -512,7 +530,7 @@ class feed_model extends CI_Model {
 		$filename = $GLOBALS['config']['base_path'] . 'cache/instagram_' . $username . '.json';
 
 		// update when needed
-		if (!file_exists($filename) || time()-filemtime($filename) > $interval * 60) {
+		if (!file_exists($filename) || time()-filemtime($filename) > $interval * 10) {
 			
 			// to avoid multiple updates during update
 			if (file_exists($filename)){
@@ -520,12 +538,19 @@ class feed_model extends CI_Model {
 			}
 
 			$url = 'https://graph.instagram.com/'.$user['user_id'].'?fields=media&access_token='.$user['access_token'];
-			$data = file_get_contents($url);
+			
+			$data = @file_get_contents($url, false, stream_context_create(['http' => ['ignore_errors' => true]]));
+			
+			$check_data = json_decode($data, true);
+
+			if (!empty($check_data['error']['message'])){
+				return ('Instagram error: <br><br>'.str_replace(['n:','.'], ['n:<br>', '<br>'], $check_data['error']['message']));
+			}
 
 			file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
 			
 		} else {
-			
+
 			$data = file_get_contents($filename);
 					
 		}
@@ -542,12 +567,12 @@ class feed_model extends CI_Model {
 					$filename = $GLOBALS['config']['base_path'] . 'cache/ig_id_' . $item['id'] . '.json';
 					if (!file_exists($filename) || time()-filemtime($filename) > $interval * 60) {
 					
-						$url = 'https://graph.instagram.com/'.$item['id'].'?fields=caption,media_type,media_url,permalink,thumbnail_url,timestamp,children&'.
+						$url = 'https://graph.instagram.com/'.$item['id'].'?fields=caption,media_type,media_url,permalink,thumbnail_url,timestamp,children{media_url,thumbnail_url}&'.
 								'access_token='.$user['access_token'];
 						
 						$image_data = file_get_contents($url);
 						
-						file_put_contents($filename, json_encode($image_data, JSON_PRETTY_PRINT));
+						file_put_contents($filename, json_encode(json_decode($image_data, true), JSON_PRETTY_PRINT));
 							
 					} else {
 								
@@ -576,28 +601,43 @@ class feed_model extends CI_Model {
 						
 						$count = $count + 1;
 					
+					} else if ($image['media_type'] == 'CAROUSEL_ALBUM'){
+						
+						$return_item = array(
+								'image_full' => $image['media_url'],
+								'link' => $image['permalink'],
+								'likes_count' => 0, // $image['likes']['count'],
+								'comments_count' => 0, // $image['comments']['count'],
+								'id' => $image['id'],
+								'created_time' => strtotime($image['timestamp']),
+								'username' => $user['username'],
+								'profile_picture' => $user['profile_picture'],
+						);
+						
+						$return_item['text'] = !empty($image['caption']) ? $image['caption'] : '';
+						
+						// add images
+						if (!empty($image['children']['data'])){
+							
+							$return_item['images'] = [];
+							
+							foreach($image['children']['data'] as $child){
+								
+								$return_item['images'][] = (!empty($child['thumbnail_url']) ? $child['thumbnail_url'] : $child['media_url']);
+								
+							}
+							
+						}
+						
+						$return[] = $return_item;
+						
+						$count = $count + 1;
+
 					}
 					
 				}
 			}
 		}
-		
-		/*
-		
-		Array
-		(
-				[image_full] => https://scontent-man2-1.cdninstagram.com/v/t51.2885-15/26068185_147086512735596_2172550382809513984_n.jpg?_nc_cat=111&ccb=1-5&_nc_sid=8ae9d6&_nc_ohc=bFcFMC_fZZEAX8UQr_1&_nc_ht=scontent-man2-1.cdninstagram.com&edm=ANQ71j8EAAAA&oh=e04464db8b15256f078f0d84f7ad8b9d&oe=61B4C2C8
-				[link] => https://www.instagram.com/p/BdL_OWgAnsD/
-				[likes_count] => 0
-				[comments_count] => 0
-				[id] => 17897993383086890
-				[created_time] => 2017-12-27T01:30:47+0000
-				[username] => raulir
-				[profile_picture] => 2021/12/instagram_11335134_70960297583.jpg
-				[text] => #gingerbread #nighttime #christmas #toomuch #eat #london #bermondsey
-				)
-				
-				*/
 		
 		// cleanup
 		foreach($return as $key => $tweet){

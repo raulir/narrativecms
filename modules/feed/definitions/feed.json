@@ -16,15 +16,15 @@
 	},
 	"item":[
 		{
-			"type":"image",
-			"name":"image",
-			"label":"Image",
-			"category":"feed"
+			"type":"textarea",
+			"name":"heading",
+			"label":"Heading",
+			"lines":"2"
 		},
 		{
 			"type":"image",
-			"name":"profile_image",
-			"label":"Profile image",
+			"name":"image",
+			"label":"Image",
 			"category":"feed"
 		},
 		{
@@ -34,10 +34,27 @@
 			"lines":"5"
 		},
 		{
-			"type":"textarea",
-			"name":"heading",
-			"label":"Heading",
-			"lines":"2"
+			"type":"repeater",
+			"name":"images",
+			"label":"Images",
+			"fields":[
+				{
+					"type":"image",
+					"name":"image",
+					"label":"Image",
+					"category":"feed"
+				}
+			]
+		},
+		{
+			"type":"subtitle",
+			"label": "Meta"
+		},
+		{
+			"type":"image",
+			"name":"profile_image",
+			"label":"Profile image",
+			"category":"feed"
 		},
 		{
 			"type":"select",

@@ -23,6 +23,10 @@ class feed_dashboard_refresh extends CI_Controller{
         	
         	$params['stats'] = $this->feed_model->refresh_feeds();
         	
+        	if (!empty($GLOBALS['feed_error'])){
+        		$params['feed_error'] = $GLOBALS['feed_error'];
+        	}
+        	
         }
         
         return $params;
