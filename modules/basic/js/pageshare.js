@@ -42,7 +42,7 @@ function pageshare_init(){
 		if (type == 'twitter'){
 			
 			window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent($this.data('content')) + 
-					'%20&url=' + encodeURIComponent(url) + '&hashtags=' + encodeURIComponent($this.data('hashtags')));
+					'%0A&url=' + encodeURIComponent(url) + '&hashtags=' + encodeURIComponent($this.data('hashtags')));
 
 		}
 		

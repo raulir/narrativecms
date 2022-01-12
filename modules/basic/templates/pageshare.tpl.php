@@ -1,4 +1,4 @@
-<div class="basic_pageshare_container" data-fb_app_id=""<?= $fb_app_id ?>>
+<div class="basic_pageshare_container" data-fb_app_id="<?= $fb_app_id ?>">
 
 	<div class="basic_pageshare_content">
 
@@ -6,7 +6,6 @@
 			<a class="basic_pageshare_icon" <?php _ib($icon['image'], 40) ?>
 					data-content="<?= $content ?>" 
 					data-type="<?= $icon['type'] ?>" 
-					data-body="<?= $body ?>" 
 					data-hashtags="<?= trim((!empty($hashtags) ? str_replace([' ', '#', ' #'], ',', $hashtags) : ''), '# ,') ?>"
 					<?php if(!empty($url)): ?>data-url="<?= $url ?>"<?php endif ?>>
 					

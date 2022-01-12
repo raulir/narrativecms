@@ -18,12 +18,21 @@ class pageshare extends CI_Controller{
 	}
 	
 	function panel_params($params){
-		
+
 		$this->load->model('cms/cms_page_panel_model');
+
+		if (!empty($params['content'])){
+			$content = $params['content'];
+		}
+		
 		$params = array_merge($params, $this->cms_page_panel_model->get_cms_page_panel_settings('basic/pageshare'));
 		
-		if (!empty($params['filter'])){
-			foreach($params['channels'] as $key => $channel){
+		if (!empty($content)){
+			$params['content'] = $content;
+		}
+		
+		foreach($params['channels'] as $key => $channel){
+			if (!empty($params['filter'])){
 				if (!in_array($channel['type'], $params['filter'])){
 					unset($params['channels'][$key]);
 				}
