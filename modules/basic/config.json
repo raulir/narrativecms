@@ -109,6 +109,14 @@
 			"user":"1",
 			"url":"admin/panel_settings/basic__lightbox/",
 			"access":"basic_media"
+		},
+		{
+			"id":"popup",
+			"name":"Popup settings",
+			"parent":"tools",
+			"user":"1",
+			"url":"admin/panel_settings/basic__popup/",
+			"access":"basic_media"
 		}
 	],
 	"access":[

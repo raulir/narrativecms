@@ -1,0 +1,12 @@
+{
+	"version":"2",
+	"label":"Popup settings",
+	"settings":[
+		{
+			"type":"image",
+			"name":"background",
+			"label":"Background",
+			"category":"content"
+		}
+	]
+}
