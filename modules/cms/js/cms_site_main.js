@@ -512,7 +512,7 @@ function get_ajax_panel(name, args, action_on_success){
 			  	context: this,
 			  	success: function( returned_data ) {
 			  		
-			  		if (returned_data.result._html && !returned_data.result.html){
+			  		if ((typeof returned_data.result != 'undefined') && (typeof returned_data.result._html != 'undefined') && !returned_data.result.html){
 			  			returned_data.result.html = returned_data.result._html
 			  		}
 			  		

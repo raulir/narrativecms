@@ -41,8 +41,29 @@ function pageshare_init(){
 		
 		if (type == 'twitter'){
 			
-			window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent($this.data('content')) + 
-					'%0A&url=' + encodeURIComponent(url) + '&hashtags=' + encodeURIComponent($this.data('hashtags')));
+			var short_url = $this.data('url') !== false ? $this.data('url') : url
+			
+			if (typeof $this.data('url_key') !== 'undefined'){
+				
+				get_ajax('basic/pageshare', {
+					'do':'shorten', 
+					'url_key':$this.data('url_key'), 
+					'url': short_url,
+					'long_url': url,
+					'title': document.title
+				}).then((data) => {
+					
+					window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent($this.data('content')) + 
+							'%0A&url=' + encodeURIComponent(data.link) + '&hashtags=' + encodeURIComponent($this.data('hashtags')))
+					
+				})
+				
+			} else {
+			
+				window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent($this.data('content')) + 
+						'%0A&url=' + encodeURIComponent(url) + '&hashtags=' + encodeURIComponent($this.data('hashtags')))
+			
+			}
 
 		}
 		

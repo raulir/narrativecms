@@ -19,12 +19,6 @@
 			"label":"Twitter content"
 		},
 		{
-			"type":"text",
-			"name":"fb_app_id",
-			"label":"FB app ID",
-			"help":"From FB dev console"
-		},
-		{
 			"type":"repeater",
 			"name":"channels",
 			"label":"Channels",
@@ -54,6 +48,22 @@
 					"label":"Text"
 				}
 			]
+		},
+		{
+			"type":"subtitle",
+			"label":"APIs"
+		},
+		{
+			"type":"text",
+			"name":"fb_app_id",
+			"label":"FB app ID",
+			"help":"From FB dev console"
+		},
+		{
+			"type":"text",
+			"name":"bitly_token",
+			"label":"Bitly token",
+			"help":"Bitly: Acccount -> Settings -> API"
 		}
 	]
 }
