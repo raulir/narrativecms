@@ -326,18 +326,27 @@ class CI_Controller {
 	
 		// images, descriptions and titles from panels
 		$image_str = '';
+		
+		foreach($GLOBALS['_panel_images'] as $ik => $image){
+			if (empty($image)){
+				unset($GLOBALS['_panel_images'][$ik]);
+			}
+		}
+		
+		if(empty($GLOBALS['_panel_images']) && !empty($GLOBALS['config']['meta_image'])){
+			$GLOBALS['_panel_images'] = [$GLOBALS['config']['meta_image']];
+		}
+		
 		if (!empty($GLOBALS['_panel_images'])){
 			$GLOBALS['_panel_images'] = array_slice($GLOBALS['_panel_images'], 0, 3); // maximum 3 images
 			$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
 			foreach($GLOBALS['_panel_images'] as $image){
-				if (!empty($image)){
-					$image_data = _iw($image, array('width' => 800, ));
-					$image_str .= '<meta property="og:image" content="'.
-							(empty($GLOBALS['config']['cdn_url']) ? $protocol.$_SERVER['HTTP_HOST'] : '').
-							$GLOBALS['config']['upload_url'].$image_data['image'].'" />'."\n";
-							$image_str .= '<meta property="og:image:width" content="'.$image_data['width'].'" />'."\n";
-							$image_str .= '<meta property="og:image:height" content="'.$image_data['height'].'" />'."\n";
-				}
+				$image_data = _iw($image, 800);
+				$image_str .= '<meta property="og:image" content="'.
+						(empty($GLOBALS['config']['cdn_url']) ? $protocol.$_SERVER['HTTP_HOST'] : '').
+						$GLOBALS['config']['upload_url'].$image_data['image'].'" />'."\n";
+						$image_str .= '<meta property="og:image:width" content="'.$image_data['width'].'" />'."\n";
+						$image_str .= '<meta property="og:image:height" content="'.$image_data['height'].'" />'."\n";
 			}
 		}
 	
@@ -365,23 +374,25 @@ class CI_Controller {
 		if (strlen($_description) > 300){
 			$_description = substr($_description, 0, strrpos($_description, ' '));
 		}
+		$_description = strip_tags($_description);
 	
 		$_title = $this->compile_page_title();
+		$_url = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443)
+						? 'https://' : 'http://' ).$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
 		
 		print(str_replace(
 	
 				'</head>',
 	
 				'<title>'.$_title.'</title>'."\n".
-				'<meta name="description" content="'.strip_tags($_description).'" />'."\n".
+				'<meta name="description" content="'.$_description.'" />'."\n".
 				$css_str."\n".
 				$js_str."\n".
-				'<meta property="og:url" content="'.
-				((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443)
-						? 'https://' : 'http://' ).$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].'" />'."\n".
+				'<meta property="og:url" content="'.$_url.'" />'."\n".
 				'<meta property="og:title" content="'.$_title.'" />'."\n".
-				'<meta property="og:description" content="'.strip_tags($_description).'" />'."\n".
+				'<meta property="og:description" content="'.$_description.'" />'."\n".
 				$image_str.
+				'<meta name="twitter:card" content="summary_large_image" />'."\n".
 				$favicon_str.
 				'</head>',
 	

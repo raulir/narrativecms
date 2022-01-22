@@ -3,17 +3,17 @@
 	"label":"Site settings",
 	"item":[
 		{
-			"type":"image",
-			"name":"favicon",
-			"label":"Favicon",
-			"category":"icon"
-		},
-		{
 			"type":"text",
 			"name":"site_title",
 			"label":"Site title",
 			"default":"New website - #page#",
 			"help":"Use #page# where page title etc has to appear"
+		},
+		{
+			"type":"modules",
+			"name":"modules",
+			"label":"Modules",
+			"help":"[modules]||Which modules and in what order to load from modules installed to the server||{cms} is always automatically loaded as the first"
 		},
 		{
 			"type":"text",
@@ -28,12 +28,6 @@
 			"targets":"page,lists",
 			"format":"short",
 			"help":"Page to land when empty slug (host domain name only)"
-		},
-		{
-			"type":"text",
-			"name":"email",
-			"label":"Admin email",
-			"help":"Email to send notifications"
 		},
 		{
 			"type":"select",
@@ -100,12 +94,6 @@
 			"label":"Not found log",
 			"default":"404.log",
 			"help":"File to log not found requests data. Under cache folder."
-		},
-		{
-			"type":"modules",
-			"name":"modules",
-			"label":"Modules",
-			"help":"[modules]||Which modules and in what order to load from modules installed to the server||{cms} is always automatically loaded as the first"
 		},
 		{
 			"type":"text",
@@ -261,6 +249,32 @@
 		},
 		{
 			"type":"subtitle",
+			"label":"Metadata and SEO",
+			"width":"wide",
+			"help":"Settings related to sharing and search engine metadata"
+		},
+		{
+			"type":"image",
+			"name":"meta_image",
+			"label":"Image",
+			"category":"content",
+			"help":"Imge to use when page or list item doesn't have meta image defined"
+		},
+		{
+			"type":"image",
+			"name":"favicon",
+			"label":"Favicon",
+			"category":"icon"
+		},
+        {
+            "type": "file",
+            "name": "meta_video",
+            "label": "Video",
+        	"accept": ".mp4",
+        	"help": "[.mp4 only]||Uploading any other format may cause undetermined results in various browsers"
+        },
+		{
+			"type":"subtitle",
 			"label":"CMS interface",
 			"width":"wide",
 			"help":"Settings related to CMS look"
@@ -332,6 +346,12 @@
 			"type":"text",
 			"name":"sender_email",
 			"label":"Sender email"
+		},
+		{
+			"type":"text",
+			"name":"email",
+			"label":"Admin email",
+			"help":"Email to send notifications"
 		}
 	]
 }

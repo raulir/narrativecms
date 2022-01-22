@@ -81,8 +81,8 @@ class pageshare extends CI_Controller{
 		if (!empty($params['bitly_token'])){
 			foreach($params['channels'] as $key => $channel){
 				if ($channel['type'] == 'twitter'){
-					
-					$url_key = md5($params['url']);
+
+					$url_key = md5($params['url'] ?? '');
 					
 					$filename = $GLOBALS['config']['base_path'].'/cache/bitly_'.$url_key.'.json';
 					

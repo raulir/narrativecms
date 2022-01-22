@@ -17,7 +17,13 @@ function pageshare_init(){
 		var url = location.href;
 		
 		if ($this.data('url')){
-			var url = location.protocol + '//' + location.host + $this.data('url');
+			
+			if ($this.data('url').startsWith('http')){
+				url = $this.data('url')
+			} else {
+				url = location.protocol + '//' + location.host + $this.data('url');
+			}
+			
 		}
 
 		e.stopPropagation();
@@ -54,14 +60,16 @@ function pageshare_init(){
 				}).then((data) => {
 					
 					window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent($this.data('content')) + 
-							'%0A&url=' + encodeURIComponent(data.link) + '&hashtags=' + encodeURIComponent($this.data('hashtags')))
-					
+							'&url=' + encodeURIComponent(data.link) + '&original_referer=' + encodeURIComponent(data.link) + 
+							'&hashtags=' + encodeURIComponent($this.data('hashtags')))
+
 				})
 				
 			} else {
 			
 				window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent($this.data('content')) + 
-						'%0A&url=' + encodeURIComponent(url) + '&hashtags=' + encodeURIComponent($this.data('hashtags')))
+						'&url=' + encodeURIComponent(url) + '&original_referer=' + encodeURIComponent(url) + 
+						'&hashtags=' + encodeURIComponent($this.data('hashtags')))
 			
 			}
 

@@ -70,10 +70,14 @@ if ( !function_exists('_iw')) {
 	/**
 	 * returns link to resized image
 	 */
-	function _iw($image, $params){
+	function _iw($image, $params = []){
 		
 		if (empty($image)){
 			return ['image' => '', 'width' => '', 'height' => '', ];
+		}
+		
+		if (is_numeric($params)){
+			$params = ['width' => $params]; 
 		}
 
 		$name_a = pathinfo($image);
@@ -83,7 +87,11 @@ if ( !function_exists('_iw')) {
 				|| (empty($params['width']) && empty($params['height']))
 				|| !($name_a['extension'] == 'jpg' || $name_a['extension'] == 'jpeg' || $name_a['extension'] == 'png' || $name_a['extension'] == 'ico')) {
 			
-			return ['image' => $image, 'width' => !empty($params['width']) ? $params['width'] : 0, 'height' => !empty($params['height']) ? $params['height'] : 0, ];
+			return [
+					'image' => $image, 
+					'width' => !empty($params['width']) ? $params['width'] : 0, 
+					'height' => !empty($params['height']) ? $params['height'] : 0, 
+			];
 		
 		}
 
