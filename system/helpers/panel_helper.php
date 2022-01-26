@@ -346,10 +346,15 @@ if ( !function_exists('get_position')) {
     		return;
     	}
     	
-    	print('<pre style="background-color: white; color: black; display: block; border: 0.1rem solid orange; padding: 1.0rem; '.
+    	$backtrace = debug_backtrace();
+    	
+    	print('<pre style="background-color: white; color: black; display: block; border: 0.1rem solid orange; '.
     			'font-size: 0.8rem; line-height: 0.9rem; letter-spacing: 0; font-family: monospace; text-align: left; ">');
+    	print('<div style="line-height: 0.6rem;  padding: 0.4rem; color: orange; ">'.
+    			strtoupper(basename($backtrace[0]['file']).':'.$backtrace[0]['line']).'</div>'.
+    			'<div style="padding: 0.6rem 1.0rem; ">');
     	print_r($item);
-    	print('</pre>');
+    	print('</div></pre>');
     	 
     }
     

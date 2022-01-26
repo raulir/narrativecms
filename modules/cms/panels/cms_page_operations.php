@@ -51,6 +51,8 @@ class cms_page_operations extends CI_Controller {
 				$data['seo_title'] = $this->input->post('seo_title');
 				$data['description'] = $this->input->post('description');
 				$data['image'] = $this->input->post('image');
+				$data['video'] = $this->input->post('video');
+				$data['video_id'] = $this->input->post('video_id');
 				$data['layout'] = $this->input->post('layout');
 				$data['positions'] = $this->input->post('positions');
 			}

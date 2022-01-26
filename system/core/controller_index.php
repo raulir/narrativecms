@@ -59,7 +59,18 @@ class Index extends CI_Controller {
 				$GLOBALS['_panel_titles'][] = $page['title'];
 			}
 			$GLOBALS['_panel_descriptions'][] = !empty($page['description']) ? $page['description'] : '';
-			$GLOBALS['_panel_images'][] = !empty($page['image']) ? $page['image'] : '';
+			
+    		if (!empty($page['image'])){
+				$GLOBALS['_panel_images'][] = $page['image'];
+			}
+			
+    				if (!empty($page['video'])){
+				$GLOBALS['_panel_videos'][] = $page['video'];
+			}
+			
+			if (!empty($page['video_id'])){
+				$GLOBALS['_panel_video_id'] = $page['video_id'];
+			}
 			
 			$blocks = $this->_get_cms_page_panels($page_id);
 

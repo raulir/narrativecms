@@ -47,7 +47,7 @@
 								'name_clean' => 'status',
 								'help' => '[Page published status]||"{Automatic}" - hidden when page doesn\'t have any panels added, otherwise visible.||
 										"{Hidden}" - visible only while logged into CMS admin.',
-						)); ?>
+						)) ?>
 							
 					<?php else: ?>
 						
@@ -55,16 +55,42 @@
 						
 					<?php endif ?>
 						
-					<?php _panel('cms/cms_input_subtitle', ['label' => 'SEO', 'width' => 'narrow', 'help' => '[SEO]||These fields are very important for search engines, page sharing in social media etc']) ?>
+					<?php _panel('cms/cms_input_subtitle', ['label' => 'Structure', 'width' => 'narrow', 
+							'help' => '[Structure]||These fields define general layout and static areas of page, like header and footer']) ?>
+					
+					<?php
+						_panel('cms/cms_input_layout', [
+								'label' => 'Layout', 
+								'value' => $cms_page_layout, 
+								'name' => 'cms_page_layout', 
+								'help' => '[Page layout]||CMS "Default fixed" is fixed pixel size layout.||'.
+										'CMS "Default rems" layout changes rem size with page size.||'.
+										'There might be more layouts available, defined in other modules.',
+						]);
+					?>
+					
+					<?php
+						_panel('cms/cms_page_positions', [
+								'cms_page_id' => $page['cms_page_id'],
+								'cms_page_layout' => $cms_page_layout,
+						]);
+					?>
+
+					<?php _panel('cms/cms_input_subtitle', [
+							'label' => 'Sharing and SEO', 
+							'width' => 'narrow', 
+							'help' => '[Sharing and SEO]||These fields are very important for search engines, page sharing in social media etc']) ?>
 					
 					<?php _panel('cms/cms_input_text', [
 							'name' => 'slug',
 							'value' => $page['slug'],
 							'name_clean' => 'page_slug',
 							'label' => 'Slug',
-							'help' => '[Page slug]||Can be seen on browser address bar following the main address part of the site. Important for SEO.||Can contain only letters, numbers, hyphens and underscores (_).',
+							'help' => '[Page slug]||Can be seen on browser address bar following the main address part of the site. '.
+							'Important for SEO.||Can contain only letters, numbers, hyphens and underscores (_).'.
+							'||Slug is ignored when page is set as default landing page.',
 							'meta_class' => 'cms_page_slug',
-					]); ?>
+					]) ?>
 					
 					<?php _panel('cms/cms_input_text', [
 							'name' => 'seo_title',
@@ -74,7 +100,7 @@
 							'label' => 'Title',
 							'help' => '[SEO title]||Can be seen on browser title bar, search engine results and social media shares. Important for SEO',
 							'meta_class' => 'cms_page_seo_title',
-					]); ?>
+					]) ?>
 	
 					<?php 
 						_panel('cms/cms_input_textarea', array(
@@ -97,30 +123,31 @@
 								'value' => !empty($page['image']) ? $page['image'] : '', 
 								'name' => 'cms_page_image', 
 								'category' => 'content',
-								'help' => '[Page image]||Important for social media sharing.||Can be seen in social media shares. Shouldn\'t be left empty.||There might be additional images added when page is list item page. In this case this should be left empty.',
+								'help' => '[Page image]||Important for social media sharing.||Can be seen on social media shares. Shouldn\'t be left empty.'.
+								'||There might be additional images added when page is list item page. In this case this should be left empty.',
 						));
 					?>
-				
-					<?php _panel('cms/cms_input_subtitle', ['label' => 'Structure', 'width' => 'narrow', 
-							'help' => '[Structure]||These fields define general layout and static areas of page, like header and footer']) ?>
-					
-					<?php
-						_panel('cms/cms_input_layout', [
-								'label' => 'Layout', 
-								'value' => $cms_page_layout, 
-								'name' => 'cms_page_layout', 
-								'help' => '[Page layout]||CMS "Default fixed" is fixed pixel size layout.||'.
-										'CMS "Default rems" layout changes rem size with page size.||'.
-										'There might be more layouts available, defined in other modules.',
-						]);
+									
+					<?php 
+						_panel('cms/cms_input_file', array(
+								'label' => 'Video', 
+								'value' => !empty($page['video']) ? $page['video'] : '', 
+								'name' => 'cms_page_video', 
+								'accept' => '.mp4',
+								'help' => '[Page video]||For social media sharing.||Could be seen on social media shares if the channel supports this. '.
+										'Facebook, Twitter etc are not playing all videos, especially from less known websites.',
+						));
 					?>
-					
-					<?php
-						_panel('cms/cms_page_positions', [
-								'cms_page_id' => $page['cms_page_id'],
-								'cms_page_layout' => $cms_page_layout,
-						]);
-					?>
+									
+					<?php _panel('cms/cms_input_text', [
+							'name' => 'cms_page_video_id',
+							'translate' => 1,
+							'value' => (!empty($page['video_id']) ? $page['video_id'] : ''),
+							'name_clean' => 'cms_page_video_id',
+							'label' => 'Video ID',
+							'help' => '[SEO video]||Video ID for Twitter player card. Needs in site settings Twitter type to be set to \'player\'',
+							'meta_class' => 'cms_page_video_id',
+					]) ?>
 					
 				<?php endif ?>
 

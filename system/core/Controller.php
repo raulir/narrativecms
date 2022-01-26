@@ -44,7 +44,10 @@ class CI_Controller {
 			$GLOBALS['_panel_descriptions'] = array();
 		}
 		if (!isset($GLOBALS['_panel_images'])){
-			$GLOBALS['_panel_images'] = array();
+			$GLOBALS['_panel_images'] = [];
+		}
+		if (!isset($GLOBALS['_panel_videos'])){
+			$GLOBALS['_panel_videos'] = [];
 		}
 		
 		if (empty($GLOBALS['_panel_js'])){
@@ -325,6 +328,8 @@ class CI_Controller {
 		$js_str = pack_js($jss);
 	
 		// images, descriptions and titles from panels
+		$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
+		
 		$image_str = '';
 		
 		foreach($GLOBALS['_panel_images'] as $ik => $image){
@@ -339,7 +344,6 @@ class CI_Controller {
 		
 		if (!empty($GLOBALS['_panel_images'])){
 			$GLOBALS['_panel_images'] = array_slice($GLOBALS['_panel_images'], 0, 3); // maximum 3 images
-			$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
 			foreach($GLOBALS['_panel_images'] as $image){
 				$image_data = _iw($image, 800);
 				$image_str .= '<meta property="og:image" content="'.
@@ -349,7 +353,19 @@ class CI_Controller {
 						$image_str .= '<meta property="og:image:height" content="'.$image_data['height'].'" />'."\n";
 			}
 		}
-	
+		
+		$video_str = '';
+		if (!empty($GLOBALS['_panel_videos'])){
+			$video = array_pop($GLOBALS['_panel_videos']);
+			$video_str .= '<meta property="og:video" content="'.(empty($GLOBALS['config']['cdn_url']) ? $protocol.$_SERVER['HTTP_HOST'] : '').
+					$GLOBALS['config']['upload_url'].$video.'" />'."\n";
+			$video_str .= '<meta property="og:video:secure_url" content="'.(empty($GLOBALS['config']['cdn_url']) ? $protocol.$_SERVER['HTTP_HOST'] : '').
+					$GLOBALS['config']['upload_url'].$video.'" />'."\n";
+			$video_str .= '<meta property="og:video:type" content="video/mp4" />'."\n";
+			$video_str .= '<meta property="og:video:width" content="1920">';
+			$video_str .= '<meta property="og:video:height" content="1080">';
+		}
+		
 		$favicon_str = '';
 		
 		if (empty($GLOBALS['config']['favicon'])){
@@ -379,7 +395,7 @@ class CI_Controller {
 		$_title = $this->compile_page_title();
 		$_url = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443)
 						? 'https://' : 'http://' ).$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-		
+
 		print(str_replace(
 	
 				'</head>',
@@ -388,11 +404,27 @@ class CI_Controller {
 				'<meta name="description" content="'.$_description.'" />'."\n".
 				$css_str."\n".
 				$js_str."\n".
+				'<meta property="og:type" content="website">'.
 				'<meta property="og:url" content="'.$_url.'" />'."\n".
 				'<meta property="og:title" content="'.$_title.'" />'."\n".
 				'<meta property="og:description" content="'.$_description.'" />'."\n".
 				$image_str.
-				'<meta name="twitter:card" content="summary_large_image" />'."\n".
+				$video_str.
+				
+				(
+						(!empty($GLOBALS['_panel_video_id']) && $GLOBALS['config']['meta_video_twitter'] == 'player') ?
+				
+						'<meta name="twitter:card" content="player" />'.
+						'<meta name="twitter:player" content="https://www.youtube.com/embed/'.$GLOBALS['_panel_video_id'].'">'.
+						'<meta name="twitter:player:width" content="1280">'.
+						'<meta name="twitter:player:height" content="720">'
+						
+						:
+						
+						'<meta name="twitter:card" content="summary_large_image" />'
+						
+				)."\n".
+								
 				$favicon_str.
 				'</head>',
 	

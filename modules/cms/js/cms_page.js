@@ -29,6 +29,8 @@ function cms_page_save(params){
 		'seo_title': $('.cms_page_seo_title').val(),
 		'description': $('.cms_page_description').val(),
 		'image': $('.cms_image_input_cms_page_image').val(),
+		'video': $('.cms_file_input_cms_page_video').val(),
+		'video_id': $('.cms_page_video_id').val(),
 		'layout': $('.cms_page_layout').val(),
 		'position': $('.cms_page_position').val(),
 		'positions': $('.cms_page_positions > select').map((ok, ob) => {return {name:$(ob).attr('name'), value:$(ob).val()}}).get(),
