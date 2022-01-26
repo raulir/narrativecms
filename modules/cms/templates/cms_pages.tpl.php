@@ -59,7 +59,7 @@
 			<?php endif ?>
 
 			<div class="cms_pages_label"><?= !empty($page['title']) ? $page['title'] : '[ no title ]' ?></div>
-			<a class="cms_list_item_button" <?php _lh('admin/page/' . $page['cms_page_id']) ?>>edit</a>
+			<a class="cms_small_button" <?php _lh('admin/page/' . $page['cms_page_id']) ?>>edit</a>
 			
 			<a class="cms_pages_link" <?php _lh('admin/page/' . $page['cms_page_id']) ?>></a>
 		

@@ -95,6 +95,27 @@ ul {
 	padding: 0;
 }
 
+/* buttons */
+
+.cms_small_button {
+	height: 2.0rem;
+	border: 0.1rem solid $colour_border;
+	box-sizing: border-box;
+	line-height: 1.8rem;
+	padding: 0 1.0rem;
+	border-radius: 0.3rem;
+	margin: 0.3rem 0 0 0.4rem;
+	font-size: 1.4rem;
+	text-decoration: none;
+	display: block;
+	float: right;
+	cursor: pointer;
+	min-width: 5.2rem;
+	text-align: center;
+	color: $colour_grey;
+	background-color:$colour_white;
+}
+
 /* cms header area */
 
 .cms_header_container {
@@ -297,25 +318,6 @@ ul {
 		background-color:#efefef;	
 	}
 
-}
-
-.cms_list_item_button {
-	height: 2.0rem;
-	border: 0.1rem solid #a0a0a0;
-	box-sizing: border-box;
-	line-height: 1.8rem;
-	padding: 0 1.0rem;
-	border-radius: 0.3rem;
-	margin: 0.3rem 0 0 0.4rem;
-	font-size: 1.4rem;
-	text-decoration: none;
-	display: block;
-	float: right;
-	cursor: pointer;
-	min-width: 5.2rem;
-	text-align: center;
-	color: #606060;
-	background-color:#ffffff;
 }
 
 .admin_list_sortable_blocks_container {

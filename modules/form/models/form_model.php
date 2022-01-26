@@ -17,6 +17,15 @@ class form_model extends CI_Model {
 	
 	}
 	
+	function delete_form_data($form_data_id){
+		
+		$sql = "delete from form_data where form_data_id = ? limit 1 ";
+		$this->db->query($sql, [$form_data_id]);
+	
+		return true;
+		
+	}
+	
     function send_contact_request($emails, $data, $title, $from, $warning){
 
 		foreach($emails as $email){    	
@@ -83,22 +92,71 @@ class form_model extends CI_Model {
     	
     }
     
-    function file_form_data($cms_page_panel_id, $filename){
-    	
+    /**
+     * 
+     * @param unknown $cms_page_panel_id
+     * 
+     * @param number $return_data 
+     * 0 both data
+     * 1 fields only
+     * 2 data only 
+     * 
+     * @return string[][]|unknown[][]
+     */
+    function get_form_data($cms_page_panel_id, $return_data = 0){
+
     	$sql = "select * from form_data where cms_page_panel_id = ? ";
-     	$query = $this->db->query($sql, array($cms_page_panel_id, ));
+    	$query = $this->db->query($sql, array($cms_page_panel_id, ));
     	$data = $query->result_array();
-    	
+    	 
     	// get possible fields
-    	$fields = array('time');
-    	$table = array();
-    	foreach($data as $row){
-    		$row_unpacked = !empty($row['data']) ? json_decode($row['data'], true) : array('email' => $row['email'], );
-    		$fields = array_unique(array_merge($fields, array_keys($row_unpacked)));
-    		$row_unpacked['time'] = date('Y-m-d H:i', !empty($row_unpacked['time']) ? $row_unpacked['time'] : 0);
-    		$table[] = $row_unpacked;
+    	if ($return_data != 2){
+    		$fields = ['time'];
+    	}
+    	if ($return_data != 1){
+	    	$table = [];
     	}
     	
+    	foreach($data as $row){
+    		
+    		$row_unpacked = !empty($row['data']) ? json_decode($row['data'], true) : array('email' => $row['email'], );
+    		if (isset($row_unpacked['id'])){
+    			unset($row_unpacked['id']);
+    		}
+    		
+    		if ($return_data != 2){
+    			$fields = array_unique(array_merge($fields, array_keys($row_unpacked)));
+    		}
+    		
+    		if ($return_data != 1){
+	    		$row_unpacked['time'] = date('Y-m-d H:i', !empty($row_unpacked['time']) ? $row_unpacked['time'] : 0);
+	    		$row_unpacked['form_data_id'] = $row['form_data_id'] ?? '';
+	    		$row_unpacked['item_id'] = $row['form_data_id'] ?? 0;
+	    		$table[] = $row_unpacked;
+    		}
+    		
+    	}
+    	
+    	$return = [];
+    	
+        if ($return_data == 0 || $return_data == 1){
+    		$return['fields'] = $fields;
+    	}
+    	
+    	if ($return_data == 0 || $return_data == 2){
+    		$return['table'] = $table;
+    	}
+    	
+    	return $return;
+    	
+    }
+    
+    function file_form_data($cms_page_panel_id, $filename){
+    	
+    	$data = $this->get_form_data($cms_page_panel_id);
+    	$table = $data['table'];
+    	$fields = $data['fields']; 
+
     	// create csv file
 		header('Content-Type: application/CSV; charset=utf-16');
 		header('Content-Disposition: attachment; filename="'.$filename.'.csv"');
@@ -112,6 +170,7 @@ class form_model extends CI_Model {
 		// use tabs
 		foreach($table as $row){
 			$row_print = array();
+			unset($row['form_data_id']);
 			foreach($fields as $field){
 				$row_print[] = !empty($row[$field]) ? $row[$field] : '';
 			}
@@ -177,12 +236,40 @@ class form_model extends CI_Model {
     		list($rest, $district) = explode('-', $params['mailchimp_api_key']);
     	}
     	
-        $postdata = array(
+        $postdata = [
             'email_address' => $data['email'],
             'status' => 'subscribed',
-        );
+        ];
+        
+        $ip = '';
+        if(!empty($_SERVER['HTTP_CLIENT_IP'])) {  
+        	$ip = $_SERVER['HTTP_CLIENT_IP'];  
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {  
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];  
+     	} else {  
+            $ip = $_SERVER['REMOTE_ADDR'];  
+     	}
+     	
+     	if (!empty($ip)){
+     		$postdata['ip_signup'] = $ip;
+     	}
+     	
+        if (!empty($data['location'])){
+        	
+        	$url_extra = '?skip_merge_validation=true';
+        	
+        	$postdata['merge_fields']['ADDRESS']['addr1'] = $data['location'];
+        	$postdata['merge_fields']['ADDRESS']['city'] = '';
+        	$postdata['merge_fields']['ADDRESS']['state'] = '';
+        	$postdata['merge_fields']['ADDRESS']['zip'] = '';
+        	
+            if (!empty($data['name'])){
+        		$postdata['merge_fields']['FNAME'] = $data['name'];
+        	}
 
-        $context = stream_context_create(array (
+        }
+
+		$context = stream_context_create(array (
             'http' => array (
                 'method'  => 'POST',
                 'header'  =>
@@ -193,9 +280,16 @@ class form_model extends CI_Model {
             ),
         ));
 
-        $result = @file_get_contents('https://'.$district.'.api.mailchimp.com/3.0/lists/'.$params['mailchimp_list_id'].'/members/', false, $context);
+        $result = @file_get_contents(
+        		'https://'.$district.'.api.mailchimp.com/3.0/lists/'.$params['mailchimp_list_id'].'/members/'.($url_extra ?? ''), 
+        		false, 
+        		$context
+        );
         
-        return $result;
+// file_put_contents($GLOBALS['config']['base_path'].'cache/mc_debug_submit.txt', json_encode($postdata, JSON_PRETTY_PRINT));
+// file_put_contents($GLOBALS['config']['base_path'].'cache/mc_debug_result.txt', json_encode(json_decode($result, true), JSON_PRETTY_PRINT));
+        
+		return $result;
     
     }
     

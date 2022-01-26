@@ -49,28 +49,41 @@ class cms_input_grid extends CI_Controller {
 			$this->load->model('cms/cms_page_panel_model');
 			$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
 			
+			$params['fields'] = $params['fields'] ?? [];
 			if (!empty($params['operations']) && stristr($params['operations'], 'S')){
-				
-				$params['fields'] = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [
+
+				$ds_params = [
 					'do' => 'S',
 					'id' => $params['base_id'],
 					'fields' => $params['fields'],
-				]);
+				];
+				
+				if (!empty($base['_extends'])){
+					$ds_params['_extends'] = $base['_extends'];
+				}
+				
+				$params['fields'] = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], $ds_params);
 				
 				if (!empty($params['fields']['_no_cache'])) unset($params['fields']['_no_cache']);
 
 			}
-			
+
 			usort($params['fields'], function($a, $b){
 				if (empty($a['order'])) $a['order'] = 20;
 				if (empty($b['order'])) $b['order'] = 20;
 				return ((int)$a['order'] > $b['order'])*2 - 1;
 			});
-					
-			$params['data'] = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [
+			
+			$ds_params = [
 					'do' => 'L',
 					'id' => $params['base_id'],
-			]);
+			];
+			
+			if (!empty($base['_extends'])){
+				$ds_params['_extends'] = $base['_extends'];
+			}
+			
+			$params['data'] = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], $ds_params);
 			
 			if (!empty($params['data']['_no_cache'])) unset($params['data']['_no_cache']);
 		

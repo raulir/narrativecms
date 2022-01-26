@@ -15,7 +15,7 @@ function cms_cssjs_settings_init(){
 		if (value != null){
 			$('.cms_cssjs_settings_csss').append('<div class="cms_list_sortable_item cms_cssjs_settings_csss_item ui-sortable-handle" style="' + $('.cms_cssjs_settings_csss').data('bg') + '"' +
 					' data-value="' + value + '" data-text="' + $(':selected', $select).text() + '">' + $(':selected', $select).text() +
-					'<div class="cms_cssjs_settings_csss_item_delete cms_list_item_button">remove</div>' +
+					'<div class="cms_cssjs_settings_csss_item_delete cms_small_button">remove</div>' +
 					'</div>');
 			
 			$(':selected', $select).remove();

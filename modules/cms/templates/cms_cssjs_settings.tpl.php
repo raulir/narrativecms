@@ -27,7 +27,7 @@
 							data-text="<?= str_replace(['modules/','css/', '.css','.scss'], '', $current_css_item) ?>"
 							<?php _ib('cms/cms_drag.png', 14) ?>>
 						<?= str_replace(['modules/','css/', '.css','.scss'], '', $current_css_item) ?>
-						<div class="cms_cssjs_settings_csss_item_delete cms_list_item_button">remove</div>
+						<div class="cms_cssjs_settings_csss_item_delete cms_small_button">remove</div>
 					</div>
 
 				<?php endforeach ?>

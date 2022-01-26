@@ -27,21 +27,21 @@
 						<div class="cms_input_page_panels_item_buttons">
 						
 							<?php if (!empty($block['_delete'])): ?>
-								<div class="cms_list_item_button cms_page_panel_delete" data-cms_page_panel_id="<?= $block['cms_page_panel_id'] ?>">
+								<div class="cms_small_button cms_page_panel_delete" data-cms_page_panel_id="<?= $block['cms_page_panel_id'] ?>">
 									remove
 								</div>
 							<?php endif ?>
 							
 							<?php if (!empty($block['_edit'])): ?>
-								<a class="cms_list_item_button" <?php _lh('admin/cms_page_panel/'.$block['cms_page_panel_id'].'/'); ?>>edit</a>
+								<a class="cms_small_button" <?php _lh('admin/cms_page_panel/'.$block['cms_page_panel_id'].'/'); ?>>edit</a>
 							<?php endif ?>
 							
-							<div class="cms_list_item_button cms_page_panel_show" data-cms_page_panel_id="<?= $block['cms_page_panel_id'] ?>">
+							<div class="cms_small_button cms_page_panel_show" data-cms_page_panel_id="<?= $block['cms_page_panel_id'] ?>">
 								<?= $block['show'] ? 'hide' : 'show' ?>
 							</div>
 							
 							<?php if (!empty($block['_goto'])): ?>
-								<a class="cms_list_item_button" <?php _lh('admin/cms_page_panel/'.$block['goto_id'].'/'); ?>>goto</a>
+								<a class="cms_small_button" <?php _lh('admin/cms_page_panel/'.$block['goto_id'].'/'); ?>>goto</a>
 							<?php endif ?>
 						
 						</div>

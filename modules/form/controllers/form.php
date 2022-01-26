@@ -13,9 +13,7 @@ class form extends CI_Controller {
 		}
         
 		$this->js[] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
-		$this->js[] = array('script' => 'modules/cms/js/tinymce/tinymce.min.js', 'sync' => '', );
         
-		$this->js[] = 'modules/cms/js/cms_preloader.js';
         $this->js[] = 'modules/cms/js/cms.js';
   
         $GLOBALS['_panel_titles'][] = 'ADMIN';
@@ -42,6 +40,27 @@ class form extends CI_Controller {
         
     	$this->output('cms/admin', 'form/admin', $panel_data);
    	
+   	}
+   	
+   	function grid($cms_page_panel_id){
+   		
+   		// set page config
+   		$page_config = array(
+   				array('position' => 'header', 'panel' => 'cms/cms_user', 'module' => 'cms', ),
+   				array('position' => 'header', 'panel' => 'cms/cms_menu', 'module' => 'cms', ),
+   				array(
+   						'position' => 'main',
+   						'panel' => 'form/form_grid',
+   						'module' => 'form',
+   						'params' => ['cms_page_panel_id' => $cms_page_panel_id, ],
+   				),
+   		);
+   		
+   		// render panels
+   		$panel_data = $this->render($page_config);
+   		
+   		$this->output('cms/admin', 'form/admin', $panel_data);
+   			
    	}
 
 }

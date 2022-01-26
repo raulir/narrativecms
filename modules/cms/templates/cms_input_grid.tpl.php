@@ -41,7 +41,7 @@
 											<?php endforeach ?>
 										</div>
 									<?php elseif(stristr($field['type'],'/')): ?>
-										<?php _panel($field['type'], $field + ['base_id' => $base_id, 'item_id' => $key]) ?>
+										<?php _panel($field['type'], $field + ['base_id' => $base_id, 'item_id' => $line_data['item_id']]) ?>
 									<?php endif ?>
 								</div>
 								
@@ -71,3 +71,5 @@
 	<div class="cms_grid_line cms_grid_line_bottom"></div>
 
 </div>
+
+<?php // _print_r($_params) ?>
