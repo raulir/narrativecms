@@ -64,7 +64,7 @@ class pageshare extends CI_Controller{
 			$content = $params['content'];
 		}
 		
-		$params = array_merge($params, $this->cms_page_panel_model->get_cms_page_panel_settings('basic/pageshare'));
+		$params = array_merge($this->cms_page_panel_model->get_cms_page_panel_settings('basic/pageshare'), $params);
 		
 		if (!empty($content)){
 			$params['content'] = $content;

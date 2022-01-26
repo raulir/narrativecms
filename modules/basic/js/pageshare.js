@@ -1,20 +1,24 @@
 function pageshare_init(){
 	
-    window.fbAsyncInit = function() {
-    	FB.init({
-    		appId      : $('.basic_pageshare_container').data('fb_app_id'),
-    		xfbml      : false,
-    		version    : 'v2.5'
-    	});
-    };
+	if ($('.basic_pageshare_container').data('fb_app_id')){
+	
+	    window.fbAsyncInit = function() {
+	    	FB.init({
+	    		appId      : $('.basic_pageshare_container').data('fb_app_id'),
+	    		xfbml      : false,
+	    		version    : 'v2.5'
+	    	});
+	    };
+	    
+	    $('body').append('<div id="fb-root"></div><script src="//connect.facebook.net/en_US/sdk.js"></script>')
     
-    $('body').append('<div id="fb-root"></div><script src="//connect.facebook.net/en_US/sdk.js"></script>')
+	}
 
 	$('.basic_pageshare_icon').off('click.cms').on('click.cms', function(e){
 		
 		var $this = $(this);
 		
-		var url = location.href;
+		var url = window.location.href.split('#')[0]
 		
 		if ($this.data('url')){
 			
@@ -38,16 +42,33 @@ function pageshare_init(){
 		
 		if (type == 'facebook'){
 			
-			FB.ui({
-				method: 'share',
-				href: url,
-			}, function(response){});
+			if ($this.closest('.basic_pageshare_container').data('fb_url')){
+				url = $this.closest('.basic_pageshare_container').data('fb_url')
+			}
+			
+			if (typeof FB !== 'undefined'){
+			
+				FB.ui({
+					method: 'share',
+					href: url,
+				}, function(response){});
+				
+			} else {
+			
+				window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), 'FBsharing', 
+						'left=100,top=100,width=500,height=600,popup')
+			
+			}
 			
 		}
 		
 		if (type == 'twitter'){
 			
 			var short_url = $this.data('url') !== false ? $this.data('url') : url
+					
+			var twitter_suffix = ($this.closest('.basic_pageshare_container').data('twitter_suffix') ? 
+					(' ' + $this.closest('.basic_pageshare_container').data('twitter_suffix')) : '')
+			var content = encodeURIComponent($this.data('content') + twitter_suffix)
 			
 			if (typeof $this.data('url_key') !== 'undefined'){
 				
@@ -59,16 +80,18 @@ function pageshare_init(){
 					'title': document.title
 				}).then((data) => {
 					
-					window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent($this.data('content')) + 
-							'&url=' + encodeURIComponent(data.link) + '&original_referer=' + encodeURIComponent(data.link) + 
+					window.open('https://twitter.com/intent/tweet?text=' + content + 
+							($this.data('twitter_hide_url') == '0' ? ('&url=' + encodeURIComponent(data.link)) : '') + 
+							'&original_referer=' + encodeURIComponent(data.link) + 
 							'&hashtags=' + encodeURIComponent($this.data('hashtags')))
 
 				})
 				
 			} else {
 			
-				window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent($this.data('content')) + 
-						'&url=' + encodeURIComponent(url) + '&original_referer=' + encodeURIComponent(url) + 
+				window.open('https://twitter.com/intent/tweet?text=' + content + 
+						($this.data('twitter_hide_url') == '0' ? ('&url=' + encodeURIComponent(url)) : '') + 
+						'&original_referer=' + encodeURIComponent(url) + 
 						'&hashtags=' + encodeURIComponent($this.data('hashtags')))
 			
 			}

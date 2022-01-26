@@ -64,6 +64,23 @@
 			"name":"bitly_token",
 			"label":"Bitly token",
 			"help":"Bitly: Acccount -> Settings -> API"
+		},
+		{
+			"type":"select",
+			"name":"twitter_hide_url",
+			"label":"URL in Twitter",
+			"values":{
+				"0":"Visible",
+				"1":"Hidden"
+			},
+			"default":"0",
+			"help":"If card or text already includes an url"
+		},
+		{
+			"type":"text",
+			"name":"twitter_suffix",
+			"label":"Twitter suffix",
+			"help":"Goes between text and url in share dialog"
 		}
 	]
 }

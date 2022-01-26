@@ -266,13 +266,16 @@
 			"label":"Favicon",
 			"category":"icon"
 		},
-        {
-            "type": "file",
-            "name": "meta_video",
-            "label": "Video",
-        	"accept": ".mp4",
-        	"help": "[.mp4 only]||Uploading any other format may cause undetermined results in various browsers"
-        },
+		{
+			"type":"select",
+			"name":"meta_video_twitter",
+			"label":"Preferred Twitter card type",
+			"values":{
+				"summary_large_image":"Summary large image",
+				"player":"Video player"
+			},
+			"default":"summary_large_image"
+		},
 		{
 			"type":"subtitle",
 			"label":"CMS interface",
