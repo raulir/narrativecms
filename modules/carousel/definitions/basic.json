@@ -102,12 +102,24 @@
 					"label": "Colour scheme",
 					"values": {
 						"white": "White",
-						"black": "Black"
+						"black": "Black",
+						"transparent": "Transparent"
 					},
 					"default": "white",
 					"groups":["copy"]
 				}
 			]
+		},
+		{
+			"type":"textarea",
+			"name":"heading",
+			"label":"Heading",
+			"lines":"2"
+		},
+		{
+			"type":"text",
+			"name":"style_id",
+			"label":"Style ID"
 		}
 	],
 	"settings":[

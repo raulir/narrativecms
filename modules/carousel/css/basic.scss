@@ -210,6 +210,21 @@
 
 /* colour schemes */
 
+.carousel_basic_item_scheme_transparent {
+	
+	color: inherit;
+	
+	.carousel_basic_item_cta {
+		border: 0.1rem solid transparent;
+		color: $colour_black;
+		&:hover {
+			background-color: transparent;
+			color: $colour_white;
+		}
+	}
+
+}
+
 .carousel_basic_item_scheme_white {
 	
 	color: $colour_white;

@@ -1,7 +1,12 @@
-<div class="carousel_basic_container carousel_basic_count_<?= count($items) ?>">
+<div class="carousel_basic_container carousel_basic_count_<?= count($items) ?> <?= !empty($style_id) ? 'carousel_basic_style_'.$style_id : '' ?>">
 	<div class="carousel_basic_content">
 	
-		<div class="carousel_basic_items carousel_basic_carousel_hidden" data-animation_speed="<?= $speed?>" data-delay="<?= $delay ?>" data-cycle="<?= $cycle ?>">
+		<?php if(!empty($heading)): ?>
+			<div class="carousel_basic_heading"><?= $heading ?></div>
+		<?php endif ?>
+	
+		<div class="carousel_basic_items carousel_basic_carousel_hidden" data-animation_speed="<?= $speed?>" 
+				data-delay="<?= $delay ?>" data-cycle="<?= $cycle ?>">
 
 			<?php foreach($items as $item): ?>
 			
