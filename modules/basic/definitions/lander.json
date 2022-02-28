@@ -5,9 +5,7 @@
 		{
 			"type":"link",
 			"name":"target_page",
-			"label":"Target page",
-			"targets":"page",
-			"format":"short"
+			"label":"Target page"
 		},
 		{
 			"type":"select",

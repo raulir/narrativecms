@@ -433,16 +433,16 @@ String.prototype.to_title_case = function () {
  */
 
 function get_ajax(name, params){
-	
+
 	return new Promise((resolve, reject) => {
 		
-		var ext_params = $.extend({
+		var ext_params = Object.assign({
 			'no_html': '1', 
 			'success': data => {
 				resolve(data)
-			} 
+			}
 		}, params)
-		
+
 		var action_on_success = ext_params.success
 		delete ext_params.success
 		
@@ -467,7 +467,7 @@ var _cms_test_localstorage = function() {
 
 function get_ajax_panel(name, args, action_on_success){
 
-	var params = $.extend({
+	var params = Object.assign({
 		'cache': ''
 	}, args)
 

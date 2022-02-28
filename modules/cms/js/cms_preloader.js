@@ -16,6 +16,8 @@ function cms_preloader_class(){
 
 		return new Promise ((resolve, reject) => {
 
+			var _this = this;
+				
 			var ok_interval = setInterval(() => {
 
 				if (this.images_ok && this.videos_ok && this.sounds_ok){
@@ -26,7 +28,7 @@ function cms_preloader_class(){
 			}, 100)
 			
 			if (typeof params.images == 'undefined'){
-				this.images_ok = true
+				_this.images_ok = true
 			} else {
 				
 				for (var i = 0; i < params.images.length; i++) {
@@ -34,11 +36,11 @@ function cms_preloader_class(){
 					this.preloaded_images[i].src = params.images[i];
 				}
 				
-				var that = this;
+				var _this = this;
 				var interval = setInterval(function(){
-					if (that.count_not_complete() == 0){
+					if (_this.count_not_complete() == 0){
 						clearInterval(interval);
-						that.images_ok = true
+						_this.images_ok = true
 					}
 				}, 100);
 	
@@ -46,7 +48,6 @@ function cms_preloader_class(){
 	
 			if (typeof params.videos != 'undefined'){
 				
-				var _this = this;
 				
 				// add to videos to load
 				$(params.videos).each(function(key, video){
@@ -65,7 +66,7 @@ function cms_preloader_class(){
 				});
 	
 				if (typeof this.video_interval == 'undefined'){
-					var _this = this;
+
 					_this.video_interval = setInterval(function(){
 						var ret = _this.check_videos()
 						if (!ret) {
@@ -73,6 +74,7 @@ function cms_preloader_class(){
 							_this.videos_ok = true
 						}
 					}, 200);
+
 				}
 				
 			} else {
