@@ -19,17 +19,22 @@ if (!session_id()){
 	}
 	
 	// detect webp support
-	if (empty($_SESSION['webp'])){
+	if (!isset($_SESSION['webp'])){
 		
 		$_SESSION['webp'] = false;
 		if (!empty($GLOBALS['config']['images_webp']) && !empty($_SERVER['HTTP_ACCEPT'])){
-			if (empty($_SESSION['webp']) && strpos($_SERVER['HTTP_ACCEPT'], 'image/webp') !== false){
+			
+			// no webp for safari as animations show opacity as black
+			$is_safari = (bool)stristr($_SERVER['HTTP_USER_AGENT'], 'safari/') && !(bool)stristr($_SERVER['HTTP_USER_AGENT'], 'chrome/') 
+					&& !(bool)stristr($_SERVER['HTTP_USER_AGENT'], 'chromium/');
+
+			if (!$is_safari && empty($_SESSION['webp']) && strpos($_SERVER['HTTP_ACCEPT'], 'image/webp') !== false){
 				$_SESSION['webp'] = true;
 			}
 		}
 		
 	}
-	
+
 	// detect mobile
 	if (!isset($_SESSION['mobile']) && !empty($_SERVER['HTTP_USER_AGENT'])){
 	
