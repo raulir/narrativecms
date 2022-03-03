@@ -1,4 +1,4 @@
-<div class="basic_pageshare_container" data-fb_app_id="<?= $fb_app_id ?>" data-fb_url="<?= !empty($fb_url) ? $fb_url : '' ?>" 
+<div class="basic_pageshare_container" data-fb_app_id="<?= $fb_app_id ?? '' ?>" data-fb_url="<?= !empty($fb_url) ? $fb_url : '' ?>" 
 		data-twitter_suffix="<?= !empty($twitter_suffix) ? $twitter_suffix : '' ?>">
 
 	<div class="basic_pageshare_content">
