@@ -6,7 +6,7 @@
 
 <div class="cms_user_settings_container">
 
-	<?php if (!empty($GLOBALS['config']['admin_username'])): ?>
+	<?php if (!empty($GLOBALS['config']['admin_username']) && empty($GLOBALS['config']['admin_hide'])): ?>
 		<div class="cms_user_settings_superuser">
 			Superuser with username "<?= $GLOBALS['config']['admin_username'] ?>" is set in "<?= $config_file ?>"
 		</div>
