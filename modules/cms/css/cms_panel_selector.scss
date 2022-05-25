@@ -12,7 +12,7 @@
 
 .cms_panel_selector_content {
 	box-sizing: border-box;
-	border: 0.1rem solid $colour_border;
+	border: 0.1rem solid $cms_border;
 	padding: 1.0rem;
 	width: 96.0rem;
 	height: 60.0rem;
@@ -56,7 +56,7 @@
 	position: absolute;
 	top: 1.0rem;
 	left: 0;
-	border: 0.1rem solid $colour_border;
+	border: 0.1rem solid $cms_border;
 	box-sizing: border-box;
 	background-color: $colour_extralight_shadow;
 }
@@ -158,7 +158,7 @@
 	line-height: 2.6rem;
     letter-spacing: -0.04rem;
     font-size: 1.6rem;
-    border-bottom: 0.1rem solid $colour_border;
+    border-bottom: 0.1rem solid $cms_border;
 }
 
 .cms_panel_selector_item {
@@ -167,7 +167,7 @@
     height: 2.8rem;
     line-height: 2.6rem;
     font-size: 1.6rem;
-    border: 0.1rem solid $colour_border;
+    border: 0.1rem solid $cms_border;
     color: $colour_black;
     padding: 0 0.3rem 0 0.8rem;
     margin-bottom: 0.6rem;
@@ -195,7 +195,7 @@
 	position: absolute;
 	top: 0;
 	right: 0;
-	border-bottom: 0.1rem solid $colour_border;
+	border-bottom: 0.1rem solid $cms_border;
 }
 
 .cms_panel_selector_filter_label {
@@ -213,7 +213,7 @@
 .cms_panel_selector_filter_select {
 	box-sizing: border-box;
     display: block;
-    border: 0.1rem solid $colour_border;
+    border: 0.1rem solid $cms_border;
     width: calc(100% - 11.0rem);
     height: 2.5rem;
     line-height: 2.2rem;
@@ -230,7 +230,7 @@
 	bottom: 2.0rem;
 	height: 3.5rem;
 	width: calc(100% - 4.0rem);
-	border-top: 0.1rem solid $colour_border;
+	border-top: 0.1rem solid $cms_border;
 	padding-top: 1.2rem;
 	box-sizing: border-box;
 }
@@ -250,7 +250,7 @@
 .cms_panel_selector_shortcut_select {
 	box-sizing: border-box;
     display: block;
-    border: 0.1rem solid $colour_border;
+    border: 0.1rem solid $cms_border;
     width: 32.6rem;
     height: 2.5rem;
     line-height: 2.2rem;

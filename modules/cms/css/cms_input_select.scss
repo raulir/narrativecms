@@ -1,4 +1,4 @@
-$colour_border: #a0a0a0;
+// $colour_border: #a0a0a0;
 
 .cms_input_select {
 	z-index: 10;
@@ -7,7 +7,7 @@ $colour_border: #a0a0a0;
 .cms_input_select_select {
 	box-sizing: border-box;
 	display: block;
-	border: 0.1rem solid $colour_border;
+	border: 0.1rem solid $cms_border;
 	width: 33.0rem;
 	height: 2.5rem;
 	line-height: 2.2rem;

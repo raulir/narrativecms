@@ -5,7 +5,7 @@
 .cms_input_date_input {
 	box-sizing: border-box;
 	display: block;
-	border: 1px solid $colour_border;
+	border: 1px solid $cms_border;
 	width: 250px;
 	height: 26px;
 	line-height: 23px;
@@ -31,7 +31,7 @@
 	box-sizing: border-box;
 	height: 26px;
 	width: 32px;
-	border: 1px solid $colour_border;
+	border: 1px solid $cms_border;
 	border-radius: 4px;
 	position: absolute;
 	right: 5.0rem;
@@ -46,7 +46,7 @@
 	box-sizing: border-box;
 	height: 26px;
 	width: 32px;
-	border: 1px solid $colour_border;
+	border: 1px solid $cms_border;
 	border-radius: 4px;
 	position: absolute;
 	right: 1.0rem;

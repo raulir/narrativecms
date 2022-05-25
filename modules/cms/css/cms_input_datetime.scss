@@ -5,7 +5,7 @@
 .cms_input_datetime_date {
 	box-sizing: border-box;
 	display: block;
-	border: 1px solid $colour_border;
+	border: 1px solid $cms_border;
 	width: 120px;
 	height: 26px;
 	line-height: 23px;
@@ -31,7 +31,7 @@
 }
 
 .cms_input_datetime_hour,.cms_input_datetime_minute {
-	border: 1px solid $colour_border;
+	border: 1px solid $cms_border;
 	width: 6.0rem;
 	height: 100%;
 	height: 2.5rem;
@@ -60,7 +60,7 @@
 	box-sizing: border-box;
 	height: 26px;
 	width: 32px;
-	border: 1px solid $colour_border;
+	border: 1px solid $cms_border;
 	border-radius: 4px;
 	position: absolute;
 	right: 5.0rem;
@@ -75,7 +75,7 @@
 	box-sizing: border-box;
 	height: 26px;
 	width: 32px;
-	border: 1px solid $colour_border;
+	border: 1px solid $cms_border;
 	border-radius: 4px;
 	position: absolute;
 	right: 1.0rem;

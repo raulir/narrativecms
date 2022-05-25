@@ -47,7 +47,7 @@
 	font-size: 0;
 	letter-spacing: 0;
 	box-sizing: border-box;
-	border: 0.1rem solid $colour_border;
+	border: 0.1rem solid $cms_border;
 	display: inline-block;
 	background-size: 4.0rem auto;
 	background-position: center;
@@ -97,7 +97,7 @@
 	input {
 		box-sizing: border-box;
 		margin: 0px;
-		border: 1px solid $colour_border;
+		border: 1px solid $cms_border;
 		height: 26px;
 		padding: 0px 3px;
 		line-height: 24px;
@@ -131,7 +131,7 @@
 .cms_image_category {
 	box-sizing: border-box;
 	margin: 0px;
-	border: 1px solid $colour_border;
+	border: 1px solid $cms_border;
 	height: 26px;
 	padding: 0px 3px;
 	line-height: 26px;

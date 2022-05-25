@@ -1,5 +1,4 @@
 $colour_background: white;
-$colour_border: #a0a0a0;
 $colour_shadow: #606060;
 $colour_light_shadow: #e0e0e0;
 $colour_extralight_shadow: #f7f7f7;
@@ -9,7 +8,9 @@ $colour_black: black;
 $colour_green: green;
 $colour_green_background: #efffef;
 $colour_hover: #efefef;
+
 $cms_orange: #f7a034;
+$cms_border: #a0a0a0;
 
 $cms_orange_button_border: #884825;
 $cms_orange_button_background: #e1c05f;
@@ -99,7 +100,7 @@ ul {
 
 .cms_small_button {
 	height: 2.0rem;
-	border: 0.1rem solid $colour_border;
+	border: 0.1rem solid $cms_border;
 	box-sizing: border-box;
 	line-height: 1.8rem;
 	padding: 0 1.0rem;
@@ -161,7 +162,7 @@ ul {
 	padding: 3.0rem 1.0rem 0 1.0rem;
 	margin: 0 auto;
 	background-color: $colour_background;
-	outline: 0.1rem solid $colour_border;
+	outline: 0.1rem solid $cms_border;
 	box-shadow: 0.1rem 0.2rem 0.7rem $colour_shadow;
 	font-size: 1.6rem;
 	line-height: 2.6rem;
@@ -172,7 +173,7 @@ ul {
 
 .cms_toolbar {
 	box-sizing: border-box;
-	border-bottom: 0.1rem solid $colour_border;
+	border-bottom: 0.1rem solid $cms_border;
 	padding: 0 0 1.0rem 0;
 	margin: 0 auto;
 	position: relative;
@@ -202,7 +203,7 @@ ul {
 }
 
 .cms_column_header {
-	border-bottom: 1px solid $colour_border;
+	border-bottom: 1px solid $cms_border;
     line-height: 24px;
     font-size: 18px;
     padding-top: 35px;
@@ -269,7 +270,7 @@ ul {
 	height: 2.7rem;
 	line-height: 26px;
 	font-size: 16px;
-	border: 0.12rem solid $colour_border;
+	border: 0.12rem solid $cms_border;
 	border-radius: 4px;
 	text-decoration: none;
 	color: #404040;

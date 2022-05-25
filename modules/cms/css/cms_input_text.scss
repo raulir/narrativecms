@@ -5,14 +5,14 @@
 .cms_input_text_input {
 	box-sizing: border-box;
 	display: block;
-	border: 0.1rem solid $colour_border;
+	border: 0.1rem solid $cms_border;
 	width: 33.0rem;
 	height: 2.5rem;
 	line-height: 2.2rem;
 	font-size: 1.7rem;
 	float: right;
 	padding: 0.1rem 0.5rem 0 0.5rem;
-	box-shadow: 0 0 0.02rem $colour_border;
+	box-shadow: 0 0 0.02rem $cms_border;
 }
 
 .cms_repeater_block .cms_input_text_input {

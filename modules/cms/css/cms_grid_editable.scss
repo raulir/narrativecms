@@ -5,7 +5,7 @@
 }
 
 .cms_grid_editable_input {
-	border: 0.1rem solid $colour_border;
+	border: 0.1rem solid $cms_border;
 	padding: 0 0.5rem;
 	margin: 0;
 	line-height: 1.8rem;
@@ -15,6 +15,6 @@
 	box-sizing: border-box;
 	height: 2.0rem;
 	&:focus {
-		outline: 0.1rem solid $colour_border;
+		outline: 0.1rem solid $cms_border;
 	}
 }

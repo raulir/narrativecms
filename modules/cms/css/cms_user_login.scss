@@ -16,7 +16,7 @@
 
 .cms_user_login_box {
 	padding: 2.0rem 2.0rem 2.2rem 2.0rem;
-	border: 0.1rem solid $colour_border;
+	border: 0.1rem solid $cms_border;
 	border-radius: 0.5rem;
 	position: relative;
 	text-align: left;
@@ -35,7 +35,7 @@
 	max-height: 3.4rem;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	border-bottom: 0.1rem solid $colour_border;
+	border-bottom: 0.1rem solid $cms_border;
 	margin-bottom: 1.4rem;
 }
 

@@ -1,4 +1,4 @@
-$colour_border: #a0a0a0;
+// $colour_border: #a0a0a0;
 $colour_white: white;
 
 .cms_page_panel_toolbar_container {
@@ -122,7 +122,7 @@ $colour_white: white;
     	width: 100rem;
     	left: 50%;
     	transform: translate(-50%);
-		border-bottom: 0.1rem solid $colour_border;
+		border-bottom: 0.1rem solid $cms_border;
 		text-shadow: 0 0 0.2rem $colour_white;
 		&:hover {
 			background-color: $colour_white;

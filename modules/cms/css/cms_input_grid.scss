@@ -23,7 +23,7 @@
 }
 
 .cms_grid_line {
-    border-top: 0.16rem dashed $colour_border;
+    border-top: 0.16rem dashed $cms_border;
     width: 100%;
     margin: 0 auto;
     position: relative;
@@ -32,7 +32,7 @@
     	position: absolute;
     	width: 0;
     	height: 0.5rem;
-    	border-left: 0.16rem dashed $colour_border;
+    	border-left: 0.16rem dashed $cms_border;
     }
 }
 
@@ -67,7 +67,7 @@
 
 .cms_grid_row,.cms_grid_header {
 	height: 3.5rem;
-	border-bottom: 0.12rem solid $colour_border;
+	border-bottom: 0.12rem solid $cms_border;
 	box-sizing: border-box;
 }
 
@@ -85,7 +85,7 @@
 		position: absolute;
 		display: block;
 		width: 0.12rem;
-		background-color: $colour_border;
+		background-color: $cms_border;
 		right: 0;
 		top: 0;
 		opacity: 0.5;
@@ -131,7 +131,7 @@
 }
 
 .cms_grid_id {
-	border-bottom: 0.1rem solid $colour_border;
+	border-bottom: 0.1rem solid $cms_border;
 	display: inline-block;
 }
 
