@@ -1,0 +1,74 @@
+.feed_dashboard_item_container {
+	
+}
+
+.feed_dashboard_item_icon {
+	display: block;
+	height: 2.0rem;
+	width: 2.5rem;
+	background-size: 1.7rem auto;
+	background-position: 0.2rem center;
+	background-repeat: no-repeat;
+	position: absolute;
+	left: 2.2rem;
+	top: 0.4rem;
+}
+
+.feed_dashboard_item_title {
+	position: absolute;
+	top: 3px;
+	left: 45px;
+	font-size: 12px;
+	width: 161px;
+	height: 24px;
+	overflow: hidden;
+}
+
+.feed_dashboard_item_image_container {
+	position: absolute;
+	bottom: 3px;
+	height: 95px;
+	width: 95px;
+	border: 1px solid #a0a0a0;
+	background-position: center;
+}
+
+.feed_dashboard_item_image {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+}
+
+.feed_dashboard_item_content {
+	position: absolute;
+	overflow: hidden;
+	left: 109px;
+	top: 28px;
+	max-height: 97px;
+	width: 20.0rem;
+	border-top: 1px solid #b0b0b0;
+	box-sizing: border-box;
+	padding-top: 2px;
+}
+
+div.feed_dashboard_item_heading {
+	font-size: 15px;
+	line-height: 17px;
+	font-weight: bold;
+	max-height: 34px;
+	overflow: hidden;
+}
+
+div.feed_dashboard_item_text {
+	font-size: 14px;
+	line-height: 16px;
+}
+
+div.feed_dashboard_item_text b {
+	font-weight: bold;
+}
