@@ -104,14 +104,14 @@ class CI_Controller {
 		} else {
 			$files = $this->get_panel_filenames($panel_name_param, $params);
 		}
-	
-		$ci =& get_instance();
-		
+
 		// if extended, run extended controller first
 		if (!empty($files['extends_controller'])){
 
+			$ci =& get_instance();
+
 			$extends_panel_name = $files['extends_module'].'_'.$files['extends_name'].'_panel';
-			$ci->load->library(
+			$res = $ci->load->library(
 					$files['extends_controller'],
 					['module' => $files['extends_module'], 'name' => $files['extends_name'], ],
 					$extends_panel_name
@@ -130,18 +130,18 @@ class CI_Controller {
 		// if there is a normal controller, do this
 		if (!empty($files['controller']) && is_array($params)){
 
+			$ci =& get_instance();
+			
 			// load panel stuff into this sandbox - it will be the same as sandbox is singleton for itself
 			$panel_name = $files['module'].'_'.$files['name'].'_panel';
 
-			$ci->load->library(
+			$res = $ci->load->library(
 					$files['controller'],
 					['module' => $files['module'], 'name' => $files['name'], ],
 					$panel_name
 					);
-			
-			// _pri nt_r($ci->load);
-				
-			if (method_exists($ci->$panel_name, $panel_method)){
+
+			if (method_exists($ci->{$panel_name}, $panel_method)){
 	
 				// define this controller as panel
 				$ci->{$panel_name}->init_panel(array('name' => $files['name'], 'controller' => $files['controller'], ));
