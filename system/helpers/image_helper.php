@@ -308,12 +308,16 @@ if ( !function_exists('_i')) {
 			
 			print(' style="background-image: url('.$fileurl_mobile.'); '.$params['css'].' " '.$dataprops);
 			
+		} elseif (!$_SESSION['imageset']){
+			
+			print(' style="background-image: url('.$fileurl_hq.'); '.$params['css'].' " '.$dataprops);
+			
 		} else {
 			
 			print(
 					' style="background-image: url('.$fileurl_hq.'); '.
 					( $fileurl_lq != $fileurl_hq ? 'background-image: -webkit-image-set( url('.$fileurl_lq.') 1x, url('.$fileurl_hq.') 2x ); '.
-							'background-image: image-set( url('.$fileurl_lq.') 1x, url('.$fileurl_hq.') 2x ); '	: '').$params['css'].' " '.$dataprops);
+							'background-image: image-set(url('.$fileurl_lq.') 1x, url('.$fileurl_hq.') 2x ); '	: '').$params['css'].' " '.$dataprops);
 			
 		}
 
