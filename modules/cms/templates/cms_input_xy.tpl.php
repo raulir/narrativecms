@@ -1,4 +1,6 @@
-<div class="cms_input cms_input_xy_container cms_input_xy_target_<?= $target ?>" data-cms_input_height="4" data-target_image="<?= $target_image ?>">
+<div class="cms_input cms_input_xy_container cms_input_xy_target_<?= $target ?>" data-cms_input_height="4"
+		data-target_image="<?= $target_image ?>" data-target="<?= $target ?>">
+		
 	<div class="cms_input_xy_content">
 	
 		<label class="cms_input_label"><?= $label ?></label>
@@ -21,9 +23,12 @@
 					<div class="cms_input_xy_pointer"></div>
 				</div>
 			<?php else: ?>
-				-- empty target --
+				<div class="cms_input_xy_image_inner cms_input_xy_empty">
+					-- empty target --
+				</div>
 			<?php endif ?>
 		</div>
 	
 	</div>
+	
 </div>

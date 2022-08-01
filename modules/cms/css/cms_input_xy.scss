@@ -110,3 +110,14 @@
 	border-radius: 0.7rem;
 	transform: translate(-50%, -50%);
 }
+
+.cms_input_xy_empty {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 1.6rem;
+	line-height: 1.6rem;
+	width: 100%;
+	text-align: center;
+}

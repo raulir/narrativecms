@@ -60,11 +60,24 @@ function cms_input_image_popup($element){
 				
 				var $container = $('.cms_input_image_content_' + input_name).closest('.cms_input_image');
 				
-				$('.cms_input_xy_image_inner', $('.cms_input_xy_target_' + input_name)).data('w', $container.data('w'))
-				$('.cms_input_xy_image_inner', $('.cms_input_xy_target_' + input_name)).data('h', $container.data('h'))
-				$('.cms_input_xy_image_inner', $('.cms_input_xy_target_' + input_name))
-						.css({'background-image': 'url(' + config_url + 'img/' + $('.cms_input_image_input', $container).val()})
-				$('.cms_input_xy_target_' + input_name).data('target_image', $('.cms_input_image_input', $container).val())
+				if (!$('.cms_input_image_input', $container).val()){
+					
+					$('.cms_input_xy_image_inner', $('.cms_input_xy_target_' + input_name)).addClass('cms_input_xy_empty')
+						.css({'background-image':'', 'height': '', 'width': ''}).html('-- empty target --')
+					$('.cms_input_xy_target_' + input_name).data('target_image', '')
+					
+				} else {
+					
+					$('.cms_input_xy_image_inner', $('.cms_input_xy_target_' + input_name)).removeClass('cms_input_xy_empty')
+						.html('<div class="cms_input_xy_pointer"></div>')
+
+					$('.cms_input_xy_image_inner', $('.cms_input_xy_target_' + input_name)).data('w', $container.data('w'))
+					$('.cms_input_xy_image_inner', $('.cms_input_xy_target_' + input_name)).data('h', $container.data('h'))
+					$('.cms_input_xy_image_inner', $('.cms_input_xy_target_' + input_name))
+							.css({'background-image': 'url(' + config_url + 'img/' + $('.cms_input_image_input', $container).val()})
+					$('.cms_input_xy_target_' + input_name).data('target_image', $('.cms_input_image_input', $container).val())
+				
+				}
 				
 				cms_input_xy_init()
 				
@@ -97,6 +110,18 @@ function cms_input_image_clear($element){
 	var input_name = $element.data('name');
 	$('.cms_image_input_' + input_name + '').val('');
 	$('.cms_input_image_content_' + input_name).html('-- no image --');
+	
+	// clear xy input
+	
+	if ($('.cms_input_xy_target_' + input_name).length){
+		
+		var $container = $('.cms_input_image_content_' + input_name).closest('.cms_input_image');
+
+		$('.cms_input_xy_image_inner', $('.cms_input_xy_target_' + input_name)).addClass('cms_input_xy_empty')
+			.css({'background-image': '', 'height': '', 'width': ''}).html('-- empty target --')
+		$('.cms_input_xy_target_' + input_name).data('target_image', '')
+	
+	}
 	
 }
 
