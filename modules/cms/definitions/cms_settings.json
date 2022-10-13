@@ -96,6 +96,17 @@
 			"help":"File to log not found requests data. Under cache folder."
 		},
 		{
+			"type":"select",
+			"name":"allow_ajax_panels",
+			"label":"Ajax access to any panel",
+			"values":{
+				"0":"Disabled",
+				"1":"Enabled"
+			},
+			"default":"0",
+			"help":"Enable ajax loading any panel. Usually not secure"
+		},
+		{
 			"type":"text",
 			"name":"salt",
 			"label":"Salt",

@@ -29,7 +29,7 @@ class Ajax_api extends CI_Controller {
 			
 			$panel_config = $this->cms_panel_model->get_cms_panel_config($this->params['panel_id']);
 			
-			if (!empty($panel_config['list']['ajax_target'])){
+			if (!empty($panel_config['list']['ajax_target']) || $GLOBALS['config']['allow_ajax_panels']){
 				$this->params = array_merge($this->cms_page_panel_model->get_cms_page_panel($this->params['cms_page_panel_id']), $this->params);
 			} else {
 				print(json_encode(array('result' => array(), 'error' => array('message' => 'List ajax blocked', ))));
