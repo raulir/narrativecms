@@ -25,6 +25,13 @@
 			"parent":"user",
 			"url":"admin/panel_settings/user__header/",
 			"access":"user_settings"
+		},
+		{
+			"id":"users",
+			"name":"User settings",
+			"parent":"user",
+			"url":"admin/panel_settings/user__user_settings/",
+			"access":"user_settings"
 		}
 	],
 	"access":[

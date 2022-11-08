@@ -136,7 +136,7 @@ if ( !function_exists('_i')) {
 			// if not in uploads, copy over
 			if (!file_exists($filepath)){
 				
-				$original_path = $GLOBALS['config']['base_path'].'modules/'.$params['module'].'/img/'.$image;
+				$original_path = ($GLOBALS['config']['base_site']??'').$GLOBALS['config']['base_path'].'modules/'.$params['module'].'/img/'.$image;
 				
 				if (!file_exists($GLOBALS['config']['upload_path'].$params['module'].'/')){
 					mkdir($GLOBALS['config']['upload_path'].$params['module'].'/');

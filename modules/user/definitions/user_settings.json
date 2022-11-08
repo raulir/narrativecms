@@ -1,0 +1,20 @@
+{
+	"version":"2",
+	"label":"User module settings",
+	"item":[
+	
+	],
+	"settings":[
+		{
+			"type":"select",
+			"name":"show_username",
+			"label":"Separate username",
+			"values":{
+				"0":"No, email is username",
+				"1":"Yes, separate username"
+			},
+			"default":"0",
+			"help":"If username and main email are separate fields"
+		}
+	]
+}

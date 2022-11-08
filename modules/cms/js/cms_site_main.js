@@ -544,6 +544,33 @@ function get_ajax_panel(name, args, action_on_success){
 			
 }
 
+function get_ajax_panel_anchor(anchor, params){
+
+	return new Promise ((resolve, reject) => {
+		
+		if (!params){
+			params = {}
+		}
+		
+		params.anchor = anchor
+
+		$.ajax({
+			type: 'POST',
+		  	url: config_url + 'ajax_api/get_panel_anchor/',
+		  	data: params,
+		  	dataType: 'json',
+		  	context: this,
+		  	success: function( returned_data ) {
+
+				resolve(returned_data)
+				
+			}
+		})
+		
+	})
+	
+}
+
 function get_ajax_page(url, params, action_on_success){
 	
 	params = $.extend({ '_positions': ['main'] }, params)

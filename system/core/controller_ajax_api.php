@@ -47,5 +47,26 @@ class Ajax_api extends CI_Controller {
 
 		print(json_encode(['result' => $data]));
    	}
+   	
+   	function get_panel_anchor(){
+   		
+   		$this->load->model('cms/cms_page_panel_model');
+   		$cms_page_panels = $this->cms_page_panel_model->get_cms_page_panels_by(['submenu_anchor' => $this->params['anchor']]);
+
+		if (count($cms_page_panels)){
+	   		
+   			$cms_page_panel = reset($cms_page_panels);
+   			
+   			$data = $this->ajax_panel($cms_page_panel['panel_name'], $cms_page_panel);
+   			
+   			print(json_encode(['result' => ['html' => $data['_html']]], JSON_PRETTY_PRINT));
+   			die();
+   			
+   		}
+   		
+   		print(json_encode(array('result' => [], 'error' => ['message' => 'Can\'t show', ])));
+   		die();
+   		
+   	}
     
 }

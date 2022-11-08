@@ -209,7 +209,9 @@ if ( !function_exists('get_position')) {
     		list($url, $hash) = explode('#', $url);
     	}
 
-		if (substr($url, 0, 1) == '#'){
+		if (substr($url, 0, 2) == '//'){
+    		$url = substr($url, 1);
+    	} else if (substr($url, 0, 1) == '#'){
     		$url = $url;
     	} else if (substr($url, 0, 7) == 'mailto:'){
     		$url = $url;
