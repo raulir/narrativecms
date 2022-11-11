@@ -4,6 +4,8 @@ function language_init(){
 
 		var $this = $(this);
 		
+		cms_cookie_create('language', $this.data('language_id'), 365)
+		
 		get_ajax('basic/language', {
 			'do':'language_set',
 			'language_id': $this.data('language_id'),

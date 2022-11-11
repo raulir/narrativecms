@@ -12,8 +12,8 @@ function cms_cookie_create(name, value, days) {
     if (location.protocol === 'https:') {
         secure = '; SameSite=None; Secure'
     }
-    
-    document.cookie = encodeURIComponent(name) + '=' + encodeURIComponent(value) + expires + '; path=' + encodeURIComponent(config_url) + secure
+
+    document.cookie = encodeURIComponent(name) + '=' + encodeURIComponent(value) + expires + '; path=' + config_url + secure
 
 }
 

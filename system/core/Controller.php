@@ -867,8 +867,7 @@ class CI_Controller {
 			unset($panel_data);
 	
 		}
-		
-		
+
 		return $return;
 		 
 	}

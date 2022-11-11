@@ -132,11 +132,11 @@ if ( !function_exists('_i')) {
 			$fileurl = $GLOBALS['config']['base_url'].'modules/'.$params['module'].'/img/'.$image;
 			
 			$filepath = $GLOBALS['config']['upload_path'].$params['module'].'/'.$image;
-			
+
 			// if not in uploads, copy over
 			if (!file_exists($filepath)){
 				
-				$original_path = ($GLOBALS['config']['base_site']??'').$GLOBALS['config']['base_path'].'modules/'.$params['module'].'/img/'.$image;
+				$original_path = /* ($GLOBALS['config']['base_site']??''). */ $GLOBALS['config']['base_path'].'modules/'.$params['module'].'/img/'.$image;
 				
 				if (!file_exists($GLOBALS['config']['upload_path'].$params['module'].'/')){
 					mkdir($GLOBALS['config']['upload_path'].$params['module'].'/');

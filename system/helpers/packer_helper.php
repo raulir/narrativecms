@@ -28,7 +28,7 @@ if ( !function_exists('pack_css')) {
 	}
 	
 	function pack_css($scsss){
-		
+
 		$csss = [];
 
 		// compile scss
