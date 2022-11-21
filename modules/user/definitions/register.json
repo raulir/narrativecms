@@ -7,37 +7,15 @@
 			"type":"text",
 			"name":"heading",
 			"label":"Heading",
-			"default": "register here"
-		},
-		{
-			"type":"text",
-			"name":"register_first_name",
-			"label":"First name label",
-			"default": "first name"
-		},
-		{
-			"type":"text",
-			"name":"register_last_name",
-			"label":"Last name label",
-			"default": "last name"
-		},
-		{
-			"type":"text",
-			"name":"register_email",
-			"label":"Email label",
-			"default": "email"
-		},
-		{
-			"type":"text",
-			"name":"register_phone",
-			"label":"Phone label",
-			"default": "phone"
+			"default": "register here",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"register_submit",
 			"label":"Submit label",
-			"default": "register"
+			"default": "register",
+			"translate":"1"
 		},
 		{
 			"type":"link",
@@ -67,6 +45,73 @@
 		},
 		{
 			"type":"subtitle",
+			"label":"Full name"
+		},
+		{
+			"type":"select",
+			"label":"Ask for full name",
+			"name":"show_fullname",
+			"values":{
+				"0":"No",
+				"1":"Yes",
+				"2":"Mandatory"
+			},
+			"default":"1"
+		},
+		{
+			"type":"textarea",
+			"label":"Help information",
+			"name":"fullname_info",
+			"lines":"2",
+			"help":"Leave empty when not needed",
+			"translate":"1"
+		},
+		{
+			"type":"text",
+			"name":"register_first_name",
+			"label":"First name label",
+			"default": "first name",
+			"translate":"1"
+		},
+		{
+			"type":"text",
+			"name":"register_last_name",
+			"label":"Last name label",
+			"default": "last name",
+			"translate":"1"
+		},
+		{
+			"type":"subtitle",
+			"label":"Email"
+		},
+		{
+			"type":"select",
+			"label":"Ask for email",
+			"name":"show_email",
+			"values":{
+				"0":"No",
+				"1":"Yes",
+				"2":"Mandatory"
+			},
+			"default":"2"
+		},
+		{
+			"type":"textarea",
+			"label":"Help information",
+			"name":"email_info",
+			"lines":"2",
+			"help":"Leave empty when not needed",
+			"translate":"1"
+		},
+		{
+			"type":"text",
+			"name":"register_email",
+			"label":"Email label",
+			"default": "email",
+			"translate":"1"
+		},
+		{
+			"type":"subtitle",
 			"label":"Username"
 		},
 		{
@@ -74,16 +119,27 @@
 			"label":"Ask for username",
 			"name":"show_username",
 			"values":{
-				"yes":"Yes",
-				"no":"No"
+				"0":"No",
+				"1":"Yes",
+				"2":"Mandatory"
 			},
-			"default":"yes"
+			"default":"0",
+			"help":"Can be used as display name"
+		},
+		{
+			"type":"textarea",
+			"label":"Help information",
+			"name":"username_info",
+			"lines":"2",
+			"help":"Leave empty when not needed",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"register_username",
 			"label":"Username label",
-			"default": "username"
+			"default": "username",
+			"translate":"1"
 		},
 		{
 			"type":"subtitle",
@@ -94,22 +150,73 @@
 			"label":"Ask for password",
 			"name":"show_password",
 			"values":{
-				"yes":"Yes",
-				"no":"No"
+				"1":"Yes",
+				"0":"No"
 			},
-			"default":"yes"
+			"default":"1"
+		},
+		{
+			"type":"textarea",
+			"label":"Help information",
+			"name":"password_info",
+			"lines":"2",
+			"help":"Leave empty when not needed",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"register_password",
 			"label":"Password label",
-			"default": "new password"
+			"default": "new password",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"register_password2",
 			"label":"Password x2 label",
-			"default": "new password again"
+			"default": "new password again",
+			"translate":"1"
+		},
+		{
+			"type":"repeater",
+			"name":"fields",
+			"label":"Extra fields",
+			"fields":[
+				{
+					"type":"text",
+					"name":"name",
+					"label":"Field name",
+					"help":"User info field name",
+					"mandatory":"1",
+					"help":"Numbers and lowercase letters only, no spaces, first letter can't be number"
+				},
+				{
+					"type":"text",
+					"name":"label",
+					"label":"Label",
+					"help":"Label to show user",
+					"mandatory":"1",
+					"translate":"1"
+				},
+				{
+					"type":"select",
+					"label":"Mandatory",
+					"name":"mandatory",
+					"values":{
+						"yes":"Yes",
+						"no":"No"
+					},
+					"default":"no"
+				},
+				{
+					"type":"textarea",
+					"label":"Help information",
+					"name":"info",
+					"lines":"2",
+					"help":"Leave empty when not needed",
+					"translate":"1"
+				}
+			]
 		},
 		{
 			"type":"subtitle",
@@ -120,49 +227,81 @@
 			"name":"loggedin_text",
 			"label":"Logged in message",
 			"lines":"2",
-			"default": "You are currently logged in. Please log out to register a new account."
+			"default": "You are currently logged in. Please log out to register a new account.",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
 			"name":"message_password_mismatch",
 			"label":"Password mismatch",
 			"lines":"2",
-			"default": "Your entered passwords didn't match"
+			"default": "Your entered passwords didn't match",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
 			"name":"message_bademail",
 			"label":"Bad email",
 			"lines":"2",
-			"default": "Email missing or not properly formed"
+			"default": "Email missing or not properly formed",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
 			"name":"message_usernamelength",
 			"label":"Username length",
 			"lines":"2",
-			"default": "Your username is too short"
+			"default": "Your username is too short",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
 			"name":"message_usernameexists",
 			"label":"Username exists",
 			"lines":"2",
-			"default": "Your selected username exists"
+			"default": "Your selected username exists",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
 			"name":"message_emailexists",
 			"label":"Email exists",
 			"lines":"2",
-			"default": "This email already is registered"
+			"default": "This email already is registered",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
-			"name":"message_password_missing",
-			"label":"Password missing",
+			"name":"message_mandatory",
+			"label":"Field mandatory",
 			"lines":"2",
-			"default": "Password has to be filled in"
+			"default": "Field '{{fieldname}}' is mandatory and has to be filled in",
+			"translate":"1"
+		},
+		{
+			"type":"textarea",
+			"name":"message_mandatories",
+			"label":"Field mandatories",
+			"lines":"2",
+			"default": "Fields '{{fieldname}}' are mandatory and have to be filled in",
+			"translate":"1"
+		},
+		{
+			"type":"text",
+			"name":"message_mandatory_glue",
+			"label":"Mandatory glue",
+			"default": "', '",
+			"translate":"1"
+		},
+		{
+			"type":"textarea",
+			"width":"wide",
+			"name":"text",
+			"label":"Text to confirm",
+			"lines":"12",
+			"default": "I confirm that I am happy to register on this site and it saves any information about me I entered in this form or is needed for the site functionality",
+			"translate":"1",
+			"html":"BAHP"
 		}
 	]
 }

@@ -5,7 +5,7 @@ class user_model extends Model {
 	
 	function create_user($data){
 		
-		$return = [];
+		$return = ['errors' => []];
 		
 		$this->load->model('cms/cms_page_panel_model');
 
@@ -15,8 +15,7 @@ class user_model extends Model {
 		 
 		if ($check_user !== false){
 		
-			$return['error'] = 'emailexists';
-			return $return;
+			$return['errors'][] = 'emailexists';
 		
 		}
 		 
@@ -28,27 +27,26 @@ class user_model extends Model {
 			
 			if ($check_user !== false){
 				 
-				$return['error'] = 'usernameexists';
-				return $return;
+				$return['errors'][] = 'usernameexists';
 				 
 			}
 			
 			if (strlen($data['username']) < 3) {
 			
-				$return['error'] = 'usernamelength';
-				return $return;
+				$return['errors'][] = 'usernamelength';
 				
 			}
 		
-		} else {
-			$data['username'] = '';
 		}
 		
 		if (!stristr($data['email'], '@') || !stristr($data['email'], '.')) {
 				
-			$return['error'] = 'bademail';
-			return $return;
+			$return['errors'][] = 'bademail';
 		
+		}
+		
+		if (!empty($return['errors'])){
+			return $return;
 		}
 
 		$user = [
@@ -62,7 +60,7 @@ class user_model extends Model {
 				'phone' => $data['phone'],
 				'password' => sha1((!empty($GLOBALS['settings']['salt']) ? $GLOBALS['settings']['salt'] : 'cms').$data['password']),
 				'image' => '',
-				'meta' => '',
+				'meta' => json_encode($data['meta'], JSON_PRETTY_PRINT),
 		];
 		 
 		$user_id = $this->cms_page_panel_model->create_cms_page_panel($user);

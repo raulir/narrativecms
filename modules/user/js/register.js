@@ -2,36 +2,50 @@ function register_init(){
 	
 	$('.register_submit').on('click.cms', function(){
 		
+		register_hide_error()
+		
 		var data = {
 				'do': 'register',
-				'email': $('.register_email').val(),
-				'phone': $('.register_phone').val(),
-				'first_name': $('.register_first_name').val(),
-				'last_name': $('.register_last_name').val()
+				'fields': [],
 		}
 		
-		if ($('.register_username').length){
-			data['username'] = $('.register_username').val()
-		}
+		var error_fields = []
+		
+		$('.register_input').each(function(){
+			
+			var $this = $(this)
 
-		if ($('.register_password').length){
+			data.fields.push({
+				id: $this.data('field_id'), 
+				value: $this.val(), 
+				label: $this.data('label'),
+			})
 			
-			data['password'] = $('.register_password').val()
-			data['password2'] = $('.register_password2').val()
-			
-			if (data['password'] == ''){
-				register_show_error('password_missing')
-				return
+			if (!$this.val() && $this.hasClass('register_field_mandatory')){
+				$this.addClass('register_input_error')
+				error_fields.push($this.data('label'))
 			}
+			
+		})
+		
+		if (error_fields.length){
+			
+			if (error_fields.length == 1){
+				register_show_error('mandatory', error_fields[0])
+			} else {
+				register_show_error('mandatories', error_fields.join($('.register_fieldname').data('glue')))
+			}
+			
+			return
 			
 		}
 		
 		data.success = function(result){
 
-			if (result.result.error){
+			if (result.result.errors){
 				
-				register_show_error(result.result.error)
-				
+				result.result.errors.forEach(error => register_show_error(error))
+
 			} else {
 				
 				// redirect to success url
@@ -43,20 +57,33 @@ function register_init(){
 				
 			}
 		}
-
-		$('.register_error_active').removeClass('register_error_active')
 		
 		get_ajax('user/register', data);
 
 	})
+	
+	$('.register_errors').on('click.cms', register_hide_error)
 
 }
 
-function register_show_error(error){
+function register_show_error(error, fieldname = false){
 	
-	$('.register_error_active').removeClass('register_error_active')
+	if (fieldname){
+		$('.register_fieldname').html(fieldname)
+	}
+	
 	$('.register_error_' + error).addClass('register_error_active')
 	
+	$('.register_errors').addClass('register_errors_active')
+	
+}
+
+function register_hide_error(){
+	
+	$('.register_error_active').removeClass('register_error_active')
+	$('.register_errors_active').removeClass('register_errors_active')
+	$('.register_input_error').removeClass('register_input_error')
+
 }
 
 function register_resize(){

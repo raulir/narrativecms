@@ -104,4 +104,11 @@
     .cms_repeater_block & {
     	left: 11.6rem;
     }
+   	.cms_input_textarea & {
+		left: auto;
+		right: 0;
+		.cms_page_panel_container & {
+			right: 0.7rem;
+		}
+	}
 }

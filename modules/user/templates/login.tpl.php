@@ -1,10 +1,11 @@
-<div class="login_container" <?php if($redirect_link['target'] != '_none'): ?> data-success="<?= _l($redirect_link) ?>" <?php endif ?>>
-	<div class="login_content">
-	
-		<div class="login_heading"><?= $heading ?></div>
+<?php if(empty($loggedin)): ?>
+
+	<div class="login_container" <?php if($redirect_link['target'] != '_none'): ?> data-success="<?= _l($redirect_link) ?>" <?php endif ?>>
+		<div class="login_content">
 		
-		<?php if(empty($loggedin)): ?>
-	
+			<div class="login_heading"><?= $heading ?></div>
+			
+		
 			<form class="login_form" method="post" autocomplete="off">
 		
 				<div class="login_row">
@@ -13,7 +14,8 @@
 				</div>
 				<div class="login_row">
 					<label for="login_login_password" class="login_label"><?= $password_label ?></label>
-					<input id="login_login_password" class="login_input login_input_password" type="password" name="password" placeholder="<?= $password_label ?>">
+					<input id="login_login_password" class="login_input login_input_password" type="password" name="password" 
+							placeholder="<?= $password_label ?>">
 				</div>
 				<div class="login_row login_submit_row">
 					<div class="login_submit login_login"><?= $button_label ?></div>
@@ -44,12 +46,13 @@
 				<a class="login_register_cta" <?php _lh($register_link) ?>><?= $register_cta ?></a>
 			
 			</div>
-
-		<?php else: ?>
+	
+		</div>
 		
-			<div class="login_loggedin_text"><?= $loggedin_text ?></div>
-
-		<?php endif ?>
-
 	</div>
-</div>
+	
+<?php else: ?>
+
+	<script type="text/javascript">window.location.href = "<?= _l($redirect_link) ?>"</script>
+
+<?php endif ?>

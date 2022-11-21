@@ -34,10 +34,23 @@
 	
 }
 
+.register_errors {
+	
+}
+
 .register_error {
 	display: none;
 }
 
 .register_error_active {
 	display: block;
+}
+
+.register_input_error {
+	
+}
+
+.register_fieldname {
+	display: inline;
+	font-weight: bold;
 }
