@@ -9,6 +9,7 @@ class login extends \CI_Controller{
 	function panel_action($params){
 		
 		$this->load->model('user/user_model');
+		$this->load->model('cms/cms_page_panel_model');
 		
 		$do = $this->input->post('do');
 
@@ -22,10 +23,11 @@ class login extends \CI_Controller{
 				return $return;
 			}
 			
-			$user = $this->user_model->get_user_by_username($username);
-
-			if (empty($user)){
+			$config = $this->cms_page_panel_model->get_cms_page_panel_settings('user/user_settings');
+			if (empty($config['show_username'])){
 				$user = $this->user_model->get_user_by_email($username);
+			} else {
+				$user = $this->user_model->get_user_by_username($username);
 			}
 
 			if (empty($user) || !$user['show']){

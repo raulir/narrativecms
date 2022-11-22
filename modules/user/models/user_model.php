@@ -132,9 +132,11 @@ class user_model extends Model {
 			
 			$return['user_id'] = $return['cms_page_panel_id'];
 
-			$config = $this->cms_page_panel_model->get_cms_page_panel_settings('user/user');
+			$config = $this->cms_page_panel_model->get_cms_page_panel_settings('user/user_settings');
 			if (empty($config['show_username'])){
-				$return['username'] = $return['email'];
+				$return['loginname'] = $return['email'];
+			} else {
+				$return['loginname'] = $return['username'];
 			}
 			
 			if (empty($return['_panel_heading'])){

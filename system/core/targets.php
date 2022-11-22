@@ -70,11 +70,11 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 
 			if(!empty($_SESSION['user_id'])){
 					
-				$_SESSION['targets'][$group['heading']] = $ug_labels[1];
+				$_SESSION['targets'][$group['heading']] = $ug_labels[1] ?? 'logged out';
 			
 			} else {
 			
-				$_SESSION['targets'][$group['heading']] = $ug_labels[0];
+				$_SESSION['targets'][$group['heading']] = $ug_labels[0] ?? 'logged in';
 			
 			}
 

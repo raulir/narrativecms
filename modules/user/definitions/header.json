@@ -25,14 +25,25 @@
 		},
 		{
 			"type":"select",
-			"label":"Show labels",
-			"name":"show_labels",
+			"label":"Hide labels",
+			"name":"hide_labels",
 			"values":{
 				"1":"Yes",
 				"0":"No"
 			},
 			"default":"0",
 			"help":"Show login and username as labels, vs only icons"
+		},
+		{
+			"type":"select",
+			"label":"Hide icons",
+			"name":"hide_icons",
+			"values":{
+				"1":"Yes",
+				"0":"No"
+			},
+			"default":"0",
+			"help":"Show icons"
 		},
 		{
 			"type":"subtitle",
@@ -50,6 +61,45 @@
 			"label":"Icon logged in",
 			"category":"icon",
 			"default":"user/user_loggedin.png"
+		},
+		{
+			"type":"select",
+			"name":"display_name",
+			"label":"Display name",
+			"values":{
+				"username":"Username",
+				"email":"Email",
+				"full":"Full name",
+				"first":"First name"
+			},
+			"default":"username",
+			"help":"What name to show in header when logged in"
+		},
+		{
+			"type":"link",
+			"name":"settings_link",
+			"label":"Settings",
+			"help":"Link to user settings"
+		},
+		{
+			"type":"text",
+			"name":"settings_text",
+			"label":"Settings label",
+			"default":"Settings",
+			"translate":"1"
+		},
+		{
+			"type":"link",
+			"name":"logout_link",
+			"label":"Log out",
+			"help":"Link to log out"
+		},
+		{
+			"type":"text",
+			"name":"logout_text",
+			"label":"Log out label",
+			"default":"Log out",
+			"translate":"1"
 		}
 	]
 }

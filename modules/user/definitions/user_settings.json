@@ -8,13 +8,13 @@
 		{
 			"type":"select",
 			"name":"show_username",
-			"label":"Separate username",
+			"label":"Login username",
 			"values":{
-				"0":"No, email is username",
-				"1":"Yes, separate username"
+				"0":"Email is login name",
+				"1":"Username is login name"
 			},
 			"default":"0",
-			"help":"If username and main email are separate fields"
+			"help":"What field user uses to log in"
 		}
 	]
 }
