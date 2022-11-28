@@ -591,7 +591,7 @@ class cms_page_panel_model extends Model {
 			$data['submenu_title'] = '';
 		}
 		
-		$data['sort'] ??= 1;
+		if (empty($data['sort'])) $data['sort'] = 1;
 
 		$panel_params = array();
 		
