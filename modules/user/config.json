@@ -72,6 +72,10 @@
 		{
 			"id":"profile",
 			"name":"Profile"
+		},
+		{
+			"id":"userforward",
+			"name":"User forwarder"
 		}
 	]
 }
