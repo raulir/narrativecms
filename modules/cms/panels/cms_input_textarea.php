@@ -19,15 +19,7 @@ class cms_input_textarea extends CI_Controller {
 	function panel_params($params){
 
 		$field_empty = !isset($data[$params['name']]);
-		
-		if (!empty($params['mandatory'])){
-			$mandatory_class = ' cms_input_mandatory ';
-			$mandatory_label = ' *';
-		} else {
-			$mandatory_class = '';
-			$mandatory_label = '';
-		}
-		
+
 		if (!empty($params['max_chars'])){
 			$max_chars_class = ' admin_max_chars ';
 			$max_chars_data = ' data-max_chars="'.$params['max_chars'].'" ';
@@ -46,7 +38,6 @@ class cms_input_textarea extends CI_Controller {
 			$meta_data = '';
 		}
 		
-		$params['label'] = $params['label'].$mandatory_label;
 		$params['lines'] = !empty($params['lines']) ? $params['lines'] : '3';
 		$params['width'] = !empty($params['width']) ? $params['width'] : 'narrow';
 		
@@ -58,7 +49,6 @@ class cms_input_textarea extends CI_Controller {
 
 		$params['max_chars_class'] = $max_chars_class;
 		$params['meta_class'] = $meta_class;
-		$params['mandatory_class'] = $mandatory_class;
 
 		if (!empty($params['html'])){
 			

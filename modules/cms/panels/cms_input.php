@@ -16,7 +16,10 @@ class cms_input extends CI_Controller {
 	}
 	
 	function panel_params($params){
-
+		
+		$params['mandatory_class'] = $params['mandatory'] ?? '' ? ' cms_input_mandatory ' : '';
+		$params['label'] .= $params['mandatory'] ?? '' ? ' *' : '';
+		
 		// find correct panel to display
 		if (!stristr($params['type'], '/')){
 			

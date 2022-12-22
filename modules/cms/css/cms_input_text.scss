@@ -7,14 +7,38 @@
 	display: block;
 	border: 0.1rem solid $cms_border;
 	width: 33.0rem;
-	height: 2.5rem;
-	line-height: 2.2rem;
+	height: 2.6rem;
+	line-height: 2.3rem;
 	font-size: 1.7rem;
-	float: right;
 	padding: 0.1rem 0.5rem 0 0.5rem;
 	box-shadow: 0 0 0.02rem $cms_border;
+	position: absolute;
+	right: 1.0rem;
+	top: 0.5rem;
+	z-index: 10;
 }
 
 .cms_repeater_block .cms_input_text_input {
 	width: 31.0rem;
+}
+
+.cms_input_text_default {
+	box-sizing: border-box;
+    height: 1.8rem;
+    width: 1.8rem;
+    border: 0.1rem solid $cms_border;
+    border-radius: 0.3rem;
+    position: absolute;
+    right: 1.4rem;
+    top: 0.9rem;
+    background-size: 1.3rem auto;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    z-index: 20;
+    opacity: 0;
+    transition: opacity 0.3s;
+    .cms_input_text:hover & {
+    	opacity: 1;
+    }
 }

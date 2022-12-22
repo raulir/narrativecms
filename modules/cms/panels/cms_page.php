@@ -12,6 +12,8 @@ class cms_page extends CI_Controller {
 			exit();
 		}
 
+		add_css('cms/cms_page_panel_toolbar.scss');
+	
 	}
 
 	function panel_params($params){

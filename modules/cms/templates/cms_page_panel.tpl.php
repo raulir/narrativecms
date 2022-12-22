@@ -18,7 +18,7 @@
 			<input class="cms_page_panel_parent_name" type="hidden" name="parent_name" value="<?= $parent_name ?>">
 		<?php endif ?>
 		<input type="hidden" class="cms_page_id" name="cms_page_id" value="<?= isset($_admin_title) ? $block['cms_page_id'] : $cms_page_id ?>">
-		<input type="hidden" name="sort" value="<?php print($block['sort']); ?>">
+		<input type="hidden" name="sort" value="<?= $block['sort'] ?>">
 		<?php if(!empty($_mode)): ?>
 			<input class="cms_page_panel_mode" type="hidden" name="_mode" value="<?php print($_mode); ?>">
 		<?php endif ?>

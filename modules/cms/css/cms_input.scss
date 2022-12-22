@@ -91,8 +91,8 @@
 	height: 1.6rem;
     width: 1.6rem;
     position: absolute;
-    left: 12.6rem;
-    top: 1.2rem;
+    left: 10.7rem;
+    top: 1.4rem;
     box-sizing: border-box;
     background-color: white;
     border-radius: 0.8rem;
@@ -101,9 +101,12 @@
     background-position: center;
     background-repeat: no-repeat;
     opacity: 0.7;
-    .cms_repeater_block & {
-    	left: 11.6rem;
-    }
+    .cms_page_panel_container & {
+		left: 12.7rem;
+	    .cms_repeater_block & {
+	    	left: 11.6rem;
+	    }
+	}
    	.cms_input_textarea & {
 		left: auto;
 		right: 0;

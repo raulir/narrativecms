@@ -22,7 +22,11 @@ function cms_input_text_init(){
 			
 		}
 		
-	});
+		$('.cms_input_text_default', $this).on('click.cms', function(){
+			$('.cms_input_text_input', $this).val($(this).data('value'))
+		})
+		
+	})
 
 }
 

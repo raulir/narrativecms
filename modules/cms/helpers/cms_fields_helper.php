@@ -39,33 +39,6 @@ if (!function_exists('print_fields')){
 		    	}
 			}
 			
-			// :meta:
-			if (!empty($field['default']) && substr($field['default'],0,6) == ':meta:'){
-				list($a, $b, $meta_src, $meta_field) = explode(':', $field['default']);
-				$meta_class = ' cms_meta ';
-				$meta_data = ' data-meta_src="'.$meta_src.'" data-meta_field="'.$meta_field.'" ';
-				$field['default'] = '';
-			} else {
-				$meta_class = '';
-				$meta_data = '';
-			}
-			
-			if (!empty($field['max_chars'])){
-				$max_chars_class = ' admin_max_chars ';
-				$max_chars_data = ' data-max_chars="'.$field['max_chars'].'" ';
-			} else {
-				$max_chars_class = '';
-				$max_chars_data = '';
-			}
-			
-			if (!empty($field['mandatory'])){
-				$mandatory_class = ' cms_input_mandatory ';
-				$mandatory_label = ' *';
-			} else {
-				$mandatory_class = '';
-				$mandatory_label = '';
-			}
-
 			if ($field['type'] == 'repeater' && $prefix == ''){ // only one sublevel
 				
 				foreach($field['fields'] as $kf => $vf){
@@ -81,23 +54,6 @@ if (!function_exists('print_fields')){
 						'_return' => true,
 				]); 
 			
-			} elseif ($field['type'] == 'text'){
-				
-				$return .= _panel('cms/cms_input_text', [
-						'label' => $field['label'].$mandatory_label,
-						'value' => ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) ),
-						'name' => 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']'),
-						'name_clean' => ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']),
-						'max_chars_class' => $max_chars_class,
-						'meta_class' => $meta_class,
-						'mandatory_class' => $mandatory_class,
-						'extra_data' => $max_chars_data.' '.$meta_data.' ',
-						'_return' => true,
-						'help' => !empty($field['help']) ? $field['help'] : '',
-						'translate' => !empty($field['translate']) ? 1 : 0,
-						'params' => $field,
-				]);
-										
 			} elseif ($field['type'] == 'cms_page_panels' || $field['type'] == 'panels'){
 				
 				$return .= _panel('cms/cms_input_page_panels', array(
@@ -164,6 +120,9 @@ if (!function_exists('print_fields')){
 				$field['name_clean'] = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
 				$field['name'] = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
 				$field['panel_structure'] = $structure;
+				if (isset($field['default']) && !is_array($field['default'])){
+					$field['default'] = str_replace('"', '&quot;', $field['default']);
+				}
 				if (empty($field['base_id'])){
 					$field['base_id'] = (!empty($data['cms_page_panel_id']) ? $data['cms_page_panel_id'] : '');
 				}
