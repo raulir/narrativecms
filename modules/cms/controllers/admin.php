@@ -119,11 +119,7 @@ class admin extends CI_Controller {
 		}
 		
 		// check if exists
-		if (stristr($panel_name, 'settings')){ // for backwards compatibility with cms settings and feed settings
-			$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => $panel_name, 'cms_page_id' => 0, 'parent_id' => 0, ]);
-		} else {
-			$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => $panel_name, 'cms_page_id' => 0, 'parent_id' => 0, 'sort' => 0, ]);
-		}
+		$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => $panel_name, 'cms_page_id' => 0, 'parent_id' => 0, 'sort' => 0, ]);
 		
 		if (!count($settings_a)){
 			
@@ -141,10 +137,11 @@ class admin extends CI_Controller {
 			$params['parent_id'] = 0;
 			
 			$cms_page_panel_id = $this->cms_page_panel_model->create_cms_page_panel($params);
-			
+
 		} else {
 			
 			$settings_a = array_values($settings_a);
+			$settings_a[0]['sort'] = 0;
 			$cms_page_panel_id = $settings_a[0]['cms_page_panel_id'];
 			
 		}

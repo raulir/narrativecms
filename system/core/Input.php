@@ -79,7 +79,7 @@ class Input {
 	{
 		log_message('debug', "Input Class Initialized");
 
-		$this->_allow_get_array	= (config_item('allow_get_array') === TRUE);
+		$this->_allow_get_array	= true;
 		$this->_enable_xss		= false;
 		$this->_enable_csrf		= false;
 

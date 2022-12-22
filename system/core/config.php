@@ -2,7 +2,6 @@
 
 // static system config (CI heritage, deprecated)
 $config['system']['charset'] = 'UTF-8';
-$config['system']['allow_get_array'] = TRUE;
 $config['system']['log_path'] = '';
 $config['system']['log_date_format'] = 'Y-m-d H:i:s';
 
@@ -11,9 +10,14 @@ $config['system']['log_date_format'] = 'Y-m-d H:i:s';
  */
 
 $config['config_file'] = $working_directory.'config/'.strtolower($_SERVER['SERVER_NAME']).'.json';
+
 if (file_exists($config['config_file'])){
 	
 	$config = array_merge($config, json_decode(file_get_contents($config['config_file']), true));
+	if (json_last_error()){
+		print('Config file error: '.json_last_error_msg());
+		die();
+	}
 	
 	if ($config['base_path'] == '_auto_'){
 		$config['base_path'] = rtrim(str_replace("\\", "/", trim(getcwd(), " \\")), '/').'/';
