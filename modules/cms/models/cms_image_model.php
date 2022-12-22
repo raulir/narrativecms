@@ -229,7 +229,7 @@ class cms_image_model extends CI_Model {
 
 	}
 
-	function scrape_image($source, $prefix = 'scraped', $category = 'scraped'){
+	function scrape_image($source, $prefix = 'scraped', $category = 'scraped', $fill_ext = 'jpg'){
 
 		if (stristr($source, '?')){
 			list($fn, $pr) = explode('?', $source, 2);
@@ -238,6 +238,11 @@ class cms_image_model extends CI_Model {
 		} else {
 			$ext = pathinfo($source, PATHINFO_EXTENSION);
 			$filename = pathinfo($source, PATHINFO_BASENAME);
+		}
+		
+		if (empty($ext)){
+			$ext = $fill_ext;
+			$filename .= '.'.$fill_ext;
 		}
 
 		$return = '';

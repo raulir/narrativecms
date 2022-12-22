@@ -76,6 +76,14 @@
 		{
 			"id":"userforward",
 			"name":"User forwarder"
+		},
+		{
+			"id":"login_google",
+			"name":"Login by Google"
+		},
+		{
+			"id":"auth_google",
+			"name":"Auth by Google"
 		}
 	]
 }

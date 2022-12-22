@@ -1,0 +1,18 @@
+{
+    "version": "2",
+	"label": "Login by Google",
+	"image":"",
+    "item": [
+		{
+			"type":"text",
+			"name":"google_client_id",
+			"label":"Google Client ID"
+		},
+		{
+			"type":"link",
+			"name":"google_auth_page",
+			"label":"Google Auth Page"
+		}
+	]
+}
+	

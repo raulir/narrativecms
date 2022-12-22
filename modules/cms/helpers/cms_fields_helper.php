@@ -74,13 +74,13 @@ if (!function_exists('print_fields')){
 				$name_clean = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
 				
 				$return .= _panel('cms/cms_input_select', array(
-						'label' => $field['label'].$mandatory_label, 
+						'label' => $field['label'], // .$mandatory_label, 
 						'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
 						'values' => $field['values'],
 						'name' => $name, 
 						'name_clean' => !empty($name_clean) ? $name_clean : $name, 
 						'_return' => true, 
-						'mandatory_class' => $mandatory_class,
+						'mandatory_class' => '', // $mandatory_class,
 						'help' => !empty($field['help']) ? $field['help'] : '', 
 						'params' => $field,
 				));
@@ -100,13 +100,13 @@ if (!function_exists('print_fields')){
 				
 				$return .= _panel('cms/cms_input_repeater_select', [
 						'select_params' => [
-								'label' => $field['label'].$mandatory_label, 
+								'label' => $field['label'], // .$mandatory_label, 
 								'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
 								'values' => [],
 								'name' => $name, 
 								'name_clean' => !empty($name_clean) ? $name_clean : $name, 
 								'extra_class' => ' cms_input_repeater_select',
-								'mandatory_class' => $mandatory_class,
+								'mandatory_class' => '', // $mandatory_class,
 								'help' => !empty($field['help']) ? $field['help'] : '',
 								'extra_data' => $repeater_select_data,
 						],

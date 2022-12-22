@@ -43,8 +43,8 @@ class cms_input_text extends CI_Controller {
 			$params['default_class'] = ' cms_input_default ';
 		}
 		
-		$params['mandatory_class'] ??= '';
-		$params['extra_class'] ??= '';
+		$params['mandatory_class'] = (empty($params['mandatory_class']) ? '' : $params['mandatory_class']);
+		$params['extra_class'] = (empty($params['extra_class']) ? '' : $params['extra_class']);
 		
 		return $params;
 		

@@ -18,3 +18,9 @@
 	position: relative;
 	z-index: 10;
 }
+
+.cms_input_text_input {
+	.cms_page_container & {
+		right: 0;
+	}
+}
