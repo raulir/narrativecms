@@ -564,6 +564,13 @@ function get_ajax_panel_anchor(anchor, params){
 
 				resolve(returned_data)
 				
+			},
+			error: function( return_handler ) {
+				
+				var data = {}
+				data.result = {'html':return_handler.responseText}
+				resolve(data)
+				
 			}
 		})
 		

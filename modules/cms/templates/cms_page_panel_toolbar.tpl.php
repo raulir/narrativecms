@@ -34,7 +34,7 @@
 							<?php foreach($buttons as $button): ?>
 							
 								<?php if($button['position'] == 'hidden'): ?>
-									<?php _panel($button['name'], array('cms_page_panel_id' => $cms_page_panel_id, )); ?>
+									<?php _panel($button['name'], ['cms_page_panel_id' => $cms_page_panel_id, 'panel_name' => $button['panel_name'], ]); ?>
 								<?php endif ?>
 							
 							<?php endforeach ?>

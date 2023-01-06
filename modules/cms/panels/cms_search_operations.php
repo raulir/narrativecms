@@ -83,7 +83,7 @@ class cms_search_operations extends CI_Controller {
 			foreach($result['cms_page_panels'] as $cms_page_panel_id => $score){
 				
 				// pages panels
-				if (!in_array($result['panel_data'][$cms_page_panel_id]['cms_page_id'], [0,999999])){
+				if ($result['panel_data'][$cms_page_panel_id]['cms_page_id'] != 0){
 					
 					$page_data = $this->cms_page_model->get_page($result['panel_data'][$cms_page_panel_id]['cms_page_id']);
 				
@@ -137,8 +137,12 @@ class cms_search_operations extends CI_Controller {
 					
 					// check if editable
 					$panel_data = $this->cms_panel_model->get_cms_panel_config($result['panel_data'][$cms_page_panel_id]['panel_name']);
-					
-					if (empty($panel_data['filename'])){
+
+					if (!$result['panel_data'][$cms_page_panel_id]['sort']){
+						$edit_url = 'panel_settings/'.str_replace('/', '__', $result['panel_data'][$cms_page_panel_id]['panel_name']);
+						$title = !empty($result['panel_data'][$cms_page_panel_id]['title']) ? $result['panel_data'][$cms_page_panel_id]['title'] : 
+								$result['panel_data'][$cms_page_panel_id]['panel_name'].' settings';
+					} else if (empty($panel_data['filename'])){
 						$edit_url = '';
 						$title = $result['panel_data'][$cms_page_panel_id]['panel_name'] . ' - ' . $result['panel_data'][$cms_page_panel_id]['title'];
 					} else {
@@ -160,7 +164,7 @@ class cms_search_operations extends CI_Controller {
 			
 			// sort and cut everything
 			function scoresort($a, $b){
-				return $a['score'] < $b['score'];
+				return (int)($a['score'] < $b['score']);
 			}
 			
 			if (!empty($return['result']['pages']['lists'])) usort($return['result']['pages']['lists'], 'scoresort');
