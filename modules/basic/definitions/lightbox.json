@@ -2,7 +2,8 @@
 	"version":"2",
 	"label":"Lightbox settings",
     "js": [
-    	"cms/cms_preloader"
+    	"cms/cms_preloader",
+    	"cms/cms_scroll_lock"
     ],
 	"settings":[
 		{

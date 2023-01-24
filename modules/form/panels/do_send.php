@@ -37,7 +37,7 @@ class do_send extends CI_Controller {
         	}
         	
         	$captcha_verified = true;
-        	if (isset($data['recaptcha_token'])){
+        	if (isset($data['recaptcha_token']) && empty($GLOBALS['config']['environment'])){
         		
         		$captcha_verified = false;
         		
@@ -65,12 +65,18 @@ class do_send extends CI_Controller {
         			$data['captcha'] = $response['score'].'|'.$response['challenge_ts'];
         		}
 
-        		unset($data['recaptcha_token']);
-        	
         	}
         	
         	if (!$captcha_verified){
         		$return['result'] = ['error' => $panel['recaptcha_error_message']];
+        	}
+
+        	if (isset($data['recaptcha_token'])){
+        		unset($data['recaptcha_token']);
+        	}
+
+        	if (isset($data['id'])){
+        		unset($data['id']);
         	}
         	
         	// page title for email
@@ -90,25 +96,17 @@ class do_send extends CI_Controller {
         	// send notification
 			if(!empty($params['emails']) && count($params['emails'])){
 				
-				if (!empty($params['noreply_notification'])){
-					$from = 'noreply@bytecrackers.com';
-				} else {
-					if (!empty($data['email']) && stristr($data['email'], '@') && stristr($data['email'], '.')){
+				$reply_to = ['email' => '', 'name' => ''];
+				$from = $_SERVER['SERVER_NAME'].'@bytecrackers.com';
+
+				if (!empty($data['email']) && stristr($data['email'], '@') && stristr($data['email'], '.')){
 						
-						$from = $data['email'];
-						
-						if (!empty($data['name'])){
-							$from = $data['name'].' <'.$from.'>';
-						}
-					
-					} else {
-					
-						$from = 'noreply@bytecrackers.com';
-					
-					}
+					$reply_to['email'] = $data['email'];
+					$reply_to['name'] = $data['name'] ? $data['name'] : $data['email'];
+
 				}
 				
-				$this->form_model->send_contact_request($params['emails'], $data, $title, $from, !empty($params['noreply_notification']));
+				$this->form_model->send_contact_request($params['emails'], $data, $title, $from, $reply_to );
 			
 			}
 			

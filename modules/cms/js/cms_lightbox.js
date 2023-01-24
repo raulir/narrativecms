@@ -41,7 +41,7 @@
 				// create overlay
         		$this.on('click.cms', function(){
         			
-        			cms_lock_scroll();
+        			cms_scroll_lock();
         			
         			var $this = $(this);
         			

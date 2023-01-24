@@ -59,17 +59,6 @@
 			"label":"Notification"
 		},
 		{
-			"type":"select",
-			"name":"noreply_notification",
-			"label":"Notification address",
-			"values":{
-				"0":"Send notification from visitor address",
-				"1":"Send notification from noreply address"
-			},
-			"default":"0",
-			"help":"Send new form submission notification from system address to avoid out of office messages. When replying, user has to change reply to address."
-		},
-		{
 			"type":"repeater",
 			"name":"emails",
 			"label":"People receiving notifications",

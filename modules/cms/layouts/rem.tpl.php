@@ -19,6 +19,8 @@
 <script type="text/javascript">
 	var config_url = '<?= $GLOBALS['config']['base_url'] ?>';
 	<?= !empty($_SESSION['cms_user']['cms_user_id']) ? 'var admin_logged_in = 1;' : '' ?>
+	setInterval(() => {_cms_rem = parseFloat(getComputedStyle(document.documentElement).fontSize)}, 500)
+	var _cms_rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
 </script>
 </head>
 

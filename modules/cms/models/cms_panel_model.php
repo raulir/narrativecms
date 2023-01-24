@@ -101,14 +101,14 @@ class cms_panel_model extends Model {
 			} else {
 				$return = $panel_params_structure;
 			}
-			
+
 			// if extends
 			if(!empty($return['extends']['panel'])){
 
 				$extends_config = $this->get_cms_panel_config($return['extends']['panel']);
-
+				
 				// join structures, do not overwrite item elements
-				$items = $return['item'];
+				$items = $return['item'] ?? [];
 				
 				if (empty($extends_config['item'])){
 					$extends_config['item'] = [];

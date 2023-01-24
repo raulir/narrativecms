@@ -366,6 +366,32 @@
 			"name":"email",
 			"label":"Admin email",
 			"help":"Email to send notifications"
+		},
+		{
+			"type":"subtitle",
+			"label":"SMTP"
+		},
+		{
+			"type":"text",
+			"name":"smtp_server",
+			"label":"SMTP server",
+			"help":"If empty, php mail is used"
+		},
+		{
+			"type":"text",
+			"name":"smtp_port",
+			"label":"SMTP port",
+			"default":"25"
+		},
+		{
+			"type":"text",
+			"name":"smtp_username",
+			"label":"SMTP username"
+		},
+		{
+			"type":"text",
+			"name":"smtp_password",
+			"label":"SMTP password"
 		}
 	]
 }

@@ -1,5 +1,12 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require_once('system/vendor/phpmailer/Exception.php');
+require_once('system/vendor/phpmailer/PHPMailer.php');
+require_once('system/vendor/phpmailer/SMTP.php');
+
 class form_model extends CI_Model {
 	
 	function create_form_data($cms_page_panel_id, $email, $data){
@@ -26,7 +33,7 @@ class form_model extends CI_Model {
 		
 	}
 	
-    function send_contact_request($emails, $data, $title, $from, $warning){
+    function send_contact_request($emails, $data, $title, $from, $reply_to){
 
 		foreach($emails as $email){    	
 
@@ -36,16 +43,43 @@ class form_model extends CI_Model {
 				$content .= $key . ': ' . $value . "\n";
  			}
  			
-		 	if ($warning){
- 				$content .= "\n\n".'This email is sent from the server address to reduce chance of this email being marked as spam.'."\n".
- 						'Please replace recipient email with the email in the submitted data when replying to the website visitor.';
- 			}
+			$content .= "\n\n".'This email is sent from the server address to reduce chance of this email being marked as spam.'."\n\n".
+					'Please, check recipient email when replying to the website visitor. If needed replace this with the email in the submitted data.';
 
- 			$content .= "\n\n".'You received this email because this email address is included as recipient for notifications at '.$_SERVER['SERVER_NAME'].
- 					' Please contact webmaster to unsubscribe.'."\n\n";
+ 			$content .= "\n\n".'You received this email because this email address is included as recipient for notifications at site '.$_SERVER['SERVER_NAME'].
+ 					"\n\n".'UNSUBSCRIBE: Please contact site webmaster, developer or your IT-support to unsubscribe. Do not mark this email as a spam, '.
+ 					'because you or other recipients may not receive any website notifications after that.';
  
 	   		// send email
-	    	@mail($email['email'], $title, $content, 'From: '.$from."\r\n".'Auto-Submitted: auto-generated'."\r\n");
+	   		if(empty($GLOBALS['config']['smtp_server'])){
+		    	
+	   			@mail($email['email'], $title, $content, 'From: '.$from."\r\n".'Auto-Submitted: auto-generated'."\r\n");
+	   		
+	   		} else {
+	   			
+	   			$mail = new PHPMailer(true);
+	   		
+	   			$mail->isSMTP();
+	   			$mail->Host = $GLOBALS['config']['smtp_server'];
+	   			$mail->SMTPAuth = true;
+	   			$mail->Username = $GLOBALS['config']['smtp_username'];
+	   			$mail->Password = $GLOBALS['config']['smtp_password'];
+	   			$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+	   			$mail->Port = $GLOBALS['config']['smtp_port'];
+	   			
+	   			$mail->setFrom($from);
+	   			$mail->addAddress($email['email']);
+	   			
+	   			if(!empty($reply_to['email'])){
+		   			$mail->addReplyTo($reply_to['email'], $reply_to['name']);
+	   			}
+	   			
+	   			$mail->Subject = $title;
+	   			$mail->Body = $content;
+	   			
+	   			$mail->send();
+	   			
+	   		}
     		
 		}
     	
@@ -188,11 +222,39 @@ class form_model extends CI_Model {
     	}
     	
     	if (!empty($data['email'])){
-	   		// send email
-	    	@mail($data['email'], $autoreply_subject, $autoreply_text, 
-					'From: '.$autoreply_name.'<'.$autoreply_email.'>'."\r\n".'Reply-to: '.$autoreply_name.'<'.$autoreply_email.'>'."\r\n");
+    		
+    		if(empty($GLOBALS['config']['smtp_server'])){
+    			
+		   		// send email
+		    	@mail($data['email'], $autoreply_subject, $autoreply_text, 
+						'From: '.$autoreply_name.'<'.$autoreply_email.'>'."\r\n".'Reply-to: '.$autoreply_name.'<'.$autoreply_email.'>'."\r\n");
+		    	
+    		} else {
+    			
+    			$mail = new PHPMailer(true);
+    			 
+    			$mail->isSMTP();
+    			$mail->Host = $GLOBALS['config']['smtp_server'];
+    			$mail->SMTPAuth = true;
+    			$mail->Username = $GLOBALS['config']['smtp_username'];
+    			$mail->Password = $GLOBALS['config']['smtp_password'];
+    			$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    			$mail->Port = $GLOBALS['config']['smtp_port'];
+    			
+    			$mail->setFrom($_SERVER['SERVER_NAME'].'@bytecrackers.com', $_SERVER['SERVER_NAME']);
+    			$mail->addAddress($data['email']);
+    			
+   				$mail->addReplyTo($autoreply_email, $autoreply_name);
+    			
+    			$mail->Subject = $autoreply_subject;
+    			$mail->Body = $autoreply_text;
+    			
+    			$mail->send();
+    			
+    		}
+    		
     	}
-    	
+
     }
 
     function create_cm_subscriber($data, $params){

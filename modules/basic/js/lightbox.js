@@ -29,7 +29,7 @@ function basic_lightbox_init(){
     	
 		var $this = $(this)
 		
-    	cms_lock_scroll()
+    	cms_scroll_lock()
     	
     	$this.addClass('basic_lightbox_current')
 
