@@ -23,6 +23,7 @@
 </div>
 
 <div class="cms_user_login_copyright">
-	<a class="cms_user_login_cms" <?php _lh('https://www.bytecrackers.com/') ?> <?php _ib('cms/cms_icon.png', 15) ?>>BC CMS</a> &nbsp; - &nbsp; 
-	<a <?php _lh('https://github.com/raulir/bccms/') ?>>&copy; 2012-2022</a>
+	<a class="cms_user_login_cms" <?php _lh('https://github.com/raulir/bccms/') ?> <?php _ib('cms/cms_icon.png', 15) ?>>
+		BC CMS &nbsp; - &nbsp; &copy; 2012-2023
+	</a>
 </div>

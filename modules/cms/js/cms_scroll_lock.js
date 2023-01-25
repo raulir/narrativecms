@@ -14,20 +14,3 @@ function cms_scroll_unlock(){
 	$('html,body').scrollTop(-scrollTop)
 
 }
-
-/* deprecated */
-function lock_scroll(){
-	cms_scroll_lock();
-}
-
-function cms_lock_scroll(){
-	cms_scroll_lock()
-}
-
-function unlock_scroll(){
-	cms_scroll_unlock()
-}
-
-function cms_unlock_scroll(){
-	cms_scroll_unlock()
-}

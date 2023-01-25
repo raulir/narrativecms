@@ -116,11 +116,11 @@ function cms_init(){
 
 $(document).ready(function() {
 	
-	$(window).on('resize.cms', cms_resize);
-	$(window).on('scroll.cms', cms_scroll);
+	$(window).on('resize.cms', cms_resize)
+	$(window).on('scroll.cms', cms_scroll)
 	
-	cms_init();
-	cms_resize();
-	cms_scroll();
+	cms_init()
+	cms_resize()
+	cms_scroll()
 
-});
+})

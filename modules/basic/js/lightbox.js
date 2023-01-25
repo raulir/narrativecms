@@ -84,7 +84,7 @@ function basic_lightbox_init(){
 		$('.basic_lightbox_content').animate({'opacity':'0'}, 500, function(){
     		$('.basic_lightbox_container').animate({'opacity':'0'}, 300, function(){
         		$('.basic_lightbox_container').css({'display':'none'}).removeClass('basic_lightbox_active');
-        		cms_unlock_scroll();
+        		cms_scroll_unlock();
         		$('.basic_lightbox_current').removeClass('basic_lightbox_current');
         	});
     	});

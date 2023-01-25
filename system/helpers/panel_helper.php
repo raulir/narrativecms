@@ -195,7 +195,7 @@ if ( !function_exists('get_position')) {
     /**
      * prints out url with full site path where needed
      */
-    function _l($url, $print = true){
+    function _l($url, $print = true, $params = []){
     	
     	if (is_array($url)){
     		if(!empty($url['url'])){
@@ -234,7 +234,7 @@ if ( !function_exists('get_position')) {
     			$url = '/';
     		}
 
-    		$url = $GLOBALS['config']['base_url'].ltrim($url, '/');
+    		$url = ($params['base_url'] ?? $GLOBALS['config']['base_url']).ltrim($url, '/');
     		
     	}
     	    	
@@ -288,7 +288,7 @@ if ( !function_exists('get_position')) {
     	
     	if ($url || $url === ''){
     		
- 	    	$href = _l($url, false);
+ 	    	$href = _l($url, false, $params);
 	    	
 	    	$target = '';
 	    	if (substr($url, 0, 4) == 'http'){

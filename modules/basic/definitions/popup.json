@@ -1,6 +1,9 @@
 {
 	"version":"2",
 	"label":"Popup settings",
+    "js": [
+    	"cms/cms_scroll_lock"
+    ],
 	"settings":[
 		{
 			"type":"image",

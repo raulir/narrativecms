@@ -169,7 +169,6 @@ class cms_page_panel_toolbar extends CI_Controller {
 		$params['buttons'][] = [
 				'name' => 'cms/cms_page_panel_button_save', 
 				'position' => 'visible', 
-				'panel_name' => $cms_page_panel['panel_name'],
 		];
 
 		// delete,caching,hide = except not on page && list item == settings
