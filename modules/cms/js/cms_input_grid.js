@@ -22,6 +22,30 @@ function cms_input_grid_init(){
 		})
 
 	})
+	
+	$('.cms_grid_delete').on('click.cms', function(){
+
+		var $this = $(this)
+
+		get_ajax_panel('cms/cms_popup_yes_no', {'text':'Are you sure?'}, function(data){
+			panels_display_popup(data.result._html, {
+				'yes': function(){
+					get_ajax('cms/cms_input_grid', {
+						'do':'delete_row',
+						'ds': $this.data('ds'),
+						'id': $this.data('line_id'),
+						'base_name': $this.data('base_name'),
+						'success': function(data){
+							if (data.result.web){
+								$this.closest('.cms_grid_row').remove()
+							}
+						}
+					})
+				}
+			})
+		})
+
+	})
 
 }
 

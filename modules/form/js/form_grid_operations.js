@@ -1,6 +1,6 @@
 function form_grid_operations_init(){
 	
-	$('.form_grid_operations_delete').on('click', function(){
+	$('.form_grid_operations_delete').on('click.cms', function(){
 
 		var $this = $(this)
 

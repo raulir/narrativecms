@@ -79,6 +79,7 @@
 	line-height: 1.55rem;
 	padding: 0.2rem 0.5rem;
 	position: relative;
+	vertical-align: top;
 	&::after {
 		content: '';
 		height: 3.38rem;
@@ -147,4 +148,10 @@
 	line-height: 1.5rem;
 	padding: 3.5rem 0;
 	text-align: center;
+}
+
+.cms_grid_delete {
+	margin: 0.5rem 0 0 0;
+    float: none;
+    display: inline-block;
 }

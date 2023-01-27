@@ -1,5 +1,5 @@
 <div class="cms_input cms_grid_container" data-cms_input_height="<?= !empty($lines) ? $lines + 4 : count($data) + 4 ?>" data-cms_input_width="2" 
-		data-cms_page_panel_id="<?= $base_id ?>">
+		data-cms_page_panel_id="<?= $base_id ?? 0 ?>">
 
 	<div class="cms_grid_label"><?= $label ?></div>
 	<div class="cms_grid_line cms_grid_line_top"></div>
@@ -22,6 +22,7 @@
 			<?php if (!empty($data)): ?>
 				<?php foreach($data as $key => $line_data): ?>
 					<div class="cms_grid_row">
+					
 						<?php foreach($fields as $field): ?>
 						
 							<div class="cms_grid_field cms_grid_field_<?= !empty($field['align']) ? $field['align'] : 'center' ?>" 
@@ -48,6 +49,21 @@
 							</div>
 						
 						<?php endforeach ?>
+						
+						<?php if(!empty($operations) && stristr($operations, 'D')): ?>
+							<div class="cms_grid_field cms_grid_field_left ">
+								
+								<div class="cms_small_button cms_grid_delete"
+										<?= !empty($base_name) ? ' data-base_name="'.$base_name.'" ' : ''?> 
+										data-ds="<?= $ds ?>" data-line_id="<?= $line_data['id'] ?>">
+										
+									Delete
+									
+								</div>
+								
+							</div>
+						<?php endif ?>
+
 					</div>
 				<?php endforeach ?>
 			<?php endif ?>

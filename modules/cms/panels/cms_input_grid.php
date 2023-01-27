@@ -19,6 +19,7 @@ class cms_input_grid extends CI_Controller {
 	function panel_action($params){
 		
 		if(!empty($params['do'])){
+			
 			if ($params['do'] == 'create_row'){
 				
 				$this->load->model('cms/cms_page_panel_model');
@@ -33,7 +34,28 @@ class cms_input_grid extends CI_Controller {
 				
 				die();
 				
+			} else if ($params['do'] == 'delete_row'){
+				
+				$this->load->model('cms/cms_page_panel_model');
+
+				if(!empty($params['base_id'])){
+					$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
+					$base_name = $base['panel_name'];
+				} else {
+					$base_name = $params['base_name'];
+				}
+				
+				$params['data'] = $this->run_panel_method($base_name, 'ds_'.$params['ds'], [
+						'do' => 'D',
+						'id' => $params['id'],
+				]);
+				
+				print(json_encode(['result' => $params['data']], JSON_PRETTY_PRINT));
+				
+				die();
+				
 			}
+				
 		}
 		
 		return $params;
@@ -44,20 +66,30 @@ class cms_input_grid extends CI_Controller {
 		
 		$params['data'] = [];
 
-		if(!empty($params['base_id'])){
+		if(!empty($params['base_id']) || !empty($params['base_name'])){
 		
 			$this->load->model('cms/cms_page_panel_model');
-			$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
+			$this->load->model('cms/cms_panel_model');
+				
+			if (!empty($params['base_id'])){
+				$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
+			} else {
+				$panel_config = $this->cms_panel_model->get_cms_panel_config($params['base_name']);
+				$base['panel_name'] = $params['base_name'];
+				if (!empty($panel_config['extends'])){
+					$base['_extends'] = $panel_config['extends'];
+				}
+			}
 			
 			$params['fields'] = $params['fields'] ?? [];
 			if (!empty($params['operations']) && stristr($params['operations'], 'S')){
 
 				$ds_params = [
 					'do' => 'S',
-					'id' => $params['base_id'],
+					'id' => $params['base_id'] ?? 0,
 					'fields' => $params['fields'],
 				];
-				
+
 				if (!empty($base['_extends'])){
 					$ds_params['_extends'] = $base['_extends'];
 				}
@@ -76,7 +108,7 @@ class cms_input_grid extends CI_Controller {
 			
 			$ds_params = [
 					'do' => 'L',
-					'id' => $params['base_id'],
+					'id' => $params['base_id'] ?? 0,
 			];
 			
 			if (!empty($base['_extends'])){
