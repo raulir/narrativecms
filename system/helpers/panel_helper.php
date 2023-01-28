@@ -47,8 +47,10 @@ if ( !function_exists('get_position')) {
     
     function html_error($error){
     	
-    	return '<div style="clear: both; border: 1px solid red; background-color: white; color: red; padding: 10px; box-sizing: border-box; font-size: 1rem; line-height: 1rem; ">'.
-    			str_replace('#br#', '<br>', htmlentities(str_replace('<br>', '#br#', $error))).'</div>';
+    	return '<div style="clear: both; border: 1px solid red; background-color: white; color: red; '.
+      	'font-family: monospace; padding: 1.0rem; box-sizing: border-box; font-size: 1.0rem; line-height: 1.0rem; ">'.
+    			str_replace(['#br#', '#b#', '#bb#'], ['<br>', '<b>', '</b>'], 
+    					htmlentities(str_replace(['<br>', '<b>', '</b>'], ['#br#', '#b#', '#bb#'], $error))).'</div>';
     	
     }
     

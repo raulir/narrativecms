@@ -1,5 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+include_once('system/helpers/json_helper.php');
+
 if (!function_exists('array_merge_recursive_ex')){
 
 	function array_merge_recursive_ex(array $array1, array $array2){
@@ -87,14 +89,8 @@ class cms_panel_model extends Model {
 			// images // replace
 			$json_data = str_replace('"//', '"'.$return['module'].'/', $json_data);
 			
-			$panel_params_structure = json_decode($json_data, true);
-				
-			if( json_last_error() ){
-				
-				_html_error('Problem loading json: '.json_last_error_msg().' in '.str_replace($GLOBALS['config']['base_path'], '', $filename));
-				
-			}
-				
+			$panel_params_structure = cms_json_decode($json_data, $filename);
+
 			if (empty($panel_params_structure['version']) || $panel_params_structure['version'] < 2){
 				$return['item'] = $panel_params_structure;
 				$return['version'] = 1;
