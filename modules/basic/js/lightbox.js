@@ -36,6 +36,12 @@ function basic_lightbox_init(){
     	$('.basic_lightbox_container').css({'display':'block'}).addClass('basic_lightbox_active')
     	$('.basic_lightbox_content').css({'background-image': 'url(' + $this.data('basic_lightbox') + ')'})
     	
+    	if($this.data('basic_lightbox_text')){
+    		$('.basic_lightbox_text').css({'display':''}).html($this.data('basic_lightbox_text'))
+    	} else {
+    		$('.basic_lightbox_text').css({'display':'none'})
+    	}
+    	
     	setTimeout(() => {
     	
         	$('.basic_lightbox_container').animate({'opacity':'1'}, 400);
@@ -51,7 +57,7 @@ function basic_lightbox_init(){
     		if (e.keyCode == 37){ // left
     			$('.basic_lightbox_previous').click();
     		}
-    		if (e.keyCode == 39){ // right
+    		if (e.keyCode == 39 || e.keyCode == 32){ // right + space
     			$('.basic_lightbox_next').click();
     		}
     		if (e.keyCode == 27){ // esc
@@ -92,6 +98,8 @@ function basic_lightbox_init(){
 	});
 	
 	$('.basic_lightbox_previous').on('click.cms', function(){
+		
+		var $this = $(this)
 	
 		var $current = $('.basic_lightbox_current')
 		$current.removeClass('basic_lightbox_current')
@@ -127,12 +135,19 @@ function basic_lightbox_init(){
 			$('.basic_lightbox_content').animate({'opacity':'1'}, 300, () => {
 				$new.addClass('basic_lightbox_current')
 			})
+	    	if($new.data('basic_lightbox_text')){
+	    		$('.basic_lightbox_text').css({'display':''}).html($new.data('basic_lightbox_text'))
+    		} else {
+    			$('.basic_lightbox_text').css({'display':'none'})
+    		}
 		})
 		
 	});
 
 	$('.basic_lightbox_next').on('click.cms', function(){
 	
+		var $this = $(this)
+
 		var $current = $('.basic_lightbox_current')
 		$current.removeClass('basic_lightbox_current')
 
@@ -169,6 +184,11 @@ function basic_lightbox_init(){
 			$('.basic_lightbox_content').animate({'opacity':'1'}, 300, () => {
 				$new.addClass('basic_lightbox_current')
 			})
+	    	if($new.data('basic_lightbox_text')){
+	    		$('.basic_lightbox_text').css({'display':''}).html($new.data('basic_lightbox_text'))
+    		} else {
+    			$('.basic_lightbox_text').css({'display':'none'})
+    		}
 		})
 		
 	});

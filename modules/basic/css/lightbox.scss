@@ -23,6 +23,19 @@
 	position: relative;
 }
 
+.basic_lightbox_text {
+	position: absolute;
+	background-color: rgba(0,0,0,0.5);
+	color: white;
+	padding: 1.0rem;
+	left: 50%;
+	transform: translate(-50%, 0);
+	bottom: 1.0rem;
+	z-index: 10;
+	font-size: 1.2rem;
+	line-height: 1.5rem;
+}
+
 .basic_lightbox_close {
 	position: absolute; 
 	top: 2.0rem; 
@@ -50,7 +63,7 @@
 	height: 100%;
 	background-size: 1.0rem auto;
 	background-repeat: no-repeat;
-	background-position: 2.0rem center;
+	background-position: 3.0rem center;
 	opacity: 0.5;
 	transition: opacity 0.5s;
 
@@ -70,7 +83,7 @@
 	height: 100%;
 	background-size: 1.0rem auto;
 	background-repeat: no-repeat;
-	background-position: right 2.0rem center;
+	background-position: right 3.0rem center;
 	opacity: 0.5;
 	transition: opacity 0.5s;
 
