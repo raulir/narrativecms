@@ -53,11 +53,7 @@ class do_send extends CI_Controller {
         				]),
         			],
         		]);
-        		
-        		if (isset($data['id'])){
-        			unset($data['id']);
-        		}
-        		
+        		        		
         		@$response = json_decode(file_get_contents('https://www.google.com/recaptcha/api/siteverify', 0, $context), true);
         		
         		if ($response['success'] == 1 && $response['action'] == 'form'){

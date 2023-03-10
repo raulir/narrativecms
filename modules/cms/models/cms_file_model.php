@@ -78,6 +78,10 @@ class cms_file_model extends CI_Model {
 		$year = date('Y');
 		$month = date('m');
 		
+		if (!is_dir($GLOBALS['config']['upload_path'].$dir)){
+			mkdir($GLOBALS['config']['upload_path'].$dir);
+		}
+		
 		if (!is_dir($GLOBALS['config']['upload_path'].$dir.$year)){
 			mkdir($GLOBALS['config']['upload_path'].$dir.$year);
 		}
@@ -88,16 +92,29 @@ class cms_file_model extends CI_Model {
 		
 		$filename = $dir.$year.'/'.$month.'/'.$name_data;
 		
+		$extension = pathinfo($filename, PATHINFO_EXTENSION);
+		$filename_wo = substr($filename, 0, -(strlen($extension) + 1));
+		
+		$name_data_wo = substr($name_data, 0, -(strlen($extension) + 1));
+		
 		if ($overwrite){
 			$this->delete_cms_file_by_filename($filename);
 		}
 		
+		$i = 1;
+		while (file_exists($GLOBALS['config']['upload_path'].$filename)){
+			$filename = $filename_wo.'_'.$i.'.'.$extension;
+			$i += 1;
+			$name_data = $name_data_wo.'_'.$i.'.'.$extension;
+		}
+				
 		$sql = "insert into cms_file set name = ? , filename = ? , date_posted = ? ";
 		$this->db->query($sql, array($name_data, $filename, date('Y-m-d H:i:s')));
  
  		return array(
 				'filename' => $filename,
 				'name' => $name_data,
+ 				'name_original' => $name_data_wo.'.'.$extension,
 				'cms_file_id' => $this->db->insert_id(),
 				'date_posted' => date('Y-m-d H:i:s'),
 		);

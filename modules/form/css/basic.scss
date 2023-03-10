@@ -1,4 +1,16 @@
 
+.form_basic_input_file_area {
+	
+}
+
+.form_basic_input_file {
+	
+}
+
+.form_basic_input_file_area_label {
+	
+}
+
 .form_basic_message {
 	display: block;
 	position: absolute;
@@ -17,30 +29,24 @@
 	}
 }
 
-
-.form_basic_message_table {
-	display: table;
-	height: 100%;
-	width: 100%;
-}
-
-.form_basic_message_cell {
-	display: table-cell;
-	vertical-align: middle;
-	text-align: center;
-	font-size: 21px;
-}
-
 .form_basic_message_text {
 	display: none;
 	padding: 20px 0;
 	box-sizing: border-box;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
 }
 
 .form_basic_message_sending {
 	display: none;
 	padding: 20px 0;
 	box-sizing: border-box;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
 }
 
 .form_basic_message_status_sending {

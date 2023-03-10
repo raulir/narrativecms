@@ -97,6 +97,24 @@
 									<?php endif ?>
 								<?php endforeach ?>
 							</div>
+							
+						<?php elseif ($element['type'] == 'file'): ?>
+						
+							<div class="form_basic_input_file_area" <?php _ib($file_icon, 30) ?> data-finishing_label="<?= $file_finishing_label ?>">
+							
+								<input id="form_basic_<?= $element['name'] ?>" type="file" name="<?= $element['name'] ?>"
+										class="form_basic_input_file">
+							
+								<?php if(!empty($label_as_placeholder)): ?>
+									<div class="form_basic_input_file_area_label"><?= $element['label'] ?></div>
+								<?php endif ?>
+								
+								<div class="form_basic_input_file_status"></div>
+								
+								<input id="form_basic_<?= $element['name'] ?>_url" type="hidden" class="form_basic_input_file_url" 
+									name="<?= $element['name'] ?>_url" <?= $element['mandatory'] ? 'form_basic_mandatory' : '' ?>>
+							
+							</div>
 
 						<?php endif ?>
 

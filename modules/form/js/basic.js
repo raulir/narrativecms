@@ -40,12 +40,16 @@ function form_basic_submit($this){
 			$('.form_basic_message', $container).addClass('form_basic_message_status_sending');
 		}, 50);
 		
+		$('.form_basic_input_file', $container).remove()
+		
 		var fa = $form.serializeArray();
 		var fo = {};
 		$.each(fa,
 		    function(i, v) {
 		        fo[v.name] = v.value;
 		    });
+		
+		fo['_page'] = document.title
 		
 		get_ajax('form/do_send', $.extend({ 'success': function(data){
 			
@@ -180,9 +184,97 @@ function form_basic_init(){
 					$container.data('recaptcha_key') + '" data-key="' + $container.data('recaptcha_key') + '"></script>')
 			
 		}
+
+		$('.form_basic_input_file').on('change.cms', function(){
+			var $this = $(this)
+			$this.off('change.cms')
+			form_basic_file_upload($this)
+		})
 		
 	})
 
+}
+
+function form_basic_file_upload($this){
+	
+	var data = new FormData();
+	
+	data.append('file', $this.get(0).files[0])
+	
+	// var data = new FormData( $('.form_basic_image_form').get(0) );
+	
+	data.append('panel_id', 'form/form_upload');
+	data.append('do', 'form_upload');
+	
+	form_basic_file_transfer(data, function(data){
+		
+		console.log(data)
+
+		$('.form_basic_input_file_status', $this.closest('.form_basic_input_file_area'))
+			.html($this.closest('.form_basic_input_file_area').data('finishing_label') + ' ' + data.result.filename_clean)
+			
+		$('.form_basic_input_file_url', $this.closest('.form_basic_input_file_area')).val(data.result.filename)
+		
+		$this.on('change.cms', function(){
+			$this.off('change.cms')
+			form_basic_file_upload($this)
+		})
+
+	}, $('.form_basic_input_file_status', $this.closest('.form_basic_input_file_area')));
+
+}
+
+function form_basic_file_transfer(data, success, $info){
+	
+	var percentage = 0;
+	var label = '0%';
+	
+	$.ajax( {
+		url: config_url + 'ajax_api/get_panel',
+	    type: 'POST',
+	    data: data,
+	    processData: false,
+	    contentType: false,
+	    dataType: 'json',
+	    success: function(data){
+	    	
+	    	success(data);
+
+	    },
+	    xhr: function() {
+	        var xhr = new window.XMLHttpRequest();
+	
+	        xhr.upload.addEventListener('progress', function(evt) {
+	        	if (evt.lengthComputable) {
+	        	  
+	        		var percentComplete = evt.loaded / evt.total;
+	        		percentComplete = parseInt(percentComplete * 100);
+	        		
+	        		/*
+        			$('.cms_images_container_bg').css({'width': percentComplete + '%'});
+        			*/
+
+        			/*
+	        		if (percentComplete < 99){
+		        		$('.cms_images_container_label').html(percentComplete + '%');
+		        		label = percentComplete + '%';
+	        		} else {
+		        		$('.cms_images_container_label').html('finishing');
+		        		label = 'finishing';
+	        		}
+	        		*/
+        			
+        			$info.html(percentComplete + '%')
+        			
+        			console.log(percentComplete);
+	
+	        	}
+	        }, false);
+	
+	        return xhr;
+	    }
+	});
+	
 }
 
 function form_basic_resize(){

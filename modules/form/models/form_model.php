@@ -35,21 +35,25 @@ class form_model extends CI_Model {
 	
     function send_contact_request($emails, $data, $title, $from, $reply_to){
 
-		foreach($emails as $email){    	
-
- 			$content = $title.':'."\n\n";
+ 		$content = $title.(!empty($data['_page']) ? ("\n".'Page title: '.$data['_page']) : '').':'."\n\n";
+ 		
+ 		if (!empty($data['_page'])) {
+ 			unset($data['_page']);
+ 		}
  			
-			foreach($data as $key => $value){
-				$content .= $key . ': ' . $value . "\n";
- 			}
+		foreach($data as $key => $value){
+			$content .= $key . ': ' . $value . "\n";
+ 		}
  			
-			$content .= "\n\n".'This email is sent from the server address to reduce chance of this email being marked as spam.'."\n\n".
-					'Please, check recipient email when replying to the website visitor. If needed replace this with the email in the submitted data.';
+		$content .= "\n\n".'This email is sent from the server address to reduce chance of this email being marked as spam.'."\n\n".
+				'Please, check recipient email when replying to the website visitor. If needed replace this with the email in the submitted data.';
 
- 			$content .= "\n\n".'You received this email because this email address is included as recipient for notifications at site '.$_SERVER['SERVER_NAME'].
- 					"\n\n".'UNSUBSCRIBE: Please contact site webmaster, developer or your IT-support to unsubscribe. Do not mark this email as a spam, '.
- 					'because you or other recipients may not receive any website notifications after that.';
+ 		$content .= "\n\n".'You received this email because this email address is included as recipient for notifications at site '.$_SERVER['SERVER_NAME'].
+ 				"\n\n".'UNSUBSCRIBE: Please contact site webmaster, developer or your IT-support to unsubscribe. Do not mark this email as a spam, '.
+ 				'because you or other recipients may not receive any website notifications after that.';
  
+    	foreach($emails as $email){    	
+
 	   		// send email
 	   		if(empty($GLOBALS['config']['smtp_server'])){
 		    	
@@ -58,6 +62,8 @@ class form_model extends CI_Model {
 	   		} else {
 	   			
 	   			$mail = new PHPMailer(true);
+	   			
+	   			// $mail->SMTPDebug = 1;
 	   		
 	   			$mail->isSMTP();
 	   			$mail->Host = $GLOBALS['config']['smtp_server'];

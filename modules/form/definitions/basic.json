@@ -198,7 +198,8 @@
 						"checkbox": "Checkbox",
 						"spacer":"Spacer",
 						"copy": "Copy",
-						"radio":"Radio"
+						"radio":"Radio",
+						"file":"File"
 					},
 					"default":"text"
 				},
@@ -279,6 +280,23 @@
 			"type":"text",
 			"name":"recaptcha_error_message",
 			"label":"Error message"
+		},
+		{
+			"type":"subtitle",
+			"label":"Design"
+		},
+		{
+			"type":"image",
+			"label":"File upload icon",
+			"name":"file_icon",
+			"default":"//upload_icon.png",
+			"category":"icon"
+		},
+		{
+			"type":"text",
+			"name":"file_finishing_label",
+			"label":"File finishing label",
+			"default":"Finishing"
 		}
 	]
 }
