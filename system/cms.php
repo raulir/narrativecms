@@ -21,8 +21,12 @@ if (stristr($request_uri, '/')){
 	
 		foreach($GLOBALS['config']['module'][$module]['api'] as $capi){
 			if ($capi['id'] == $api){
-				
-				include($GLOBALS['config']['base_path'].'modules/'.$module.'/api/'.$api.'.php');
+				$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/api/'.$api.'.php';
+				if (!file_exists($filename)){
+					print('Can\'t find API main controller: '.$filename);
+				} else {
+					include($filename);
+				}
 				die();
 				
 			}

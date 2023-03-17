@@ -31,7 +31,7 @@ class Index extends CI_Controller {
    	}
 
     function index($page_id = 0, $extra = ''){
-    	
+
     	if (empty($page_id)){
     		$page_id = $GLOBALS['config']['landing_page']['_value'];
     	}
