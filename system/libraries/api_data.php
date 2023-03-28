@@ -149,9 +149,3 @@ function get_data_prefix($prefix, $type = ''){
 
 }
 */
-
-function pprint($array){
-	print('<pre>');
-	print_r($array);
-	print('</pre>');
-}

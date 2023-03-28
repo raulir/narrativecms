@@ -1,20 +1,75 @@
 {
-	"version":"2",
-	"label":"Vimeo settings",
-	"settings":[
+    "version": "2",
+	"title":"Vimeo",
+    "item": [
 		{
 			"type":"image",
-			"name":"sound_on",
-			"label":"Sound on",
-			"category":"icon",
-			"default":"basic/sound_on.png"
+			"name":"image",
+			"label":"Loading image",
+			"category":"content"
 		},
+		{
+			"type":"text",
+			"name":"vimeo_id",
+			"label":"Vimeo ID"
+		},
+		{
+			"type":"select",
+			"name":"autoplay",
+			"label":"Autoplay",
+			"values": {
+				"1":"Yes",
+				"":"No"
+			},
+			"default":""
+		}
+    ],
+    "settings": [
 		{
 			"type":"image",
 			"name":"sound_off",
-			"label":"Sound off",
+			"label":"Sound is off",
 			"category":"icon",
-			"default":"basic/sound_off.png"
+			"default":"//vimeo_sound_off.png"
+		},
+		{
+			"type":"image",
+			"name":"sound_on",
+			"label":"Sound is on",
+			"category":"icon",
+			"default":"//vimeo_sound_on.png"
+		},
+		{
+			"type":"image",
+			"name":"play_button",
+			"label":"Play button",
+			"category":"icon",
+			"default":"//vimeo_play.png"
+		},
+		{
+			"type":"image",
+			"name":"pause_button",
+			"label":"Pause button",
+			"category":"icon",
+			"default":"//vimeo_pause.png"
+		},
+		{
+			"type":"image",
+			"name":"play_large",
+			"label":"Play large",
+			"category":"icon",
+			"default":"//vimeo_play.png"
+		},
+		{
+			"type":"select",
+			"name":"scheme",
+			"label":"Colour scheme",
+			"values": {
+				"dark":"Dark",
+				"light":"Light"
+			},
+			"default":"light",
+			"help":"Background colour"
 		}
-	]
+    ]
 }

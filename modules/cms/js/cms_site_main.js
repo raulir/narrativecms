@@ -999,6 +999,8 @@ var serialize_form = function(form_selector){
 
 }
 
+const zero_pad = (num, places) => String(num).padStart(places || 2, '0')
+
 $(document).ready(function() {
 	
 	cms_hover_init();

@@ -300,11 +300,34 @@ CREATE TABLE `cms_user` (
   PRIMARY KEY (`cms_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `cms_api` (
+  `data_id` varchar(20) NOT NULL,
+  `type` varchar(20) NOT NULL,
+  `data` varchar(1000) NOT NULL,
+  `created` bigint(20) NOT NULL,
+  `updated` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+				
+ALTER TABLE `cms_api`
+  ADD UNIQUE KEY `data_idx` (`data_id`);
+
+CREATE TABLE `cms_api_token` (
+  `token` char(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `ip` varchar(20) NOT NULL,
+  `valid` int(10) UNSIGNED NOT NULL,
+  `created` int(10) UNSIGNED NOT NULL,
+  `updated` int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+				
+ALTER TABLE `cms_api_token`
+  ADD PRIMARY KEY (`token`);
+
 INSERT INTO cms_page VALUES
 ("1","1","homepage","{\"title\":\"Homepage\",\"status\":\"0\",\"seo_title\":\"\",\"description\":\"\",\"image\":\"\",\"layout\":\"rem\"}");
 
 INSERT INTO cms_page_panel VALUES
-("1","0","0","0","1","","cms/cms_settings","",""),
+("1","0","0","0","0","","cms/cms_settings","",""),
 ("2","0","0","0","0","","cms/cms_cssjs_settings","","");				
 
 INSERT INTO cms_page_panel_param VALUES

@@ -95,7 +95,7 @@
 			"access":"basic_sharing"
 		},
 		{
-			"id":"vimeo",
+			"id":"vimeo_settings",
 			"name":"Vimeo settings",
 			"parent":"tools",
 			"user":"1",
@@ -103,7 +103,7 @@
 			"access":"basic_media"
 		},
 		{
-			"id":"lightbox",
+			"id":"lightbox_settings",
 			"name":"Lightbox settings",
 			"parent":"tools",
 			"user":"1",
@@ -111,7 +111,7 @@
 			"access":"basic_media"
 		},
 		{
-			"id":"popup",
+			"id":"popup_settings",
 			"name":"Popup settings",
 			"parent":"tools",
 			"user":"1",
