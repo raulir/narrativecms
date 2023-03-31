@@ -12,7 +12,7 @@
 			"access":"form_data"
 		},
         {
-            "id": "form",
+            "id": "form_settings",
             "name": "Forms default settings",
             "parent": "forms",
             "user": "1",

@@ -114,7 +114,7 @@
 		},
 		{
 			"type":"subtitle",
-			"label":"Mailing lists"
+			"label":"Mailchimp"
 		},
 		{
 			"type":"select",
@@ -139,6 +139,10 @@
 			"label":"Mailchimp list ID",
 			"default":"",
 			"help":"Mailchimp list ID||Get this in MC:||{Lists} -> {Settings} -> {<list name>} -> {List ID}"
+		},
+		{
+			"type":"subtitle",
+			"label":"Campaign Monitor"
 		},
 		{
 			"type":"select",
@@ -169,6 +173,33 @@
 			"name":"cm_list_id",
 			"label":"CM list ID",
 			"default":""
+		},
+		{
+			"type":"subtitle",
+			"label":"Sendgrid"
+		},
+		{
+			"type":"select",
+			"name":"add_sendgrid",
+			"label":"Add to Sendgrid contacts",
+			"values":{
+				"0":"No",
+				"1":"Yes"
+			},
+			"default":"0"
+		},
+		{
+			"type":"text",
+			"name":"sendgrid_api_key",
+			"label":"Sendgrid API key",
+			"default":""
+		},
+		{
+			"type":"text",
+			"name":"sendgrid_list_id",
+			"label":"Sendgrid list ID",
+			"default":"",
+			"help":"Optional. If not set, will be added to global contacts"
 		},
 		{
 			"type":"repeater",
@@ -212,6 +243,11 @@
 						"1":"Yes"
 					},
 					"default":"0"
+				},
+				{
+					"type":"text",
+					"name":"error",
+					"label":"Mandatory error"
 				},
 				{
 					"type":"text",

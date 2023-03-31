@@ -1,5 +1,34 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+if (!function_exists('get_user_ip')){
+
+	function get_user_ip(){
+
+		if (isset($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+			$_SERVER['REMOTE_ADDR'] = $_SERVER["HTTP_CF_CONNECTING_IP"];
+			$_SERVER['HTTP_CLIENT_IP'] = $_SERVER["HTTP_CF_CONNECTING_IP"];
+		}
+
+		$client = $_SERVER['HTTP_CLIENT_IP'] ?? false;
+
+		$forward = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? false;
+
+		$remote  = $_SERVER['REMOTE_ADDR'];
+
+		if(filter_var($client, FILTER_VALIDATE_IP)) {
+			$ip = $client;
+		} elseif(filter_var($forward, FILTER_VALIDATE_IP)) {
+			$ip = $forward;
+		} else {
+			$ip = $remote;
+		}
+
+		return $ip;
+
+	}
+
+}
+
 class do_send extends CI_Controller {
 	
 	function panel_action($params){
@@ -75,6 +104,8 @@ class do_send extends CI_Controller {
         		unset($data['id']);
         	}
         	
+        	$data['ip'] = get_user_ip();
+        	
         	// page title for email
 	        $title_parts = [trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), $GLOBALS['config']['site_title_delimiter'].' ')];
         	// if settings
@@ -87,18 +118,26 @@ class do_send extends CI_Controller {
 	        	}
 	        	
         	}
-        	$title = (!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '') . 'New form "'.$params['title'].'" submission on "'.implode(' - ', $title_parts).'"';
+        	$title = (!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '') . 
+        			'New form "'.$params['title'].'" submission on "'.implode(' - ', $title_parts).'"';
 
         	// send notification
 			if(!empty($params['emails']) && count($params['emails'])){
 				
 				$reply_to = ['email' => '', 'name' => ''];
-				$from = $_SERVER['SERVER_NAME'].'@bytecrackers.com';
-
+				if (!empty($GLOBALS['config']['email'])){
+					$from = $GLOBALS['config']['email'];
+				} else {
+					$from = $_SERVER['SERVER_NAME'].'@bytecrackers.com';
+				}
+				
 				if (!empty($data['email']) && stristr($data['email'], '@') && stristr($data['email'], '.')){
 						
 					$reply_to['email'] = $data['email'];
-					$reply_to['name'] = $data['name'] ? $data['name'] : $data['email'];
+					
+					$name = trim($data['name'] ?? (($data['first_name'] ?? '').' '.($data['last_name'] ?? '')));
+					
+					$reply_to['name'] = $name ?? $data['email'];
 
 				}
 				
@@ -107,7 +146,8 @@ class do_send extends CI_Controller {
 			}
 			
 			if(!empty($params['autoreply'])){
-				$this->form_model->send_autoreply($data, $params['autoreply_text'], $params['autoreply_email'], $params['autoreply_name'], $params['autoreply_subject']);
+				$this->form_model->send_autoreply($data, $params['autoreply_text'], $params['autoreply_email'], 
+						$params['autoreply_name'], $params['autoreply_subject']);
 			}
 
 			$this->form_model->create_form_data($cms_page_panel_id, !empty($data['email']) ? $data['email'] : '', $data);
@@ -119,10 +159,23 @@ class do_send extends CI_Controller {
 				$result = $this->form_model->create_mailchimp_subscriber($data, $params);
 			}
 			
-			if (!empty($params['add_cm']) && !empty($data['email']) && !empty($params['cm_api_key']) && !empty($params['cm_api_url']) && !empty($params['cm_list_id'])){
+        	if (!empty($params['add_cm']) && !empty($data['email']) && !empty($params['cm_api_key']) && 
+					!empty($params['cm_api_url']) && !empty($params['cm_list_id'])){
 				$result = $this->form_model->create_cm_subscriber($data, $params);
 			}
+			
+			if (!empty($params['add_sendgrid'])){
 				
+				if (empty($params['sendgrid_api_key']) && !empty($GLOBALS['config']['sendgrid_apikey'])){
+					$params['sendgrid_api_key'] = $GLOBALS['config']['sendgrid_apikey'];
+				}
+				
+				if(!empty($data['email']) && !empty($params['sendgrid_api_key'])){
+					$result = $this->form_model->create_sendgrid_subscriber($data, $params);
+				}
+				
+			}
+			
 			$return['message'] = 'ok';
 			
 			if (!empty($GLOBALS['config']['errors_visible']) && !empty($result)){

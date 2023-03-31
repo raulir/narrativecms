@@ -3,6 +3,10 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+if (file_exists($GLOBALS['config']['base_path'] . 'vendor/autoload.php')){
+	require_once($GLOBALS['config']['base_path'] . 'vendor/autoload.php');
+}
+
 require_once('system/vendor/phpmailer/Exception.php');
 require_once('system/vendor/phpmailer/PHPMailer.php');
 require_once('system/vendor/phpmailer/SMTP.php');
@@ -35,7 +39,7 @@ class form_model extends CI_Model {
 	
     function send_contact_request($emails, $data, $title, $from, $reply_to){
 
- 		$content = $title.(!empty($data['_page']) ? ("\n".'Page title: '.$data['_page']) : '').':'."\n\n";
+ 		$content = $title.(!empty($data['_page']) ? ("\n".'Page title: '.$data['_page']) : '')."\n\n";
  		
  		if (!empty($data['_page'])) {
  			unset($data['_page']);
@@ -353,12 +357,55 @@ class form_model extends CI_Model {
         		false, 
         		$context
         );
-        
-// file_put_contents($GLOBALS['config']['base_path'].'cache/mc_debug_submit.txt', json_encode($postdata, JSON_PRETTY_PRINT));
-// file_put_contents($GLOBALS['config']['base_path'].'cache/mc_debug_result.txt', json_encode(json_decode($result, true), JSON_PRETTY_PRINT));
-        
-		return $result;
+
+        return $result;
     
+    }
+    
+    function create_sendgrid_subscriber($data, $params){
+    	
+    	foreach($data as $key => $value){
+    		$data[$key] = str_replace([',','"'], [';', "'"], $value);
+    	}
+    	
+    	$sendgrid = new \SendGrid($params['sendgrid_api_key']);
+    	
+    	if (!empty($data['company'])){
+    		
+   			$response = $sendgrid->client->marketing()->field_definitions()->get();
+//   			_print_r(json_decode($response->body(), true));
+   			
+   			$custom_fields_definitions = json_decode($response->body(), true)['custom_fields'];
+   			
+   			$custom_fields = '';
+   			foreach($custom_fields_definitions as $def){
+   				if (!empty($data[$def['name']])){
+
+   					$custom_fields .= ',"'.$def['id'].'":"'.$data[$def['name']].'"';
+
+   				}
+   			}
+    		
+    		$custom_fields = trim($custom_fields, ',');
+    	}
+
+    	$request_body = json_decode('{
+            	'.(!empty($params['sendgrid_list_id']) ? ('"list_ids": ["'.$params['sendgrid_list_id'].'"], ') : '').'
+            	"contacts": [
+                	{
+                    	"email": "'.$data['email'].'",
+                    	"first_name": "'.($data['first_name'] ?? ($data['name'] ?? '')).'",
+    					"last_name": "'.($data['last_name'] ?? '').'"
+   						'.(!empty($data['phone']) ? (',"phone_number":"'.$data['phone'].'"') : '').'
+   						'.(!empty($custom_fields) ? (',"custom_fields": {'.$custom_fields.'}') : '').'
+    				}
+            	]
+        	}');
+    	
+    	$response = $sendgrid->client->marketing()->contacts()->put($request_body);
+    	
+//    	_print_r($response);
+    	
     }
     
 }

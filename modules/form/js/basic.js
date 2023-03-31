@@ -26,7 +26,7 @@ function form_basic_submit($this){
 			$target.addClass('form_basic_error');
 			setTimeout(function(){
 				$target.removeClass('form_basic_error');
-			}, 5000)
+			}, 30000)
 		}
 		
 	});
@@ -80,7 +80,7 @@ function form_basic_submit($this){
 			setTimeout(function(){
 				$('.form_basic_message', $container).removeClass('form_basic_message_status_active').removeClass('form_basic_message_active');
 				$('.form_basic_input_input', $form).val('');
-				$('.form_basic_close', $container).click();
+//				$('.form_basic_close', $container).click();
 			}, 300000)
 			
 			if (typeof form_basic_after !== 'undefined'){

@@ -20,7 +20,8 @@
 				<input type="hidden" name="id" value="<?= $cms_page_panel_id ?>">
 
 				<?php foreach($elements as $element): ?>
-					<div class="form_basic_input form_basic_input_type_<?= $element['type'] ?> form_basic_input_<?= $element['name'] ?>">
+					<div class="form_basic_input form_basic_input_type_<?= $element['type'] ?> form_basic_input_<?= $element['name'] ?>
+							<?= $element['mandatory'] ? 'form_basic_input_mandatory' : '' ?>">
 
 						<?php if (!empty($element['label']) && empty($label_as_placeholder) && $element['type'] != 'radio'): ?>
 							<label class="form_basic_input_label" for="form_basic_<?= $element['name'] ?>"><?= $element['label'] ?></label>
@@ -116,6 +117,10 @@
 							
 							</div>
 
+						<?php endif ?>
+						
+						<?php if(!empty($element['error'])): ?>
+							<div class="form_basic_input_error"><?= $element['error'] ?></div>
 						<?php endif ?>
 
 					</div>
