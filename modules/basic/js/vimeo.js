@@ -7,7 +7,11 @@ function basic_vimeo_init(){
 		$vimeos.each(function(){
 		
 			var $vimeo = $(this)
-	
+			
+			if ($vimeo.hasClass('basic_vimeo_ok')){
+				return
+			}
+			$vimeo.addClass('basic_vimeo_ok')
 	
 			var iframe = $('.basic_vimeo_iframe', $vimeo)[0]
 		    var player = new Vimeo.Player(iframe)
@@ -79,9 +83,28 @@ function basic_vimeo_init(){
 			$('.basic_vimeo_progress_search', $vimeo).on('click.cms', function(e){
 			
 				$vimeo.data('player').getDuration().then(duration => { 
-					$vimeo.data('player').setCurrentTime((e.offsetX / $(this).width()) * duration)
+					var seconds = (e.offsetX / $(this).width()) * duration
+					if ($vimeo.data('subs')){
+						var found = false
+						$vimeo.data('subs').forEach((element, index) => {
+							if (!found && element.start_time <= seconds ){
+								$vimeo.data('next_subs', index)
+							} else {
+								found = true
+							}
+						})
+					}
+					$vimeo.data('player').setCurrentTime(seconds)
 				})
 	
+			})
+			
+			$('.basic_vimeo_subtitles_button', $vimeo).on('click.cms', function(){
+				if ($vimeo.hasClass('basic_vimeo_subtitles_off')){
+					$vimeo.removeClass('basic_vimeo_subtitles_off')
+				} else {
+					$vimeo.addClass('basic_vimeo_subtitles_off')
+				}
 			})
 			
 			$vimeo.data('player').on('timeupdate', e => {
@@ -104,6 +127,30 @@ function basic_vimeo_init(){
 	//					+ dur_h + ':' + zero_pad(dur_min) + ':' + zero_pad(dur_sec))
 	
 				$('.basic_vimeo_current', $vimeo).html(zero_pad(cur_min) + ':' + zero_pad(cur_sec) + '/' + zero_pad(dur_min) + ':' + zero_pad(dur_sec))
+				
+				if ($vimeo.data('subs')){
+				
+					var stop_time = $('.basic_vimeo_subtitles', $vimeo).data('stop_time')
+					if (stop_time && stop_time <= e.seconds){
+						$('.basic_vimeo_subtitles', $vimeo).data('stop_time', 0)
+						$('.basic_vimeo_subtitles', $vimeo).html('')
+					}
+				
+					if ($vimeo.data('subs')[$vimeo.data('next_subs')]['start_time'] <= e.seconds){
+						$('.basic_vimeo_subtitles', $vimeo).html($vimeo.data('subs')[$vimeo.data('next_subs')]['text'])
+						$('.basic_vimeo_subtitles', $vimeo).data('stop_time', $vimeo.data('subs')[$vimeo.data('next_subs')]['stop_time'])
+						$vimeo.data('next_subs', $vimeo.data('next_subs') + 1)
+					}
+
+				} else if (!$vimeo.data('subsloading') && $vimeo.data('subsfile')){
+					$vimeo.data('subsloading', true)
+					fetch($vimeo.data('subsfile')).then(response => response.json().then(function(data) {
+						$vimeo.data('subs', data)
+        				$vimeo.data('subsloading', false)
+//        				console.log(data)
+      				}))
+				}
+				
 			})
 
 		})

@@ -1,4 +1,6 @@
-<div class="basic_vimeo_container basic_vimeo_scheme_<?= $scheme ?>" data-autoplay="<?= $autoplay ?? '' ?>" data-volume="0.8">
+<div class="basic_vimeo_container basic_vimeo_scheme_<?= $scheme ?> basic_vimeo_buttons_<?= (int)!empty($subsfile) ?>" 
+		data-autoplay="<?= $autoplay ?? '' ?>" data-volume="0.8" 
+		<?= !empty($subsfile) ? (' data-subsfile="'.$subsfile.'"') : '' ?> data-next_subs="0">
 	<div class="basic_vimeo_content">
 
 		<div class="basic_vimeo_area" <?php _ib($image, 300) ?>>
@@ -42,8 +44,14 @@
 					<div class="basic_vimeo_volume_button" data-volume="0.9"></div>
 					<div class="basic_vimeo_volume_button" data-volume="1.0"></div>
 				</div>
+
+				<?php if(!empty($subsfile)): ?>
+					<div class="basic_vimeo_subtitles_button" <?php _ib($subtitles_button, 30) ?>></div>
+				<?php endif ?>
 			
 			</div>
+			
+			<div class="basic_vimeo_subtitles"></div>
 			
 			<?php if(empty($autoplay)): ?>
 				<div class="basic_vimeo_start" <?php _ib($play_large, 400) ?>></div>
