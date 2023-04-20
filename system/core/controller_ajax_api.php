@@ -57,7 +57,7 @@ class Ajax_api extends CI_Controller {
 	   		
    			$cms_page_panel = reset($cms_page_panels);
    			
-   			$data = $this->ajax_panel($cms_page_panel['panel_name'], $cms_page_panel);
+   			$data = $this->ajax_panel($cms_page_panel['panel_name'], array_merge($this->input->post(), $cms_page_panel));
    			
    			print(json_encode(['result' => ['html' => $data['_html']]], JSON_PRETTY_PRINT));
    			die();

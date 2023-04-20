@@ -1,6 +1,9 @@
 {
     "version": "2",
 	"title":"Vimeo",
+    "js": [
+     	"cms/cms_scroll_lock"
+    ],
     "item": [
 		{
 			"type":"image",
@@ -72,6 +75,24 @@
 			"label":"Subtitles",
 			"category":"icon",
 			"default":"//vimeo_subtitles.png"
+		},
+		{
+			"type":"image",
+			"name":"fullscreen_button",
+			"label":"Fullscreen",
+			"category":"icon",
+			"default":"//vimeo_fullscreen.png"
+		},
+		{
+			"type":"select",
+			"name":"disable_fullscreen",
+			"label":"Disable fullscreen",
+			"values": {
+				"0":"No",
+				"1":"Yes"
+			},
+			"default":"0",
+			"help":"Removes fullscreen button"
 		},
 		{
 			"type":"select",

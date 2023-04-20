@@ -3,7 +3,7 @@
 class vimeo extends CI_Controller{
 	
 	function panel_params($params){
-// _print_r($params);		
+
 		if (!empty($params['subtitle'])){
 			
 			$filename = 'sub_'.md5($params['subtitle'].filemtime($GLOBALS['config']['upload_path'].$params['subtitle'])).'.json';

@@ -1,4 +1,55 @@
+var cms_fullscreen_open = function(){
+
+	if (document.fullscreenElement !== null){
+		console.log('fullcsreen active')
+		return
+	}
+
+	if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)){
+		console.log('browser doesn\'t allow fullscreen')
+		return
+	}
+		
+	if (typeof cms_scroll_lock != 'undefined'){
+		cms_scroll_lock()
+	}
+
+	var doc = document.documentElement
+	if (doc.requestFullscreen) {
+	    doc.requestFullscreen()
+	} else if (doc.webkitRequestFullscreen) {
+		console.log('webkit prefix');
+	    docElm.webkitRequestFullscreen();
+	}
+
+	return false;
+
+}
+
+var cms_fullscreen_close = function(){
+	
+	if (typeof cms_scroll_unlock != 'undefined'){
+		cms_scroll_unlock()
+	}
+
+	if (document.exitFullscreen) {
+		document.exitFullscreen()
+	} else {
+		document.webkitExitFullscreen()
+	}
+	
+}
+
 function basic_vimeo_init(){
+
+	$(document).on('fullscreenchange', function(){
+		if (document.fullscreenElement === null){
+			$('.basic_vimeo_fullscreen').removeClass('basic_vimeo_fullscreen')
+			if (typeof cms_scroll_unlock != 'undefined'){
+				cms_scroll_unlock()
+			}
+		}
+	})
 
 	setTimeout(function(){
 
@@ -75,11 +126,7 @@ function basic_vimeo_init(){
 			$('.basic_vimeo_sound', $vimeo).on('click.cms', function(){
 				basic_vimeo_toggle_sound($vimeo)
 			})
-			
-			$vimeo.data('player').on('seeked', e => {
-				$('.basic_vimeo_progress_current', $vimeo).css({'width': e.percent * 100 + '%'})
-			})
-			
+						
 			$('.basic_vimeo_progress_search', $vimeo).on('click.cms', function(e){
 			
 				$vimeo.data('player').getDuration().then(duration => { 
@@ -107,56 +154,79 @@ function basic_vimeo_init(){
 				}
 			})
 			
-			$vimeo.data('player').on('timeupdate', e => {
-	
-				var dur = Math.round(e.duration)
-				var dur_min = Math.floor(dur/60)
-				var dur_sec = dur - dur_min * 60
-	//			var dur_h = Math.floor(dur_min/60)
-	//			dur_min = dur_min - dur_h * 60
-				
-				var cur = Math.round(e.seconds)
-				var cur_min = Math.floor(cur/60)
-				var cur_sec = cur - cur_min * 60
-	//			var cur_h = Math.floor(cur_min/60)
-	//			cur_min = cur_min - cur_h * 60
-			
-				$('.basic_vimeo_progress_current', $vimeo).css({'width': e.percent * 100 + '%'})
-				
-	//			$('.basic_vimeo_current').html(cur_h + ':' + zero_pad(cur_min) + ':' + zero_pad(cur_sec) + '/' 
-	//					+ dur_h + ':' + zero_pad(dur_min) + ':' + zero_pad(dur_sec))
-	
-				$('.basic_vimeo_current', $vimeo).html(zero_pad(cur_min) + ':' + zero_pad(cur_sec) + '/' + zero_pad(dur_min) + ':' + zero_pad(dur_sec))
-				
-				if ($vimeo.data('subs')){
-				
-					var stop_time = $('.basic_vimeo_subtitles', $vimeo).data('stop_time')
-					if (stop_time && stop_time <= e.seconds){
-						$('.basic_vimeo_subtitles', $vimeo).data('stop_time', 0)
-						$('.basic_vimeo_subtitles', $vimeo).html('')
-					}
-				
-					if ($vimeo.data('subs')[$vimeo.data('next_subs')]['start_time'] <= e.seconds){
-						$('.basic_vimeo_subtitles', $vimeo).html($vimeo.data('subs')[$vimeo.data('next_subs')]['text'])
-						$('.basic_vimeo_subtitles', $vimeo).data('stop_time', $vimeo.data('subs')[$vimeo.data('next_subs')]['stop_time'])
-						$vimeo.data('next_subs', $vimeo.data('next_subs') + 1)
-					}
+			$('.basic_vimeo_fullscreen_button', $vimeo).on('click.cms', function(){
 
-				} else if (!$vimeo.data('subsloading') && $vimeo.data('subsfile')){
-					$vimeo.data('subsloading', true)
-					fetch($vimeo.data('subsfile')).then(response => response.json().then(function(data) {
-						$vimeo.data('subs', data)
-        				$vimeo.data('subsloading', false)
-//        				console.log(data)
-      				}))
+				if ($vimeo.hasClass('basic_vimeo_fullscreen')){
+					cms_fullscreen_close()
+					$vimeo.removeClass('basic_vimeo_fullscreen')
+				} else {
+					cms_fullscreen_open()
+					$vimeo.addClass('basic_vimeo_fullscreen')
 				}
-				
 			})
+
+			basic_vimeo_player_events($vimeo)
 
 		})
 	
 	}, 1000)
 
+}
+
+function basic_vimeo_player_events($vimeo){
+
+// console.log($vimeo.data('player'))
+
+	$vimeo.data('player').on('seeked', e => {
+		$('.basic_vimeo_progress_current', $vimeo).css({'width': e.percent * 100 + '%'})
+	})
+
+	$vimeo.data('player').on('timeupdate', e => {
+
+		var dur = Math.round(e.duration)
+		var dur_min = Math.floor(dur/60)
+		var dur_sec = dur - dur_min * 60
+//			var dur_h = Math.floor(dur_min/60)
+//			dur_min = dur_min - dur_h * 60
+		
+		var cur = Math.round(e.seconds)
+		var cur_min = Math.floor(cur/60)
+		var cur_sec = cur - cur_min * 60
+//			var cur_h = Math.floor(cur_min/60)
+//			cur_min = cur_min - cur_h * 60
+	
+		$('.basic_vimeo_progress_current', $vimeo).css({'width': e.percent * 100 + '%'})
+		
+//			$('.basic_vimeo_current').html(cur_h + ':' + zero_pad(cur_min) + ':' + zero_pad(cur_sec) + '/' 
+//					+ dur_h + ':' + zero_pad(dur_min) + ':' + zero_pad(dur_sec))
+
+		$('.basic_vimeo_current', $vimeo).html(zero_pad(cur_min) + ':' + zero_pad(cur_sec) + '/' + zero_pad(dur_min) + ':' + zero_pad(dur_sec))
+		
+		if ($vimeo.data('subs')){
+		
+			var stop_time = $('.basic_vimeo_subtitles', $vimeo).data('stop_time')
+			if (stop_time && stop_time <= e.seconds){
+				$('.basic_vimeo_subtitles', $vimeo).data('stop_time', 0)
+				$('.basic_vimeo_subtitles', $vimeo).html('')
+			}
+		
+			if ($vimeo.data('subs')[$vimeo.data('next_subs')]['start_time'] <= e.seconds){
+				$('.basic_vimeo_subtitles', $vimeo).html($vimeo.data('subs')[$vimeo.data('next_subs')]['text'])
+				$('.basic_vimeo_subtitles', $vimeo).data('stop_time', $vimeo.data('subs')[$vimeo.data('next_subs')]['stop_time'])
+				$vimeo.data('next_subs', $vimeo.data('next_subs') + 1)
+			}
+
+		} else if (!$vimeo.data('subsloading') && $vimeo.data('subsfile')){
+			$vimeo.data('subsloading', true)
+			fetch($vimeo.data('subsfile')).then(response => response.json().then(function(data) {
+				$vimeo.data('subs', data)
+  				$vimeo.data('subsloading', false)
+//        				console.log(data)
+				}))
+		}
+		
+	})
+	
 }
 
 function basic_vimeo_toggle_sound($vimeo){

@@ -1,4 +1,4 @@
-<div class="basic_vimeo_container basic_vimeo_scheme_<?= $scheme ?> basic_vimeo_buttons_<?= (int)!empty($subsfile) ?>" 
+<div class="basic_vimeo_container basic_vimeo_scheme_<?= $scheme ?> basic_vimeo_buttons_<?= (int)!empty($subsfile) + (int)empty($disable_fullscreen) ?>" 
 		data-autoplay="<?= $autoplay ?? '' ?>" data-volume="0.8" 
 		<?= !empty($subsfile) ? (' data-subsfile="'.$subsfile.'"') : '' ?> data-next_subs="0">
 	<div class="basic_vimeo_content">
@@ -47,6 +47,10 @@
 
 				<?php if(!empty($subsfile)): ?>
 					<div class="basic_vimeo_subtitles_button" <?php _ib($subtitles_button, 30) ?>></div>
+				<?php endif ?>
+				
+				<?php if(empty($disable_fullscreen)): ?>
+					<div class="basic_vimeo_fullscreen_button" <?php _ib($fullscreen_button, 30) ?>></div>
 				<?php endif ?>
 			
 			</div>
