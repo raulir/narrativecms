@@ -1,0 +1,35 @@
+{
+	"version":"2",
+	"label":"Downloads",
+    "image":"//panel_downloads.jpg",
+    "description":"Downloads panel. Displays all downloadable files in one group",
+	"item":[
+		{
+			"type": "text",
+			"name": "cta",
+			"label": "CTA",
+			"default": "download"
+		},
+		{
+			"type": "fk",
+			"name": "group_id",
+			"label": "File group",
+			"list": "documents/group"
+		}
+	],
+	"settings":[
+        {
+            "type": "repeater",
+            "name": "images",
+            "label": "Images",
+            "fields": [
+            	{
+					"type": "image",
+					"name": "image",
+					"label": "Image",
+					"category": "content"
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,38 @@
+{
+	"cms_menu":[
+		{
+			"id":"documents",
+			"name":"Documents"
+		},
+        {
+            "id":"documents",
+            "name":"Documents",
+            "parent":"documents",
+            "url":"admin/cms_list/documents__file/"
+        },
+        {
+            "id":"filegroup",
+            "name":"Document groups",
+            "parent":"documents",
+            "url":"admin/cms_list/documents__group/"
+        },
+        {
+            "id":"downloadsettings",
+            "name":"Document download settings",
+            "parent":"documents",
+            "url":"admin/panel_settings/documents__downloads/"
+        }
+	],
+	"panels":[
+		{
+			"id":"downloads",
+			"name":"Downloads"
+		}
+	],
+	"access":[
+		{
+			"access":"documents_*",
+			"name":"Documents ALL"
+		}
+	]
+}

@@ -1,0 +1,20 @@
+{
+	"version":"2",
+	"list":{
+		"list_title":"Download groups",
+		"item_title":"Download group",
+		"link_target":"0",
+		"ajax_target": "0",
+		"filter_fields":{
+			"show":"-- show --"
+		}
+	},
+	"item":[
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Name",
+			"mandatory":"1"
+		}
+	]
+}
