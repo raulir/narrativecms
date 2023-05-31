@@ -1,5 +1,8 @@
-<div class="cms_container mimage_container" <?= !empty($colour) ? ('style="background-color: '.$colour.';"') : '' ?>>
+<div class="cms_container mimage_container mimage_responsiveness_<?= $responsiveness ?? 'all' ?>" 
+		<?= !empty($colour) ? ('style="background-color: '.$colour.';"') : '' ?>>
+		
 	<div class="mimage_content">
+	
 		<div class="mimage_image" <?php _ib($image, ['width' => 2000, 'pb' => 1]) ?>>
 			<?php foreach($links as $link): ?>
 
@@ -22,5 +25,7 @@
 				<?php endfor ?>
 			<?php endforeach ?>
 		</div>
+		
 	</div>
+	
 </div>
