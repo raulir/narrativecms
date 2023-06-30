@@ -203,6 +203,7 @@ class cms_slug_model extends Model {
 	}
 	
 	function get_cms_slug_by_target($target){
+		
 		$sql = "select * from cms_slug where target = ? limit 1 ";
     	$query = $this->db->query($sql, array($target, ));
     	if ($query->num_rows()){
@@ -211,6 +212,7 @@ class cms_slug_model extends Model {
     	} else {
     		return '';
     	}
+    	
 	}
 	
 	function update_slug_status($target, $status){
@@ -221,6 +223,29 @@ class cms_slug_model extends Model {
 		$this->_regenerate_cache();
 		$this->_regenerate_sitemap();
 	
+	}
+	
+	function get_target_by_cms_slug($slug){
+		
+		$sql = "select * from cms_slug where cms_slug_id = ? and status = '0' limit 1 ";
+		$query = $this->db->query($sql, [$slug, ]);
+		if ($query->num_rows()){
+			
+			$row = $query->row_array();
+			
+			if (stristr($row['target'], '=')){
+				
+				list($rest, $return) = explode('=', $row['target']);
+				return $return;
+				
+			}
+			
+			return $row['target'];
+			
+		} else {
+			return 0;
+		}
+		
 	}
 
 }

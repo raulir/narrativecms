@@ -70,7 +70,9 @@ class Router {
 	 * @access public
 	 */
 	var $default_controller;
-
+	
+	var $uri;
+	
 	/**
 	 * Constructor
 	 *

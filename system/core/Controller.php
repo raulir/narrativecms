@@ -1,9 +1,22 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+#[AllowDynamicProperties]
+
 class CI_Controller {
 
 	static $instance;
 
+	var $utf8;
+	var $log;
+	var $uri;
+	var $router;
+	var $output;
+	var $input;
+	var $load;
+	var $db;
+	var $panel_name;
+	var $panel_controller;
+	
 	/**
 	 * Constructor
 	 */
@@ -691,7 +704,7 @@ class CI_Controller {
 		
 					$css_arr_prep = [];
 					foreach ($css_arr as $css_inc){
-						$css_arr_prep[] = $css_inc['script'];
+						$css_arr_prep[] = (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$css_inc['script'];
 					}
 					$css_arr_str = implode('\', \'', $css_arr_prep);
 		

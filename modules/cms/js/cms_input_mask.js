@@ -41,7 +41,7 @@ function cms_input_mask_picker($input){
 		'image': $input.data('target_image'),
 		'definition': $input.data('definition'),
 		'value': $('.cms_input_mask_value', $input).val(),
-		'name_hash': hex_md5($('.cms_page_panel_id') + ' ' + $input.data('name'))
+		'name_hash': md5($('.cms_page_panel_id') + ' ' + $input.data('name'))
 	
 	}, function(data){
 

@@ -2,6 +2,14 @@
 
 class Index extends CI_Controller {
 	
+	var $params;
+	var $cms_language_model;
+	var $cms_page_panel_model;
+	var $cms_page_model;
+	var $cms_menu_model;
+	var $cms_panel_model;
+	var $cms_image_model;
+	
     public function __construct() {
     	
         parent::__construct();

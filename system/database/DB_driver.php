@@ -70,7 +70,7 @@ class CI_DB_driver {
 	var $curs_id;
 	var $limit_used;
 
-
+	var $stricton;
 
 	/**
 	 * Constructor.  Accepts one parameter containing the database

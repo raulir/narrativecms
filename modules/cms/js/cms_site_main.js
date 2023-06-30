@@ -8,19 +8,10 @@
  * Distributed under the BSD License
  * See http://pajhome.org.uk/crypt/md5 for more info.
  */
-
-/*
- * Configurable variables. You may need to tweak these to be compatible with
- * the server-side, but the defaults work in most cases.
- */
 var hexcase = 0;   /* hex output format. 0 - lowercase; 1 - uppercase        */
 var b64pad  = "";  /* base-64 pad character. "=" for strict RFC compliance   */
 
-/*
- * These are the functions you'll usually want to call
- * They take string arguments and return either hex or base-64 encoded strings
- */
-function hex_md5(s)    { return rstr2hex(rstr_md5(str2rstr_utf8(s))); }
+function md5(s)    { return rstr2hex(rstr_md5(str2rstr_utf8(s))); }
 function b64_md5(s)    { return rstr2b64(rstr_md5(str2rstr_utf8(s))); }
 function any_md5(s, e) { return rstr2any(rstr_md5(str2rstr_utf8(s)), e); }
 function hex_hmac_md5(k, d)
@@ -29,14 +20,6 @@ function b64_hmac_md5(k, d)
   { return rstr2b64(rstr_hmac_md5(str2rstr_utf8(k), str2rstr_utf8(d))); }
 function any_hmac_md5(k, d, e)
   { return rstr2any(rstr_hmac_md5(str2rstr_utf8(k), str2rstr_utf8(d)), e); }
-
-/*
- * Perform a simple self-test to see if the VM is working
- */
-function md5_vm_test()
-{
-  return hex_md5("abc").toLowerCase() == "900150983cd24fb0d6963f7d28e17f72";
-}
 
 /*
  * Calculate the MD5 of a raw string
@@ -458,7 +441,7 @@ function get_ajax_panel(name, args, action_on_success){
 		
 		// try to read from storage
 		if (_cms_test_localstorage() && cache > 0 && !admin_logged_in){
-			var key = hex_md5(config_url + name + JSON.stringify(params));
+			var key = md5(config_url + name + JSON.stringify(params));
 			var local_data = localStorage.getItem(key);
 			if (local_data){
 				data = $.parseJSON(local_data);
@@ -565,7 +548,7 @@ function get_ajax_page(url, params, action_on_success){
 
 	// try to read from storage
 	if (_cms_test_localstorage() && cache > 0 && !admin_logged_in){
-		var key = hex_md5(config_url + name + JSON.stringify(params));
+		var key = md5(config_url + name + JSON.stringify(params));
 		var local_data = localStorage.getItem(key);
 		if (local_data){
 			data = $.parseJSON(local_data);

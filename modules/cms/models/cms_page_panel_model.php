@@ -26,6 +26,8 @@ if (!function_exists('array_merge_recursive_ex')){
 
 class cms_page_panel_model extends Model {
 	
+	var $default_language;
+	
 	function __construct(){
 		
 		$this->load->model('cms/cms_language_model');
