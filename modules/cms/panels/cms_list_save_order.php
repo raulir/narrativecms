@@ -21,7 +21,7 @@ class cms_list_save_order extends CI_Controller {
 			 
 			$list_order = $this->input->post('list_order');
 			 
-			$this->load->model('cms_page_panel_model');
+			$this->load->model('cms/cms_page_panel_model');
 			 
 			// get reusable sorts
 			$previous_sort = array();

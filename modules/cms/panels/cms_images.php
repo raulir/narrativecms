@@ -21,7 +21,7 @@ class cms_images extends CI_Controller {
 		}
 
 		// get possible categories
-		$this->load->model('cms_image_model');
+		$this->load->model('cms/cms_image_model');
 		$params['categories'] = $this->cms_image_model->get_cms_image_categories();
 		if (!empty($params['category']) && empty($params['categories'][$params['category']])){
 			$params['categories'][$params['category']] = ucfirst($params['category']);

@@ -186,9 +186,8 @@ class CI_DB_active_record extends CI_DB_driver {
 
 		$type = strtoupper($type);
 
-		if ( ! in_array($type, array('MAX', 'MIN', 'AVG', 'SUM')))
-		{
-			show_error('Invalid function type: '.$type);
+		if ( ! in_array($type, array('MAX', 'MIN', 'AVG', 'SUM'))){
+			_html_error('Invalid function type: '.$type, 500);
 		}
 
 		if ($alias == '')

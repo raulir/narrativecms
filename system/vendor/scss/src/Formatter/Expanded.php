@@ -18,8 +18,10 @@ use ScssPhp\ScssPhp\Formatter;
  * Expanded formatter
  *
  * @author Leaf Corcoran <leafot@gmail.com>
+ *
+ * @internal
  */
-class Expanded extends Formatter
+final class Expanded extends Formatter
 {
     /**
      * {@inheritdoc}
@@ -39,7 +41,7 @@ class Expanded extends Formatter
     /**
      * {@inheritdoc}
      */
-    protected function indentStr()
+    protected function indentStr(): string
     {
         return str_repeat($this->indentChar, $this->indentLevel);
     }
@@ -47,7 +49,7 @@ class Expanded extends Formatter
     /**
      * {@inheritdoc}
      */
-    protected function blockLines(OutputBlock $block)
+    protected function blockLines(OutputBlock $block): void
     {
         $inner = $this->indentStr();
 
@@ -55,7 +57,9 @@ class Expanded extends Formatter
 
         foreach ($block->lines as $index => $line) {
             if (substr($line, 0, 2) === '/*') {
-                $block->lines[$index] = preg_replace('/\r\n?|\n|\f/', $this->break, $line);
+                $replacedLine = preg_replace('/\r\n?|\n|\f/', $this->break, $line);
+                assert($replacedLine !== null);
+                $block->lines[$index] = $replacedLine;
             }
         }
 

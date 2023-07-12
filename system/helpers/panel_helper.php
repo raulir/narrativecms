@@ -45,20 +45,122 @@ if ( !function_exists('get_position')) {
     	
     }
     
-    function html_error($error){
+    function _html_error($error, $exit = 0, $extra = []){
+
+    	$formatted = str_replace(['#br#', '#b#', '#bb#'], ['<br>', '<b>', '</b>'],
+    									htmlentities(str_replace(['<br>', '<b>', '</b>'], ['#br#', '#b#', '#bb#'], $error)));
+    										
+// _backtrace();   	
+
+//		_print_r($extra);
+		
+    	if (empty($extra['location'])){
+			$backtrace = debug_backtrace();
+			if (empty($extra['backtrace'])){
+				$extra['backtrace'] = 0; 
+			}
+// _print_r($backtrace[$extra['backtrace']]);		
+			$extra['location'] = basename($backtrace[$extra['backtrace']]['file']).':'.$backtrace[$extra['backtrace']]['line'];
+    	}
+
+    	$return = ('<pre style="background-color: white; color: black; display: block; border: 0.1rem solid red; '.
+    			'font-size: 0.8rem; line-height: 0.9rem; letter-spacing: 0; font-family: monospace; text-align: left; ">');
+    	$return .= ('<div style="line-height: 0.6rem;  padding: 0.4rem; color: red; font-weight: bold; ">'.
+    			strtoupper($extra['location']??'').'</div><div style="padding: 0.6rem 1.0rem; ">');
     	
-    	return '<div style="clear: both; border: 1px solid red; background-color: white; color: red; '.
-      	'font-family: monospace; padding: 1.0rem; box-sizing: border-box; font-size: 1.0rem; line-height: 1.0rem; ">'.
-    			str_replace(['#br#', '#b#', '#bb#'], ['<br>', '<b>', '</b>'], 
-    					htmlentities(str_replace(['<br>', '<b>', '</b>'], ['#br#', '#b#', '#bb#'], $error))).'</div>';
+    	$return .= ($formatted);
+    	$return .= ('</div></pre>');
+    			 
+    	if(!empty($GLOBALS['config']['errors_visible'])){
+    		print($return);
+    	}
+    	
+    	if ($exit){
+    		set_status_header($exit);
+    		exit();
+    	}
+
+    	return $return;
     	
     }
     
-    function _html_error($error){
+/*
 
-    	print(html_error($error));
 
-    }
+	// --------------------------------------------------------------------
+
+	/**
+	 * General Error Page
+	 *
+	 * This function takes an error message as input
+	 * (either as a string or an array) and displays
+	 * it using the specified template.
+	 *
+	 * @access	private
+	 * @param	string	the heading
+	 * @param	string	the message
+	 * @param	string	the template name
+	 * @param 	int		the status code
+	 * @return	string
+	 * /
+	function show_error($heading, $message, $template = 'error_general', $status_code = 500)
+	{
+		set_status_header($status_code);
+
+		$message = '<p>'.implode('</p><p>', ( ! is_array($message)) ? array($message) : $message).'</p>';
+
+		if (ob_get_level() > $this->ob_level + 1){
+			ob_end_flush();
+		}
+		
+		ob_start();
+		include($GLOBALS['config']['base_path'].'system/helpers/'.$template.'.php');
+		$buffer = ob_get_contents();
+		ob_end_clean();
+		return $buffer;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Native PHP error handler
+	 *
+	 * @access	private
+	 * @param	string	the error severity
+	 * @param	string	the error string
+	 * @param	string	the error filepath
+	 * @param	string	the error line number
+	 * @return	string
+	 * /
+	function show_php_error($severity, $message, $filepath, $line)
+	{
+		$severity = ( ! isset($this->levels[$severity])) ? $severity : $this->levels[$severity];
+
+		$filepath = str_replace("\\", "/", $filepath);
+
+		// For safety reasons we do not show the full file path
+		if (FALSE !== strpos($filepath, '/'))
+		{
+			$x = explode('/', $filepath);
+			$filepath = $x[count($x)-2].'/'.end($x);
+		}
+
+		if (ob_get_level() > $this->ob_level + 1)
+		{
+			ob_end_flush();
+		}
+		ob_start();
+		include($GLOBALS['config']['base_path'].'system/helpers/error_php.php');
+		$buffer = ob_get_contents();
+		ob_end_clean();
+		echo $buffer;
+	}
+
+
+
+
+ */    
+    
     
     /**
      * prints out cms_page_panel by id

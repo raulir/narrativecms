@@ -1,4 +1,4 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 if ( ! function_exists('config_item')) {
 	function config_item($item)	{
@@ -50,11 +50,8 @@ if ( ! function_exists('load_class'))
 		}
 
 		// Did we find the class?
-		if ($name === FALSE)
-		{
-			// Note: We use exit() rather then show_error() in order to avoid a
-			// self-referencing loop with the Excptions class
-			exit('Unable to locate the specified class: '.$class.'.php');
+		if ($name === FALSE){
+			_html_error('Unable to locate the specified class: '.$class.'.php', 500);
 		}
 
 		// Keep track of what we just loaded
@@ -92,33 +89,9 @@ if ( ! function_exists('is_loaded'))
 // ------------------------------------------------------------------------
 
 /**
-* Error Handler
-*
-* This function lets us invoke the exception class and
-* display errors using the standard error template located
-* in application/errors/errors.php
-* This function will send the error page directly to the
-* browser and exit.
-*
-* @access	public
-* @return	void
-*/
-if ( ! function_exists('show_error'))
-{
-	function show_error($message, $status_code = 500, $heading = 'An Error Was Encountered')
-	{
-		$_error =& load_class('Exceptions');
-		echo $_error->show_error($heading, $message, 'error_general', $status_code);
-		exit;
-	}
-}
-
-// ------------------------------------------------------------------------
-
-/**
 * 404 Page Handler
 *
-* This function is similar to the show_error() function above
+* This function is similar to the show_ error() function above
 * However, instead of the standard error template it displays
 * 404 errors.
 *
@@ -213,19 +186,16 @@ if ( ! function_exists('set_status_header'))
 							505	=> 'HTTP Version Not Supported'
 						);
 
-		if ($code == '' OR ! is_numeric($code))
-		{
-			show_error('Status codes must be numeric', 500);
+		if ($code == '' OR ! is_numeric($code)){
+			_html_error('Status codes must be numeric');
 		}
 
-		if (isset($stati[$code]) AND $text == '')
-		{
+		if (isset($stati[$code]) AND $text == ''){
 			$text = $stati[$code];
 		}
 
-		if ($text == '')
-		{
-			show_error('No status text available.  Please check your status code number or supply your own message text.', 500);
+		if ($text == ''){
+			_html_error('No status text available. Please check your status code number or supply your own message text.');
 		}
 
 		$server_protocol = (isset($_SERVER['SERVER_PROTOCOL'])) ? $_SERVER['SERVER_PROTOCOL'] : FALSE;
@@ -276,13 +246,42 @@ if ( ! function_exists('_exception_handler'))
 		}
 
 		$_error =& load_class('Exceptions');
-
+		
+		$levels = [
+				E_ERROR				=>	'Error',
+				E_WARNING			=>	'Warning',
+				E_PARSE				=>	'Parsing Error',
+				E_NOTICE			=>	'Notice',
+				E_CORE_ERROR		=>	'Core Error',
+				E_CORE_WARNING		=>	'Core Warning',
+				E_COMPILE_ERROR		=>	'Compile Error',
+				E_COMPILE_WARNING	=>	'Compile Warning',
+				E_USER_ERROR		=>	'User Error',
+				E_USER_WARNING		=>	'User Warning',
+				E_USER_NOTICE		=>	'User Notice',
+				E_STRICT			=>	'Runtime Notice',
+		];
+		
+		$severity = $levels[$severity] ?? $severity;
+		
+		$filepath = str_replace('\\', '/', $filepath);
+		if (stristr($filepath, '/')){
+			$x = explode('/', $filepath);
+			$filepath = $x[count($x)-2].'/'.end($x);
+		}
+		
 		if (!empty($GLOBALS['config']['errors_visible'])){
-			$_error->show_php_error($severity, $message, $filepath, $line);
+			
+			$error_text = 	'<b>A PHP Error was encountered</b>'."\n".
+							'Severity: '.$severity."\n".
+							'Message: '.$message."\n";
+
+			_html_error($error_text, 0, ['location' => $filepath.':'.$line]);
+		
 		}
 
 		$_error->log_exception($severity, $message, $filepath, $line);
-		
+
 		return false;
 		
 	}

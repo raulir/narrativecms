@@ -1,5 +1,9 @@
 'use strict';
 
+if (typeof config_url != 'undefined'){
+	var _cms_url = config_url
+}
+
 /*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
  * Digest Algorithm, as defined in RFC 1321.
@@ -462,7 +466,7 @@ function get_ajax_panel(name, args, action_on_success){
 			params.panel_id = name;
 			$.ajax({
 				type: 'POST',
-			  	url: config_url + 'ajax_api/get_panel/',
+			  	url: _cms_url + 'ajax_api/get_panel/',
 			  	data: params,
 			  	dataType: 'json',
 			  	context: this,
@@ -715,7 +719,7 @@ function get_api(name, params){
 
 	$.ajax({
 		type: 'POST',
-	  	url: config_url + name,
+	  	url: _cms_url + name,
 	  	data: ext_params,
 	  	dataType: 'json',
 	  	context: this,

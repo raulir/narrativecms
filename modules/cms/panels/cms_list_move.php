@@ -24,7 +24,7 @@ class cms_list_move extends CI_Controller {
 			$start = $this->input->post('start');
 			$limit = $this->input->post('limit');
 			 
-			$this->load->model('cms_page_panel_model');
+			$this->load->model('cms/cms_page_panel_model');
 			 
 			// get block panel name
 			$block = $this->cms_page_panel_model->get_cms_page_panel($block_id);

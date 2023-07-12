@@ -5,7 +5,7 @@ class Files extends CI_Controller {
     function download($file_id){
 
     	// get panels on page by slug
-    	$this->load->model('cms_file_model');
+    	$this->load->model('cms/cms_file_model');
     	$file = $this->cms_file_model->get_file($file_id);
     	
     	if ($file_id && !empty($file['cms_file_id']) && !empty($_SESSION['user']['user_id']) && 
@@ -23,7 +23,7 @@ class Files extends CI_Controller {
     function get($filename){
 
     	// get panels on page by slug
-    	$this->load->model('cms_file_model');
+    	$this->load->model('cms/cms_file_model');
     	$file = $this->cms_file_model->get_cms_file_by_filename(str_replace('__', '/', $filename));
     	
     	if ($filename && !empty($file['cms_file_id']) &&  

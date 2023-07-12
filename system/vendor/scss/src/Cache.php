@@ -13,7 +13,6 @@
 namespace ScssPhp\ScssPhp;
 
 use Exception;
-use ScssPhp\ScssPhp\Version;
 
 /**
  * The scss cache manager.
@@ -30,6 +29,8 @@ use ScssPhp\ScssPhp\Version;
  * SCSS cache
  *
  * @author Cedric Morin <cedric@yterium.com>
+ *
+ * @internal
  */
 class Cache
 {

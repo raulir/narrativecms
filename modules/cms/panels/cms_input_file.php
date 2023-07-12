@@ -20,7 +20,7 @@ class cms_input_file extends CI_Controller {
 		
 		if (!empty($params['do']) && $params['do'] == 'cms_file_rename'){
 			
-			$this->load->model('cms_file_model');
+			$this->load->model('cms/cms_file_model');
 			
 			$temp = explode('/', $params['old_name']); 
 			

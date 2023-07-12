@@ -145,11 +145,12 @@ class Loader {
 
 	function model($model, $name = ''){
 
-		if (stristr($model, '/')) {
-			list($module, $model) = explode('/', $model, 2);
-		} else {
-			$module = 'cms';
+		if (!stristr($model, '/')) {
+			_html_error('Bad model name: '.$model, 500, ['backtrace' => 1]);
+			return;
 		}
+		
+		list($module, $model) = explode('/', $model, 2);
 
 		$model = strtolower($model);
 	
@@ -163,8 +164,7 @@ class Loader {
 		}
 
 		if (isset($CI->$name)) {
-
-			show_error('The model name you are loading is the name of a resource that is already being used: '.$name);
+			_html_error('The model name you are loading is the name of a resource that is already being used: '.$name, 500);
 		}
 
 		if (file_exists($GLOBALS['config']['base_path'].'modules/'.$module.'/models/'.$model.'.php')){
@@ -184,7 +184,8 @@ class Loader {
 		}
 
 		// couldn't find the model
-		show_error('Unable to locate the model you have specified: '.$module.'/'.$model);
+		_html_error('Unable to locate the model you have specified: '.$module.'/'.$model, 500, ['backtrace' => 1]);
+		
 	}
 
 	/**
@@ -587,7 +588,7 @@ class Loader {
 		}
 
 		if ( ! $file_exists && ! file_exists($_ci_path)) {
-			show_error('Unable to load the requested file: '.$_ci_file);
+			_html_error('Unable to load the requested file: '.$_ci_file, 500);
 		}
 
 		// This allows anything loaded using $this->load (views, files, etc.)
@@ -786,10 +787,9 @@ class Loader {
 
 		// If we got this far we were unable to find the requested class.
 		// We do not issue errors if the load call failed due to a duplicate request
-		if ($is_duplicate == FALSE)
-		{
+		if ($is_duplicate == FALSE){
 			log_message('error', "Unable to load the requested class: ".$class);
-			show_error("Unable to load the requested class: ".$class);
+			_html_error("Unable to load the requested class: ".$class, 500);
 		}
 	}
 
@@ -829,10 +829,9 @@ class Loader {
 		}
 
 		// Is the class name valid?
-		if ( ! class_exists($name))
-		{
+		if ( ! class_exists($name)){
 			log_message('error', "Non-existent class: ".$name);
-			show_error("Non-existent class: ".$class);
+			_html_error('Non-existent class: '.$class, 500);
 		}
 
 		// Set the variable name we will assign the class to
@@ -977,7 +976,7 @@ class Loader {
 	
 			// unable to load the helper
 			if ( ! isset($this->_ci_helpers[$helper])) {
-				show_error('Unable to load the requested file: helpers/'.$helper.'.php');
+				_html_error('Unable to load the requested file: helpers/'.$helper.'.php', 500, ['backtrace' => 1, ]);
 			}
 		}
 	}

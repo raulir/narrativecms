@@ -114,6 +114,17 @@
 			"help":"Salt for hash functions. Do not change when you don't know about this."
 		},
 		{
+			"type":"select",
+			"name":"allow_api_anywhere",
+			"label":"Allow API anywhere",
+			"values":{
+				"0":"Disabled",
+				"1":"Enabled"
+			},
+			"default":"0",
+			"help":"Enable API from anywhere. Adds Access-Control-Allow-Origin header to API requests"
+		},
+		{
 			"type":"text",
 			"name":"language",
 			"label":"Site default language",

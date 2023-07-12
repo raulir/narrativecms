@@ -18,8 +18,10 @@ use ScssPhp\ScssPhp\Formatter;
  * Compressed formatter
  *
  * @author Leaf Corcoran <leafot@gmail.com>
+ *
+ * @internal
  */
-class Compressed extends Formatter
+final class Compressed extends Formatter
 {
     /**
      * {@inheritdoc}
@@ -39,7 +41,7 @@ class Compressed extends Formatter
     /**
      * {@inheritdoc}
      */
-    public function blockLines(OutputBlock $block)
+    protected function blockLines(OutputBlock $block): void
     {
         $inner = $this->indentStr();
 
@@ -48,8 +50,6 @@ class Compressed extends Formatter
         foreach ($block->lines as $index => $line) {
             if (substr($line, 0, 2) === '/*' && substr($line, 2, 1) !== '!') {
                 unset($block->lines[$index]);
-            } elseif (substr($line, 0, 3) === '/*!') {
-                $block->lines[$index] = '/*' . substr($line, 3);
             }
         }
 
@@ -65,7 +65,7 @@ class Compressed extends Formatter
      *
      * @param \ScssPhp\ScssPhp\Formatter\OutputBlock $block
      */
-    protected function blockSelectors(OutputBlock $block)
+    protected function blockSelectors(OutputBlock $block): void
     {
         assert(! empty($block->selectors));
 

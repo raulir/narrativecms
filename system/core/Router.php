@@ -146,9 +146,8 @@ class Router {
 	 */
 	function _set_default_controller()
 	{
-		if ($this->default_controller === FALSE)
-		{
-			show_error("Unable to determine what should be displayed. A default route has not been specified in the routing file.");
+		if ($this->default_controller === FALSE){
+			_html_error("Unable to determine what should be displayed. A default route has not been specified in the routing file.", 500);
 		}
 		// Is the method being specified?
 		if (strpos($this->default_controller, '/') !== FALSE)

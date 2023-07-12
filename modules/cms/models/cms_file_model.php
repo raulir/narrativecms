@@ -178,7 +178,7 @@ class cms_file_model extends CI_Model {
 	
 	function rename_file($old_name, $new_filename, $new_short_name){
 		
-		$this->load->model('cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_model');
 		
 		$this->update_cms_file($old_name, ['filename' => $new_filename]);
 		$this->update_cms_file($new_filename, ['name' => $new_short_name]);

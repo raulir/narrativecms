@@ -16,10 +16,10 @@ class cms_page_panel_import extends CI_Controller {
 	
 	function panel_action($params){
 
-		$this->load->model('cms_page_panel_model');
-		$this->load->model('cms_panel_model');
-		$this->load->model('cms_image_model');
-		$this->load->model('cms_file_model');
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_panel_model');
+		$this->load->model('cms/cms_image_model');
+		$this->load->model('cms/cms_file_model');
 		
 		$do = $this->input->post('do');
 

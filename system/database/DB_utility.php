@@ -110,9 +110,8 @@ class CI_DB_utility extends CI_DB_forge {
 	{
 		$sql = $this->_optimize_table($table_name);
 
-		if (is_bool($sql))
-		{
-				show_error('db_must_use_set');
+		if (is_bool($sql)){
+			_html_error('db_must_use_set', 500);
 		}
 
 		$query = $this->db->query($sql);
@@ -186,101 +185,6 @@ class CI_DB_utility extends CI_DB_forge {
 		return current($res);
 	}
 
-	// --------------------------------------------------------------------
-
-	/**
-	 * Generate CSV from a query result object
-	 *
-	 * @access	public
-	 * @param	object	The query result object
-	 * @param	string	The delimiter - comma by default
-	 * @param	string	The newline character - \n by default
-	 * @param	string	The enclosure - double quote by default
-	 * @return	string
-	 */
-	function csv_from_result($query, $delim = ",", $newline = "\n", $enclosure = '"')
-	{
-		if ( ! is_object($query) OR ! method_exists($query, 'list_fields'))
-		{
-			show_error('You must submit a valid result object');
-		}
-
-		$out = '';
-
-		// First generate the headings from the table column names
-		foreach ($query->list_fields() as $name)
-		{
-			$out .= $enclosure.str_replace($enclosure, $enclosure.$enclosure, $name).$enclosure.$delim;
-		}
-
-		$out = rtrim($out);
-		$out .= $newline;
-
-		// Next blast through the result array and build out the rows
-		foreach ($query->result_array() as $row)
-		{
-			foreach ($row as $item)
-			{
-				$out .= $enclosure.str_replace($enclosure, $enclosure.$enclosure, $item).$enclosure.$delim;
-			}
-			$out = rtrim($out);
-			$out .= $newline;
-		}
-
-		return $out;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Generate XML data from a query result object
-	 *
-	 * @access	public
-	 * @param	object	The query result object
-	 * @param	array	Any preferences
-	 * @return	string
-	 */
-	function xml_from_result($query, $params = array())
-	{
-		if ( ! is_object($query) OR ! method_exists($query, 'list_fields'))
-		{
-			show_error('You must submit a valid result object');
-		}
-
-		// Set our default values
-		foreach (array('root' => 'root', 'element' => 'element', 'newline' => "\n", 'tab' => "\t") as $key => $val)
-		{
-			if ( ! isset($params[$key]))
-			{
-				$params[$key] = $val;
-			}
-		}
-
-		// Create variables for convenience
-		extract($params);
-
-		// Load the xml helper
-		$CI =& get_instance();
-		$CI->load->helper('xml');
-
-		// Generate the result
-		$xml = "<{$root}>".$newline;
-		foreach ($query->result_array() as $row)
-		{
-			$xml .= $tab."<{$element}>".$newline;
-
-			foreach ($row as $key => $val)
-			{
-				$xml .= $tab.$tab."<{$key}>".xml_convert($val)."</{$key}>".$newline;
-			}
-			$xml .= $tab."</{$element}>".$newline;
-		}
-		$xml .= "</$root>".$newline;
-
-		return $xml;
-	}
-
-	// --------------------------------------------------------------------
 
 	/**
 	 * Database Backup

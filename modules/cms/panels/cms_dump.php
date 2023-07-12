@@ -83,7 +83,7 @@ class cms_dump extends CI_Controller {
 	
 	function panel_action($params){
 		
-		$this->load->model('cms_update_model');
+		$this->load->model('cms/cms_update_model');
 		
 		$tables = ['block', 'cms_page_panel', 'cms_file', 'cms_image', 'cms_keyword', 'cms_page', 'cms_page_panel_param', 'cms_search_cache', 'cms_slug', 'cms_text', 'cms_user', 'menu_item', ];
 		

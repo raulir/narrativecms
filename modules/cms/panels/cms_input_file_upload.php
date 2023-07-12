@@ -29,7 +29,7 @@ class cms_input_file_upload extends CI_Controller {
 
 				if (!empty($new_file)){
 						
-					$this->load->model('cms_file_model');
+					$this->load->model('cms/cms_file_model');
 					$return = $this->cms_file_model->create_cms_file('', $new_file);
 						
 					rename($GLOBALS['config']['upload_path'].$new_file, $GLOBALS['config']['upload_path'].$return['filename']);

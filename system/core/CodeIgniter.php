@@ -121,7 +121,7 @@
 		}
 		
 		if ($not_found){
-			show_error('Unable to load your default controller. Please make sure the controller specified in your Routes.php file is validx.');
+			_html_error('Unable to load your default controller. Please make sure the controller specified in your Routes.php file is valid.', 500);
 		}
 		
 	} else {

@@ -16,8 +16,8 @@ class cms_keyword extends CI_Controller {
 
 	function panel_action(){
 
-		$this->load->model('cms_keyword_model');
-		$this->load->model('cms_image_model');
+		$this->load->model('cms/cms_keyword_model');
+		$this->load->model('cms/cms_image_model');
 		 
 		$do = $this->input->post('do');
 		if ($do == 'cms_keyword_save'){

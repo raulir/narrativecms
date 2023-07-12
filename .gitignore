@@ -1,6 +1,8 @@
 /robots.txt
 .DS_Store
-
+/.settings/
+/.buildpath
+/.project
 /cache/*
 !/cache/.gitkeep
 !/cache/index.html
@@ -10,9 +12,6 @@ _db/*
 !_db/cms.sql
 
 .svn
-.settings
-.buildpath
-.project
 
 _feed
 

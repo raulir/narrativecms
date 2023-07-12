@@ -16,8 +16,8 @@ class cms_image extends CI_Controller {
 
 	function panel_params($params){
 
-		$this->load->model('cms_image_model');
-		$this->load->model('cms_keyword_model');
+		$this->load->model('cms/cms_image_model');
+		$this->load->model('cms/cms_keyword_model');
 
 		if (empty($params['filename'])) {
 			$params['filename'] = '';

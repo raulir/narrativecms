@@ -19,7 +19,7 @@ class admin_save_page_order extends CI_Controller {
 		$do = $this->input->post('do');
 		if ($do == 'admin_save_page_order'){
 
-			$this->load->model('cms_page_model');
+			$this->load->model('cms/cms_page_model');
 
 			$page_orders = $this->input->post('page_orders');
 

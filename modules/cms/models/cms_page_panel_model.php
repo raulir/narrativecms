@@ -337,7 +337,7 @@ class cms_page_panel_model extends Model {
 				
 		} else {
 			
-			html_error('Cant cache non-existant panel id: '.$cms_page_panel_id);
+			_html_error('Cant cache non-existant panel id: '.$cms_page_panel_id);
 		
 		}
 
@@ -915,7 +915,7 @@ class cms_page_panel_model extends Model {
 	function get_cms_page_panel_settings($cms_panel_name){
 		
 		if (!stristr($cms_panel_name, '/')){
-			html_error('Can\'t load cms panel settings, module not specified.');
+			_html_error('Can\'t load cms panel settings, module not specified.');
 			return [];
 		}
 		

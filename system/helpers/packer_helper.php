@@ -103,13 +103,19 @@ if ( !function_exists('pack_css')) {
 						$css_string = str_replace(
 								[
 										"src: url('", 
+										'src: url("', 
 										", url('",
+										', url("',
 										"image: url('../",
+										'image: url("../',
 								], 
 								[
 										"src: url('".$GLOBALS['config']['base_url'].$scsss_item['module_path'].'css/', 
+										'src: url("'.$GLOBALS['config']['base_url'].$scsss_item['module_path'].'css/', 
 										", url('".$GLOBALS['config']['base_url'].$scsss_item['module_path'].'css/', 
+										', url("'.$GLOBALS['config']['base_url'].$scsss_item['module_path'].'css/', 
 										"image: url('".$GLOBALS['config']['base_url'].$scsss_item['module_path'],
+										'image: url("'.$GLOBALS['config']['base_url'].$scsss_item['module_path'],
 								], 
 								$css_string);
 						

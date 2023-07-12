@@ -34,7 +34,7 @@ if ( !function_exists('_i')) {
 
 			if (empty($params['silent'])){
 				if (substr($image_data['image'], 0, 4) != 'http'){
-					print($GLOBALS['config']['upload_url'].$image_data['image']);
+					print(($GLOBALS['config']['base_site'] ?? '').$GLOBALS['config']['upload_url'].$image_data['image']);
 				} else {
 					print($image_data['image']);
 				}
@@ -117,7 +117,8 @@ if ( !function_exists('_i')) {
 		if (($extension == 'gif' || $extension == 'svg') && file_exists($GLOBALS['config']['upload_path'].$image) && 
 				!is_dir($GLOBALS['config']['upload_path'].$image)){
 			
-			print('style="background-image:  url('.$GLOBALS['config']['upload_url'].trim($image, '/').'); '.$params['css'].'"');
+			print('style="background-image:  url('.($GLOBALS['config']['base_site']??'').$GLOBALS['config']['upload_url'].
+					trim($image, '/').'); '.$params['css'].'"');
 			return ['image' => $image, 'height' => 0, 'width' => 0, ];
 			
 		}
@@ -169,7 +170,7 @@ if ( !function_exists('_i')) {
 		if (!(file_exists($GLOBALS['config']['upload_path'].$image) && !is_dir($GLOBALS['config']['upload_path'].$image)) 
 				|| empty($image_db_data['original_width'])){
 			
-			$fileurl = $GLOBALS['config']['base_url'].'modules/cms/img/cms_no_image.png';
+			$fileurl = ($GLOBALS['config']['base_site'] ?? '').$GLOBALS['config']['base_url'].'modules/cms/img/cms_no_image.png';
 			$image_data['width'] = 2800;
 			$image_data['height'] = 2800;
 			
@@ -239,9 +240,12 @@ if ( !function_exists('_i')) {
 				$filename_hq = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_hq'].'.'.$params['output'];
 				$filename_lq = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_lq'].'.'.$params['output'];
 				$filename_mobile = $GLOBALS['config']['upload_path'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_mobile'].'.'.$params['output'];
-				$fileurl_hq = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_hq'].'.'.$params['output'];
-				$fileurl_lq = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_lq'].'.'.$params['output'];
-				$fileurl_mobile = $GLOBALS['config']['upload_url'].$image_dir.'/_'.$image_db_data['name'].'.'.$params['width_mobile'].'.'.$params['output'];
+				$fileurl_hq = ($GLOBALS['config']['base_site'] ?? '').$GLOBALS['config']['upload_url'].$image_dir.
+						'/_'.$image_db_data['name'].'.'.$params['width_hq'].'.'.$params['output'];
+				$fileurl_lq = ($GLOBALS['config']['base_site'] ?? '').$GLOBALS['config']['upload_url'].$image_dir.
+						'/_'.$image_db_data['name'].'.'.$params['width_lq'].'.'.$params['output'];
+				$fileurl_mobile = ($GLOBALS['config']['base_site'] ?? '').$GLOBALS['config']['upload_url'].$image_dir.
+						'/_'.$image_db_data['name'].'.'.$params['width_mobile'].'.'.$params['output'];
 				
 				// if mobile
 				if ($_SESSION['mobile']){
@@ -291,12 +295,7 @@ if ( !function_exists('_i')) {
 		if (!empty($params['pb'])){
 			$params['css'] .= ' padding-bottom: '.round($image_data['height']/$image_data['width']*100, 2).'%; ';
 		}
-		
-		if (!empty($GLOBALS['config']['base_site'])){
-			$fileurl_lq = trim($GLOBALS['config']['base_site'],'/').$fileurl_lq;
-			$fileurl_hq = trim($GLOBALS['config']['base_site'],'/').$fileurl_hq;
-		}
-		
+
 		if (!empty($needs_lazy_loading)){
 			
 			$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_images_lazy.js';

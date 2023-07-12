@@ -1181,10 +1181,8 @@ class CI_DB_driver {
 
 		$trace = debug_backtrace();
 
-		foreach ($trace as $call)
-		{
-			if (isset($call['file']) && strpos($call['file'], BASEPATH.'database') === FALSE)
-			{
+		foreach ($trace as $call){
+			if (isset($call['file']) && strpos($call['file'], BASEPATH.'database') === FALSE){
 				// Found it - use a relative path for safety
 				$message[] = 'Filename: '.str_replace(array(BASEPATH), '', $call['file']);
 				$message[] = 'Line Number: '.$call['line'];
@@ -1193,8 +1191,7 @@ class CI_DB_driver {
 			}
 		}
 
-		$error =& load_class('Exceptions');
-		echo $error->show_error($heading, $message, 'error_db');
+		_html_error('<h3'.$heading.'</h3>'.$message, 500);
 		exit;
 	}
 

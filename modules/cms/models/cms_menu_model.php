@@ -54,7 +54,7 @@ class cms_menu_model extends CI_Model {
 	
 	function get_menu_items_by($filter){
 		
-		$this->load->model('cms_page_model');
+		$this->load->model('cms/cms_page_model');
 	
 		$fields = array_keys($filter);
 		

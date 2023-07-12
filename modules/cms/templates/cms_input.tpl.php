@@ -9,6 +9,6 @@
 	
 <?php else: ?>
 
-	<?= html_error('Undefined cms input: "'.$params['type'].'"') ?>
+	<?php _html_error('Undefined cms input: "'.$params['type'].'"') ?>
 	
 <?php endif ?>

@@ -51,7 +51,7 @@ class cms_table extends CI_Controller {
 			 */
 
 			// save data
-			$this->load->model('cms_table_model');
+			$this->load->model('cms/cms_table_model');
 			$ids = array();
 			if (!empty($data[$table])){
 				foreach($data[$table] as $row){
@@ -65,7 +65,7 @@ class cms_table extends CI_Controller {
 			}
 			 
 			// get file field name load block type structure from definition file
-			$this->load->model('cms_panel_model');
+			$this->load->model('cms/cms_panel_model');
 			$structure = $this->cms_panel_model->get_cms_panel_definition('cms_table_'.$params['table']);
 
 			foreach ($structure as $struct){
@@ -88,13 +88,13 @@ class cms_table extends CI_Controller {
 
 	function panel_params($params){
 
-		$this->load->model('cms_table_model');
+		$this->load->model('cms/cms_table_model');
 
 		$return['data'][$params['table']] = $this->cms_table_model->get_data($params['table']);
 		$return['table_title'] = ucfirst(str_replace('_', ' ', $params['table']).'s');
 
 		// get file field name load block type structure from definition file
-		$this->load->model('cms_panel_model');
+		$this->load->model('cms/cms_panel_model');
 		$return['table_structure'] = $this->cms_panel_model->get_cms_panel_definition('cms_table_'.$params['table']);
 
 		// collect needed fk data

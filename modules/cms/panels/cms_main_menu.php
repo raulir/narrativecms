@@ -19,7 +19,7 @@ class cms_main_menu extends CI_Controller {
 		$do = $this->input->post('do');
 		if ($do == 'admin_main_menu_save'){
 
-			$this->load->model('cms_menu_model');
+			$this->load->model('cms/cms_menu_model');
 
 			$menu_id = $this->input->post('menu_id');
 			$menu_item_ids = $this->input->post('menu_item_id');
@@ -69,9 +69,9 @@ class cms_main_menu extends CI_Controller {
 
 	function panel_params($params){
 
-		$this->load->model('cms_menu_model');
-		$this->load->model('cms_page_model');
-		$this->load->model('cms_page_panel_model');
+		$this->load->model('cms/cms_menu_model');
+		$this->load->model('cms/cms_page_model');
+		$this->load->model('cms/cms_page_panel_model');
 
 		$return['menu_items'] = $this->cms_menu_model->get_menu_items($params['menu_id']);
 
@@ -121,7 +121,7 @@ class cms_main_menu extends CI_Controller {
 
 		$return['pages'] = $this->cms_page_model->get_cms_pages();
 
-		$this->load->model('cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_model');
 		$return['cms_page_panels'] = $this->cms_menu_model->get_cms_page_panels();
 		foreach($return['cms_page_panels'] as $key => $value){
 			if ($value['submenu_anchor'] == ''){

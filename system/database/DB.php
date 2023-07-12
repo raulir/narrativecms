@@ -50,9 +50,8 @@ function &DB($params = '', $active_record_override = NULL)
 		$db['default']['autoinit'] = TRUE;
 		$db['default']['stricton'] = FALSE;
 		
-		if ( ! isset($db) OR count($db) == 0)
-		{
-			show_error('No database connection settings were found in the database config file.');
+		if ( ! isset($db) OR count($db) == 0){
+			_html_error('No database connection settings were found in the database config file.', 500);
 		}
 
 		if ($params != '')
@@ -60,9 +59,8 @@ function &DB($params = '', $active_record_override = NULL)
 			$active_group = $params;
 		}
 
-		if ( ! isset($active_group) OR ! isset($db[$active_group]))
-		{
-			show_error('You have specified an invalid database connection group.');
+		if ( ! isset($active_group) OR ! isset($db[$active_group])){
+			_html_error('You have specified an invalid database connection group.', 500);
 		}
 
 		$params = $db[$active_group];
@@ -77,9 +75,8 @@ function &DB($params = '', $active_record_override = NULL)
 		 *  $dsn = 'driver://username:password@hostname/database';
 		 */
 
-		if (($dns = @parse_url($params)) === FALSE)
-		{
-			show_error('Invalid DB Connection String');
+		if (($dns = @parse_url($params)) === FALSE){
+			_html_error('Invalid DB Connection String', 500);
 		}
 
 		$params = array(
@@ -113,9 +110,8 @@ function &DB($params = '', $active_record_override = NULL)
 	}
 
 	// No DB specified yet?  Beat them senseless...
-	if ( ! isset($params['dbdriver']) OR $params['dbdriver'] == '')
-	{
-		show_error('You have not selected a database type to connect to.');
+	if ( ! isset($params['dbdriver']) OR $params['dbdriver'] == '')	{
+		_html_error('You have not selected a database type to connect to.', 500);
 	}
 
 	// Load the DB classes.  Note: Since the active record class is optional

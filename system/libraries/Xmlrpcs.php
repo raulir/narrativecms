@@ -13,14 +13,12 @@
  * @filesource
  */
 
-if ( ! function_exists('xml_parser_create'))
-{
-	show_error('Your PHP installation does not support XML');
+if ( ! function_exists('xml_parser_create')){
+	_html_error('Your PHP installation does not support XML', 500);
 }
 
-if ( ! class_exists('CI_Xmlrpc'))
-{
-	show_error('You must load the Xmlrpc class before loading the Xmlrpcs class in order to create a server.');
+if ( ! class_exists('CI_Xmlrpc')){
+	_html_error('You must load the Xmlrpc class before loading the Xmlrpcs class in order to create a server.', 500);
 }
 
 // ------------------------------------------------------------------------
