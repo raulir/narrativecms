@@ -10,10 +10,6 @@ class Ajax_api extends CI_Controller {
    	
    	function get_panel(){
 
-   		if (!empty($GLOBALS['config']['allow_api_anywhere'])){
-   			header('Access-Control-Allow-Origin: *');
-   		}
-   		
    		if (empty($this->params['panel_id'])){
     		print(json_encode(array('result' => array(), 'error' => array('message' => 'Missing panel_id', ))));
     		die();

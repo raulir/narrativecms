@@ -677,38 +677,79 @@ function panels_display_popup(html, params){
 	
 }
 
+function _cms_load_css(filename){
+	return new Promise((resolve,reject) => {
+		
+		let link = document.createElement('link')
+	    
+	    link.type = 'text/css'
+	    link.rel    = 'stylesheet'
+	    link.addEventListener('load',resolve)
+	    link.href = filename
+	    
+	    document.head.appendChild(link)
+	    
+	})
+}
+
 function cms_load_css(filenames, force_download, class_to_remove){
 	
-	$(filenames).each(function(key, filename){
-
-		if (filename.indexOf('?') !== -1){
-			var clean_filename = filename.substr(0, filename.indexOf('?'));
-		} else {
-			var clean_filename = filename;
-		}
-		
-		var found = false;
-		
-		$('link[type="text/css"]').each(function(){
-			if (this.href.indexOf(clean_filename) !== -1){
-				found = true;
-			}
-		});
-
-		if(!found){
-			
-			if (force_download){
-				filename = clean_filename + '?v=' + Math.round(Math.random() * 10000000);
-			}
-			
-			$('head').append('<link rel="stylesheet" type="text/css" href="' + filename + '"/>');
-
-		}
-		
-	});
-
-	$('.' + class_to_remove).remove();
+	return new Promise((resolve,reject) => {
 	
+		var load_total = 0
+		var load_finished = 0
+		
+		$(filenames).each(function(key, filename){
+	
+			if (filename.indexOf('?') !== -1){
+				var clean_filename = filename.substr(0, filename.indexOf('?'));
+			} else {
+				var clean_filename = filename;
+			}
+			
+			var found = false;
+			
+			$('link[type="text/css"]').each(function(){
+				if (this.href.indexOf(clean_filename) !== -1){
+					found = true;
+				}
+			});
+	
+			if(!found){
+	
+				if (force_download){
+					filename = clean_filename + '?v=' + Math.round(Math.random() * 10000000);
+				}
+				
+				load_total += 1
+				_cms_load_css(filename).then(() => {
+					load_finished += 1
+					setTimeout(() => {
+						if (load_finished == load_total){
+							resolve()
+						}
+//						console.log(load_finished)
+					}, 100)
+				})
+				
+				// $('head').append('<link rel="stylesheet" type="text/css" href="' + filename + '"/>');
+	
+			}
+			
+		});
+	
+//		$('.' + class_to_remove).remove();
+		
+		if (load_total == 0){
+			resolve()
+		} else {
+			setTimeout(() => {
+				resolve()
+			}, 5000)
+		}
+
+	})
+
 }
 
 function get_api(name, params){

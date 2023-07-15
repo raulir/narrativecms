@@ -235,7 +235,7 @@ class Index extends CI_Controller {
 		
 		} else {
 			
-			header('Access-Control-Allow-Origin: *');
+//			header('Access-Control-Allow-Origin: *');
 
 			$positions = $this->input->post('cms_positions');
 			

@@ -4,6 +4,10 @@
 $working_directory = str_replace('\\', '/', trim(getcwd()).'/');
 include($working_directory.'system/core/config.php');
 
+if (!empty($GLOBALS['config']['allow_api_anywhere'])){
+	header('Access-Control-Allow-Origin: *');
+}
+   		
 // check if api call
 if (substr($_SERVER['REQUEST_URI'], 0, strlen($GLOBALS['config']['base_url'])) == $GLOBALS['config']['base_url']) {
 	$string = substr($_SERVER['REQUEST_URI'], strlen($GLOBALS['config']['base_url']));

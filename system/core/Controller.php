@@ -708,11 +708,18 @@ class CI_Controller {
 						$css_arr_prep[] = (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$css_inc['script'];
 					}
 					$css_arr_str = implode('\', \'', $css_arr_prep);
+					$rand_id = md5($css_arr_str);
+					
+					$return['_html'] = '<span class="_cms_load_container_'.$rand_id.'" style="opacity: 0; ">'.$return['_html'].'</span>';
 		
-					$css_str .= '<script class="cms_load_css cms_load_css_'.md5($css_arr_str).'" type="text/javascript">'."\n";
+					$css_str .= '<script class="cms_load_css cms_load_css_'.$rand_id.'" type="text/javascript">'."\n";
+//					$css_str .= '$_cms_css_'.$rand_id.' = $(".cms_load_css_'.$rand_id.'").parent().css("opacity", "0"); ';
+//					$css_str .= 'console.log($_cms_css_'.$rand_id.');';
 					$css_str .= 'cms_load_css([\'';
 					$css_str .=	$css_arr_str;
-					$css_str .= '\'], '. (!empty($GLOBALS['config']['cache']['force_download']) ? 'true' : 'false') .', \'cms_load_css_'. md5($css_arr_str) .'\');'."\n".'</script>'."\n";
+					$css_str .= '\'], '. (!empty($GLOBALS['config']['cache']['force_download']) ? 'true' : 'false') .','.
+							' \'cms_load_css_'. $rand_id .
+							'\').then(() => {$("._cms_load_container_'.$rand_id.'").css("opacity", "")});'."\n".'</script>'."\n";
 		
 				}
 			
