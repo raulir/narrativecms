@@ -82,6 +82,7 @@ class cms_input_grid extends CI_Controller {
 			}
 			
 			$params['fields'] = $params['fields'] ?? [];
+
 			if (!empty($params['operations']) && stristr($params['operations'], 'S')){
 
 				$ds_params = [
@@ -94,9 +95,15 @@ class cms_input_grid extends CI_Controller {
 					$ds_params['_extends'] = $base['_extends'];
 				}
 				
-				$params['fields'] = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], $ds_params);
+				$fields = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], $ds_params);
+
+				if (!empty($fields['fields'])){
+					$params['fields'] = $fields['fields'];
+				} else {
+					$params['fields'] = $fields;
+				}
 				
-				if (!empty($params['fields']['_no_cache'])) unset($params['fields']['_no_cache']);
+				if (!empty($fields['_no_cache'])) unset($params['fields']['_no_cache']);
 
 			}
 

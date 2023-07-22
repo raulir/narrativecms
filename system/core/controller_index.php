@@ -49,6 +49,11 @@ class Index extends CI_Controller {
     	$this->load->model('cms/cms_menu_model');
     	
     	$page_config = [];
+    	
+    	$get_params = $this->input->get();
+    	if (!is_array($get_params)){
+    		$get_params = [];
+    	}
     		
         // if module list item module/item=XX then / causes second parameter
     	if (!empty($extra)){
@@ -84,12 +89,12 @@ class Index extends CI_Controller {
 
 			foreach($blocks as $block){
 
-				$page_config[] = array(
+				$page_config[] = [
 						'position' => 'main',
 						'panel' => $block['panel_name'],
-						'params' => $block,
+						'params' => array_merge($get_params, $block),
 						'_cms_layout' => $page['layout'],
-				);
+				];
 				
 			}
 
@@ -149,13 +154,13 @@ class Index extends CI_Controller {
 						$extra_params_2 = $extra_params;
 					}
 
-					$page_config[] = array(
+					$page_config[] = [
 							'position' => 'main',
 							'panel' => $block['panel_name'],
-							'params' => array_merge($block, $extra_params_2, // keep submenu details from settings ->
-									array('submenu_anchor' => $block['submenu_anchor'], 'submenu_title' =>  $block['submenu_title'], )),
+							'params' => array_merge($get_params, $block, $extra_params_2, // keep submenu details from settings ->
+									['submenu_anchor' => $block['submenu_anchor'], 'submenu_title' =>  $block['submenu_title'], ]),
 							'_cms_layout' => $page['layout'],
-					);
+					];
 					
 				}
 				
@@ -164,18 +169,18 @@ class Index extends CI_Controller {
     		} else { // put a panel to main position
     			
 	    		if ($list_item_data['show'] == 1){
-					$page_config[] = array(
+					$page_config[] = [
 							'position' => 'main',
 							'panel' => $panel_name,
-							'params' => array_merge($list_item_data, $extra_params),
+							'params' => array_merge($get_params, $list_item_data, $extra_params),
 							'_cms_layout' => $page['layout'],
-					);
+					];
 	    		}
 	    		
     		}
     		
     	}
-    	
+
     	// add headers, footers, etc
     	if($cms_page_id && !empty($page['positions'])){
 

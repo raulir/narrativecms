@@ -831,7 +831,7 @@ class Loader {
 		// Is the class name valid?
 		if ( ! class_exists($name)){
 			log_message('error', "Non-existent class: ".$name);
-			_html_error('Non-existent class: '.$class, 500);
+			_html_error('Non-existent class: '.$class, 500, ['backtrace' => 1]);
 		}
 
 		// Set the variable name we will assign the class to

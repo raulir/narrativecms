@@ -23,6 +23,10 @@ class cms_input extends CI_Controller {
 		// find correct panel to display
 		if (!stristr($params['type'], '/')){
 			
+			if($params['type'] == 'color'){
+				$params['type'] = 'colour';
+			}
+			
 			// cms panel
 			$filename = $GLOBALS['config']['base_path'].'modules/cms/templates/cms_input_'.str_replace('cms_', '', $params['type']).'.tpl.php';
 			if (file_exists($filename)){

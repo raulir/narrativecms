@@ -43,8 +43,9 @@
 			"type":"textarea",
 			"name":"text",
 			"label":"Description",
-			"lines":"6",
-			"translate":"1"
+			"lines":"12",
+			"translate":"1",
+			"html":"PB"
 		},
 		{
 			"type":"fk",
@@ -66,6 +67,13 @@
 			"label":"Specification text",
 			"lines":"6",
 			"translate":"1"
+		},
+		{
+			"type":"image",
+			"name":"image",
+			"label":"Image",
+			"category":"product",
+			"help":"Main image used for the product mainly on listings"
 		},
 		{
 			"type":"grid",
@@ -129,6 +137,17 @@
 					"name":"text",
 					"label":"Label",
 					"translate":"1"
+				},
+				{
+					"type":"select",
+					"name":"style",
+					"label":"Style",
+					"values": {
+						"full":"Full",
+						"frame":"Frame",
+						"small":"Small"
+					},
+					"default":"full"
 				}
 			]
 		}

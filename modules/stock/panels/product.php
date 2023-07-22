@@ -103,19 +103,21 @@ class product extends CI_Controller{
 				
 			// get dimensions
 			$product_stock = $this->cms_page_panel_model->get_cms_page_panel($product['product_stock_id']);
-			foreach($product_stock['dimensions'] as $key =>	$dim){
-	
-				$dim_data = $this->cms_page_panel_model->get_cms_page_panel($dim['dimension']);
-	
-				$return[] = [
-						'type' => 'stock/dim_value_select',
-						'name' => 'dimension_' . $dim_data['id'],
-						'label' => $dim_data['heading'],
-						'width' => '10',
-						'dimension' => $dim_data['id'],
-						'order' => 30 + $key,
-				];
-	
+			if (!empty($product_stock['dimensions'])){
+				foreach($product_stock['dimensions'] as $key =>	$dim){
+		
+					$dim_data = $this->cms_page_panel_model->get_cms_page_panel($dim['dimension']);
+		
+					$return[] = [
+							'type' => 'stock/dim_value_select',
+							'name' => 'dimension_' . $dim_data['id'],
+							'label' => $dim_data['heading'],
+							'width' => '10',
+							'dimension' => $dim_data['id'],
+							'order' => 30 + $key,
+					];
+		
+				}
 			}
 
 		// list

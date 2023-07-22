@@ -1,0 +1,72 @@
+.cms_input_colour_container {
+	max-width: 47.0rem;
+}
+
+.cms_input_colour_helper_area {
+	box-sizing: border-box;
+	display: block;
+	border: 0.1rem solid $cms_border;
+	width: 5.0rem;
+	height: 2.6rem;
+	line-height: 2.3rem;
+	font-size: 1.7rem;
+	padding: 0.1rem 0.5rem 0 0.5rem;
+	box-shadow: 0 0 0.02rem $cms_border;
+	position: absolute;
+	left: 15.0rem;
+	top: 0.5rem;
+	z-index: 10;
+	overflow: hidden;
+	background-position: center;
+	background-size: 4.0rem auto;
+}
+
+.cms_input_colour_helper {
+	cursor: pointer;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%) scale(2);
+}
+
+.cms_input_colour_input {
+	box-sizing: border-box;
+	display: block;
+	border: 0.1rem solid $cms_border;
+	width: 27.0rem;
+	height: 2.6rem;
+	line-height: 2.3rem;
+	font-size: 1.7rem;
+	padding: 0.1rem 0.5rem 0 0.5rem;
+	box-shadow: 0 0 0.02rem $cms_border;
+	position: absolute;
+	left: 21.0rem;
+	top: 0.5rem;
+	z-index: 10;
+}
+
+.cms_repeater_block .cms_input_text_input {
+	width: 31.0rem;
+	right: 0;
+}
+
+.cms_input_colour_default {
+	box-sizing: border-box;
+    height: 1.8rem;
+    width: 1.8rem;
+    border: 0.1rem solid $cms_border;
+    border-radius: 0.3rem;
+    position: absolute;
+    right: 1.4rem;
+    top: 0.9rem;
+    background-size: 1.3rem auto;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    z-index: 20;
+    opacity: 0;
+    transition: opacity 0.3s;
+    .cms_input_colour:hover & {
+    	opacity: 1;
+    }
+}
