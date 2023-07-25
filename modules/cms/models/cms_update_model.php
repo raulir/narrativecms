@@ -630,8 +630,12 @@ class cms_update_model extends CI_Model {
 
 	function run_sql($sql){
 		
-		$query = $this->db->query($sql);
-		
+		try {
+			$query = $this->db->query($sql);
+		} catch (Exception $e) {
+			_html_error($e->getMessage(), 0, ['backtrace' => 1]);
+		}
+
 		if ($query === false || $query === true){
 			return [$query];
 		}

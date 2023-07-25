@@ -85,7 +85,8 @@ class cms_dump extends CI_Controller {
 		
 		$this->load->model('cms/cms_update_model');
 		
-		$tables = ['cms_page_panel', 'cms_file', 'cms_image', 'cms_keyword', 'cms_page', 'cms_page_panel_param', 'cms_search_cache', 'cms_slug', 'cms_text', 'cms_user', ];
+		$tables = ['cms_file', 'cms_image', 'cms_keyword', 'cms_page', 'cms_page_panel', 'cms_page_panel_param', 
+				'cms_search_cache', 'cms_slug', 'cms_text', 'cms_user', ];
 		
 		if (!empty($params['do'])){
 				
@@ -132,7 +133,8 @@ class cms_dump extends CI_Controller {
 					}
 					
 					// database
-					Export_Database($GLOBALS['config']['database']['hostname'],$GLOBALS['config']['database']['username'],$GLOBALS['config']['database']['password'],$GLOBALS['config']['database']['database'],
+					Export_Database($GLOBALS['config']['database']['hostname'],$GLOBALS['config']['database']['username'],
+							$GLOBALS['config']['database']['password'],$GLOBALS['config']['database']['database'],
 							$tables, $sql_temp);
 						
 					if (is_file($sql_temp)){
@@ -167,7 +169,8 @@ class cms_dump extends CI_Controller {
 					$this->add_month_to_zip($zip, date('Y', strtotime('first day of last month')).'/'.date('m', strtotime('first day of last month')));
 					
 					// add sql file
-					Export_Database($GLOBALS['config']['database']['hostname'], $GLOBALS['config']['database']['username'], $GLOBALS['config']['database']['password'],
+					Export_Database($GLOBALS['config']['database']['hostname'], $GLOBALS['config']['database']['username'], 
+							$GLOBALS['config']['database']['password'],
 							$GLOBALS['config']['database']['database'],	$tables, $sql_temp);
 						
 					if (is_file($sql_temp)){
@@ -259,14 +262,17 @@ class cms_dump extends CI_Controller {
 						$sql = 'drop table if exists '.$table.'_bu';
 						$this->cms_update_model->run_sql($sql);
 						
-						$sql = "select 1 from ".$table." limit 1";
+						// $sql = "select 1 from ".$table." limit 1";
+						$sql = "show tables like '".$table."'";
 						$query = $this->db->query($sql);
 						
 						if ($query && $query->num_rows()){
+							
 							$sql = 'RENAME TABLE `'.$table.'` TO `'.$table.'_bu`';
 							$this->cms_update_model->run_sql($sql);
+							
 						}
-						
+
 					}
 						
 					// import sql

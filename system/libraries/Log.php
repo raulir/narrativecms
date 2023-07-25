@@ -22,10 +22,10 @@ class CI_Log {
 		}
 
 		$filepath = $GLOBALS['config']['base_path'].$GLOBALS['config']['errors_log'].'.txt';
-		$message  = '';
+		$message = '';
 
-		if ( ! file_exists($filepath))
-		{
+		if ( ! file_exists($filepath)){
+			file_put_contents($filepath, '');
 			$message .= "<"."?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?".">\n\n";
 		}
 

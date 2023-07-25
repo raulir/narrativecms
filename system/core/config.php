@@ -1,5 +1,39 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
+function _html_error($error, $exit = 0, $extra = []){
+
+  	$formatted = str_replace(['#br#', '#b#', '#bb#'], ['<br>', '<b>', '</b>'], 
+  			htmlentities(str_replace(['<br>', '<b>', '</b>'], ['#br#', '#b#', '#bb#'], $error)));
+
+    if (empty($extra['location'])){
+		$backtrace = debug_backtrace();
+		if (empty($extra['backtrace'])){
+			$extra['backtrace'] = 0; 
+		}
+		$extra['location'] = basename($backtrace[$extra['backtrace']]['file']).':'.$backtrace[$extra['backtrace']]['line'];
+    }
+
+  	$return = ('<pre style="background-color: white; color: black; display: block; border: 0.1rem solid red; '.
+   			'font-size: 0.8rem; line-height: 0.9rem; letter-spacing: 0; font-family: monospace; text-align: left; ">');
+   	$return .= ('<div style="line-height: 0.6rem;  padding: 0.4rem; color: red; font-weight: bold; ">'.
+   			strtoupper($extra['location']??'').'</div><div style="padding: 0.6rem 1.0rem; ">');
+    	
+   	$return .= ($formatted);
+   	$return .= ('</div></pre>');
+    			 
+   	if(!empty($GLOBALS['config']['errors_visible'])){
+   		print($return);
+   	}
+    	
+   	if ($exit){
+   		set_status_header($exit);
+   		exit();
+   	}
+
+   	return $return;
+    	
+}
+
 // static system config (CI heritage, deprecated)
 $config['system']['charset'] = 'UTF-8';
 $config['system']['log_path'] = '';
@@ -92,8 +126,14 @@ if ($GLOBALS['config']['database']['dbdriver'] = 'mysqli') {
 	$conn_hash = md5($GLOBALS['config']['database']['hostname'].$GLOBALS['config']['database']['username'].
 			$GLOBALS['config']['database']['password'].$GLOBALS['config']['database']['database']);
 	
-	$GLOBALS['dbconnections'][$conn_hash] = @mysqli_connect($GLOBALS['config']['database']['hostname'], 
-			$GLOBALS['config']['database']['username'], $GLOBALS['config']['database']['password'], $GLOBALS['config']['database']['database']);
+	try {
+		$GLOBALS['dbconnections'][$conn_hash] = @mysqli_connect($GLOBALS['config']['database']['hostname'],
+				$GLOBALS['config']['database']['username'], $GLOBALS['config']['database']['password'], $GLOBALS['config']['database']['database']);
+	} catch (Exception $e) {
+		print('Can\'t connect database');
+		die();
+	}
+	
 }
 
 // load config from db
@@ -115,7 +155,11 @@ if ($db === false){
 
 $sql = "select b.name, b.value from cms_page_panel a join cms_page_panel_param b on a.cms_page_panel_id = b.cms_page_panel_id ".
 		" where a.panel_name = 'cms/cms_settings' and b.name != ''";
-$query = mysqli_query($db, $sql);
+try {
+	$query = mysqli_query($db, $sql);
+} catch (Exception $e) {
+	_html_error($e->getMessage());
+}
 
 if ($query === false){
 	print('Database error: '.$db->error);

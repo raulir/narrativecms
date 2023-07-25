@@ -86,7 +86,11 @@ if ( !function_exists('pack_css')) {
 				$scss_string .= '/* CUT HERE */'.file_get_contents($GLOBALS['config']['base_path'].$scsss_item['script']);
 	
 				// compile scss
-				require_once($GLOBALS['config']['base_path'].'system/vendor/scss/scss.inc.php');
+				try {
+					require_once($GLOBALS['config']['base_path'].'system/vendor/scss/scss.inc.php');
+				}  catch (Exception $e) {
+					_html_error($e->getMessage(), 500);
+				}
 		   
 				$scss_compiler = new Compiler();
 		   
