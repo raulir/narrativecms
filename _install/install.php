@@ -1,7 +1,7 @@
 <?php
 
 /**
- * BC CMS install script
+ * Narrative CMS install script
  */
 
 // actions
@@ -83,7 +83,7 @@ if (!empty($_POST['do'])){
 				'content' => $postdata
 		)));
 		 
-		$master_data = @file_get_contents('http://cms.bytecrackers.com/cms/updater/', false, $context);
+		$master_data = @file_get_contents('http://update.narrativecms.com/cms/updater/', false, $context);
 
 		if ($master_data === false){
 			print(json_encode(['ok' => 0]));
@@ -105,7 +105,7 @@ if (!empty($_POST['do'])){
 				'content' => $postdata
 		)));
 			
-		$master_data = @file_get_contents('http://cms.bytecrackers.com/cms/updater/', false, $context);
+		$master_data = @file_get_contents('http://update.narrativecms.com/cms/updater/', false, $context);
 		$master_data = json_decode($master_data, true);
 		
 		$master_length = count($master_data['files']);
@@ -144,7 +144,7 @@ if (!empty($_POST['do'])){
 		        		'content' => $postdata
 		    	)));
 		
-				$master_file_data = file_get_contents('http://cms.bytecrackers.com/cms/updater/', false, $context);
+				$master_file_data = file_get_contents('http://update.narrativecms.com/cms/updater/', false, $context);
 				$master_file_data = json_decode($master_file_data, true);
 					
 				// replace local file
@@ -347,7 +347,7 @@ INSERT INTO cms_page_panel_param VALUES
 ("417","1","inline_limit","100000","0"),
 ("418","1","targets_enabled","0","0"),
 ("419","1","cron_trigger","visits","0"),
-("420","1","cms_update_url","http://cms.bytecrackers.com/cms/updater/","0"),
+("420","1","cms_update_url","http://update.narrativecms.com/cms/updater/","0"),
 ("421","1","layout","cms/rem","0"),
 ("422","1","modules.000","cms","0"),
 ("424","1","rem_px","1400","0"),
@@ -363,7 +363,7 @@ INSERT INTO cms_page_panel_param VALUES
 ("434","1","cms_background","","0"),
 ("435","1","images_rows","4","0"),
 ("436","1","input_link_order","0","0"),
-("437","1","","{\"cms_background\":\"\",\"cms_update_url\":\"http:\\/\\/cms.bytecrackers.com\\/cms\\/updater\\/\",\"cron_trigger\":\"visits\",\"email\":\"\",'.
+("437","1","","{\"cms_background\":\"\",\"cms_update_url\":\"http:\\/\\/update.narrativecms.com\\/cms\\/updater\\/\",\"cron_trigger\":\"visits\",\"email\":\"\",'.
 '\"favicon\":\"\",\"images_1x\":\"1\",\"images_2x\":\"1.5\",\"images_quality\":\"85\",\"images_rows\":\"4\",\"images_textarea\":\"0.5\",'.
 '\"inline_limit\":\"100000\",\"input_link_order\":\"0\",\"landing_page\":{\"cms_page_id\":\"1\",\"target\":\"_page\",\"target_id\":\"\",'.
 '\"text\":\"Homepage\",\"url\":\"homepage\\/\",\"_value\":\"1\"},\"layout\":\"rem\",\"modules\":{\"000\":\"cms\"},\"panel_cache\":\"0\",'.
@@ -558,7 +558,7 @@ $project_name = strtolower($project_name);
 
 	<body>
 	
-		<div>BC CMS install<br><br></div>
+		<div>Narrative CMS install<br><br></div>
 		
 		<div class="step_1">
 		

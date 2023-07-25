@@ -74,8 +74,8 @@ RewriteRule .* - [F,L]
 # Everything, what is not set domain goes to set domain
 RewriteCond %{HTTP_HOST} !^(.*)\.localhost
 RewriteCond %{HTTP_HOST} !^stg\.
-RewriteCond %{HTTP_HOST} !^cms\.bytecrackers\.com
-RewriteRule ^(.*)$ http://cms.bytecrackers.com%{REQUEST_URI} [R=302,L]
+RewriteCond %{HTTP_HOST} !^update\.narrativecms\.com
+RewriteRule ^(.*)$ http://update.narrativecms.com%{REQUEST_URI} [R=302,L]
 
 # Redirect from .co.uk to .com
 RewriteCond %{HTTP_HOST} ^(.*)\.co\.uk

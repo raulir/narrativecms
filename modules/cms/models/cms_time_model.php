@@ -21,7 +21,8 @@ class cms_time_model extends CI_Model {
 				touch($filename);
 			}
 
-			$query_url = 'https://maps.googleapis.com/maps/api/timezone/json?location='.$coordinates_url.'&timestamp='.$timestamp.'&key=AIzaSyBIWcZfKf5DEKEvVMKRn0aH59reTTkm4vg';
+			$query_url = 'https://maps.googleapis.com/maps/api/timezone/json?location='.$coordinates_url.'&timestamp='.
+					$timestamp.'&key='.$GLOBALS['config']['google_map_api_key'].'';
 			
 			$content = file_get_contents($query_url);
 			$data = json_decode($content, true);

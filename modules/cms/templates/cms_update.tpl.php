@@ -28,7 +28,7 @@
 
 			<?php foreach($data as $row): ?>
 				<div class="cms_update_row">
-					<div class="cms_update_cell"><?= !empty($row['area']) ? $row['area'] : 'BC CMS' ?></div>
+					<div class="cms_update_cell"><?= !empty($row['area']) ? $row['area'] : 'Narrative CMS' ?></div>
 					<div class="cms_update_cell">
 						
 						<?php if($row['local_version'] !== '0.0.0'): ?>

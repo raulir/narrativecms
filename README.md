@@ -1,6 +1,6 @@
-# BC CMS
+# Narrative CMS
 
-BC CMS is a full stack PHP/Javascript/SCSS framework with CMS for websites and other browser based projects.
+Narrative CMS is a full stack PHP/Javascript/SCSS framework with CMS for websites and other browser based projects.
 
 * Allows rapid and lean, no-nonsense web development
 * For working with everchanging designs and constant client feedback
@@ -15,9 +15,7 @@ BC CMS is a full stack PHP/Javascript/SCSS framework with CMS for websites and o
 * Built in SCSS (SASS3) compiler
 * Built in externals optimiser, only scripts and styles really needed on page are loaded
 
-Non-technical information and case studies: http://www.bytecrackers.com/
-
-BC CMS is branched from Codeigniter 2.0 (2013)
+Non-technical information and case studies: https://www.narrativecms.com/
 
 ### Installation and setup
 
