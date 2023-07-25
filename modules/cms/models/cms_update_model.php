@@ -224,9 +224,9 @@ class cms_update_model extends CI_Model {
 		if (!file_exists($filename)){
 
 			if (!empty($area)){
-				if (file_exists($GLOBALS['config']['base_path'].'modules/'.$area['name'].'/')){
+				if (file_exists($GLOBALS['config']['base_path'].'modules/'.$area.'/')){
 					
-					$this->rebuild_area($area, ['modules/'.$area['name'].'/']);
+					$this->rebuild_area($area, ['modules/'.$area.'/']);
 					
 				}
 			} else {
