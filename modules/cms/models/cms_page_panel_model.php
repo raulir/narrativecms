@@ -914,6 +914,11 @@ class cms_page_panel_model extends Model {
 	 */
 	function get_cms_page_panel_settings($cms_panel_name){
 		
+		if (is_numeric($cms_panel_name)){
+			$panel_data = $this->get_cms_page_panel($cms_panel_name);
+			$cms_panel_name = $panel_data['panel_name'];
+		}
+		
 		if (!stristr($cms_panel_name, '/')){
 			_html_error('Can\'t load cms panel settings, module not specified.');
 			return [];

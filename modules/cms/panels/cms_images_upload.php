@@ -18,33 +18,35 @@ class cms_images_upload extends CI_Controller {
 	
 	// common functionality of file uploading
 	function image_upload($input_name, $category){
-		
+
 		$this->load->library('upload', array('allowed_types' => 'svg|gif|jpg|png|jpeg', 'upload_path' => $GLOBALS['config']['upload_path'], ));
 		
 		$new_image = $this->upload->upload_image($input_name);
 		
-		if (!empty($new_image)){
+		$filename = '';
 		
+		if (!empty($new_image)){
+
 			// move it to year/month directory
 			if (!file_exists($GLOBALS['config']['upload_path'].date('Y'))){
 				mkdir($GLOBALS['config']['upload_path'].date('Y'));
 			}
-		
+
 			if (!file_exists($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'))){
 				mkdir($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'));
 			}
-		
+
 			$filename = $this->cms_image_model->create_cms_image(date('Y').'/'.date('m').'/', $new_image, $category);
 
 			// delete existing images
 			if(file_exists($GLOBALS['config']['upload_path'].$filename)){
 				$this->cms_image_model->delete_cms_image_by_filename($filename, false);
 			}
-		
+
 			rename($GLOBALS['config']['upload_path'].$new_image, $GLOBALS['config']['upload_path'].$filename);
-		
+
 		}
-		
+
 		return $filename;
 		
 	}

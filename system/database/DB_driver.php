@@ -274,6 +274,7 @@ class CI_DB_driver {
 		// Is query caching enabled?  If the query is a "read type"
 		// we will load the caching class and return the previously
 		// cached query if it exists
+		/*
 		if ($this->cache_on == TRUE AND stristr($sql, 'SELECT'))
 		{
 			if ($this->_cache_init())
@@ -285,7 +286,7 @@ class CI_DB_driver {
 				}
 			}
 		}
-
+*/
 		// Save the  query for debugging
 		if ($this->save_queries == TRUE)
 		{
@@ -306,29 +307,21 @@ class CI_DB_driver {
 			// This will trigger a rollback if transactions are being used
 			$this->_trans_status = FALSE;
 
-			if ($this->db_debug)
-			{
-				// grab the error number and message now, as we might run some
-				// additional queries before displaying the error
-				$error_no = $this->_error_number();
-				$error_msg = $this->_error_message();
+			// grab the error number and message now, as we might run some
+			// additional queries before displaying the error
+			$error_no = $this->_error_number();
+			$error_msg = $this->_error_message();
 
-				// We call this function in order to roll-back queries
-				// if transactions are enabled.  If we don't call this here
-				// the error message will trigger an exit, causing the
-				// transactions to remain in limbo.
-				$this->trans_complete();
+			// We call this function in order to roll-back queries
+			// if transactions are enabled.  If we don't call this here
+			// the error message will trigger an exit, causing the
+			// transactions to remain in limbo.
+			$this->trans_complete();
 
-				// Log and display errors
-				log_message('error', 'Query error: '.$error_msg);
-				return $this->display_error(
-										array(
-												'Error Number: '.$error_no,
-												$error_msg,
-												$sql
-											)
-										);
-			}
+			// Log and display errors
+			log_message('error', 'Query error: '.$error_msg);
+			
+			_html_error('Error Number: '.$error_no.', message: '.$error_msg.', SQL: '.$sql);
 
 			return FALSE;
 		}
@@ -356,14 +349,6 @@ class CI_DB_driver {
 				$this->CACHE->delete();
 			}
 
-			return TRUE;
-		}
-
-		// Return TRUE if we don't need to create a result object
-		// Currently only the Oracle driver uses this when stored
-		// procedures are used
-		if ($return_object !== TRUE)
-		{
 			return TRUE;
 		}
 

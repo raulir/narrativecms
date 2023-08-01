@@ -52,27 +52,11 @@ class cms_panel_model extends Model {
 		}
 		
 		$filename = '';
-		if (!stristr($cms_panel, '/')){
-			
-			// figure out module name
-			foreach($GLOBALS['config']['modules'] as $module){
-				
-				$hfilename = $GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/'.$cms_panel.'.json';
-				if (file_exists($hfilename)){
-					$filename = $hfilename;
-					$default_module = $module;
-				}
 
-			}
-				
-		} else {
-			
-			$hfilename = $GLOBALS['config']['base_path'].'modules/'.str_replace('/', '/definitions/',$cms_panel).'.json';
-			if (file_exists($hfilename)){
-				$filename = $hfilename;
-				list($default_module, $_panel_name) = explode('/', $cms_panel);
-			}
-
+		$hfilename = $GLOBALS['config']['base_path'].'modules/'.str_replace('/', '/definitions/',$cms_panel).'.json';
+		if (file_exists($hfilename)){
+			$filename = $hfilename;
+			list($default_module, $_panel_name) = explode('/', $cms_panel);
 		}
 		
 		$return = [

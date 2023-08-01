@@ -21,6 +21,9 @@ class cms_page_panel_toolbar extends CI_Controller {
 		$this->load->model('cms/cms_panel_model');
 
 		$cms_page_panel = $this->cms_page_panel_model->get_cms_page_panel($params['target_id']);
+		if (empty($cms_page_panel)){
+			$cms_page_panel = [];
+		}
 
 		if (!empty($params['target_parent_id'])) {
 			$cms_page_panel['target_parent_id'] = $params['target_parent_id'];

@@ -211,7 +211,7 @@ class cms_image_model extends CI_Model {
 		if (file_exists($GLOBALS['config']['upload_path'].$filename)){
 			unlink($GLOBALS['config']['upload_path'].$filename);
 		}
-		 
+
 		$name_a = pathinfo($filename);
 
 		$image_names = $GLOBALS['config']['upload_path'].$name_a['dirname'].'/_'.$name_a['filename'].'.*.*';
@@ -219,14 +219,14 @@ class cms_image_model extends CI_Model {
 			unlink($_filename);
 		}
 
-		if ($delete){
+		if ($delete){ // TODO: here may be error!
 			$sql = "delete from cms_image where filename = ? ";
-			$this->db->query($sql, array($filename, ));
+			$this->db->query($sql, [$filename]);
 		} else {
 			$sql = "update cms_image where filename = ? set meta = '' limit 1";
-			$this->db->query($sql, array($filename, ));
+			$this->db->query($sql, [$filename]);
 		}
-
+		
 	}
 
 	function scrape_image($source, $prefix = 'scraped', $category = 'scraped', $fill_ext = 'jpg'){

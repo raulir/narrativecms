@@ -44,13 +44,7 @@ if ( !function_exists('get_position')) {
 		return $return;
     	
     }
-    
-    /**
-     * prints out cms_page_panel by id
-     * 
-     * @param int $block_id
-     * @param array $_params optional extra params
-     */
+
     function _panel_id($block_id, $_params = array()){
     	
     	if (empty($block_id) && !empty($GLOBALS['config']['errors_visible'])){
