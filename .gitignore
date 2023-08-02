@@ -6,7 +6,6 @@
 /cache/*
 !/cache/.gitkeep
 !/cache/index.html
-!/system/libraries/Cache/
 
 _db/*
 !_db/cms.sql
@@ -21,4 +20,3 @@ _feed
 
 /config/*
 !/config/.gitkeep
-!/config/bccms.dev.php

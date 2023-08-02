@@ -19,6 +19,13 @@
 			"translate":"1"
 		},
 		{
+			"type":"image",
+			"name":"image",
+			"label":"Image",
+			"category":"product",
+			"help":"Main image used for the product mainly on listings"
+		},
+		{
 			"type":"fk",
 			"list":"stock/category",
 			"name":"category_id",
@@ -34,10 +41,11 @@
 		},
 		{
 			"type":"fk",
-			"list":"stock/brand",
-			"name":"brand_id",
-			"label":"Brand",
-			"add_empty":"1"
+			"list":"stock/product_stock",
+			"name":"product_stock_id",
+			"label":"Stock group",
+			"add_empty":"1",
+			"help":"Needed for delivery options"
 		},
 		{
 			"type":"textarea",
@@ -48,32 +56,12 @@
 			"html":"PB"
 		},
 		{
-			"type":"fk",
-			"list":"stock/line",
-			"name":"line_id",
-			"label":"Line",
-			"add_empty":"1"
-		},
-		{
-			"type":"fk",
-			"list":"stock/product_stock",
-			"name":"product_stock_id",
-			"label":"Stock group",
-			"add_empty":"1"
-		},
-		{
 			"type":"textarea",
 			"name":"specification",
 			"label":"Specification text",
 			"lines":"6",
-			"translate":"1"
-		},
-		{
-			"type":"image",
-			"name":"image",
-			"label":"Image",
-			"category":"product",
-			"help":"Main image used for the product mainly on listings"
+			"translate":"1",
+			"help":"Any extra information"
 		},
 		{
 			"type":"grid",
@@ -150,6 +138,17 @@
 					"default":"full"
 				}
 			]
+		},
+		{
+			"type":"subtitle",
+			"label":"Design"
+		},
+		{
+			"type":"colour",
+			"name":"colour",
+			"label":"Accent colour",
+			"default":"black",
+			"help":"Used on product page design"
 		}
 	],
 	"settings":[

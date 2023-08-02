@@ -42,6 +42,7 @@ class cms_update extends CI_Controller {
 			$params['local_version'] = $version_data['version'];
 
 			$version_data = $this->cms_update_model->get_master_version();
+			
 			$params['master_version'] = !empty($version_data['version']) ? $version_data['version'] : '';
 
 		} else if ($do == 'cms_update_file'){ // updates file
@@ -111,6 +112,11 @@ class cms_update extends CI_Controller {
 			if (!in_array($area['area'], $GLOBALS['config']['update']['master'])){
 				
 				$version_data = $this->cms_update_model->get_master_version($area['area']);
+
+				if ($version_data['error']){
+					$params['data'][$key]['error'] = $version_data['error'];
+				}
+				
 // print('<pre>');
 // print_r($version_data);
 // print('</pre>');

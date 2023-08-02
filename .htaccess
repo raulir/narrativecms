@@ -65,6 +65,8 @@ RedirectMatch 404 \.git
 RewriteCond %{REQUEST_URI} /_install [NC]
 RewriteRule .* - [F,L]
 
+RewriteRule ^loader\.js modules/cms/js/cms_loader.js [NC,L]
+
 # Protect cache
 RewriteCond %{REQUEST_URI} ^/cache [NC]
 RewriteCond %{REQUEST_URI} ^/_ [NC]

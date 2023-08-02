@@ -278,10 +278,16 @@ class cms_update_model extends CI_Model {
     	$context  = stream_context_create(array('http' => array(
     			'method'  => 'POST',
     			'header'  => $header,
-    			'content' => $postdata
+    			'content' => $postdata,
+    			'ignore_errors' => true,
     	)));
-    	 
-    	$master_data = file_get_contents($url, false, $context);
+    	
+   		$master_data = file_get_contents($url, false, $context);
+   		if (stristr($master_data, 'was not found')){
+    		return [
+    				'error' => 'Bad update URL:<br>'.$url,
+    		];
+    	}
 
     	if ($master_data === false){
 			return [];

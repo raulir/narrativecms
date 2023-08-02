@@ -93,7 +93,7 @@ class Exceptions {
 			
 		}
 
-		_html_error('<h3>'.$heading.'</h3>'.$message, 404);
+		_html_error('<h3>'.$heading.'</h3>'.$message, 404, ['backtrace' => 1]);
 	}
 
 }
