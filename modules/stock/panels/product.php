@@ -89,7 +89,8 @@ class product extends CI_Controller{
 	function ds_product_items($params){
 	
 		$this->load->model('cms/cms_page_panel_model');
-	
+		$this->load->model('shop/shop_model');
+		
 		// schema
 		if ($params['do'] == 'S'){
 				
@@ -120,6 +121,43 @@ class product extends CI_Controller{
 				}
 			}
 
+			if ($product_stock['stock_control'] == 'count'){
+				
+				$return[] = [
+					'type' => 'cms/cms_grid_editable',
+					'name' => 'number',
+					'label' => 'Number',
+					'width' => '10',
+					'align' => 'right',
+					'order' => '70',
+				];
+			
+			} else if ($product_stock['stock_control'] == 'request') {
+				
+				$return = [];
+				
+			} else {
+				
+				$return[] = [
+					'type' => 'id',
+					'name' => 'order_id',
+					'label' => 'Order',
+					'width' => '5',
+					'align' => 'center',
+					'order' => '80',
+				];
+
+				$return[] = [
+					'type' => 'ids',
+					'name' => 'baskets',
+					'label' => 'Baskets',
+					'width' => '25',
+					'align' => 'left',
+					'order' => '90',
+				];
+
+			}
+
 		// list
 		} elseif ($params['do'] == 'L'){
 				
@@ -136,10 +174,24 @@ class product extends CI_Controller{
 					$dimensions[] = $dimension['value'];
 				}
 	
+				$orders = [];
+				$order_lines = $this->cms_page_panel_model->get_list('cg/order_line', ['ref_id' => $key]);
+				foreach($order_lines as $order_line){
+					if (!empty($order_line['order_id']) && $order_line['order_id'] != $line['order_id'] && !in_array($order_line['order_id'], $orders)){
+						$orders[] = $order_line['order_id'];
+					}
+				}
+				
+				// TODO: status
+				
 				$return[$key] = [
 						'id' => $key,
+						'order_id' => !empty($line['order_id']) ? $line['order_id'] : '',
+						'price' => !empty($line['price']) ? $line['price'] : (!empty($product['price']) ? ('('.$product['price'].')') : ''),
 						'sku' => $line['sku'],
 						'dimensions' => implode(',', $dimensions),
+						'status' => !empty($line['order_id']) ? 'sold' : 'available',
+						'baskets' => $orders,
 				];
 	
 				ksort($return);

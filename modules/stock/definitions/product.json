@@ -6,7 +6,8 @@
 		"title_field":"heading",
 		"filter_fields":{
 			"show":"-- show --",
-			"product_category_id":"-- product category --"
+			"product_category_id":"-- product category --",
+			"status":"-- status --"
 		},
 		"link_target":"1"
 	},
@@ -24,6 +25,17 @@
 			"label":"Image",
 			"category":"product",
 			"help":"Main image used for the product mainly on listings"
+		},
+		{
+			"type":"select",
+			"name":"status",
+			"label":"Product status",
+			"values":{
+				"available":"Available",
+				"archive":"Archive",
+				"bespoke":"Bespoke"
+			},
+			"default":"available"
 		},
 		{
 			"type":"fk",
@@ -46,6 +58,11 @@
 			"label":"Stock group",
 			"add_empty":"1",
 			"help":"Needed for delivery options"
+		},
+		{
+			"type":"text",
+			"name":"price",
+			"label":"Default price"
 		},
 		{
 			"type":"textarea",
@@ -82,8 +99,22 @@
 					"name":"sku",
 					"label":"SKU",
 					"width":"15",
-					"align":"center",
-					"order":"20"
+					"align":"left",
+					"order":"40"
+				},
+				{
+					"type":"text",
+					"name":"price",
+					"label":"Price",
+					"width":"10",
+					"order":"50"
+				},
+				{
+					"type":"text",
+					"name":"status",
+					"label":"Status",
+					"width":"10",
+					"order":"60"
 				}
 			]
 		},
@@ -105,6 +136,20 @@
 					"label":"Value",
 					"mandatory":"1",
 					"translate":"1"
+				}
+			]
+		},
+		{
+			"type":"repeater",
+			"name":"related",
+			"label":"Related",
+			"help":"Related products, maximum three from here is shown randomly. If not enough here, shows random other products.",
+			"fields":[
+				{
+					"type":"fk",
+					"name":"product_id",
+					"label":"Product",
+					"list":"cg/product"
 				}
 			]
 		},
@@ -133,7 +178,8 @@
 					"values": {
 						"full":"Full",
 						"frame":"Frame",
-						"small":"Small"
+						"small":"Small",
+						"hide":"Hide"
 					},
 					"default":"full"
 				}
@@ -158,6 +204,45 @@
 			"label":"Panel",
 			"add_empty":"1",
 			"help":"Panel to show product in"
+		},
+		{
+			"type":"repeater",
+			"name":"categories",
+			"label":"Category defaults",
+			"fields":[
+				{
+					"type":"select",
+					"name":"category",
+					"label":"Product category",
+					"values":{
+						"archive":"Archive",
+						"bespoke":"Bespoke",
+						"limited":"Limited"
+					},
+					"default":"archive"
+				},
+				{
+					"type":"text",
+					"name":"buy_label",
+					"label":"Order default label"
+				},
+				{
+					"type":"link",
+					"name":"buy_link",
+					"label":"Order default link"
+				}
+			]
+		},
+		{
+			"type":"select",
+			"name":"show_like",
+			"label":"Show product like",
+			"values":{
+				"0":"No",
+				"1":"Yes"
+			},
+			"default":"0",
+			"help":"If Yes, show like button and liked products link"
 		}
 	]
 }

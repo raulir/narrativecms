@@ -42,7 +42,11 @@
 											<?php endforeach ?>
 										</div>
 									<?php elseif(stristr($field['type'],'/')): ?>
-										<?php _panel($field['type'], $field + ['base_id' => $base_id, 'item_id' => $line_data['item_id']]) ?>
+										<?php _panel($field['type'], $field + [
+												'base_id' => $base_id, 
+												'item_id' => $line_data['id'], 
+												'id' => $line_data['id'],
+										]) ?>
 									<?php endif ?>
 								</div>
 								

@@ -589,8 +589,12 @@ class cms_page_panel_model extends Model {
 			$data['submenu_anchor'] = '';
 		}
 		
-		if (empty($data['submenu_title'])){
+			if (empty($data['submenu_title'])){
 			$data['submenu_title'] = '';
+		}
+		
+		if (empty($data['title'])){
+			$data['title'] = '';
 		}
 		
 		if (!isset($data['sort'])) $data['sort'] = 1;
