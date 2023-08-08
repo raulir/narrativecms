@@ -113,7 +113,7 @@ class cms_update extends CI_Controller {
 				
 				$version_data = $this->cms_update_model->get_master_version($area['area']);
 
-				if ($version_data['error']){
+				if (!empty($version_data['error'])){
 					$params['data'][$key]['error'] = $version_data['error'];
 				}
 				

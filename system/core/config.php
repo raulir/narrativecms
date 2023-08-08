@@ -5,6 +5,8 @@ $config['system']['charset'] = 'UTF-8';
 $config['system']['log_path'] = '';
 $config['system']['log_date_format'] = 'Y-m-d H:i:s';
 
+require_once($working_directory.'system/helpers/json_helper.php');
+
 /*
  * LOAD CONFIG
  */
@@ -13,12 +15,15 @@ $config['config_file'] = $working_directory.'config/'.strtolower($_SERVER['SERVE
 
 if (file_exists($config['config_file'])){
 	
-	$config = array_merge($config, json_decode(file_get_contents($config['config_file']), true));
-	if (json_last_error()){
-		print('Config file error: '.json_last_error_msg());
+	$json = file_get_contents($config['config_file']);
+	$config_file = cms_json_decode($json, $config['config_file']);
+	
+	if (empty($config_file)){
 		die();
 	}
-	
+
+	$config = array_merge($config, $config_file);
+
 	if ($config['base_path'] == '_auto_'){
 		$config['base_path'] = rtrim(str_replace("\\", "/", trim(getcwd(), " \\")), '/').'/';
 	}
