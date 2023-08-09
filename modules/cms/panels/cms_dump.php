@@ -235,10 +235,11 @@ class cms_dump extends CI_Controller {
 				$this->load->library('upload', array('allowed_types' => 'zip', 'upload_path' => $GLOBALS['config']['base_path'].'cache/dump/', ));
 		
 				if ( ! $this->upload->do_upload('file')) {
-					print('Problem with file upload. Upload path = '.$this->upload_path);
-					print_r($this->upload->display_errors());
-					print_r($_FILES);
-					die();
+
+					_html_error('Problem with file upload: '.$this->upload->display_errors().'<br>'.
+							'Upload path: '.$GLOBALS['config']['base_path'].'cache/dump/<br>'.
+							'Filename: '.$_FILES['file']['name'], 500);
+
 				}
 		
 				$upload_data = $this->upload->data();

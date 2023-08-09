@@ -809,39 +809,11 @@ class CI_Upload {
 		}
 	}
 
-	// --------------------------------------------------------------------
-
-	/**
-	 * Display the error message
-	 *
-	 * @param	string
-	 * @param	string
-	 * @return	string
-	 */
-	public function display_errors($open = '<p>', $close = '</p>')
-	{
-		$str = '';
-		foreach ($this->error_msg as $val)
-		{
-			$str .= $open.$val.$close;
-		}
-
-		return $str;
+	public function display_errors() {
+		return implode("\n", $this->error_msg);
 	}
 
-	// --------------------------------------------------------------------
-
-	/**
-	 * Prep Filename
-	 *
-	 * Prevents possible script execution from Apache's handling of files multiple extensions
-	 * http://httpd.apache.org/docs/1.3/mod/mod_mime.html#multipleext
-	 *
-	 * @param	string
-	 * @return	string
-	 */
-	protected function _prep_filename($filename)
-	{
+	protected function _prep_filename($filename) {
 		if (strpos($filename, '.') === FALSE OR $this->allowed_types == '*')
 		{
 			return $filename;
