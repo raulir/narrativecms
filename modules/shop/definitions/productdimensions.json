@@ -1,0 +1,12 @@
+{
+	"version":"2",
+	"label":"Product dimensions widget",
+	"settings":[ 
+		{
+			"type":"text",
+			"name":"hint_heading",
+			"label":"Hint heading",
+			"default":"Availability"
+		}
+	]
+}

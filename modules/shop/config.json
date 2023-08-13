@@ -7,6 +7,10 @@
 		{
 			"id":"checkout",
 			"name":"Checkout"
+		},
+		{
+			"id":"basket",
+			"name":"Basket"
 		}
 	],
 	"cms_menu":[
@@ -31,9 +35,27 @@
 		{
 			"id":"shop_settings",
 			"name":"Settings",
-			"parent":"shop",
+			"parent":"_shop",
 			"access":"shop_settings",
 			"url":"admin/panel_settings/shop__shop/"
+		},
+		{
+			"id":"productbuy_settings",
+			"name":"Product buy settings",
+			"parent":"shop",
+			"url":"admin/panel_settings/shop__productbuy/"
+		},
+		{
+			"id":"productdimensions_settings",
+			"name":"Product dimensions settings",
+			"parent":"shop",
+			"url":"admin/panel_settings/shop__productdimensions/"
+		},
+		{
+			"id":"checkout_settings",
+			"name":"Checkout settings",
+			"parent":"shop",
+			"url":"admin/panel_settings/shop__checkout/"
 		}
 	]
 }

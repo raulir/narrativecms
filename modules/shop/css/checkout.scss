@@ -1,0 +1,479 @@
+.shop_checkout_container {
+	width: 48.0rem;
+	min-height: 30.0rem;
+	box-sizing: border-box;
+	outline: 0.12rem solid $colour_grey;
+	padding: 2.0rem;
+	background-color: $colour_black;
+	text-align: center;
+	margin: 0 auto;
+}
+
+.shop_checkout_content {
+	position: relative;
+}
+
+.shop_checkout_close {
+	position: absolute;
+	right: -1.0rem;
+	top: -1.0rem;
+	font-size: 0.85rem;
+	line-height: 1.0rem;
+	letter-spacing: 0.02rem;
+	z-index: 10;
+	cursor: pointer;
+	font-family: suisse;
+    text-transform: uppercase;
+    color: $colour_shop_grey_light;
+    letter-spacing: 0.07rem;
+    display: inline-block;
+    transition: opacity 0.3s, color 0.3s;
+	border-bottom: 0.12rem solid $colour_grey;
+	opacity: 0.5;
+    &:hover{
+    	color: $colour_white;
+    	opacity: 1;
+    }
+}
+
+.shop_checkout_heading {
+	font-size: 2.5rem;
+	line-height: 3.0rem;
+ 	letter-spacing: -0.02rem;
+ 	padding-bottom: 1.0rem;
+}
+
+.shop_checkout_menu {
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
+}
+
+.shop_checkout_menu_item {
+	font-size: 1.4rem;
+	display: inline-block;
+    color: $colour_grey;
+    border-bottom: 0.15rem solid transparent;
+    margin: 0 2.0rem;
+    transition: color 0.3s, border-color 0.3s;
+    line-height: calc(2.9rem - 0.5rem);
+    box-sizing: border-box;
+    white-space: nowrap;
+    position: relative;
+    &::before,&::after {
+	    content: '';
+	    position: absolute;
+	    right: -2.4rem;
+	    height: 0.1rem;
+	    top: calc(50% - 0.05rem);
+	    width: 0.8rem;
+	    background-color: $colour_grey;
+	    transform-origin: 100% 50%;
+	}
+	&::before {
+		transform: rotate(45deg);
+	}
+	&::after {
+		transform: rotate(-45deg);
+	}
+	&:last-of-type::before, &:last-of-type::after {
+		display: none;
+	}
+}
+
+.shop_checkout_menu_item_available {
+	color: $colour_white;
+	border-bottom: 0.15rem solid $colour_grey;
+    cursor: pointer;
+    &:hover {
+    	border-bottom: 0.15rem solid $colour_white;
+    }
+}
+
+.shop_checkout_menu_item_active {
+	color: $colour_brown;
+	border-bottom: 0.15rem solid $colour_brown;
+    cursor: pointer;
+    &:hover {
+    	border-bottom: 0.15rem solid $colour_white;
+    }
+}
+
+.shop_checkout_tabs {
+	
+}
+
+.shop_checkout_tab {
+	padding: 2.0rem 0 0 0;
+}
+
+.shop_checkout_lines {
+	
+}
+
+.shop_checkout_line {
+	position: relative;
+	padding: 2.0rem 10.0rem;
+	border-bottom: 0.12rem solid $colour_grey;
+}
+
+.shop_checkout_line_image {
+	position: absolute;
+	left: 0;
+	top: 2.0rem;
+	width: 8.0rem;
+	height: 5.0rem;
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
+.shop_checkout_line_heading {
+	text-align: left;
+	font-size: 1.8rem;
+	line-height: 2.0rem;
+	padding-bottom: 1.0rem;
+}
+
+.shop_checkout_line_description {
+	text-align: left;
+	font-size: 1.4rem;
+	line-height: 1.6rem;
+	padding-bottom: 1.0rem;
+}
+
+.shop_checkout_line_price {
+	position: absolute;
+	right: 0;
+	top: 2.0rem;
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+	font-size: 1.8rem;
+	line-height: 2.0rem;
+	font-weight: bold;
+	color: $colour_brown;
+	letter-spacing: 0.1rem;
+	&::before {
+		content: '£';
+	}
+}
+
+.shop_checkout_line_decimals {
+	display: inline-block;
+	font-size: 1.2rem;
+}
+
+.shop_checkout_delivery {
+	position: relative;
+    padding: 0 3.0rem 5.0rem 3.0rem;
+}
+
+.shop_checkout_delivery_methods {
+	
+}
+
+.shop_checkout_regions_label {
+	font-size: 1.6rem;
+	line-height: 1.6rem;
+	padding: 2.0rem 0 1.5rem 0;
+}
+
+.shop_checkout_deliveries {
+	width: 20.0rem;
+	margin: 0 auto;
+	text-align: left;
+}
+
+.shop_checkout_delivery_method {
+	padding: 0.5rem 0 0.5rem 3.0rem;
+	cursor: pointer;
+	position: relative;
+	line-height: 2.0rem;
+	font-size: 1.4rem;
+	&::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 50%;
+		transform: translate(0, -50%);
+		border: 0.12rem solid $colour_brown;
+		width: 2.0rem;
+		height: 2.0rem;
+		box-sizing: border-box;
+		display: block;
+	}
+	&::after {
+		content: '';
+		position: absolute;
+		left: 0.4rem;
+		top: 50%;
+		transform: translate(0, -50%);
+		width: 1.2rem;
+		height: 1.2rem;
+		background-color: transparent;
+		box-sizing: border-box;
+		display: block;
+		transition: background-color 0.3s;
+	}
+	&:hover::after {
+		background-color: $colour_brown;
+	}
+}
+
+.shop_checkout_address {
+	
+}
+
+.shop_checkout_row {
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
+	position: relative;
+	text-align: left;
+	padding: 0.2rem 0;
+}
+
+.shop_checkout_label {
+	display: inline-block;
+	width: 30%;
+	line-height: 2.0rem;
+	font-size: 1.2rem;
+}
+
+.shop_checkout_data {
+	display: inline-block;
+	width: 70%;
+	line-height: 2.0rem;
+	font-size: 1.2rem;
+	position: relative;
+}
+
+.shop_checkout_delivery_description {
+	padding-right: 5.0rem;
+}
+
+.shop_checkout_delivery_price {
+	position: absolute;
+	top: 0;
+	right: 0;
+	color: $colour_brown;
+	font-weight: bold;
+	&::before {
+		content: '£';
+	}
+}
+
+.shop_checkout_delivery_change {
+    text-transform: uppercase;
+    display: inline-block;
+    border-bottom: 0.1rem solid $colour_grey;
+    color: $colour_grey;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-family: suisse;
+    letter-spacing: 0.02rem;
+    padding-top: 0.9rem;
+    vertical-align: top;
+    cursor: pointer;
+    transition: color 0.3s, border 0.3s;
+    position: relative;
+    top: -0.8rem;
+    &:hover {
+    	color: $colour_white;
+    	border-bottom: 0.1rem solid $colour_white;
+    }
+}
+
+.shop_checkout_spacer {
+	height: 3.0rem;
+}
+
+.shop_checkout_delivery_input {
+	padding: 0.2rem;
+    border: 0;
+    background-color: $colour_white;
+    border-radius: 0;
+    color: $colour_black;
+    font-size: 1.2rem;
+    line-height: 1.6rem;
+    letter-spacing: -0.01rem;
+    vertical-align: top;
+    box-sizing: border-box;
+    font-family: inherit;
+    display: block;
+    width: 100%;
+    &.shop_checkout_error {
+    	outline: 0.12rem solid rgb(128, 0, 0);
+    }
+}
+
+.shop_checkout_delivery_save {
+	cursor: pointer;
+}
+
+.shop_checkout_review_delivery {
+	position: relative;
+	padding: 2.0rem 10.0rem;
+	border-bottom: 0.12rem solid $colour_grey;
+}
+
+.shop_checkout_review_delivery_heading {
+	text-align: left;
+    font-size: 1.8rem;
+    line-height: 2.0rem;
+    padding: 0 0 1.0rem 0;
+}
+
+.shop_checkout_review_delivery_address {
+	text-align: left;
+	line-height: 2.0rem;
+}
+
+.shop_checkout_review_delivery_address_line {
+	line-height: 1.6rem;
+	position: relative;
+}
+
+.shop_checkout_review_delivery_address_label {
+	position: absolute;
+	left: -10.0rem;
+	top: 0.3rem;
+	width: 9.0rem;
+    font-size: 0.85rem;
+    color: $colour_grey;
+    text-transform: uppercase;
+    font-family: suisse;
+    letter-spacing: 0.03rem;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+.shop_checkout_review_delivery_spacer {
+	height: 0.5rem;
+}
+
+.shop_checkout_review_delivery_price {
+	color: $colour_brown;
+	font-weight: bold;
+	position: absolute;
+    right: 0;
+    top: 2.0rem;
+    font-size: 1.8rem;
+    line-height: 2rem;
+    font-weight: bold;
+    letter-spacing: 0.1rem;
+	&::before {
+		content: '£';
+	}
+}
+
+.shop_checkout_review_calculation {
+	position: relative;
+	padding: 1.5rem 0 2.0rem 0;
+    font-size: 1.2rem;
+    line-height: 2.0rem;
+}
+
+.shop_checkout_review_total_label {
+	text-align: left;
+	padding-left: 10.0rem;
+}
+
+.shop_checkout_review_total {
+	color: $colour_brown;
+	font-weight: bold;
+	position: absolute;
+    right: 0;
+    top: 1.5rem;
+    font-weight: bold;
+    letter-spacing: 0.1rem;
+	&::before {
+		content: '£ ';
+	}
+}
+
+.shop_checkout_review_tax_label {
+	text-align: left;
+    padding: 0 0 1.5rem 0;
+	padding-left: 10.0rem;
+}
+
+.shop_checkout_review_tax {
+	color: $colour_brown;
+	font-weight: bold;
+	position: absolute;
+    right: 0;
+    top: 3.5rem;
+    font-weight: bold;
+    letter-spacing: 0.1rem;
+	&::before {
+		content: '£ ';
+	}
+}
+
+.shop_checkout_review_topay_label {
+	text-align: left;
+    font-size: 1.8rem;
+    line-height: 2.0rem;
+    padding: 2.0rem 0 1.0rem 10.0rem;
+	border-top: 0.12rem solid $colour_grey;
+}
+
+.shop_checkout_review_topay {
+	color: $colour_brown;
+	font-weight: bold;
+	position: absolute;
+    right: 0;
+    top: 9.0rem;
+    font-size: 1.8rem;
+    line-height: 2rem;
+    font-weight: bold;
+    letter-spacing: 0.1rem;
+	&::before {
+		content: '£ ';
+	}
+}
+
+.shop_checkout_pay {
+	cursor: pointer;
+}
+
+.shop_checkout_iframe {
+	width: calc(100% - 2.0rem);
+	height: 50.0rem;
+}
+
+.shop_checkout_tab_error {
+	font-size: 1.2rem;
+	line-height: 1.6rem;
+	width: 20.0rem;
+	margin: 0 auto;
+}
+
+@media screen and (max-width: 900px) {
+
+	.shop_checkout_container {
+		width: 100%;
+	}
+
+	.shop_checkout_close {
+		font-size: 1.0rem;
+	}
+
+	.shop_checkout_delivery {
+		padding: 0 1.0rem 5.0rem 1.0rem;
+	}
+
+	.shop_checkout_delivery_change {
+		font-size: 1.0rem;
+	}
+
+	.shop_checkout_review_delivery_address_label {
+		font-size: 1.0rem;
+		top: 0.4rem;
+		line-height: 0.9rem;
+	}
+
+}

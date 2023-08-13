@@ -1,0 +1,236 @@
+{
+	"version":"2",
+	"label":"Checkout",
+	"item":[
+	
+	],
+	"settings":[
+		{
+			"type":"select",
+			"label":"Is this live?",
+			"name":"is_live",
+			"values":{
+				"0":"No, test card payments are used",
+				"1":"Yes, real card payments are used"
+			},
+			"default":"black"
+		},
+		{
+			"type":"subtitle",
+			"label":"General"
+		},
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Heading",
+			"default":"Checkout"
+		},
+		{
+			"type":"text",
+			"name":"proceed_label",
+			"label":"Proceed label",
+			"default":"Review and pay"
+		},
+		{
+			"type":"text",
+			"name":"delivery_select",
+			"label":"Delivery select",
+			"default":"Select delivery method"
+		},
+		{
+			"type":"text",
+			"name":"close_label",
+			"label":"Close label",
+			"default":"close"
+		},
+		{
+			"type":"subtitle",
+			"label":"Menu"
+		},
+		{
+			"type":"text",
+			"name":"menu_label_basket",
+			"label":"Basket label",
+			"default":"Basket"
+		},
+		{
+			"type":"text",
+			"name":"menu_label_delivery",
+			"label":"Delivery label",
+			"default":"Delivery"
+		},
+		{
+			"type":"text",
+			"name":"menu_label_review",
+			"label":"Review label",
+			"default":"Review"
+		},
+		{
+			"type":"text",
+			"name":"menu_label_payment",
+			"label":"Payment label",
+			"default":"Payment"
+		},
+		{
+			"type":"text",
+			"name":"region_label",
+			"label":"Region label",
+			"default":"Please select region"
+		},
+		{
+			"type":"subtitle",
+			"label":"Delivery"
+		},
+		{
+			"type":"text",
+			"name":"address_delivery_label",
+			"label":"Address delivery label",
+			"default":"Delivery"
+		},
+		{
+			"type":"text",
+			"name":"address_delivery_change_label",
+			"label":"Address change label",
+			"default":"change"
+		},
+		{
+			"type":"text",
+			"name":"address_address_label",
+			"label":"Address label",
+			"default":"Address"
+		},
+		{
+			"type":"text",
+			"name":"address_county_label",
+			"label":"County label",
+			"default":"Region or county"
+		},
+		{
+			"type":"text",
+			"name":"address_postcode_label",
+			"label":"Postcode label",
+			"default":"Postcode or ZIP code"
+		},
+		{
+			"type":"text",
+			"name":"address_country_label",
+			"label":"Country label",
+			"default":"Country"
+		},
+		{
+			"type":"text",
+			"name":"address_country_select_label",
+			"label":"Country select label",
+			"default":"-- select country --"
+		},
+		{
+			"type":"text",
+			"name":"address_email_label",
+			"label":"Email label",
+			"default":"Email"
+		},
+		{
+			"type":"text",
+			"name":"address_name_label",
+			"label":"Name label",
+			"default":"Name"
+		},
+		{
+			"type":"text",
+			"name":"address_phone_label",
+			"label":"Phone label",
+			"default":"Phone"
+		},
+		{
+			"type":"text",
+			"name":"address_save_label",
+			"label":"Address save label",
+			"default":"Continue"
+		},
+		{
+			"type":"subtitle",
+			"label":"Review"
+		},
+		{
+			"type":"text",
+			"name":"review_delivery_heading",
+			"label":"Review delivery label",
+			"default":"Delivery address"
+		},
+		{
+			"type":"text",
+			"name":"review_delivery_address_label",
+			"label":"Review address label",
+			"default":"Address"
+		},
+		{
+			"type":"text",
+			"name":"review_delivery_postcode_label",
+			"label":"Review postcode label",
+			"default":"Postcode or ZIP code"
+		},
+		{
+			"type":"text",
+			"name":"review_delivery_county_label",
+			"label":"Review county label",
+			"default":"State, city or county"
+		},
+		{
+			"type":"text",
+			"name":"review_delivery_country_label",
+			"label":"Review country label",
+			"default":"Country"
+		},
+		{
+			"type":"text",
+			"name":"review_delivery_email_label",
+			"label":"Review email label",
+			"default":"Email"
+		},
+		{
+			"type":"text",
+			"name":"review_total_label",
+			"label":"Review total label",
+			"default":"Subtotal"
+		},
+		{
+			"type":"text",
+			"name":"review_tax_label",
+			"label":"Review tax label",
+			"default":"UK VAT"
+		},
+		{
+			"type":"text",
+			"name":"review_topay_label",
+			"label":"Review to pay label",
+			"default":"Amount to pay"
+		},
+		{
+			"type":"subtitle",
+			"label":"Payment"
+		},
+		{
+			"type":"link",
+			"name":"success_page",
+			"label":"Success page"
+		},
+		{
+			"type":"subtitle",
+			"label":"General errors"
+		},
+		{
+			"type":"textarea",
+			"lines":"3",
+			"name":"noreview_label",
+			"label":"Review error",
+			"default":"Checkout can't be completed because there is no delivery method selected or there is a problem with basket."
+		},
+		{
+			"type":"textarea",
+			"lines":"3",
+			"name":"nopay_label",
+			"label":"Pay error",
+			"default":"Checkout can't be completed because there is no delivery method selected or there is a problem with basket."
+		}
+	]
+}

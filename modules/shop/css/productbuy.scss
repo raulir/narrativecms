@@ -1,0 +1,84 @@
+.shop_productbuy_container {
+	font-size: 1.0rem;
+	line-height: 1.0rem;
+	color: $colour_black;
+}
+
+.shop_productbuy_content {
+	
+}
+
+.shop_productbuy_add {
+	cursor: pointer;
+	margin-top: 2.0rem;
+}
+
+.shop_productbuy_added {
+	padding: 1.0rem 0;
+    font-size: 1.1rem;
+    line-height: 1.6rem;
+    color: $colour_green;
+}
+
+.shop_productbuy_link_area {
+	padding: 1.0rem 0;
+    font-size: 1.1rem;
+    line-height: 1.6rem;
+}
+
+.shop_productbuy_link {
+	display: inline-block;
+    border-bottom: 0.1rem solid $colour_black;
+}
+
+.shop_productbuy_feature {
+	font-size: 0;
+    line-height: 0;
+    letter-spacing: 0;
+    padding: 1.0rem 0;
+}
+
+.shop_productbuy_feature_label {
+	display: inline-block;
+	vertical-align: top;
+	width: 25%;
+	box-sizing: border-box;
+	font-size: 1.0rem;
+    line-height: 1.0rem;
+    color: $colour_black;
+	&::after {
+		content: ':';
+	}
+}
+
+.shop_productbuy_feature_text {
+	display: inline-block;
+	vertical-align: top;
+	text-align: left;
+	width: 75%;
+	white-space: pre-line;
+	color: $colour_shop_grey_light;
+	font-size: 1.0rem;
+    line-height: 1.0rem;
+    color: $colour_black;
+}
+
+.shop_productbuy_error_heading {
+	padding-top: 3.0rem;
+	font-size: 1.8rem;
+    line-height: 2.0rem;
+    width: 30.0rem;
+    margin: 0 auto;
+}
+
+.shop_productbuy_error_text {
+	padding: 1.5rem 0;
+	font-size: 1.4rem;
+    line-height: 1.8rem;
+    width: 30.0rem;
+    margin: 0 auto;
+}
+
+.shop_productbuy_error_button {
+	
+}

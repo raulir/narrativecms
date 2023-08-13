@@ -1,0 +1,81 @@
+{
+	"version":"2",
+	"label":"Product buy widget",
+	"settings":[ 
+		{
+			"type":"text",
+			"name":"add_label",
+			"label":"Add label",
+			"default":"Add to basket"
+		},
+		{
+			"type":"text",
+			"name":"select_error",
+			"label":"Select error",
+			"default":"Please select"
+		},
+		{
+			"type":"text",
+			"name":"added_message",
+			"label":"Added message",
+			"default":"Item added to basket"
+		},
+		{
+			"type":"text",
+			"name":"link_text",
+			"label":"Basket link text",
+			"default":"Go to basket"
+		},
+		{
+			"type":"link",
+			"name":"link_link",
+			"label":"Basket link"
+		},
+		{
+			"type":"text",
+			"name":"price_label",
+			"label":"Price label",
+			"default":"Price"
+		},
+		{
+			"type":"text",
+			"name":"reset_label",
+			"label":"Reset label",
+			"default":"Clear selection"
+		},
+		{
+			"type":"subtitle",
+			"label":"Sold out"
+		},
+		{
+			"type":"text",
+			"name":"stock_error_heading",
+			"label":"Sold out heading",
+			"default":"This product is sold out"
+		},
+		{
+			"type":"textarea",
+			"name":"stock_error_text",
+			"label":"Sold out text",
+			"lines":"2",
+			"default":"Please contact us to pre-order"
+		},
+		{
+			"type":"text",
+			"name":"stock_error_button_label",
+			"label":"Button label",
+			"default":"Contact"
+		},
+		{
+			"type":"link",
+			"name":"stock_error_button_link",
+			"label":"Button link"
+		},
+		{
+			"type":"text",
+			"name":"stock_error_last_in_basket",
+			"label":"Last item in basket",
+			"default":"You have the last item in your basket"
+		}
+	]
+}

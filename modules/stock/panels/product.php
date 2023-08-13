@@ -121,7 +121,7 @@ class product extends CI_Controller{
 				}
 			}
 
-			if ($product_stock['stock_control'] == 'count'){
+			if (!empty($product_stock['stock_control']) && $product_stock['stock_control'] == 'count'){
 				
 				$return[] = [
 					'type' => 'cms/cms_grid_editable',
@@ -132,7 +132,7 @@ class product extends CI_Controller{
 					'order' => '70',
 				];
 			
-			} else if ($product_stock['stock_control'] == 'request') {
+			} else if (!empty($product_stock['stock_control']) && $product_stock['stock_control'] == 'request') {
 				
 				$return = [];
 				

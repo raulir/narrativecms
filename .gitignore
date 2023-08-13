@@ -3,20 +3,19 @@
 /.settings/
 /.buildpath
 /.project
+.svn
 /cache/*
 !/cache/.gitkeep
 !/cache/index.html
+/img/*
+!/img/.gitkeep
+!/img/index.html
 
 _db/*
 !_db/cms.sql
 
-.svn
 
 _feed
-
-/img/*
-!/img/.gitkeep
-!/img/index.html
 
 /config/*
 !/config/.gitkeep

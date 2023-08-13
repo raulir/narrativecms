@@ -1,0 +1,64 @@
+{
+	"version":"2",
+	"label":"Basket",
+	"image":"//panel_basket.png",
+	"item":[
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Heading",
+			"default":"Shopping Basket"
+		},
+		{
+			"type":"text",
+			"name":"items_label",
+			"label":"Items label",
+			"default":"items"
+		},
+		{
+			"type":"text",
+			"name":"items_label_singular",
+			"label":"Items label singular",
+			"default":"item"
+		},
+		{
+			"type":"text",
+			"name":"price_label",
+			"label":"Price label",
+			"default":"Price"
+		},
+		{
+			"type":"text",
+			"name":"proceed_label",
+			"label":"Proceed label",
+			"default":"Proceed to checkout"
+		},
+		{
+			"type":"text",
+			"name":"remove_label",
+			"label":"Remove label",
+			"default":"remove"
+		},
+		{
+			"type":"subtitle",
+			"label":"Empty basket"
+		},
+		{
+			"type":"text",
+			"name":"empty_message",
+			"label":"Empty message",
+			"default":"Basket is empty"
+		},
+		{
+			"type":"text",
+			"name":"empty_button",
+			"label":"Empty button",
+			"default":"Go to shop"
+		},
+		{
+			"type":"link",
+			"name":"empty_link",
+			"label":"Empty link"
+		}
+	]
+}

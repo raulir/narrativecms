@@ -1,0 +1,161 @@
+.shop_basket_container {
+	max-width: 60.0rem;
+	margin: 0 auto;
+	padding: 4.0rem 3.0rem;
+ 	text-align: center;
+}
+
+.shop_basket_content {
+	
+}
+
+.shop_basket_heading {
+	font-size: 2.8rem;
+	line-height: 3.2rem;
+ 	letter-spacing: -0.02rem;
+ 	padding-bottom: 1.0rem;
+}
+
+.shop_basket_area {
+	
+}
+
+.shop_basket_count {
+	font-family: suisse;
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	color: $colour_red;
+	letter-spacing: 0.07rem;
+}
+
+.shop_basket_item {
+	padding: 5.0rem 0 2.5rem 0;
+	position: relative;
+	border-bottom: 0.1rem dotted $colour_grey;
+}
+
+.shop_basket_image {
+	position: absolute;
+	top: 5.0rem;
+	left: 0;
+	width: 21.0rem;
+	height: 14.0rem;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.shop_basket_item_right {
+	padding-left: 25.0rem;
+	text-align: left;
+}
+
+.shop_basket_item_heading {
+	display: block;
+	font-size: 2.8rem;
+	line-height: 3.2rem;
+ 	letter-spacing: -0.02rem;
+ 	padding-bottom: 1.5rem;
+}
+
+.shop_basket_item_description {
+	color: $colour_grey;
+}
+
+.shop_basket_elements {
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
+	text-align: left;
+}
+
+.shop_basket_element {
+	display: inline-block;
+	width: 30%;
+	vertical-align: top;
+	padding: 2.0rem 0;
+}
+
+.shop_basket_element_label {
+	font-family: suisse;
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	color: $colour_grey;
+	letter-spacing: 0.07rem;
+	padding-bottom: 1.0rem;
+}
+
+.shop_basket_element_text {
+	color: $colour_white;
+	font-style: italic;
+}
+
+.shop_basket_element_price {
+	&::before {
+		content: '£';
+	}
+}
+
+.shop_basket_item_remove {
+	font-family: suisse;
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	color: $colour_brown;
+	letter-spacing: 0.07rem;
+	padding-bottom: 0.1rem;
+	border-bottom: 0.1rem dotted $colour_grey;
+	display: inline-block;
+	cursor: pointer;
+}
+
+.shop_basket_checkout {
+	position: relative;
+	left: 3.0rem;
+	margin-top: 4.0rem;
+	cursor: pointer;
+}
+
+.shop_basket_message {
+	font-size: 1.2rem;
+	line-height: 1.6rem;
+}
+
+.shop_basket_empty_button {
+	margin-top: 4.0rem;
+}
+
+@media screen and (max-width: 900px) {
+
+	.shop_basket_image {
+		width: 18.0rem;
+		height: 12.0rem;
+	}
+
+	.shop_basket_item_right {
+		padding-left: 21.0rem;
+	}
+
+	.shop_basket_item_description {
+		font-size: 1.6rem;
+		line-height: 2.2rem;
+		letter-spacing: 0.05rem;
+		color: inherit;
+	}
+
+	.shop_basket_element {
+		padding-right: 2.5rem;
+	}
+
+	.shop_basket_element_label {
+		font-size: 1.0rem;
+	}
+
+	.shop_basket_element_text {
+		font-size: 2.4rem;
+	}
+
+	.shop_basket_item_remove {
+		font-size: 1.0rem;
+	}
+
+}

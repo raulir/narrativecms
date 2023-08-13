@@ -31,6 +31,18 @@
 			"type":"text",
 			"name":"dimension_rounding",
 			"label":"Dimension rounding"
+		},
+		{
+			"type":"repeater",
+			"name":"emails",
+			"label":"Notification emails",
+			"fields":[
+				{
+					"type":"text",
+					"name":"email",
+					"label":"Email"
+				}
+			]
 		}
 	]
 }
