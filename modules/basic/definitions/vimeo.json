@@ -1,6 +1,7 @@
 {
     "version": "2",
 	"title":"Vimeo",
+	"label":"Vimeo",
     "js": [
      	"cms/cms_scroll_lock"
     ],
@@ -84,6 +85,13 @@
 			"default":"//vimeo_fullscreen.png"
 		},
 		{
+			"type":"image",
+			"name":"default_image",
+			"label":"Default image",
+			"category":"content",
+			"default":"//vimeo_image.png"
+		},
+		{
 			"type":"select",
 			"name":"disable_fullscreen",
 			"label":"Disable fullscreen",
@@ -104,6 +112,17 @@
 			},
 			"default":"light",
 			"help":"Background colour"
+		},
+		{
+			"type":"select",
+			"name":"size_by_image",
+			"label":"Size by image",
+			"values": {
+				"no":"No",
+				"yes":"Yes"
+			},
+			"default":"no",
+			"help":"Set video size by cover image size"
 		}
     ]
 }

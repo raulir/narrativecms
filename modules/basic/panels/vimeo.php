@@ -3,6 +3,10 @@
 class vimeo extends CI_Controller{
 	
 	function panel_params($params){
+		
+		if (empty($params['image'])){
+			$params['image'] = $params['default_image'];
+		}
 
 		if (!empty($params['subtitle'])){
 			

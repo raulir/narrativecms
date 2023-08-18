@@ -19,6 +19,21 @@
 	background-repeat: no-repeat;
 	background-position: center;
 	height: 100%;
+	.basic_vimeo_sizebyimage_yes & {
+		height: 0;
+	}
+	.basic_vimeo_fullscreen & {
+		padding-bottom: 0!important;
+		height: 100%;
+	}
+}
+
+.basic_vimeo_inner {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
 }
 
 .basic_vimeo_iframe {
