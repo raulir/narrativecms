@@ -128,7 +128,7 @@ class do_send extends CI_Controller {
 				if (!empty($GLOBALS['config']['email'])){
 					$from = $GLOBALS['config']['email'];
 				} else {
-					$from = $_SERVER['SERVER_NAME'].'@bytecrackers.com';
+					$from = $_SERVER['SERVER_NAME'].'@narrativecms.com';
 				}
 				
 				if (!empty($data['email']) && stristr($data['email'], '@') && stristr($data['email'], '.')){

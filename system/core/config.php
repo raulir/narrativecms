@@ -117,7 +117,7 @@ if ($db === false){
 	if (file_exists($working_directory.'_install/install.php')){
 		include($working_directory.'_install/install.php');
 	} else {
-		print('Can\'t connect database!');
+		_html_error('Can\'t connect database!', 500);
 	}
 	
 	die();
@@ -133,27 +133,7 @@ try {
 }
 
 if ($query === false){
-	print('Database error: '.$db->error);
-	die();
-}
-
-// if empty result, rename old settings
-if (!mysqli_num_rows($query)){
-	
-	$sql = "select * from cms_page_panel where panel_name = 'cms_settings'";
-	$query = mysqli_query($db, $sql);
-	
-	if (mysqli_num_rows($query)){
-		
-		$sql = "update cms_page_panel set panel_name = 'cms/cms_settings' where panel_name = 'cms_settings'";
-		$query = mysqli_query($db, $sql);
-		
-		// try to load again
-		$sql = "select b.name, b.value from cms_page_panel a join cms_page_panel_param b on a.cms_page_panel_id = b.cms_page_panel_id where a.panel_name = 'cms/cms_settings' and b.name != ''";
-		$query = mysqli_query($db, $sql);
-		
-	}
-	
+	_html_error('Database error: '.$db->error, 500);
 }
 
 while($result = mysqli_fetch_assoc($query)){

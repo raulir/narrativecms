@@ -241,6 +241,13 @@ class form_model extends CI_Model {
 		    	
     		} else {
     			
+    			if (!empty($GLOBALS['config']['email'])){
+    				$from = $GLOBALS['config']['email'];
+    			} else {
+    				$from = $_SERVER['SERVER_NAME'].'@narrativecms.com';
+    			}
+    			 
+    			
     			$mail = new PHPMailer(true);
     			 
     			$mail->isSMTP();
@@ -251,7 +258,7 @@ class form_model extends CI_Model {
     			$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     			$mail->Port = $GLOBALS['config']['smtp_port'];
     			
-    			$mail->setFrom($_SERVER['SERVER_NAME'].'@bytecrackers.com', $_SERVER['SERVER_NAME']);
+    			$mail->setFrom($from, $_SERVER['SERVER_NAME']);
     			$mail->addAddress($data['email']);
     			
    				$mail->addReplyTo($autoreply_email, $autoreply_name);
