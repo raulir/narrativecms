@@ -22,7 +22,10 @@ function cms_preloader_class(){
 
 				if (this.images_ok && this.videos_ok && this.sounds_ok){
 					clearInterval(ok_interval)
-					resolve()
+					params.images = this.preloaded_images 
+					params.videos = this.preloaded_videos
+					params.sounds = this.preloaded_sounds 
+					resolve(params)
 				}
 				
 			}, 100)
