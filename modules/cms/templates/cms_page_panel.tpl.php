@@ -75,6 +75,10 @@
 	
 	<div class="cms_page_panel_info">
 		<div class="cms_page_panel_info_column">
+			<div class="cms_page_panel_info_label">panel:</div>
+			<div class="cms_page_panel_info_value"><?= $block['panel_name'] ?></div>
+		</div>
+		<div class="cms_page_panel_info_column">
 			<div class="cms_page_panel_info_label">created:</div>
 			<div class="cms_page_panel_info_value"><?= !empty($block['create_time']) ? date('Y-m-d H:i:s', $block['create_time']) : '' ?>
 			<?= !empty($block['create_user']['username']) ? $block['create_user']['username'] : '-' ?></div>

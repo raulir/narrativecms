@@ -35,7 +35,8 @@
 				"archive":"Archive",
 				"bespoke":"Bespoke"
 			},
-			"default":"available"
+			"default":"available",
+			"help":"Please leave available to show on the shop!"
 		},
 		{
 			"type":"fk",
@@ -179,7 +180,8 @@
 						"full":"Full",
 						"frame":"Frame",
 						"small":"Small",
-						"hide":"Hide"
+						"hide":"Hide",
+						"limited":"Limited height"
 					},
 					"default":"full"
 				}
