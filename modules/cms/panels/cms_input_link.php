@@ -119,6 +119,9 @@ class cms_input_link extends CI_Controller {
 				
 		}
 
+		if (empty($params['lists'])){
+			$params['lists'] = [];
+		}
 		if (!empty($GLOBALS['config']['input_link_order'])){
 			foreach($params['lists'] as &$l){
 				natcasesort($l);

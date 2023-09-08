@@ -51,6 +51,16 @@ class cms_panel_model extends Model {
 			}
 		}
 		
+		$return = [
+				'item' => [],
+				'version' => 2,
+		];
+		
+		if (!stristr($cms_panel, '/')){
+			_html_error('Panel name has to include module: '.$cms_panel, 0, ['backtrace' => 1]);
+			return $return;
+		}
+		
 		$filename = '';
 
 		$hfilename = $GLOBALS['config']['base_path'].'modules/'.str_replace('/', '/definitions/',$cms_panel).'.json';
@@ -58,12 +68,7 @@ class cms_panel_model extends Model {
 			$filename = $hfilename;
 			list($default_module, $_panel_name) = explode('/', $cms_panel);
 		}
-		
-		$return = [
-				'item' => [], 
-				'version' => 2, 
-		];
-		
+				
 		$return['module'] = !empty($default_module) ? $default_module : 'cms';
 
 		if ($filename){

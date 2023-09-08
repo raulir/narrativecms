@@ -67,7 +67,7 @@ function basic_lightbox_init(){
     	
     	var $parent = $this.closest('.basic_lightbox_parent')
     	if (!$parent.length){
-    		$parent = $this.parent()
+    		$parent = $('body')
     	}
     	
     	if ($('.basic_lightbox', $parent).length <= 1){
@@ -110,7 +110,7 @@ function basic_lightbox_init(){
 		
 		var $parent = $current.closest('.basic_lightbox_parent')
     	if (!$parent.length){
-    		$parent = $this.parent()
+    		$parent = $('body')
     	}
     	
     	var $items = $('.basic_lightbox', $parent)
@@ -157,7 +157,7 @@ function basic_lightbox_init(){
 		
 		var $parent = $current.closest('.basic_lightbox_parent')
     	if (!$parent.length){
-    		$parent = $current.parent()
+    		$parent = $('body')
     	}
     	
     	var $items = $('.basic_lightbox', $parent)

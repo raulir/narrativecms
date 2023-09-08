@@ -3,6 +3,7 @@
 		<?= !empty($format) && $format == 'short' ? ' cms_input_link_short ' : '' ?>" 
 		data-cms_input_height="<?= !empty($format) && $format == 'short' ? '1' : '2' ?>">
 	
+
 	<label for="admin_input_link_<?php print($name_clean); ?>"><?php print($label); ?></label>
 	<?php _panel('cms/cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
 	
@@ -32,11 +33,11 @@
 		
 			<select class="cms_input_link_select cms_input_link_select_<?= str_replace('/', '__', $list_name) ?> cms_input_link_dropdown" 
 					name="<?php print($name); ?>[<?php print($list_name); ?>_id]<?php print($name_extra); ?>">
-				
+
 				<?php foreach($list as $item_id => $item_title): ?>
 					
 					<option value="<?php print($list_name.'='.$item_id) ?>" 
-							<?= !empty($value[$list_name.'_id']) && ($list_name.'='.$item_id) == $value[$list_name.'_id'] ? ' selected="selected"' : '' ?>
+							<?= !empty($value[$list_name]) && ($list_name.'='.$item_id) == $value[$list_name] ? ' selected="selected"' : '' ?>
 							data-slug="<?php print($slugs[$list_name][$item_id]); ?>"
 							data-target_id="<?php print($item_id); ?>"
 							><?php print($item_title); ?></option>

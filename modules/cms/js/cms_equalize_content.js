@@ -1,7 +1,7 @@
 ( function( $ ) {
 	
 	// params.step = percentage to shrink at each try
-    $.fn.equalize_content = function(params) {
+    $.fn.cms_equalize_content = function(params) {
     	
     	params = params || {};
     	

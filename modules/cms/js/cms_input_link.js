@@ -82,11 +82,13 @@ function cms_input_link_target($container){
 		$input_value.val($page_select.val());
 
 	} else { // list
+		
 		$input_url_display.attr('disabled', true);
 		$input_text_display.attr('disabled', true);
 		cms_input_link_update_list($select);
 		var $list_select = $select.siblings('.cms_input_link_select_' + $select.val());
-		$input_value.val($list_select.val().replace('__', '/') + '=' + $input_target_id.val());
+		$input_value.val($list_select.val().replace('__', '/')/* + '=' + $input_target_id.val()*/);
+		
 	}
 	
 }
@@ -102,6 +104,7 @@ function cms_input_link_update_list($select){
 		$this.siblings('.cms_input_link_url').val($this.val());
 		$this.siblings('.cms_input_link_text,.cms_input_link_text_display').val($option.html());
 		$this.siblings('.cms_input_link_target_id').val($option.data('target_id'));
+		$this.siblings('.cms_input_link_value').val($this.val());
 	}).change();
 
 }

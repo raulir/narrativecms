@@ -91,7 +91,7 @@ class cms_page_panel_model extends Model {
 		foreach ($GLOBALS['config']['modules'] as $module){
 			foreach(glob($GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/*.json') as $filename){
 				$list_name = basename($filename, '.json');
-				$block_config = $this->cms_panel_model->get_cms_panel_config($list_name);
+				$block_config = $this->cms_panel_model->get_cms_panel_config($module.'/'.$list_name);
 				if (!empty($block_config['list'])){
 					$return[$module.'/'.$list_name] = $module.'/'.$list_name;
 				}
@@ -924,7 +924,7 @@ class cms_page_panel_model extends Model {
 		}
 		
 		if (!stristr($cms_panel_name, '/')){
-			_html_error('Can\'t load cms panel settings, module not specified.');
+			_html_error('Can\'t load cms panel settings, module not specified. Panel name: '.$cms_panel_name);
 			return [];
 		}
 		

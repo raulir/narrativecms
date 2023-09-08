@@ -6,7 +6,7 @@ if ( !function_exists('_iw')) {
 	if ( !function_exists('get_instance')){
 		
 		include_once($GLOBALS['config']['base_path'] . 'system/core/Common.php');
-		include($GLOBALS['config']['base_path'] . 'system/core/Controller.php');
+		include($GLOBALS['config']['base_path'] . 'system/core/controller.php');
 		
 		function &get_instance(){
 			return CI_Controller::get_instance();

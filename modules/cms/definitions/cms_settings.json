@@ -86,7 +86,7 @@
 			"type":"text",
 			"name":"cms_update_url",
 			"label":"CMS update URL",
-			"default":"http://cms.bytecrackers.com/cms/updater/"
+			"default":"http://update.narrativecms.com/cms/updater/"
 		},
 		{
 			"type":"text",

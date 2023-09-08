@@ -12,7 +12,7 @@
 	}
 <?php endif ?><?php if(!empty($GLOBALS['config']['rem_m_px'])): // mobile - 1/50 ?>
 	@media (max-width: <?= $GLOBALS['config']['rem_m_px'] ?>px) {
-	html {font-size: <?= 100/$GLOBALS['config']['rem_m_k'] ?>v<?= empty($GLOBALS['config']['rem_switched']) ? 'w' : 'h' ?> !important;}
+	html {font-size: <?= 100/($GLOBALS['config']['rem_m_k'] ?? 50) ?>v<?= empty($GLOBALS['config']['rem_switched']) ? 'w' : 'h' ?> !important;}
 	}
 <?php endif ?>
 </style>
@@ -21,8 +21,8 @@
 	<?= !empty($_SESSION['cms_user']['cms_user_id']) ? 'var admin_logged_in = 1;' : '' ?>
 	setInterval(() => {_cms_rem = parseFloat(getComputedStyle(document.documentElement).fontSize)}, 500)
 	var _cms_rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
-	var _cms_mobile = ( window.innerWidth <= <?= $GLOBALS['config']['rem_m_px'] ?> ? true : false)
-	setInterval(() => {_cms_mobile = ( window.innerWidth <= <?= $GLOBALS['config']['rem_m_px'] ?> ? true : false)}, 500)
+	var _cms_mobile = ( window.innerWidth <= <?= ($GLOBALS['config']['rem_m_px'] ?? 0) ?> ? true : false)
+	setInterval(() => {_cms_mobile = ( window.innerWidth <= <?= ($GLOBALS['config']['rem_m_px'] ?? 0) ?> ? true : false)}, 500)
 </script>
 </head>
 

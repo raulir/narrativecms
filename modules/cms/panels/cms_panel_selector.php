@@ -40,7 +40,7 @@ class cms_panel_selector extends CI_Controller {
 				foreach($config['panels'] as $panel){
 					
 					// get panel config
-					$panel_config = $this->cms_panel_model->get_cms_panel_config($panel['id']);
+					$panel_config = $this->cms_panel_model->get_cms_panel_config($module.'/'.$panel['id']);
 		
 					// add panel type to the dropdown of panel types
 					$panel_id = $module.'/'.$panel['id'];

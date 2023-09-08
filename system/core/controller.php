@@ -1029,7 +1029,3 @@ class CI_Controller {
 	}
 
 }
-// END Controller class
-
-/* End of file Controller.php */
-/* Location: ./system/core/Controller.php */
