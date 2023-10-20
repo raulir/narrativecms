@@ -445,6 +445,10 @@ class cms_page_panel_model extends Model {
 			unset($data['panel_params']);
 		}
 		
+		if (!empty($data['title'])){
+			$data['title'] = substr($data['title'], 0, 98);
+		}
+		
 		// check if update time and user needs update
 		$keys = array_keys($data);
 		$keys = array_diff($keys, ['show', 'sort', 'cms_page_panel_id', 'cms_page_id', 'parent_id', ]);
@@ -596,6 +600,7 @@ class cms_page_panel_model extends Model {
 		if (empty($data['title'])){
 			$data['title'] = '';
 		}
+		$data['title'] = substr($data['title'], 0, 98);
 		
 		if (!isset($data['sort'])) $data['sort'] = 1;
 

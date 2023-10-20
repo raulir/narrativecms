@@ -175,6 +175,7 @@ if ( !function_exists('_iw')) {
 				imagesavealpha($tmp, true);
 				imagepng($tmp, $GLOBALS['config']['upload_path'].$new_image);
 				
+				/*
 				// optimise on linux
 				if(!empty($GLOBALS['config']['images_pngquant'])){
 					
@@ -205,6 +206,7 @@ if ( !function_exists('_iw')) {
 					unlink($temp_name);
 				
 				}
+				*/
 				
 				// if size is same or bigger, but new filesize is bigger, then use original image instead
 				if ($width >= $original_width){
@@ -232,7 +234,7 @@ if ( !function_exists('_iw')) {
 						
 						imagesavealpha($tmp, true);
 						imagepng($tmp, $GLOBALS['config']['upload_path'].$png_image);
-						
+						/*
 						// optimise on linux
 						if(!empty($GLOBALS['config']['images_pngquant'])){
 							
@@ -248,17 +250,17 @@ if ( !function_exists('_iw')) {
 //							unlink($temp_name);
 							
 						}
-					
+						*/
 					}
 					
 					// convert png to webp
-					if ($GLOBALS['config']['images_webp'] == 'gd'){
+					if ($GLOBALS['config']['images_webp'] == 'gd' || $GLOBALS['config']['images_webp'] == 'cwebp'){
 						
 						$src = imagecreatefrompng($GLOBALS['config']['upload_path'].$png_image);
 						
 						imagewebp($tmp, $GLOBALS['config']['upload_path'].$new_image);
 						
-					} else if ($GLOBALS['config']['images_webp'] == 'cwebp'){
+					} /* else if ($GLOBALS['config']['images_webp'] == 'cwebp'){
 						
 						$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($png_image).'.png';
 						rename($GLOBALS['config']['upload_path'].$png_image, $temp_name);
@@ -269,7 +271,7 @@ if ( !function_exists('_iw')) {
 						
 						unlink($temp_name);
 						
-					}
+					} */
 					
 					if (file_exists($GLOBALS['config']['upload_path'].$png_image)){
 						unlink($GLOBALS['config']['upload_path'].$png_image);
@@ -278,11 +280,11 @@ if ( !function_exists('_iw')) {
 				} else { // if jpg
 					
 					// convert jpg to webp
-					if ($GLOBALS['config']['images_webp'] == 'gd'){
+					if ($GLOBALS['config']['images_webp'] == 'gd' || $GLOBALS['config']['images_webp'] == 'cwebp'){
 					
 						imagewebp($tmp, $GLOBALS['config']['upload_path'].$new_image);
 					
-					} else if ($GLOBALS['config']['images_webp'] == 'cwebp'){
+					} /* else if ($GLOBALS['config']['images_webp'] == 'cwebp'){
 					
 						$jpg_image = _get_iw_new($image, $width, 'jpg');
 						$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($jpg_image).'.jpg';
@@ -297,7 +299,7 @@ if ( !function_exists('_iw')) {
 						
 						unlink($temp_name);
 
-					}
+					} */
 
 				}
 			

@@ -108,8 +108,8 @@ class cms_file_model extends CI_Model {
 			$name_data = $name_data_wo.'_'.$i.'.'.$extension;
 		}
 				
-		$sql = "insert into cms_file set name = ? , filename = ? , date_posted = ? ";
-		$this->db->query($sql, array($name_data, $filename, date('Y-m-d H:i:s')));
+		$sql = "insert into cms_file set name = ? , filename = ? , date_posted = ? , cms_user_id = ? , sort = ? , icon = ? , title = ? ";
+		$this->db->query($sql, array($name_data, $filename, date('Y-m-d H:i:s'), 0, 0, '', ''));
  
  		return array(
 				'filename' => $filename,
@@ -117,7 +117,11 @@ class cms_file_model extends CI_Model {
  				'name_original' => $name_data_wo.'.'.$extension,
 				'cms_file_id' => $this->db->insert_id(),
 				'date_posted' => date('Y-m-d H:i:s'),
-		);
+ 				'cms_user_id' => 0,
+ 				'sort' => 0,
+ 				'icon' => '',
+ 				'title' => '',
+ 		);
  
 	}
 	

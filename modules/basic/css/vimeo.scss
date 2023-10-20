@@ -41,7 +41,6 @@
 	height: 100%;
 	opacity: 0;
 	transition: opacity 0.5s;
-	background-color: $colour_black;
 }
 
 .basic_vimeo_link {
@@ -71,12 +70,12 @@
 	position: absolute;
 	left: 3.5rem;
 	bottom: 1.5rem;
-	width: calc(100% - 7.0rem);
 	height: 2.0rem;
 	z-index: 20;
 	opacity: 0;
 	transition: opacity 0.5s;
 	color: $colour_white;
+	display: flex;
 	&::before {
 		content: '';
 		display: block;
@@ -91,15 +90,17 @@
 	.basic_vimeo_area:hover & {
 		opacity: 1;
 	}
+	.basic_vimeo_toolbarwidth_wide & {
+		width: calc(100% - 7.0rem);
+	}
 }
 
+/* control play */
 .basic_vimeo_play {
-	position: absolute;
-	left: 0;
-	top: 0;
 	height: 100%;
 	width: 2.0rem;
 	cursor: pointer;
+	position: relative;
 }
 
 .basic_vimeo_play_button {
@@ -144,28 +145,25 @@
 	}
 }
 
+/* control current */
 .basic_vimeo_current {
 	font-size: 0.95rem;
-	position: absolute;
-	left: 1.7rem;
-	top: 0.5rem;
+	padding: 0.5rem 0;
 	line-height: 1.0rem;
 	width: 7.5rem;
 	text-align: center;
 	font-weight: 100;
 }
 
+/* control progress */
 .basic_vimeo_progress {
-	position: absolute;
-	left: 9.5rem;
-	top: 0;
 	height: 100%;
-	width: calc(100% - 19.0rem);
+//	width: calc(100% - 19.0rem);
 	.basic_vimeo_buttons_1 & {
-		width: calc(100% - 22.0rem);
+//		width: calc(100% - 22.0rem);
 	}
 	.basic_vimeo_buttons_2 & {
-		width: calc(100% - 25.0rem);
+//		width: calc(100% - 25.0rem);
 	}
 }
 
@@ -198,11 +196,10 @@
 	z-index: 20;
 }
 
+/* control sound */
 .basic_vimeo_sound {
-	position: absolute;
-	right: 6.0rem;
+	position: relative;
 	height: 100%;
-	top: 0;
 	width: 2.0rem;
 	cursor: pointer;
 	.basic_vimeo_buttons_1 & {
@@ -255,12 +252,12 @@
 	}
 }
 
+/* control volume */
 .basic_vimeo_volume {
 	font-size: 0;
 	line-height: 0;
 	letter-spacing: 0;
-	position: absolute;
-	right: 0;
+	position: relative;
 	height: 0.8rem;
 	top: 50%;
 	transform: translate(0, -50%);
@@ -324,17 +321,14 @@
 	}
 }
 
+/* control subtitles */
 .basic_vimeo_subtitles_button {
-	position: absolute;
-	right: 0;
-	top: 50%;
 	z-index: 1;
 	width: 2.0rem;
 	height: 100%;
 	background-position: right center;
 	background-size: 1.7rem auto;
 	background-repeat: no-repeat;
-	transform: translate(0, -50%);
 	cursor: pointer;
 	opacity: 1;
 	transition: opacity 0.5s;
@@ -352,13 +346,10 @@
 	}
 }
 
+/* control fullscreen */
 .basic_vimeo_fullscreen_button {
-	position: absolute;
-	right: 0;
-	top: 50%;
 	z-index: 1;
 	width: 2.0rem;
-	height: 100%;
 	background-position: center;
 	background-size: 1.35rem auto;
 	background-repeat: no-repeat;

@@ -7,6 +7,16 @@ class vimeo extends CI_Controller{
 		if (empty($params['image'])){
 			$params['image'] = $params['default_image'];
 		}
+		
+		if (empty($params['hide_controls']) && empty($params['controls'])){
+			$params['controls'] = [
+				'play' => 1,	
+				'current' => 1,	
+				'progress' => 1,	
+				'sound' => 1,	
+				'volume' => 1,	
+			];
+		}
 
 		if (!empty($params['subtitle'])){
 			
@@ -82,7 +92,30 @@ class vimeo extends CI_Controller{
 			}
 
 			$params['subsfile'] = $GLOBALS['config']['base_url'].'cache/'.$filename;
+			if (empty($params['hide_controls']) && !isset($params['controls']['subtitles'])){
+				$params['controls']['subtitles'] = 1;
+			}
 			
+		}
+		
+		if (empty($params['hide_controls']) && !isset($params['controls']['fullscreen']) && empty($params['disable_fullscreen'])){
+			$params['controls']['fullscreen'] = 1;
+		}
+		
+		if (empty($params['hide_controls']) && !empty($params['controls']['progress'])){
+			$params['toolbar_width'] = 'wide';
+		} else {
+			$params['toolbar_width'] = 'narrow';
+		}
+		
+		$found = 0;
+		foreach($params['controls'] as $value){
+			if ($value == 1){
+				$found = 1;
+			} 
+		}
+		if ($found == 0){
+			$params['hide_controls'] = 1;
 		}
 
 		return $params;
