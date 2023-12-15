@@ -39,7 +39,7 @@
 			"type":"fk",
 			"name":"delivery_set_id",
 			"label":"Delivery set",
-			"list":"stock/delivery_set",
+			"list":"shop/delivery_set",
 			"add_empty":"1"
 		},
 		{

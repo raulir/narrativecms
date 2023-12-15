@@ -211,7 +211,7 @@ class checkout extends CI_Controller{
 		
 		$params['topay_main'] = floor($params['topay']);
 		$params['topay_decimals'] = round(($params['topay'] - $params['topay_main']) * 100);
-		
+
 		return $params;
 	
 	}

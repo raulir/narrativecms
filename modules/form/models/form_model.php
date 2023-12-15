@@ -96,15 +96,22 @@ class form_model extends CI_Model {
     }
     
     function create_table_form_data(){
-    	
     	$db_debug = $this->db->db_debug; //save setting
+    	
+    	mysqli_report(MYSQLI_REPORT_OFF);
+    	
+    	$errors_visible = $GLOBALS['config']['errors_visible'];
+    	$GLOBALS['config']['errors_visible'] = 0;
+    	
     	$this->db->db_debug = false; //disable debugging for queries
     	
 		$sql = "select cms_page_panel_id from form_data limit 1 ";
-		$query = $this->db->query($sql);
-
-		$this->db->db_debug = $db_debug; //restore setting
 		
+		$query = $this->db->query($sql);
+		
+		$this->db->db_debug = $db_debug; //restore setting
+		$GLOBALS['config']['errors_visible'] = $errors_visible;
+
 		if($this->db->_error_number() == 1146){
     	
     		$sql = "CREATE TABLE `form_data` (

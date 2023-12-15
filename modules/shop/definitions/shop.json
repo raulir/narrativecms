@@ -1,6 +1,9 @@
 {
 	"version":"2",
 	"label":"Shop settings",
+	"item": [
+	
+	],
 	"settings":[ 
 		{
 			"type":"text",
@@ -31,6 +34,16 @@
 			"type":"text",
 			"name":"dimension_rounding",
 			"label":"Dimension rounding"
+		},
+		{
+			"type":"select",
+			"name":"show_tax",
+			"label":"Show tax",
+			"values":{
+				"0":"No",
+				"1":"Yes"
+			},
+			"default":"1"
 		},
 		{
 			"type":"repeater",

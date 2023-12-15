@@ -16,6 +16,9 @@
 	right: 1.0rem;
 	top: 0.5rem;
 	z-index: 10;
+	.cms_input_text_readonly & {
+		background-color: $colour_light_shadow;
+	}
 }
 
 .cms_repeater_block .cms_input_text_input {
