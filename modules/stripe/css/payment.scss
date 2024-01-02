@@ -1,0 +1,368 @@
+$colour_white: white;
+
+$dashboard_blue_border: blue;
+$dashboard_black: black;
+$dashboard_blue_lighter: lightblue;
+$dashboard_form_blue: rgb(10,10,255);
+$dashboard_blue_background: rgb(200,200,255);
+$dashboard_grey: grey;
+
+@mixin dashboard_small_link {
+	display: inline-block;
+	color: $dashboard_form_blue;
+	border-bottom: 0.14rem solid $dashboard_blue_background;
+	font-size: 0.85rem;
+	line-height: 1.05rem;
+	margin: 0 0 0.2rem 0;
+	transition: border 0.3s;
+	position: relative;
+	z-index: 1;
+	text-decoration: none;
+	&::before {
+	  	content: attr(data-label);
+	  	-webkit-text-stroke: 0.2rem $colour_white;
+	  	color: $colour_white;
+		position: absolute;
+		left: 0;
+	  	z-index: -1
+	}
+	&::after {
+	
+	}
+	&:hover {
+		border-color: $dashboard_form_blue;
+	}
+}
+
+@mixin dashboard_cta {
+	display: inline-block;
+	line-height: 2.6rem;
+	padding: 0 2.0rem;
+	border-radius: 0.3rem;
+	background-color: $dashboard_blue_border;
+	color: $colour_white;
+	transition: background-color 0.3s, opacity 0.3s;
+	cursor: pointer;
+	&:hover {
+		background-color: $dashboard_blue_border;
+	}
+}
+
+.payment_container {
+	/*
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100.0vw;
+	height: 100.0vh;
+	z-index: 10020;
+	background-color: rgba(0,0,0,0.8);
+	*/
+}
+
+.payment_content {
+	width: 27.0rem;
+	position: relative;
+}
+
+.payment_area {
+	background-color: $colour_white;
+	padding: 2.0rem 3.0rem 3.0rem 3.0rem;
+	border-radius: 2.0rem;
+	border: 0.14rem solid $dashboard_blue_border;
+	text-align: left;
+	overflow: hidden;
+}
+
+.payment_inner {
+	position: relative;
+	padding-bottom: 5.0rem;
+}
+
+.payment_heading {
+	font-size: 2.6rem;
+	line-height: 3.0rem;
+	color: $dashboard_black;
+	padding: 0.5rem 19.0rem 0.75rem 0;
+	font-weight: bold;
+}
+
+.payment_text {
+	color: $dashboard_black;
+	font-size: 0.95rem;
+    line-height: 1.1rem;
+    padding: 0 0 2.0rem 0;
+}
+
+.payment_logos {
+	position: absolute;
+	right: 0;
+	bottom: 0.1rem;
+	width: 100%;
+	height: 5.0rem;
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.payment_focus_area {
+
+}
+
+.payment_overview {
+	position: relative;
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
+    padding: 1.0rem;
+    background-color: $dashboard_blue_lighter;
+    border-radius: 0.5rem;
+}
+
+.payment_overview_label,.payment_overview_value {
+	width: 50%;
+	color: $dashboard_black;
+	font-size: 0.95rem;
+    line-height: 1.6rem;
+    display: inline-block;
+}
+
+.payment_overview_value {
+	font-weight: 500;
+}
+
+.payment_cta_area {
+	padding: 1.0rem 0 2.0rem 0;
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
+	display: none;
+    text-align: center;
+}
+
+.payment_button_pay {
+	margin-top: 1.0rem;
+	background-image: none!important;
+	display: block;
+	background-color: $dashboard_blue_border;
+	line-height: 3.4rem;
+    border-radius: 0.5rem;
+    color: $colour_white;
+    transition: background-color 0.3s, opacity 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 1.1rem;
+    padding: 0 2.0rem;
+    &:hover {
+    	background-color: $dashboard_blue_border;
+    }
+    &:first-letter {
+    	text-transform: uppercase;
+    }
+}
+
+.payment_button_cancel {
+	@include dashboard_small_link;
+	cursor: pointer;
+	margin: 1.0rem auto 0 auto;
+	opacity: 0.5;
+	color: $dashboard_grey;
+	border-color: $dashboard_grey;
+	transition: opacity 0.3s, color 0.3s, border 0.3s;
+	display: inline-block;
+	&:hover {
+		opacity: 1;
+		color: $dashboard_blue_border;
+		border-color: $dashboard_blue_border;
+	}
+}
+
+
+.payment_cta {
+
+}
+
+.payment_success_message,.payment_failure_message,.payment_pending_message {
+	text-align: left;
+	padding: 1.5rem 0 0.75rem 0;
+	display: none;
+	background-size: 1.2rem auto;
+	background-position: left top 2.3rem;
+	background-repeat: no-repeat;
+	position: relative;
+}
+
+.payment_pending_icon {
+	width: 1.4rem;
+	height: 1.4rem;
+	position: absolute;
+	left: 0;
+	top: calc(50% - 1.5rem);
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+	animation-duration: 5s;
+	animation-name: pending;
+	animation-iteration-count: infinite;
+}
+
+.payment_message_inner {
+	color: $dashboard_grey;
+	font-size: 1.25rem;
+    line-height: 2.6rem;
+    padding: 0 0 1.0rem 2.0rem;
+}
+
+.payment_message_cta {
+	@include dashboard_cta;
+	position: static;
+	display: block;
+	text-align: center;
+	font-weight: 500;
+}
+
+.payment_message_active {
+	display: block;
+}
+
+.payment_popup_container {
+	display: none;
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 10050;
+	background-color: rgba(0,0,0,0.9);
+	overflow: hidden;
+}
+
+.payment_popup_content {
+	background-color: $colour_white;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	padding: 2.0rem 3.0rem 3.0rem 3.0rem;
+	border-radius: 2.0rem;
+	border: 0.14rem solid $dashboard_blue_border;
+	text-align: center;
+	overflow: hidden;
+	#submit {
+		@include dashboard_cta;
+		position: static;
+		display: block;
+		text-align: center;
+		font-weight: 500;
+		margin: 1.0rem auto 0 auto;
+	}
+}
+
+.payment_popup_active {
+	display: block;
+}
+
+.payment_popup_close {
+	position: absolute;
+	right: 1.5rem;
+	top: 1.5;
+	font-size: 0.8rem;
+	cursor: pointer;
+	line-height: 0.8rem;
+	text-transform: uppercase;
+}
+
+@keyframes pending {
+	
+	0% {
+		transform: rotate(0deg);
+	}
+
+	12.5% {
+		transform: rotate(0deg);
+	}
+	12.51% {
+		transform: rotate(45deg);
+	}
+
+	25.0% {
+		transform: rotate(45deg);
+	}
+	25.01% {
+		transform: rotate(90deg);
+	}
+
+	37.5% {
+		transform: rotate(90deg);
+	}
+	37.51% {
+		transform: rotate(135deg);
+	}
+
+	50.0% {
+		transform: rotate(135deg);
+	}
+	50.01% {
+		transform: rotate(180deg);
+	}
+
+	62.5% {
+		transform: rotate(180deg);
+	}
+	62.51% {
+		transform: rotate(225deg);
+	}
+
+	75.0% {
+		transform: rotate(225deg);
+	}
+	75.01% {
+		transform: rotate(270deg);
+	}
+
+	87.5% {
+		transform: rotate(270deg);
+	}
+	87.51% {
+		transform: rotate(315deg);
+	}
+
+	99.99% {
+		transform: rotate(315deg);
+	}
+	100.0% {
+		transform: rotate(360deg);
+	}
+
+}
+
+@media only screen and (max-width: 500px) {
+
+	.payment_content {
+		width: calc(100% - 2.0rem);
+		padding: 1.5rem;
+	}
+
+	.payment_area {
+		padding: 1.5rem;
+	}
+
+	.payment_popup_content {
+		width: calc(100% - 2rem);
+    	padding: 1.5rem;
+	}
+
+}
+
+@media only screen and (max-width: 420px) {
+
+	.payment_overview_label, .payment_overview_value {
+		width: 100%;
+	}
+
+	.payment_overview_value {
+		padding-bottom: 0.3rem;
+		font-weight: bold;
+	}
+
+}

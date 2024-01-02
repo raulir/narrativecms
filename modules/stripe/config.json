@@ -1,0 +1,24 @@
+{
+	"panels":[
+		{
+			"id":"payment_hook_success",
+			"name":"Payment hook success"
+		},
+		{
+			"id":"payment_success",
+			"name":"Payment success"
+		}
+	],
+	"cms_menu":[
+		{
+			"id":"stripe",
+			"name":"Stripe"
+		},
+        {
+            "id":"payment_settings",
+            "name":"Payment settings",
+            "parent":"stripe",
+            "url":"admin/panel_settings/stripe__payment/"
+        }
+    ]
+}

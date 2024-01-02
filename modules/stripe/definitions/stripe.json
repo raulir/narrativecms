@@ -1,0 +1,20 @@
+{
+    "version": "2",
+    "label":"Stripe",
+    "description":"Stripe settings",
+	"item":{
+
+	},
+    "settings": [
+		{
+			"name":"test_payments",
+			"type":"select",
+			"label":"Test payments",
+			"values":{
+				"1":"Use test payments",
+				"0":"Use live payments"
+			},
+			"default":"1"
+		}
+	]
+}

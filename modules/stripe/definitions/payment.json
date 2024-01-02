@@ -1,0 +1,132 @@
+{
+    "version": "2",
+    "label":"Payment",
+    "image":"",
+    "description":"Payment panel",
+    "js": [
+
+    ],
+    "item": [
+    
+    ],
+    "settings": [
+    	{
+    		"type":"text",
+    		"label":"Heading",
+    		"name":"heading",
+    		"default":"Payment"
+    	},
+    	{
+        	"type": "image",
+        	"name": "powered_by",
+        	"label": "Powered by",
+        	"category": "content"
+        },
+    	{
+    		"type":"textarea",
+    		"label":"Text",
+    		"name":"text",
+    		"default":"Payment for the first period"
+    	},
+    	{
+    		"type":"text",
+    		"label":"Cancel label",
+    		"name":"cancel_label",
+    		"default":"cancel"
+    	},
+    	{
+    		"type":"text",
+    		"label":"Pay label",
+    		"name":"pay_label",
+    		"default":"pay now"
+    	},
+    	{
+    		"type":"text",
+    		"label":"Period end label",
+    		"name":"period_end_label",
+    		"default":"Until"
+    	},
+    	{
+    		"type":"text",
+    		"label":"Payment extra label",
+    		"name":"payment_extra_label",
+    		"default":"Pay now"
+    	},
+    	{
+    		"type":"text",
+    		"label":"Payment new label",
+    		"name":"payment_new_label",
+    		"default":"After that"
+    	},
+        {
+        	"type": "subtitle",
+        	"label": "Pending"
+        },
+    	{
+        	"type": "text",
+        	"name": "payment_pending_message",
+        	"label": "Pending message"
+        },
+    	{
+        	"type": "image",
+        	"name": "pending",
+        	"label": "Pending icon",
+        	"category": "icon"
+        },
+    	{
+        	"type": "text",
+        	"name": "popup_close_label",
+        	"label": "Popup close label"
+        },
+        {
+        	"type": "subtitle",
+        	"label": "Success"
+        },
+    	{
+        	"type": "text",
+        	"name": "payment_success_message",
+        	"label": "Success message"
+        },
+    	{
+        	"type": "image",
+        	"name": "success",
+        	"label": "Success icon",
+        	"category": "icon"
+        },
+    	{
+        	"type": "text",
+        	"name": "success_cta_label",
+        	"label": "CTA label"
+        },
+        {
+        	"type": "link",
+        	"name": "success_cta_link",
+        	"label": "CTA link"
+        },
+        {
+        	"type": "subtitle",
+        	"label": "Failure"
+        },
+    	{
+        	"type": "text",
+        	"name": "payment_failure_message",
+        	"label": "Failure message"
+        },
+    	{
+        	"type": "image",
+        	"name": "failure",
+        	"label": "Failure icon",
+        	"category": "icon"
+        },
+    	{
+        	"type": "text",
+        	"name": "failure_cta_label",
+        	"label": "CTA label"
+        },
+        {
+        	"type": "link",
+        	"name": "failure_cta_link",
+        	"label": "CTA link"
+        }
+	]
+}

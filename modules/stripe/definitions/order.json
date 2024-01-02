@@ -1,0 +1,145 @@
+{
+    "version": "2",
+    "label":"Order",
+    "image":"//panel_order.png",
+    "description":"Order panel",
+    "js": [
+
+    ],
+    "item": [
+    	{
+    		"type":"text",
+    		"label":"Heading",
+    		"name":"heading",
+    		"default":"My subscription"
+    	},
+    	{
+    		"type":"text",
+    		"label":"Cancel label",
+    		"name":"cancel_label",
+    		"default":"cancel"
+    	},
+    	{
+    		"type":"text",
+    		"label":"Continue label",
+    		"name":"continue_label",
+    		"default":"continue"
+    	},
+		{
+			"type":"subtitle",
+			"label":"Plan selection"
+		},
+    	{
+    		"type":"text",
+    		"label":"Plan label",
+    		"name":"plan_label",
+    		"default":"Select plan"
+    	},
+    	{
+			"type":"repeater",
+			"name":"plans",
+			"label":"Plans",
+			"fields":[
+		        {
+		        	"type": "fk",
+		        	"name": "plan_id",
+		        	"label": "Plan",
+		        	"list": "dashboard/plan"
+		        }
+		    ]
+		},
+    	{
+    		"type":"text",
+    		"label":"Number label",
+    		"name":"number_label",
+    		"default":"Number of licences"
+    	},
+	   	{
+    		"type":"text",
+    		"label":"Period label",
+    		"name":"period_label",
+    		"default":"Renewal period"
+    	},
+		{
+    		"type":"text",
+    		"label":"Summary label",
+    		"name":"summary_label",
+    		"default":"Summary"
+    	},
+		{
+    		"type":"text",
+    		"label":"Register label",
+    		"name":"register_button_label",
+    		"default":"Continue to payment"
+    	},
+		{
+    		"type":"text",
+    		"label":"Register heading",
+    		"name":"register_heading",
+    		"default":"Create account"
+    	},
+		{
+    		"type":"text",
+    		"label":"Register back label",
+    		"name":"register_back_label",
+    		"default":"Back to my subscription"
+    	}
+    ],
+    "settings": [
+    	{
+			"type":"repeater",
+			"name":"periods",
+			"label":"Periods",
+			"fields":[
+		        {
+		        	"type": "select",
+		        	"name": "period_id",
+		        	"label": "Period id",
+		        	"values": {
+		        		"m":"Month",
+		        		"y":"Year"
+		        	}
+		        },
+		        {
+		        	"type": "text",
+		        	"name": "sale_label",
+		        	"label": "Sale label"
+		        },
+		        {
+		        	"type": "text",
+		        	"name": "heading",
+		        	"label": "Heading"
+		        },
+		        {
+		        	"type": "textarea",
+		        	"name": "price_text",
+		        	"label": "Price text",
+		        	"lines": "2"
+		        },
+		        {
+		        	"type": "text",
+		        	"name": "extra_text",
+		        	"label": "Extra text"
+		        }
+			]
+		},
+		{
+    		"type":"text",
+    		"label":"USD prefix",
+    		"name":"usd_prefix",
+    		"default":"$"
+    	},
+		{
+    		"type":"text",
+    		"label":"GBP prefix",
+    		"name":"gbp_prefix",
+    		"default":"£"
+    	},
+		{
+    		"type":"text",
+    		"label":"EUR prefix",
+    		"name":"eur_prefix",
+    		"default":"€"
+    	}      
+	]
+}
