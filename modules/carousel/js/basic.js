@@ -33,13 +33,16 @@ function carousel_basic_user_hide($this){
 		}
 
 	}, 100);
+
+	var event = new CustomEvent('carousel_basic_slide_hide')
+	$this.get(0).dispatchEvent(event)
 	
 }
 
 function carousel_basic_user_show($this){
 
 	'use strict'
-	
+
 	carousel_basic_clear_progress_handlers($this)
 
 	var $button = $('.carousel_basic_active', $this);
@@ -71,6 +74,9 @@ function carousel_basic_user_show($this){
 		
 		
 	}
+// console.log($this)	
+	var event = new CustomEvent('carousel_basic_slide_show')
+	$this.get(0).dispatchEvent(event)
 
 }
 

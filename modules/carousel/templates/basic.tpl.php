@@ -10,9 +10,10 @@
 
 			<?php foreach($items as $item): ?>
 			
-				<div class="carousel_basic_item <?= !empty($item['colour_scheme']) ? ' carousel_basic_item_scheme_'.$item['colour_scheme'] : '' ?>
+				<div class="carousel_basic_item <?= !empty($item['scheme']) ? ' carousel_basic_item_scheme_'.$item['scheme'] : '' ?>
 						<?= !empty($item['id']) ? ' carousel_basic_item_id_'.$item['id'].' ' : '' ?>" 
-						<?= !empty($item['id']) ? ' data-id="'.$item['id'].'" ' : '' ?>>
+						<?= !empty($item['id']) ? ' data-id="'.$item['id'].'" ' : '' ?> 
+						<?= !empty($item['scheme']) ? ' data-scheme="'.$item['scheme'].'" ' : '' ?>>
 
 					<div class="carousel_basic_item_image" <?php _ib($item['image'], ['width' => 1100, 'output' => 'jpg']) ?>></div>
 					<div class="carousel_basic_item_mobile_image" <?php _ib(!empty($item['mobile_image']) ? $item['mobile_image'] : $item['image'], 700) ?>>
