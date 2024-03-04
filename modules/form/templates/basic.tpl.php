@@ -1,3 +1,21 @@
+<?php if(!empty($confirm_result)): ?>
+
+<div class="form_basic_container">
+	<div class="form_basic_content">
+	
+		<div class="form_basic_confirm_success"><?= $confirm_success_message ?></div>
+		
+		<script>
+			setTimeout(() => {
+				$('.form_basic_success_show').removeClass('form_basic_success_show')
+			    window.history.replaceState(null, '', window.location.pathname)
+			}, 1000)</script>
+	
+	</div>
+</div>
+
+<?php else: ?>
+
 <div class="form_basic_container form_basic_recaptcha_<?= !empty($recaptcha) ? 'on' : 'off' ?>"
 		<?php if (!empty($recaptcha)): ?>data-recaptcha_key="<?= $recaptcha_client_key ?>" <?php endif ?>
 		<?php if (!empty($brochure)): ?>data-success_url="<?php _lfd($brochure, false) ?>" <?php endif ?>
@@ -21,7 +39,7 @@
 
 				<?php foreach($elements as $element): ?>
 					<div class="form_basic_input form_basic_input_type_<?= $element['type'] ?> form_basic_input_<?= $element['name'] ?>
-							<?= $element['mandatory'] ? 'form_basic_input_mandatory' : '' ?>">
+							<?= !empty($element['mandatory']) ? 'form_basic_input_mandatory' : '' ?>">
 
 						<?php if (!empty($element['label']) && empty($label_as_placeholder) && $element['type'] != 'radio'): ?>
 							<label class="form_basic_input_label" for="form_basic_<?= $element['name'] ?>"><?= $element['label'] ?></label>
@@ -93,7 +111,9 @@
 							<div class="form_basic_input_copy_area">
 								<?php foreach($values as $value): ?>
 									<?php if ($value['element'] == $element['name']): ?>
-										<div class="form_basic_input_copy_heading"><?= $value['label'] ?></div>
+										<?php if(!empty($value['label'])): ?>
+											<div class="form_basic_input_copy_heading"><?= $value['label'] ?></div>
+										<?php endif ?>
 										<div class="form_basic_input_copy_text"><?= $value['text'] ?></div>
 									<?php endif ?>
 								<?php endforeach ?>
@@ -142,3 +162,5 @@
 
 	</div>
 </div>
+
+<?php endif ?>

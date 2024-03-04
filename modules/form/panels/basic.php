@@ -75,4 +75,23 @@ class basic extends \CI_Controller{
 		
 	}
 	
+	function panel_action($params){
+		
+		$this->load->model('form/form_model');
+	
+		if (!empty($_GET['confirmation_code'])){
+			
+			// find code
+			$confirm_result = $this->form_model->confirm_code($_GET['confirmation_code']);
+			
+			if ($confirm_result){
+				$params['confirm_result'] = 1;
+			}
+				
+		}
+		
+		return $params;
+		
+	}
+	
 }

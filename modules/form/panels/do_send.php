@@ -145,11 +145,26 @@ class do_send extends CI_Controller {
 			
 			}
 			
+			// autoreply
 			if(!empty($params['autoreply'])){
-				$this->form_model->send_autoreply($data, $params['autoreply_text'], $params['autoreply_email'], 
-						$params['autoreply_name'], $params['autoreply_subject']);
+				
+				if ($params['confirm']){
+					
+					$data['confirmation_code'] = md5('CMS'.mt_rand(1000, 9999).$data['email']);
+					
+					if (!stristr($params['autoreply_text'], '[codeurl]')){
+						$params['autoreply_text'] .= "\r\n\r\n".'[codeurl]';
+					}
+					
+					$data['codeurl'] = 'http'.($_SERVER['SERVER_PORT'] == 80 ? '' : 's').'://'.
+							$_SERVER['SERVER_NAME'].$GLOBALS['config']['base_url'].$page['slug'].'/?confirmation_code='.$data['confirmation_code'];
+				
+				}
+				
+				$this->form_model->send_autoreply($data, $params);
+			
 			}
-
+			
 			$this->form_model->create_form_data($cms_page_panel_id, !empty($data['email']) ? $data['email'] : '', $data);
 			
 			$return = [];

@@ -19,9 +19,19 @@ class form_model extends CI_Model {
 		$this->create_table_form_data();
 		
 		$data['time'] = time();
+		
+		$code = '';
+		if ($data['confirmation_code']){
+			
+			$code = $data['confirmation_code'];
+			
+			unset($data['confirmation_code']);
+			unset($data['codeurl']);
+			
+		}
 	
-		$sql = "insert into form_data set cms_page_panel_id = ? , email = ? , data = ? ";
-		$this->db->query($sql, array($cms_page_panel_id, $email, json_encode($data), ));
+		$sql = "insert into form_data set cms_page_panel_id = ? , email = ? , code = ? , data = ? ";
+		$this->db->query($sql, [$cms_page_panel_id, $email, $code, json_encode($data), ]);
 		$return = $this->db->insert_id();
 		
 		return $return;
@@ -96,33 +106,30 @@ class form_model extends CI_Model {
     }
     
     function create_table_form_data(){
+    	
     	$db_debug = $this->db->db_debug; //save setting
-    	
-    	mysqli_report(MYSQLI_REPORT_OFF);
-    	
-    	$errors_visible = $GLOBALS['config']['errors_visible'];
-    	$GLOBALS['config']['errors_visible'] = 0;
-    	
     	$this->db->db_debug = false; //disable debugging for queries
     	
 		$sql = "select cms_page_panel_id from form_data limit 1 ";
-		
 		$query = $this->db->query($sql);
-		
-		$this->db->db_debug = $db_debug; //restore setting
-		$GLOBALS['config']['errors_visible'] = $errors_visible;
 
+		$this->db->db_debug = $db_debug; //restore setting
+		
 		if($this->db->_error_number() == 1146){
     	
     		$sql = "CREATE TABLE `form_data` (
     					`form_data_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     					`cms_page_panel_id` int(10) UNSIGNED NOT NULL,
-    					`email` varchar(100) NOT NULL, `data` text NOT NULL,
+    					`email` varchar(100) NOT NULL, 
+    					`code` varchar(100) NOT NULL, 
+    					`data` text NOT NULL,
     					PRIMARY KEY (`form_data_id`)
     				) ENGINE=InnoDB DEFAULT CHARSET=utf8";
     		$this->db->query($sql);
     	
     		$sql = "ALTER TABLE `form_data` ADD KEY `cms_page_panel_idx` (`cms_page_panel_id`)";
+    		$this->db->query($sql);
+    		$sql = "ALTER TABLE `uamh`.`form_data` ADD INDEX `code_idx` (`code`(3))";
     		$this->db->query($sql);
     	
     	}
@@ -183,6 +190,7 @@ class form_model extends CI_Model {
 	    		$row_unpacked['time'] = date('Y-m-d H:i', !empty($row_unpacked['time']) ? $row_unpacked['time'] : 0);
 	    		$row_unpacked['form_data_id'] = $row['form_data_id'] ?? '';
 	    		$row_unpacked['item_id'] = $row['form_data_id'] ?? 0;
+	    		$row_unpacked['id'] = $row['form_data_id'] ?? 0;
 	    		$table[] = $row_unpacked;
     		}
     		
@@ -232,55 +240,6 @@ class form_model extends CI_Model {
     	
     }
     
-    function send_autoreply($data, $autoreply_text, $autoreply_email, $autoreply_name, $autoreply_subject){
-    	
-    	foreach($data as $key => $val){
-    		$autoreply_text = str_replace('['.$key.']', $val, $autoreply_text);
-    	}
-    	
-    	if (!empty($data['email'])){
-    		
-    		if(empty($GLOBALS['config']['smtp_server'])){
-    			
-		   		// send email
-		    	@mail($data['email'], $autoreply_subject, $autoreply_text, 
-						'From: '.$autoreply_name.'<'.$autoreply_email.'>'."\r\n".'Reply-to: '.$autoreply_name.'<'.$autoreply_email.'>'."\r\n");
-		    	
-    		} else {
-    			
-    			if (!empty($GLOBALS['config']['email'])){
-    				$from = $GLOBALS['config']['email'];
-    			} else {
-    				$from = $_SERVER['SERVER_NAME'].'@narrativecms.com';
-    			}
-    			 
-    			
-    			$mail = new PHPMailer(true);
-    			 
-    			$mail->isSMTP();
-    			$mail->Host = $GLOBALS['config']['smtp_server'];
-    			$mail->SMTPAuth = true;
-    			$mail->Username = $GLOBALS['config']['smtp_username'];
-    			$mail->Password = $GLOBALS['config']['smtp_password'];
-    			$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    			$mail->Port = $GLOBALS['config']['smtp_port'];
-    			
-    			$mail->setFrom($from, $_SERVER['SERVER_NAME']);
-    			$mail->addAddress($data['email']);
-    			
-   				$mail->addReplyTo($autoreply_email, $autoreply_name);
-    			
-    			$mail->Subject = $autoreply_subject;
-    			$mail->Body = $autoreply_text;
-    			
-    			$mail->send();
-    			
-    		}
-    		
-    	}
-
-    }
-
     function create_cm_subscriber($data, $params){
     	
         $postdata = [
@@ -422,4 +381,172 @@ class form_model extends CI_Model {
     	
     }
     
+    function confirm_code($code){
+// _print_r($code);    	
+    	$return = 0;
+    	
+    	if (empty($code)){
+    		return $return;
+    	}
+    	
+    	// check if exists
+    	$sql = "select form_data_id, code from form_data where code = ? ";
+    	$query = $this->db->query($sql, [$code]);
+    	
+    	$data = $query->result_array();
+ 
+    	foreach($data as $row){
+    	
+    		if ($row['code']){
+    			$return = 1;
+    			$sql = "update form_data set code = '' where form_data_id = ? ";
+    			$this->db->query($sql, [$row['form_data_id']]);
+    			
+    			$this->send_confirmation_success($row['form_data_id']);
+    			
+    		}
+
+    	}
+
+    	return $return;
+
+    }
+    
+    function send_autoreply($data, $params){ // $autoreply_text, $autoreply_email, $autoreply_name, $autoreply_subject){
+    	
+    	$autoreply_text = $params['autoreply_text'];
+    	$autoreply_email = $params['autoreply_email'];
+    	$autoreply_name = $params['autoreply_name'];
+    	$autoreply_subject = $params['autoreply_subject'];
+    	$autoreply_html = false;
+    	
+    	if (!empty($params['autoreply_html']['target_id'])){
+    		
+    		$autoreply_html = true;
+    		
+    		$link = 'http'.($_SERVER['SERVER_PORT'] == 80 ? '' : 's').'://'.$_SERVER['SERVER_NAME']._l($params['autoreply_html']['url'], false);
+
+			$autoreply_text = file_get_contents($link);
+			
+    	}
+    	
+    	foreach($data as $key => $val){
+    		$autoreply_text = str_replace('['.$key.']', $val, $autoreply_text);
+    	}
+    	
+    	if (!empty($data['email'])){
+    		
+    		if(empty($GLOBALS['config']['smtp_server'])){
+    			
+		   		// send email
+		    	@mail($data['email'], $autoreply_subject, $autoreply_text, 
+						'From: '.$autoreply_name.'<'.$autoreply_email.'>'."\r\n".'Reply-to: '.$autoreply_name.'<'.$autoreply_email.'>'."\r\n");
+		    	
+    		} else {
+    			
+    			if (!empty($GLOBALS['config']['email'])){
+    				$from = $GLOBALS['config']['email'];
+    			} else {
+    				$from = $_SERVER['SERVER_NAME'].'@narrativecms.com';
+    			}
+    			 
+    			
+    			$mail = new PHPMailer(true);
+    			 
+    			$mail->isSMTP();
+    			$mail->Host = $GLOBALS['config']['smtp_server'];
+    			$mail->SMTPAuth = true;
+    			$mail->Username = $GLOBALS['config']['smtp_username'];
+    			$mail->Password = $GLOBALS['config']['smtp_password'];
+    			$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    			$mail->Port = $GLOBALS['config']['smtp_port'];
+    			
+    			$mail->setFrom($from, $_SERVER['SERVER_NAME']);
+    			$mail->addAddress($data['email']);
+    			
+   				$mail->addReplyTo($autoreply_email, $autoreply_name);
+    			
+    			$mail->Subject = $autoreply_subject;
+    			$mail->Body = $autoreply_text;
+    			$mail->IsHTML($autoreply_html);
+    			
+    			$mail->send();
+    			
+    		}
+    		
+    	}
+
+    }
+
+    function send_confirmation_success($form_data_id){
+    	
+    	$this->load->model('cms/cms_page_panel_model');
+    	
+    	$sql = "select * from form_data where form_data_id = ? ";
+    	$query = $this->db->query($sql, [$form_data_id]);
+    	$data = $query->result_array();
+
+    	foreach($data as $row){
+    	
+    		$row_unpacked = !empty($row['data']) ? json_decode($row['data'], true) : ['email' => $row['email']];
+    	
+    	}
+
+    	// get form panel data
+    	$panel = $this->cms_page_panel_model->get_cms_page_panel($row['cms_page_panel_id']);
+    	
+    	$email_html = false;
+    	 
+    	if (!empty($panel['confirm_html']['target_id'])){
+    		$email_html = true;
+    		$email_text = file_get_contents('http'.($_SERVER['SERVER_PORT'] == 80 ? '' : 's').'://'.
+							$_SERVER['SERVER_NAME']._l($panel['confirm_html']['url'], false));
+    	} else {
+    		$email_text = $panel['confirm_success_text'];
+    	}
+
+    	foreach($row_unpacked as $key => $val){
+	    	$email_text = str_replace('['.$key.']', $val, $email_text);
+	    }
+    	
+    	if(empty($GLOBALS['config']['smtp_server'])){
+    			
+	   		// send email
+	    	@mail($row_unpacked['email'], $panel['autoreply_subject'], $email_text, 
+					'From: '.$panel['autoreply_name'].'<'.$panel['autoreply_email'].'>'."\r\n".
+	    			'Reply-to: '.$panel['autoreply_name'].'<'.$panel['autoreply_email'].'>'."\r\n");
+		    	
+   		} else {
+
+   			if (!empty($GLOBALS['config']['email'])){
+   				$from = $GLOBALS['config']['email'];
+   			} else {
+   				$from = $_SERVER['SERVER_NAME'].'@narrativecms.com';
+   			}
+    			     			
+    		$mail = new PHPMailer(true);
+    			 
+    		$mail->isSMTP();
+    		$mail->Host = $GLOBALS['config']['smtp_server'];
+   			$mail->SMTPAuth = true;
+   			$mail->Username = $GLOBALS['config']['smtp_username'];
+   			$mail->Password = $GLOBALS['config']['smtp_password'];
+   			$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+   			$mail->Port = $GLOBALS['config']['smtp_port'];
+    			
+   			$mail->setFrom($from, $_SERVER['SERVER_NAME']);
+   			$mail->addAddress($row_unpacked['email']);
+    			
+			$mail->addReplyTo($panel['autoreply_email'], $panel['autoreply_name']);
+    			
+    		$mail->Subject = $panel['confirm_subject'];
+   			$mail->Body = $email_text;
+   			$mail->IsHTML($email_html);
+   			
+   			$mail->send();
+    			
+   		}
+    		
+   	}
+
 }
