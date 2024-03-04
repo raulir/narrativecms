@@ -211,6 +211,8 @@ class checkout extends CI_Controller{
 		
 		$params['topay_main'] = floor($params['topay']);
 		$params['topay_decimals'] = round(($params['topay'] - $params['topay_main']) * 100);
+		
+		$params['show_tax'] = $this->cms_page_panel_model->get_cms_page_panel_settings('shop/shop')['show_tax'];
 
 		return $params;
 	

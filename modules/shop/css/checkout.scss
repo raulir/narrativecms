@@ -4,7 +4,7 @@
 	box-sizing: border-box;
 	outline: 0.12rem solid $colour_grey;
 	padding: 2.0rem;
-	background-color: $colour_black;
+	background-color: $colour_white;
 	text-align: center;
 	margin: 0 auto;
 }
@@ -82,20 +82,20 @@
 }
 
 .shop_checkout_menu_item_available {
-	color: $colour_white;
-	border-bottom: 0.15rem solid $colour_grey;
+	color: $colour_black;
+	border-bottom: 0.15rem solid $colour_white;
     cursor: pointer;
     &:hover {
-    	border-bottom: 0.15rem solid $colour_white;
+    	border-bottom: 0.15rem solid $colour_black;
     }
 }
 
 .shop_checkout_menu_item_active {
 	color: $colour_brown;
-	border-bottom: 0.15rem solid $colour_brown;
+	border-bottom: 0.15rem solid $colour_black;
     cursor: pointer;
     &:hover {
-    	border-bottom: 0.15rem solid $colour_white;
+    	border-bottom: 0.15rem solid $colour_black;
     }
 }
 
@@ -280,8 +280,8 @@
     position: relative;
     top: -0.8rem;
     &:hover {
-    	color: $colour_white;
-    	border-bottom: 0.1rem solid $colour_white;
+    	color: $colour_brown;
+    	border-bottom: 0.1rem solid $colour_brown;
     }
 }
 
@@ -303,6 +303,7 @@
     font-family: inherit;
     display: block;
     width: 100%;
+    outline: 0.12rem solid $colour_grey;
     &.shop_checkout_error {
     	outline: 0.12rem solid rgb(128, 0, 0);
     }
@@ -310,6 +311,10 @@
 
 .shop_checkout_delivery_save {
 	cursor: pointer;
+}
+
+.shop_checkout_review_row {
+	position: relative;
 }
 
 .shop_checkout_review_delivery {
@@ -426,9 +431,9 @@
 	font-weight: bold;
 	position: absolute;
     right: 0;
-    top: 9.0rem;
+    top: 2.0rem;
     font-size: 1.8rem;
-    line-height: 2rem;
+    line-height: 2.0rem;
     font-weight: bold;
     letter-spacing: 0.1rem;
 	&::before {

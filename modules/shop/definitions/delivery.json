@@ -1,0 +1,55 @@
+{
+	"version":"2",
+	"label":"Delivery",
+	"list":{
+		"list_title":"Delivery methods",
+		"item_title":"Delivery method",
+		"filter_fields":{
+			"show":"-- show --"
+		},
+		"link_target":"0"
+	},
+	"item":[ 
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Name"
+		},
+		{
+			"type":"image",
+			"name":"image",
+			"label":"Image",
+			"category":"product"
+		},
+		{
+			"type":"textarea",
+			"name":"description",
+			"label":"Description",
+			"lines":"6",
+			"help":"This is visible in checkout"
+		},
+		{
+			"type":"text",
+			"name":"price",
+			"label":"Price"
+		},
+		{
+			"type":"subtitle",
+			"label":"Taxes"
+		},
+		{
+			"type":"text",
+			"name":"multiplier",
+			"label":"To pay multiplier",
+			"default":"1",
+			"help":"Part to pay when checking out.||Eg If this region doesn't have to pay VAT 20%, this should be 0.83333"
+		},
+		{
+			"type":"text",
+			"name":"tax_multiplier",
+			"label":"Tax multiplier",
+			"default":"0.16666",
+			"help":"Part of total what is shown as tax"
+		}
+	]
+}

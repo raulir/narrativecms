@@ -212,14 +212,21 @@
 					</div>
 					
 					<div class="shop_checkout_review_calculation">
+					
 						<div class="shop_checkout_review_total_label"><?= $review_total_label ?></div>
 						<div class="shop_checkout_review_total"><?= number_format($total, 2, '.', '&nbsp;') ?></div>
-						<div class="shop_checkout_review_tax_label"><?= $review_tax_label ?></div>
-						<div class="shop_checkout_review_tax"><?= number_format($tax, 2, '.', '&nbsp;') ?></div>
-						<div class="shop_checkout_review_topay_label"><?= $review_topay_label ?></div>
+					
+						<?php if($show_tax): ?>
+							<div class="shop_checkout_review_tax_label"><?= $review_tax_label ?></div>
+							<div class="shop_checkout_review_tax"><?= number_format($tax, 2, '.', '&nbsp;') ?></div>
+						<?php endif ?>
 						
-						<div class="shop_checkout_review_topay" data-amount="<?= $topay_main.'.'.$topay_decimals ?>"><?= number_format($topay_main, 0, '.', '&nbsp;') 
+						<div class="shop_checkout_review_row">
+							<div class="shop_checkout_review_topay_label"><?= $review_topay_label ?></div>
+							<div class="shop_checkout_review_topay" data-amount="<?= $topay_main.'.'.$topay_decimals ?>">
+								<?= number_format($topay_main, 0, '.', '&nbsp;') 
 								?>.<div class="shop_checkout_line_decimals"><?= str_pad($topay_decimals, 2, '0', STR_PAD_LEFT) ?></div></div>
+						</div>
 
 					</div>
 					
@@ -239,7 +246,11 @@
 			
 				<?php if (!empty($topay) && !empty($delivery_meta) && empty($address_error)): ?>
 				
-					<?php
+				
+					<?php _panel('stripe/payment', []) ?>
+				
+				
+					<?php /*
 						if(empty($is_live)):
 							$url = 'https://secure-test.worldpay.com/wcc/purchase?instId=1410061'.
 									'&cartId=' . $order['number'] .
@@ -276,7 +287,7 @@
 					?>
 			
 					<iframe class="shop_checkout_iframe" width="780" height="500" 
-							src="<?= $url ?>"></iframe>
+							src="<?= $url ?>"></iframe> */ ?>
 							
 				<?php else: ?>
 				

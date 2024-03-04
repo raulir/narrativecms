@@ -1,0 +1,44 @@
+{
+	"version":"2",
+	"label":"Delivery set",
+	"list":{
+		"list_title":"Delivery set",
+		"item_title":"Delivery sets",
+		"title_field":"heading",
+		"filter_fields":{
+			"show":"-- show --"
+		},
+		"link_target":"0"
+	},
+	"item":[ 
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Heading"
+		},
+		{
+			"type":"select",
+			"label":"Secondary",
+			"name":"secondary",
+			"values":{
+				"0":"No",
+				"1":"Yes"
+			},
+			"default":"0",
+			"help":"If there is another set in basket, methods included with this set are hidden"
+		},
+		{
+			"type":"repeater",
+			"name":"delivery_methods",
+			"label":"Delivery methods",
+			"fields":[
+				{
+					"type":"fk",
+					"name":"delivery_id",
+					"label":"Delivery",
+					"list":"shop/delivery"
+				}
+			]
+		}
+	]
+}

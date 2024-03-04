@@ -1,6 +1,6 @@
-var checkout_payment_interval = false
+var shop_checkout_payment_interval = false
 
-function checkout_init(){
+function shop_checkout_init(){
 
 	$('.shop_checkout_close,.shop_checkout_menu_item_basket').on('click.cms', function(e){
 		location.reload()
@@ -11,11 +11,11 @@ function checkout_init(){
 		$('.shop_checkout_tab').css({'display':'none'})
 		$('.shop_checkout_tab_delivery').css({'display':''})
 		
-		$('.shop_checkout_menu_item_active').removeClass('checkout_menu_item_active')
-		$(this).addClass('checkout_menu_item_active')
+		$('.shop_checkout_menu_item_active').removeClass('shop_checkout_menu_item_active')
+		$(this).addClass('shop_checkout_menu_item_active')
 		
-		$('.shop_checkout_menu_item_available').removeClass('checkout_menu_item_available')
-		$('.shop_checkout_menu_item_basket').addClass('checkout_menu_item_available')
+		$('.shop_checkout_menu_item_available').removeClass('shop_checkout_menu_item_available')
+		$('.shop_checkout_menu_item_basket').addClass('shop_checkout_menu_item_available')
 	
 	})
 	
@@ -24,12 +24,12 @@ function checkout_init(){
 		$('.shop_checkout_tab').css({'display':'none'})
 		$('.shop_checkout_tab_review').css({'display':''})
 	
-		$('.shop_checkout_menu_item_active').removeClass('checkout_menu_item_active')
-		$(this).addClass('checkout_menu_item_active')
+		$('.shop_checkout_menu_item_active').removeClass('shop_checkout_menu_item_active')
+		$(this).addClass('shop_checkout_menu_item_active')
 	
-		$('.shop_checkout_menu_item_available').removeClass('checkout_menu_item_available')
-		$('.shop_checkout_menu_item_basket').addClass('checkout_menu_item_available')
-		$('.shop_checkout_menu_item_delivery').addClass('checkout_menu_item_available')
+		$('.shop_checkout_menu_item_available').removeClass('shop_checkout_menu_item_available')
+		$('.shop_checkout_menu_item_basket').addClass('shop_checkout_menu_item_available')
+		$('.shop_checkout_menu_item_delivery').addClass('shop_checkout_menu_item_available')
 
 	})
 	
@@ -38,20 +38,20 @@ function checkout_init(){
 		$('.shop_checkout_tab').css({'display':'none'})
 		$('.shop_checkout_tab_payment').css({'display':''})
 
-		$('.shop_checkout_menu_item_active').removeClass('checkout_menu_item_active')
-		$(this).addClass('checkout_menu_item_active')
+		$('.shop_checkout_menu_item_active').removeClass('shop_checkout_menu_item_active')
+		$(this).addClass('shop_checkout_menu_item_active')
 	
-		$('.shop_checkout_menu_item_available').removeClass('checkout_menu_item_available')
-		$('.shop_checkout_menu_item_basket').addClass('checkout_menu_item_available')
-		$('.shop_checkout_menu_item_delivery').addClass('checkout_menu_item_available')
-		$('.shop_checkout_menu_item_review').addClass('checkout_menu_item_available')
+		$('.shop_checkout_menu_item_available').removeClass('shop_checkout_menu_item_available')
+		$('.shop_checkout_menu_item_basket').addClass('shop_checkout_menu_item_available')
+		$('.shop_checkout_menu_item_delivery').addClass('shop_checkout_menu_item_available')
+		$('.shop_checkout_menu_item_review').addClass('shop_checkout_menu_item_available')
 		
 		// start payment check
-		if (checkout_payment_interval !== false){
-			clearInterval(checkout_payment_interval)
+		if (shop_checkout_payment_interval !== false){
+			clearInterval(shop_checkout_payment_interval)
 		}
 		
-		checkout_payment_interval = setInterval(checkout_payment_check, 3000)
+		shop_checkout_payment_interval = setInterval(shop_checkout_payment_check, 3000)
 
 	})
 	
@@ -71,7 +71,8 @@ function checkout_init(){
 				'method_id':method_id
 			}, 
 			result => {				
-				$('.userbasket_area').html(result.result.html)
+				// $('.userbasket_area').html(result.result.html)
+				$('.shop_basket_area').html(result.result.html)
 			}
 		)
 
@@ -124,15 +125,15 @@ function checkout_init(){
 
 }
 
-function checkout_resize(){
+function shop_checkout_resize(){
 
 }
 
-function checkout_scroll(){
+function shop_checkout_scroll(){
 
 }
 
-function checkout_payment_check(){
+function shop_checkout_payment_check(){
 	
 	get_ajax_panel(
 		'shop/worldpay_check', 
@@ -143,7 +144,7 @@ function checkout_payment_check(){
 		result => {
 
 			if (result.result.status == 'paid'){
-				clearInterval(checkout_payment_interval)
+				clearInterval(shop_checkout_payment_interval)
 				$('.shop_checkout_menu').remove()
 				$('.shop_checkout_tabs').html(result.result.html)
 				
@@ -168,7 +169,7 @@ function checkout_payment_check(){
 			}
 			
 			if (result.result.status == 'problem'){
-				clearInterval(checkout_payment_interval)
+				clearInterval(shop_checkout_payment_interval)
 				$('.shop_checkout_menu').remove()
 				$('.shop_checkout_tabs').html(result.result.html)
 			}
@@ -180,18 +181,10 @@ function checkout_payment_check(){
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		checkout_resize();
-	});
-	
-	$(window).on('scroll.cms', function(){
-		checkout_scroll();
-	});
-	
-	checkout_init();
+	$(window).on('resize.cms', shop_checkout_resize)
+	$(window).on('scroll.cms', shop_checkout_scroll)
+	shop_checkout_init()
+	shop_checkout_resize()
+	shop_checkout_scroll()
 
-	checkout_resize();
-	
-	checkout_scroll();
-
-});
+})

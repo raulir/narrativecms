@@ -56,6 +56,18 @@
 			"name":"Checkout settings",
 			"parent":"shop",
 			"url":"admin/panel_settings/shop__checkout/"
+		},
+		{
+			"id":"delivery",
+			"name":"Delivery methods",
+			"parent":"shop",
+			"url":"admin/cms_list/shop__delivery/"
+		},
+		{
+			"id":"delivery",
+			"name":"Delivery sets",
+			"parent":"shop",
+			"url":"admin/cms_list/shop__delivery_set/"
 		}
 	]
 }
