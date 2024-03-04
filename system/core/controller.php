@@ -1029,3 +1029,5 @@ class CI_Controller {
 	}
 
 }
+
+class_alias('CI_Controller', 'Controller');

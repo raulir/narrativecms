@@ -1,0 +1,19 @@
+{
+	"version":"2",
+    "image":"",
+    "description":"Basic emailer image",
+	"item":[
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Name",
+			"help":"Not visible"
+		},
+		{
+			"type":"image",
+			"name":"image",
+			"label":"Image",
+			"category":"emailer"
+		}
+	]
+}

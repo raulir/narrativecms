@@ -1,0 +1,70 @@
+{
+	"version":"2",
+    "image":"",
+    "description":"Basic emailer",
+	"list":{
+		"list_title":"Emailers",
+		"item_title":"Emailer",
+		"filter_fields":{
+			"show":"-- show --"
+		},
+		"link_target":"1"
+	},
+	"item":[
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Name"
+		},
+		{
+			"name":"preview_text",
+			"type":"textarea",
+			"label":"Preview text",
+			"lines":"2"
+		},
+		{
+			"type":"select",
+			"name":"show_link",
+			"label":"Show web link",
+			"values": {
+				"0": "Do not show",
+				"1": "Show"
+			},
+			"default":"0"
+		},
+		{
+			"name":"text",
+			"type":"textarea",
+			"label":"Lead",
+			"lines":"14",
+			"mandatory":"1",
+			"html":"B"
+		},
+		{
+			"type":"list_link",
+			"label":"Link"
+		},
+		{
+			"type":"text",
+			"name":"link_text",
+			"label":"Link text",
+			"default":"Problems viewing? Click here to open in web browser"
+		},
+		{
+			"type":"image",
+			"name":"image",
+			"label":"Header image",
+			"category":"emailer"
+		},
+		{
+			"type":"cms_page_panels",
+			"name":"extra_panels",
+			"label":"Extra panels",
+			"size":"7",
+			"panels":"emailer/button,emailer/text,emailer/image"
+		}
+	],
+	"settings":[
+
+	]
+}

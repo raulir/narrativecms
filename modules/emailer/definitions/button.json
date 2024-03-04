@@ -1,0 +1,17 @@
+{
+	"version":"2",
+    "image":"",
+    "description":"Basic emailer button",
+	"item":[
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Button text"
+		},
+		{
+			"type":"text",
+			"name":"link",
+			"label":"Link"
+		}
+	]
+}

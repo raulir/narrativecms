@@ -1,0 +1,38 @@
+{
+	"panels":[
+		{
+			"id":"basic",
+			"name":"Emailer basic body"
+		},
+		{
+			"id":"button",
+			"name":"Emailer basic button"
+		},
+		{
+			"id":"text",
+			"name":"Emailer basic text"
+		},
+		{
+			"id":"image",
+			"name":"Emailer basic image"
+		}
+	],
+	"cms_menu":[
+		{
+			"id":"emailer",
+			"name":"Emailer"
+		},
+		{
+			"id":"emailers",
+			"name":"Emailers",
+			"parent":"emailer",
+			"url":"admin/cms_list/emailer__basic/"
+		}
+    ],
+	"layouts":[
+		{
+			"id":"emailer",
+			"name":"Emailer"
+		}
+	]
+}

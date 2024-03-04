@@ -177,9 +177,7 @@ function cms_input_textarea_init(){
 				    plugins: 'code paste' + plugins,
 			    	paste_text_sticky : true,
 			    	remove_linebreaks : false,
-			    	convert_urls : true,
-			    	relative_urls : false,
-			    	document_base_url: config_url,
+			    	convert_urls : false,
 			    	height: 'calc(100% - 2.5rem)',
 			    	setup : function(ed) {
 			    		ed.on('init', function(ed) {

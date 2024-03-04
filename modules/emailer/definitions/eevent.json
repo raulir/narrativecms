@@ -1,0 +1,45 @@
+{
+	"version":"2",
+    "image":"",
+    "description":"Emailer event",
+	"item":[
+		{
+			"type":"textarea",
+			"name":"name",
+			"label":"Event name",
+			"lines":"3"
+		},
+		{
+			"type":"image",
+			"name":"image",
+			"label":"Image",
+			"category":"emailer"
+		},
+		{
+			"type":"repeater",
+			"name":"items",
+			"label":"Links",
+			"fields":[
+				{
+					"name":"text",
+					"type":"textarea",
+					"label":"Text",
+					"lines":"3"
+				},
+				{
+					"type":"text",
+					"name":"cta_label",
+					"label":"CTA label"
+				},
+				{
+					"type":"text",
+					"name":"cta_url",
+					"label":"CTA URL"
+				}
+			]
+		}
+	],
+	"settings":[
+
+	]
+}

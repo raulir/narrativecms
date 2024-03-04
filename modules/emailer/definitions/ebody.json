@@ -1,0 +1,145 @@
+{
+	"version":"2",
+    "image":"",
+    "description":"Hartree emailer",
+	"list":{
+		"list_title":"Emailers",
+		"item_title":"Emailer",
+		"filter_fields":{
+			"show":"-- show --"
+		},
+		"link_target":"1"
+	},
+	"item":[
+		{
+			"type":"text",
+			"name":"strapline",
+			"label":"Strapline",
+			"help":"Can be left empty"
+		},
+		{
+			"type":"list_link",
+			"label":"Link"
+		},
+		{
+			"name":"lead",
+			"type":"textarea",
+			"label":"Lead",
+			"lines":"14",
+			"mandatory":"1"
+		},
+		{
+			"type":"image",
+			"name":"title_image",
+			"label":"Title image",
+			"category":"emailer",
+			"mandatory":"1"
+		},
+		{
+			"type":"image",
+			"name":"main_image",
+			"label":"Main image",
+			"category":"emailer",
+			"mandatory":"1"
+		},
+		{
+			"type":"text",
+			"name":"lead_extra",
+			"label":"Lead extra",
+			"help":"Can be left empty"
+		},
+		{
+			"type":"repeater",
+			"name":"items",
+			"label":"Blocks",
+			"fields":[
+				{
+					"type": "textarea",
+					"name": "heading",
+					"label": "Heading",
+					"lines": "3"
+				},
+				{
+					"name":"text",
+					"type":"textarea",
+					"label":"Text",
+					"lines":"12",
+					"mandatory":"1"
+				},
+				{
+					"type":"image",
+					"name":"image",
+					"label":"Image",
+					"category":"emailer",
+					"mandatory":"1"
+				},
+				{
+					"name":"colour",
+					"type":"colour",
+					"label":"Background colour",
+					"help":"Leave empty for default"
+				},
+				{
+					"type":"select",
+					"name":"align",
+					"label":"Alignment",
+					"values": {
+						"left": "Image left",
+						"right": "Image right"
+					}
+				}
+			]
+		},
+		{
+			"type":"subtitle",
+			"label":"Events"
+		},
+		{
+			"type":"cms_page_panels",
+			"name":"left_panels",
+			"label":"Left panels",
+			"size":"7",
+			"panels":"hartree/eevent"
+		},
+		{
+			"type":"cms_page_panels",
+			"name":"right_panels",
+			"label":"Right panels",
+			"size":"7",
+			"panels":"hartree/eevent"
+		},
+		{
+			"name":"events_heading",
+			"type":"text",
+			"label":"Events heading",
+			"default":"How to get involved"
+		},
+		{
+			"name":"upcoming_heading",
+			"type":"text",
+			"label":"Upcoming heading",
+			"default":"Next month"
+		},
+		{
+			"name":"events_lead",
+			"type":"textarea",
+			"label":"Events lead",
+			"lines":"3"
+		},
+		{
+			"name":"events_text",
+			"type":"textarea",
+			"label":"Events text",
+			"lines":"3"
+		},
+		{
+			"name":"preview_text",
+			"type":"textarea",
+			"label":"Preview text",
+			"lines":"3"
+		}
+	],
+	"settings":[
+
+	]
+}

@@ -18,12 +18,17 @@ if (!session_id()){
 		date_default_timezone_set($_SESSION['timezone']);
 	}
 	
-	// detect webp support
-	if (!isset($_SESSION['webp']) || !isset($_SESSION['imageset'])){
+	$_SESSION['webp'] = false;
+	$_SESSION['imageset'] = true;
+	$_SESSION['mobile'] = false;
+	
+	if (empty($_SERVER['HTTP_USER_AGENT'])){
 		
-		$_SESSION['webp'] = false;
-		$_SESSION['imageset'] = true;
+		$_SESSION['imageset'] = false;
 		
+	
+	} elseif (!isset($_SESSION['webp']) || !isset($_SESSION['imageset'])){
+
 		// no webp for safari as animations show opacity as black
 		$is_safari = (bool)stristr($_SERVER['HTTP_USER_AGENT'], 'safari/') && !(bool)stristr($_SERVER['HTTP_USER_AGENT'], 'chrome/') 
 				&& !(bool)stristr($_SERVER['HTTP_USER_AGENT'], 'chromium/');
@@ -36,15 +41,11 @@ if (!session_id()){
 			
 		}
 
-		// safari tends not to show 2x images
-		if ($is_safari){
-			$_SESSION['imageset'] = false;
-		}
-	
 	}
 
 	// detect mobile
-	if (!isset($_SESSION['mobile']) && !empty($_SERVER['HTTP_USER_AGENT'])){
+	
+	if (!$_SESSION['mobile'] && !empty($_SERVER['HTTP_USER_AGENT'])){
 	
 		$useragent = $_SERVER['HTTP_USER_AGENT'];
 		
@@ -67,10 +68,6 @@ if (!session_id()){
 				
 			$_SESSION['mobile'] = true;
 
-		} else {
-			
-			$_SESSION['mobile'] = false;
-			
 		}
 			
 	}

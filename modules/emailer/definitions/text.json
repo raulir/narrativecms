@@ -1,0 +1,20 @@
+{
+	"version":"2",
+    "image":"",
+    "description":"Basic emailer text",
+	"item":[
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Name",
+			"help":"Not visible"
+		},
+		{
+			"type":"textarea",
+			"name":"text",
+			"label":"Text",
+			"lines":"15",
+			"html":"BA"
+		}
+	]
+}
