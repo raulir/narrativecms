@@ -36,11 +36,9 @@
 
 				<?php foreach($list as $item_id => $item_title): ?>
 					
-					<option value="<?php print($list_name.'='.$item_id) ?>" 
-							<?= !empty($value[$list_name]) && ($list_name.'='.$item_id) == $value[$list_name] ? ' selected="selected"' : '' ?>
-							data-slug="<?php print($slugs[$list_name][$item_id]); ?>"
-							data-target_id="<?php print($item_id); ?>"
-							><?php print($item_title); ?></option>
+					<option value="<?= $list_name.'='.$item_id ?>" data-slug="<?= $slugs[$list_name][$item_id] ?>" data-target_id="<?= $item_id ?>"
+							<?= $value['_value'] == ($list_name.'='.$item_id) ? ' selected="selected"' : '' ?>
+							><?= $item_title ?></option>
 				
 				<?php endforeach ?>
 			
