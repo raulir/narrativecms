@@ -62,6 +62,14 @@
 			"label":"Extra panels",
 			"size":"7",
 			"panels":"emailer/button,emailer/text,emailer/image"
+		},
+		{
+			"name":"plain_text",
+			"type":"textarea",
+			"label":"Plaintext content",
+			"width":"wide",
+			"lines":"12",
+			"help":"If filled in, email plain text version is taken from here"
 		}
 	],
 	"settings":[

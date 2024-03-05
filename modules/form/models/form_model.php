@@ -414,12 +414,15 @@ class form_model extends CI_Model {
     
     function send_autoreply($data, $params){ // $autoreply_text, $autoreply_email, $autoreply_name, $autoreply_subject){
     	
+    	$this->load->model('cms/cms_page_panel_model');
+    	
     	$autoreply_text = $params['autoreply_text'];
     	$autoreply_email = $params['autoreply_email'];
     	$autoreply_name = $params['autoreply_name'];
     	$autoreply_subject = $params['autoreply_subject'];
     	$autoreply_html = false;
     	
+    	$plaintext = $autoreply_text;
     	if (!empty($params['autoreply_html']['target_id'])){
     		
     		$autoreply_html = true;
@@ -428,10 +431,16 @@ class form_model extends CI_Model {
 
 			$autoreply_text = file_get_contents($link);
 			
+			$emailer = $this->cms_page_panel_model->get_cms_page_panel($params['autoreply_html']['target_id']);
+			if (!empty($emailer['plain_text'])){
+				$plaintext = $emailer['plain_text'];
+			}
+			
     	}
     	
     	foreach($data as $key => $val){
     		$autoreply_text = str_replace('['.$key.']', $val, $autoreply_text);
+    		$plaintext = str_replace('['.$key.']', $val, $plaintext);
     	}
     	
     	if (!empty($data['email'])){
@@ -443,14 +452,13 @@ class form_model extends CI_Model {
 						'From: '.$autoreply_name.'<'.$autoreply_email.'>'."\r\n".'Reply-to: '.$autoreply_name.'<'.$autoreply_email.'>'."\r\n");
 		    	
     		} else {
-    			
+    			    			
     			if (!empty($GLOBALS['config']['email'])){
     				$from = $GLOBALS['config']['email'];
     			} else {
     				$from = $_SERVER['SERVER_NAME'].'@narrativecms.com';
     			}
-    			 
-    			
+
     			$mail = new PHPMailer(true);
     			 
     			$mail->isSMTP();
@@ -466,9 +474,17 @@ class form_model extends CI_Model {
     			
    				$mail->addReplyTo($autoreply_email, $autoreply_name);
     			
-    			$mail->Subject = $autoreply_subject;
+				$mail->CharSet = 'utf-8';
+   				
+				$mail->Subject = $autoreply_subject;
     			$mail->Body = $autoreply_text;
     			$mail->IsHTML($autoreply_html);
+    			
+    			if (!empty($plaintext)){
+    				$mail->AltBody = $plaintext;
+    			}
+    			
+    			$mail->XMailer = 'Narrative CMS';
     			
     			$mail->send();
     			
@@ -497,17 +513,26 @@ class form_model extends CI_Model {
     	
     	$email_html = false;
     	 
+    	$plaintext = $panel['confirm_success_text'];
     	if (!empty($panel['confirm_html']['target_id'])){
+    		
     		$email_html = true;
     		$email_text = file_get_contents('http'.($_SERVER['SERVER_PORT'] == 80 ? '' : 's').'://'.
 							$_SERVER['SERVER_NAME']._l($panel['confirm_html']['url'], false));
+    		
+    		$emailer = $this->cms_page_panel_model->get_cms_page_panel($panel['confirm_html']['target_id']);
+			if (!empty($emailer['plain_text'])){
+				$plaintext = $emailer['plain_text'];
+			}
+    		
     	} else {
     		$email_text = $panel['confirm_success_text'];
     	}
 
     	foreach($row_unpacked as $key => $val){
 	    	$email_text = str_replace('['.$key.']', $val, $email_text);
-	    }
+    		$plaintext = str_replace('['.$key.']', $val, $plaintext);
+    	}
     	
     	if(empty($GLOBALS['config']['smtp_server'])){
     			
@@ -538,12 +563,20 @@ class form_model extends CI_Model {
    			$mail->addAddress($row_unpacked['email']);
     			
 			$mail->addReplyTo($panel['autoreply_email'], $panel['autoreply_name']);
+			
+			$mail->CharSet = 'utf-8';
     			
     		$mail->Subject = $panel['confirm_subject'];
    			$mail->Body = $email_text;
    			$mail->IsHTML($email_html);
    			
-   			$mail->send();
+   		    if (!empty($plaintext)){
+    			$mail->AltBody = $plaintext;
+    		}
+   			
+    		$mail->XMailer = 'Narrative CMS';
+    	
+    		$mail->send();
     			
    		}
     		
