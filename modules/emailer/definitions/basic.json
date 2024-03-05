@@ -61,7 +61,7 @@
 			"name":"extra_panels",
 			"label":"Extra panels",
 			"size":"7",
-			"panels":"emailer/button,emailer/text,emailer/image"
+			"panels":"emailer/button,emailer/text,emailer/image,emailer/share"
 		},
 		{
 			"name":"plain_text",

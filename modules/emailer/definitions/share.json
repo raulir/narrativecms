@@ -1,0 +1,54 @@
+{
+	"version":"2",
+    "image":"",
+    "description":"Emailer share",
+	"item":[
+		{
+			"type":"text",
+			"name":"heading",
+			"label":"Heading",
+			"default":"Share the page"
+		},
+		{
+			"type":"text",
+			"name":"url",
+			"label":"URL"
+		},
+		{
+			"type":"subtitle",
+			"label":"X"
+		},
+		{
+			"type":"image",
+			"name":"x_image",
+			"label":"Icon",
+			"default":"//x_icon.png",
+			"category":"icon"
+		},
+		{
+			"type":"subtitle",
+			"label":"Facebook"
+		},
+		{
+			"type":"image",
+			"name":"fb_image",
+			"label":"Icon",
+			"default":"//fb_icon.png",
+			"category":"icon"
+		},
+		{
+			"type":"subtitle",
+			"label":"LinkedIn"
+		},
+		{
+			"type":"image",
+			"name":"li_image",
+			"label":"Icon",
+			"default":"//li_icon.png",
+			"category":"icon"
+		}
+	],
+	"settings":[
+
+	]
+}

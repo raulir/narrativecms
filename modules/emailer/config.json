@@ -15,6 +15,10 @@
 		{
 			"id":"image",
 			"name":"Emailer basic image"
+		},
+		{
+			"id":"share",
+			"name":"Emailer basic share"
 		}
 	],
 	"cms_menu":[
