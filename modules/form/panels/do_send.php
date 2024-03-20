@@ -124,24 +124,19 @@ class do_send extends CI_Controller {
         	// send notification
 			if(!empty($params['emails']) && count($params['emails'])){
 				
-				$reply_to = ['email' => '', 'name' => ''];
-				if (!empty($GLOBALS['config']['email'])){
-					$from = $GLOBALS['config']['email'];
-				} else {
-					$from = $_SERVER['SERVER_NAME'].'@narrativecms.com';
-				}
+				$pm['reply_to'] = ['email' => '', 'name' => '', ];
 				
 				if (!empty($data['email']) && stristr($data['email'], '@') && stristr($data['email'], '.')){
 						
-					$reply_to['email'] = $data['email'];
+					$pm['reply_to']['email'] = $data['email'];
 					
 					$name = trim($data['name'] ?? (($data['first_name'] ?? '').' '.($data['last_name'] ?? '')));
 					
-					$reply_to['name'] = $name ?? $data['email'];
+					$pm['reply_to']['name'] = $name ?? $data['email'];
 
 				}
 				
-				$this->form_model->send_contact_request($params['emails'], $data, $title, $from, $reply_to );
+				$this->form_model->send_info_contact($params['emails'], $data, $title, $pm);
 			
 			}
 			

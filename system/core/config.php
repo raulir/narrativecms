@@ -147,6 +147,17 @@ while($result = mysqli_fetch_assoc($query)){
 	
 }
 
+// check if email exists
+if (empty($GLOBALS['config']['email'])){
+	$GLOBALS['config']['email'] = $_SERVER['SERVER_NAME'].'@narrativecms.com';
+	$GLOBALS['config']['from_name'] = $_SERVER['SERVER_NAME'];
+}
+
+if (empty($GLOBALS['config']['reply_email'])){
+	$GLOBALS['config']['reply_email'] = $GLOBALS['config']['email'];
+	$GLOBALS['config']['reply_name'] = $GLOBALS['config']['from_name'];
+}
+
 // load module configs
 if (empty($GLOBALS['config']['modules']) || !is_array($GLOBALS['config']['modules'])){
 	$GLOBALS['config']['modules'] = ['cms'];
