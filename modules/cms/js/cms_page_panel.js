@@ -61,7 +61,7 @@ function cms_page_panel_format_mandatory(mandatory_result, colour){
 	var mandatory_extra = '';
 	
 	if (mandatory_result.length){
-		mandatory_extra = '<br><div style="display: inline-block; color: ' + colour + '; font-size: 14px; padding-top: 10px; ">Missing mandatory values:';
+		mandatory_extra = '<br><div style="display: inline-block; color: ' + colour + '; font-size: 1.4rem; padding-top: 10px; ">Missing mandatory values:';
 		$.each(mandatory_result, function(key, value){
 			mandatory_extra = mandatory_extra + '<br>- ' + value;
 		});

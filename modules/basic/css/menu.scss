@@ -1,12 +1,12 @@
 .menu_container {
-	padding: 0 30px;
+	padding: 0 3.0rem;
 	text-align: center;
 	color: $colour_black;
 	font-family: chap;
 	text-transform: uppercase;
 	position: relative;
 	height: $menu_height;
-	border-top: 1px solid $colour_grey;
+	border-top: 0.1rem solid $colour_grey;
 }
 
 .menu_content {
@@ -22,9 +22,9 @@
 	display: inline-block;
 	line-height: $menu_height;
 	vertical-align: middle;
-    font-size: 15px;
-    letter-spacing: 3px;
-    padding: 0 25px;
+    font-size: 1.5rem;
+    letter-spacing: 0.3rem;
+    padding: 0 2.5rem;
     cursor: pointer;
 }
 
@@ -40,11 +40,11 @@
 }
 
 .menu_left {
-	left: 75px;
+	left: 7.5rem;
 }
 
 .menu_right {
-	right: 75px;
+	right: 7.5rem;
 }
 
 .menu_fixed {
@@ -54,7 +54,7 @@
 		top: 0;
     	left: 0;
     	z-index: 1000;
-    	border-bottom: 1px solid $colour_light_background;
+    	border-bottom: 0.1rem solid $colour_light_background;
 	}
 
 	.menu_left,.menu_right {
@@ -63,13 +63,13 @@
 
 }
 
-@media only screen and (max-width: 1024px) {
+@media only screen and (max-width: 102.4rem) {
 	
 	.menu_item {
 	
-		font-size: 14px;
-    	letter-spacing: 2px;
-    	padding: 0 20px;
+		font-size: 1.4rem;
+    	letter-spacing: 0.2rem;
+    	padding: 0 2.0rem;
 
 		&.menu_left, &.menu_right {
 			display: inline-block;
@@ -84,7 +84,7 @@
 	
 }
 
-@media only screen and (max-width: 800px) {
+@media only screen and (max-width: $mobile_width) {
 	
 	.menu_item {
 		

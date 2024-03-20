@@ -107,19 +107,6 @@
 			"default":"Automated email"
 		},
 		{
-			"type":"text",
-			"name":"autoreply_email",
-			"label":"Reply from email",
-			"default":"noreply@narrativecms.com",
-			"help":"What email appears to be sending the automated email"
-		},
-		{
-			"type":"text",
-			"name":"autoreply_name",
-			"label":"Reply name",
-			"default":"Automatic reply"
-		},
-		{
 			"type":"subtitle",
 			"label":"Email address confirmation code"
 		},

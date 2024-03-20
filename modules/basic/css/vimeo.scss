@@ -415,7 +415,7 @@
 	
 }
 
-@media screen and (max-width: 900px) {
+@media screen and (max-width: $mobile_width) {
 
 	.basic_vimeo_container {
 		width: 50.0rem;

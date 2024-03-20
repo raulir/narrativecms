@@ -35,7 +35,7 @@
 	
 }
 
-@media screen and (max-width: 900px) {
+@media screen and (max-width: $mobile_width) {
 
 	.mimage_responsiveness_mobile {
 		display: block;

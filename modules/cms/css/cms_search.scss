@@ -1,10 +1,10 @@
 .cms_search_top {
-	padding: 3px 0 22px 0;
+	padding: 0.3rem 0 2.2rem 0;
     position: relative;
-    line-height: 32px;
+    line-height: 3.2rem;
     text-align: left;
-    font-size: 18px;
-    border-bottom: 1px solid $cms_border;
+    font-size: 1.8rem;
+    border-bottom: 0.1rem solid $cms_border;
     width: calc(100% - 2.0rem);
     margin: 0 auto;
 }
@@ -13,23 +13,23 @@
 	display: inline-block;
 	vertical-align: top;
 	position: relative;
-	top: 2px;
-	padding-right: 10px;
+	top: 0.2rem;
+	padding-right: 1.0rem;
 }
 
 .cms_search_term {
 	
 	display: inline-block;
 	vertical-align: top;
-	height: 32px;
-	line-height: 28px;
+	height: 3.2rem;
+	line-height: 2.8rem;
 	font-family: inherit;
 	margin: 0;
-	padding: 2px 10px 0 10px;
+	padding: 0.2rem 1.0rem 0 1.0rem;
 	box-sizing: border-box;
-	border: 1px solid $cms_border;
+	border: 0.1rem solid $cms_border;
 	font-size: inherit;
-	width: 369px;
+	width: 36.9rem;
 
 	&:focus {
 		outline: none;
@@ -53,11 +53,11 @@
 }
 
 .cms_search_item {
-	border: 1px solid $cms_border;
-	line-height: 24px;
-	padding: 2px 4px 0 4px;
-	font-size: 16px;
-	margin-top: 2px;
+	border: 0.1rem solid $cms_border;
+	line-height: 2.4rem;
+	padding: 0.2rem 0.4rem 0 0.4rem;
+	font-size: 1.6rem;
+	margin-top: 0.2rem;
 	position: relative;
 }
 
@@ -67,40 +67,40 @@
 
 .cms_search_title {
 	
-	height: 24px;
+	height: 2.4rem;
 	overflow: hidden;
-	max-width: 339px;
+	max-width: 33.9rem;
 	
 	.cms_search_result_panels & {
-		max-width: 394px;
+		max-width: 39.4rem;
 	}
 	
 }
 
 .cms_search_view {
 	position: absolute;
-	right: 60px;
-	top: 3px;
+	right: 6.0rem;
+	top: 0.3rem;
 	box-sizing: border-box;
-	height: 20px;
-	width: 52px;
+	height: 2.0rem;
+	width: 5.2rem;
 	text-align: center;
-	border: 1px solid $cms_border;
-	line-height: 18px;
-	font-size: 14px;
-	border-radius: 3px;
+	border: 0.1rem solid $cms_border;
+	line-height: 1.8rem;
+	font-size: 1.4rem;
+	border-radius: 0.3rem;
 }
 	
 .cms_search_edit {
 	position: absolute;
-	right: 4px;
-	top: 3px;
+	right: 0.4rem;
+	top: 0.3rem;
 	box-sizing: border-box;
-	height: 20px;
-	width: 52px;
+	height: 2.0rem;
+	width: 5.2rem;
 	text-align: center;
-	border: 1px solid $cms_border;
-	line-height: 18px;
-	font-size: 14px;
-	border-radius: 3px;
+	border: 0.1rem solid $cms_border;
+	line-height: 1.8rem;
+	font-size: 1.4rem;
+	border-radius: 0.3rem;
 }

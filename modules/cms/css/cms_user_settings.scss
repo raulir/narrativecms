@@ -3,9 +3,9 @@
 }
 
 .cms_user_settings_superuser {
-	border-bottom: 1px solid #a0a0a0;
-	line-height: 35px;
-    padding-bottom: 20px;
+	border-bottom: 0.1rem solid #a0a0a0;
+	line-height: 30.5rem;
+    padding-bottom: 2.0rem;
 }
 
 .cms_user_settings_user {
@@ -13,26 +13,26 @@
 }
 
 .cms_user_settings_user_header {
-	border-bottom: 1px solid #a0a0a0;
-	line-height: 24px;
-    font-size: 18px;
-    padding-top: 20px;
+	border-bottom: 0.1rem solid #a0a0a0;
+	line-height: 2.4rem;
+    font-size: 1.8rem;
+    padding-top: 2.0rem;
     position: relative;
 }
 
 .cms_user_settings_button {
 	box-sizing: border-box;
     display: block;
-    border: 1px solid #a0a0a0;
-    border-radius: 3px;
+    border: 0.1rem solid #a0a0a0;
+    border-radius: 0.3rem;
     float: right;
-    padding: 1px 10px 0px 10px;
+    padding: 0.1rem 1.0rem 0 1.0rem;
     cursor: pointer;
     text-align: center;
-    margin-left: 5px;
-    height: 20px;
-    line-height: 19px;
-    font-size: 14px;
+    margin-left: 0.5rem;
+    height: 2.0rem;
+    line-height: 1.9rem;
+    font-size: 1.4rem;
 }
 
 .cms_user_settings_user_save {
@@ -44,100 +44,100 @@
 }
 
 .cms_user_settings_user_content {
-	padding: 3px 0;
-	border-bottom: 1px solid #a0a0a0;
+	padding: 0.3rem 0;
+	border-bottom: 0.1rem solid #a0a0a0;
 	position: relative;
 }
 
 .cms_user_settings_line {
-	width: calc(50% - 10px);
-	padding: 3px 0;
+	width: calc(50% - 1.0rem);
+	padding: 0.3rem 0;
 	position: relative;
-	line-height: 26px;
+	line-height: 2.6rem;
 }
 
 .cms_user_settings_input {
 	width: 60%;
-	border: 1px solid #a0a0a0;
+	border: 0.1rem solid #a0a0a0;
 	display: block;
 	float: right;
 	box-sizing: border-box;
-    height: 26px;
-    line-height: 23px;
-    font-size: 17px;
-    padding: 1px 5px 0px 5px;
+    height: 2.6rem;
+    line-height: 2.3rem;
+    font-size: 1.7rem;
+    padding: 0.1rem 0.5rem 0 0.5rem;
 }
 
 .cms_user_settings_user_rights {
-	width: calc(50% - 10px);
-	height: calc(100% - 12px);
+	width: calc(50% - 1.0rem);
+	height: calc(100% - 1.2rem);
 	position: absolute;
 	right: 0;
-	top: 6px;
+	top: 0.6rem;
 }
 
 .cms_user_settings_user_rights_heading {
-	padding: 3px 0;
-	border-bottom: 1px solid #a0a0a0;
+	padding: 0.3rem 0;
+	border-bottom: 0.1rem solid #a0a0a0;
 	position: relative;
 }
 
 .cms_user_settings_user_rights_content {
-	padding: 3px 0;
-    max-height: 71px;
+	padding: 0.3rem 0;
+    max-height: 7.1rem;
     overflow-y: hidden;
-    min-height: 24px;
+    min-height: 2.4rem;
 }
 
 .cms_user_settings_user_access_item {
 	display: inline-block;
 	box-sizing: border-box;
-    border: 1px solid #a0a0a0;
-    border-radius: 3px;
-    padding: 1px 25px 0px 10px;
+    border: 0.1rem solid #a0a0a0;
+    border-radius: 0.3rem;
+    padding: 0.1rem 20.5rem 0 1.0rem;
     cursor: pointer;
     text-align: center;
-    margin: 2px 5px 2px 0;
-    height: 20px;
-    line-height: 19px;
-    font-size: 14px;
+    margin: 0.2rem 0.5rem 0.2rem 0;
+    height: 2.0rem;
+    line-height: 1.9rem;
+    font-size: 1.4rem;
     position: relative;
 }
 
 .cms_user_settings_user_access_item_x {
 	position: absolute;
-    height: 15px;
-    width: 17px;
-    border-left: 1px solid #c0c0c0;
+    height: 10.5rem;
+    width: 1.7rem;
+    border-left: 0.1rem solid #c0c0c0;
     text-align: center;
-    font-size: 14px;
-    line-height: 16px;
-    right: 0px;
-    top: 2px;
+    font-size: 1.4rem;
+    line-height: 1.6rem;
+    right: 0;
+    top: 0.2rem;
 }
 
 .cms_user_settings_user_rights_bottom {
-	padding: 3px 0;
-	border-top: 1px solid #a0a0a0;
+	padding: 0.3rem 0;
+	border-top: 0.1rem solid #a0a0a0;
 	position: relative;
 }
 
 .cms_user_settings_user_rights_select {
 	
 	float: right;
-	border: 1px solid #a0a0a0;
+	border: 0.1rem solid #a0a0a0;
 	display: block;
 	box-sizing: border-box;
-    padding: 2px 5px 0px 5px;
-    height: 20px;
-    line-height: 20px;
-    font-size: 14px;
-    font-family: foundrysterling;
+    padding: 0.2rem 0.5rem 0 0.5rem;
+    height: 2.0rem;
+    line-height: 2.0rem;
+    font-size: 1.4rem;
+    font-family: source;
     font-weight: 200;
     
     option {
 	    font-weight: 200;
-	    line-height: 24px;
+	    line-height: 2.4rem;
     }
     
 }

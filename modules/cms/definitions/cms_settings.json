@@ -315,11 +315,12 @@
 			"name":"images_rows",
 			"label":"Image library rows",
 			"values":{
+				"2":"2",
 				"3":"3",
 				"4":"4",
 				"5":"5"
 			},
-			"default":"4"
+			"default":"3"
 		},
 		{
 			"type":"select",
@@ -345,10 +346,11 @@
 		},
 		{
 			"type":"text",
-			"name":"from_email",
+			"name":"email",
 			"label":"From email",
-			"default":"noreply@bytecrackers.com",
-			"help":"Do not change, as may go to spam"
+			"default":"",
+			"help":"Do not change, as may go to spam",
+			"help":"Email to send notifications from||If empty, defaults to domain@narrativecms.com"
 		},
 		{
 			"type":"text",
@@ -360,23 +362,7 @@
 			"type":"text",
 			"name":"reply_email",
 			"label":"Reply to email",
-			"default":"noreply@bytecrackers.com"
-		},
-		{
-			"type":"text",
-			"name":"sender_name",
-			"label":"Sender name"
-		},
-		{
-			"type":"text",
-			"name":"sender_email",
-			"label":"Sender email"
-		},
-		{
-			"type":"text",
-			"name":"email",
-			"label":"Admin email",
-			"help":"Email to send notifications"
+			"default":""
 		},
 		{
 			"type":"subtitle",

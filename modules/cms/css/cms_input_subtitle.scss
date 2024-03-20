@@ -31,8 +31,8 @@
 	position: relative;
 	z-index: 20;
 	box-sizing: border-box;
-    line-height: 24px;
-    font-size: 18px;
+    line-height: 2.4rem;
+    font-size: 1.8rem;
     transform: translateZ(0);
     white-space: nowrap;
     overflow: hidden;
@@ -44,7 +44,7 @@
 .cms_input_subtitle_narrow {
 	
 	.admin_block_container > & {
-		width: 460px;
+		width: 46.0rem;
 	}
 
 }
@@ -60,12 +60,12 @@
 		
     	.cms_help {
     		left: auto;
-    		right: -2px;
+    		right: -0.2rem;
     	}
     
     	.cms_help_text {
     		left: auto;
-    		right: 2px;
+    		right: 0.2rem;
     	}
     	
     }

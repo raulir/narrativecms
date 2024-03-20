@@ -50,7 +50,7 @@
 					
 					<input type="hidden" class="cms_page_panel_caching_target_id" value="<?php print($target_id); ?>">
 				
-					<!-- div style="text-align: center; font-size: 8px; "><pre><?php print_r($params); ?></pre></div -->
+					<!-- div style="text-align: center; font-size: 0.8rem; "><pre><?php print_r($params); ?></pre></div -->
 					
 				</div>
 			

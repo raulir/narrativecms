@@ -1,0 +1,131 @@
+.cms_images_page_container {
+	font-size: 0;
+	line-height: 0;
+	letter-spacing: 0;
+}
+	
+.cms_images_image {
+	margin: 0;
+	padding: 0.5rem;
+	height: 15.8rem;
+	width: 15.8rem;
+	box-sizing: border-box;
+	display: inline-block;
+	position: relative;
+
+	&:hover {
+		.cms_images_hover {
+			opacity: 1;
+		}
+	}
+
+}
+
+.cms_images_image_cell {
+	box-sizing: border-box;
+	width: calc(100% - 1.0rem);
+	height: calc(100% - 1.0rem);
+	cursor: pointer;
+	position: absolute;
+	border: 0.1rem solid $cms_border;
+	background-position: center;
+	background-size: 4.0rem auto;
+	left: 0.5rem;
+	top: 0.5rem;
+}
+
+.cms_images_image_img {
+	position: absolute;
+	left: 0.1rem;
+	top: 0.1rem;
+	width: calc(100% - 0.2rem);
+	height: calc(100% - 0.2rem);
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+	z-index: 10;
+	filter: grayscale(0%);
+	transition: filter 0.5s;
+}
+
+.cms_images_selected {
+
+}
+
+.cms_images_mark {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	z-index: 30;
+	transform: translate(-50%,-50%);
+}
+
+.cms_images_hover {
+	opacity: 0;
+	transition: opacity 0.2s;
+}
+
+.cms_images_image_delete {
+	box-sizing: border-box;
+	position: absolute;
+	top: 0.3rem;
+	right: 0.3rem;
+	width: 4.7rem;
+	height: 2.5rem;
+	font-size: 1.4rem;
+	line-height: 2.4rem;
+	text-align: center;
+	border: 0.1rem solid #a0a0a0;
+	border-radius: 0.3rem;
+	background-color: white;
+	z-index: 20;
+}
+
+.cms_images_image_edit {
+	box-sizing: border-box;
+	position: absolute;
+	top: 0.3rem;
+	right: 7.9rem;
+	width: 2.5rem;
+	height: 2.5rem;
+	border: 0.1rem solid #a0a0a0;
+	border-radius: 0.3rem;
+	background-color: white;
+	background-size: 1.6rem auto;
+	background-repeat: no-repeat;
+	background-position: 45% 45%;
+	z-index: 20;
+}
+
+.cms_images_image_replace {
+	box-sizing: border-box;
+	position: absolute;
+	top: 0.3rem;
+	right: 5.2rem;
+	width: 2.5rem;
+	height: 2.5rem;
+	border: 0.1rem solid #a0a0a0;
+	border-radius: 0.3rem;
+	background-color: white;
+	background-size: 1.6rem auto;
+	background-repeat: no-repeat;
+	background-position: 45% 45%;
+	z-index: 20;
+}
+
+.cms_images_image_usage {
+	box-sizing: border-box;
+	position: absolute;
+	bottom: 0.3rem;
+	right: 0.3rem;
+	height: 2.5rem;
+	font-size: 1.4rem;
+	line-height: 2.4rem;
+	border: 0.1rem solid #a0a0a0;
+	border-radius: 0.3rem;
+	background-color: white;
+	opacity: 0.5;
+	display: inline;
+	padding: 0 0.5rem;
+	z-index: 20;
+}

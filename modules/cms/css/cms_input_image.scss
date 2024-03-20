@@ -46,15 +46,15 @@
 }
 
 .cms_input_image .cms_input_button {
-	width: 120px;
+	width: 12.0rem;
 	float: left;
-	margin-bottom: 7px;
+	margin-bottom: 0.7rem;
 }
 
 .cms_input_image_error {
-	line-height: 20px;
+	line-height: 2.0rem;
 	color: red;
-	padding: 20px;
+	padding: 2.0rem;
 	font-weight: 400;
 }
 
@@ -75,7 +75,7 @@
 	
 	.cms_input_button {
 		float: none;
-		width: 57px;
+		width: 5.7rem;
 		position: absolute;
 		top: 0;
 	}
@@ -85,34 +85,34 @@
 	}
 
 	.cms_input_image_button {
-		right: 63px;
+		right: 6.3rem;
 	}
 
 	.cms_input_image_input {
 		position: absolute;
 		top: 0;
-		left: 130px;
-		width: calc(100% - 257px);
-		height: 26px;
+		left: 13.0rem;
+		width: calc(100% - 25.7rem);
+		height: 2.6rem;
 		margin: 0;
 		box-sizing: border-box;
-		line-height: 24px;
-		border: 1px solid #a0a0a0;
+		line-height: 2.4rem;
+		border: 0.1rem solid #a0a0a0;
 	}
 
 	.cms_input_image_area {
 		display: none;
 		float: none;
 		position: absolute;
-		left: 130px;
-		width: 165px;
-		height: 124px;
-		top: 32px;
+		left: 13.0rem;
+		width: 16.5rem;
+		height: 12.4rem;
+		top: 3.2rem;
 	}
 
 	.cms_input_image_content_image {
-		height: 122px;
-		width: 163px;
+		height: 12.2rem;
+		width: 16.3rem;
 	}
 	
 	&.cms_input_image_hover {

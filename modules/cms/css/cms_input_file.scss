@@ -6,7 +6,7 @@
 	font-size: 0;
 	line-height: 0;
 	letter-spacing: 0;
-	padding: 7px 0 0 0;
+	padding: 0.7rem 0 0 0;
 }
 
 .cms_input_file {
@@ -40,7 +40,7 @@
 	.cms_file_container {
 		box-sizing: border-box;
 		display: inline-block;
-		width: 330px;
+		width: 33.0rem;
 		float: right;
 		position: relative;
 	}
@@ -49,17 +49,17 @@
 		box-sizing: border-box;
 		text-align: center;
 		vertical-align: middle;
-		height: 26px;
-		line-height: 24px;
+		height: 2.6rem;
+		line-height: 2.4rem;
 		clear: both;
-		border: 1px solid #a0a0a0;
+		border: 0.1rem solid #a0a0a0;
 		position: relative;
 		overflow: hidden;
 		font-size: 1.6rem;
 	}
 
 	.cms_input_file_download {
-		letter-spacing: -0.3px;
+		letter-spacing: -0.03rem;
 	}
 
 	.cms_input_file_button_disabled {
@@ -70,7 +70,7 @@
 }
 
 .cms_repeater_block .cms_input_file .cms_file_container {
-	width: 310px;
+	width: 31.0rem;
 }
 
 .cms_input_file_rename_container {
@@ -86,13 +86,13 @@
 	
 	position: absolute;
 	z-index: 10;
-	left: 2px;
-	top: 2px;
-	height: calc(100% - 4px);
-	width: 200px;
+	left: 0.2rem;
+	top: 0.2rem;
+	height: calc(100% - 0.4rem);
+	width: 20.0rem;
 	box-sizing: border-box;
-	border: 1px solid #a0a0a0;
-	padding: 0 2px;
+	border: 0.1rem solid #a0a0a0;
+	padding: 0 0.2rem;
 	margin: 0;
 	
 	&:focus {
@@ -104,40 +104,40 @@
 .cms_input_file_rename_extension {
 	position: absolute;
 	z-index: 10;
-	width: 58px;
+	width: 5.8rem;
 	text-align: left;
 	height: 100%;
 	top: 0;
-	left: 204px;
-	line-height: 24px;
+	left: 20.4rem;
+	line-height: 2.4rem;
 }
 
 .cms_input_file_rename_ok {
 	position: absolute;
 	z-index: 20;
-	height: calc(100% - 4px);
-	width: 30px;
-	border: 1px solid #a0a0a0;
+	height: calc(100% - 0.4rem);
+	width: 3.0rem;
+	border: 0.1rem solid #a0a0a0;
 	text-align: center;
-	right: 34px;	
+	right: 3.4rem;	
 	box-sizing: border-box;
-	top: 2px;
-	line-height: 18px;
-	border-radius: 4px;
+	top: 0.2rem;
+	line-height: 1.8rem;
+	border-radius: 0.4rem;
 	cursor: pointer;
 }
 
 .cms_input_file_rename_cancel {
 	position: absolute;
 	z-index: 20;
-	height: calc(100% - 4px);
-	width: 30px;
-	border: 1px solid #a0a0a0;
+	height: calc(100% - 0.4rem);
+	width: 3.0rem;
+	border: 0.1rem solid #a0a0a0;
 	text-align: center;
-	right: 2px;	
+	right: 0.2rem;	
 	box-sizing: border-box;
-	top: 2px;
-	line-height: 18px;
-	border-radius: 4px;
+	top: 0.2rem;
+	line-height: 1.8rem;
+	border-radius: 0.4rem;
 	cursor: pointer;
 }

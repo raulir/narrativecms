@@ -1,18 +1,18 @@
 .cms_input_multi {
 	
 	label {
-		height: 21px;
+		height: 2.1rem;
 	}
 	
 }
 
 .cms_input_multi_values {
-	padding: 2px 0;
+	padding: 0.2rem 0;
 	border-bottom: 0.1rem solid $cms_border;
 	border-top: 0.1rem solid $cms_border;
 	position: relative;
 	height: 7.2rem;
-	line-height: 20px;
+	line-height: 2.0rem;
 	overflow-y: auto;
 }
 
@@ -20,17 +20,17 @@
 	display: inline-block;
 	box-sizing: border-box;
     border: 0.1rem solid $cms_border;
-    border-radius: 3px;
+    border-radius: 0.3rem;
     padding: 0 2.5rem 0 1.9rem;
     cursor: pointer;
     text-align: center;
-    margin: 2px 5px 2px 0;
-    height: 20px;
-    line-height: 17px;
-    font-size: 15px;
+    margin: 0.2rem 0.5rem 0.2rem 0;
+    height: 2.0rem;
+    line-height: 1.7rem;
+    font-size: 1.5rem;
     position: relative;
-    background-position: 4px center;
-    background-size: 10px auto;
+    background-position: 0.4rem center;
+    background-size: 1.0rem auto;
     background-repeat: no-repeat;
     vertical-align: top;
     background-color: white;
@@ -39,35 +39,35 @@
 		content: 'x';
 		display: block;
 		position: absolute;
-	    height: 14px;
-	    width: 17px;
-	    border-left: 1px solid #c0c0c0;
+	    height: 1.4rem;
+	    width: 1.7rem;
+	    border-left: 0.1rem solid #c0c0c0;
 	    text-align: center;
-	    font-size: 14px;
-	    line-height: 14px;
-	    right: 0px;
-	    top: 2px;
+	    font-size: 1.4rem;
+	    line-height: 1.4rem;
+	    right: 0;
+	    top: 0.2rem;
 	}
 	
 }
 
 .cms_input_multi_bottom {
-	padding: 4px 0;
+	padding: 0.4rem 0;
 }
 
 .cms_input_multi_add {
 	box-sizing: border-box;
     display: block;
-    border: 1px solid $cms_border;
-    border-radius: 4px;
+    border: 0.1rem solid $cms_border;
+    border-radius: 0.4rem;
     float: right;
-    padding: 3px 14px 0px 14px;
+    padding: 0.3rem 1.4rem 0 1.4rem;
     cursor: pointer;
     text-align: center;
-    margin-left: 5px;
+    margin-left: 0.5rem;
     height: auto;
-    line-height: 19px;
-    font-size: 15px;
+    line-height: 1.9rem;
+    font-size: 1.5rem;
     width: auto;
 }
 
@@ -76,9 +76,9 @@
 	border: 0.1rem solid $cms_border;
 	display: block;
 	box-sizing: border-box;
-    padding: 2px 5px 0px 5px;
-    height: 23px;
-    line-height: 20px;
-    font-size: 16px;
+    padding: 0.2rem 0.5rem 0 0.5rem;
+    height: 2.3rem;
+    line-height: 2.0rem;
+    font-size: 1.6rem;
     max-width: 38.7rem;
 }

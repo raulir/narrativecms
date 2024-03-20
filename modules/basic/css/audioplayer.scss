@@ -181,11 +181,11 @@
 	
 }
 
-@media (max-width: 900px) {
+@media (max-width: $mobile_width) {
 	
 	.audioplayer_progress {
-		outline: 0.5px solid $colour_dark;
-		box-shadow: 0 0 $colour_dark 0.5px inset;
+		outline: 0.05rem solid $colour_dark;
+		box-shadow: 0 0 $colour_dark 0.05rem inset;
 	}
 
 	.audioplayer_seek {

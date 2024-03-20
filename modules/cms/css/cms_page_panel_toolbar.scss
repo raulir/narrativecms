@@ -49,8 +49,8 @@ $colour_white: white;
 
 .cms_toolbar_buttons_hidden {
 	
-	width: 52px;
-    background-size: 18px auto;
+	width: 5.2rem;
+    background-size: 1.8rem auto;
     background-repeat: no-repeat;
     background-position: 23% 44%;
     position: relative;
@@ -58,8 +58,8 @@ $colour_white: white;
     &:hover {
     	.cms_toolbar_buttons_hidden_container {
     		opacity: 1;
-    		max-height: 1000px;
-    		max-width: 200px;
+    		max-height: 100.0rem;
+    		max-width: 20.0rem;
     		transition: opacity 0.2s, max-height 0.2s 0s;
     	}
     }
@@ -67,30 +67,30 @@ $colour_white: white;
 }
 
 .cms_toolbar_buttons_hidden_arrow {
-	background-size: 6.5px 7.3px;
+	background-size: 0.65rem 0.73rem;
     background-repeat: no-repeat;
     background-position: 45% center;
     position: absolute;
-    right: 1px;
-    top: 5px;
-    height: 18px;
-    width: 15px;
+    right: 0.1rem;
+    top: 0.5rem;
+    height: 1.8rem;
+    width: 10.5rem;
     opacity: 0.5;
-    border-left: 1px solid #808080;
+    border-left: 0.1rem solid #808080;
 }
 
 .cms_toolbar_buttons_hidden_container {
 	opacity: 0;
 	max-height: 0;
-	max-width: 50px;
+	max-width: 5.0rem;
 	transition: opacity 0.2s, max-height 0s, max-width 0s;
 	position: absolute;
 	top: 3.0rem;
-    right: -4px;
+    right: -0.4rem;
     z-index: 20;
-    padding: 6px 3px 1px 5px;
+    padding: 0.6rem 0.3rem 0.1rem 0.5rem;
 	background-color: white;
-	border-radius: 7px;
+	border-radius: 0.7rem;
 	overflow: hidden;
 	box-sizing: border-box;
 	
@@ -98,13 +98,13 @@ $colour_white: white;
 		float: none;
 		display: block;
 		margin-left: 0;
-		margin-bottom: 5px;
+		margin-bottom: 0.5rem;
 		text-align: center;
 		white-space: nowrap;
-		height: 26px;
-    	line-height: 23px;
-    	font-size: 16px;
-    	padding: 1px 14px 0 14px;
+		height: 2.6rem;
+    	line-height: 2.3rem;
+    	font-size: 1.6rem;
+    	padding: 0.1rem 1.4rem 0 1.4rem;
     	text-transform: lowercase;
 	}
 	

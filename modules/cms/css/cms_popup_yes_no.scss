@@ -20,11 +20,11 @@
 
 .cms_popup_body {
 	box-sizing: border-box;
-	border: 1px solid #a0a0a0;
-	padding: 19px;
-	width: 300px;
-	height: 200px;
-	box-shadow: 2px 4px 10px rgba(0,0,0,0.5);
+	border: 0.1rem solid #a0a0a0;
+	padding: 1.9rem;
+	width: 30.0rem;
+	height: 20.0rem;
+	box-shadow: 0.2rem 0.4rem 1.0rem rgba(0,0,0,0.5);
 	background-color: white;
 	margin: 0 auto;
 }
@@ -41,26 +41,26 @@
 
 .cms_popup_yes {
 	box-sizing: border-box;
-	height: 30px;
-	width: 120px;
+	height: 3.0rem;
+	width: 12.0rem;
 	float: left;
-	border: 1px solid #a0a0a0;
-	border-radius: 4px;
-	font-size: 18px;
-	line-height: 28px;
+	border: 0.1rem solid #a0a0a0;
+	border-radius: 0.4rem;
+	font-size: 1.8rem;
+	line-height: 2.8rem;
 	text-align: center;
 	cursor: pointer;
 }
 
 .cms_popup_no {
 	box-sizing: border-box;
-	height: 30px;
-	width: 120px;
+	height: 3.0rem;
+	width: 12.0rem;
 	float: right;
-	border: 1px solid #a0a0a0;
-	border-radius: 4px;
-	font-size: 18px;
-	line-height: 28px;
+	border: 0.1rem solid #a0a0a0;
+	border-radius: 0.4rem;
+	font-size: 1.8rem;
+	line-height: 2.8rem;
 	text-align: center;
 	cursor: pointer;
 }

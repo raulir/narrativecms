@@ -45,21 +45,21 @@
 
 .admin_block_label {
 	box-sizing: border-box;
-	height: 2px;
-	border-bottom: 2px dashed #a0a0a0;
-	margin: 20px 0px;
-	padding: 0px 25px;
+	height: 0.2rem;
+	border-bottom: 0.2rem dashed #a0a0a0;
+	margin: 2.0rem 0;
+	padding: 0 20.5rem;
 }
 
 .admin_block_label .admin_block_title {
-	height: 23px;
-	line-height: 23px;
+	height: 2.3rem;
+	line-height: 2.3rem;
 	position: relative;
-	top: -10px;
+	top: -1.0rem;
 	background-color: white;
 	display: inline-block;
-	padding: 0px 10px;
-	font-size: 18px;
+	padding: 0 1.0rem;
+	font-size: 1.8rem;
 	transform: translateZ(0);
 	-webkit-transform: translateZ(0);
 }

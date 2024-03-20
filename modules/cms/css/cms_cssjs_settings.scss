@@ -1,60 +1,60 @@
 .cms_cssjs_settings_header {
-	border-bottom: 1px solid #a0a0a0;
-	line-height: 24px;
-    font-size: 18px;
-    padding-top: 10px;
+	border-bottom: 0.1rem solid #a0a0a0;
+	line-height: 2.4rem;
+    font-size: 1.8rem;
+    padding-top: 1.0rem;
     position: relative;
 }
 
 .cms_cssjs_settings_csss {
-	min-height: 100px;
+	min-height: 10.0rem;
 	position: relative;
-	padding-top: 8px;
+	padding-top: 0.8rem;
 }
 
 .cms_cssjs_settings_css_operations {
-	padding: 6px 0;
-	border-top: 1px solid #a0a0a0;
+	padding: 0.6rem 0;
+	border-top: 0.1rem solid #a0a0a0;
 	position: relative;
 	overflow: hidden;
 }
 
 .cms_cssjs_settings_csss_item_delete {
-	min-width: 67px;
+	min-width: 6.7rem;
 }
 
 .cms_cssjs_settings_css_add {
 	box-sizing: border-box;
     display: block;
-    border: 1px solid #a0a0a0;
-    border-radius: 3px;
+    border: 0.1rem solid #a0a0a0;
+    border-radius: 0.3rem;
     float: right;
-    padding: 1px 10px 0px 10px;
+    padding: 0.1rem 1.0rem 0 1.0rem;
     cursor: pointer;
     text-align: center;
-    margin-left: 5px;
-    height: 24px;
-    line-height: 22px;
-    font-size: 14px;
-    width: 47px;
+    margin-left: 0.5rem;
+    height: 2.4rem;
+    line-height: 2.2rem;
+    font-size: 1.4rem;
+    width: 4.7rem;
 }
 
 .cms_cssjs_settings_css_select {
 	
 	float: right;
-	border: 1px solid #a0a0a0;
+	border: 0.1rem solid #a0a0a0;
 	display: block;
 	box-sizing: border-box;
-    padding: 2px 5px 0px 5px;
-    height: 24px;
-    line-height: 24px;
-    font-size: 14px;
-    font-family: foundrysterling;
+    padding: 0.2rem 0.5rem 0 0.5rem;
+    height: 2.4rem;
+    line-height: 2.4rem;
+    font-size: 1.4rem;
+    font-family: source;
     font-weight: 200;
     
     option {
 	    font-weight: 200;
-	    line-height: 24px;
+	    line-height: 2.4rem;
     }
     
 }

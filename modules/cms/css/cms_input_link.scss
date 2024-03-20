@@ -3,31 +3,31 @@
 }
 
 .cms_input_link_content {
-	width: 330px;
+	width: 33.0rem;
 	float: right;
 	position: relative;
     overflow: hidden;
 }
 
 .cms_repeater_area .cms_input_link_content {
-	width: 310px;
+	width: 31.0rem;
 }
 
 .cms_input_link_dropdown {
 	box-sizing: border-box;
     display: block;
-    border: 1px solid #a0a0a0;
-    width: 163px;
-    height: 25px;
-    line-height: 22px;
-    font-size: 15px;
-    padding: 1px 5px 0px 1px;
+    border: 0.1rem solid #a0a0a0;
+    width: 16.3rem;
+    height: 2.5rem;
+    line-height: 2.2rem;
+    font-size: 1.5rem;
+    padding: 0.1rem 0.5rem 0 0.1rem;
     z-index: 10;
     position: relative;
 }
 
 .cms_repeater_area .cms_input_link_dropdown {
-	width: 153px;
+	width: 15.3rem;
 }
 
 .cms_input_link_target {
@@ -41,39 +41,39 @@
 .cms_input_link_select_placeholder {
 	box-sizing: border-box;
     display: block;
-    border: 1px solid #a0a0a0;
-    width: 163px;
-    height: 25px;
+    border: 0.1rem solid #a0a0a0;
+    width: 16.3rem;
+    height: 2.5rem;
     opacity: 0.3;
     position: absolute;
-    right: 0px;
-    top: 0px;
+    right: 0;
+    top: 0;
     z-index: 0;
 }
 
 .cms_repeater_area .cms_input_link_select_placeholder {
-	width: 153px;
+	width: 15.3rem;
 }
 
 .cms_input_link_select_spacer {
-	height: 4px;
+	height: 0.4rem;
 	clear: both;	
 }
 
 .cms_input_link_text_display,.cms_input_link_url_display {
 	box-sizing: border-box;
     display: block;
-    border: 1px solid #a0a0a0;
-    width: 163px;
-    height: 24px;
-    line-height: 21px;
-    font-size: 15px;
+    border: 0.1rem solid #a0a0a0;
+    width: 16.3rem;
+    height: 2.4rem;
+    line-height: 2.1rem;
+    font-size: 1.5rem;
     float: right;
-    padding: 1px 5px 0px 5px;
+    padding: 0.1rem 0.5rem 0 0.5rem;
 }
 
 .cms_repeater_area .cms_input_link_text_display,.cms_repeater_area .cms_input_link_url_display {
-	width: 153px;
+	width: 15.3rem;
 }
 
 .cms_input_link_url_display {
@@ -98,7 +98,7 @@
 .cms_input_link_short {
 	
 	&.cms_input_link_container {
-		height: 30px;
+		height: 3.0rem;
 	}
 
 	.cms_input_link_select_spacer {

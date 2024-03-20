@@ -89,7 +89,7 @@ function cms_input_file_upload(params){
 	        		percentComplete = parseInt(percentComplete * 100);
 
 	        		$(params.name_selector).html('<div style="float: right; background-color: #efefef; height: 100%; width: ' + (100 - percentComplete) 
-	        				+ '%; "></div><div style="width: 100%; height: 100%; top: 0px; left: 0px; position: absolute; ">' + percentComplete + '%</div>');
+	        				+ '%; "></div><div style="width: 100%; height: 100%; top: 0; left: 0; position: absolute; ">' + percentComplete + '%</div>');
 
 	        	}
 	        }, false);

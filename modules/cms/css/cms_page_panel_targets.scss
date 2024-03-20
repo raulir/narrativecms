@@ -1,5 +1,5 @@
 .cms_page_panel_targets_container {
-	height: 355px;
+	height: 350.5rem;
 }
 
 .cms_page_panel_targets_content {
@@ -8,23 +8,23 @@
 	font-size: 0;
 	line-height: 0;
 	letter-spacing: 0;
-	padding: 0 46px;
+	padding: 0 4.6rem;
 }
 
 .cms_page_panel_targets_message {
 	position: absolute;
 	left: 0;
 	width: 100%;
-	top: 20px;
-	font-size: 20px;
-	line-height: 30px;
+	top: 2.0rem;
+	font-size: 2.0rem;
+	line-height: 3.0rem;
 }
 
 .cms_page_panel_targets_table {
 	display: table;
 	table-layout: fixed;
 	width: 100%;
-	height: calc(100% - 50px);	
+	height: calc(100% - 5.0rem);	
 }
 
 .cms_page_panel_targets_cell {
@@ -33,16 +33,16 @@
 }
 
 .cms_page_panel_targets_line {
-	height: 0.8px;
+	height: 0..8rem;
 	background-color: #cccccc;
 	width: 75%;
-	margin: 10px auto;
+	margin: 1.0rem auto;
 }
 
 .cms_page_panel_targets_col1,.cms_page_panel_targets_col2,.cms_page_panel_targets_col3 {
 	display: inline-block;
-	font-size: 17px;
-	line-height: 22px;
+	font-size: 1.7rem;
+	line-height: 2.2rem;
 }
 
 .cms_page_panel_targets_col1 {
@@ -57,28 +57,28 @@
 
 .cms_page_panel_targets_select {
 	
-	width: 200px;
-	font-size: 17px;
-	line-height: 30px;
-	height: 32px;
-	border: 1px solid gray;
-	padding: 0 5px;
+	width: 20.0rem;
+	font-size: 1.7rem;
+	line-height: 3.0rem;
+	height: 3.2rem;
+	border: 0.1rem solid gray;
+	padding: 0 0.5rem;
 	box-sizing: border-box;
 	
 	option {
-		border: 1px solid gray;
+		border: 0.1rem solid gray;
 	}
 
 }
 
 .cms_page_panel_targets_buttons {
 	position: absolute;
-	bottom: 20px;
+	bottom: 2.0rem;
 	left: 0;
 	width: 100%;
 }
 
 .cms_page_panel_targets_close {
-	width: 110px;
-	margin: 0 2px;
+	width: 11.0rem;
+	margin: 0 0.2rem;
 }
