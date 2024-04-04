@@ -4,6 +4,9 @@
  * Narrative CMS install script
  */
 
+$update_url = 'http://update.narrativecms.com/';
+// $update_url = 'http://cms.localhost/';
+
 // actions
 if (!empty($_POST['do'])){
 	$do = $_POST['do'];
@@ -83,8 +86,8 @@ if (!empty($_POST['do'])){
 				'content' => $postdata
 		)));
 		 
-		$master_data = @file_get_contents('http://update.narrativecms.com/cms/updater/', false, $context);
-
+		$master_data = @file_get_contents($update_url.'cms/updater/', false, $context);
+		
 		if ($master_data === false){
 			print(json_encode(['ok' => 0]));
 		} else {
@@ -98,14 +101,14 @@ if (!empty($_POST['do'])){
 		
 		$starttime = time();
 	
-		$postdata = http_build_query(array('do' => 'files', ));
+		$postdata = http_build_query(['do' => 'files']);
 		$context  = stream_context_create(array('http' => array(
 				'method'  => 'POST',
 				'header'  => 'Content-type: application/x-www-form-urlencoded',
 				'content' => $postdata
 		)));
 			
-		$master_data = @file_get_contents('http://update.narrativecms.com/cms/updater/', false, $context);
+		$master_data = @file_get_contents($update_url.'cms/updater/', false, $context);
 		$master_data = json_decode($master_data, true);
 		
 		$master_length = count($master_data['files']);
@@ -144,12 +147,14 @@ if (!empty($_POST['do'])){
 		        		'content' => $postdata
 		    	)));
 		
-				$master_file_data = file_get_contents('http://update.narrativecms.com/cms/updater/', false, $context);
+				$master_file_data = file_get_contents($update_url.'cms/updater/', false, $context);
 				$master_file_data = json_decode($master_file_data, true);
 					
 				// replace local file
-				$file_content = base64_decode($master_file_data['file']);
-				file_put_contents($dir.$file['filename'], $file_content);
+							if(!empty($master_file_data['file'])){
+					$file_content = base64_decode($master_file_data['file']);
+					file_put_contents($dir.$file['filename'], $file_content);
+				}
 				
 				$counter += 1;
 				file_put_contents($dir.'cache/install.txt', $counter.'/'.$master_length);

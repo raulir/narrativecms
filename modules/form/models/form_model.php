@@ -550,7 +550,13 @@ class form_model extends CI_Model {
    		   
    				$mail = new PHPMailer(true);
    		   
-   				// $mail->SMTPDebug = 1;
+   				if (!empty($GLOBALS['config']['smtp_debug'])){
+	   				$GLOBALS['smtp_debug'] = [];
+	   				$mail->SMTPDebug = 2;
+	   				$mail->Debugoutput = function($line, $level) {
+	   					$GLOBALS['smtp_debug'][] = $line;
+	   				};
+   				}
    	
    				$mail->isSMTP();
    				$mail->Host = $GLOBALS['config']['smtp_server'];
@@ -572,7 +578,19 @@ class form_model extends CI_Model {
    				$mail->Subject = $title;
    				$mail->Body = $content;
    		   
-   				$mail->send();
+   				try {
+	   				$mail->send();
+   				} catch (Exception $e) {
+   					
+   					
+   					
+   				}
+   				
+   				if (isset($GLOBALS['smtp_debug'])){
+   					$debug_output = implode("\r\n", $GLOBALS['smtp_debug']);
+   					file_put_contents($GLOBALS['config']['base_path'].'/cache/smtp_debug_'.$GLOBALS['config']['smtp_server'].'_'.time().'.txt', $debug_output);
+   					unset($GLOBALS['smtp_debug']);
+   				}
    		   
    			}
    	

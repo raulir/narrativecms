@@ -378,7 +378,7 @@
 			"type":"text",
 			"name":"smtp_port",
 			"label":"SMTP port",
-			"default":"25"
+			"help":"25 for normal, 587 for authenticated SMTP"
 		},
 		{
 			"type":"text",
@@ -389,6 +389,17 @@
 			"type":"text",
 			"name":"smtp_password",
 			"label":"SMTP password"
+		},
+		{
+			"type":"select",
+			"name":"smtp_debug",
+			"label":"SMTP debug",
+			"values":{
+				"0":"Off",
+				"1":"On"
+			},
+			"default":"0",
+			"help": "Saves SMTP debug log to cache folder"
 		}
 	]
 }

@@ -34,7 +34,7 @@ class product_model extends Model {
 		
 		$filename = $GLOBALS['config']['base_path'].'/cache/shopify_'.substr(md5($endpoint.json_encode($params)), 0, 16).'.json';
 		
-		if (!file_exists($filename) || (time() - filemtime($filename)) > 300 ){
+		if (!file_exists($filename) || (time() - filemtime($filename)) > 3600 ){
 				
 			if (empty($params)){
 				$response = $this->client->get(path: $endpoint);

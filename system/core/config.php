@@ -126,10 +126,15 @@ if ($db === false){
 
 $sql = "select b.name, b.value from cms_page_panel a join cms_page_panel_param b on a.cms_page_panel_id = b.cms_page_panel_id ".
 		" where a.panel_name = 'cms/cms_settings' and b.name != ''";
+
 try {
+
 	$query = mysqli_query($db, $sql);
+
 } catch (Exception $e) {
-	_html_error($e->getMessage());
+
+	_html_error($e->getMessage(), 500);
+	
 }
 
 if ($query === false){
@@ -155,7 +160,7 @@ if (empty($GLOBALS['config']['email'])){
 
 if (empty($GLOBALS['config']['reply_email'])){
 	$GLOBALS['config']['reply_email'] = $GLOBALS['config']['email'];
-	$GLOBALS['config']['reply_name'] = $GLOBALS['config']['from_name'];
+	$GLOBALS['config']['reply_name'] = $GLOBALS['config']['from_name'] ?? '';
 }
 
 // load module configs
