@@ -79,45 +79,66 @@ class product_model extends Model {
 		}
 		
 		$products = $this->call('collections/'.$collection_id.'/products'); //, ['collection_id' => $collection_id, ]);
-		
-//		_print_r($products);
-		
+
 		$return = [];
 		
 		foreach($products as $product){
-			
-			$product_data = $this->get_product($product['id']);
-			
-//			_print_r($product_data);
-				
-			$min_price = 0;
-			$max_price = 0;
-			$available = 0;
-		
-			foreach($product_data['variants'] as $variant){
-				if (empty($min_price) || $min_price > $variant['price']) $min_price = $variant['price'];
-				if (empty($max_price) || $max_price < $variant['price']) $max_price = $variant['price'];
-				$available += $variant['inventory_quantity'];
-			}
-		
-			$return[] = [
-					'shopify_id' => $product['id'],
-					'heading' => $product_data['title'],
-					'image' => $product_data['image']['src'] ?? '',
-					'category' => $product_data['product_type'],
-					'min_price' => $min_price,
-					'max_price' => $max_price,
-					'available' => $available,
-			];
+
+			$product['shopify_data'] = $this->get_product($product['id']);
+
+			$return[] = $this->get_product_stats($product);
+
 		}
 
 		return $return;
 	
 	}
 	
+	function get_product_stats($product){
+		
+		$min_price = 0;
+		$max_price = 0;
+		$available = 0;
+		
+		foreach($product['shopify_data']['variants'] as $variant){
+			if (empty($min_price) || $min_price > $variant['price']) $min_price = $variant['price'];
+			if (empty($max_price) || $max_price < $variant['price']) $max_price = $variant['price'];
+			$available += $variant['inventory_quantity'];
+		}
+		
+		$return = [
+				'shopify_id' => $product['shopify_data']['id'],
+				'heading' => $product['shopify_data']['title'],
+				'image' => $product['shopify_data']['image']['src'] ?? '',
+				'category' => $product['shopify_data']['product_type'],
+				'min_price' => $min_price,
+				'max_price' => $max_price,
+				'available' => $available,
+		];
+		
+		return $return;
+		
+	}
+	
 	function get_product($product_shopify_id){
 		
 		$product = $this->call('products/'.$product_shopify_id)['product'];
+		
+		return $product;
+		
+	}
+	
+	function get_product_by_id($product_id){
+		
+		$this->load->model('cms/cms_page_panel_model');
+		
+		$product = $this->cms_page_panel_model->get_cms_page_panel($product_id);
+		$product['shopify_data'] = $this->get_product($product['shopify_id']);
+		
+		$product['stats'] = $this->get_product_stats($product);
+
+		$product['category'] = $product['shopify_data']['product_type'];
+		$product['image'] = $product['shopify_data']['image']['src'] ?? '';
 		
 		return $product;
 		
