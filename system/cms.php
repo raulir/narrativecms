@@ -30,7 +30,7 @@ function _html_error($error, $exit = 0, $extra = []){
 	$return .= ($formatted);
 	$return .= ('</div></pre>');
 		
-	if(!empty($GLOBALS['config']['errors_visible']) || empty($GLOBALS['config']['base_path'])){
+	if(empty($extra['silent']) && (!empty($GLOBALS['config']['errors_visible']) || empty($GLOBALS['config']['base_path']))){
 		print($return);
 	}
 

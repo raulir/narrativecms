@@ -95,6 +95,11 @@ if ( !function_exists('_i')) {
 		}
 		
 		// if image from external source
+		if (!is_string($image)){
+			_html_error('Image name must be string', 0, ['backtrace' => 1]);
+			$image = 'cms/cms_no_image.png';
+		}
+
 		if (!(substr($image, 0, 4) != 'http' && substr($image, 0, 1) != '/')){
 		
 			if (substr($image, 0, 4) == 'http'){

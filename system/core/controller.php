@@ -267,8 +267,7 @@ class CI_Controller {
 			$template_timer_end = round(microtime(true) * 1000);
 	
 		} else if (empty($params['panel_id'])){
-			$return = '';
-			_html_error('Missing panel template: '.$name);
+			$return = _html_error('Missing panel template: '.$name, ['silent' => true, ]);
 		} else {
 			$return = '';
 		}
