@@ -49,19 +49,19 @@
 	border-bottom: 0.2rem dashed #a0a0a0;
 	margin: 2.0rem 0;
 	padding: 0 20.5rem;
+	position: relative;
 }
 
-.admin_block_label .admin_block_title {
-	height: 2.3rem;
+.cms_block_title {
 	line-height: 2.3rem;
-	position: relative;
-	top: -1.0rem;
+	position: absolute;
+	top: -0.1rem;
+	left: 50%;
 	background-color: white;
-	display: inline-block;
 	padding: 0 1.0rem;
 	font-size: 1.8rem;
-	transform: translateZ(0);
-	-webkit-transform: translateZ(0);
+	transform: translate(-50%, -50%);
+	white-space: nowrap;
 }
 
 /* newer styles */

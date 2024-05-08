@@ -41,7 +41,7 @@
 						'name_clean' => 'block_submenu_anchor',
 						'label' => 'Anchor',
 						'help' => '[Page panel anchor]||Use only for in page anchors and specifying id-s for panel ajax operations.'.
-								' Non-empty value may affect page layout',
+								'||May be used for menu system||Non-empty value may affect page layout',
 				]); ?>
 				
 				<input class="cms_page_panel_panel_name" type="hidden" name="panel_name" value="<?= $block['panel_name'] ?>">
