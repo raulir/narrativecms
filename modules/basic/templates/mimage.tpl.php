@@ -3,7 +3,7 @@
 		
 	<div class="mimage_content">
 	
-		<div class="mimage_image" <?php _ib($image, ['width' => 2000, 'pb' => 1]) ?>>
+		<div class="mimage_image" <?php !empty($optimise) ? _ib($image, ['width' => 2000, 'pb' => 1]) : _ib($image, ['pb' => 1]) ?>>
 			<?php foreach($links as $link): ?>
 
 				<?php $area = json_decode($link['area'], true) ?>

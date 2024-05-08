@@ -9,7 +9,7 @@
 			"category":"content"
 		},
 		{
-			"type":"text",
+			"type":"colour",
 			"name":"colour",
 			"label":"Background colour"
 		},
@@ -23,6 +23,16 @@
 				"desktop":"Desktop only"
 			},
 			"default":""
+		},
+		{
+			"type":"select",
+			"name":"optimise",
+			"label":"Optimise",
+			"values": {
+				"":"No",
+				"1":"Yes"
+			},
+			"default":"1"
 		},
 		{
 			"type":"repeater",
