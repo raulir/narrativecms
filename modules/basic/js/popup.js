@@ -22,6 +22,8 @@ function basic_popup_init(){
 
 	});
 	
+	basic_popup_run()
+
 }
 
 function basic_popup_resize(){
@@ -30,12 +32,25 @@ function basic_popup_resize(){
 
 function basic_popup_run(popup_id, wrapper_class = false){
 	
-	return new Promise ((resolve, reject) => {
+	var $container = $('.basic_popup_container')
 	
+	if ($container.length){
+		
+		$container.css({'display':'block'});
+		setTimeout(function(){
+			$container.css({'opacity':'1'});
+		}, 50)
+		
 		if (typeof cms_scroll_lock != 'undefined'){
 			cms_scroll_lock()
 		}
+
+		return
+		
+	}
 	
+	return new Promise ((resolve, reject) => {
+		
 		// load popup panel
 		get_ajax_panel('basic/popup', {'popup_id': popup_id}).then((data) => {
 			

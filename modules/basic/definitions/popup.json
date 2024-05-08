@@ -4,12 +4,51 @@
     "js": [
     	"cms/cms_scroll_lock"
     ],
-	"settings":[
+    "settings":[
 		{
 			"type":"image",
 			"name":"background",
 			"label":"Background",
 			"category":"content"
+		}
+    ],
+	"item":[
+		{
+			"type":"image",
+			"name":"image",
+			"label":"Image",
+			"category":"content"
+		},
+		{
+			"type":"colour",
+			"name":"colour",
+			"label":"Background colour"
+		},
+		{
+			"type":"text",
+			"name":"width",
+			"label":"Width",
+			"default":"50"
+		},
+		{
+			"type":"repeater",
+			"name":"links",
+			"label":"Links",
+			"fields":[
+		        { 
+		            "type": "link",
+		            "name": "link",
+		            "label": "Link",
+		            "help":"Use no link for close"
+		        },
+		        {
+		        	"type":"mask",
+		        	"name":"area",
+		        	"label":"Area",
+		        	"target":"image",
+		        	"definition":"30"
+		        }
+		    ]
 		}
 	]
 }

@@ -26,8 +26,22 @@
 	left: 50%;
 	top: 50%;
 	transform: translate(-50%,-50%);
+	z-index: 20;
 }
 
 .basic_popup_cancel {
 	
+}
+
+.basic_popup_image {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+.basic_popup_link {
+	cursor: pointer;
+	display: block;
+	position: absolute;
+	z-index: 20;
 }
