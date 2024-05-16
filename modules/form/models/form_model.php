@@ -21,7 +21,7 @@ class form_model extends CI_Model {
 		$data['time'] = time();
 		
 		$code = '';
-		if ($data['confirmation_code']){
+		if (!empty($data['confirmation_code'])){
 			
 			$code = $data['confirmation_code'];
 			
@@ -29,7 +29,19 @@ class form_model extends CI_Model {
 			unset($data['codeurl']);
 			
 		}
-	
+		
+		// check if code field exists
+		$sql = "select COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = database() AND TABLE_NAME = ? AND COLUMN_NAME = ?";
+		$query = $this->db->query($sql, ['form_data', 'code', ]);
+		$check = $query->result_array();
+		
+		if (empty($check)){
+			$sql = "ALTER TABLE `form_data` ADD `code` varchar(100) NOT NULL";
+			$this->db->query($sql);
+			$sql = "ALTER TABLE `form_data` ADD INDEX `code_idx` (`code`(3))";
+			$this->db->query($sql);
+		}
+		
 		$sql = "insert into form_data set cms_page_panel_id = ? , email = ? , code = ? , data = ? ";
 		$this->db->query($sql, [$cms_page_panel_id, $email, $code, json_encode($data), ]);
 		$return = $this->db->insert_id();
@@ -71,7 +83,7 @@ class form_model extends CI_Model {
     	
     		$sql = "ALTER TABLE `form_data` ADD KEY `cms_page_panel_idx` (`cms_page_panel_id`)";
     		$this->db->query($sql);
-    		$sql = "ALTER TABLE `uamh`.`form_data` ADD INDEX `code_idx` (`code`(3))";
+    		$sql = "ALTER TABLE `form_data` ADD INDEX `code_idx` (`code`(3))";
     		$this->db->query($sql);
     	
     	}
