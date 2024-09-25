@@ -1,4 +1,4 @@
-<div class="cms_repeater_container">
+<div class="cms_repeater_container<?= $readonly ? ' cms_repeater_container_readonly' : '' ?>">
 
 	<div class="cms_repeater_label"><?= $label ?></div>
 	<div class="cms_repeater_line cms_repeater_line_top"></div>
@@ -13,6 +13,7 @@
 						'name' => $name,
 						'repeater_key' => $repeater_key,
 						'height' => $height,
+						'readonly' => $readonly ?? 0,
 				]) ?>
 			
 			<?php endforeach ?>
@@ -20,9 +21,11 @@
 
 	</div>
 
-	<div class="admin_small_button cms_repeater_button" data-name="<?= $name ?>" data-fields="<?= base64_encode(json_encode($fields)) ?>">
-		Add element
-	</div>
+	<?php if(!$readonly): ?>
+		<div class="admin_small_button cms_repeater_button" data-name="<?= $name ?>" data-fields="<?= base64_encode(json_encode($fields)) ?>">
+			Add element
+		</div>
+	<?php endif ?>
 	
 	<div class="cms_repeater_line cms_repeater_line_bottom"></div>
 

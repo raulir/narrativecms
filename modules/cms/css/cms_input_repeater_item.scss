@@ -4,7 +4,7 @@
 	display: inline-block;
 	vertical-align: top;
 	padding: 1.0rem;
-	width: 50%;
+	width: 49.0rem;
 	
 	.cms_input {
 		width: calc(100% - 2.0rem);
@@ -29,6 +29,9 @@
 	background-repeat: no-repeat;
 	background-position: 0.7rem 0.7rem;
 	background-size: 1.4rem 1.4rem;
+	.cms_repeater_container_readonly & {
+		background-size: 0 auto;
+	}
 }
 
 .cms_repeater_block_toolbar {

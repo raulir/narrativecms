@@ -1,7 +1,10 @@
 {
 	"version":"2",
 	"label":"Site settings",
-	"item":[
+	"item": [
+	
+	],
+	"settings":[
 		{
 			"type":"text",
 			"name":"site_title",

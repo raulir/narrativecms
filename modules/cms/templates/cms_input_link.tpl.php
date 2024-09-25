@@ -37,8 +37,7 @@
 				<?php foreach($list as $item_id => $item_title): ?>
 					
 					<option value="<?= $list_name.'='.$item_id ?>" data-slug="<?= $slugs[$list_name][$item_id] ?>" data-target_id="<?= $item_id ?>"
-							<?= $value['_value'] == ($list_name.'='.$item_id) ? ' selected="selected"' : '' ?>
-							><?= $item_title ?></option>
+							<?= ($value['_value'] ?? '') == ($list_name.'='.$item_id) ? ' selected="selected"' : '' ?>><?= $item_title ?></option>
 				
 				<?php endforeach ?>
 			
@@ -49,7 +48,6 @@
 		<div class="cms_input_link_select_spacer"></div>
 
 		<input type="text" class="cms_input_link_url_display" value="<?php print(!empty($value['url']) ? $value['url'] : ''); ?>" placeholder="Link URL">
-		<input type="text" class="cms_input_link_text_display" value="<?php print(!empty($value['text']) ? $value['text'] : ''); ?>" placeholder="Link text">
 
 		<input type="hidden" class="cms_input_link_url" name="<?php print($name); ?>[url]<?php print($name_extra); ?>" 
 				value="<?php print(!empty($value['url']) ? $value['url'] : ''); ?>">

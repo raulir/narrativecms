@@ -8,10 +8,12 @@
 }
 
 .cms_input_xy_set {
-	width: 12.0rem;
-	top: 3.3rem;
-	left: 0rem;
-	position: absolute;
+	&.cms_input_button {
+		width: 12.0rem;
+		top: 3.3rem;
+		left: 0rem;
+		position: absolute;
+	}
 }
 
 .cms_input_xy_clear {

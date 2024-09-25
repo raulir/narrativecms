@@ -10,14 +10,14 @@
 
 					<div class="cms_tool_text">Mark the squares</div>
 					
-					<a class="cms_mask_picker_select cms_tool_button admin_right popup_select">Select</a>
+					<a class="cms_mask_picker_select cms_tool_button cms_right popup_select">Select</a>
 
-					<a class="cms_mask_picker_cancel cms_tool_button admin_right popup_cancel">Cancel</a>
+					<a class="cms_mask_picker_cancel cms_tool_button cms_right popup_cancel">Cancel</a>
 
-					<a class="cms_mask_picker_clear cms_tool_button admin_right">Clear</a>
+					<a class="cms_mask_picker_clear cms_tool_button cms_right">Clear</a>
 
-					<a class="cms_mask_picker_erase cms_tool_button admin_right">Erase</a>
-					<a class="cms_mask_picker_mark cms_tool_button admin_right">Mark</a>
+					<a class="cms_mask_picker_erase cms_tool_button cms_right">Erase</a>
+					<a class="cms_mask_picker_mark cms_tool_button cms_right">Mark</a>
 
 				</div>
 

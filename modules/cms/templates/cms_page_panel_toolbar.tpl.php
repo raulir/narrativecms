@@ -27,10 +27,10 @@
 				<?php endif ?>
 		
 				<?php if(!empty($hidden_section)): ?>
-					<div class="cms_tool_button admin_right cms_toolbar_buttons_hidden" <?php _ib('cms/cms_settings.png', 30) ?>>
+					<div class="cms_tool_button cms_right cms_toolbar_buttons_hidden" <?php _ib('cms/cms_settings.png', 30) ?>>
 						<div class="cms_toolbar_buttons_hidden_arrow" <?php _ib('cms/cms_down.png', 12) ?>></div>
 						<div class="cms_toolbar_buttons_hidden_container">
-						
+
 							<?php foreach($buttons as $button): ?>
 							
 								<?php if($button['position'] == 'hidden'): ?>
@@ -53,6 +53,12 @@
 							) ?>
 						<?php endif ?>
 					
+					<?php endforeach ?>
+				<?php endif ?>
+				
+				<?php if(!empty($extra_buttons)): ?>
+					<?php foreach($extra_buttons as $extra_button): ?>
+						<?php _panel($extra_button['name'], $extra_button) ?>
 					<?php endforeach ?>
 				<?php endif ?>
 		

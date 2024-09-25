@@ -281,7 +281,7 @@ ul {
 	margin-right: 1.0rem;
 }
 
-.admin_right {
+.cms_right {
 	float: right;
 	margin-left: 1.0rem;
 }
@@ -551,4 +551,14 @@ ul {
 
 .cms_item_hidden {
 	opacity: 0.3;
+}
+
+.cms_heading_colour {
+	display: inline-block;
+	height: 1.2rem;
+	width: 1.9rem;
+	margin: 0 0.3rem 0 0;
+	border: 0.1rem solid $cms_border;
+	position: relative;
+	top: 0.15rem;
 }

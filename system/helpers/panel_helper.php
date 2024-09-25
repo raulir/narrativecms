@@ -207,6 +207,38 @@ if ( !function_exists('get_position')) {
     			$slug = $ci->cms_slug_model->get_cms_slug_by_target($url);
     			if ($slug){
     				$url = $slug.'/';
+    			} else if(stristr($url, '=') && stristr($url, '/')){
+
+    				list($panel_name, $id) = explode('=', $url);
+    				list($module, $panel) = explode('/', $panel_name);
+
+    				$ci =& get_instance();
+    						
+    				// load panel stuff into this sandbox - it will be the same as sandbox is singleton for itself
+    				$panel_name = $module.'_'.$panel.'_panel';
+    				
+    				$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/panels/'.$panel.'.php';
+
+    				if (file_exists($filename)){
+    					
+    					$res = $ci->load->library(
+    							$filename,
+    							['module' => $module, 'name' => $panel, ],
+    							$panel_name
+    							);
+    					
+    					if (method_exists($ci->{$panel_name}, 'panel_slug')){
+    					
+    						// define this controller as panel
+    						$ci->{$panel_name}->init_panel(['name' => $panel, 'controller' => $filename, ]);
+    					
+    						// get params through panel controller
+    						$url = $ci->{$panel_name}->panel_slug(['module' => $module, 'name' => $panel, 'cms_page_panel_id' => $id, ]).'/';
+    							
+    					}
+    						
+    				}
+
     			}
     		}
     		
@@ -256,12 +288,12 @@ if ( !function_exists('get_position')) {
     	
     	$data = '';
     	if (!empty($GLOBALS['config']['position_wrappers']) && !empty($GLOBALS['config']['position_links']) && !stristr($url, 'admin/')){
-    		
+// if (is_string($params_url)) { _print_r($params_url);  die(); }  		
     		if ((is_array($params_url) && !in_array($params_url['target'], ['_none', '_manual']) 
     				|| (!is_array($params_url) && stristr($params_url, '/') && stristr($params_url, '=') ))){
     		
-    			$data = ' data-_pl="1" data-_url="'.($GLOBALS['config']['base_site']??'').'" ';
-//				$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_position_link.js';
+    			$data = ' data-_pl="1" ';
+				$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_position_link.js';
     		
     		}
     		

@@ -4,7 +4,7 @@
 
 		<div class="cms_toolbar">
 			<div class="cms_tool_text">Pages</div>
-			<a class="cms_tool_button admin_right" <?php _lh('admin/page/0') ?> data-cms_ctrl="a">New Page</a>
+			<a class="cms_tool_button cms_right" <?php _lh('admin/page/0') ?> data-cms_ctrl="a">New Page</a>
 		</div>
 
 		<?php if (!(empty($pages['main']) || count($pages['main']) == 0)): ?>
@@ -26,7 +26,7 @@
 			<div class="cms_pages_position">
 				<div class="cms_toolbar">
 					<div class="cms_tool_text"><?= $position['plural'] ?></div>
-					<a class="cms_tool_button admin_right" <?php _lh('admin/page/0/'.$position['id']) ?>>New <?= $position['id'] ?></a>
+					<a class="cms_tool_button cms_right" <?php _lh('admin/page/0/'.$position['id']) ?>>New <?= $position['id'] ?></a>
 				</div>
 			</div>
 			

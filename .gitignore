@@ -10,12 +10,10 @@
 /img/*
 !/img/.gitkeep
 !/img/index.html
+/config/*
+!/config/.gitkeep
 
 _db/*
 !_db/cms.sql
 
-
 _feed
-
-/config/*
-!/config/.gitkeep

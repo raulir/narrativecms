@@ -143,7 +143,7 @@ if ( !function_exists('_iw')) {
 				
 				$name_a['extension'] = 'png';
 
-				$src = imagecreatefrompng($GLOBALS['config']['upload_path'].$image);
+				@$src = imagecreatefrompng($GLOBALS['config']['upload_path'].$image);
 					
 				imagesavealpha($tmp, true);
 				imagealphablending($tmp, false);

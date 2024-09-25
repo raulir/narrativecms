@@ -24,7 +24,7 @@ class cms_page_panel extends CI_Controller {
 		$this->load->model('cms/cms_language_model');
 		
 		$return = [];
-		
+
 		// set up new page panel
 		$params['target_type'] = $this->input->post('target_type');
 		$params['panel_name'] = $this->input->post('panel_name');
@@ -137,15 +137,15 @@ class cms_page_panel extends CI_Controller {
 		// check if panel is list item on the same named page
 		$panel_definition = $this->cms_panel_model->get_cms_panel_config($return['block']['panel_definition']);
 
-		if (!empty($panel_definition['list']) && !empty($return['cms_page_id']) && $return['block']['panel_name'] == $panel_definition['module'].'/'.$return['cms_page']['slug']){
+//		if (!empty($panel_definition['list']) && !empty($return['cms_page_id']) && $return['block']['panel_name'] == $panel_definition['module'].'/'.$return['cms_page']['slug']){
+		if (!empty($panel_definition['list']) && !empty($return['cms_page_id'])){
 			if (empty($panel_definition['settings'])){
 				$panel_structure = [];
 			} else {
 				$panel_structure = $panel_definition['settings'];
 			}
 		} else {
-			
-			
+
 			if (!empty($return['cms_page_id']) || !empty($return['block']['cms_page_id']) || !empty($return['block']['sort']) || !empty($return['block']['parent_id'])){
 
 				$panel_structure = !empty($panel_definition['item']) ? $panel_definition['item'] : [];
@@ -153,10 +153,13 @@ class cms_page_panel extends CI_Controller {
 			} else {
 				if (!empty($panel_definition['settings'])){
 					$panel_structure = $panel_definition['settings'];
-				} else if (!empty($panel_definition['item'])){
-					$panel_structure = $panel_definition['item'];
 				} else {
-					$panel_structure = [];
+					$panel_structure = [
+							[
+									'type' => 'subtitle',
+									'label' => 'No settings'
+							]
+					];
 				}
 			}
 		}
@@ -191,6 +194,8 @@ class cms_page_panel extends CI_Controller {
 		if (empty($return['block']['update_user'])){
 			$return['block']['update_user'] = [];
 		}
+		
+		$return['extra_buttons'] = $panel_definition['extra_buttons'] ?? [];
 		
 		return $return;
 

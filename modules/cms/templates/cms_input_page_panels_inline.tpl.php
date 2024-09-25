@@ -29,7 +29,9 @@
 	
 		<div class="cms_input_page_panels_inline_footer">
 	
-			<div class="admin_small_button admin_right cms_input_page_panels_inline_add" data-target="<?php _l('admin/cms_page_panel/0/0/'.$cms_page_panel_id.'/'.$name_clean.'/'); ?>" data-name="<?= $name_clean ?>">Add page panel</div>
+			<div class="admin_small_button cms_right cms_input_page_panels_inline_add" 
+					data-target="<?php _l('admin/cms_page_panel/0/0/'.$cms_page_panel_id.'/'.$name_clean.'/'); ?>" 
+					data-name="<?= $name_clean ?>">Add page panel</div>
 	
 		</div>
 	

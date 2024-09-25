@@ -40,17 +40,7 @@ class cms_panel_model extends Model {
 	}
 	
 	function get_cms_panel_config($cms_panel){
-		
-		// if array, get first with /
-		if (is_array($cms_panel)){
-			foreach($cms_panel as $_cms_panel){
-				if (stristr($_cms_panel, '/')){
-					$cms_panel = $_cms_panel;
-					break;
-				}
-			}
-		}
-		
+
 		$return = [
 				'item' => [],
 				'version' => 2,
@@ -78,14 +68,7 @@ class cms_panel_model extends Model {
 			// images // replace
 			$json_data = str_replace('"//', '"'.$return['module'].'/', $json_data);
 			
-			$panel_params_structure = cms_json_decode($json_data, $filename);
-
-			if (empty($panel_params_structure['version']) || $panel_params_structure['version'] < 2){
-				$return['item'] = $panel_params_structure;
-				$return['version'] = 1;
-			} else {
-				$return = $panel_params_structure;
-			}
+			$return = cms_json_decode($json_data, $filename);
 
 			// if extends
 			if(!empty($return['extends']['panel'])){
@@ -110,10 +93,6 @@ class cms_panel_model extends Model {
 		}
 		
 		$return['filename'] = $filename;
-		
-		if(empty($return['module'])){
-			$return['module'] = !empty($default_module) ? $default_module : 'cms';
-		}
 		
 		if (!empty($return['version']) && is_array($return['version'])){
 			$return['version'] = end($return['version']);

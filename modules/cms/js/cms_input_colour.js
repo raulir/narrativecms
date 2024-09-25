@@ -8,7 +8,7 @@ function cms_input_colour_init(){
 			return
 		}
 		
-		$this.addClass('cms_input_text_ok')
+		$this.addClass('cms_input_colour_ok')
 
 		$('.cms_input_colour_default', $this).on('click.cms', function(){
 			$('.cms_input_colour_input', $this).val($(this).data('value'))
@@ -17,6 +17,7 @@ function cms_input_colour_init(){
 		
 		$('.cms_input_colour_helper').on('change.cms', function(){
 			$('.cms_input_colour_input', $(this).closest('.cms_input_colour')).val($(this).val())
+			cms_input_colour_update($this)
 		})
 		
 		$('.cms_input_colour_input').on('change.cms keyup.cms', function(){

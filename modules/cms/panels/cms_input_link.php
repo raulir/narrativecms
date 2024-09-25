@@ -43,14 +43,14 @@ class cms_input_link extends CI_Controller {
 
 		// backwards compatibility
 		if (!empty($params['value']) && is_string($params['value'])){
-			$params['value'] = array(
+			$params['value'] = [
 					'url' => $params['value'],
 					'target' => '_manual',
-			);
+			];
 		} else if (empty($params['value'])){
-			$params['value'] = array(
+			$params['value'] = [
 					'target' => '_none',
-			);
+			];
 		}
 
 		if(empty($params['value']['target'])){

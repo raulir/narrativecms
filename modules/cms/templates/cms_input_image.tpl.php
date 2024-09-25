@@ -19,13 +19,10 @@
 			</div>
 		</div>
 		
-		<div class="cms_input_image_button cms_input_button" data-name="<?= $name_clean ?>" data-category="<?= $category ?>">
-			Select
-		</div>
-		
-		<div class="cms_input_image_clear cms_input_button" data-name="<?= $name_clean ?>">
-			Clear
-		</div>
+    	<?php if (empty($readonly)): ?>		
+			<div class="cms_input_image_button cms_input_button" data-name="<?= $name_clean ?>" data-category="<?= $category ?>">Select</div>
+			<div class="cms_input_image_clear cms_input_button" data-name="<?= $name_clean ?>">Clear</div>
+		<?php endif ?>
 		
 		<span class="cms_input_image_overlay">
 			<input type="<?= (!empty($size) && $size == 'small') ? 'text' : 'hidden' ?>" class="cms_input_image_input cms_image_input_<?= $name_clean ?>" 

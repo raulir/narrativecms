@@ -10,8 +10,8 @@
 		<?php _panel('cms/cms_language_select') ?>
 	<?php endif ?>
 	
-	<div class="cms_page_save cms_tool_button admin_right" data-cms_ctrl="s">Save</div>
-	<a class="cms_page_delete cms_tool_button admin_right">Delete</a>
+	<div class="cms_page_save cms_tool_button cms_right" data-cms_ctrl="s">Save</div>
+	<a class="cms_page_delete cms_tool_button cms_right">Delete</a>
 
 </div>
 

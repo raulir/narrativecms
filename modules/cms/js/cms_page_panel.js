@@ -79,7 +79,15 @@ function cms_page_panel_init(){
 		$title.data('new_block', true);
 	}
 	
-	$('.cms_repeater_area').sortable().disableSelection();
+	$('.cms_repeater_area').each(function(){
+		
+		if ($(this).parent().hasClass('cms_repeater_container_readonly')){
+			
+		} else {
+			$(this).sortable().disableSelection()
+		}
+		
+	})
 	
 	var title_field = $('.admin_title_text').data('title_field');
 	var $title_field = $('textarea,input,select').filter('[name="panel_params[' + title_field + ']"]');

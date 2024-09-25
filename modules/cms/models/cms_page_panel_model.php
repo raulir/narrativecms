@@ -476,27 +476,31 @@ class cms_page_panel_model extends Model {
 			
 			if ($purge){
 
-				// remove keys not existing in new value array
-				function recursive_keys($array, $prefix = ''){
-					
-					$return = [];
-					
-					foreach($array as $k => $v){
+				if (!function_exists('recursive_keys')){
+				
+					// remove keys not existing in new value array
+					function recursive_keys($array, $prefix = ''){
 						
-						if (is_numeric($k)){
-							$k = str_pad($k, 6, '0', STR_PAD_LEFT);
+						$return = [];
+						
+						foreach($array as $k => $v){
+							
+							if (is_numeric($k)){
+								$k = str_pad($k, 6, '0', STR_PAD_LEFT);
+							}
+							
+							if (!is_array($v)){
+								$return[] = $prefix.$k;
+							} else {
+								$return = array_merge($return, recursive_keys($v, $prefix.$k.'.'));
+							}
+							
 						}
 						
-						if (!is_array($v)){
-							$return[] = $prefix.$k;
-						} else {
-							$return = array_merge($return, recursive_keys($v, $prefix.$k.'.'));
-						}
+						return $return;
 						
 					}
-					
-					return $return;
-					
+				
 				}
 				
 				// build keys

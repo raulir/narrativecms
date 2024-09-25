@@ -7,8 +7,8 @@
 	<?php else: ?>
 		<div class="cms_tool_text">Main menu</div>
 	<?php endif ?>
-	<div class="cms_tool_button admin_right admin_main_menu_save_button">Save</div>
-	<div class="cms_tool_button admin_right admin_main_menu_add_button">Add item</div>
+	<div class="cms_tool_button cms_right admin_main_menu_save_button">Save</div>
+	<div class="cms_tool_button cms_right admin_main_menu_add_button">Add item</div>
 </div>
 
 <div>

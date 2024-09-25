@@ -1,5 +1,5 @@
 <?php if(!empty($GLOBALS['language'])): ?>
-	<div class="admin_right cms_language_select_container">
+	<div class="cms_right cms_language_select_container">
 		<div class="cms_toolbar_buttons_hidden cms_language_select_content">
 			
 			<div class="cms_tool_button cms_language_select_current" data-language="<?= $_SESSION['cms_language'] ?>">

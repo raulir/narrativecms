@@ -68,11 +68,6 @@ class admin extends CI_Controller {
 			_html_error('Bad list item: '.$list_item);
 			return;
 		}
-		
-		if (stristr($list_item, '/')){
-			list($module, $item) = explode('/', $list_item);
-			$list_item = [$list_item, $item];
-		}
 
 		$params = array(
 				'title' => $item_config['list']['list_title'],
@@ -84,10 +79,14 @@ class admin extends CI_Controller {
 			$params['filter_fields'] = $item_config['list']['filter_fields'];
 		}
 			
-		if (!empty($item_config['list']['title_field'])){
+			if (!empty($item_config['list']['title_field'])){
 			$params['title_field'] = $item_config['list']['title_field'];
 		}
-
+		
+		if (!empty($item_config['list']['extra_buttons'])){
+			$params['extra_buttons'] = $item_config['list']['extra_buttons'];
+		}
+		
 		// set page config
 		$page_config = array(
 				array('position' => 'header', 'panel' => 'cms/cms_user', ),
@@ -127,7 +126,7 @@ class admin extends CI_Controller {
 			
 			// load definition
 			$panel_config = $this->cms_panel_model->get_cms_panel_config($panel_name);
-			
+
 			if (!empty($panel_config['label']) && is_array($panel_config['label'])){
 				$panel_config['label'] = array_pop($panel_config['label']);
 			}

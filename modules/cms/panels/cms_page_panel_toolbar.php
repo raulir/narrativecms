@@ -234,6 +234,15 @@ class cms_page_panel_toolbar extends CI_Controller {
 			$params['hidden_section'] = 1;
 		
 		}
+		
+		if (!empty($params['extra_buttons'])){
+			foreach($params['extra_buttons'] as $bkey => $button){
+				
+				$params['extra_buttons'][$bkey]['cms_page_panel_id'] = $cms_page_panel['cms_page_panel_id'];
+				$params['extra_buttons'][$bkey]['panel_name']	= $cms_page_panel['panel_name'];
+	
+			}
+		}
 
 		return $params;
 

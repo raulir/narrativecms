@@ -4,6 +4,7 @@
 			'target_id' => $block['cms_page_panel_id'],
 			'target_page_id' => $block['cms_page_id'],
 			'target_parent_id' => $block['parent_id'],
+			'extra_buttons' => $extra_buttons,
 	]);
 
 ?>

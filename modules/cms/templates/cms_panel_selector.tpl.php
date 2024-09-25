@@ -10,10 +10,10 @@
 					<div class="cms_tool_text">Select page panel</div>
 
 					<a
-						class="cms_panel_selector_select cms_tool_button admin_right popup_select cms_panel_selector_select_disabled">Select</a>
+						class="cms_panel_selector_select cms_tool_button cms_right popup_select cms_panel_selector_select_disabled">Select</a>
 
 					<a
-						class="cms_panel_selector_cancel cms_tool_button admin_right popup_cancel">Cancel</a>
+						class="cms_panel_selector_cancel cms_tool_button cms_right popup_cancel">Cancel</a>
 
 				</div>
 

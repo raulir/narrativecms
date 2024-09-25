@@ -18,7 +18,7 @@ function cms_position_link_init(){
 					$this.on('before', function(){
 					
 						return new Promise(resolve => {
-							$('.cms_position_main').css({'opacity':'0'})
+							$('.cms_position_main').css({'opacity':'0.5'})
 							setTimeout(() => resolve($(this)), 300)
 						})
 					
@@ -85,6 +85,11 @@ function cms_position_link_init(){
 					.then(update_page)
 					.then($bu => $bu.triggerHandler('after'))
 					.then($bu => $bu.remove())
+					.then(() => {
+						if (typeof cms_position_link_after != 'undefined'){
+							cms_position_link_after.forEach((element) => element())
+						}
+					})
 
 				return false;
 				

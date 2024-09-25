@@ -51,6 +51,7 @@ if (!function_exists('print_fields')){
 						'fields' => $field['fields'],
 						'data' => !empty($data[$field['name']]) ? $data[$field['name']] : [],
 						'height' => !empty($field['height']) ? $field['height'] : 0,
+						'readonly' => $field['readonly'] ?? 0,
 						'_return' => true,
 				]); 
 			

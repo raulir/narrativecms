@@ -9,12 +9,12 @@
 
 					<div class="cms_tool_text">Click at the point</div>
 					
-					<a class="cms_xy_picker_select cms_tool_button admin_right popup_select">Select</a>
+					<a class="cms_xy_picker_select cms_tool_button cms_right popup_select">Select</a>
 
-					<a class="cms_xy_picker_cancel cms_tool_button admin_right popup_cancel">Cancel</a>
+					<a class="cms_xy_picker_cancel cms_tool_button cms_right popup_cancel">Cancel</a>
 
-					<div class="cms_tool_text admin_right cms_xy_picker_current">Selected: <div class="cms_xy_picker_current_value"></div></div>
-					<div class="cms_tool_text admin_right cms_xy_picker_cursor">Cursor: <div class="cms_xy_picker_cursor_value"></div></div>
+					<div class="cms_tool_text cms_right cms_xy_picker_current">Selected: <div class="cms_xy_picker_current_value"></div></div>
+					<div class="cms_tool_text cms_right cms_xy_picker_cursor">Cursor: <div class="cms_xy_picker_cursor_value"></div></div>
 
 				</div>
 

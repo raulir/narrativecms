@@ -17,7 +17,7 @@ class cms_input_image extends CI_Controller {
 	}
 
 	function panel_params($params){
-		
+
 		if (empty($params['name_clean'])){
 			$params['name_clean'] = $params['name'];
 		}

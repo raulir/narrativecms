@@ -60,11 +60,11 @@
 	clear: both;	
 }
 
-.cms_input_link_text_display,.cms_input_link_url_display {
+.cms_input_link_url_display {
 	box-sizing: border-box;
     display: block;
     border: 0.1rem solid #a0a0a0;
-    width: 16.3rem;
+    width: 33.0rem;
     height: 2.4rem;
     line-height: 2.1rem;
     font-size: 1.5rem;
@@ -72,25 +72,15 @@
     padding: 0.1rem 0.5rem 0 0.5rem;
 }
 
-.cms_repeater_area .cms_input_link_text_display,.cms_repeater_area .cms_input_link_url_display {
-	width: 15.3rem;
+.cms_repeater_area .cms_input_link_url_display {
+	width: 31.0rem;
 }
 
 .cms_input_link_url_display {
 	float: left;
 }
 
-.cms_input_link_text_display::-webkit-input-placeholder,.cms_input_link_url_display::-webkit-input-placeholder {
-	opacity: 0.3;
-	color: black;
-}
-
-.cms_input_link_text_display::-ms-input-placeholder,.cms_input_link_url_display::-ms-input-placeholder {
-	opacity: 0.3;
-	color: black;
-}
-
-.cms_input_link_text_display::input-placeholder,.cms_input_link_url_display::input-placeholder {
+.cms_input_link_url_display::input-placeholder {
 	opacity: 0.3;
 	color: black;
 }
@@ -106,10 +96,6 @@
 	}
 
 	.cms_input_link_url_display {
-		display: none;
-	}
-
-	.cms_input_link_text_display {
 		display: none;
 	}
 

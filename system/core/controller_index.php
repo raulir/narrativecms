@@ -158,7 +158,11 @@ class Index extends CI_Controller {
 							'position' => 'main',
 							'panel' => $block['panel_name'],
 							'params' => array_merge($get_params, $block, $extra_params_2, // keep submenu details from settings ->
-									['submenu_anchor' => $block['submenu_anchor'], 'submenu_title' =>  $block['submenu_title'], ]),
+									[
+											'submenu_anchor' => $block['submenu_anchor'], 
+											'submenu_title' =>  $block['submenu_title'], 
+											'cms_page_id' => $page['cms_page_id'],
+									]),
 							'_cms_layout' => $page['layout'],
 					];
 					
@@ -169,10 +173,10 @@ class Index extends CI_Controller {
     		} else { // put a panel to main position
     			
 	    		if ($list_item_data['show'] == 1){
-					$page_config[] = [
+	    			$page_config[] = [
 							'position' => 'main',
 							'panel' => $panel_name,
-							'params' => array_merge($get_params, $list_item_data, $extra_params),
+							'params' => array_merge($get_params, $list_item_data, $extra_params, ['cms_page_id' => $page['cms_page_id'], ]),
 							'_cms_layout' => $page['layout'],
 					];
 	    		}
@@ -187,8 +191,8 @@ class Index extends CI_Controller {
     		foreach($page['positions'] as $position){
     			
     			if (!empty($position['value'])){
-    		
-		    		$blocks = $this->_get_cms_page_panels($position['value']);
+
+    				$blocks = $this->_get_cms_page_panels($position['value']);
 		    		
 		    		foreach($blocks as $block){
 		    		
@@ -242,13 +246,8 @@ class Index extends CI_Controller {
 			
 //			header('Access-Control-Allow-Origin: *');
 
+			// existing positions
 			$positions = $this->input->post('cms_positions');
-			
-			$_url = $this->input->post('_url');
-			if ($_url){
-				$GLOBALS['config']['base_site'] = $_url;
-			}
-			
 			if (!empty($positions)){
 				
 				// new position_links functionality
@@ -257,16 +256,17 @@ class Index extends CI_Controller {
 				$positions_needed = array_keys($positions);
 
 				foreach($page_config as $key => $panel_config){
-					if (in_array($panel_config['position'], $positions_needed)
-							&& ($panel_config['params']['cms_page_id'] != $positions[$panel_config['position']])) {
-						
-						$panel_data = $this->ajax_panel($panel_config['panel'], $panel_config['params']);
-						
-						if (empty($return[$panel_config['position']])){
-							$return[$panel_config['position']]['_html'] = '';
+					if (in_array($panel_config['position'], $positions_needed)){
+						if ($panel_config['params']['cms_page_id'] != $positions[$panel_config['position']]) {
+							
+							$panel_data = $this->ajax_panel($panel_config['panel'], $panel_config['params']);
+							if (empty($return[$panel_config['position']])){
+								$return[$panel_config['position']]['_html'] = '';
+							}
+							$return[$panel_config['position']]['_html'] .= $panel_data['_html'];
+							$return[$panel_config['position']]['cms_page_id'] = $panel_config['params']['cms_page_id'];
+							
 						}
-						$return[$panel_config['position']]['_html'] .= $panel_data['_html'];
-						$return[$panel_config['position']]['cms_page_id'] = $panel_config['params']['cms_page_id'];
 					}
 				}
 

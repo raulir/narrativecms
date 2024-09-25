@@ -57,9 +57,9 @@
 		<div style="clear: both; "><!-- --></div>
 	
 		<?php if (isset($cms_page_id)): ?>
-			<div class="admin_small_button admin_right cms_input_page_panels_add" data-page_id="<?= $cms_page_id ?>">Add page panel</div>
+			<div class="admin_small_button cms_right cms_input_page_panels_add" data-page_id="<?= $cms_page_id ?>">Add page panel</div>
 		<?php else: ?>
-			<div class="admin_small_button admin_right cms_input_page_panels_add" data-parent_id="<?= $cms_page_panel_id ?>" 
+			<div class="admin_small_button cms_right cms_input_page_panels_add" data-parent_id="<?= $cms_page_panel_id ?>" 
 					data-name="<?= $name_clean ?>">Add page panel</div>
 		<?php endif ?>
 	
