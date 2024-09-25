@@ -13,21 +13,34 @@ class product extends CI_Controller{
 		$return = $params['heading'];
 
 		if (!empty($params['category_id'])){
-			
+
 			$category = $this->cms_page_panel_model->get_cms_page_panel($params['category_id']);
-			$return .= ' ('.$category['heading'];
+			if (!empty($category)){
+				$return .= ' ('.$category['heading'].')';
+			}
 			
 			if (!empty($params['subcategory_id'])){
 				$subcategory = $this->cms_page_panel_model->get_cms_page_panel($params['subcategory_id']);
-				$return .= ' - '.$subcategory['heading'];
+				$return .= ' - ('.$subcategory['heading'].')';
 			}
-			
-			$return .= ')';
-			
+
 		}
 		
 		return $return;
 	
+	}
+	
+	function panel_slug($params){
+		
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_slug_model');
+		
+		$product = $this->cms_page_panel_model->get_cms_page_panel($params['cms_page_panel_id']);
+
+		$return = $this->cms_slug_model->get_cms_slug_by_target($product['panel_name'].'='.$params['cms_page_panel_id']);
+		
+		return $return;
+		
 	}
 	
 	function panel_params($params){

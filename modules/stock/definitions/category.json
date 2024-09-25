@@ -7,23 +7,24 @@
 		"filter_fields":{
 			"show":"-- show --"
 		},
-		"link_target":"0"
+		"link_target":"1"
 	},
 	"item":[ 
-		{
-			"type":"textarea",
-			"name":"heading",
-			"label":"Heading",
-			"lines":"2",
-			"translate":"1"
-		},
-		{
-			"type":"textarea",
-			"name":"description",
-			"label":"Description",
-			"lines":"2",
-			"translate":"1",
-			"help":"Optional"
-		}
+    	{
+       		"type": "text",
+        	"name": "heading",
+        	"label": "Heading"
+    	},
+    	{
+       		"type": "textarea",
+        	"name": "text",
+        	"label": "Text",
+        	"lines": "3"
+    	},
+    	{
+       		"type": "colour",
+        	"name": "colour",
+        	"label": "Colour"
+    	}
 	]
 }

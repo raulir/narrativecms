@@ -9,7 +9,7 @@
             "default":"3"
         },
         {
-            "type": "text",
+            "type": "colour",
             "name": "background_colour",
             "label": "Background colour",
             "help": "Html colour",

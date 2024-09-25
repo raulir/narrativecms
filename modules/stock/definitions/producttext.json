@@ -1,0 +1,33 @@
+{
+    "version": "2",
+    "image":"",
+    "label":"Product text",
+    "description":"Product extra text",
+	"list":{
+		"list_title":"Product texts",
+		"item_title":"Product text",
+		"filter_fields":{
+			"show":"-- show --"
+		},
+		"link_target":"0"
+	},
+    "item": [
+		{
+			"type": "text",
+			"name": "name",
+			"label": "Heading"
+		},
+		{
+			"type": "text",
+			"name": "heading",
+			"label": "Name in list"
+		},
+		{
+            "type": "textarea",
+            "name": "text",
+            "label": "Text",
+            "lines": "10",
+            "width": "wide"
+        }
+    ]
+}

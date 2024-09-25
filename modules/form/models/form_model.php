@@ -391,8 +391,11 @@ class form_model extends CI_Model {
     	}
     	
     	foreach($data as $key => $val){
+    		
     		$autoreply_text = str_replace('['.$key.']', $val, $autoreply_text);
+    		
     		$plaintext = str_replace('['.$key.']', $val, $plaintext);
+    	
     	}
     	
     	if (!empty($data['email'])){
@@ -406,7 +409,9 @@ class form_model extends CI_Model {
 		    	
     		} else {
     			    			
-   				$from = $GLOBALS['config']['email'];
+    			$autoreply_text = str_replace(["\n", "\r\n"], '<br>', $autoreply_text);
+    			
+    			$from = $GLOBALS['config']['email'];
 
     			$mail = new PHPMailer(true);
     			 
@@ -428,12 +433,12 @@ class form_model extends CI_Model {
 				$mail->addCustomHeader('Auto-Submitted', 'auto-generated');
 				
 				$mail->Subject = $autoreply_subject;
-    			$mail->Body = $autoreply_text;
-    			$mail->IsHTML($autoreply_html);
+    			$mail->Body = '<html><body>'.$autoreply_text.'</body></html>';
+    			$mail->IsHTML(true); // $autoreply_html);
     			
-    			if (!empty($plaintext)){
+//    			if (!empty($plaintext)){
     				$mail->AltBody = $plaintext;
-    			}
+//    			}
     			
     			// $mail->XMailer = 'Narrative CMS';
     			

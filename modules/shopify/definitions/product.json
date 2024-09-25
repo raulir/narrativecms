@@ -1,0 +1,169 @@
+{
+    "version": "2",
+    "image":"",
+    "label":"Product",
+    "description":"Product panel",
+   	"extra_buttons":[
+		{
+			"name":"shopify/shopify_productrefresh",
+			"position":"none"
+		}
+	],
+	"list":{
+		"list_title":"Products",
+		"item_title":"Product",
+		"title_field":"heading",
+		"filter_fields":{
+			"show":"-- show",
+			"subcategory_id":"-- category"
+		},
+		"link_target":"1",
+		"extra_buttons":[
+			{
+				"name":"shopify/shopify_refresh",
+				"position":"none"
+			}
+		]
+	},
+	"js": [
+		
+	],
+    "item": [
+     	{
+       		"type": "text",
+        	"name": "shopify_id",
+        	"label": "Shopify ID",
+			"readonly":"1"
+    	},
+    	{
+    		"type":"image",
+    		"name":"image",
+    		"label":"Image",
+    		"category":"shopify",
+    		"readonly":"1"
+    	},
+    	{
+       		"type": "text",
+        	"name": "heading",
+        	"label": "Heading",
+			"readonly":"1"
+    	},
+    	{
+       		"type": "text",
+        	"name": "type",
+        	"label": "Type",
+			"readonly":"1"
+    	},
+    	{
+       		"type": "text",
+        	"name": "last_update",
+        	"label": "Last update",
+			"readonly":"1"
+    	},
+    	{
+       		"type": "textarea",
+        	"name": "text",
+        	"label": "Text",
+        	"lines": "8",
+			"readonly":"1"
+    	},
+    	{
+       		"type": "text",
+        	"name": "image_update",
+        	"label": "Image last update",
+			"readonly":"1"
+    	},
+    	{
+       		"type": "text",
+        	"name": "min_price",
+        	"label": "Min price",
+			"readonly":"1"
+    	},
+    	{
+       		"type": "text",
+        	"name": "max_price",
+        	"label": "Max price",
+			"readonly":"1"
+    	},
+    	{
+       		"type": "text",
+        	"name": "available",
+        	"label": "Total available",
+			"readonly":"1"
+    	},
+    	{
+			"type":"repeater",
+			"name":"images",
+			"label":"Images",
+			"readonly":"1",
+			"fields":[
+				{
+					"type":"image",
+					"name":"image",
+					"label":"Image",
+					"category":"shopify",
+					"readonly":"1"
+				},
+		    	{
+		       		"type": "text",
+		        	"name": "image_update",
+		        	"label": "Image last update",
+					"readonly":"1"
+		    	},
+		    	{
+		       		"type": "text",
+		        	"name": "shopify_id",
+		        	"label": "Shopify ID",
+					"readonly":"1"
+		    	}
+			]
+		},
+    	{
+    		"type": "subtitle",
+    		"label": "Website"
+    	},
+        {
+        	"type": "fk",
+        	"name": "subcategory_id",
+        	"label": "Subcategory",
+        	"add_empty": "1",
+        	"list": "stock/subcategory"
+        },
+        {
+        	"type": "colour",
+        	"name": "colour",
+        	"label": "Background",
+        	"default": "white",
+        	"help": "Product thumbnail background"
+        },
+    	{
+			"type":"repeater",
+			"name":"texts",
+			"label":"Product texts",
+			"fields":[
+		    	{
+		       		"type": "fk",
+		        	"name": "text_id",
+		        	"label": "Text",
+		        	"list": "stock/producttext"
+		    	}
+			]
+		},
+    	{
+			"type":"repeater",
+			"name":"related",
+			"label":"Related products",
+			"fields":[
+		    	{
+		       		"type": "fk",
+		        	"name": "product_id",
+		        	"label": "Product",
+		        	"list": "shopify/product"
+		    	}
+			]
+		}
+    ],
+    "settings": [
+
+    ]
+}

@@ -1,0 +1,1 @@
+<div class="cms_tool_button cms_right shopify_productrefresh" data-product_id="<?= $cms_page_panel_id ?>">Refresh</div>

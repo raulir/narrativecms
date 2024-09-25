@@ -1,0 +1,17 @@
+{
+	"panels":[
+
+	],
+	"cms_menu":[
+		{
+			"id":"shopify",
+			"name":"Shopify"
+		},
+		{
+			"id":"products",
+			"name":"Products",
+			"parent":"shopify",
+			"url":"admin/cms_list/shopify__product/"
+		}
+    ]
+}
