@@ -55,6 +55,10 @@
 		{
 			"id":"popup",
 			"name":"Popup"
+		},
+		{
+			"id":"iframe",
+			"name":"Iframe"
 		}
 	],
 	"cms_menu":[
