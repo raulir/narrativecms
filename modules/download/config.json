@@ -1,0 +1,32 @@
+{
+	"panels":[
+		{
+			"id": "downloads",
+			"name": "Downloads"
+		}
+	],
+	"cms_menu":[
+		{
+			"id":"content",
+			"name":"Content"
+		},
+        {
+            "id":"downloads",
+            "name":"Downloads",
+            "parent":"content",
+            "url":"admin/cms_list/download__download/"
+        },
+        {
+            "id":"downloadgroup",
+            "name":"Download groups",
+            "parent":"content",
+            "url":"admin/cms_list/download__downloadgroup/"
+        },
+        {
+            "id":"downloadgroup",
+            "name":"Downloads settings",
+            "parent":"content",
+            "url":"admin/panel_settings/download__downloads/"
+        }
+	]
+}

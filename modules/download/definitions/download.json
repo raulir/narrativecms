@@ -1,0 +1,33 @@
+{
+	"version":"2",
+	"list":{
+		"list_title":"Downloads",
+		"item_title":"Download",
+		"link_target":"0",
+		"ajax_target": "0",
+		"filter_fields":{
+			"show":"-- show --"
+		}
+	},
+	"item":[
+		{
+			"type":"file",
+			"name":"file",
+			"label":"File",
+			"mandatory":"1"
+		},
+		{
+			"type":"textarea",
+			"name":"heading",
+			"label":"Name",
+			"lines":"2",
+			"mandatory":"1"
+		},
+		{
+			"type": "fk",
+			"name": "group",
+			"label": "Downloads group",
+			"list": "download/downloadgroup"
+		}
+	]
+}

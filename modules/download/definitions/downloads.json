@@ -1,0 +1,35 @@
+{
+	"version":"2",
+	"label":"Downloads",
+    "image":"morden/panel_downloads.jpg",
+    "description":"Downloads panel. Displays all downloadable files in one group",
+	"item":[
+		{
+			"type": "text",
+			"name": "cta",
+			"label": "CTA",
+			"default": "download"
+		},
+		{
+			"type": "fk",
+			"name": "group",
+			"label": "Dowloads group",
+			"list": "download/downloadgroup"
+		}
+	],
+	"settings":[
+        {
+            "type": "repeater",
+            "name": "images",
+            "label": "Images",
+            "fields": [
+            	{
+					"type": "image",
+					"name": "image",
+					"label": "Image",
+					"category": "content"
+				}
+			]
+		}
+	]
+}
