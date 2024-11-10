@@ -3,7 +3,7 @@
 	"list":{
 		"list_title":"Downloads",
 		"item_title":"Download",
-		"link_target":"0",
+		"link_target":"1",
 		"ajax_target": "0",
 		"filter_fields":{
 			"show":"-- show --"
@@ -11,23 +11,94 @@
 	},
 	"item":[
 		{
-			"type":"file",
-			"name":"file",
-			"label":"File",
-			"mandatory":"1"
-		},
-		{
 			"type":"textarea",
 			"name":"heading",
 			"label":"Name",
-			"lines":"2",
+			"lines":"3",
 			"mandatory":"1"
+		},
+		{
+			"type":"image",
+			"name":"image",
+			"label":"Image",
+			"category":"content"
+		},
+		{
+			"type":"file",
+			"name":"file",
+			"label":"File"
+		},
+		{
+			"type":"text",
+			"name":"url",
+			"label":"URL"
 		},
 		{
 			"type": "fk",
 			"name": "group",
 			"label": "Downloads group",
-			"list": "download/downloadgroup"
+			"list": "download/downloadgroup",
+			"add_empty": "1"
+		},
+		{
+			"type":"colour",
+			"name":"colour",
+			"label":"Colour",
+			"default": "white"
+		},
+		{
+			"type":"text",
+			"name":"subtitle",
+			"label":"Subtitle"
+		},
+		{
+			"type":"image",
+			"name":"large_image",
+			"label":"Large image",
+			"category":"content",
+			"help":"optional"
+		}
+	],
+	"settings":[
+		{
+			"type":"image",
+			"name":"arrow_down",
+			"label":"Arrow down",
+			"category":"icon"
+		},
+		{
+			"type":"text",
+			"name":"cta",
+			"label":"CTA",
+			"default":"download here"
+		},
+		{
+			"type":"text",
+			"name":"previous_label",
+			"label":"Previous label",
+			"default":"Previous document"
+		},
+		{
+			"type":"text",
+			"name":"next_label",
+			"label":"Next label",
+			"default":"Next document"
+		},
+		{
+			"type":"subtitle",
+			"label":"Arrows"
+		},
+		{
+			"type":"image",
+			"name":"arrow_left",
+			"label":"Arrow left",
+			"category":"icon"
+		},
+		{
+			"type":"image",
+			"name":"arrow_right",
+			"label":"Arrow right",
+			"category":"icon"
 		}
 	]
 }

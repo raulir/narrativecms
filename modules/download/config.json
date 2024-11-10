@@ -3,6 +3,10 @@
 		{
 			"id": "downloads",
 			"name": "Downloads"
+		},
+		{
+			"id": "download",
+			"name": "Download"
 		}
 	],
 	"cms_menu":[
@@ -23,10 +27,16 @@
             "url":"admin/cms_list/download__downloadgroup/"
         },
         {
-            "id":"downloadgroup",
+            "id":"downloads_settings",
             "name":"Downloads settings",
             "parent":"content",
             "url":"admin/panel_settings/download__downloads/"
+        },
+        {
+            "id":"download_settings",
+            "name":"Download settings",
+            "parent":"content",
+            "url":"admin/panel_settings/download__download/"
         }
 	]
 }

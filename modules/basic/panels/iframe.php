@@ -4,7 +4,7 @@ class iframe extends CI_Controller {
 	
 	function panel_params($params){
 
-		if ($params['resizer'] == 'yes'){
+		if (!empty($params['resizer']) && $params['resizer'] == 'yes'){
 			$GLOBALS['_panel_js'][] = [
 					'script' => 'https://iparl.com/global/includes/iframeResizer.min.js',
 					'sync' => 'defer', 

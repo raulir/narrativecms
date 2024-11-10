@@ -1,5 +1,5 @@
 .downloads_container {
-	background-color: $morden_text;
+	background-color: $colour_white;
 }
 
 .downloads_content {
@@ -12,68 +12,55 @@
 .downloads_download {
 	display: inline-block;
 	width: 33.33%;
-	padding-bottom: 30.0%;
-	height: 0;
+	height: 33.3rem;
 	text-transform: uppercase;
 	vertical-align: top;
 	position: relative;
 	background-size: cover;
 	background-repeat: no-repeat;
 	background-position: center;
-	font-family: bureau;
-	color: $morden_green;
-	&:nth-child(6n+2) {
-		background-color: $colour_white;
-		color: $morden_text;
+	font-family: right;
+	color: $colour_black;
+	text-align: center;
+	&.downloads_download_image {
+		color: $colour_white;
 	}
-	&:nth-child(6n+4) {
-		background-color: $morden_text;
-		.downloads_cta {
-			background-color: $morden_green;
-			color: $morden_text;
-		}
-	}
-	&:nth-child(6n) {
-		background-color: $morden_green;
-		color: $morden_text;
-	}
-}
-
-.downloads_download_inner {
-	position: absolute;
-	height: 100%;
-	width: 100%;
-	top: 0;
-	left: 0;
 }
 
 .downloads_download_heading {
-	padding: 3.2rem 2.3rem;
-	font-size: 5.3rem;
-	line-height: 4.5rem;
-	max-height: 18.0rem;
-	overflow: hidden;
+	padding: 9.0rem 1.0rem 0 1.0rem;
+	font-size: 2.7rem;
+	line-height: 2.3rem;
 }
 
 .downloads_cta {
 	position: absolute;
-	left: 2.3rem;
-	bottom: 4.0rem;
-	border-radius: 0.3rem;
-	background-color: $morden_text;
-	font-size: 3.0rem;
-	line-height: 3.8rem;
-	padding: 0 1.2rem;
-	color: $morden_green;
+	left: 50%;
+	bottom: 7.0rem;
+	font-size: 1.5rem;
+	line-height: 3.2rem;
+	padding: 0 1.8rem;
+	color: $colour_black;
+	border: 0.2rem solid $colour_black;
+	transform: translate(-50%, 0);
+	.downloads_download_image & {
+		color: $colour_white;
+		border-color: $colour_white;
+	}
 }
 
 
 
 @media only screen and (max-width: $mobile_width) {
+	
+	.downloads_container {
+		width: 50.0rem;
+		overflow: hidden;
+	}
 
 	.downloads_download {
 		width: 100%;
-		padding-bottom: 50%;
+		height: 37.0rem;
 	}
 
 	.downloads_download_heading {

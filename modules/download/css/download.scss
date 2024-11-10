@@ -1,0 +1,57 @@
+$colour_black: black;
+$colour_white: white;
+
+$mobile_width: 900px;
+
+
+.download_bottom {
+	background-color: $colour_white;
+	font-family: right;
+	text-align: center;
+	position: relative;
+	padding: 8.0rem 0 20.0rem 0;
+	text-transform: uppercase;
+}
+
+.download_download {
+	font-size: 2.5rem;
+	line-height: 3.2rem;
+	padding: 0 1.2rem 0.5rem 1.2rem;
+	color: $colour_black;
+	border: 0.2rem solid $colour_black;
+	display: inline-block;
+}
+
+.download_previous {
+	position: absolute;
+	left: 2.0rem;
+	background-size: contain;
+	background-position: left center;
+	background-repeat: no-repeat;
+	font-size: 2.0rem;
+	line-height: 2.0rem;
+	width: 20.0rem;
+	bottom: 12.0rem;
+	padding: 0 0 0.5rem 3.8rem;
+	text-align: left;
+	.download_file & {
+		bottom: 8.0rem;
+	}
+}
+
+.download_next {
+	position: absolute;
+	right: 2.0rem;
+	background-size: contain;
+	background-position: right center;
+	background-repeat: no-repeat;
+	font-size: 2.0rem;
+	line-height: 2.0rem;
+	width: 14.0rem;
+	bottom: 12.0rem;
+	padding: 0 3.8rem 0.5rem 0;
+	text-align: left;
+	.download_file & {
+		bottom: 8.0rem;
+	}
+}

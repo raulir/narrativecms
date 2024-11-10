@@ -8,20 +8,24 @@ class downloads extends CI_Controller {
 		
 		$params['downloads'] = array_values($this->cms_page_panel_model->get_list('download/download', ['group' => $params['group']]));
 		
-		$images = array_values($params['images']);
-
-		$image = 0;
-		$number_images = count($images);
+		if (!empty($params['arrange_images'])){
 		
-		foreach($params['downloads'] as $key => $download){
+			$images = array_values($params['images']);
+	
+			$image = 0;
+			$number_images = count($images);
 			
-			if ($key % 2 == 0 && $number_images){
-				$params['downloads'][$key]['image'] = $images[$image % $number_images]['image'];
-				$image ++;
-			} else {
-				$params['downloads'][$key]['image'] = '';
+			foreach($params['downloads'] as $key => $download){
+				
+				if ($key % 2 == 0 && $number_images){
+					$params['downloads'][$key]['image'] = $images[$image % $number_images]['image'];
+					$image ++;
+				} else {
+					$params['downloads'][$key]['image'] = '';
+				}
+	
 			}
-
+			
 		}
 		
 		return $params;
