@@ -4,13 +4,14 @@
 
 .cms_input_link_content {
 	width: 33.0rem;
-	float: right;
-	position: relative;
-    overflow: hidden;
+	position: absolute;
+	top: 0.5rem;
+	right: 1.0rem;
 }
 
 .cms_repeater_area .cms_input_link_content {
 	width: 31.0rem;
+	right: 0;
 }
 
 .cms_input_link_dropdown {
@@ -65,19 +66,16 @@
     display: block;
     border: 0.1rem solid #a0a0a0;
     width: 33.0rem;
-    height: 2.4rem;
+    height: 2.6rem;
     line-height: 2.1rem;
     font-size: 1.5rem;
-    float: right;
     padding: 0.1rem 0.5rem 0 0.5rem;
+    position: relative;
+    top: 0.4rem;
 }
 
 .cms_repeater_area .cms_input_link_url_display {
 	width: 31.0rem;
-}
-
-.cms_input_link_url_display {
-	float: left;
 }
 
 .cms_input_link_url_display::input-placeholder {

@@ -75,6 +75,12 @@
     	},
     	{
        		"type": "text",
+        	"name": "image_name_hash",
+        	"label": "Image name hash",
+			"readonly":"1"
+    	},
+    	{
+       		"type": "text",
         	"name": "min_price",
         	"label": "Min price",
 			"readonly":"1"

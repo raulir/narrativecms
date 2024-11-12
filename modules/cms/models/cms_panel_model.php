@@ -110,8 +110,54 @@ class cms_panel_model extends Model {
 			$return['image'] = end($return['image']);
 		}
 		
+		foreach($GLOBALS['config']['extends'] as $item){
+			if ($item['target'] == $cms_panel){
+				$return = $this->merge_structures($return, $this->get_cms_panel_config($item['source']));
+			}
+		}
+		
 		return $return;
 
+	}
+	
+	function merge_structures($structure_into, $structure_from){
+		
+		if (empty($structure_from['item'])) $structure_from['item'] = [];
+		if (empty($structure_into['item'])) $structure_into['item'] = [];
+		foreach($structure_from['item'] as $item){
+			
+			$copied = 0;
+			foreach($structure_into['item'] as $key => $into){
+				if (!empty($item['name']) && !empty($into['name']) && $into['name'] == $item['name']){
+					$structure_into['item'][$key] = $item;
+					$copied = 1;
+				}
+			}
+			if ($copied == 0){
+				$structure_into['item'][] = $item;
+			}
+			
+		}
+		
+		if (empty($structure_from['settings'])) $structure_from['settings'] = [];
+		if (empty($structure_into['settings'])) $structure_into['settings'] = [];
+		foreach($structure_from['settings'] as $item){
+				
+			$copied = 0;
+			foreach($structure_into['settings'] as $key => $into){
+				if (!empty($item['name']) && !empty($into['name']) && $into['name'] == $item['name']){
+					$structure_into['settings'][$key] = $item;
+					$copied = 1;
+				}
+			}
+			if ($copied == 0){
+				$structure_into['settings'][] = $item;
+			}
+				
+		}
+		
+		return $structure_into;
+		
 	}
 	
 	function get_cms_panel_fk_data($block_structure){

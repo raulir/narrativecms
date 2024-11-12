@@ -172,6 +172,8 @@ array_unshift($GLOBALS['config']['modules'], 'cms');
 
 $GLOBALS['config']['modules'] = array_values(array_unique($GLOBALS['config']['modules']));
 
+$GLOBALS['config']['extends'] = [];
+
 foreach($GLOBALS['config']['modules'] as $module_name){
 	
 	$filename = $GLOBALS['config']['base_path'].'modules/'.$module_name.'/config.json';
@@ -187,6 +189,15 @@ foreach($GLOBALS['config']['modules'] as $module_name){
 	
 	if (empty($GLOBALS['config']['module'][$module_name]['panels'])){
 		$GLOBALS['config']['module'][$module_name]['panels'] = [];
+	}
+	
+	if (!empty($GLOBALS['config']['module'][$module_name]['extends'])){
+		foreach($GLOBALS['config']['module'][$module_name]['extends'] as $item){
+			if (stristr($item['source'], '//')){
+				$item['source'] = str_replace('//', $module_name.'/', $item['source']);
+			}
+			$GLOBALS['config']['extends'][] = $item;
+		}
 	}
 	
 }

@@ -31,15 +31,32 @@ class shopify_product_model extends Model {
 	
 	function call($endpoint, $params = []){
 		
+		$caching = $params['force'] ?? 0;
+		// -1 - never update if cache available
+		// 0 - 300s caching
+		// 1 - always update cache
+		
+		if (isset($params['force'])){
+			unset($params['force']);
+		}
+		
 		$filename = $GLOBALS['config']['base_path'].'/cache/shopify_'.substr(md5($endpoint.json_encode($params)), 0, 16).'.json';
 		
-		if (!file_exists($filename) || (time() - filemtime($filename)) > 300 || !empty($params['nocache'])){
+		$needs_update = 0;
+		if (!file_exists($filename)){
+			$needs_update = 1;
+		} else if (($caching === 0 || $caching === false) && (time() - filemtime($filename)) > 300){
+			$needs_update = 1;
+		} else if ($caching === 1){
+			$needs_update = 1;
+		}
+		
+		if (!file_exists($filename) || ((time() - filemtime($filename)) > 300 && $caching != -1) || $caching == 1){
 				
 			if (empty($params)){
 				$response = $this->client->get(path: $endpoint);
 			} else {
 				$response = $this->client->get(path: $endpoint, query: $params);
-//				_print_r($response);
 			}
 			
 			$data = $response->getDecodedBody();
@@ -86,9 +103,9 @@ class shopify_product_model extends Model {
 	
 	}
 
-	function get_product($product_shopify_id, $nocache = false){
+	function get_product($product_shopify_id, $force = 0){
 		
-		$product = $this->call('products/'.$product_shopify_id, ['nocache' => $nocache, ]);
+		$product = $this->call('products/'.$product_shopify_id, ['force' => $force, ]);
 // _print_r($product);		
 		if (!empty($product['errors']) && $product['errors'] == 'Not Found'){
 			return [];
@@ -152,7 +169,7 @@ class shopify_product_model extends Model {
 		
 	}
 	
-	function refresh_product($cms_product_id, $force = false){
+	function refresh_product($cms_product_id, $force = 0){
 		
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_slug_model');
@@ -179,7 +196,7 @@ class shopify_product_model extends Model {
 			$needs_update = true;
 		}
 		
-			if (empty($cms_product['type']) || $cms_product['type'] != $shopify_product['product_type']){
+		if (empty($cms_product['type']) || $cms_product['type'] != $shopify_product['product_type']){
 			$cms_product['type'] = $shopify_product['product_type'];
 			$needs_update = true;
 		}
@@ -190,14 +207,23 @@ class shopify_product_model extends Model {
 		}
 		
 		if (empty($shopify_product['image']['src']) && !empty($cms_product['image'])){
+			
 			$cms_product['image'] = '';
 			$cms_product['image_update'] = '';
 			$needs_update = true;
-		} else if (empty($cms_product['image_update']) || $cms_product['image_update'] != strtotime($shopify_product['image']['updated_at'])){
+			
+		} else if (empty($cms_product['image_update']) || 
+				($cms_product['image_name_hash'] ?? '') != md5(parse_url($shopify_product['image']['src'], PHP_URL_PATH)) ||
+				$cms_product['image_update'] != strtotime($shopify_product['image']['updated_at']) ||
+				!file_exists($GLOBALS['config']['upload_path'].$cms_product['image'])){
+			
 			$image = $this->cms_image_model->scrape_image($shopify_product['image']['src'], 'shopify', 'shopify');
+			
 			$cms_product['image'] = $image;
 			$cms_product['image_update'] = strtotime($shopify_product['image']['updated_at']);
+			$cms_product['image_name_hash'] = md5(parse_url($shopify_product['image']['src'], PHP_URL_PATH));
 			$needs_update = true;
+			
 		}
 		
 		$found_images = [];
@@ -211,7 +237,7 @@ class shopify_product_model extends Model {
 				if ($image['shopify_id'] == $shopify_image['id']){
 					$i_current = $key;
 		
-					if ($image['image_update'] != strtotime($shopify_image['updated_at'])){
+					if ($image['image_update'] != strtotime($shopify_image['updated_at']) ||	!file_exists($GLOBALS['config']['upload_path'].$image['image'])){
 		
 						// update image
 						$new_image = $this->cms_image_model->scrape_image($shopify_image['src'], 'shopify', 'shopify');

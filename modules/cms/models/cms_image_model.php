@@ -261,19 +261,19 @@ class cms_image_model extends CI_Model {
 					mkdir($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'));
 				}
 
-				$return = $this->create_cms_image(date('Y').'/'.date('m').'/', $prefix.'_'.$filename, $category);
-
-				file_put_contents($GLOBALS['config']['upload_path'].$return, $image_content);
 
 				// check if not duplicate
-				$hash = sha1_file($GLOBALS['config']['upload_path'].$return);
-				$existing = $this->get_cms_image_by_hash($hash);
+				// $hash = sha1_file($GLOBALS['config']['upload_path'].$return);
+				$hash = sha1($image_content);
 
-				if (empty($existing)){
-					$this->update_cms_image($return, array('hash' => $hash, ));
-				} else {
-					$this->delete_cms_image_by_filename($return);
+				$existing = $this->get_cms_image_by_hash($hash);
+				if (!empty($existing) && !file_exists($existing['filename'])){
+					file_put_contents($GLOBALS['config']['upload_path'].$existing['filename'], $image_content);
 					$return = $existing['filename'];
+				} else if (empty($existing)) {
+					$return = $this->create_cms_image(date('Y').'/'.date('m').'/', $prefix.'_'.$filename, $category);
+					file_put_contents($GLOBALS['config']['upload_path'].$return, $image_content);
+					$this->update_cms_image($return, ['hash' => $hash, ]);
 				}
 
 			}
