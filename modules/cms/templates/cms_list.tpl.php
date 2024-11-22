@@ -3,6 +3,10 @@
 	<div class="cms_tool_text"><?php print($title); ?></div>
 	
 	<?php if(empty($hide_new)): ?>
+	
+		<div class="cms_list_infinity cms_tool_button cms_right">
+			<div class="cms_tool_button_inner" <?php _ib('cms/cms_infinity.png', 34) ?>></div>
+		</div>
 
 		<a class="cms_tool_button cms_right" href="<?php print($GLOBALS['config']['base_url'].$edit_base.str_replace('/', '__', $new_panel_name).'/'); ?>">New</a>
 		
@@ -58,7 +62,7 @@
 		<?php if(!empty($no_sort)): ?>
 			data-no_sort="no_sort"	
 		<?php endif ?>
-		data-limit="<?php print(!empty($limit) ? $limit : 20); ?>"	
-		>
+		data-limit="<?= $limit ?? 20 ?>"
+		data-orig_limit="1">
 
 </div>

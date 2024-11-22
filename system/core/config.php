@@ -73,7 +73,7 @@ if (file_exists($config['config_file'])){
 // TODO: to be refactored like css to cms cssjs settings
 $config['js'] = array(
 		array(
-				'script' => 'modules/cms/js/jquery/jquery-3.6.1.min.js',
+				'script' => 'modules/cms/js/jquery/jquery.min.js',
 				'no_pack' => 1,
 				'sync' => (!empty($config['jquery_blocks']) ? '' : 'defer'),
 		),

@@ -67,3 +67,34 @@
 	}
 
 }
+
+@media only screen and (max-width: $mobile_width) {
+
+	.copy_container {
+		width: 50.0rem;
+	}
+
+	.copy_content {
+		padding: 6.0rem 2.0rem;
+	}
+
+	.copy_heading {
+		font-size: 4.5rem;
+		line-height: 4.5rem;
+	}
+
+	.copy_text {
+		a {
+			display: inline;
+		}
+		li {
+			line-height: 2.0rem;
+			padding: 1.0rem 0 1.0rem 3.0rem;
+			&::before {
+				font-size: 3.0rem;
+				top: 0.8rem;
+			}
+		}
+	}
+
+}

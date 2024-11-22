@@ -26,3 +26,13 @@ div.cms_list_set {
 .cms_list_filter {
 	max-width: 12.0rem;
 }
+
+.cms_list_infinity {
+	width: 3.0rem;
+	.cms_tool_button_inner {
+		background-size: 1.7rem auto;
+		background-position: center;
+		background-repeat: no-repeat;
+		opacity: 0.7;
+	}
+}
