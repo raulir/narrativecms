@@ -6,6 +6,8 @@ function basic_popup_init(){
 		var $container = $(this).closest('.basic_popup_container');
 		$container.css({'opacity':''});
 		
+		cms_cookie_create('basic_popup_hide_' + $('.basic_popup_container').data('popup_hash'), 1, $('.basic_popup_container').data('popup_days'))
+		
 		setTimeout(function(){
 			
 			$container.css({'display':'none'});

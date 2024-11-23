@@ -7,6 +7,8 @@ class popup extends CI_Controller{
 		if (empty($params['popup_id'])){
 			$params['popup_id'] = $params['cms_page_panel_id'];
 		}
+		
+		$params['hash'] = md5($params['title']);
 
 		return $params;
 		

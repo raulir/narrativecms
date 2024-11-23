@@ -2,7 +2,8 @@
 	"version":"2",
 	"label":"Popup settings",
     "js": [
-    	"cms/cms_scroll_lock"
+    	"cms/cms_scroll_lock",
+    	"cms/cms_cookie"
     ],
     "settings":[
 		{
@@ -29,6 +30,12 @@
 			"name":"width",
 			"label":"Width",
 			"default":"50"
+		},
+		{
+			"type":"text",
+			"name":"days",
+			"label":"Days to hide",
+			"default":"7"
 		},
 		{
 			"type":"repeater",
