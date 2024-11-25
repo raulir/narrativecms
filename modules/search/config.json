@@ -1,0 +1,21 @@
+{
+	"name":"Search",
+	"cms_menu":[
+		{
+			"id":"search_settings",
+			"name":"Search settings",
+			"parent":"content",
+			"url":"admin/panel_settings/search__search/"
+		},
+		{
+			"id":"searchajax_settings",
+			"name":"Search result settings",
+			"parent":"content",
+			"url":"admin/panel_settings/search__searchajax/"
+		}
+	],
+	"panels":[
+
+	]
+}
+			

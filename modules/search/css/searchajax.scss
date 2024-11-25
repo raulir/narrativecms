@@ -1,0 +1,102 @@
+.searchajax_container {
+	display: inline;
+}
+
+.searchajax_content {
+	display: inline;
+}
+
+.searchajax_message {
+	padding: 0;
+	font-size: 1.2rem;
+	line-height: 2.4rem;
+	letter-spacing: -0.02rem;
+}
+
+.searchajax_item {
+	position: relative;
+	display: block;
+	font-size: 1.2rem;
+	line-height: 2.4rem;
+	letter-spacing: -0.02rem;
+}
+
+/*
+.searchajax_item_image {
+	position: absolute;
+	left: 0.5rem;
+	top: 0.6rem;
+	width: 6.6rem;
+	height: 4.8rem;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	box-sizing: border-box;
+}
+
+.searchajax_item_subtitle {
+	position: absolute;
+	left: 9.0rem;
+	top: 1.2rem;
+	text-transform: uppercase;
+	font-size: 1.09rem;
+	line-height: 1.6rem;
+}
+*/
+
+.searchajax_item_title {
+	display: inline-block;
+	position: relative;
+	text-transform: none;
+	opacity: 0.6;
+	.searchajax_item:hover & {
+		&::after {
+			content: '';
+			position: absolute;
+			background-color: $colour_white;
+			height: 0.2rem;
+			width: 100%;
+			left: 0;
+			bottom: 0;
+			transform: rotate(0.05deg);
+		}
+	}
+}
+
+.searchajax_item_bold {
+	opacity: 1;
+}
+
+.searchajax_item_noimage {
+	
+	.searchajax_item_image {
+		border: 0.1rem solid $colour_black;
+		transition: border 0.3s;
+	}
+
+}
+
+@media screen and (max-width: 900px) {
+
+	.searchajax_item {
+		height: 8.0rem;
+	}
+
+	.searchajax_item_image {
+	    width: 9.6rem;
+	    height: 6.8rem;
+    }
+   
+	.searchajax_item_subtitle {
+		left: 12.0rem;
+		font-size: 1.2rem;
+		top: 1.7rem;
+	}
+
+	.searchajax_item_title {
+		left: 12.0rem;
+		font-size: 2.1rem;
+		top: 4.1rem;
+	}
+
+}

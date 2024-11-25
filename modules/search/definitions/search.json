@@ -1,0 +1,25 @@
+{
+	"version":"2",
+	"label": "Search",
+    "js": [
+
+    ],
+    "item":[
+    
+    ],
+	"settings":[
+		{
+			"type":"text",
+			"name":"search",
+			"label":"Search label",
+			"default": "Search"
+		},
+		{
+			"type":"image",
+			"name":"search_icon",
+			"label":"Search icon",
+			"category":"icon",
+			"default":"//search_icon.png"
+		}
+	]
+}
