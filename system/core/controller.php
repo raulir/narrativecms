@@ -996,6 +996,8 @@ class CI_Controller {
 		if (!empty($extends['join_css']) && !empty($extends['panel'])){
 			$return['scss'] = array_merge($return['scss'], $extends_files['scss']);
 		}
+		
+		// main module scss
 		if (file_exists($GLOBALS['config']['base_path'].'modules/'.$return['module'].'/css/'.$return['module'].'.scss')) {
 			$return['scss'][] = array(
 					'script' => 'modules/'.$return['module'].'/css/'.$return['module'].'.scss',
@@ -1005,6 +1007,8 @@ class CI_Controller {
 					'module_path' => 'modules/'.$return['module'].'/',
 			);
 		}
+		
+		// panel scss
 		if (file_exists($GLOBALS['config']['base_path'].'modules/'.$return['module'].'/css/'.$return['name'].'.scss')) {
 			$return['scss'][] = array(
 					'script' => 'modules/'.$return['module'].'/css/'.$return['name'].'.scss',
@@ -1014,7 +1018,39 @@ class CI_Controller {
 			);
 			$panel_css_exists = true; // scss replaces css here
 		}
-	
+		
+		// any extensions from module definition
+		foreach($GLOBALS['config']['extends'] as $item){
+			if ($item['target'] == $return['module'].'/'.$return['name']){
+				
+				list($ext_module, $ext_panel) = explode('/', $item['source']);
+				
+				if (file_exists($GLOBALS['config']['base_path'].'modules/'.$ext_module.'/css/'.$ext_module.'.scss')){
+					$return['scss'][] = [
+							'script' => 'modules/'.$ext_module.'/css/'.$ext_module.'.scss',
+							'top' => 1,
+							'related' => [],
+							'css' => 'cache/'.$ext_module.'__'.$ext_module.'.css',
+							'module_path' => 'modules/'.$ext_module.'/',
+					];
+				}
+				
+				if (file_exists($GLOBALS['config']['base_path'].'modules/'.$ext_module.'/css/'.$ext_panel.'.scss')){
+
+					$return['scss'][] = [
+							'script' => 'modules/'.$ext_module.'/css/'.$ext_panel.'.scss',
+							'related' => file_exists($GLOBALS['config']['base_path'].'modules/'.$ext_module.'/css/'.$ext_module.'.scss') ?
+							['modules/'.$ext_module.'/css/'.$ext_module.'.scss', ] : [],
+							'css' => 'cache/'.$ext_module.'__'.$ext_panel.'.css',
+					];
+					
+					
+					$panel_css_exists = true; // scss replaces css here
+					
+				}
+			}
+		}
+
 		if (empty($panel_css_exists) && !empty($extends_files['scss']) && empty($extends['join_css'])){
 			$return['css'] = array_merge($return['css'], $extends_files['css']);
 			$return['scss'] = array_merge($return['scss'], $extends_files['scss']);
