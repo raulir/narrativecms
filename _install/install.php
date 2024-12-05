@@ -4,7 +4,7 @@
  * Narrative CMS install script
  */
 
-$update_url = 'http://update.narrativecms.com/';
+$update_url = 'https://update.narrativecms.com/';
 // $update_url = 'http://cms.localhost/';
 
 // actions
@@ -352,7 +352,7 @@ INSERT INTO cms_page_panel_param VALUES
 ("417","1","inline_limit","100000","0"),
 ("418","1","targets_enabled","0","0"),
 ("419","1","cron_trigger","visits","0"),
-("420","1","cms_update_url","http://update.narrativecms.com/cms/updater/","0"),
+("420","1","cms_update_url","https://update.narrativecms.com/cms/updater/","0"),
 ("421","1","layout","cms/rem","0"),
 ("422","1","modules.000","cms","0"),
 ("424","1","rem_px","1400","0"),
@@ -368,7 +368,7 @@ INSERT INTO cms_page_panel_param VALUES
 ("434","1","cms_background","","0"),
 ("435","1","images_rows","4","0"),
 ("436","1","input_link_order","0","0"),
-("437","1","","{\"cms_background\":\"\",\"cms_update_url\":\"http:\\/\\/update.narrativecms.com\\/cms\\/updater\\/\",\"cron_trigger\":\"visits\",\"email\":\"\",'.
+("437","1","","{\"cms_background\":\"\",\"cms_update_url\":\"https:\\/\\/update.narrativecms.com\\/cms\\/updater\\/\",\"cron_trigger\":\"visits\",\"email\":\"\",'.
 '\"favicon\":\"\",\"images_1x\":\"1\",\"images_2x\":\"1.5\",\"images_quality\":\"85\",\"images_rows\":\"4\",\"images_textarea\":\"0.5\",'.
 '\"inline_limit\":\"100000\",\"input_link_order\":\"0\",\"landing_page\":{\"cms_page_id\":\"1\",\"target\":\"_page\",\"target_id\":\"\",'.
 '\"text\":\"Homepage\",\"url\":\"homepage\\/\",\"_value\":\"1\"},\"layout\":\"rem\",\"modules\":{\"000\":\"cms\"},\"panel_cache\":\"0\",'.
@@ -718,7 +718,9 @@ $project_name = strtolower($project_name);
 				Thank you!<br>
 				<br>
 				<a href="./">&gt; Homepage</a><br>
-				<a href="./admin/">&gt; CMS admin</a>			
+				<a href="./admin/">&gt; CMS admin</a>		
+				<div><span>Username: </span><span class="step_6_username"></span></div>
+				<div><span>Password: </span><span class="step_6_password"></span></div>
 			</div>
 		
 		</div>
@@ -967,10 +969,14 @@ $project_name = strtolower($project_name);
 				$('.step_5_next').on('click', function(){
 
 					// show step 6 - done
-					$('.step_5').css({'display':'none'});
-					$('.step_6').css({'display':'block'});
+					$('.step_5').css({'display':'none'})
+
+					$('.step_6_username').html($('#admin_user').val())
+					$('.step_6_password').html($('#admin_pass').val())
 					
-				});
+					$('.step_6').css({'display':'block'})
+					
+				})
 
 			});
 		

@@ -65,6 +65,11 @@ if (file_exists($config['config_file'])){
 
 }
 
+if (empty($GLOBALS['config']['base_host'])){
+	$GLOBALS['config']['base_host'] = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443)
+			? 'https://' : 'http://' ).$_SERVER['HTTP_HOST'];
+}
+
 /*
  * common config for all project environments:
  */
