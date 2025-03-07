@@ -1,4 +1,5 @@
-<div class="cms_input_container <?= !empty($params['groups']) ? ' cms_input_container_groups ' : '' ?>" 
+<div class="cms_input_container <?= !empty($params['groups']) ? ' cms_input_container_groups ' : '' ?>
+		<?= !empty($readonly) ? ' cms_input_select_readonly ' : '' ?>" 
 		<?= !empty($params['groups']) ? ' data-groups="'.implode(',', $params['groups']).'" ' : '' ?>>
 
 	<div class="cms_input cms_input_select <?= !empty($mandatory_class) ? $mandatory_class : '' ?>
@@ -14,10 +15,14 @@
 	
 		<?php _panel('cms/cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
 	
-		<select class="cms_input_select_select <?= !empty($name) ? $name : '' ?>" name="<?= !empty($name) ? $name : '' ?>" id="select_<?= $name_clean ?>">
+		<select class="cms_input_select_select <?= !empty($name) ? $name : '' ?>" 
+				name="<?= !empty($name) ? $name : '' ?>" id="select_<?= $name_clean ?>"
+				<?= !empty($readonly) ? ' style="pointer-events:none" tabindex="-1" aria-disabled="true" ' : '' ?>>
+				
 			<?php foreach($values as $key => $key_label): ?>
 				<option value="<?= $key ?>"<?= $key == $value ? ' selected="selected"' : '' ?>><?= $key_label ?></option>
 			<?php endforeach ?>
+			
 		</select>
 	
 	</div>

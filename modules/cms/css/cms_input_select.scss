@@ -14,4 +14,7 @@
 	font-size: 1.7rem;
 	padding: 0.1rem 0.5rem 0 0.5rem;
 	float: right;
+	.cms_input_select_readonly & {
+		background-color: $colour_light_shadow;
+	}
 }

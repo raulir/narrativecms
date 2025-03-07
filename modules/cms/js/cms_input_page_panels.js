@@ -55,7 +55,7 @@ function cms_input_page_panels_init(){
 							cms_page_panel_save({
 								'success':function(data){
 									
-									window.location.href = config_url + 'admin/cms_page_panel/' + data.result.cms_page_panel_id + '/'
+									window.location.href = _cms_base + 'admin/cms_page_panel/' + data.result.cms_page_panel_id + '/'
 									
 									// cms_input_page_panel_selector('panel', $this.data('parent_id'), $this.data('name'), 
 									// 		$this.closest('.cms_input_page_panel').data('panels'))
@@ -120,7 +120,7 @@ function cms_input_page_panel_selector(target_type, target_id, target_name, filt
 						'cms_page_panel_id': shortcut_target_id,
 						'success': function(){
 							cms_notification('Shortcut created', 3)
-							setTimeout(() => window.location.href = config_url + 'admin/page/' + $('.cms_page_id').val() + '/', 1000)
+							setTimeout(() => window.location.href = _cms_base + 'admin/page/' + $('.cms_page_id').val() + '/', 1000)
 						}
 					})
 					
@@ -133,7 +133,7 @@ function cms_input_page_panel_selector(target_type, target_id, target_name, filt
 				// if on page
 				if(target_type == 'page'){
 				
-					$('body').append('<form class="cms_params_form" action="' + config_url + 'admin/cms_page_panel/0/" method="post"></form>')
+					$('body').append('<form class="cms_params_form" action="' + _cms_base + 'admin/cms_page_panel/0/" method="post"></form>')
 					
 					$('.cms_params_form').append('<input name="target_type" value="' + target_type + '">')
 					$('.cms_params_form').append('<input name="target_id" value="' + target_id + '">')
@@ -148,7 +148,7 @@ function cms_input_page_panel_selector(target_type, target_id, target_name, filt
 				
 				// if on panel
 				
-				$('body').append('<form class="cms_params_form" action="' + config_url + 'admin/cms_page_panel/0/" method="post"></form>')
+				$('body').append('<form class="cms_params_form" action="' + _cms_base + 'admin/cms_page_panel/0/" method="post"></form>')
 				
 				$('.cms_params_form').append('<input name="target_type" value="' + target_type + '">')
 				$('.cms_params_form').append('<input name="target_id" value="' + target_id + '">')

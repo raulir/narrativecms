@@ -1,0 +1,14 @@
+{
+    "version": "2",
+    "label":"FAQs",
+    "image":"//panel_faqs.png",
+    "description":"FAQs",
+    "item": [
+		{
+			"name":"arrow",
+			"type":"image",
+			"label":"Arrow",
+			"category":"icon"
+		}
+	]
+}

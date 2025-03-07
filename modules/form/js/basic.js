@@ -230,7 +230,7 @@ function form_basic_file_transfer(data, success, $info){
 	var label = '0%';
 	
 	$.ajax( {
-		url: config_url + 'ajax_api/get_panel',
+		url: _cms_base + 'ajax_api/get_panel',
 	    type: 'POST',
 	    data: data,
 	    processData: false,

@@ -37,7 +37,7 @@ function cms_input_file_rename(input_name){
 				$('.cms_file_input_' + input_name).val(data.result.new_filename)
 				
 		    	// update download button
-		    	$('.cms_input_file_download', $content.closest('.cms_input_file')).attr('href', config_url + 'files/get/' + data.result.new_filename.replace(/\//g, '__'));
+		    	$('.cms_input_file_download', $content.closest('.cms_input_file')).attr('href', _cms_base + 'files/get/' + data.result.new_filename.replace(/\//g, '__'));
 				
 				cms_notification('File renamed', 3);
 				
@@ -54,7 +54,7 @@ function cms_input_file_upload(params){
 	data.append('panel_id', 'cms/cms_input_file_upload');
 	
 	$.ajax( {
-		url: config_url + 'ajax_api/get_panel',
+		url: _cms_base + 'ajax_api/get_panel',
 	    type: 'POST',
 	    data: data,
 	    processData: false,
@@ -68,7 +68,7 @@ function cms_input_file_upload(params){
 	    	$(params.name_selector).parent().parent().siblings('.cms_input_date_posted').val(data.result.date_posted);
 	    	
 	    	// update download button
-	    	$(params.name_selector).siblings('.cms_input_file_buttons').children('.cms_input_file_download').attr('href', config_url + 'files/get/' + data.result.filename.replace(/\//g, '__'));
+	    	$(params.name_selector).siblings('.cms_input_file_buttons').children('.cms_input_file_download').attr('href', _cms_base + 'files/get/' + data.result.filename.replace(/\//g, '__'));
 	    	
 	    	// update rename button
 	    	$('.cms_input_file_button_disabled' ,$(params.name_selector).closest('.cms_input_file')).removeClass('cms_input_file_button_disabled');

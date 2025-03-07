@@ -34,6 +34,8 @@ class cms_image extends CI_Controller {
 		$params['description'] = !empty($meta['description']) ? $meta['description'] : '';
 
 		$params['category'] = $image['category'];
+		
+		$params['image'] = $image;
 
 		return $params;
 

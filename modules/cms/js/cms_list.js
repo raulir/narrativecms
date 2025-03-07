@@ -145,7 +145,7 @@ function cms_list_init(){
 					data.append('do', 'cms_page_panel_import');
 					
 					$.ajax( {
-						url: config_url + 'ajax_api/get_panel',
+						url: _cms_base + 'ajax_api/get_panel',
 					    type: 'POST',
 					    data: data,
 					    processData: false,

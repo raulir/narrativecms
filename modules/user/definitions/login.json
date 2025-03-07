@@ -139,6 +139,43 @@
 			"label":"Empty username or password",
 			"default": "Empty username or password submitted",
 			"translate":"1"
+		},
+		{
+			"type":"repeater",
+			"name":"alternatives",
+			"label":"Alternatives",
+			"fields":[
+				{
+					"type":"text",
+					"name":"label",
+					"label":"Label",
+					"mandatory":"1",
+					"translate":"1"
+				},
+				{
+					"type":"link",
+					"name":"link",
+					"label":"Link"
+				},
+				{
+					"type":"image",
+					"label":"Icon",
+					"name":"icon",
+					"category":"icon"
+				},
+				{
+					"type":"colour",
+					"label":"Background",
+					"name":"background",
+					"default":"white"
+				},
+				{
+					"type":"colour",
+					"label":"Text colour",
+					"name":"colour",
+					"default":"black"
+				}
+			]
 		}
 	]
 }

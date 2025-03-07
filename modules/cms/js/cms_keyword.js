@@ -17,7 +17,7 @@ function cms_keyword_init(){
 			'do': 'cms_keyword_delete',
 			'cms_keyword_id': $('#cms_keyword_id').val(),
 			'success': function(){
-				window.location.href = config_url + 'admin/keywords/';
+				window.location.href = _cms_base + 'admin/keywords/';
 			}
 		})
 		

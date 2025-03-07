@@ -13,7 +13,7 @@ function cms_cookie_create(name, value, days) {
         secure = '; SameSite=None; Secure'
     }
 
-    document.cookie = encodeURIComponent(name) + '=' + encodeURIComponent(value) + expires + '; path=' + config_url + secure
+    document.cookie = encodeURIComponent(name) + '=' + encodeURIComponent(value) + expires + '; path=' + _cms_base + secure
 
 }
 

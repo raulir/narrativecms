@@ -58,6 +58,10 @@ if (substr($_SERVER['REQUEST_URI'], 0, strlen($GLOBALS['config']['base_url'])) =
 	$string = $_SERVER['REQUEST_URI'];
 }
 
+if (stristr($string, '?')){
+	list($string, $rest) = explode('?', $string);
+}
+
 $request_uri = trim($string, '/');
 
 if (stristr($request_uri, '/')){

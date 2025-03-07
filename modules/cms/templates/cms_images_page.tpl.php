@@ -9,7 +9,6 @@
 				
 				<div class="cms_images_hover cms_images_image_delete">Delete</div>
 				<div class="cms_images_hover cms_images_image_edit" <?php _ib('cms/cms_edit.png', 16) ?>></div>
-				<div class="cms_images_hover cms_images_image_replace" <?php _ib('cms/cms_replace.png', 16) ?>></div>
 				<div class="cms_images_hover cms_images_image_usage"><?= $cms_image['number'] ?></div>
 			
 			</div>

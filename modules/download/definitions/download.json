@@ -15,7 +15,8 @@
 			"name":"heading",
 			"label":"Name",
 			"lines":"3",
-			"mandatory":"1"
+			"mandatory":"1",
+			"search":"3"
 		},
 		{
 			"type":"image",
@@ -49,7 +50,8 @@
 		{
 			"type":"text",
 			"name":"subtitle",
-			"label":"Subtitle"
+			"label":"Subtitle",
+			"search":"2"
 		},
 		{
 			"type":"image",
@@ -57,6 +59,42 @@
 			"label":"Large image",
 			"category":"content",
 			"help":"optional"
+		},
+		{
+			"type":"subtitle",
+			"label":"Search"
+		},
+		{
+			"type":"file",
+			"name":"search_file",
+			"label":"AI search pdf",
+			"help":"Max 2 MB"
+		},
+		{
+			"type":"textarea",
+			"name":"search_keywords",
+			"label":"AI search keywords",
+			"search":"1",
+			"lines":"6"
+		},
+		{
+			"type":"textarea",
+			"name":"search_text",
+			"label":"AI search text",
+			"search":"1",
+			"lines":"12"
+		},
+		{
+			"type":"textarea",
+			"name":"search_description",
+			"label":"AI SEO description",
+			"search":"1",
+			"lines":"6"
+		},
+		{
+			"type":"download/generate",
+			"name":"generate",
+			"label":"Generate"
 		}
 	],
 	"settings":[
@@ -83,6 +121,12 @@
 			"name":"next_label",
 			"label":"Next label",
 			"default":"Next document"
+		},
+		{
+			"type":"text",
+			"name":"keywords_label",
+			"label":"Keywords label",
+			"default":"Keywords:"
 		},
 		{
 			"type":"subtitle",

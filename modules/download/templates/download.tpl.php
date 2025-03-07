@@ -21,6 +21,8 @@
 			
 			<a class="download_previous" <?php _ib($arrow_left, 60) ?> <?php _lh('download/download='.$siblings['last_id']) ?>><?= $previous_label ?></a>
 			<a class="download_next" <?php _ib($arrow_right, 60) ?> <?php _lh('download/download='.$siblings['next_id']) ?>><?= $next_label ?></a>
+			
+			<div class="download_keywords"><?= $keywords_label ?> <?= $search_keywords ?></div>
 		
 		</div>
 	

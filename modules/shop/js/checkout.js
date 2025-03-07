@@ -162,7 +162,7 @@ function shop_checkout_payment_check(){
 				
 				if ($('.shop_checkout_container').data('success_page')){
 					setTimeout(() => {
-						window.location = config_url + $('.shop_checkout_container').data('success_page')
+						window.location = _cms_base + $('.shop_checkout_container').data('success_page')
 					}, 1000)
 				}
 

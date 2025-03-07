@@ -73,7 +73,6 @@ if (!function_exists('print_fields')){
 				
 				$name = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
 				$name_clean = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
-				
 				$return .= _panel('cms/cms_input_select', array(
 						'label' => $field['label'], // .$mandatory_label, 
 						'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
@@ -84,6 +83,7 @@ if (!function_exists('print_fields')){
 						'mandatory_class' => '', // $mandatory_class,
 						'help' => !empty($field['help']) ? $field['help'] : '', 
 						'params' => $field,
+						'readonly' => $field['readonly'] ?? '0',
 				));
 				
 			} elseif ($field['type'] == 'repeater_select'){

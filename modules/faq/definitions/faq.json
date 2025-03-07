@@ -1,0 +1,33 @@
+{
+	"version":"2",
+    "image":"",
+    "description":"FAQ item",
+	"list":{
+		"list_title":"FAQs",
+		"item_title":"FAQ",
+		"filter_fields":{
+			"show":"-- show --"
+		},
+		"link_target":"0"
+	},
+	"item":[
+		{
+			"name":"heading",
+			"type":"textarea",
+			"label":"Heading",
+			"lines":"3",
+			"mandatory":"1",
+			"search":"3"
+		},
+		{
+			"name":"text",
+			"type":"textarea",
+			"label":"Text",
+			"lines":"20",
+			"mandatory":"1",
+			"html":"BPA",
+			"width":"wide",
+			"search":"2"
+		}
+	]
+}

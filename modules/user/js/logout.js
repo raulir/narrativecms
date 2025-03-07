@@ -1,4 +1,4 @@
-var base_url = config_url
+var base_url = _cms_base
 
 function logout_init(){
 	

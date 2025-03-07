@@ -74,7 +74,7 @@ function cms_input_image_popup($element){
 					$('.cms_input_xy_image_inner', $('.cms_input_xy_target_' + input_name)).data('w', $container.data('w'))
 					$('.cms_input_xy_image_inner', $('.cms_input_xy_target_' + input_name)).data('h', $container.data('h'))
 					$('.cms_input_xy_image_inner', $('.cms_input_xy_target_' + input_name))
-							.css({'background-image': 'url(' + config_url + 'img/' + $('.cms_input_image_input', $container).val()})
+							.css({'background-image': 'url(' + _cms_base + 'img/' + $('.cms_input_image_input', $container).val()})
 					$('.cms_input_xy_target_' + input_name).data('target_image', $('.cms_input_image_input', $container).val())
 				
 				}
@@ -94,7 +94,7 @@ function cms_input_image_popup($element){
 				$('.cms_input_mask_image_inner', $('.cms_input_mask_target_' + input_name)).data('w', $container.data('w'))
 				$('.cms_input_mask_image_inner', $('.cms_input_mask_target_' + input_name)).data('h', $container.data('h'))
 				$('.cms_input_mask_image_inner', $('.cms_input_mask_target_' + input_name))
-						.css({'background-image': 'url(' + config_url + 'img/' + $('.cms_input_image_input', $container).val()})
+						.css({'background-image': 'url(' + _cms_base + 'img/' + $('.cms_input_image_input', $container).val()})
 				$('.cms_input_mask_target_' + input_name).data('target_image', $('.cms_input_image_input', $container).val())
 				
 				cms_input_mask_init()

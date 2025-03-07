@@ -49,13 +49,13 @@ function cms_page_panel_save(params){
 					
 						// adding child
 						cms_notification('Panel created' + mandatory_extra, 3);
-						window.location.href = config_url + 'admin/cms_page_panel/' + data.result.cms_page_panel_id + '/';
+						window.location.href = _cms_base + 'admin/cms_page_panel/' + data.result.cms_page_panel_id + '/';
 					
 					} else if ($('.cms_page_panel_id').val() == '0' && (parseInt(data.result.cms_page_panel_id) > 0)){
 						
 						// adding list item
 						cms_notification('New ' + data.result.panel_name + ' created', 3);
-						window.location.href = config_url + 'admin/cms_page_panel/' + data.result.cms_page_panel_id + '/';
+						window.location.href = _cms_base + 'admin/cms_page_panel/' + data.result.cms_page_panel_id + '/';
 						
 					} else {
 					

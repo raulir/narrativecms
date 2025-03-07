@@ -111,7 +111,7 @@ function cms_input_textarea_init(){
 					setup.push(function(ed){
 						ed.ui.registry.addButton('h2', {
 			    			title : 'Subheader',
-			    			image : config_url + 'modules/cms/img/tinymce_h_icon.png',
+			    			image : _cms_base + 'modules/cms/img/tinymce_h_icon.png',
 			    			onclick : function() {
 			    				ed.execCommand('FormatBlock', false, 'h2');
 			    			}
@@ -169,7 +169,7 @@ function cms_input_textarea_init(){
 					toolbar: toolbar,
 					mode : 'textareas',
 					theme: 'silver',
-					content_css: config_url + $this.data('html_css'),
+					content_css: _cms_base + $this.data('html_css'),
 					body_class: $this.data('html_class') + ' cms_tinymce_body',
 				    forced_root_block : '',
 				    menubar: false,

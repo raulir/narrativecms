@@ -1,0 +1,20 @@
+{
+	"panels":[
+		{
+			"id":"faqs",
+			"name":"FAQs"
+		}
+	],
+	"cms_menu":[
+		{
+			"id":"content",
+			"name":"Content"
+		},
+		{
+			"id":"faqs",
+			"name":"FAQs",
+			"parent":"content",
+			"url":"admin/cms_list/faq__faq/"
+		}
+    ]
+}

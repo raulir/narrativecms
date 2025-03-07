@@ -1,9 +1,5 @@
 'use strict';
 
-if (typeof config_url != 'undefined'){
-	var _cms_url = config_url
-}
-
 /*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
  * Digest Algorithm, as defined in RFC 1321.
@@ -445,7 +441,7 @@ function get_ajax_panel(name, args, action_on_success){
 		
 		// try to read from storage
 		if (_cms_test_localstorage() && cache > 0 && !admin_logged_in){
-			var key = md5(config_url + name + JSON.stringify(params));
+			var key = md5(_cms_base + name + JSON.stringify(params));
 			var local_data = localStorage.getItem(key);
 			if (local_data){
 				data = $.parseJSON(local_data);
@@ -466,7 +462,7 @@ function get_ajax_panel(name, args, action_on_success){
 			params.panel_id = name;
 			$.ajax({
 				type: 'POST',
-			  	url: _cms_url + 'ajax_api/get_panel/',
+			  	url: _cms_base + 'ajax_api/get_panel/',
 			  	data: params,
 			  	dataType: 'json',
 			  	context: this,
@@ -516,7 +512,7 @@ function get_ajax_panel_anchor(anchor, params){
 
 		$.ajax({
 			type: 'POST',
-		  	url: config_url + 'ajax_api/get_panel_anchor/',
+		  	url: _cms_base + 'ajax_api/get_panel_anchor/',
 		  	data: params,
 		  	dataType: 'json',
 		  	context: this,
@@ -552,7 +548,7 @@ function get_ajax_page(url, params, action_on_success){
 
 	// try to read from storage
 	if (_cms_test_localstorage() && cache > 0 && !admin_logged_in){
-		var key = md5(config_url + name + JSON.stringify(params));
+		var key = md5(_cms_base + name + JSON.stringify(params));
 		var local_data = localStorage.getItem(key);
 		if (local_data){
 			data = $.parseJSON(local_data);
@@ -760,7 +756,7 @@ function get_api(name, params){
 
 	$.ajax({
 		type: 'POST',
-	  	url: _cms_url + name,
+	  	url: _cms_base + name,
 	  	data: ext_params,
 	  	dataType: 'json',
 	  	context: this,

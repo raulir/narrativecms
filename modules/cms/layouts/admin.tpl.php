@@ -7,8 +7,8 @@
 			html {font-size: 10px!important;}
 		</style>
 		<script type="text/javascript">
- 			var config_url = '<?php print($GLOBALS['config']['base_url']); ?>';
- 			var _cms_rem = 10;
+			var _cms_base = '<?php print($GLOBALS['config']['base_url']); ?>'
+ 			var _cms_rem = 10
 		</script>
    	</head>
 	<body <?php (!empty($GLOBALS['config']['cms_background'])) ? 

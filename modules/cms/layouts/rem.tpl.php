@@ -17,12 +17,13 @@
 <?php endif ?>
 </style>
 <script type="text/javascript">
-	var config_url = '<?= $GLOBALS['config']['base_url'] ?>';
+	var _cms_base = '<?= $GLOBALS['config']['base_url'] ?>'
+	var config_url = _cms_base
 	<?= !empty($_SESSION['cms_user']['cms_user_id']) ? 'var admin_logged_in = 1;' : '' ?>
-	setInterval(() => {_cms_rem = parseFloat(getComputedStyle(document.documentElement).fontSize)}, 500)
+	setInterval(() => {_cms_rem = parseFloat(getComputedStyle(document.documentElement).fontSize)}, 1000)
 	var _cms_rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
 	var _cms_mobile = ( window.innerWidth <= <?= ($GLOBALS['config']['rem_m_px'] ?? 0) ?> ? true : false)
-	setInterval(() => {_cms_mobile = ( window.innerWidth <= <?= ($GLOBALS['config']['rem_m_px'] ?? 0) ?> ? true : false)}, 500)
+	setInterval(() => {_cms_mobile = ( window.innerWidth <= <?= ($GLOBALS['config']['rem_m_px'] ?? 0) ?> ? true : false)}, 1000)
 </script>
 </head>
 

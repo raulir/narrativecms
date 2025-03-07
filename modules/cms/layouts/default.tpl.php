@@ -25,8 +25,8 @@
 			
 		}, 0)
 
-		var config_url = '<?php print($GLOBALS['config']['base_url']); ?>';
-		<?php if(!empty($_SESSION['cms_user']['cms_user_id'])): ?>var admin_logged_in = 1;<?php endif ?>
+		var _cms_base = '<?php print($GLOBALS['config']['base_url']); ?>'
+		<?php if(!empty($_SESSION['cms_user']['cms_user_id'])): ?>var admin_logged_in = 1<?php endif ?>
 
 	</script>
 </head>

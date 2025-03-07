@@ -1,8 +1,8 @@
-function _cms_loader(panel_name, panel_params, target, config_url){
+function _cms_loader(panel_name, panel_params, target, _cms_base){
 
 	panel_params.panel_id = panel_name
 	
-	_cms_url = config_url
+	_cms_url = _cms_base
 	
 	_cms_load_jquery().then(_cms_load_main).then(() => {
 		

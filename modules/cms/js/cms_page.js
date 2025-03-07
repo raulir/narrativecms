@@ -42,7 +42,7 @@ function cms_page_save(params){
 			cms_notification('Page saved', 3);
 			
 			// update url in browser when page has changed
-			change_url(config_url + 'admin/page/' + $('.cms_page_id').val() + '/');
+			change_url(_cms_base + 'admin/page/' + $('.cms_page_id').val() + '/');
 			
 			// update new page panel target
 			$('.cms_input_page_panels_add').data('page', $('.cms_page_id').val());
@@ -68,11 +68,11 @@ function cms_page_delete(){
 						'page_id': page_id,
 						'do': 'cms_page_delete',
 						'success': function(data){
-							window.location.href = config_url + 'admin/pages/';
+							window.location.href = _cms_base + 'admin/pages/';
 						}
 					})
 				} else {
-					window.location.href = config_url + 'admin/pages/';
+					window.location.href = _cms_base + 'admin/pages/';
 				}
 				
 			}

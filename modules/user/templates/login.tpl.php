@@ -5,7 +5,18 @@
 		
 			<div class="login_heading"><?= $heading ?></div>
 			
-		
+			<?php if (!empty($alternatives)): ?>
+				<div class="login_alternatives">
+					<?php foreach($alternatives as $item): ?>
+					
+						<a class="login_alternative" <?php _lh($item['link']) ?> <?php _ib($item['icon'], ['width' => 24, 
+								'css' => ('background-color: '.$item['background'].'; color: '.$item['colour'].'; border-color: '.$item['colour'].';')]) 
+								?>><?= $item['label'] ?></a>
+					
+					<?php endforeach ?>
+				</div>
+			<?php endif ?>
+
 			<form class="login_form" method="post" autocomplete="off">
 		
 				<div class="login_row">
