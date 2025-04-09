@@ -104,8 +104,8 @@ class cms_input_link extends CI_Controller {
 							$block_title = !empty($list_page['heading']) ? $list_page['heading'] : ($list.'='.$list_page['cms_page_panel_id']);
 						}
 
-						$params['lists'][$list][$list_page['cms_page_panel_id']] = mb_substr($block_title, 0, 40);
-
+						$params['lists'][$list][$list_page['cms_page_panel_id']] = mb_substr(strip_tags($block_title), 0, 40);
+						
 						// slug data
 						$block_target = $list.'='.$list_page['cms_page_panel_id'];
 						$block_slug = $this->cms_slug_model->get_cms_slug_by_target($block_target);
