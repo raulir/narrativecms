@@ -1,21 +1,21 @@
 .cms_help {
 	
-	height: 1.6rem;
-	width: 1.6rem;
+	height: 1.5rem;
+	width: 1.5rem;
 	position: absolute;
-	left: 10.7rem;
-	top: 0;
+	left: 10.8rem;
+	top: 0.3rem;
 	box-sizing: border-box;
 	background-color: white;
-	border-radius: 0.8rem;
+	border-radius: 0.75rem;
 	z-index: 100;
 
 	.cms_page_panel_container & {
-		left: 12.7rem;
+		left: 12.8rem;
 	}
 
 	.cms_repeater_block & {
-		left: 10.7rem;
+		left: 10.8rem;
 	}
 
 	.cms_input_textarea & {

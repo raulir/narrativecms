@@ -14,7 +14,7 @@ if ( !function_exists('_iw')) {
 
 	}
 	
-	function _get_iw_size($image, $params){
+	function _get_iw_size($image, $params = []){
 		
 		$ci =& get_instance();
 		if ($ci === null) {
@@ -66,6 +66,61 @@ if ( !function_exists('_iw')) {
 		return $new_image;
 	
 	}
+	
+	function _load_gd_image($image){
+		
+		list($width, $height, $original_width, $original_height) = _get_iw_size($image);
+		
+		$name_a = pathinfo($image);
+		
+		// check memory availability
+		$needed = (4 * $original_width * $original_height + 4 * $width * $height) * 3.5 + 10000000;
+			
+		$limit = str_replace(array('G', 'M', 'K', ), array('000000000', '000000', '000', ), ini_get('memory_limit'));
+		if ($limit > 0 && $limit < $needed) ini_set('memory_limit', $needed);
+			
+		// check again for memory limit and give up if not enough
+		$limit = str_replace(array('G', 'M', 'K', ), array('000000000', '000000', '000', ), ini_get('memory_limit'));
+		
+		if ($needed > $limit) {
+		
+			trigger_error('Not enough memory to work with image: needed='.$needed.' memory_limit='.$limit, E_USER_NOTICE);
+		
+		} else {
+				
+			if (!function_exists('imagecreatetruecolor')){
+				print('PHP module gd not present, please enable!');
+				die();
+			}
+		
+			// detect file format
+			$imagetype = exif_imagetype($GLOBALS['config']['upload_path'].$image);
+				
+			if ($imagetype == IMAGETYPE_JPEG){
+		
+				$name_a['extension'] = 'jpg';
+		
+				$src = imagecreatefromjpeg($GLOBALS['config']['upload_path'].$image);
+		
+			} else if ($imagetype == IMAGETYPE_PNG){
+		
+				$name_a['extension'] = 'png';
+				
+				ob_start();
+				$src = imagecreatefrompng($GLOBALS['config']['upload_path'].$image);
+				ob_end_clean();
+				
+//				imagepng($src, 'c://xampp/htdocs/timmy/img/2025/05/testprint_1c.png');
+				
+//_print_r($image);					
+		
+					
+			}
+		}
+		
+		return $src;
+
+	}
 
 	/**
 	 * returns link to resized image
@@ -108,58 +163,32 @@ if ( !function_exists('_iw')) {
 		
 		// really needs resizing:
 		
-		// check memory availability
-		$needed = (4 * $original_width * $original_height + 4 * $width * $height) * 3.5 + 10000000;
+		
+		$src = _load_gd_image($image);
+		
+		
+		if (empty($src)){
+			$src = imagecreatefrompng($GLOBALS['config']['base_path'].'modules/cms/img/cms_no_image.png');
+			list($original_width, $original_height) = getimagesize($GLOBALS['config']['base_path'].'modules/cms/img/cms_no_image.png');
+		}
 			
-		$limit = str_replace(array('G', 'M', 'K', ), array('000000000', '000000', '000', ), ini_get('memory_limit'));
-		if ($limit > 0 && $limit < $needed) ini_set('memory_limit', $needed);
 			
-		// check again for memory limit and give up if not enough
-		$limit = str_replace(array('G', 'M', 'K', ), array('000000000', '000000', '000', ), ini_get('memory_limit'));
-
-		if ($needed > $limit) {
-
-			trigger_error('Not enough memory to compress image: needed='.$needed.' memory_limit='.$limit, E_USER_NOTICE);
-
-		} else {
+		$tmp = imagecreatetruecolor($width, $height);
+		
+		$imagetype = exif_imagetype($GLOBALS['config']['upload_path'].$image);
+		if ($imagetype == IMAGETYPE_PNG){
+			$background = imagecolorallocatealpha($tmp , 0, 0, 0, 127);
+			imagefill($tmp , 0, 0, $background);
+				
+			imagealphablending($tmp, false); // to preserve transparencies
 			
-			if (!function_exists('imagecreatetruecolor')){
-				print('PHP module gd not present, please enable!');
-				die();
-			}
+			imagesavealpha($tmp, true);
+			imagealphablending($tmp, false);
 
-			$tmp = imagecreatetruecolor($width, $height);
+		}
 			
-			// detect file format
-			$imagetype = exif_imagetype($GLOBALS['config']['upload_path'].$image);
 			
-			if ($imagetype == IMAGETYPE_JPEG){
-				
-				$name_a['extension'] = 'jpg';
-				
-				$src = imagecreatefromjpeg($GLOBALS['config']['upload_path'].$image);
-
-			} else if ($imagetype == IMAGETYPE_PNG){
-				
-				$name_a['extension'] = 'png';
-
-				@$src = imagecreatefrompng($GLOBALS['config']['upload_path'].$image);
-					
-				imagesavealpha($tmp, true);
-				imagealphablending($tmp, false);
-					
-				$background = imagecolorallocatealpha($tmp , 0, 0, 0, 127);
-				imagefill($tmp , 0, 0, $background);
-					
-				imagealphablending($tmp, false); // to preserve transparencies
-					
-			} else {
-				
-				$src = imagecreatefrompng($GLOBALS['config']['base_path'].'modules/cms/img/cms_no_image.png');
-				list($original_width, $original_height) = getimagesize($GLOBALS['config']['base_path'].'modules/cms/img/cms_no_image.png');
-				
-			}
-
+			
 			imagecopyresampled($tmp, $src, 0, 0, 0, 0, $width, $height, $original_width, $original_height);
 			
 			/* output */
@@ -383,8 +412,6 @@ if ( !function_exists('_iw')) {
 			imagedestroy($src);
 
 			$image = $new_image;
-
-		}
 
 		return ['image' => $image, 'width' => $width, 'height' => $height, 'original_width' => $original_width, 'original_height' => $original_height, ];
 		 
