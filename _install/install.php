@@ -258,7 +258,8 @@ CREATE TABLE `cms_page_panel` (
   `submenu_anchor` varchar(50) NOT NULL,
   `submenu_title` varchar(100) NOT NULL,
   PRIMARY KEY (`cms_page_panel_id`),
-  KEY `page_idx` (`cms_page_id`)
+  KEY `page_idx` (`cms_page_id`),
+  KEY `panel_name_idx` (`panel_name`(20))
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `cms_page_panel_param` (

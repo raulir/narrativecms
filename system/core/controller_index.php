@@ -51,6 +51,13 @@ class Index extends CI_Controller {
     	$page_config = [];
     	
     	$get_params = $this->input->get();
+    	$bad_params = ['module', 'cms_page_panel_id', 'show', 'panel_name', ];
+    	foreach($bad_params as $bad_param){
+	    	if (isset($get_params[$bad_param])){
+	    		unset($get_params[$bad_param]);
+	    	}
+    	}
+    	
     	if (!is_array($get_params)){
     		$get_params = [];
     	}
@@ -232,7 +239,7 @@ class Index extends CI_Controller {
 		//
 		$_ajax = $this->input->post('_ajax');
 		if (empty($_ajax)){
-			
+
 			// render panels
 			$panel_data = $this->render($page_config);
 
