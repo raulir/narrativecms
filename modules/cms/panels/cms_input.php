@@ -44,9 +44,13 @@ class cms_input extends CI_Controller {
 		$params['label'] = !empty($params['label']) ? $params['label'] : '[no label]';
 		$params['help'] = !empty($params['help']) ? $params['help'] : '';
 
+		if (!empty($params['groups']) && !is_array($params['groups'])){
+				$params['groups'] = [$params['groups']];
+		}
+		
 		// copy params to params for easier manipulation
 		$params['params'] = $params;
-
+				
 		return $params;
 		
 	}

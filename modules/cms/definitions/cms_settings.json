@@ -368,6 +368,13 @@
 			"default":""
 		},
 		{
+			"type":"text",
+			"name":"admin_email",
+			"label":"Technical admin email",
+			"default":"",
+			"help":"Email to send technical system messages. Eg error logs."
+		},
+		{
 			"type":"subtitle",
 			"label":"SMTP"
 		},

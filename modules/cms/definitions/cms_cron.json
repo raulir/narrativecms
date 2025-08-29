@@ -1,7 +1,7 @@
 {
 	"version":"2",
 	"label":"CMS repeating tasks",
-	"item":[
+	"settings":[
 		{
 			"type":"repeater",
 			"name":"items",
@@ -12,7 +12,7 @@
 					"name":"panel",
 					"flag":"cron",
 					"label":"Task name",
-					"help":"Calls panel_action() after every x timeunits||Minimum is 5 minutes"
+					"help":"Calls panel_action() after every x time units||Minimum is 5 minutes"
 				},
 				{
 					"type":"select",

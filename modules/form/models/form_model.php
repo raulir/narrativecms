@@ -423,7 +423,7 @@ class form_model extends CI_Model {
     			$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     			$mail->Port = $GLOBALS['config']['smtp_port'];
     			
-    			$mail->setFrom($GLOBALS['config']['email'], $GLOBALS['config']['from_name']);
+    			$mail->setFrom($GLOBALS['config']['email'], strtolower($_SERVER['SERVER_NAME']));
     			$mail->addAddress($data['email']);
     			
    				$mail->addReplyTo($GLOBALS['config']['reply_email'], $GLOBALS['config']['reply_name']);
@@ -509,7 +509,7 @@ class form_model extends CI_Model {
    			$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
    			$mail->Port = $GLOBALS['config']['smtp_port'];
     			
-   			$mail->setFrom($GLOBALS['config']['email'], $GLOBALS['config']['from_name']);
+   			$mail->setFrom($GLOBALS['config']['email'], strtolower($_SERVER['SERVER_NAME']));
    			$mail->addAddress($row_unpacked['email']);
     			
 			$mail->addReplyTo($GLOBALS['config']['reply_email'], $GLOBALS['config']['reply_name']);
@@ -583,7 +583,7 @@ class form_model extends CI_Model {
    				$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
    				$mail->Port = $GLOBALS['config']['smtp_port'];
    		   
-   				$mail->setFrom($GLOBALS['config']['email'], $GLOBALS['config']['from_name']);
+   				$mail->setFrom($GLOBALS['config']['email'], strtolower($_SERVER['SERVER_NAME']));
    				$mail->addAddress($email['email']);
    		   
    				if(!empty($params['reply_to']['email'])){
@@ -650,7 +650,7 @@ class form_model extends CI_Model {
    				$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
    				$mail->Port = $GLOBALS['config']['smtp_port'];
    		
-   				$mail->setFrom($GLOBALS['config']['email'], $GLOBALS['config']['from_name']);
+   				$mail->setFrom($GLOBALS['config']['email'], strtolower($_SERVER['SERVER_NAME']));
    				$mail->addAddress($email['email']);
    		
    				if(!empty($params['reply_to']['email'])){

@@ -1,6 +1,6 @@
 <div class="cms_input_container <?= !empty($params['groups']) ? ' cms_input_container_groups ' : '' ?>
 		<?= !empty($readonly) ? ' cms_input_select_readonly ' : '' ?>" 
-		<?= !empty($params['groups']) ? ' data-groups="'.implode(',', $params['groups']).'" ' : '' ?>>
+		<?= !empty($groups) ? ' data-groups="'.implode(',', $groups).'" ' : '' ?>>
 
 	<div class="cms_input cms_input_select <?= !empty($mandatory_class) ? $mandatory_class : '' ?>
 			<?= !empty($extra_class) ? $extra_class : '' ?>"

@@ -24,6 +24,16 @@ class cms_input_select extends CI_Controller {
 		if (!empty($params['add_empty']) && empty($params['values']['']) && empty($params['values'][0])){
 			$params['values'] = ['' => '-- not specified --'] + $params['values'];
 		}
+
+		if (!empty($params['params']['groups'])){
+			
+			$params['groups'] = $params['params']['groups'];
+			
+			if(!is_array($params['groups'])){
+				$params['groups'] = [$params['groups']];
+			}
+			
+		}
 		
 		return $params;
 	
