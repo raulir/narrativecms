@@ -115,7 +115,7 @@ class Index extends CI_Controller {
 
  			// list item panel data, for example article
     		$list_item_data = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
-    		
+
     		// if can't find list item - error 404
     		if (!is_array($list_item_data)){
     			show_404($page_id);
@@ -139,7 +139,7 @@ class Index extends CI_Controller {
     			$page = $this->cms_page_model->get_page($list_item_data['_template_page_id'], 'auto');
     			
     		}
-    		
+
     		if (!empty($page['page_id'])){
 
     			// if page exists, overload this
@@ -178,6 +178,10 @@ class Index extends CI_Controller {
 				$cms_page_id = $page['cms_page_id'];
 
     		} else { // put a panel to main position
+    			
+    			if (empty($page)){
+    				_html_error('No panel template or page defined. Panel name: '.$panel_name, 500);
+    			}
     			
 	    		if ($list_item_data['show'] == 1){
 	    			$page_config[] = [

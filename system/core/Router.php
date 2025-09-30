@@ -81,7 +81,6 @@ class Router {
 	function __construct()
 	{
 		$this->uri =& load_class('URI');
-		log_message('debug', "Router Class Initialized");
 	}
 
 	// --------------------------------------------------------------------
@@ -167,8 +166,6 @@ class Router {
 
 		// re-index the routed segments array so it starts with 1 rather than 0
 		$this->uri->_reindex_segments();
-
-		log_message('debug', "No URI present. Default controller set.");
 	}
 
 	// --------------------------------------------------------------------

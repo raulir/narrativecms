@@ -42,8 +42,6 @@ class CI_Upload {
 		{
 			$this->initialize($props);
 		}
-
-		log_message('debug', "Upload Class Initialized");
 	}
 
 	// --------------------------------------------------------------------
@@ -799,13 +797,13 @@ class CI_Upload {
 			foreach ($msg as $val)
 			{
 				$this->error_msg[] = $val;
-				log_message('error', $val);
+				_html_error('Upload error '.$val);
 			}
 		}
 		else
 		{
 			$this->error_msg[] = $msg;
-			log_message('error', $msg);
+			_html_error('Upload error '.$msg);
 		}
 	}
 

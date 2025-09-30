@@ -91,8 +91,6 @@ class Loader {
 		$this->_ci_ob_level  = ob_get_level();
 		$this->_ci_library_paths = array(BASEPATH);
 		$this->_ci_view_paths = [];
-
-		log_message('debug', "Loader Class Initialized");
 	}
 
 	// --------------------------------------------------------------------
@@ -767,7 +765,7 @@ class Loader {
 					}
 
 					$is_duplicate = TRUE;
-					log_message('debug', $class." class already loaded. Second attempt ignored.");
+					_html_error('Unable to load the requested class: '.$class);
 					return;
 				}
 
@@ -788,7 +786,6 @@ class Loader {
 		// If we got this far we were unable to find the requested class.
 		// We do not issue errors if the load call failed due to a duplicate request
 		if ($is_duplicate == FALSE){
-			log_message('error', "Unable to load the requested class: ".$class);
 			_html_error("Unable to load the requested class: ".$class, 500);
 		}
 	}
@@ -830,7 +827,6 @@ class Loader {
 
 		// Is the class name valid?
 		if ( ! class_exists($name)){
-			log_message('error', "Non-existent class: ".$name);
 			_html_error('Non-existent class: '.$class, 500, ['backtrace' => 1]);
 		}
 
@@ -970,7 +966,7 @@ class Loader {
 				include_once($filename);
 					
 				$this->_ci_helpers[$helper] = TRUE;
-				log_message('debug', 'Helper loaded: '.$helper);
+
 				break;
 			}
 	

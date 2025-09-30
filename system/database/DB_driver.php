@@ -87,8 +87,6 @@ class CI_DB_driver {
 				$this->$key = $val;
 			}
 		}
-
-		log_message('debug', 'Database Driver Class Initialized');
 	}
 
 	// --------------------------------------------------------------------
@@ -529,7 +527,7 @@ class CI_DB_driver {
 				$this->_trans_status = TRUE;
 			}
 
-			log_message('debug', 'DB Transaction Failure');
+//			log_message('debug', 'DB Transaction Failure');
 			return FALSE;
 		}
 

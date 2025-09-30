@@ -72,6 +72,7 @@ class cms_log_rotate extends CI_Controller {
 		$text = '';
 		
 		$text .= '<b>PHP errors report:</b>'."\n\n";
+		$text .= 'Site name: '.str_replace(['#page#',' - '], '', $GLOBALS['config']['site_title'])."\n";
 		$text .= 'Server name: '.strtolower($_SERVER['SERVER_NAME'])."\n";
 		$text .= 'Errors from: '.$email_filename."\n\n";
 		$text .= 'Count - Last seen - Error'."\n";
@@ -117,7 +118,9 @@ class cms_log_rotate extends CI_Controller {
 			
 				$mail->addCustomHeader('Auto-Submitted', 'auto-generated');
 			
-				$mail->Subject = 'PHP errors '.strtolower($_SERVER['SERVER_NAME']);
+				$mail->Subject = 'PHP errors '.(!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].']' : '').' '.
+						str_replace(['#page#',' - '], '', $GLOBALS['config']['site_title']).' ('.strtolower($_SERVER['SERVER_NAME'].')');
+				
 				$mail->Body = '<html><body>'.$text.'</body></html>';
 				$mail->IsHTML(true); // $autoreply_html);
 				 

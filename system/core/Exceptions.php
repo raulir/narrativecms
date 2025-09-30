@@ -64,7 +64,8 @@ class Exceptions {
 	{
 		$severity = ( ! isset($this->levels[$severity])) ? $severity : $this->levels[$severity];
 
-		log_message('error', 'Severity: '.$severity.'  --> '.$message. ' '.$filepath.' '.$line, TRUE);
+//		log_message('error', 'Severity: '.$severity.'  --> '.$message. ' '.$filepath.' '.$line, TRUE);
+		_html_error("Unable to load the requested class: ".$class, 500);
 	}
 
 	// --------------------------------------------------------------------

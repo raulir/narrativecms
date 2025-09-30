@@ -67,11 +67,7 @@ class URI {
 	 *
 	 * @access	public
 	 */
-	function __construct()
-	{
-		log_message('debug', "URI Class Initialized");
-	}
-
+	function __construct(){}
 
 	// --------------------------------------------------------------------
 

@@ -108,35 +108,13 @@ if ( ! function_exists('show_404'))
 	}
 }
 
-// ------------------------------------------------------------------------
-
-/**
-* Error Logging Interface
-*
-* We use this as a simple mechanism to access the logging
-* class and send messages to be logged.
-*
-* @access	public
-* @return	void
-*/
-if ( ! function_exists('log_message'))
-{
-	function log_message($level = 'error', $message, $php_error = FALSE)
-	{
-		static $_log;
-
-		$_log =& load_class('Log', 'libraries', 'CI_');
-		$_log->write_log($level, $message, $php_error);
-	}
-}
-
 if ( ! function_exists('_exception_handler'))
 {
 	function _exception_handler($severity, $message, $filepath, $line){
 		ini_set('display_errors', '0');
 		
 		if (!empty($GLOBALS['config']['errors_log'])){
-			ini_set('error_log', $GLOBALS['config']['errors_log']);
+			ini_set('error_log', ($GLOBALS['config']['base_path'].$GLOBALS['config']['errors_log']));
 		}
 
 		// We don't bother with "strict" notices
@@ -179,7 +157,7 @@ if ( ! function_exists('_exception_handler'))
 		
 		}
 
-		$_error->log_exception($severity, $message, $filepath, $line);
+//		$_error->log_exception($severity, $message, $filepath, $line);
 
 		return false;
 		

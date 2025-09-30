@@ -90,8 +90,6 @@ class Security {
 			// Set the CSRF hash
 			$this->_csrf_set_hash();
 		}
-
-		log_message('debug', "Security Class Initialized");
 	}
 	
 	// --------------------------------------------------------------------
@@ -323,7 +321,6 @@ class Security {
 			return ($str == $converted_string) ? TRUE: FALSE;
 		}
 
-		log_message('debug', "XSS Filtering completed");
 		return $str;
 	}
 

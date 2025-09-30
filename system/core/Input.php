@@ -43,7 +43,6 @@ class Input {
 
 	var $_enable_csrf;
 	var $security;
-	var $uni;
 	
 	/**
 	 * Constructor
@@ -55,21 +54,12 @@ class Input {
 	 */
 	public function __construct()
 	{
-		log_message('debug', "Input Class Initialized");
-
 		$this->_allow_get_array	= true;
 		$this->_enable_xss		= false;
 		$this->_enable_csrf		= false;
 
 		global $SEC;
 		$this->security =& $SEC;
-
-		// Do we need the UTF-8 class?
-		if (UTF8_ENABLED === TRUE)
-		{
-			global $UNI;
-			$this->uni =& $UNI;
-		}
 
 		// Sanitize global arrays
 		$this->_sanitize_globals();
@@ -459,7 +449,6 @@ class Input {
 		// Sanitize PHP_SELF
 		$_SERVER['PHP_SELF'] = strip_tags($_SERVER['PHP_SELF']);
 
-		log_message('debug', "Global POST data sanitized");
 	}
 
 	// --------------------------------------------------------------------
@@ -484,12 +473,6 @@ class Input {
 				$new_array[$this->_clean_input_keys($key)] = $this->_clean_input_data($val);
 			}
 			return $new_array;
-		}
-
-		// Clean UTF-8 if supported
-		if (UTF8_ENABLED === TRUE)
-		{
-			$str = $this->uni->clean_string($str);
 		}
 
 		// Remove control characters
@@ -529,18 +512,10 @@ class Input {
 	function _clean_input_keys($str)
 	{
 		
-			if ( ! preg_match("/^[a-z0-9:_\/-@]+$/i", $str)) {
+		if ( ! preg_match("/^[a-z0-9:_\/-@]+$/i", $str)) {
 			return '';
-//			var_dump($str);
-//			exit('Disallowed Key Characters.');
 		}
 		
-		// Clean UTF-8 if supported
-		if (UTF8_ENABLED === TRUE)
-		{
-			$str = $this->uni->clean_string($str);
-		}
-
 		return $str;
 	}
 
