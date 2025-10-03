@@ -43,16 +43,30 @@
     		"readonly":"1"
     	},
     	{
+       		"type": "select",
+        	"name": "shopify_status",
+        	"label": "Shopify status",
+			"values": {
+				"unconfirmed":"Unconfirmed",
+				"active":"Active",
+				"unavailable":"Unavailable"
+			},
+			"default":"unconfirmed",
+			"readonly":"1"
+    	},
+    	{
        		"type": "text",
         	"name": "heading",
         	"label": "Heading",
-			"readonly":"1"
+			"readonly":"1",
+			"search":"3"
     	},
     	{
        		"type": "text",
         	"name": "type",
         	"label": "Type",
-			"readonly":"1"
+			"readonly":"1",
+			"search":"1"
     	},
     	{
        		"type": "text",
@@ -65,7 +79,8 @@
         	"name": "text",
         	"label": "Text",
         	"lines": "8",
-			"readonly":"1"
+			"readonly":"1",
+			"search":"1"
     	},
     	{
        		"type": "text",
@@ -134,13 +149,6 @@
         	"label": "Subcategory",
         	"add_empty": "1",
         	"list": "stock/subcategory"
-        },
-        {
-        	"type": "colour",
-        	"name": "colour",
-        	"label": "Background",
-        	"default": "white",
-        	"help": "Product thumbnail background"
         },
     	{
 			"type":"repeater",

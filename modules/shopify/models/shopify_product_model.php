@@ -3,7 +3,7 @@ require_once 'vendor/autoload.php';
 
 use Shopify\Auth\FileSessionStorage;
 use Shopify\Clients\Rest;
-use Shopify\Rest\Admin2023_10\Collection;
+use Shopify\Rest\Admin2025_07\Collection;
 use Shopify\Utils;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
@@ -22,7 +22,7 @@ class shopify_product_model extends Model {
 				scopes: ['read_products', 'read_product_listings', 'read_orders', 'read_product_feeds'],
 				hostName: 'tim-sanders.myshopify.com',
 				sessionStorage: new FileSessionStorage($tmp_dir),
-				apiVersion: '2023-10',
+				apiVersion: '2025-07',
 		);
 		
 		$this->client = new Rest('tim-sanders.myshopify.com', $GLOBALS['config']['shopify_api_token']);
@@ -50,16 +50,59 @@ class shopify_product_model extends Model {
 		} else if ($caching === 1){
 			$needs_update = 1;
 		}
-		
+
 		if (!file_exists($filename) || ((time() - filemtime($filename)) > 300 && $caching != -1) || $caching == 1){
-				
-			if (empty($params)){
-				$response = $this->client->get(path: $endpoint);
-			} else {
-				$response = $this->client->get(path: $endpoint, query: $params);
-			}
 			
-			$data = $response->getDecodedBody();
+			$more = true;
+			$data = [];
+			
+			while ($more){
+		
+				if (empty($params)){
+					$response = $this->client->get(path: $endpoint);
+				} else {
+					$response = $this->client->get(path: $endpoint, query: $params);
+				}
+				
+				$request_data = $response->getDecodedBody();
+
+				if (stristr($endpoint, '/') && count($request_data) == 1){
+					
+					$data = reset($request_data);
+					$more = false;
+
+				} else {
+	
+	
+	
+					$request_data = $request_data[array_key_first($request_data)];
+				
+					foreach($request_data as $record){
+						$data[] = $record;
+					}
+
+					$headers = $response->getHeaders();
+
+					if (empty($headers['link'])){
+						$more = false;
+					} 
+
+					if ($more){
+						
+						$last_record = $request_data[array_key_last($request_data)];
+						$params['since_id'] = $last_record['id'];
+
+						if (empty($last_record['id'])){
+							$more = false;
+						} else {
+							usleep(1000000);
+						}
+						
+					}
+				
+				}
+
+			}
 
 			file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
 				
@@ -69,18 +112,7 @@ class shopify_product_model extends Model {
 				
 		}
 
-		if (stristr($endpoint, '/')){
-			$endpoint_a = explode('/', $endpoint);
-			$endpoint_key = end($endpoint_a);
-		} else {
-			$endpoint_key = $endpoint;
-		}
-		
-		if (!empty($data[$endpoint_key])){
-			return $data[$endpoint_key];
-		} else {
-			return $data;
-		}
+		return $data;
 
 	}
 
@@ -90,15 +122,15 @@ class shopify_product_model extends Model {
 	function get_products(){
 		
 		$collections = $this->call('custom_collections');
-
+// _print_r($collections);
 		foreach($collections as $collection){
 			if ($collection['handle'] == 'frontpage'){
 				$collection_id = $collection['id'];
 			}
 		}
 		
-		$return = $this->call('collections/'.$collection_id.'/products', ['limit' => 250, ]); //, ['collection_id' => $collection_id, ]);
-
+		$return = $this->call('collections/'.$collection_id.'/products', ['limit' => 250, 'force' => 1, ]); //, ['collection_id' => $collection_id, ]);
+// _print_r($return); die();
 		return $return;
 	
 	}
@@ -111,7 +143,7 @@ class shopify_product_model extends Model {
 			return [];
 		}
 		
-		return $product['product'];
+		return $product;
 		
 	}
 	
@@ -125,17 +157,25 @@ class shopify_product_model extends Model {
 	
 	function refresh_products(){
 		
+		set_time_limit(300);
+		
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_slug_model');
 		
 		$shopify_products = $this->get_products();
+// _print_r($shopify_products);
+// die();
+
 
 		$slugs_updated = false;
+		$n = 0;
 		foreach($shopify_products as $product_key => $product){
 				
+// print(' '.$n++.' '.(round(microtime(true) * 1000) - $GLOBALS['timer']['start']));
+			
 			$cms_product = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'shopify/product', 'shopify_id' => $product['id']]);
 				
-			// _print_r($cms_product);
+// _print_r($cms_product);
 				
 			if (empty($cms_product)){
 
@@ -155,16 +195,18 @@ class shopify_product_model extends Model {
 				$slug = $this->cms_slug_model->generate_list_item_slug('_/product='.$shopify_products[$product_key]['cms_page_panel_id'], $product['title']);
 		
 				$this->cms_slug_model->set_page_slug('_/product='.$shopify_products[$product_key]['cms_page_panel_id'], $slug, '0');
-		
-				$slugs_updated = true;
 				
-				$this->cms_slug_model->_regenerate_cache();
-				$this->cms_slug_model->_regenerate_sitemap();
+				$slugs_updated = true;
 		
 			}
 				
 		}
-
+		
+		if ($slugs_updated){
+			$this->cms_slug_model->_regenerate_cache();
+			$this->cms_slug_model->_regenerate_sitemap();
+		}
+		
 		return $shopify_products;
 		
 	}
@@ -176,6 +218,10 @@ class shopify_product_model extends Model {
 		$this->load->model('cms/cms_image_model');
 		
 		$cms_product = $this->cms_page_panel_model->get_cms_page_panel($cms_product_id);
+		
+		if (empty($cms_product['cms_page_panel_id'])){
+			return [];
+		}
 		
 		if (empty($cms_product['shopify_id'])){
 			$this->cms_page_panel_model->update_cms_page_panel($cms_product_id, ['show' => 0, ]);
@@ -190,6 +236,19 @@ class shopify_product_model extends Model {
 		}
 
 		$needs_update = false;
+		
+		$cms_product['shopify_status'] ??= 'unconfirmed';
+		if (empty($shopify_product['status']) || $shopify_product['status'] != 'active'){
+			if ($cms_product['shopify_status'] != 'unavailable'){
+				$cms_product['shopify_status'] = 'unavailable';
+				$needs_update = true;
+			}
+		} else {
+			if ($cms_product['shopify_status'] != 'active'){
+				$cms_product['shopify_status'] = 'active';
+				$needs_update = true;
+			}
+		}
 
 		if (empty($cms_product['heading']) || $cms_product['heading'] != $shopify_product['title']){
 			$cms_product['heading'] = $shopify_product['title'];
@@ -329,6 +388,7 @@ class shopify_product_model extends Model {
 		}
 
 		if ($needs_update){
+			$cms_product['update_time'] = time();
 			$cms_product['last_update'] = time();
 			$this->cms_page_panel_model->update_cms_page_panel($cms_product_id, $cms_product, true);
 		}
