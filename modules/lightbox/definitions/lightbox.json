@@ -1,0 +1,34 @@
+{
+	"version":"2",
+	"label":"Lightbox settings",
+    "js": [
+    	"cms/cms_preloader",
+    	"cms/cms_scroll_lock"
+    ],
+    "item": [
+    
+    ],
+	"settings":[
+		{
+			"type":"image",
+			"name":"next",
+			"label":"Next arrow",
+			"category":"icon",
+			"default":"//lightbox_right.png"
+		},
+		{
+			"type":"image",
+			"name":"close",
+			"label":"Close",
+			"category":"icon",
+			"default":"//lightbox_close.png"
+		},
+		{
+			"type":"image",
+			"name":"previous",
+			"label":"Previous arrow",
+			"category":"icon",
+			"default":"//lightbox_left.png"
+		}
+	]
+}
