@@ -23,9 +23,29 @@
 			"label":"Autoplay",
 			"values": {
 				"1":"Yes",
-				"":"No"
+				"0":"No"
 			},
 			"default":""
+		},
+		{
+			"type":"select",
+			"name":"control_sound",
+			"label":"Control sound",
+			"values": {
+				"1":"Yes",
+				"0":"No"
+			},
+			"default":"0"
+		},
+		{
+			"type":"select",
+			"name":"control_progress",
+			"label":"Control progress",
+			"values": {
+				"1":"Yes",
+				"0":"No"
+			},
+			"default":"0"
 		},
 		{
 			"type":"file",

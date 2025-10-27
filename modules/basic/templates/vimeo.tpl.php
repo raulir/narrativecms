@@ -12,9 +12,9 @@
 			
 				<iframe class="basic_vimeo_iframe" src="https://player.vimeo.com/video/<?= $vimeo_id ?>?background=1" 
 						width="640" height="360" frameborder="0" 
-						allow="autoplay; fullscreen" allowfullscreen></iframe>
+						allow="autoplay; fullscreen"></iframe>
 				
-				<?php if(empty($hide_controls) && !empty($controls)): ?>
+				<?php if(!empty($control_progress)): ?>
 					<div class="basic_vimeo_toolbar">
 					
 						<?php if (!empty($controls['play'])): ?>
@@ -68,8 +68,17 @@
 						<?php endif ?>
 					
 					</div>
+				<?php elseif(!empty($control_sound) && !empty($controls['sound'])): ?>				
+					<div class="basic_vimeo_minitoolbar">
+						<?php if (!empty($controls['sound'])): ?>
+							<div class="basic_vimeo_sound basic_vimeo_sound_is_off">
+								<div class="basic_vimeo_sound_off" <?php _ib($sound_off, 30) ?>></div>
+								<div class="basic_vimeo_sound_on" <?php _ib($sound_on, 30) ?>></div>
+							</div>
+						<?php endif ?>
+					</div>
 				<?php endif ?>
-				
+
 				<?php if(!empty($subsfile)): ?>
 					<div class="basic_vimeo_subtitles"></div>
 				<?php endif ?>

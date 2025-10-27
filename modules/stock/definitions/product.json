@@ -32,8 +32,7 @@
 			"label":"Product status",
 			"values":{
 				"available":"Available",
-				"archive":"Archive",
-				"bespoke":"Bespoke"
+				"archive":"Archive"
 			},
 			"default":"available",
 			"help":"Please leave available to show on the shop!"
