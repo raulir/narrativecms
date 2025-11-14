@@ -1,0 +1,128 @@
+{
+    "version": "2",
+	"title":"Vimeo",
+	"label":"Vimeo",
+    "js": [
+     	"cms/cms_scroll_lock"
+    ],
+    "item": [
+		{
+			"type":"image",
+			"name":"image",
+			"label":"Loading image",
+			"category":"content"
+		},
+		{
+			"type":"text",
+			"name":"vimeo_id",
+			"label":"Vimeo ID"
+		},
+		{
+			"type":"select",
+			"name":"autoplay",
+			"label":"Autoplay",
+			"values": {
+				"1":"Yes",
+				"":"No"
+			},
+			"default":""
+		},
+		{
+			"type":"file",
+			"name":"subtitle",
+			"label":"Subtitle",
+			"help":".srt"
+		}
+    ],
+    "settings": [
+		{
+			"type":"image",
+			"name":"sound_off",
+			"label":"Sound is off",
+			"category":"icon",
+			"default":"//vimeo_sound_off.png"
+		},
+		{
+			"type":"image",
+			"name":"sound_on",
+			"label":"Sound is on",
+			"category":"icon",
+			"default":"//vimeo_sound_on.png"
+		},
+		{
+			"type":"image",
+			"name":"play_button",
+			"label":"Play button",
+			"category":"icon",
+			"default":"//vimeo_play.png"
+		},
+		{
+			"type":"image",
+			"name":"pause_button",
+			"label":"Pause button",
+			"category":"icon",
+			"default":"//vimeo_pause.png"
+		},
+		{
+			"type":"image",
+			"name":"play_large",
+			"label":"Play large",
+			"category":"icon",
+			"default":"//vimeo_play.png"
+		},
+		{
+			"type":"image",
+			"name":"subtitles_button",
+			"label":"Subtitles",
+			"category":"icon",
+			"default":"//vimeo_subtitles.png"
+		},
+		{
+			"type":"image",
+			"name":"fullscreen_button",
+			"label":"Fullscreen",
+			"category":"icon",
+			"default":"//vimeo_fullscreen.png"
+		},
+		{
+			"type":"image",
+			"name":"default_image",
+			"label":"Default image",
+			"category":"content",
+			"default":"//vimeo_image.png"
+		},
+		{
+			"type":"select",
+			"name":"disable_fullscreen",
+			"label":"Disable fullscreen",
+			"values": {
+				"0":"No",
+				"1":"Yes"
+			},
+			"default":"0",
+			"help":"Removes fullscreen button"
+		},
+		{
+			"type":"select",
+			"name":"scheme",
+			"label":"Colour scheme",
+			"values": {
+				"dark":"Dark",
+				"light":"Light"
+			},
+			"default":"light",
+			"help":"Background colour"
+		},
+		{
+			"type":"select",
+			"name":"size_by_image",
+			"label":"Size by image",
+			"values": {
+				"no":"No",
+				"yes":"Yes"
+			},
+			"default":"no",
+			"help":"Set video size by cover image size"
+		}
+    ]
+}

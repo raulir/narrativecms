@@ -1,0 +1,29 @@
+{
+	"panels":[
+
+	],
+	"cms_menu":[
+		{
+			"id":"tools",
+			"name":"Tools"
+		},
+		{
+			"id":"vimeo_settings",
+			"name":"Vimeo settings",
+			"parent":"tools",
+			"user":"1",
+			"url":"admin/panel_settings/video__vimeo/",
+			"access":"video_vimeo"
+		}
+	],
+	"access":[
+		{
+			"access":"video_*",
+			"name":"Video ALL"
+		},
+		{
+			"access":"video_vimeo",
+			"name":"Video Vimeo"
+		}
+	]
+}
