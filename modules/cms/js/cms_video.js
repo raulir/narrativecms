@@ -152,3 +152,45 @@ function video_pause($video){
 	$video.animate({'opacity':'0'}, 250);
 	
 }
+
+function video_init(){
+	
+	var $cms_video = $('[data-cms_video]')
+	
+	$cms_video.each(function() {
+		
+		var $this = $(this)
+		var video_url = $this.data('cms_video')
+		var fit = $this.css('background-size')
+		
+		var $video = $('<div class="cms_video" style="width: 100%; height: 100%; position: relative; ">' 
+			+ '<video style="max-width: 100%; max-height: 100%; display: block; position: absolute; left: 50%; top: 50%; '
+			+ 'transform: translate(-50%, -50%); " src="' + video_url + '" '
+			+ 'autoplay="autoplay" muted="muted" loop="loop" playsinline="playsinline">'
+			+ '</div>')
+			
+		$this.empty().append($video);
+		$this.css({'background-image':''})
+		
+	})
+	
+}
+
+function video_resize(){
+	
+}
+
+function video_scroll(){
+	
+}
+
+$(document).ready(function() {
+	
+	$(window).on('resize.cms', video_resize)
+	$(window).on('scroll.cms', video_scroll)
+	
+	video_init()
+	video_resize()
+	video_scroll()
+
+})

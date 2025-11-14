@@ -159,7 +159,7 @@ class cms_image_model extends CI_Model {
 			$extension = 'jpg';
 		}
 
-		$name_data = str_replace(array('.jpg','.jpeg','.png','.gif','.svg'), '', trim($name_data));
+		$name_data = str_replace(['.jpg','.jpeg','.png','.gif','.svg','.mp4'], '', trim($name_data));
 
 		$name_data = str_replace(array(' ','-','.'), '_', $name_data);
 
@@ -197,9 +197,14 @@ class cms_image_model extends CI_Model {
 		}
 
 		$filename = $dir . $name_data . '.' . $extension;
+		
+		$type = 'image';
+		if ($extension == 'mp4'){
+			$type = 'video';
+		}
 
-		$sql = "insert into cms_image set name = ? , filename = ? , category = ? , hash = '', meta = '', keyword = '' ";
-		$this->db->query($sql, array($name_data, $filename, $category, ));
+		$sql = "insert into cms_image set type = ? , name = ? , filename = ? , category = ? , hash = '', meta = '', keyword = '' ";
+		$this->db->query($sql, [$type, $name_data, $filename, $category, ]);
 
 		return $filename;
 

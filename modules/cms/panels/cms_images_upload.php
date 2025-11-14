@@ -19,7 +19,7 @@ class cms_images_upload extends CI_Controller {
 	// common functionality of file uploading
 	function image_upload($input_name, $category){
 
-		$this->load->library('upload', array('allowed_types' => 'svg|gif|jpg|png|jpeg', 'upload_path' => $GLOBALS['config']['upload_path'], ));
+		$this->load->library('upload', array('allowed_types' => 'svg|gif|jpg|png|jpeg|mp4', 'upload_path' => $GLOBALS['config']['upload_path'], ));
 		
 		$new_image = $this->upload->upload_image($input_name);
 		
@@ -39,12 +39,19 @@ class cms_images_upload extends CI_Controller {
 			$filename = $this->cms_image_model->create_cms_image(date('Y').'/'.date('m').'/', $new_image, $category);
 
 			// delete existing images
-			if(file_exists($GLOBALS['config']['upload_path'].$filename)){
+			if (file_exists($GLOBALS['config']['upload_path'].$filename)){
 				$this->cms_image_model->delete_cms_image_by_filename($filename, false);
+			}
+			if (is_dir($GLOBALS['config']['upload_path'].$filename.'.data')){
+				array_map('unlink', glob($GLOBALS['config']['upload_path'].$filename.'.data'.'/*.*'));
+				rmdir($GLOBALS['config']['upload_path'].$filename.'.data');
 			}
 
 			rename($GLOBALS['config']['upload_path'].$new_image, $GLOBALS['config']['upload_path'].$filename);
-
+			if (is_dir($GLOBALS['config']['upload_path'].$filename.'.data')){			
+				rename($GLOBALS['config']['upload_path'].$new_image.'.data', $GLOBALS['config']['upload_path'].$filename.'.data');
+			}
+			
 		}
 
 		return $filename;

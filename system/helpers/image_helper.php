@@ -128,6 +128,26 @@ if ( !function_exists('_i')) {
 			
 		}
 		
+		// if video
+		if ($extension == 'mp4'){
+			$params['video'] = ' data-cms_video="'.$GLOBALS['config']['upload_url'].$image.'" ';
+			
+			
+			if (file_exists($GLOBALS['config']['upload_path'].$image.'.data/poster.jpg')){
+				
+			} else {
+				
+				print($params['video'].' style="background-image:  url('.
+						($GLOBALS['config']['base_site'] ?? '').$GLOBALS['config']['base_url'].'modules/cms/img/cms_video_loading.png); '.$params['css'].'" ');
+				
+				$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_video.js';
+				
+				return ['image' => $image, 'height' => 0, 'width' => 0, ];
+			
+			}
+			
+		}
+		
 		// if from module
 		if (!empty($params['module']) || substr_count($image, '/') == 1){
 			

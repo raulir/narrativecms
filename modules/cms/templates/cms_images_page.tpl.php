@@ -5,7 +5,7 @@
 			
 			<div class="cms_images_image_cell" <?php _ib('cms/cms_opacity.png', 40) ?>>
 				
-				<div class="cms_images_image_img" <?php _ib($cms_image['filename'], 145); ?>></div>
+				<div class="cms_images_image_img" <?php _ib($cms_image['filename'], 150); ?>></div>
 				
 				<div class="cms_images_hover cms_images_image_delete">Delete</div>
 				<div class="cms_images_hover cms_images_image_edit" <?php _ib('cms/cms_edit.png', 16) ?>></div>
