@@ -153,7 +153,33 @@ function video_pause($video){
 	
 }
 
-function video_init(){
+function cms_video_fallback($video_el, url){
+	$video_el.attr('src', url)
+	$video_el[0].play()
+}
+
+function cms_video_waitshaka(callback, timeout = 1000, interval = 20) {
+
+	if (typeof shaka !== 'undefined') {
+		callback()
+		return;
+	}
+
+    let elapsed = 0;
+    const timer = setInterval(() => {
+        elapsed += interval;
+        if (typeof shaka !== 'undefined') {
+            clearInterval(timer);
+            callback()
+        } else if (elapsed >= timeout) {
+            clearInterval(timer);
+            callback();
+        }
+    }, interval);
+    
+}
+
+function cms_video_init(){
 	
 	var $cms_video = $('[data-cms_video]')
 	
@@ -165,32 +191,58 @@ function video_init(){
 		
 		var $video = $('<div class="cms_video" style="width: 100%; height: 100%; position: relative; ">' 
 			+ '<video style="max-width: 100%; max-height: 100%; display: block; position: absolute; left: 50%; top: 50%; '
-			+ 'transform: translate(-50%, -50%); " src="' + video_url + '" '
+			+ 'transform: translate(-50%, -50%); " ' // src="' + video_url + '" '
 			+ 'autoplay="autoplay" muted="muted" loop="loop" playsinline="playsinline">'
 			+ '</div>')
-			
-		$this.empty().append($video);
+
 		$this.css({'background-image':''})
+
+		cms_video_waitshaka(() => {
 		
+			$this.empty().append($video);
+		
+			var $video_el = $('video', $this)
+			
+			if ($this.data('cms_video_manifest') && typeof shaka !== 'undefined' && shaka.Player.isBrowserSupported()) {
+			
+	            var player = new shaka.Player();
+	            player.configure({ abr: { enabled: true, }, restrictions: {maxWidth: (parseInt($this.data('cms_video_width')) || Infinity), } });
+	
+	            player.attach($video_el[0]).then(() => {
+	            	return player.load($this.data('cms_video_manifest')).catch(function (err) {
+	            		console.log('fallback: manifest fail ' + $this.data('cms_video_manifest'))
+	                	cms_video_fallback($video_el, video_url);
+	            	})
+	            })
+	        
+	        } else {
+	        
+	            console.log('fallback: ' + $this.data('cms_video'))
+	            cms_video_fallback($video_el, video_url);
+	        
+	        }
+			
+		})
+
 	})
 	
 }
 
-function video_resize(){
+function cms_video_resize(){
 	
 }
 
-function video_scroll(){
+function cms_video_scroll(){
 	
 }
 
 $(document).ready(function() {
 	
-	$(window).on('resize.cms', video_resize)
-	$(window).on('scroll.cms', video_scroll)
+	$(window).on('resize.cms', cms_video_resize)
+	$(window).on('scroll.cms', cms_video_scroll)
 	
-	video_init()
-	video_resize()
-	video_scroll()
+	cms_video_init()
+	cms_video_resize()
+	cms_video_scroll()
 
 })

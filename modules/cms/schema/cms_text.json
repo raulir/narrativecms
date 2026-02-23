@@ -1,0 +1,13 @@
+{
+  "table": "cms_text",
+  "engine": "InnoDB",
+  "charset": "utf8mb4",
+  "collation": "utf8mb4_general_ci",
+  "columns": {
+    "cms_text_id": { "type": "VARCHAR", "constraint": 50, "null": false },
+    "text": { "type": "MEDIUMTEXT", "null": false }
+  },
+  "indexes": {
+    "cms_text_id": { "columns": ["cms_text_id"] }
+  }
+}

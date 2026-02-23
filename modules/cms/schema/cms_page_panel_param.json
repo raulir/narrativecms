@@ -1,0 +1,20 @@
+{
+  "table": "cms_page_panel_param",
+  "engine": "InnoDB",
+  "charset": "utf8mb4",
+  "collation": "utf8mb4_general_ci",
+  "columns": {
+    "cms_page_panel_param_id": { "type": "INT", "constraint": 10, "unsigned": true, "null": false, "auto_increment": true },
+    "cms_page_panel_id": { "type": "INT", "constraint": 10, "unsigned": true, "null": false },
+    "language": { "type": "VARCHAR", "constraint": 2, "null": false, "default": "" },
+    "name": { "type": "VARCHAR", "constraint": 50, "null": false },
+    "value": { "type": "MEDIUMTEXT", "null": false },
+    "search": { "type": "INT", "constraint": 10, "unsigned": true, "null": false }
+  },
+  "indexes": {
+    "PRIMARY": { "columns": ["cms_page_panel_param_id"], "type": "primary" },
+    "search_idx": { "columns": ["search"] },
+    "value_idx": { "columns": ["value"], "length": 10 },
+    "cms_page_panel_idx": { "columns": ["cms_page_panel_id", "language", "name"], "type": "unique" }
+  }
+}

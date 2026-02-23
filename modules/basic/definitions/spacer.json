@@ -1,7 +1,7 @@
 {
     "version": "2",
     "item": [
-         {
+        {
             "type": "text",
             "name": "height",
             "label": "Height",

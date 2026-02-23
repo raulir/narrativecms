@@ -36,20 +36,24 @@ class cms_images_upload extends CI_Controller {
 				mkdir($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'));
 			}
 
-			$filename = $this->cms_image_model->create_cms_image(date('Y').'/'.date('m').'/', $new_image, $category);
+			$filedata = $this->cms_image_model->create_cms_image(date('Y').'/'.date('m').'/', $new_image, $category);
 
 			// delete existing images
-			if (file_exists($GLOBALS['config']['upload_path'].$filename)){
-				$this->cms_image_model->delete_cms_image_by_filename($filename, false);
+			if (file_exists($GLOBALS['config']['upload_path'].$filedata['filename'])){
+				$this->cms_image_model->delete_cms_image_by_filename($filedata['filename'], false);
 			}
-			if (is_dir($GLOBALS['config']['upload_path'].$filename.'.data')){
-				array_map('unlink', glob($GLOBALS['config']['upload_path'].$filename.'.data'.'/*.*'));
-				rmdir($GLOBALS['config']['upload_path'].$filename.'.data');
+			if (is_dir($GLOBALS['config']['upload_path'].$filedata['filename'].'.data')){
+				array_map('unlink', glob($GLOBALS['config']['upload_path'].$filedata['filename'].'.data'.'/*.*'));
+				rmdir($GLOBALS['config']['upload_path'].$filedata['filename'].'.data');
 			}
 
-			rename($GLOBALS['config']['upload_path'].$new_image, $GLOBALS['config']['upload_path'].$filename);
-			if (is_dir($GLOBALS['config']['upload_path'].$filename.'.data')){			
-				rename($GLOBALS['config']['upload_path'].$new_image.'.data', $GLOBALS['config']['upload_path'].$filename.'.data');
+			rename($GLOBALS['config']['upload_path'].$new_image, $GLOBALS['config']['upload_path'].$filedata['filename']);
+			if (is_dir($GLOBALS['config']['upload_path'].$filedata['filename'].'.data')){			
+				rename($GLOBALS['config']['upload_path'].$new_image.'.data', $GLOBALS['config']['upload_path'].$filedata['filename'].'.data');
+			}
+			
+			if ($filedata['type'] == 'video'){
+				$this->cms_image_model->video_add_queue($filedata['cms_image_id']);
 			}
 			
 		}

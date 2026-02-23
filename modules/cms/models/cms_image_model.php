@@ -139,6 +139,97 @@ class cms_image_model extends CI_Model {
 		return $return;
 
 	}
+	
+	function get_video_metadata($videofile) {
+		
+		$ffprobe_name = str_replace('<filename>', 'ffprobe', $GLOBALS['config']['ffmpeg']);
+		
+		$command = $ffprobe_name.' -v quiet -print_format json -show_format -show_streams '.escapeshellarg($videofile);
+		$output = shell_exec($command);
+		$json = json_decode($output, true);
+		
+		$video_stream = null;
+		foreach ($json['streams'] as $stream) {
+			if ($stream['codec_type'] === 'video') {
+				$video_stream = $stream;
+				break;
+			}
+		}
+		if (!$video_stream) {
+			throw new Exception('No video stream found.');
+		}
+	
+		$width = $video_stream['width'];
+		$height = $video_stream['height'];
+		$bitrate = $video_stream['bit_rate'] ?? $json['format']['bit_rate'] ?? 0;
+		
+		$bit_depth = $video_stream['bits_per_raw_sample'] ?? $video_stream['pix_fmt'] ?? null;
+		if (!$bit_depth && isset($video_stream['pix_fmt'])) {
+			if (preg_match('/(\d+)le$/', $video_stream['pix_fmt'], $m)) {
+				$bit_depth = (int)$m[1];
+			} elseif (strpos($video_stream['pix_fmt'], '10') !== false) {
+				$bit_depth = 10;
+			} else {
+				$bit_depth = 8;
+			}
+		}
+	
+		return [
+				'width' => $width,
+				'height' => $height,
+				'bitrate_kbps' => round($bitrate / 1000),
+				'bit_depth' => $bit_depth,
+		];
+	}
+	
+	function video_add_queue($video_id){
+		
+		$sql = "select * from cms_image where cms_image_id = ? ";
+		$query = $this->db->query($sql, [$video_id, ]);
+		$video = $query->result_array()[0];
+
+		$metadata = $this->get_video_metadata($GLOBALS['config']['upload_path'].$video['filename']);
+		
+		$queue_filename = $GLOBALS['config']['base_path'].'cache/video_queue.json';
+		
+		if (file_exists($queue_filename)){
+			$queue = json_decode(file_get_contents($queue_filename), true);
+		} else {
+			$queue = [];
+		}
+		
+		$ladder = [
+				['width' => 320, 'stdbr' => 150, 'crf' => 32, 'audio_br' => '32k',],
+				['width' => 640, 'stdbr' => 500, 'crf' => 30, 'audio_br' => '64k',],
+				['width' => 1280, 'stdbr' => 2000, 'crf' => 28, 'audio_br' => '96k',],
+				['width' => 1920, 'stdbr' => 4000, 'crf' => 26, 'audio_br' => '128k',],
+				['width' => 3840, 'stdbr' => 10000, 'crf' => 24, 'audio_br' => '192k',],
+		];
+		
+		$video_todo = [
+				'ladder' => [],
+				'videofile' => $GLOBALS['config']['upload_path'].$video['filename'],
+				'target_folder' => $GLOBALS['config']['upload_path'].$video['filename'].'.data/'
+		];
+		
+		foreach ($ladder as $step){
+			if ($step['width'] < $metadata['width']){
+				$video_todo['ladder'][] = $step;
+			} else {
+				$video_todo['ladder'][] = $step;
+				break;
+			}
+		}
+		
+		foreach($video_todo['ladder'] as $i => $step){
+			$video_todo['ladder'][$i]['br'] = round($step['stdbr'] * 1.5 * $metadata['height'] / $metadata['width']).'k';
+			$video_todo['ladder'][$i]['profile'] = $metadata['bit_depth'] == 10 ? 'main10' : 'main';
+		}
+		
+		$queue[] = $video_todo;
+		file_put_contents($queue_filename, json_encode($queue, JSON_PRETTY_PRINT));
+		
+	}
 
 	function create_cms_image($dir, $name_data, $category){
 
@@ -205,8 +296,9 @@ class cms_image_model extends CI_Model {
 
 		$sql = "insert into cms_image set type = ? , name = ? , filename = ? , category = ? , hash = '', meta = '', keyword = '' ";
 		$this->db->query($sql, [$type, $name_data, $filename, $category, ]);
+		$insert_id = $this->db->insert_id();
 
-		return $filename;
+		return ['filename' => $filename, 'type' => $type, 'cms_image_id' => $insert_id, ];
 
 	}
 

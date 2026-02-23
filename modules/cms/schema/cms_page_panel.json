@@ -1,0 +1,21 @@
+{
+  "table": "cms_page_panel",
+  "engine": "InnoDB",
+  "charset": "utf8mb4",
+  "collation": "utf8mb4_general_ci",
+  "columns": {
+    "cms_page_panel_id": { "type": "INT", "constraint": 10, "unsigned": true, "null": false, "auto_increment": true },
+    "cms_page_id": { "type": "INT", "constraint": 10, "unsigned": true, "null": false },
+    "parent_id": { "type": "INT", "constraint": 10, "unsigned": true, "null": false },
+    "show": { "type": "INT", "constraint": 10, "unsigned": true, "null": false },
+    "sort": { "type": "INT", "constraint": 10, "unsigned": true, "null": false },
+    "title": { "type": "VARCHAR", "constraint": 100, "null": false },
+    "panel_name": { "type": "VARCHAR", "constraint": 50, "null": false },
+    "submenu_anchor": { "type": "VARCHAR", "constraint": 50, "null": false },
+    "submenu_title": { "type": "VARCHAR", "constraint": 100, "null": false }
+  },
+  "indexes": {
+    "PRIMARY": { "columns": ["cms_page_panel_id"], "type": "primary" },
+    "page_idx": { "columns": ["cms_page_id"] }
+  }
+}

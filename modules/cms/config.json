@@ -78,6 +78,13 @@
 			"parent":"cms",
 			"access":"cms_cms",
 			"url":"admin/update/"
+		},
+		{
+			"id":"cms_schema",
+			"name":"Schema",
+			"parent":"cms",
+			"access":"cms_cms",
+			"url":"admin/schema/"
 		}
 	],
 	"layouts":[
@@ -162,6 +169,14 @@
 		{
 			"id":"cms_log_rotate",
 			"name":"CMS log rotate",
+			"flags":[
+				"hidden",
+				"cron"
+			]
+		},
+		{
+			"id":"cms_video_encode",
+			"name":"CMS video encode",
 			"flags":[
 				"hidden",
 				"cron"

@@ -183,6 +183,23 @@ class admin extends CI_Controller {
 		 
 	}
 	
+	function schema($param = ''){
+	
+		// set page config
+		$page_config = [
+				['position' => 'header', 'panel' => 'cms/cms_user', ],
+				['position' => 'header', 'panel' => 'cms/cms_menu', ],
+				['position' => 'main', 'panel' => 'cms/cms_schema', ],
+		];
+	
+		// render panels
+		$panel_data = $this->render($page_config);
+	
+		// output to layout
+		$this->output('cms/admin', 'admin/search', $panel_data);
+			
+	}
+	
 	function cssjs($param = ''){
 	
 		// set page config

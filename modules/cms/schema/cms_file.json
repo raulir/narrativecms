@@ -1,0 +1,20 @@
+{
+  "table": "cms_file",
+  "engine": "InnoDB",
+  "charset": "utf8mb4",
+  "collation": "utf8mb4_general_ci",
+  "columns": {
+    "cms_file_id": { "type": "INT", "constraint": 10, "unsigned": true, "null": false, "auto_increment": true },
+    "cms_user_id": { "type": "INT", "constraint": 10, "unsigned": true, "null": false },
+    "sort": { "type": "INT", "constraint": 10, "unsigned": true, "null": false },
+    "filename": { "type": "VARCHAR", "constraint": 100, "null": false },
+    "name": { "type": "VARCHAR", "constraint": 100, "null": false },
+    "icon": { "type": "VARCHAR", "constraint": 100, "null": false },
+    "title": { "type": "VARCHAR", "constraint": 500, "null": false },
+    "date_posted": { "type": "DATETIME", "null": false }
+  },
+  "indexes": {
+    "PRIMARY": { "columns": ["cms_file_id"], "type": "primary" },
+    "user_id": { "columns": ["cms_user_id"] }
+  }
+}

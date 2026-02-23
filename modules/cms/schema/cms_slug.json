@@ -1,0 +1,15 @@
+{
+  "table": "cms_slug",
+  "engine": "InnoDB",
+  "charset": "utf8mb4",
+  "collation": "utf8mb4_general_ci",
+  "columns": {
+    "cms_slug_id": { "type": "VARCHAR", "constraint": 100, "null": false },
+    "target": { "type": "VARCHAR", "constraint": 100, "null": false },
+    "status": { "type": "INT", "constraint": 10, "unsigned": true, "null": false }
+  },
+  "indexes": {
+    "PRIMARY": { "columns": ["cms_slug_id"], "type": "primary" },
+    "target_idx": { "columns": ["target"], "length": 10 }
+  }
+}

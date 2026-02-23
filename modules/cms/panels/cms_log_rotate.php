@@ -26,10 +26,16 @@ class cms_log_rotate extends CI_Controller {
 		
 		$lines = file($filename);
 		
-		$errors = array();
+		$errors = [];
+		$skipped = [];
 		
 		foreach($lines as $line){
 		
+			if (!stristr($line, $explode_str)){
+				$skipped[] = $line;
+				continue;
+			}
+			
 			list($time, $error_text) = explode($explode_str, $line);
 		
 			$error_found = 0;
@@ -79,6 +85,9 @@ class cms_log_rotate extends CI_Controller {
 		foreach($errors as $error) {
 			$text .= sprintf('%7s', $error['count']).' - '.$error['times'][(count($error['times']) - 1)].' - '.$error['message'];
 		}
+		
+		$text .= "\n\nSkipped:\n\n";
+		$text .= implode("\n", $skipped);
 
 		// add stats to archive too
 		file_put_contents($GLOBALS['config']['base_path'].'cache/php_errors_'.date('Y-m-d_H-i-s').'.log', $text);

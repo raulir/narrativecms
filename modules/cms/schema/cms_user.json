@@ -1,0 +1,18 @@
+{
+  "table": "cms_user",
+  "engine": "InnoDB",
+  "charset": "utf8mb4",
+  "collation": "utf8mb4_general_ci",
+  "columns": {
+    "cms_user_id": { "type": "INT", "constraint": 10, "unsigned": true, "null": false, "auto_increment": true },
+    "username": { "type": "VARCHAR", "constraint": 50, "null": false },
+    "password": { "type": "VARCHAR", "constraint": 50, "null": false },
+    "access": { "type": "VARCHAR", "constraint": 250, "null": false },
+    "name": { "type": "VARCHAR", "constraint": 50, "null": false },
+    "email": { "type": "VARCHAR", "constraint": 50, "null": false },
+    "sort": { "type": "INT", "constraint": 10, "unsigned": true, "null": false }
+  },
+  "indexes": {
+    "PRIMARY": { "columns": ["cms_user_id"], "type": "primary" }
+  }
+}

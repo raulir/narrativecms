@@ -1,0 +1,25 @@
+{
+  "table": "cms_image",
+  "engine": "InnoDB",
+  "charset": "utf8mb4",
+  "collation": "utf8mb4_general_ci",
+  "columns": {
+    "cms_image_id": { "type": "INT", "constraint": 10, "unsigned": true, "null": false, "auto_increment": true },
+    "name": { "type": "VARCHAR", "constraint": 50, "null": false },
+    "type": { "type": "VARCHAR", "constraint": 50, "null": false, "default": "", "charset": "ascii", "collation": "ascii_general_ci" },
+    "filename": { "type": "VARCHAR", "constraint": 100, "null": false },
+    "hash": { "type": "VARCHAR", "constraint": 40, "null": false },
+    "title": { "type": "VARCHAR", "constraint": 500, "null": false, "default": "" },
+    "description": { "type": "VARCHAR", "constraint": 500, "null": false, "default": "" },
+    "category": { "type": "VARCHAR", "constraint": 30, "null": false },
+    "meta": { "type": "MEDIUMTEXT", "null": false },
+    "keyword": { "type": "VARCHAR", "constraint": 200, "null": false }
+  },
+  "indexes": {
+    "PRIMARY": { "columns": ["cms_image_id"], "type": "primary" },
+    "filename_idx": { "columns": ["filename"], "length": 10 },
+    "category_idx": { "columns": ["category"], "length": 10 },
+    "type_idx": { "columns": ["type"], "length": 3 },
+    "hash_idx": { "columns": ["hash"] }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "table": "cms_search_cache",
+  "engine": "InnoDB",
+  "charset": "utf8mb4",
+  "collation": "utf8mb4_general_ci",
+  "columns": {
+    "term": { "type": "VARCHAR", "constraint": 30, "null": false },
+    "cached_time": { "type": "INT", "constraint": 11, "null": false },
+    "result": { "type": "MEDIUMTEXT", "null": false }
+  },
+  "indexes": {
+    "PRIMARY": { "columns": ["term"], "type": "primary" }
+  }
+}
