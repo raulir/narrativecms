@@ -1,3 +1,4 @@
+var video_debug = true
 
 function video_play($video, params){
 
@@ -153,76 +154,243 @@ function video_pause($video){
 	
 }
 
-function cms_video_fallback($video_el, url){
+function cms_video_fallback($video_el){
+
+	var url = $video_el.closest('[data-cms_video]').data('cms_video')
 	$video_el.attr('src', url)
 	$video_el[0].play()
+	
 }
 
-function cms_video_waitshaka(callback, timeout = 1000, interval = 20) {
+function cms_video_waitdash(callback, timeout = 1000, interval = 20) {
 
-	if (typeof shaka !== 'undefined') {
+	if (typeof dashjs !== 'undefined') {
 		callback()
-		return;
+		return
 	}
 
     let elapsed = 0;
     const timer = setInterval(() => {
-        elapsed += interval;
-        if (typeof shaka !== 'undefined') {
-            clearInterval(timer);
+        elapsed += interval
+        if (typeof dashjs !== 'undefined') {
+            clearInterval(timer)
             callback()
         } else if (elapsed >= timeout) {
-            clearInterval(timer);
-            callback();
+            clearInterval(timer)
+            callback()
         }
-    }, interval);
+    }, interval)
     
 }
 
+function cms_video_cleanup($element) {
+    $element.find('video.cms_video_player').each(function() {
+        if (this.player) {
+            if (typeof this.player.destroy === 'function') {
+                this.player.destroy()
+            } else if (typeof this.player.reset === 'function') {
+                this.player.reset()
+            }
+            this.player = null
+        }
+    })
+}
+
+function cms_video_wrapper($this){
+
+	var fit = $this.css('background-size') || 'cover'
+
+	var $video_wrapper = $('<div class="cms_video">')
+        .css({
+            width: '100%',
+            height: '100%',
+            position: 'relative',
+            overflow: 'hidden'   // safety for cover
+        })
+
+    var video_styles = {
+        position: 'absolute',
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
+        'max-width': 'none',     // important override
+        'max-height': 'none'
+    }
+
+    if (fit === 'cover' || fit === '100% 100%' || fit === 'cover cover') {
+        video_styles.width = '100%'
+        video_styles.height = '100%'
+        video_styles['object-fit'] = 'cover'
+        // optional: read background-position later and set object-position
+        // e.g. var pos = $this.css('background-position')
+        // video_styles['object-position'] = pos
+    } else {
+        // contain or other → keep your original centred + max-*
+        video_styles['max-width'] = '100%'
+        video_styles['max-height'] = '100%'
+        // no object-fit needed, acts like contain by default
+    }
+ 
+    var $video = $('<video class="cms_video_player" autoplay="autoplay" muted="muted" loop="loop" playsinline="playsinline">')
+        .css(video_styles)		
+        
+    $video_wrapper.append($video)
+        	
+	return $video_wrapper
+
+}
+
 function cms_video_init(){
-	
+
 	var $cms_video = $('[data-cms_video]')
 	
 	$cms_video.each(function() {
 		
 		var $this = $(this)
-		var video_url = $this.data('cms_video')
-		var fit = $this.css('background-size')
 		
-		var $video = $('<div class="cms_video" style="width: 100%; height: 100%; position: relative; ">' 
-			+ '<video style="max-width: 100%; max-height: 100%; display: block; position: absolute; left: 50%; top: 50%; '
-			+ 'transform: translate(-50%, -50%); " ' // src="' + video_url + '" '
-			+ 'autoplay="autoplay" muted="muted" loop="loop" playsinline="playsinline">'
-			+ '</div>')
+		var $video = cms_video_wrapper($this)
 
-		$this.css({'background-image':''})
+		if ($this.data('cms_video_manifest')){
 
-		cms_video_waitshaka(() => {
+			cms_video_waitdash(() => {
+
+				$this.css({'background-image':''})
+				$this.empty().append($video);
+				var $video_el = $('video', $this)
+			
+				var video_width = parseInt($this.data('cms_video_width'))
 		
+				var player = dashjs.MediaPlayer().create()
+
+				player.on(dashjs.MediaPlayer.events.ERROR, function(e) {
+                	console.error('dash.js error:', e)
+                	if (e.error.code === dashjs.MediaPlayer.errors.MANIFEST_PARSING_ERROR ||
+                    	e.error.code === dashjs.MediaPlayer.errors.MANIFEST_LOADED_WITH_ERRORS) {
+	                    console.log('Loading issue - trying native fallback')
+	                    cms_video_fallback($video_el)
+	                }
+            	})
+            	
+            	/*== image area width rule ==*/
+
+				var MaxWidthRule;
+				
+				// Rule that limits video representations to max width (e.g. 640 px on small panels)
+				function MaxWidthRuleClass() {
+				    let factory = dashjs.FactoryMaker;
+				    let SwitchRequest = factory.getClassFactoryByName('SwitchRequest');
+				    let context = this.context;
+				    let instance;
+				
+				    function setup() {
+				    }
+				
+				    function getSwitchRequest(rulesContext) {
+				        let mediaInfo = rulesContext.getMediaInfo();
+				        if (!mediaInfo || mediaInfo.type !== 'video') {
+				            return SwitchRequest(context).create();
+				        }
+				
+				        let representations = mediaInfo.representations;
+				        let max_width = Math.max(video_width, 500);  // change this dynamically if needed (see below)
+				
+				        // filter representations by width
+				        let filtered = representations.filter(function(rep) {
+				            return (rep.width || 0) <= max_width;
+				        });
+				
+				        // if no reps match, keep all (fallback)
+				        if (filtered.length === 0) {
+				            filtered = representations;
+				        }
+				
+				        // get current representation
+				        let currentRep = rulesContext.getCurrentRepresentation();
+				
+				        // if current is already in filtered, no need to switch
+				        if (filtered.some(rep => rep.id === currentRep.id)) {
+				            return SwitchRequest(context).create();
+				        }
+				
+				        // choose the highest bitrate from filtered reps (or lowest, or any logic)
+				        let bestRep = filtered.reduce((prev, curr) => {
+				            return (curr.bandwidth > prev.bandwidth) ? curr : prev;
+				        }, filtered[0]);
+				
+				        let switchRequest = SwitchRequest(context).create();
+				        switchRequest.representation = bestRep;
+				        switchRequest.reason = 'Limited to max width ' + max_width + ' px';
+				        switchRequest.priority = SwitchRequest.PRIORITY.STRONG;
+				
+				        return switchRequest;
+				    }
+				
+				    instance = {
+				        getSwitchRequest: getSwitchRequest
+				    };
+				
+				    setup();
+				    return instance;
+				}
+				
+				MaxWidthRuleClass.__dashjs_factory_name = 'MaxWidthRule';
+				MaxWidthRule = dashjs.FactoryMaker.getClassFactory(MaxWidthRuleClass);
+
+				player.addABRCustomRule(
+				    'qualitySwitchRules',  // string literal, lowercase
+				    'MaxWidthRule',       // unique name for your rule
+				    MaxWidthRule
+				)
+
+				/** end **/
+				
+				var manifest_url = $this.data('cms_video_manifest')
+            	player.initialize($video_el[0], manifest_url, true)
+            	
+            	setup_cms_video_loop(player, $video_el[0])
+
+				// keep looping
+				function setup_cms_video_loop(player, video) {
+				
+					var $video = $(video)
+				    $video.off('ended.cms timeupdate.cms')
+				
+				    // Option A - ended event (preferred when it fires reliably)
+				    $video.on('ended.cms', function() {
+				        video.currentTime = 0
+				        video.play().catch(e => console.warn('play after ended failed', e))
+				        console.log('native')
+				    })
+				
+				    // Option B - timeupdate fallback (catches cases where ended doesn't fire)
+				    $video.on('timeupdate.cms', function () {
+				        if (video.duration > 0 && video.currentTime >= video.duration - 0.2) {  // 200ms threshold to catch early
+				            video.currentTime = 0
+				            video.play().catch(e => console.warn('play after timeupdate failed', e))
+				        console.log('timeupdate')
+				        }
+				    })
+				
+				    // optional: dash.js native event (sometimes more precise for VOD)
+				    player.on(dashjs.MediaPlayer.events.PLAYBACK_ENDED, function () {
+				        player.seek(0)
+				        console.log('dash')
+				    })
+				}
+	        
+	        }) // end of waitdash()
+			
+		} else {
+		
+			if (video_debug) console.log('No video manifest url - trying native fallback')
+			
+			$this.css({'background-image':''})
 			$this.empty().append($video);
-		
 			var $video_el = $('video', $this)
-			
-			if ($this.data('cms_video_manifest') && typeof shaka !== 'undefined' && shaka.Player.isBrowserSupported()) {
-			
-	            var player = new shaka.Player();
-	            player.configure({ abr: { enabled: true, }, restrictions: {maxWidth: (parseInt($this.data('cms_video_width')) || Infinity), } });
-	
-	            player.attach($video_el[0]).then(() => {
-	            	return player.load($this.data('cms_video_manifest')).catch(function (err) {
-	            		console.log('fallback: manifest fail ' + $this.data('cms_video_manifest'))
-	                	cms_video_fallback($video_el, video_url);
-	            	})
-	            })
-	        
-	        } else {
-	        
-	            console.log('fallback: ' + $this.data('cms_video'))
-	            cms_video_fallback($video_el, video_url);
-	        
-	        }
-			
-		})
+
+	        cms_video_fallback($video_el)
+	    
+	    }
 
 	})
 	

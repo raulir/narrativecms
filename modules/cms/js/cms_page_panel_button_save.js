@@ -17,7 +17,7 @@ function cms_page_panel_save(params){
 			}
 		}
 		
-		var data_to_submit = serialize_form('.admin_form')
+		var data_to_submit = cms_page_panel_save_serialize_form('.admin_form')
 		
 		// add do and language
 		data_to_submit['do'] = 'cms_page_panel_save';
@@ -76,6 +76,32 @@ function cms_page_panel_save(params){
 		
 	}
 	
+}
+
+var cms_page_panel_save_serialize_form = function(form_selector) {
+
+	var result = {}
+
+    $(form_selector).serializeArray().forEach(function(item) {
+        var name = item.name
+        var value = item.value
+
+        if (!name) return
+
+        if (name.slice(-2) === '[]') {
+            var clean_name = name.slice(0, -2)
+
+            if (!Array.isArray(result[clean_name])) {
+                result[clean_name] = []
+            }
+            result[clean_name].push(value)
+        } else {
+            result[name] = value
+        }
+    })
+
+    return result
+    
 }
 
 function cms_page_panel_button_save_init(){

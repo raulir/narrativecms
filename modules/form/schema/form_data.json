@@ -1,0 +1,48 @@
+{
+  "table": "form_data",
+  "engine": "InnoDB",
+  "charset": "utf8mb4",
+  "collation": "utf8mb4_general_ci",
+  "columns": {
+    "webform_data_id": {
+      "type": "INT",
+      "constraint": 10,
+      "unsigned": true,
+      "null": false,
+      "auto_increment": true
+    },
+    "cms_page_panel_id": {
+      "type": "INT",
+      "constraint": 10,
+      "unsigned": true,
+      "null": false
+    },
+    "email": {
+      "type": "VARCHAR",
+      "constraint": 100,
+      "null": false
+    },
+    "data": {
+      "type": "TEXT",
+      "null": false
+    },
+    "code": {
+      "type": "VARCHAR",
+      "constraint": 100,
+      "null": false
+    }
+  },
+  "indexes": {
+    "PRIMARY": {
+      "columns": ["webform_data_id"],
+      "type": "primary"
+    },
+    "cms_page_panel_idx": {
+      "columns": ["cms_page_panel_id"]
+    },
+    "email_idx": {
+      "columns": ["email"],
+      "length": 20
+    }
+  }
+}

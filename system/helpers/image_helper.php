@@ -136,16 +136,19 @@ if ( !function_exists('_i')) {
 				$video_file = $GLOBALS['config']['upload_url'].$image;
 			}
 
-			$params['video'] = ' data-cms_video="'.$GLOBALS['config']['upload_url'].$image.'" ';
+			$params['video'] = ' data-cms_video="'.$video_file.'" ';
 			
 			if ($params['width']){
-				$params['video'] .= ' data-cms_video_width="'.((int)max(($params['width']*$GLOBALS['config']['images_2x']), 500)).'" ';
+				$params['video'] .= ' data-cms_video_width="'.((int)max(($params['width']*$GLOBALS['config']['images_2x']), 360)).'" ';
 			}
 			
 			if (file_exists($GLOBALS['config']['upload_path'].$image.'.data/manifest.mpd')){
 				$params['video'] .= ' data-cms_video_manifest="'.$GLOBALS['config']['upload_url'].$image.'.data/manifest.mpd" ';
 			}
-
+			if (file_exists($GLOBALS['config']['upload_path'].$image.'.data/libx264/manifest.mpd')){
+				$params['video'] .= ' data-cms_video_manifest_old="'.$GLOBALS['config']['upload_url'].$image.'.data/libx264/manifest.mpd" ';
+			}
+			
 			if (file_exists($GLOBALS['config']['upload_path'].$image.'.data/poster.jpg')){
 				
 			} else {
@@ -154,7 +157,7 @@ if ( !function_exists('_i')) {
 						($GLOBALS['config']['base_site'] ?? '').$GLOBALS['config']['base_url'].'modules/cms/img/cms_video_loading.png); '.$params['css'].'" ');
 				
 				$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_video.js';
-				$GLOBALS['_panel_js'][] = 'modules/cms/js/shaka/shaka.min.js';
+				$GLOBALS['_panel_js'][] = 'modules/cms/js/dash/dash.min.js';
 				
 				return ['image' => $image, 'height' => 0, 'width' => 0, ];
 			
@@ -429,6 +432,27 @@ if ( !function_exists('_i')) {
 			
 		}
 
+	}
+	
+	function _delete_directory($directory) {
+		if (!is_dir($directory)) {
+			return false;
+		}
+	
+		$objects = scandir($directory);
+		foreach ($objects as $object) {
+			if ($object != '.' && $object != '..') {
+				$full_path = $directory.'/'.$object;
+	
+				if (is_dir($full_path)) {
+					_delete_directory($full_path);
+				} else {
+					unlink($full_path);
+				}
+			}
+		}
+	
+		return rmdir($directory);
 	}
 
 }

@@ -297,8 +297,10 @@ class cms_image_model extends CI_Model {
 		$sql = "insert into cms_image set type = ? , name = ? , filename = ? , category = ? , hash = '', meta = '', keyword = '' ";
 		$this->db->query($sql, [$type, $name_data, $filename, $category, ]);
 		$insert_id = $this->db->insert_id();
+		
+		$hash = $this->refresh_cms_image_hash($filename);
 
-		return ['filename' => $filename, 'type' => $type, 'cms_image_id' => $insert_id, ];
+		return ['filename' => $filename, 'type' => $type, 'cms_image_id' => $insert_id, 'hash' => $hash, ];
 
 	}
 
@@ -314,6 +316,11 @@ class cms_image_model extends CI_Model {
 		$image_names = $GLOBALS['config']['upload_path'].$name_a['dirname'].'/_'.$name_a['filename'].'.*.*';
 		foreach(glob($image_names) as $_filename) {
 			unlink($_filename);
+		}
+		
+		$directory = is_dir($GLOBALS['config']['upload_path'].$filename.'.data');
+		if (is_dir($directory)){
+			_delete_directory($directory);
 		}
 
 		if ($delete){ // TODO: here may be error!

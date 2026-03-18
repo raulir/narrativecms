@@ -177,6 +177,9 @@ function cms_images_load_images(page, limit, filename){
 	
 	$('.cms_images_paging_enabled').addClass('cms_images_paging_disabled').removeClass('cms_images_paging_enabled').off('click.cms');
 	$('.cms_images_image').css({'opacity':'0.5'});
+	if (typeof cms_video_cleanup == 'function'){
+		cms_video_cleanup($('.cms_images_area'))
+	}
 	
 	get_ajax_panel('cms/cms_images_page', cms_images_load_parameters, function(data){
 		
@@ -232,9 +235,7 @@ $(document).ready(function() {
 		$('.cms_images_new_image').click();
 	});
 	
-	/*
-	 * manipulates hidden image upload form
-	 */
+	// manipulates hidden image upload form
 	$('.cms_images_new_image').on('change.r', function(){
 		$('.cms_images_new_image').off('change.r');
 		cms_images_upload();

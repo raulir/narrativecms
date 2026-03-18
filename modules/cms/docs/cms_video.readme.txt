@@ -1,0 +1,10 @@
+Player uses dash.js (local modules/cms/js/dash/dash.min.js)
+Small containers (≤640 px) automatically limit max video width via custom ABR rule.
+Fallback to native <video> src happens only when both manifests fail.
+Normalised screen recordings are stored as normalised.mp4 inside .data folder.
+All video panels use data attributes: data-cms_video_manifest.
+Quality capping is based on actual rendered container width, not bandwidth.
+
+Todo:
+HEVC manifest is loaded first; AVC manifest is fallback on any error.
+Background encoding status can be monitored via log files in each video’s .data folder.

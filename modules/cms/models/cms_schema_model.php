@@ -274,27 +274,25 @@ class cms_schema_model extends Model {
 	// ====================== SQL BUILDERS ======================
 
 	private function _create_table($table, $def) {
-		$cols = [];
-		foreach ($def['columns'] as $name => $spec) {
-			$cols[] = $this->_build_column_definition($name, $spec);
-		}
-
-		$sql = "CREATE TABLE `{$table}` (\n  " . implode(",\n  ", $cols);
-
-		// indexes (except PRIMARY which is already in column if auto_increment)
-		if (!empty($def['indexes'])) {
-			foreach ($def['indexes'] as $idx_name => $spec) {
-				if ($idx_name !== 'PRIMARY') {
-					$sql .= ",\n  " . $this->_build_index_definition($idx_name, $spec);
-				}
-			}
-		}
-
-		$sql .= "\n) ENGINE=" . ($def['engine'] ?? 'InnoDB') .
-		        " DEFAULT CHARSET=" . ($def['charset'] ?? 'utf8mb4') .
-		        " COLLATE=" . ($def['collation'] ?? 'utf8mb4_general_ci');
-
-		return $this->_execute($sql);
+	    $cols = [];
+	    foreach ($def['columns'] as $name => $spec) {
+	        $cols[] = $this->_build_column_definition($name, $spec);
+	    }
+	
+	    $sql = "CREATE TABLE `{$table}` (\n " . implode(",\n ", $cols);
+	
+	    // Always add indexes — including PRIMARY
+	    if (!empty($def['indexes'])) {
+	        foreach ($def['indexes'] as $idx_name => $spec) {
+	            $sql .= ",\n " . $this->_build_index_definition($idx_name, $spec);
+	        }
+	    }
+	
+	    $sql .= "\n) ENGINE=" . ($def['engine'] ?? 'InnoDB') .
+	            " DEFAULT CHARSET=" . ($def['charset'] ?? 'utf8mb4') .
+	            " COLLATE=" . ($def['collation'] ?? 'utf8mb4_general_ci');
+	
+	    return $this->_execute($sql);
 	}
 
 	private function _add_column($table, $column, $spec, $def) {

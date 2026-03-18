@@ -39,12 +39,39 @@ class cms_video_encode extends CI_Controller {
 		$duration_sec = $json['format']['duration'] ?? 0;
 		$has_audio = false;
 		foreach ($json['streams'] as $stream) {
-			if (($stream['codec_type'] ?? '') === 'audio') {
-				$has_audio = true;
-				break;
-			}
+		    if (($stream['codec_type'] ?? '') === 'audio') {
+		        $has_audio = true;
+		        break;
+		    }
 		}
 
+		$is_screen = false;
+		
+		if (strpos(basename($todo['videofile']), 'screenrecording') !== false) {
+		    $is_screen = true;
+		} else if (isset($json['format']['tags']['encoder'])) {
+		    $encoder = strtolower($json['format']['tags']['encoder']);
+		    if (strpos($encoder, 'screen') !== false || strpos($encoder, 'lavf') !== false || strpos($encoder, 'obs') !== false) {
+		        $is_screen = true;
+		    }
+		} else if (isset($json['streams'][0]['avg_frame_rate'])) {
+		    $fr = $json['streams'][0]['avg_frame_rate'];
+		    if ($fr === '0/0' || strpos($fr, '1000') !== false) {   // vfr or weird numbers
+		        $is_screen = true;
+		    }
+		}
+		
+		if ($is_screen) {
+		    $new_videofile = $this->_normalise_video($todo['videofile'], $todo['target_folder']);
+		    if ($new_videofile !== $todo['videofile']) {
+		        // re-probe the normalised file (now it is clean/standard)
+		        $cmd = $ffprobe_name." -v quiet -print_format json -show_format -show_streams " . escapeshellarg($new_videofile);
+		        $json = json_decode(shell_exec($cmd), true);
+		        $duration_sec = $json['format']['duration'] ?? 0;
+		        $todo['videofile'] = $new_videofile;
+		    }
+		}
+	
 		// aspect ratio
 		$dar = '16:9';
 		foreach ($json['streams'] as $stream) {
@@ -68,8 +95,8 @@ class cms_video_encode extends CI_Controller {
 				break;
 			}
 		}
-		//list($source_ar_w, $source_ar_h) = explode(':', $dar);
 		
+		// 265
 		$filters     = [];
 		$maps        = [];
 		$varmap      = [];
@@ -77,16 +104,8 @@ class cms_video_encode extends CI_Controller {
 		$i           = 0;
 		
 		foreach ($todo['ladder'] as $step) {
-			// --- EXACT TARGET WIDTH & HEIGHT (both even) ---
-		    //$target_w = $step['width'];
-		    //$target_h = (int)floor($target_w * $source_ar_h / $source_ar_w);
-		
-		    // Force both even
-		    //if ($target_w % 2 == 1) $target_w--;
-		    //if ($target_h % 2 == 1) $target_h--;
 		    
 			$filters[] = "[0:v]scale={$step['width']}:-2:force_original_aspect_ratio=decrease,pad=ceil(iw/2)*2:ceil(ih/2)*2,setsar=1[v{$i}out]";
-			// $filters[] = "[0:v]scale={$target_w}:{$target_h}:force_original_aspect_ratio=decrease,setsar=1[v{$i}out]";
 
     		$maps[] = "-map \"[v{$i}out]\" " .
             "-aspect:v:{$i} {$dar} " .
@@ -96,9 +115,8 @@ class cms_video_encode extends CI_Controller {
 			"-crf:v:{$i} {$step['crf']} -preset medium " .
 			"-profile:v:{$i} {$step['profile']} " .
 			"-g 150 -keyint_min 150";
-		
-			// ---- audio (only if source has it) ----------------------------------
-			if ($has_audio) {
+
+    		if ($has_audio) {
 				$audio_maps[] = "-map a:0 -c:a:{$i} aac -b:a:{$i} {$step['audio_br']}";
 				$varmap[]     = "v:{$i},a:{$i}";
 			} else {
@@ -110,17 +128,79 @@ class cms_video_encode extends CI_Controller {
 		$adaptation = "id=0,streams=v" . ($has_audio ? " id=1,streams=a" : "");
 		
 		$cmd = $ffmpeg_name . " -y -i " . escapeshellarg($todo['videofile']) .
-			       " -filter_complex \"" . implode(';', $filters) . "\" " .
-			       implode(' ', $maps) . " " . implode(' ', $audio_maps) .
-			       " -var_stream_map \"" . implode(' ', $varmap) . "\" " .
-			       " -f dash -seg_duration 5 " .
-			       " -init_seg_name init-\$RepresentationID\$.m4s " .
-			       " -media_seg_name chunk-\$RepresentationID\$-\$Number%05d\$.m4s " .
-			       " -adaptation_sets \"{$adaptation}\" " .
-			       " -brand dash -write_prft 1 " .
-			       " -movflags +frag_keyframe+empty_moov " .
-			       escapeshellarg("{$todo['target_folder']}/manifest.mpd");
+	       " -filter_complex \"" . implode(';', $filters) . "\" " .
+	       implode(' ', $maps) . " " . implode(' ', $audio_maps) .
+	       " -var_stream_map \"" . implode(' ', $varmap) . "\" " .
+	       " -f dash -seg_duration 5 " .   // reliable timing control
+	       " -init_seg_name init-\$RepresentationID\$.m4s " .
+	       " -media_seg_name chunk-\$RepresentationID\$-\$Number%05d\$.m4s " .
+	       " -adaptation_sets \"{$adaptation}\" " .
+	       " -brand dash -write_prft 1 " .
+	       " -movflags +frag_keyframe+empty_moov " .
+	       " -use_template 1 -use_timeline 1 " .
+	       escapeshellarg("{$todo['target_folder']}/manifest.mpd");
+	       
+	    // 264
+	    
+       $avc_target_folder = $todo['target_folder'] . 'libx264/';
+       if (!is_dir($avc_target_folder)) {
+       		mkdir($avc_target_folder, 0755, true);
+       }
+       
+       $avc_filters = [];
+       $avc_maps = [];
+       $avc_audio_maps = [];
+       $avc_varmap = [];
+       $j = 0;
+       
+       foreach ($todo['ladder'] as $step) {
+       	$avc_filters[] = "[0:v]scale={$step['width']}:-2:force_original_aspect_ratio=decrease,pad=ceil(iw/2)*2:ceil(ih/2)*2,setsar=1[avc{$j}out]";
+       
+       	$avc_maps[] = "-map \"[avc{$j}out]\" " .
+       	"-c:v:{$j} libx264 -tag:v:{$j} avc1 " .
+       	"-b:v:{$j} " . (trim($step['br'], 'k') * 1.6) . "k " .           // AVC needs ~60% more bitrate
+       	"-maxrate:v:{$j} " . (trim($step['br'], 'k') * 1.6) . "k " .
+       	"-bufsize:v:{$j} " . (2 * (trim($step['br'], 'k') * 1.6)) . "k " .
+       	"-crf:v:{$j} " . ($step['crf'] + 2) . " -preset medium " .
+       	"-profile:v:{$j} main -level:v:{$j} 4.1 -pix_fmt yuv420p " .
+       	"-g 150 -keyint_min 75 " .
+       	"-aspect:v:{$j} {$dar}";
+       
+       	$avc_varmap[] = "v:{$j}";
+       
+       	$j++;
+       }
+       
+       // audio (only once, not duplicated per rep)
+       if ($has_audio) {
+       	foreach ($todo['ladder'] as $k => $step) {
+       		$avc_audio_maps[] = "-map a:0 -c:a:{$k} aac -b:a:{$k} {$step['audio_br']}";
+       		$avc_varmap[] = "v:{$k},a:{$k}";
+       	}
+       } else {
+       	foreach ($todo['ladder'] as $k => $step) {
+       		$avc_varmap[] = "v:{$k}";
+       	}
+       }
+       
+       $avc_adaptation = $has_audio ? "id=0,streams=v id=1,streams=a" : "id=0,streams=v";
+       
+       $avc_cmd = $ffmpeg_name . " -y -i " . escapeshellarg($todo['videofile']) .
+       " -filter_complex \"" . implode(';', $avc_filters) . "\" " .
+       implode(' ', $avc_maps) . " " . implode(' ', $avc_audio_maps) .
+       " -var_stream_map \"" . implode(' ', $avc_varmap) . "\" " .
+       " -f dash -seg_duration 5 " .
+       " -init_seg_name init-\$RepresentationID\$.m4s " .
+       " -media_seg_name chunk-\$RepresentationID\$-\$Number%05d\$.m4s " .
+       " -adaptation_sets \"{$avc_adaptation}\" " .
+       " -brand dash -write_prft 1 " .
+       " -movflags +frag_keyframe+empty_moov " .
+       " -use_template 1 -use_timeline 1 " .
+       escapeshellarg($avc_target_folder . 'manifest.mpd');
 
+	       
+	       
+	       
 		// fallback video 400kbps
 		$fallback_cmd = $ffmpeg_name." -y -i ".escapeshellarg($todo['videofile']).
 		" -vf \"scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2\"".
@@ -148,11 +228,18 @@ class cms_video_encode extends CI_Controller {
 		" -filter_complex \"{$concat}\" -map \"[outv]\" -loop 0 -final_delay 50".
 		" ".escapeshellarg("{$todo['target_folder']}/thumb.gif");
 		
-		// execute these:
+		// jpg cover thumbnail for loading
+		$jpg_cmd = $ffmpeg_name.'-i '.escapeshellarg($todo['videofile']).' -vf scale=300:-2 -frames:v 1 -q:v 5'.
+				escapeshellarg("{$todo['target_folder']}/cover.jpg");
 
-//		_print_r($pass1);
-//		_print_r($cmd_base);
-
+		// run jpg extract
+		exec($jpg_cmd . ' 2>&1', $output, $ret);
+		if ($ret !== 0) {
+			$msg = "jpg extract failed (exit $ret):\n" . implode("\n", $output);
+			unlink($queue_lockname);
+			throw new Exception("jpg extract failed: " . implode("\n", $output));
+		}
+		
 		// run main
 		exec($cmd . ' 2>&1', $output, $ret);
 		if ($ret !== 0) {
@@ -175,6 +262,14 @@ class cms_video_encode extends CI_Controller {
 			throw new Exception("GIF encoding failed: " . implode("\n", $out_gif));
 		}
 		
+		// run libx264/avc encode
+		exec($avc_cmd . ' 2>&1', $avc_output, $avc_ret);
+		if ($avc_ret !== 0) {
+			$msg = "AVC encoding failed (exit $avc_ret):\n" . implode("\n", $avc_output);
+			unlink($queue_lockname);
+			throw new Exception("AVC encoding failed: " . implode("\n", $avc_output));
+		}
+		
 		// codec name fix for x265
 		$mpd_file = "{$todo['target_folder']}/manifest.mpd";
 		$mpd = file_get_contents($mpd_file);
@@ -186,32 +281,7 @@ class cms_video_encode extends CI_Controller {
 		}
 		
 		file_put_contents($mpd_file, $mpd);
-		
-		/* TODO:
-		
-				$codec_map = [
-		    'libx264' => 'avc1.64001F',   // H.264 High
-		    'libx265' => 'hvc1.1.6.L63.90',
-		    'libsvtav1' => 'av01.0.04M.08',
-		];
-		
-		$codec = $codec_map[$step['codec'] ?? 'libx265'];
-		$mpd = preg_replace('/codecs=""/', "codecs=\"{$codec}\"", $mpd);
-		
-		$level_map = [
-		    240  => 'L30',  // 240p
-		    360  => 'L40',
-		    480  => 'L50',
-		    720  => 'L60',
-		    1080 => 'L63',
-		    2160 => 'L81',
-		];
-		$width = $step['width'];
-		$level = $level_map[$width] ?? 'L63';
-		$codecs = "hvc1.1.6.{$level}.90";
-		
-		 */
-		
+
 		array_shift($queue);
 		$queue = array_values($queue);
 		
@@ -222,61 +292,30 @@ class cms_video_encode extends CI_Controller {
 		return [];
 				
 	}
+	
+	function _normalise_video($input_file, $target_folder) {
+		
+		$normalised_file = $target_folder.str_replace('.mp4', '_nrm.mp4', basename($input_file));
+		$ffmpeg_name = str_replace('<filename>', 'ffmpeg', $GLOBALS['config']['ffmpeg']);
+
+		// reencode to standard AVC + constant frame rate, shrink to max 1080p if larger
+		$normalise_cmd = $ffmpeg_name . " -y -i " . escapeshellarg($input_file) .
+	        " -r 30 -vsync cfr " .   // force constant 30 fps
+	        " -vf \"scale='min(1920,iw)':-2:force_original_aspect_ratio=decrease,pad=ceil(iw/2)*2:ceil(ih/2)*2,format=yuv420p\" " .
+	        " -color_range pc " .
+	        " -c:v libx264 -profile:v main -level 4.1 -crf 21 -preset medium " .
+	        " -pix_fmt yuv420p -movflags +faststart " .
+	        " -c:a aac -b:a 128k " .
+	        escapeshellarg($normalised_file);
+	
+	    exec($normalise_cmd . ' 2>&1', $out_norm, $ret_norm);
+	    if ($ret_norm !== 0) {
+	        error_log("Normalisation failed for $input_file: " . implode("\n", $out_norm));
+	        return $input_file; // fallback to original if fail
+	    }
+	
+		return $normalised_file; // use this as input for main DASH encode
+		
+	}
 
 }
-
-/*
-		$filters = [];
-		$maps = [];
-		$varmap = [];
-		$audio_maps = [];
-		$i = 0;
-		foreach ($todo['ladder'] as $step) {
-			// Scale to step width preserve AR
-			$scale = "scale={$step['width']}:-2:force_original_aspect_ratio=decrease,pad=width=ceil(iw/2)*2:height=ceil(ih/2)*2";
-			$filters[] = "[0:v]{$scale}[v{$i}out]";
-			
-			// Video map: 2-pass, slow preset, high compression
-			$maps[] = "-map \"[v{$i}out]\" -c:v:{$i} libx265 -b:v:{$i} {$step['br']} -maxrate:v:{$i} {$step['br']} -bufsize:v:{$i} ". 
-					(2 * (int)str_replace('k', '', $step['br'])) . "k -crf:v:{$i} {$step['crf']} -preset medium -profile:v:{$i} {$step['profile']} ".
-					"-g 150 -keyint_min 150 -sc_threshold 0 -pass 1 -passlogfile passlog{$i}"; // Pass 1
-					
-			if($has_audio){
-				// Audio per variant
-				$audio_maps[] = "-map a:0 -c:a:{$i} aac -b:a:{$i} {$step['audio_br']}";
-				$varmap[] = "v:{$i},a:{$i}";
-			} else {
-				$varmap[] = "v:{$i}";
-			}
-			
-			$i++;
-		}
-		
-		// For 2-pass: We need to run FFmpeg twice (first for analysis, second for encode)
-		// But to simplify, this command is for pass 2; run pass 1 first by changing -pass 2 and removing DASH opts.
-		
-		$cmd_base = $ffmpeg_name." -y -i " . escapeshellarg($todo['videofile']) . " -filter_complex \"" . implode(';', $filters) . "\" " .
-				implode(' ', $maps) . " " . implode(' ', $audio_maps) .
-				" -var_stream_map \"" . implode(' ', $varmap) . "\" " .
-				" -f dash -seg_duration 5 -init_seg_name init-\$RepresentationID\$.m4s -media_seg_name chunk-\$RepresentationID\$-\$Number%05d\$.m4s " .
-				" -adaptation_sets \"id=0,streams=v " . ($has_audio ? " id=1,streams=a" : "") . escapeshellarg("{$todo['target_folder']}/manifest.mpd");
-		
-		// To enable 2-pass: First run with -pass 1 -an -f null /dev/null (analysis only)
-		$pass1 = str_replace('-pass 2', '-pass 1', $cmd_base); // Adjust maps to -pass 1, remove audio/DASH, add -an -f null /dev/null
-		$pass1 = preg_replace('/-pass 2/', '-pass 1', $pass1); // Simplified; full: remove DASH parts for pass 1
-		if (!$has_audio) {
-			$pass1 = preg_replace('/-map a:\d+[^ ]*/    //', '', $pass1); // remove any -map a:*
-//		}
-//		$pass1 .= " -an -f null /dev/null"; // No audio/output for pass 1
-
-// Run Pass 1 (analysis, slow but necessary for compression)
-//		exec($pass1 . ' 2>&1', $out1, $ret1);
-//		if ($ret1 !== 0) throw new Exception("Pass 1 encoding failed: " . implode("\n", $out1));
-
-// Run Pass 2 (encode)
-//		exec($cmd_base . ' 2>&1', $out2, $ret2);
-//		if ($ret2 !== 0) throw new Exception("Pass 2 encoding failed: " . implode("\n", $out2));
-
-
-
-
