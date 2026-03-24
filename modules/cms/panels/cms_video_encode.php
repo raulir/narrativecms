@@ -197,18 +197,25 @@ class cms_video_encode extends CI_Controller {
        " -movflags +frag_keyframe+empty_moov " .
        " -use_template 1 -use_timeline 1 " .
        escapeshellarg($avc_target_folder . 'manifest.mpd');
-
-	       
-	       
-	       
-		// fallback video 400kbps
-		$fallback_cmd = $ffmpeg_name." -y -i ".escapeshellarg($todo['videofile']).
-		" -vf \"scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2\"".
-		" -c:v libx265 -b:v 400k -maxrate 400k -bufsize 1000k -preset medium -profile:v ".$step['profile']." ".
-		($has_audio ? " -c:a aac -b:a 96k " : '').
-		" -movflags +faststart".
-		" ".escapeshellarg("{$todo['target_folder']}/fallback.mp4");
 		
+		// fallback video 400kbps - preserves original aspect ratio (no forced black bars)
+		$fallback_cmd = $ffmpeg_name.' -y -i '.escapeshellarg($todo['videofile']).
+			' -vf "scale=640:-2"'.                                      // max 640px width, height auto = original ratio
+			' -c:v libx264 -b:v 400k -maxrate 400k -bufsize 1000k -preset medium'.
+			' -profile:v main -level 3.1 -pix_fmt yuv420p '.
+			($has_audio ? ' -c:a aac -b:a 96k ' : '').
+			' -movflags +faststart '.
+			escapeshellarg($todo['target_folder'].'/fallback.mp4');
+		
+		// fallback video 1Mbps - preserves original aspect ratio (better quality)
+		$fallback_hd_cmd = $ffmpeg_name.' -y -i '.escapeshellarg($todo['videofile']).
+			' -vf "scale=854:-2"'.                                      // max 854px width, height auto = original ratio
+			' -c:v libx264 -b:v 1000k -maxrate 1250k -bufsize 2500k -preset medium'.
+			' -profile:v main -level 4.0 -pix_fmt yuv420p '.
+			($has_audio ? ' -c:a aac -b:a 128k ' : '').
+			' -movflags +faststart '.
+			escapeshellarg($todo['target_folder'].'/fallback_hd.mp4');
+
 		// gif thumbnail
 		function hmsToSeconds($hms) {
 			$parts = explode(':', $hms);
@@ -229,7 +236,7 @@ class cms_video_encode extends CI_Controller {
 		" ".escapeshellarg("{$todo['target_folder']}/thumb.gif");
 		
 		// jpg cover thumbnail for loading
-		$jpg_cmd = $ffmpeg_name.'-i '.escapeshellarg($todo['videofile']).' -vf scale=300:-2 -frames:v 1 -q:v 5'.
+		$jpg_cmd = $ffmpeg_name.' -i '.escapeshellarg($todo['videofile']).' -vf scale=300:-2 -frames:v 1 -q:v 5 '.
 				escapeshellarg("{$todo['target_folder']}/cover.jpg");
 
 		// run jpg extract
@@ -249,7 +256,12 @@ class cms_video_encode extends CI_Controller {
 		}
 
 		// run fallback encode
-		exec($fallback_cmd.' 2>&1', $out_fb, $ret_fb);
+			exec($fallback_cmd.' 2>&1', $out_fb, $ret_fb);
+		if ($ret_fb !== 0) {
+			unlink($queue_lockname);
+			throw new Exception("Fallback encoding failed: " . implode("\n", $out_fb));
+		}
+		exec($fallback_hd_cmd.' 2>&1', $out_fb, $ret_fb);
 		if ($ret_fb !== 0) {
 			unlink($queue_lockname);
 			throw new Exception("Fallback encoding failed: " . implode("\n", $out_fb));

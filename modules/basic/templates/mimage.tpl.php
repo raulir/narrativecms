@@ -1,7 +1,7 @@
 <div class="cms_container mimage_container mimage_responsiveness_<?= $responsiveness ?? 'all' ?>" 
 		<?= !empty($colour) ? ('style="background-color: '.$colour.';"') : '' ?>>
 		
-	<div class="mimage_content">
+	<div class="mimage_content" <?= !empty($width) ? 'style="max-width: '.$width.'rem; "' : '' ?>>
 	
 		<div class="mimage_image" <?php !empty($optimise) ? _ib($image, ['width' => 2000, 'pb' => 1]) : _ib($image, ['pb' => 1]) ?>>
 			<?php foreach($links as $link): ?>

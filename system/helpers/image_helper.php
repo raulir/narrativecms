@@ -130,13 +130,20 @@ if ( !function_exists('_i')) {
 		
 		// if video
 		if ($extension == 'mp4'){
+			
 			if (file_exists($GLOBALS['config']['upload_path'].$image.'.data/fallback.mp4')){
 				$video_file = $GLOBALS['config']['upload_url'].$image.'.data/fallback.mp4';
 			} else {
 				$video_file = $GLOBALS['config']['upload_url'].$image;
 			}
-
-			$params['video'] = ' data-cms_video="'.$video_file.'" ';
+			
+			if (file_exists($GLOBALS['config']['upload_path'].$image.'.data/fallback_hd.mp4')){
+				$video_hd_file = $GLOBALS['config']['upload_url'].$image.'.data/fallback_hd.mp4';
+			} else {
+				$video_hd_file = $GLOBALS['config']['upload_url'].$image;
+			}
+				
+			$params['video'] = ' data-cms_video="'.$video_file.'" data-cms_video_hd="'.$video_hd_file.'" ';
 			
 			if ($params['width']){
 				$params['video'] .= ' data-cms_video_width="'.((int)max(($params['width']*$GLOBALS['config']['images_2x']), 360)).'" ';
@@ -149,22 +156,22 @@ if ( !function_exists('_i')) {
 				$params['video'] .= ' data-cms_video_manifest_old="'.$GLOBALS['config']['upload_url'].$image.'.data/libx264/manifest.mpd" ';
 			}
 			
-			if (file_exists($GLOBALS['config']['upload_path'].$image.'.data/poster.jpg')){
-				
+			$cover = $GLOBALS['config']['upload_path'].$image.'.data/cover.jpg';
+			if (!file_exists($cover)){
+				$cover = $GLOBALS['config']['base_url'].'modules/cms/img/cms_video_loading.png';
 			} else {
-				
-				print($params['video'].' style="background-image:  url('.
-						($GLOBALS['config']['base_site'] ?? '').$GLOBALS['config']['base_url'].'modules/cms/img/cms_video_loading.png); '.$params['css'].'" ');
-				
-				$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_video.js';
-				$GLOBALS['_panel_js'][] = 'modules/cms/js/dash/dash.min.js';
-				
-				return ['image' => $image, 'height' => 0, 'width' => 0, ];
-			
+				$cover = $GLOBALS['config']['upload_url'].$image.'.data/cover.jpg';
 			}
 			
+			print($params['video'].' data-cms_video_poster="'.$cover.'" style="background-image:  url('.$cover.'); '.$params['css'].'" ');
+			
+			$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_video.js';
+			$GLOBALS['_panel_js'][] = 'modules/cms/js/dash/dash.min.js';
+			
+			return ['image' => $image, 'height' => 0, 'width' => 0, ];
+			
 		}
-		
+			
 		// if from module
 		if (!empty($params['module']) || substr_count($image, '/') == 1){
 			

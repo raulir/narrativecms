@@ -154,15 +154,20 @@ function video_pause($video){
 	
 }
 
-function cms_video_fallback($video_el){
+function cms_video_fallback($video_el, higher_quality = false){
 
 	var url = $video_el.closest('[data-cms_video]').data('cms_video')
+	
+	if (higher_quality){
+		url = $video_el.closest('[data-cms_video]').data('cms_video_hd')
+	}
+	
 	$video_el.attr('src', url)
 	$video_el[0].play()
 	
 }
 
-function cms_video_waitdash(callback, timeout = 1000, interval = 20) {
+function cms_video_waitdash(callback, timeout = 5000, interval = 20) {
 
 	if (typeof dashjs !== 'undefined') {
 		callback()
@@ -214,7 +219,7 @@ function cms_video_wrapper($this){
         top: '50%',
         transform: 'translate(-50%, -50%)',
         'max-width': 'none',     // important override
-        'max-height': 'none'
+        'max-height': 'none',
     }
 
     if (fit === 'cover' || fit === '100% 100%' || fit === 'cover cover') {
@@ -231,13 +236,18 @@ function cms_video_wrapper($this){
         // no object-fit needed, acts like contain by default
     }
  
-    var $video = $('<video class="cms_video_player" autoplay="autoplay" muted="muted" loop="loop" playsinline="playsinline">')
+    var $video = $('<video class="cms_video_player" autoplay="autoplay" muted="muted" loop="loop" playsinline="playsinline" poster="'
+    	+ $this.data('cms_video_poster') + '">')
         .css(video_styles)		
         
     $video_wrapper.append($video)
         	
 	return $video_wrapper
 
+}
+
+function cms_video_is_iphone(){
+	return /iPhone|iPod/.test(navigator.userAgent) || navigator.platform === 'iPhone'
 }
 
 function cms_video_init(){
@@ -250,7 +260,7 @@ function cms_video_init(){
 		
 		var $video = cms_video_wrapper($this)
 
-		if ($this.data('cms_video_manifest')){
+		if ($this.data('cms_video_manifest') && !cms_video_is_iphone()){
 
 			cms_video_waitdash(() => {
 
@@ -270,125 +280,55 @@ function cms_video_init(){
 	                    cms_video_fallback($video_el)
 	                }
             	})
-            	
-            	/*== image area width rule ==*/
 
-				var MaxWidthRule;
+				/*== cms video quality selector by container width ==*/
 				
-				// Rule that limits video representations to max width (e.g. 640 px on small panels)
-				function MaxWidthRuleClass() {
-				    let factory = dashjs.FactoryMaker;
-				    let SwitchRequest = factory.getClassFactoryByName('SwitchRequest');
-				    let context = this.context;
-				    let instance;
+				player.on(dashjs.MediaPlayer.events.MANIFEST_LOADED, function () {
+					setTimeout(function () {
+						let bitrate_list = player.getBitrateInfoListFor('video')
+						if (!bitrate_list || bitrate_list.length < 1) return
 				
-				    function setup() {
-				    }
+						// start at lowest quality (chunk-0*) for instant playback
+//						player.setQualityFor('video', 0)
 				
-				    function getSwitchRequest(rulesContext) {
-				        let mediaInfo = rulesContext.getMediaInfo();
-				        if (!mediaInfo || mediaInfo.type !== 'video') {
-				            return SwitchRequest(context).create();
+						// calculate highest quality allowed by container width
+						let max_w = Math.max(video_width || 2100, 500)
+						let allowed = bitrate_list.filter(function(b){
+							return (b.width || 0) <= max_w
+						})
+						if (allowed.length === 0) allowed = bitrate_list
+				
+						let best_index = 0
+						let best_bitrate = 0
+						allowed.forEach(function(b){
+							if (b.bitrate > best_bitrate){
+								best_bitrate = b.bitrate
+								best_index = bitrate_list.indexOf(b)
 				        }
+						})
 				
-				        let representations = mediaInfo.representations;
-				        let max_width = Math.max(video_width, 500);  // change this dynamically if needed (see below)
+						// upgrade to highest allowed quality after 1.2s
+						setTimeout(function () {
+							player.setQualityFor('video', best_index)
+						}, 1000)
 				
-				        // filter representations by width
-				        let filtered = representations.filter(function(rep) {
-				            return (rep.width || 0) <= max_width;
-				        });
-				
-				        // if no reps match, keep all (fallback)
-				        if (filtered.length === 0) {
-				            filtered = representations;
-				        }
-				
-				        // get current representation
-				        let currentRep = rulesContext.getCurrentRepresentation();
-				
-				        // if current is already in filtered, no need to switch
-				        if (filtered.some(rep => rep.id === currentRep.id)) {
-				            return SwitchRequest(context).create();
-				        }
-				
-				        // choose the highest bitrate from filtered reps (or lowest, or any logic)
-				        let bestRep = filtered.reduce((prev, curr) => {
-				            return (curr.bandwidth > prev.bandwidth) ? curr : prev;
-				        }, filtered[0]);
-				
-				        let switchRequest = SwitchRequest(context).create();
-				        switchRequest.representation = bestRep;
-				        switchRequest.reason = 'Limited to max width ' + max_width + ' px';
-				        switchRequest.priority = SwitchRequest.PRIORITY.STRONG;
-				
-				        return switchRequest;
-				    }
-				
-				    instance = {
-				        getSwitchRequest: getSwitchRequest
-				    };
-				
-				    setup();
-				    return instance;
-				}
-				
-				MaxWidthRuleClass.__dashjs_factory_name = 'MaxWidthRule';
-				MaxWidthRule = dashjs.FactoryMaker.getClassFactory(MaxWidthRuleClass);
+					}, 200)
+				})
 
-				player.addABRCustomRule(
-				    'qualitySwitchRules',  // string literal, lowercase
-				    'MaxWidthRule',       // unique name for your rule
-				    MaxWidthRule
-				)
-
-				/** end **/
-				
 				var manifest_url = $this.data('cms_video_manifest')
             	player.initialize($video_el[0], manifest_url, true)
-            	
-            	setup_cms_video_loop(player, $video_el[0])
-
-				// keep looping
-				function setup_cms_video_loop(player, video) {
-				
-					var $video = $(video)
-				    $video.off('ended.cms timeupdate.cms')
-				
-				    // Option A - ended event (preferred when it fires reliably)
-				    $video.on('ended.cms', function() {
-				        video.currentTime = 0
-				        video.play().catch(e => console.warn('play after ended failed', e))
-				        console.log('native')
-				    })
-				
-				    // Option B - timeupdate fallback (catches cases where ended doesn't fire)
-				    $video.on('timeupdate.cms', function () {
-				        if (video.duration > 0 && video.currentTime >= video.duration - 0.2) {  // 200ms threshold to catch early
-				            video.currentTime = 0
-				            video.play().catch(e => console.warn('play after timeupdate failed', e))
-				        console.log('timeupdate')
-				        }
-				    })
-				
-				    // optional: dash.js native event (sometimes more precise for VOD)
-				    player.on(dashjs.MediaPlayer.events.PLAYBACK_ENDED, function () {
-				        player.seek(0)
-				        console.log('dash')
-				    })
-				}
 	        
 	        }) // end of waitdash()
 			
 		} else {
 		
-			if (video_debug) console.log('No video manifest url - trying native fallback')
+			if (video_debug) console.log('No video manifest url or iphone detected - trying native fallback')
 			
 			$this.css({'background-image':''})
 			$this.empty().append($video);
 			var $video_el = $('video', $this)
 
-	        cms_video_fallback($video_el)
+	        cms_video_fallback($video_el, true)
 	    
 	    }
 

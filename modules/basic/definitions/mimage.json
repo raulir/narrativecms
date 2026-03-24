@@ -35,6 +35,13 @@
 			"default":"1"
 		},
 		{
+			"type":"text",
+			"name":"width",
+			"label":"Image width rem",
+			"default":"100",
+			"help":"Image width on desktop in rems, default 100, leave empty for full screen width for any screen size"
+		},
+		{
 			"type":"repeater",
 			"name":"links",
 			"label":"Links",
