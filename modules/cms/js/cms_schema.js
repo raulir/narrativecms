@@ -30,6 +30,42 @@ function cms_schema_init() {
 			}
 		})
 	})
+
+	$('.cms_schema_sync').on('click.cms', function(e) {
+		e.preventDefault()
+
+		var $this = $(this)
+		var module = $this.data('module')
+
+		if (!module) {
+			return
+		}
+
+		if (!confirm('Synchronise panel table data for module "' + module + '"?\n\nThis copies table fields from params into panel tables and removes migrated param rows. Ensure you have a database backup first.')) {
+			return
+		}
+
+		$this.addClass('cms_disabled').text('syncing...')
+
+		var data = {
+			do: 'sync_panel_tables',
+			module: module
+		}
+
+		get_ajax_panel('cms/cms_schema', data, function(result) {
+			var res = result && result.result ? result.result : {}
+			var stats = res.stats || {}
+			var ok = res.success == 1 || res.success === true || (Array.isArray(stats.errors) && stats.errors.length === 0 && (stats.synced > 0 || stats.skipped > 0))
+
+			if (ok) {
+				$('.cms_schema_container').parent().html(res._html)
+				cms_notification(res.message || 'Panel tables synchronised', 5, 'success')
+			} else {
+				$this.removeClass('cms_disabled').text('sync panel tables')
+				cms_error(res.message || 'Sync failed', 8)
+			}
+		})
+	})
 }
 
 function cms_schema_resize() {

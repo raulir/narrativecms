@@ -59,6 +59,15 @@ if ( !function_exists('get_position')) {
     	
     	$params = $ci->cms_page_panel_model->get_cms_page_panel($block_id);
     	
+    	if (!is_array($params) || empty($params['cms_page_panel_id'])){
+    		if (empty($_params['_return'])){
+    			print('<!-- embed #'.$block_id.' not found -->');
+    			return;
+    		} else {
+    			return('<!-- embed #'.$block_id.' not found -->');
+    		}
+    	}
+    	
     	if (empty($params['show'])){
     		if (empty($_params['_return'])){
     			print('<!-- embed '.$params['panel_name'].' #'.$block_id.' is hidden -->');
@@ -288,7 +297,6 @@ if ( !function_exists('get_position')) {
     	
     	$data = '';
     	if (!empty($GLOBALS['config']['position_wrappers']) && !empty($GLOBALS['config']['position_links']) && !stristr($url, 'admin/')){
-// if (is_string($params_url)) { _print_r($params_url);  die(); }  		
     		if ((is_array($params_url) && !in_array($params_url['target'], ['_none', '_manual']) 
     				|| (!is_array($params_url) && stristr($params_url, '/') && stristr($params_url, '=') ))){
     		

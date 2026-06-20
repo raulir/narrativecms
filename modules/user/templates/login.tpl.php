@@ -5,7 +5,21 @@
 		
 			<div class="login_heading"><?= $heading ?></div>
 			
-			<?php if (!empty($alternatives)): ?>
+			<?php if (!empty($GLOBALS['config']['inapp'])): ?>
+			
+				<div class="login_alternatives">
+					<?php foreach($alternatives as $item): ?>
+					
+						<div class="login_alternative login_app_google" <?php _ib($item['icon'], ['width' => 24, 
+								'css' => ('background-color: '.$item['background'].'; color: '.$item['colour'].'; border-color: '.$item['colour'].';')]) 
+								?>><?= $item['label'] ?></div>
+					
+					<?php endforeach ?>
+				</div>
+				<div class="login_alternatives_separator"><?= $separator_label ?></div>
+
+			<?php elseif (!empty($alternatives)): ?>
+			
 				<div class="login_alternatives">
 					<?php foreach($alternatives as $item): ?>
 					
@@ -15,6 +29,8 @@
 					
 					<?php endforeach ?>
 				</div>
+				<div class="login_alternatives_separator"><?= $separator_label ?></div>
+			
 			<?php endif ?>
 
 			<form class="login_form" method="post" autocomplete="off">

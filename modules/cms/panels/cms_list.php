@@ -80,6 +80,22 @@ class cms_list extends CI_Controller {
 						
 						}
 						
+					} else if (!empty($panel_field['name']) && !empty($panel_field['table']) && $panel_field['table'] == '1' && $panel_field['name'] == $filter_field) {
+
+						$panel_name = $params['filter']['panel_name'];
+						$table = $this->cms_page_panel_model->get_panel_table_name($panel_name);
+						$params['filter_fields_values'][$filter_field] = [];
+
+						if ($table && $this->cms_page_panel_model->panel_table_exists($panel_name)) {
+							$sql = "select distinct `".$panel_field['name']."` as val from `{$table}` where `".$panel_field['name']."` != '' order by `".$panel_field['name']."` ";
+							$query = $this->db->query($sql);
+							if ($query->num_rows()) {
+								foreach ($query->result_array() as $row) {
+									$params['filter_fields_values'][$filter_field][$row['val']] = $row['val'];
+								}
+							}
+						}
+
 					}
 						
 				}

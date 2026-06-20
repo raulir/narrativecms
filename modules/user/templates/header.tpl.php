@@ -4,17 +4,7 @@
 		<?php if($loggedin): ?>
 	
 			<div class="user_header_loggedin">
-				<a class="user_header_loggedin_link" <?php _lh($user_link ?? '') ?>>
-				
-					<?php if(empty($hide_icons)): ?>
-						<div class="user_header_loggedin_image" <?php _ib($user_image, 30) ?>></div>
-					<?php endif ?>
-					
-					<?php if(empty($hide_labels)): ?>
-						<div class="user_header_loggedin_label"><?= $user_name ?></div>
-					<?php endif ?>
-				
-				</a>
+				<div class="user_header_username"><?= $user_name ?></div>
 				<div class="user_header_dropdown">
 					<a class="user_header_dropdown_item user_header_settings" <?php _lh($settings_link) ?>><?= $settings_text ?></a>
 					<div class="user_header_dropdown_item user_header_logout">

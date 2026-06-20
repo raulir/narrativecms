@@ -31,6 +31,10 @@ function login_init(){
 		get_ajax('user/login', data);
 
 	})
+	
+	if ($('.login_app_google').length){
+		$('.login_app_google').on('click.cms', google_login)
+	}
 
 }
 

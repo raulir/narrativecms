@@ -27,6 +27,7 @@ if (!function_exists('array_merge_recursive_ex')){
 class cms_page_panel_model extends Model {
 	
 	var $default_language;
+	var $_panel_table_cache = [];
 	
 	function __construct(){
 		
@@ -34,6 +35,132 @@ class cms_page_panel_model extends Model {
 		
 		$this->default_language = $this->cms_language_model->get_default();
 
+	}
+
+	function get_panel_table_name($panel_name) {
+		if (!stristr($panel_name, '/')) {
+			return '';
+		}
+		list($module, $panel) = explode('/', $panel_name, 2);
+		return $module.'_'.$panel;
+	}
+
+	function get_panel_table_fields($panel_name) {
+		if (isset($this->_panel_table_cache[$panel_name])) {
+			return $this->_panel_table_cache[$panel_name];
+		}
+
+		$this->load->model('cms/cms_panel_model');
+		$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+		$fields = [];
+
+		if (!empty($config['list']) && !empty($config['item'])) {
+			foreach ($config['item'] as $item) {
+				if (!empty($item['table']) && $item['table'] == '1' && !empty($item['name'])) {
+					$fields[$item['name']] = $item;
+				}
+			}
+		}
+
+		$this->_panel_table_cache[$panel_name] = $fields;
+		return $fields;
+	}
+
+	function panel_table_exists($panel_name) {
+		$table = $this->get_panel_table_name($panel_name);
+		if (!$table) {
+			return false;
+		}
+		return $this->db->table_exists($table);
+	}
+
+	function _read_panel_table_row($cms_page_panel_id, $panel_name) {
+		$fields = $this->get_panel_table_fields($panel_name);
+		if (empty($fields) || !$this->panel_table_exists($panel_name)) {
+			return [];
+		}
+
+		$table = $this->get_panel_table_name($panel_name);
+		$sql = "select * from `{$table}` where cms_page_panel_id = ? limit 1 ";
+		$query = $this->db->query($sql, [(int)$cms_page_panel_id]);
+		if (!$query->num_rows()) {
+			return [];
+		}
+
+		$row = $query->row_array();
+		unset($row['cms_page_panel_id']);
+		return $row;
+	}
+
+	function _write_panel_table_row($cms_page_panel_id, $panel_name, $data) {
+		$fields = $this->get_panel_table_fields($panel_name);
+		if (empty($fields) || !$this->panel_table_exists($panel_name)) {
+			return;
+		}
+
+		$row = [];
+		foreach ($fields as $name => $spec) {
+			if (array_key_exists($name, $data)) {
+				$row[$name] = $data[$name];
+			}
+		}
+		if (empty($row)) {
+			return;
+		}
+
+		$table = $this->get_panel_table_name($panel_name);
+		$sql = "select cms_page_panel_id from `{$table}` where cms_page_panel_id = ? limit 1 ";
+		$query = $this->db->query($sql, [(int)$cms_page_panel_id]);
+
+		if ($query->num_rows()) {
+			$sets = [];
+			$bind = [];
+			foreach ($row as $col => $val) {
+				$sets[] = '`'.$col.'` = ?';
+				$bind[] = $val;
+			}
+			$bind[] = (int)$cms_page_panel_id;
+			$sql = "update `{$table}` set ".implode(', ', $sets)." where cms_page_panel_id = ? ";
+			$this->db->query($sql, $bind);
+		} else {
+			$row['cms_page_panel_id'] = (int)$cms_page_panel_id;
+			$cols = array_keys($row);
+			$sql = "insert into `{$table}` (`".implode('`, `', $cols)."`) values (".implode(', ', array_fill(0, count($cols), '?')).") ";
+			$this->db->query($sql, array_values($row));
+		}
+
+		foreach (array_keys($fields) as $field_name) {
+			$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name = ? and language = '' ";
+			$this->db->query($sql, [(int)$cms_page_panel_id, $field_name]);
+		}
+	}
+
+	function _delete_panel_table_row($cms_page_panel_id, $panel_name) {
+		if (!$this->panel_table_exists($panel_name)) {
+			return;
+		}
+		$table = $this->get_panel_table_name($panel_name);
+		$sql = "delete from `{$table}` where cms_page_panel_id = ? ";
+		$this->db->query($sql, [(int)$cms_page_panel_id]);
+	}
+
+	function _overlay_panel_table_fields(&$panel_params, $cms_page_panel_id, $panel_name) {
+		$table_row = $this->_read_panel_table_row($cms_page_panel_id, $panel_name);
+		if (!empty($table_row)) {
+			$panel_params = array_merge($panel_params, $table_row);
+		}
+	}
+
+	function _split_panel_table_fields($panel_name, &$data) {
+		$table_data = [];
+		$fields = $this->get_panel_table_fields($panel_name);
+		foreach ($fields as $name => $spec) {
+			if (array_key_exists($name, $data)) {
+				$table_data[$name] = $data[$name];
+				unset($data[$name]);
+			}
+		}
+		return $table_data;
 	}
 	
 	/**
@@ -331,6 +458,8 @@ class cms_page_panel_model extends Model {
 				}
 			
 			}
+
+			$this->_overlay_panel_table_fields($panel_params, $cms_page_panel_id, $page_panel_base['panel_name']);
 			
 			$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = '' , value = ? , search = 0 ";
 			$this->db->query($sql, [$cms_page_panel_id, json_encode($panel_params, JSON_PRETTY_PRINT)]);
@@ -357,6 +486,12 @@ class cms_page_panel_model extends Model {
 	    	if($language && !empty($return['_translations'][$language])){
     			$return = array_merge_recursive_ex($return, $return['_translations'][$language]);
     		}
+
+			$sql = "select panel_name from cms_page_panel where cms_page_panel_id = ? limit 1 ";
+			$pquery = $this->db->query($sql, [$cms_page_panel_id]);
+			if ($pquery->num_rows() && is_array($return)) {
+				$this->_overlay_panel_table_fields($return, $cms_page_panel_id, $pquery->row_array()['panel_name']);
+			}
 
 		} else if($retry){
     		
@@ -471,6 +606,20 @@ class cms_page_panel_model extends Model {
 			}
 		}
 
+		$panel_name = $data['panel_name'] ?? '';
+		if (!$panel_name) {
+			$sql = "select panel_name from cms_page_panel where cms_page_panel_id = ? limit 1 ";
+			$pquery = $this->db->query($sql, [(int)$cms_page_panel_id]);
+			if ($pquery->num_rows()) {
+				$panel_name = $pquery->row_array()['panel_name'];
+			}
+		}
+
+		$table_data = [];
+		if ($panel_name) {
+			$table_data = $this->_split_panel_table_fields($panel_name, $params);
+		}
+
 		// params data
 		if (!empty($params)){
 			
@@ -517,6 +666,11 @@ class cms_page_panel_model extends Model {
 			$this->_insert_or_update_param($cms_page_panel_id, '', $params, $search_params, $translate_params);
 			$this->_update_cached_params($cms_page_panel_id);
 		
+		}
+
+		if (!empty($table_data) && $panel_name) {
+			$this->_write_panel_table_row($cms_page_panel_id, $panel_name, $table_data);
+			$this->_update_cached_params($cms_page_panel_id);
 		}
 
 		// panel data
@@ -616,6 +770,11 @@ class cms_page_panel_model extends Model {
 				unset($data[$key]);
 			}
 		}
+
+		$table_data = [];
+		if (!empty($data['panel_name'])) {
+			$table_data = $this->_split_panel_table_fields($data['panel_name'], $panel_params);
+		}
 		
 		// check sort
 		if (!empty($data['sort']) && $data['sort'] == 'first'){
@@ -647,6 +806,11 @@ class cms_page_panel_model extends Model {
 			$this->_insert_or_update_param($insert_id, '', $panel_params, $search_params);
 			$this->_update_cached_params($insert_id);
 		}
+
+		if (!empty($table_data) && !empty($data['panel_name'])) {
+			$this->_write_panel_table_row($insert_id, $data['panel_name'], $table_data);
+			$this->_update_cached_params($insert_id);
+		}
 		
 		$this->invalidate_html_cache($insert_id);
 		
@@ -655,7 +819,7 @@ class cms_page_panel_model extends Model {
 	}
 		
 	/**
-	 * 
+	 *
 	 * @param array $orders
 	 * 
 	 * save page panels order by array: block_id => sort
@@ -715,6 +879,10 @@ class cms_page_panel_model extends Model {
 	    	}
 	    }
 		
+		if (!empty($cms_page_panel['panel_name'])) {
+			$this->_delete_panel_table_row($cms_page_panel_id, $cms_page_panel['panel_name']);
+		}
+
 		$sql = "delete from cms_page_panel where cms_page_panel_id = ? ";
 	    $this->db->query($sql, array($cms_page_panel_id, ));
 		
@@ -786,13 +954,29 @@ class cms_page_panel_model extends Model {
 				
 		// separate filters
 		$sql_filter = array();
+		$table_filter = array();
 		$params_filter = array();
 		$sql_arrays = array();
+		$table_arrays = array();
 		$sql_filter_str = '';
+		$table_filter_str = '';
 		
 		if (!is_array($filter)){
 			error_log('Bad filter in cms_page_panel_model!');
 			$filter = [];
+		}
+
+		$panel_name = $filter['panel_name'] ?? '';
+		$table_fields = [];
+		$use_panel_table = false;
+		$panel_table = '';
+
+		if ($panel_name) {
+			$table_fields = $this->get_panel_table_fields($panel_name);
+			if (!empty($table_fields) && $this->panel_table_exists($panel_name)) {
+				$use_panel_table = true;
+				$panel_table = $this->get_panel_table_name($panel_name);
+			}
 		}
 
 		foreach($filter as $key => $value){
@@ -810,17 +994,40 @@ class cms_page_panel_model extends Model {
 						$new_array[] = str_replace(array("'", '"'), array("\\\'", '\\\"'), $el);
 					}
 					
-					$sql_arrays[] = " `".$tkey."` ".($tkey != $key ? ' not ' : '')." in ('".implode("','", $new_array)."') ";
+					$sql_arrays[] = " a.`".$tkey."` ".($tkey != $key ? ' not ' : '')." in ('".implode("','", $new_array)."') ";
 				}
 			
+			} else if ($use_panel_table && isset($table_fields[$tkey])) {
+				if (!is_array($value)){
+					$table_filter[$key] = $value;
+				} else if (!empty($value) && is_array($value)){
+					$new_array = array();
+					foreach($value as $el){
+						$new_array[] = str_replace(array("'", '"'), array("\\\'", '\\\"'), $el);
+					}
+					$table_arrays[] = " t.`".$tkey."` ".($tkey != $key ? ' not ' : '')." in ('".implode("','", $new_array)."') ";
+				}
 			} else {
 				$params_filter[$key] = $value;
 			}
 		}
 
-		$fields = array_keys($sql_filter);
-		if (!empty($fields)){
-			$sql_filter_str = $sql_filter_str . " `" . preg_replace("/[^A-Za-z0-9_=?!` ]/", '', implode('` = ? and `', $fields)) . "` = ? ";
+		$sql_filter_parts = [];
+		foreach ($sql_filter as $key => $value) {
+			$tkey = str_replace('!', '', $key);
+			$sql_filter_parts[] = 'a.`'.$tkey.'` '.($tkey != $key ? '!=' : '=').' ?';
+		}
+		if (!empty($sql_filter_parts)) {
+			$sql_filter_str = implode(' and ', $sql_filter_parts);
+		}
+
+		$table_filter_parts = [];
+		foreach ($table_filter as $key => $value) {
+			$tkey = str_replace('!', '', $key);
+			$table_filter_parts[] = 't.`'.$tkey.'` '.($tkey != $key ? '!=' : '=').' ?';
+		}
+		if (!empty($table_filter_parts)) {
+			$table_filter_str = implode(' and ', $table_filter_parts);
 		}
 		
 		if(!empty($sql_arrays)){
@@ -828,12 +1035,25 @@ class cms_page_panel_model extends Model {
 		} else {
 			$sql_arrays_str = '';
 		}
-		
-		$sql = "select a.*, b.value as _params from `cms_page_panel` a left join cms_page_panel_param b on b.name = '' and b.cms_page_panel_id = a.cms_page_panel_id " .
-				" where ".$sql_filter_str." ".(!empty($sql_filter_str) && !empty($sql_arrays_str) ? ' and ' : '')." ".$sql_arrays_str." order by sort ".$order;
-		$sql = str_replace('!` =', '` !=', $sql); // not query
 
-		$query = $this->db->query($sql, $sql_filter);
+		if(!empty($table_arrays)){
+			$table_arrays_str = implode(' and ', $table_arrays);
+		} else {
+			$table_arrays_str = '';
+		}
+
+		$where_parts = array_filter([$sql_filter_str, $sql_arrays_str, $table_filter_str, $table_arrays_str]);
+		$where_str = implode(' and ', $where_parts);
+
+		$table_join = $use_panel_table ? " join `{$panel_table}` t on t.cms_page_panel_id = a.cms_page_panel_id " : '';
+
+		$sql = "select a.*, b.value as _params from `cms_page_panel` a ".$table_join.
+				"left join cms_page_panel_param b on b.name = '' and b.cms_page_panel_id = a.cms_page_panel_id ".
+				($where_str ? " where ".$where_str." " : " ").
+				"order by a.sort ".$order;
+
+		$bind = array_merge(array_values($sql_filter), array_values($table_filter));
+		$query = $this->db->query($sql, $bind);
 		
 		if (!$query){
 			_html_error('Missing field or table: cms_page_panel or cms_page_panel_param');

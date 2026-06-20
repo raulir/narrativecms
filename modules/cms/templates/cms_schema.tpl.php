@@ -7,6 +7,23 @@
 				<!-- intentionally empty – no global fix button -->
 			</div>
 		</div>
+
+		<?php if (!empty($panel_table_modules_pending)): ?>
+
+			<div class="cms_schema_panel_tables">
+				<div class="cms_schema_panel_tables_title">Panel table data</div>
+				<?php foreach ($panel_table_modules_pending as $module): ?>
+					<div class="cms_schema_panel_tables_row">
+						<div class="cms_schema_panel_tables_module"><?= $module ?></div>
+						<div class="cms_schema_sync cms_small_button"
+						     data-module="<?= $module ?>">
+							sync panel tables
+						</div>
+					</div>
+				<?php endforeach ?>
+			</div>
+
+		<?php endif ?>
 		
 		<?php if (!$has_errors): ?>
 			
@@ -24,7 +41,13 @@
 						<div class="cms_schema_module_title">
 							<?= $module ?>
 						</div>
-						<div class="cms_schema_module_fix">
+						<div class="cms_schema_module_actions">
+							<?php if (in_array($module, $panel_table_modules_pending ?? [])): ?>
+								<div class="cms_schema_sync cms_small_button"
+								     data-module="<?= $module ?>">
+									sync panel tables
+								</div>
+							<?php endif ?>
 							<div class="cms_schema_fix cms_small_button"
 							     data-key="<?= $module ?>">
 								fix module

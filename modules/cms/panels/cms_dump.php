@@ -81,12 +81,21 @@ class cms_dump extends CI_Controller {
 
 	}
 	
+	function _get_dump_tables() {
+		$this->load->model('cms/cms_schema_model');
+
+		$tables = ['cms_file', 'cms_image', 'cms_keyword', 'cms_page', 'cms_page_panel'];
+		$tables = array_merge($tables, $this->cms_schema_model->get_panel_table_names());
+		$tables = array_merge($tables, ['cms_page_panel_param', 'cms_search_cache', 'cms_slug', 'cms_text', 'cms_user']);
+
+		return $tables;
+	}
+
 	function panel_action($params){
 		
 		$this->load->model('cms/cms_update_model');
 		
-		$tables = ['cms_file', 'cms_image', 'cms_keyword', 'cms_page', 'cms_page_panel', 'cms_page_panel_param', 
-				'cms_search_cache', 'cms_slug', 'cms_text', 'cms_user', ];
+		$tables = $this->_get_dump_tables();
 		
 		if (!empty($params['do'])){
 				

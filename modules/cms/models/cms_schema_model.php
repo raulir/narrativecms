@@ -161,11 +161,308 @@ class cms_schema_model extends Model {
 	    ];
 	}
 	
+	// ====================== PANEL TABLE SCHEMAS ======================
+
+	function get_panel_table_modules() {
+		list(, $owner) = $this->_build_panel_table_schemas();
+		return array_values(array_unique($owner));
+	}
+
+	function get_panel_table_names() {
+		list($schemas, ) = $this->_build_panel_table_schemas();
+		return array_keys($schemas);
+	}
+
+	function get_panel_table_modules_pending() {
+		$this->load->model('cms/cms_page_panel_model');
+
+		list($schemas, $owner) = $this->_build_panel_table_schemas();
+		$pending = [];
+
+		foreach ($schemas as $table => $def) {
+			$table_module = $owner[$table] ?? '';
+			if (!$table_module) {
+				continue;
+			}
+			if ($this->_panel_table_needs_sync($table, $table_module)) {
+				$pending[$table_module] = $table_module;
+			}
+		}
+
+		return array_values($pending);
+	}
+
+	private function _panel_table_needs_sync($table, $table_module) {
+		if (!$this->db->table_exists($table)) {
+			return false;
+		}
+
+		$panel_name = $table_module.'/'.preg_replace('/^'.preg_quote($table_module, '/').'_/', '', $table);
+		$table_fields = $this->cms_page_panel_model->get_panel_table_fields($panel_name);
+		if (empty($table_fields)) {
+			return false;
+		}
+
+		$field_names = array_keys($table_fields);
+		$in_list = "'".implode("','", $field_names)."'";
+
+		$sql = "select count(*) as c from cms_page_panel_param p ".
+			"join cms_page_panel a on a.cms_page_panel_id = p.cms_page_panel_id ".
+			"where a.panel_name = ? and p.name in (".$in_list.") and p.language = '' ";
+		$query = $this->db->query($sql, [$panel_name]);
+		if ((int)$query->row_array()['c'] > 0) {
+			return true;
+		}
+
+		$sql = "select count(*) as c from cms_page_panel a ".
+			"left join `{$table}` t on t.cms_page_panel_id = a.cms_page_panel_id ".
+			"where a.panel_name = ? and t.cms_page_panel_id is null ";
+		$query = $this->db->query($sql, [$panel_name]);
+		if ((int)$query->row_array()['c'] > 0) {
+			return true;
+		}
+
+		return false;
+	}
+
+	function synchronise_panel_table_data($module = '') {
+		$this->load->model('cms/cms_page_panel_model');
+
+		list($schemas, $owner) = $this->_build_panel_table_schemas();
+		$stats = ['synced' => 0, 'skipped' => 0, 'errors' => []];
+
+		foreach ($schemas as $table => $def) {
+			$table_module = $owner[$table] ?? '';
+			if ($module && $table_module !== $module) {
+				continue;
+			}
+			if (!$this->db->table_exists($table)) {
+				$stats['errors'][] = $table.': table not found — run schema fix first';
+				continue;
+			}
+
+			$panel_name = $table_module.'/'.preg_replace('/^'.preg_quote($table_module, '/').'_/', '', $table);
+			$table_fields = $this->cms_page_panel_model->get_panel_table_fields($panel_name);
+			if (empty($table_fields)) {
+				continue;
+			}
+
+			$sql = "select cms_page_panel_id from cms_page_panel where panel_name = ? ";
+			$query = $this->db->query($sql, [$panel_name]);
+			$rows = $query->result_array();
+
+			foreach ($rows as $row) {
+				$cms_page_panel_id = (int)$row['cms_page_panel_id'];
+				$row_data = ['cms_page_panel_id' => $cms_page_panel_id];
+				$has_source = false;
+				$has_legacy_params = false;
+
+				foreach ($table_fields as $field_name => $field_spec) {
+					$sql = "select cms_page_panel_param_id from cms_page_panel_param where cms_page_panel_id = ? and name = ? and language = '' limit 1 ";
+					$legacy_query = $this->db->query($sql, [$cms_page_panel_id, $field_name]);
+					if ($legacy_query->num_rows()) {
+						$has_legacy_params = true;
+					}
+
+					$value = $this->_get_panel_param_value($cms_page_panel_id, $field_name);
+					if ($value === null) {
+						continue;
+					}
+					$row_data[$field_name] = $value;
+					$has_source = true;
+				}
+
+				if (!$has_source) {
+					$stats['skipped']++;
+					continue;
+				}
+
+				if (!$has_legacy_params && $this->_panel_table_row_complete($table, $cms_page_panel_id, $table_fields, $row_data)) {
+					$stats['skipped']++;
+					continue;
+				}
+
+				if ($this->_upsert_panel_table_row($table, $row_data)) {
+					foreach (array_keys($table_fields) as $field_name) {
+						if (array_key_exists($field_name, $row_data)) {
+							$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name = ? and language = '' ";
+							$this->db->query($sql, [$cms_page_panel_id, $field_name]);
+						}
+					}
+					$this->cms_page_panel_model->_update_cached_params($cms_page_panel_id);
+					$stats['synced']++;
+				} else {
+					$stats['errors'][] = $table.':'.$cms_page_panel_id.': upsert failed';
+				}
+			}
+		}
+
+		return $stats;
+	}
+
+	private function _panel_table_row_complete($table, $cms_page_panel_id, $table_fields, $row_data) {
+		$sql = "select * from `{$table}` where cms_page_panel_id = ? limit 1 ";
+		$query = $this->db->query($sql, [(int)$cms_page_panel_id]);
+		if (!$query->num_rows()) {
+			return false;
+		}
+
+		$existing = $query->row_array();
+		foreach ($table_fields as $field_name => $field_spec) {
+			if (!array_key_exists($field_name, $row_data)) {
+				continue;
+			}
+			if (!array_key_exists($field_name, $existing) || (string)$existing[$field_name] !== (string)$row_data[$field_name]) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private function _get_panel_param_value($cms_page_panel_id, $field_name) {
+		$sql = "select value from cms_page_panel_param where cms_page_panel_id = ? and name = ? and language = '' limit 1 ";
+		$query = $this->db->query($sql, [$cms_page_panel_id, $field_name]);
+		if ($query->num_rows()) {
+			return $query->row_array()['value'];
+		}
+
+		$sql = "select value from cms_page_panel_param where cms_page_panel_id = ? and name = '' limit 1 ";
+		$query = $this->db->query($sql, [$cms_page_panel_id]);
+		if (!$query->num_rows()) {
+			return null;
+		}
+
+		$params = cms_json_decode($query->row_array()['value'], 'panel params cache');
+		if (!is_array($params) || !array_key_exists($field_name, $params)) {
+			return null;
+		}
+
+		return $params[$field_name];
+	}
+
+	private function _upsert_panel_table_row($table, $row_data) {
+		$cms_page_panel_id = (int)$row_data['cms_page_panel_id'];
+		unset($row_data['cms_page_panel_id']);
+
+		$sql = "select cms_page_panel_id from `{$table}` where cms_page_panel_id = ? limit 1 ";
+		$query = $this->db->query($sql, [$cms_page_panel_id]);
+
+		if ($query->num_rows()) {
+			if (empty($row_data)) {
+				return true;
+			}
+			$sets = [];
+			$bind = [];
+			foreach ($row_data as $col => $val) {
+				$sets[] = '`'.$col.'` = ?';
+				$bind[] = $val;
+			}
+			$bind[] = $cms_page_panel_id;
+			$sql = "update `{$table}` set ".implode(', ', $sets)." where cms_page_panel_id = ? ";
+			return $this->_execute($sql, $bind);
+		}
+
+		$row_data['cms_page_panel_id'] = $cms_page_panel_id;
+		$cols = array_keys($row_data);
+		$sql = "insert into `{$table}` (`".implode('`, `', $cols)."`) values (".implode(', ', array_fill(0, count($cols), '?')).") ";
+		return $this->_execute($sql, array_values($row_data));
+	}
+
+	private function _build_panel_table_schemas() {
+		$merged = [];
+		$owner = [];
+		$modules = $GLOBALS['config']['modules'] ?? [];
+
+		foreach ($modules as $module) {
+			$def_dir = $GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/';
+			if (!is_dir($def_dir)) {
+				continue;
+			}
+
+			foreach (glob($def_dir.'*.json') as $file) {
+				$panel = basename($file, '.json');
+				$json = file_get_contents($file);
+				$def = cms_json_decode($json, basename($file));
+				if (!is_array($def) || empty($def['list']) || empty($def['item'])) {
+					continue;
+				}
+
+				$table_fields = [];
+				foreach ($def['item'] as $item) {
+					if (!empty($item['table']) && $item['table'] == '1' && !empty($item['name'])) {
+						$table_fields[$item['name']] = $item;
+					}
+				}
+				if (empty($table_fields)) {
+					continue;
+				}
+
+				$table = $module.'_'.$panel;
+				$merged[$table] = $this->_build_panel_table_schema($table, $table_fields);
+				$owner[$table] = $module;
+			}
+		}
+
+		return [$merged, $owner];
+	}
+
+	private function _build_panel_table_schema($table, $table_fields) {
+		$columns = [
+			'cms_page_panel_id' => [
+				'type' => 'INT',
+				'constraint' => 10,
+				'unsigned' => true,
+				'null' => false,
+			],
+		];
+		$indexes = [
+			'PRIMARY' => ['columns' => ['cms_page_panel_id'], 'type' => 'primary'],
+		];
+
+		foreach ($table_fields as $name => $spec) {
+			$columns[$name] = $this->_parse_panel_table_type($spec['table_type'] ?? 'text');
+
+			if (!empty($spec['table_index'])) {
+				$idx_name = $name.'_idx';
+				if ($spec['table_index'] === 'unique') {
+					$indexes[$idx_name] = ['columns' => [$name], 'type' => 'unique'];
+				} else {
+					$indexes[$idx_name] = ['columns' => [$name]];
+				}
+			}
+		}
+
+		return [
+			'table' => $table,
+			'engine' => 'InnoDB',
+			'charset' => 'utf8mb4',
+			'collation' => 'utf8mb4_general_ci',
+			'columns' => $columns,
+			'indexes' => $indexes,
+		];
+	}
+
+	private function _parse_panel_table_type($table_type) {
+		if (preg_match('/^varchar:(\d+)$/i', $table_type, $m)) {
+			return [
+				'type' => 'VARCHAR',
+				'constraint' => (int)$m[1],
+				'null' => false,
+				'default' => '',
+			];
+		}
+
+		return [
+			'type' => 'TEXT',
+			'null' => false,
+		];
+	}
+
 	// ====================== REUSABLE HELPERS ======================
 
 	private function _build_merged_schemas() {
-		$merged = [];
-		$owner = [];
+		list($merged, $owner) = $this->_build_panel_table_schemas();
 		$modules = $GLOBALS['config']['modules'] ?? [];
 
 		foreach ($modules as $module) {
@@ -189,7 +486,7 @@ class cms_schema_model extends Model {
 				} else {
 					$merged[$table] = $def;
 				}
-				$owner[$table] = $module; // last module wins
+				$owner[$table] = $module;
 				
 			}
 		}
@@ -373,11 +670,13 @@ class cms_schema_model extends Model {
 		return $this->_execute($sql);
 	}
 
-	private function _execute($sql) {
-		$this->db->query($sql);
+	private function _execute($sql, $bind = []) {
+		if (!empty($bind)) {
+			$this->db->query($sql, $bind);
+		} else {
+			$this->db->query($sql);
+		}
 		return true;
-//		$error = $this->db->error();
-//		return $error['code'] == 0;
 	}
 
     function _deep_merge($a, $b) {

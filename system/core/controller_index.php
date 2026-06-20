@@ -39,7 +39,7 @@ class Index extends CI_Controller {
    	}
 
     function index($page_id = 0, $extra = ''){
-
+// _print_r($page_id);
     	if (empty($page_id)){
     		$page_id = $GLOBALS['config']['landing_page']['_value'];
     	}
@@ -223,24 +223,6 @@ class Index extends CI_Controller {
     		
     	}
 
-    	if (extension_loaded('newrelic') && !empty($page_config)) {
-
-			newrelic_set_appname(trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), ' '.$GLOBALS['config']['site_title_delimiter']));
-			
-    		$newrelic_name = '';
-    		foreach($page_config as $config_item){
-    			if ($config_item['position'] == 'main'){
-    				$newrelic_name .= '/'.$config_item['panel'];
-    			}
-    		}
-    		
-    		if (!empty($newrelic_name)){
-  				newrelic_name_transaction($newrelic_name);
-    		}
-    		
-		}
-
-		//
 		$_ajax = $this->input->post('_ajax');
 		if (empty($_ajax)){
 
@@ -265,7 +247,7 @@ class Index extends CI_Controller {
 				$return = [];
 
 				$positions_needed = array_keys($positions);
-
+// _print_r($page_config);
 				foreach($page_config as $key => $panel_config){
 					if (in_array($panel_config['position'], $positions_needed)){
 						if ($panel_config['params']['cms_page_id'] != $positions[$panel_config['position']]) {

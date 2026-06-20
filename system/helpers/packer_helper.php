@@ -14,7 +14,10 @@ if ( !function_exists('pack_css')) {
 			list($m_start, $m_path) = explode('modules/', $scss_filename);
 			list($m_module, $m_rest) = explode('/', $m_path, 2);
 				
-			$module_scss = $m_start.'modules/'.$m_module.'/'.$m_module.'.scss';
+			$module_scss = $m_start.'modules/'.$m_module.'/css/'.$m_module.'.scss';
+			if (!file_exists($module_scss)){
+				$module_scss = $m_start.'modules/'.$m_module.'/'.$m_module.'.scss';
+			}
 			if (file_exists($module_scss)){
 				$return['module_scss'] = $module_scss;
 			}
@@ -66,12 +69,16 @@ if ( !function_exists('pack_css')) {
 				
 			// check if needed to compile, happens when any of files in set is newer than cache
 			$css_file_update_needed = false;
-			foreach($scss_set as $scss_file){
-				$css_file = $GLOBALS['config']['base_path'].$scsss_item['css'];
-				// if needs update
-				
-				if(!file_exists($css_file) || (filemtime($GLOBALS['config']['base_path'].$scss_file) > filemtime($css_file))){
-					$css_file_update_needed = true;
+
+			if (!empty($GLOBALS['config']['cache']['force_scss'])){
+				$css_file_update_needed = true;
+			} else {
+				foreach($scss_set as $scss_file){
+					$css_file = $GLOBALS['config']['base_path'].$scsss_item['css'];
+					if(!file_exists($css_file) || (filemtime($GLOBALS['config']['base_path'].$scss_file) > filemtime($css_file))){
+						$css_file_update_needed = true;
+						break;
+					}
 				}
 			}
 	

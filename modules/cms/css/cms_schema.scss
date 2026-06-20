@@ -6,6 +6,27 @@
 	padding: 0 1.0rem;
 }
 
+.cms_schema_panel_tables {
+	padding: 1.0rem 1.0rem 0;
+}
+
+.cms_schema_panel_tables_title {
+	font-size: 1.5rem;
+	padding-bottom: 0.8rem;
+}
+
+.cms_schema_panel_tables_row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.8rem 0;
+	border-bottom: 0.1rem solid $cms_border;
+}
+
+.cms_schema_panel_tables_module {
+	font-weight: 700;
+}
+
 .cms_schema_module_header {
 	display: flex;
 	align-items: center;
@@ -13,6 +34,12 @@
 	border-bottom: 0.1rem solid $cms_border;
 	padding-top: 1.4rem;
 	padding-bottom: 0.6rem;
+}
+
+.cms_schema_module_actions {
+	display: flex;
+	align-items: center;
+	gap: 0.8rem;
 }
 
 .cms_schema_module_title {
