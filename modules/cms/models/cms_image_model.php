@@ -94,10 +94,9 @@ class cms_image_model extends CI_Model {
 
 		$page = (int)$page;
 		$limit = (int)$limit;
-		$search = str_replace(array("'", '"', ), '', $search); // preg_replace("/[^[:alnum:][:space:]_-]/ui", '', $search));
+		$search = str_replace(array("'", '"', ), '', $search);
 		$category = trim(preg_replace("/[^[:alnum:]_]/ui", '', $category));
 
-		// build where
 		$where = " 1=1 ";
 		$params = array();
 
@@ -117,7 +116,6 @@ class cms_image_model extends CI_Model {
 
 		$return['result'] = $query->result_array();
 		
-		// add page images to count
 		$pages = $this->cms_page_model->get_cms_pages();
 		
 		foreach($return['result'] as $key => $image){
@@ -130,7 +128,6 @@ class cms_image_model extends CI_Model {
 			}
 		}
 		
-		// get total number of images in filter
 		$sql_count = "select count(*) as number from cms_image a where ".$where." ";
 		$query = $this->db->query($sql_count, $params);
 		$number_a = $query->row_array();
@@ -138,97 +135,6 @@ class cms_image_model extends CI_Model {
 
 		return $return;
 
-	}
-	
-	function get_video_metadata($videofile) {
-		
-		$ffprobe_name = str_replace('<filename>', 'ffprobe', $GLOBALS['config']['ffmpeg']);
-		
-		$command = $ffprobe_name.' -v quiet -print_format json -show_format -show_streams '.escapeshellarg($videofile);
-		$output = shell_exec($command);
-		$json = json_decode($output, true);
-		
-		$video_stream = null;
-		foreach ($json['streams'] as $stream) {
-			if ($stream['codec_type'] === 'video') {
-				$video_stream = $stream;
-				break;
-			}
-		}
-		if (!$video_stream) {
-			throw new Exception('No video stream found.');
-		}
-	
-		$width = $video_stream['width'];
-		$height = $video_stream['height'];
-		$bitrate = $video_stream['bit_rate'] ?? $json['format']['bit_rate'] ?? 0;
-		
-		$bit_depth = $video_stream['bits_per_raw_sample'] ?? $video_stream['pix_fmt'] ?? null;
-		if (!$bit_depth && isset($video_stream['pix_fmt'])) {
-			if (preg_match('/(\d+)le$/', $video_stream['pix_fmt'], $m)) {
-				$bit_depth = (int)$m[1];
-			} elseif (strpos($video_stream['pix_fmt'], '10') !== false) {
-				$bit_depth = 10;
-			} else {
-				$bit_depth = 8;
-			}
-		}
-	
-		return [
-				'width' => $width,
-				'height' => $height,
-				'bitrate_kbps' => round($bitrate / 1000),
-				'bit_depth' => $bit_depth,
-		];
-	}
-	
-	function video_add_queue($video_id){
-		
-		$sql = "select * from cms_image where cms_image_id = ? ";
-		$query = $this->db->query($sql, [$video_id, ]);
-		$video = $query->result_array()[0];
-
-		$metadata = $this->get_video_metadata($GLOBALS['config']['upload_path'].$video['filename']);
-		
-		$queue_filename = $GLOBALS['config']['base_path'].'cache/video_queue.json';
-		
-		if (file_exists($queue_filename)){
-			$queue = json_decode(file_get_contents($queue_filename), true);
-		} else {
-			$queue = [];
-		}
-		
-		$ladder = [
-				['width' => 320, 'stdbr' => 150, 'crf' => 32, 'audio_br' => '32k',],
-				['width' => 640, 'stdbr' => 500, 'crf' => 30, 'audio_br' => '64k',],
-				['width' => 1280, 'stdbr' => 2000, 'crf' => 28, 'audio_br' => '96k',],
-				['width' => 1920, 'stdbr' => 4000, 'crf' => 26, 'audio_br' => '128k',],
-				['width' => 3840, 'stdbr' => 10000, 'crf' => 24, 'audio_br' => '192k',],
-		];
-		
-		$video_todo = [
-				'ladder' => [],
-				'videofile' => $GLOBALS['config']['upload_path'].$video['filename'],
-				'target_folder' => $GLOBALS['config']['upload_path'].$video['filename'].'.data/'
-		];
-		
-		foreach ($ladder as $step){
-			if ($step['width'] < $metadata['width']){
-				$video_todo['ladder'][] = $step;
-			} else {
-				$video_todo['ladder'][] = $step;
-				break;
-			}
-		}
-		
-		foreach($video_todo['ladder'] as $i => $step){
-			$video_todo['ladder'][$i]['br'] = round($step['stdbr'] * 1.5 * $metadata['height'] / $metadata['width']).'k';
-			$video_todo['ladder'][$i]['profile'] = $metadata['bit_depth'] == 10 ? 'main10' : 'main';
-		}
-		
-		$queue[] = $video_todo;
-		file_put_contents($queue_filename, json_encode($queue, JSON_PRETTY_PRINT));
-		
 	}
 
 	function create_cms_image($dir, $name_data, $category){
@@ -269,7 +175,7 @@ class cms_image_model extends CI_Model {
 			$query = $this->db->query($sql, array($str));
 			$result = $query->result_array();
 			
-			if (!empty($result[0]['name']) && substr_count($name_data, '/') == 1){ // module image and exists in db
+			if (!empty($result[0]['name']) && substr_count($name_data, '/') == 1){
 				
 				return $dir . $name_data . '.' . $extension;
 				
@@ -306,7 +212,6 @@ class cms_image_model extends CI_Model {
 
 	function delete_cms_image_by_filename($filename, $delete = true){
 
-		// TODO: if not unlinking bad file
 		if (file_exists($GLOBALS['config']['upload_path'].$filename)){
 			unlink($GLOBALS['config']['upload_path'].$filename);
 		}
@@ -323,7 +228,7 @@ class cms_image_model extends CI_Model {
 			_delete_directory($directory);
 		}
 
-		if ($delete){ // TODO: here may be error!
+		if ($delete){
 			$sql = "delete from cms_image where filename = ? ";
 			$this->db->query($sql, [$filename]);
 		} else {
@@ -333,61 +238,29 @@ class cms_image_model extends CI_Model {
 		
 	}
 
-	function scrape_image($source, $prefix = 'scraped', $category = 'scraped', $fill_ext = 'jpg'){
+	function update_cms_image($filename, $data){
 
-		if (stristr($source, '?')){
-			list($fn, $pr) = explode('?', $source, 2);
-			$ext = pathinfo($fn, PATHINFO_EXTENSION);
-			$filename = pathinfo($fn, PATHINFO_BASENAME);
-		} else {
-			$ext = pathinfo($source, PATHINFO_EXTENSION);
-			$filename = pathinfo($source, PATHINFO_BASENAME);
+		foreach($data as $field => $value){
+			$sql = "update cms_image set ".$field." = ? where filename = ? ";
+			$query = $this->db->query($sql, array($value, $filename, ));
 		}
-		
-		if (empty($ext)){
-			$ext = $fill_ext;
-			$filename .= '.'.$fill_ext;
-		}
-
-		$return = '';
-
-		if ($ext == 'jpg' || $ext == 'png'){
-				
-			$image_content = file_get_contents($source);
-			if (!empty($image_content)){
-
-				// move it to year/month directory
-				if (!file_exists($GLOBALS['config']['upload_path'].date('Y'))){
-					mkdir($GLOBALS['config']['upload_path'].date('Y'));
-				}
-
-				if (!file_exists($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'))){
-					mkdir($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'));
-				}
-
-
-				// check if not duplicate
-				// $hash = sha1_file($GLOBALS['config']['upload_path'].$return);
-				$hash = sha1($image_content);
-
-				$existing = $this->get_cms_image_by_hash($hash);
-				if (!empty($existing) && !file_exists($existing['filename'])){
-					file_put_contents($GLOBALS['config']['upload_path'].$existing['filename'], $image_content);
-					$return = $existing['filename'];
-				} else if (empty($existing)) {
-					$return = $this->create_cms_image(date('Y').'/'.date('m').'/', $prefix.'_'.$filename, $category);
-					file_put_contents($GLOBALS['config']['upload_path'].$return, $image_content);
-					$this->update_cms_image($return, ['hash' => $hash, ]);
-				}
-
-			}
-
-		}
-
-		return $return;
 
 	}
-	
+
+	function get_cms_image_by_hash($hash){
+
+		$sql = "select * from cms_image where hash = ? ";
+		$query = $this->db->query($sql, array($hash));
+		if ($query->num_rows()){
+			$result = $query->row_array();
+		} else {
+			$result = array();
+		}
+		 
+		return $result;
+
+	}
+
 	function refresh_cms_image_hash($filename){
 		
 		if (empty($filename) || !file_exists($GLOBALS['config']['upload_path'].$filename)){
@@ -420,6 +293,65 @@ class cms_image_model extends CI_Model {
 
 	}
 
+	function scrape_image($source, $prefix = 'scraped', $category = 'scraped', $fill_ext = 'jpg'){
+
+		if (stristr($source, '?')){
+			list($fn, $pr) = explode('?', $source, 2);
+			$ext = pathinfo($fn, PATHINFO_EXTENSION);
+			$filename = pathinfo($fn, PATHINFO_BASENAME);
+		} else {
+			$ext = pathinfo($source, PATHINFO_EXTENSION);
+			$filename = pathinfo($source, PATHINFO_BASENAME);
+		}
+		
+		if (empty($ext)){
+			$ext = $fill_ext;
+			$filename .= '.'.$fill_ext;
+		}
+
+		$return = '';
+
+		if ($ext == 'jpg' || $ext == 'png'){
+				
+			$image_content = file_get_contents($source);
+			if (!empty($image_content)){
+
+				if (!file_exists($GLOBALS['config']['upload_path'].date('Y'))){
+					mkdir($GLOBALS['config']['upload_path'].date('Y'));
+				}
+
+				if (!file_exists($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'))){
+					mkdir($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'));
+				}
+
+				$hash = sha1($image_content);
+
+				$existing = $this->get_cms_image_by_hash($hash);
+				if (!empty($existing) && !file_exists($existing['filename'])){
+					file_put_contents($GLOBALS['config']['upload_path'].$existing['filename'], $image_content);
+					$return = $existing['filename'];
+				} else if (empty($existing)) {
+					$return = $this->create_cms_image(date('Y').'/'.date('m').'/', $prefix.'_'.$filename, $category);
+					file_put_contents($GLOBALS['config']['upload_path'].$return, $image_content);
+					$this->update_cms_image($return, ['hash' => $hash, ]);
+				}
+
+			}
+
+		}
+
+		return $return;
+
+	}
+
+	function get_image_url($image, $params){
+		
+		include_once $GLOBALS['config']['base_path'].'application/helpers/image_optimiser_helper.php';
+
+		return $GLOBALS['config']['upload_url']._iw($image, $params)['image'];
+
+	}
+
 	function gif_is_animated($filepath){
 
 		$content = @file_get_contents($filepath);
@@ -428,18 +360,6 @@ class cms_image_model extends CI_Model {
 		}
 
 		return preg_match_all('/\x00\x2C/', $content, $matches) > 1;
-
-	}
-
-	function ffmpeg_is_available(){
-
-		if (empty($GLOBALS['config']['ffmpeg'])){
-			return false;
-		}
-
-		$ffmpeg_name = str_replace('<filename>', 'ffmpeg', $GLOBALS['config']['ffmpeg']);
-
-		return is_file($ffmpeg_name);
 
 	}
 
@@ -492,8 +412,9 @@ class cms_image_model extends CI_Model {
 
 		if ($this->gif_is_animated($filepath)){
 
-			if ($this->ffmpeg_is_available()){
-				$filename = $this->_convert_animated_gif_to_mp4($filename);
+			$this->load->model('cms/cms_video_model');
+			if ($this->cms_video_model->ffmpeg_is_available()){
+				$filename = $this->_convert_animated_gif($filename);
 			}
 
 		} else {
@@ -539,41 +460,32 @@ class cms_image_model extends CI_Model {
 
 	}
 
-	function _convert_animated_gif_to_mp4($filename){
+	function _convert_animated_gif($filename){
 
 		$gif_path = $GLOBALS['config']['upload_path'].$filename;
-		$name_a = pathinfo($filename);
-		$new_filename = $name_a['dirname'].'/'.$name_a['filename'].'.mp4';
-		$mp4_path = $GLOBALS['config']['upload_path'].$new_filename;
 
 		$image = $this->get_cms_image_by_filename($filename);
 		$cms_image_id = !empty($image['cms_image_id']) ? $image['cms_image_id'] : 0;
 
-		$ffmpeg_name = str_replace('<filename>', 'ffmpeg', $GLOBALS['config']['ffmpeg']);
-		$cmd = $ffmpeg_name.' -y -i '.escapeshellarg($gif_path).' -movflags +faststart -pix_fmt yuv420p -an '.
-				escapeshellarg($mp4_path).' 2>&1';
+		$this->load->model('cms/cms_video_model');
+		$result = $this->cms_video_model->convert_gif_to_mp4($filename);
 
-		exec($cmd, $out, $ret);
-
-		if ($ret !== 0 || !file_exists($mp4_path)){
+		if (empty($result)){
 			return $filename;
 		}
 
 		$meta_extra = ['converted_from' => 'gif'];
-
-		try {
-			$metadata = $this->get_video_metadata($mp4_path);
-			$meta_extra['original_width'] = $metadata['width'];
-			$meta_extra['original_height'] = $metadata['height'];
-		} catch (Exception $e) {
+		if (!empty($result['width'])){
+			$meta_extra['original_width'] = $result['width'];
+			$meta_extra['original_height'] = $result['height'];
 		}
 
 		unlink($gif_path);
 
-		$new_filename = $this->_update_image_filename($filename, $new_filename, $meta_extra);
+		$new_filename = $this->_update_image_filename($filename, $result['filename'], $meta_extra);
 
 		if ($cms_image_id){
-			$this->video_add_queue($cms_image_id);
+			$this->cms_video_model->video_add_queue($cms_image_id);
 		}
 
 		return $new_filename;
@@ -642,35 +554,4 @@ class cms_image_model extends CI_Model {
 
 	}
 
-	function update_cms_image($filename, $data){
-
-		foreach($data as $field => $value){
-			$sql = "update cms_image set ".$field." = ? where filename = ? ";
-			$query = $this->db->query($sql, array($value, $filename, ));
-		}
-
-	}
-
-	function get_cms_image_by_hash($hash){
-
-		$sql = "select * from cms_image where hash = ? ";
-		$query = $this->db->query($sql, array($hash));
-		if ($query->num_rows()){
-			$result = $query->row_array();
-		} else {
-			$result = array();
-		}
-		 
-		return $result;
-
-	}
-	
-	function get_image_url($image, $params){
-		
-		include_once $GLOBALS['config']['base_path'].'application/helpers/image_optimiser_helper.php';
-
-		return $GLOBALS['config']['upload_url']._iw($image, $params)['image'];
-
-	}
-	
 }

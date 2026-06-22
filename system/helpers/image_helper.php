@@ -143,6 +143,17 @@ if ( !function_exists('_i')) {
 		
 		// if video
 		if ($extension == 'mp4'){
+
+			$has_source = file_exists($GLOBALS['config']['upload_path'].$image) && !is_dir($GLOBALS['config']['upload_path'].$image);
+			$has_fallback = file_exists($GLOBALS['config']['upload_path'].$image.'.data/fallback.mp4');
+
+			if (!$has_source && !$has_fallback){
+
+				$fileurl = ($GLOBALS['config']['base_site'] ?? '').$GLOBALS['config']['base_url'].'modules/cms/img/cms_no_image.png';
+				print('style="background-image:  url('.$fileurl.'); '.$params['css'].'"');
+				return ['image' => $image, 'height' => 0, 'width' => 0, ];
+
+			}
 			
 			if (file_exists($GLOBALS['config']['upload_path'].$image.'.data/fallback.mp4')){
 				$video_file = $GLOBALS['config']['upload_url'].$image.'.data/fallback.mp4';

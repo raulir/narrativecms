@@ -13,6 +13,7 @@ class cms_images_upload extends CI_Controller {
 		}
 		
 		$this->load->model('cms/cms_image_model');
+		$this->load->model('cms/cms_video_model');
 		
 	}
 	
@@ -53,7 +54,7 @@ class cms_images_upload extends CI_Controller {
 //			}
 			
 			if ($filedata['type'] == 'video'){
-				$this->cms_image_model->video_add_queue($filedata['cms_image_id']);
+				$this->cms_video_model->video_add_queue($filedata['cms_image_id']);
 			}
 			
 		}
