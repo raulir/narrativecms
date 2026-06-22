@@ -2,34 +2,35 @@
 	"name":"User",
 	"cms_menu":[
 		{
-			"id":"user",
-			"name":"User"
+			"id":"user_user",
+			"name":"User",
+			"order":"60"
 		},
 		{
-			"id":"users",
+			"id":"user_users",
 			"name":"Users",
-			"parent":"user",
+			"parent":"user_user",
 			"url":"admin/cms_list/user__user/",
 			"access":"user_users"
 		},
 		{
-			"id":"usergroups",
+			"id":"user_usergroups",
 			"name":"User groups",
-			"parent":"user",
+			"parent":"user_user",
 			"url":"admin/cms_list/user__usergroup/",
 			"access":"user_usergroups"
 		},
 		{
-			"id":"users",
+			"id":"user_header",
 			"name":"User header settings",
-			"parent":"user",
+			"parent":"user_user",
 			"url":"admin/panel_settings/user__header/",
 			"access":"user_settings"
 		},
 		{
-			"id":"users",
+			"id":"user_settings",
 			"name":"User settings",
-			"parent":"user",
+			"parent":"user_user",
 			"url":"admin/panel_settings/user__user_settings/",
 			"access":"user_settings"
 		}
@@ -84,6 +85,10 @@
 		{
 			"id":"auth_google",
 			"name":"Auth by Google"
+		},
+		{
+			"id":"auth_gapp",
+			"name":"Google app auth"
 		}
 	]
 }

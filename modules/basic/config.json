@@ -63,65 +63,61 @@
 	],
 	"cms_menu":[
 		{
-			"id":"tools",
-			"name":"Tools"
-		},
-		{
-			"id":"gtag",
+			"id":"basic_gtag",
 			"name":"Analytics settings",
 			"url":"admin/panel_settings/basic__gtag/",
-			"parent":"tools",
+			"parent":"cms_tools",
 			"access":"basic_analytics"
 		},
 		{
-			"id":"gtm",
+			"id":"basic_gtm",
 			"name":"GTM settings",
 			"url":"admin/panel_settings/basic__gtm/",
-			"parent":"tools",
+			"parent":"cms_tools",
 			"access":"basic_analytics"
 		},
 		{
-			"id":"pixel",
+			"id":"basic_pixel",
 			"name":"FB pixel settings",
 			"url":"admin/panel_settings/basic__pixel/",
-			"parent":"tools",
+			"parent":"cms_tools",
 			"access":"basic_analytics"
 		},
 		{
-			"id":"language",
+			"id":"basic_language",
 			"name":"Language settings",
 			"url":"admin/panel_settings/basic__language/",
-			"parent":"tools",
+			"parent":"cms_tools",
 			"access":"basic_language"
 		},
 		{
-			"id":"pageshare",
+			"id":"basic_pageshare",
 			"name":"Sharing settings",
-			"parent":"tools",
+			"parent":"cms_tools",
 			"user":"1",
 			"url":"admin/panel_settings/basic__pageshare/",
 			"access":"basic_sharing"
 		},
 		{
-			"id":"vimeo_settings",
+			"id":"basic_vimeo_settings",
 			"name":"Vimeo settings",
-			"parent":"tools",
+			"parent":"cms_tools",
 			"user":"1",
 			"url":"admin/panel_settings/basic__vimeo/",
 			"access":"basic_media"
 		},
 		{
-			"id":"lightbox_settings",
+			"id":"basic_lightbox_settings",
 			"name":"Lightbox settings",
-			"parent":"tools",
+			"parent":"cms_tools",
 			"user":"1",
 			"url":"admin/panel_settings/basic__lightbox/",
 			"access":"basic_media"
 		},
 		{
-			"id":"popup_settings",
+			"id":"basic_popup_settings",
 			"name":"Popup settings",
-			"parent":"tools",
+			"parent":"cms_tools",
 			"user":"1",
 			"url":"admin/panel_settings/basic__popup/",
 			"access":"basic_media"

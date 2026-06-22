@@ -14,96 +14,148 @@ class cms_menu extends CI_Controller {
 
 	}
 
+	function _menu_hide_active($value){
+
+		if (!isset($value)){
+			return false;
+		}
+
+		return $value !== false && $value !== 0 && $value !== '0';
+
+	}
+
+	function _menu_parent_active($parent){
+
+		if (!isset($parent)){
+			return false;
+		}
+
+		if ($parent === false || $parent === 0 || $parent === '0' || $parent === ''){
+			return false;
+		}
+
+		return true;
+
+	}
+
+	function _menu_user_has_access($menu_item){
+
+		if (empty($menu_item['access'])){
+			return true;
+		}
+
+		foreach($_SESSION['cms_user']['access'] as $access){
+			if (preg_match('/'.str_replace('*', '.*?', $access).'/', $menu_item['access'])){
+				return true;
+			}
+		}
+
+		return false;
+
+	}
+
 	function panel_params($params){
 		
 		$this->load->model('cms/cms_module_model');
-		$this->load->model('cms/cms_panel_model');
 		
-		$menu_items = array();
+		$source_items = [];
+
 		foreach($GLOBALS['config']['modules'] as $module){
 			
 			$config = $this->cms_module_model->get_module_config($module);
 
 			if (!empty($config['cms_menu'])){
-				$menu_items = array_merge($menu_items, $config['cms_menu']);
-			}
-
-			// add module variables
-			if (file_exists($GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/'.$module.'.json')){
-				
-				$panel_config = $this->cms_panel_model->get_cms_panel_config($module.'/'.$module);
-				
-				if (!empty($panel_config['settings'])){
-				
-					$menu_items[] = [
-							'id' => $module.'_settings',
-							'name' => 'Settings',
-							'parent' => $module,
-							'access' => $module.'_'.$module,
-							'url' => 'admin/panel_settings/'.$module.'__'.$module,
-					];
-					// check if parent exists
-					$exists = false;
-					foreach($menu_items as $item){
-						if ($item['id'] === $module){
-							$exists = true;
-						}
-					}
-					if (!$exists){
-						$menu_items[] = [
-								'id' => $module,
-								'name' => !empty($config['name']) ? $config['name'] : ucfirst($module),
-						];
-					}
-				
+				foreach($config['cms_menu'] as $item){
+					$source_items[] = $item;
 				}
-			
 			}
 
 		}
 
-		$return['menu_items'] = array();
-		$return['children'] = array();
-		foreach($menu_items as $menu_item){
-				
-			$found = true;
-				
-			// check if user has access rights
-			if (!empty($menu_item['access'])){
-				$found = false;
-				foreach($_SESSION['cms_user']['access'] as $access){
-						
-					if (preg_match('/'.str_replace('*', '.*?', $access).'/', $menu_item['access'])){
-						$found = true;
-					}
-						
-				}
+		$flat = [];
+		foreach($source_items as $item){
 
+			if (empty($item['id'])){
+				continue;
 			}
 
-			if ($found){
-
-				if (empty($menu_item['parent'])){
-					if (empty($return['menu_items'][$menu_item['id']])){
-						$return['menu_items'][$menu_item['id']] = $menu_item;
-					}
-				} else {
-					if (!isset($return['children'][$menu_item['parent']])){
-						$return['children'][$menu_item['parent']] = array();
-					}
-					$return['children'][$menu_item['parent']][] = $menu_item;
-				}
-
+			$id = $item['id'];
+			if (empty($flat[$id])){
+				$flat[$id] = $item;
+			} else {
+				$flat[$id] = array_merge($flat[$id], $item);
 			}
-				
+
 		}
 
-		// remove lonely parents
+		$default_order = 9000;
+		foreach($flat as $id => &$item){
+			if (!isset($item['order'])){
+				$item['order'] = $default_order;
+				$default_order += 10;
+			}
+		}
+		unset($item);
+
+		foreach($flat as $id => $item){
+			if (!$this->_menu_user_has_access($item)){
+				unset($flat[$id]);
+			}
+		}
+
+		foreach($flat as $id => $item){
+
+			if ($this->_menu_hide_active($item['hide'] ?? null)){
+				unset($flat[$id]);
+				continue;
+			}
+
+			unset($flat[$id]['hide']);
+
+		}
+
+		$return['menu_items'] = [];
+		$return['children'] = [];
+
+		foreach($flat as $id => $item){
+
+			if ($this->_menu_parent_active($item['parent'] ?? null)){
+
+				$parent = $item['parent'];
+				if (empty($flat[$parent])){
+					continue;
+				}
+
+				if (!isset($return['children'][$parent])){
+					$return['children'][$parent] = [];
+				}
+				$return['children'][$parent][] = $item;
+
+			} else {
+
+				unset($item['parent']);
+				$return['menu_items'][$id] = $item;
+
+			}
+
+		}
+
 		foreach($return['menu_items'] as $key => $value){
 			if (empty($return['children'][$key]) && empty($value['url'])){
 				unset($return['menu_items'][$key]);
 			}
 		}
+
+		uasort($return['menu_items'], function($a, $b){
+			return ((int)($a['order'] ?? 9999)) <=> ((int)($b['order'] ?? 9999));
+		});
+
+		foreach($return['children'] as $parent_id => &$group){
+			usort($group, function($a, $b){
+				return ((int)($a['order'] ?? 9999)) <=> ((int)($b['order'] ?? 9999));
+			});
+		}
+		unset($group);
 
 		return $return;
 

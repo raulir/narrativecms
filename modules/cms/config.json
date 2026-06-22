@@ -2,87 +2,91 @@
 	"name":"CMS",
 	"cms_menu":[
 		{
-			"id":"pages",
+			"id":"cms_pages",
 			"name":"Pages",
 			"access":"cms_pages",
 			"url":"admin/pages/",
+			"order":"10",
 			"ctrl":"1"
 		},
 		{
-			"id":"content",
+			"id":"cms_content",
 			"name":"Content",
+			"order":"20",
 			"ctrl":"2"
 		},
 		{
-			"id":"cms",
+			"id":"cms_cms",
 			"name":"CMS",
+			"order":"30",
 			"ctrl":"3"
 		},
 		{
-			"id":"tools",
+			"id":"cms_tools",
 			"name":"Tools",
+			"order":"40",
 			"ctrl":"4"
 		},
 		{
 			"id":"cms_search",
 			"name":"Search",
-			"parent":"cms",
+			"parent":"cms_cms",
 			"access":"cms_search",
 			"url":"admin/search/"
 		},
 		{
 			"id":"cms_site_settings",
 			"name":"Site settings",
-			"parent":"cms",
+			"parent":"cms_cms",
 			"access":"cms_cms",
 			"url":"admin/panel_settings/cms__cms_settings/"
 		},
 		{
 			"id":"cms_user_settings",
 			"name":"Admin users",
-			"parent":"cms",
+			"parent":"cms_cms",
 			"access":"cms_users",
 			"url":"admin/users/"
 		},
 		{
 			"id":"cms_cssjs_settings",
 			"name":"Global css",
-			"parent":"cms",
+			"parent":"cms_cms",
 			"access":"cms_cssjs",
 			"url":"admin/cssjs/"
 		},
 		{
 			"id":"cms_dump",
 			"name":"Data dumps",
-			"parent":"cms",
+			"parent":"cms_cms",
 			"access":"cms_dump",
 			"url":"admin/dump/"
 		},
 		{
 			"id":"cms_cron",
 			"name":"Repeating tasks",
-			"parent":"cms",
+			"parent":"cms_cms",
 			"access":"cms_cron",
 			"url":"admin/panel_settings/cms__cms_cron/"
 		},
 		{
 			"id":"cms_targets",
 			"name":"Target groups",
-			"parent":"cms",
+			"parent":"cms_cms",
 			"access":"cms_targets",
 			"url":"admin/panel_settings/cms__cms_targets/"
 		},
 		{
 			"id":"cms_update",
 			"name":"Update",
-			"parent":"cms",
+			"parent":"cms_cms",
 			"access":"cms_cms",
 			"url":"admin/update/"
 		},
 		{
 			"id":"cms_schema",
 			"name":"Schema",
-			"parent":"cms",
+			"parent":"cms_cms",
 			"access":"cms_cms",
 			"url":"admin/schema/"
 		}
