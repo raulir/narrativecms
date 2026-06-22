@@ -9,14 +9,17 @@ class user_model extends Model {
 		
 		$this->load->model('cms/cms_page_panel_model');
 
-		// check if email exists
-		$check_user = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'user/user', 'email' => $data['email'], ]);
-		$check_user = reset($check_user);
-		 
-		if ($check_user !== false){
-		
-			$return['errors'][] = 'emailexists';
-		
+		if (!empty($data['email'])){
+			
+			$check_user = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'user/user', 'email' => $data['email'], ]);
+			$check_user = reset($check_user);
+			 
+			if ($check_user !== false){
+			
+				$return['errors'][] = 'emailexists';
+			
+			}
+			
 		}
 		 
 		// check if username exists
@@ -39,10 +42,14 @@ class user_model extends Model {
 		
 		}
 		
-		if (!stristr($data['email'], '@') || !stristr($data['email'], '.')) {
-				
-			$return['errors'][] = 'bademail';
-		
+		if (!empty($data['email'])){
+			
+			if (!stristr($data['email'], '@') || !stristr($data['email'], '.')){
+					
+				$return['errors'][] = 'bademail';
+			
+			}
+			
 		}
 		
 		if (!empty($return['errors'])){

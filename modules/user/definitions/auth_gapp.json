@@ -1,0 +1,7 @@
+{
+    "version": "2",
+	"label": "Google app auth",
+	"description": "AJAX endpoint for native app WebView Google login",
+	"image":"",
+    "item": []
+}

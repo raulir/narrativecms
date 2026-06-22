@@ -55,10 +55,7 @@ class reminder extends CI_Controller{
 						(!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').
 						'Password reminder from '.$title,
 						$content,
-						'From: '.$GLOBALS['config']['from_name'].' <'.$GLOBALS['config']['from_email'].'>' . "\r\n" .
-						( !empty($GLOBALS['config']['sender_email']) ?
-								('Sender: '.$GLOBALS['config']['sender_name'].' <'.$GLOBALS['config']['sender_email'].'>' . "\r\n") : '').
-						'Reply-To: '.$GLOBALS['config']['reply_name'].' <'.$GLOBALS['config']['reply_email'].'>' . "\r\n");
+						$this->_mail_headers());
 
 			}
 			
@@ -122,9 +119,7 @@ class reminder extends CI_Controller{
 						(!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').
 						'Password update at '.$title,
 						'Password associated with this email updated.',
-						'From: Caroline Groves <noreply@bytecrackers.com>' . "\r\n" .
-						'Sender: Caroline Groves <enquiries@carolinegroves.com>' . "\r\n" .
-						'Reply-To: Caroline Groves <enquiries@carolinegroves.com>' . "\r\n");
+						$this->_mail_headers());
 
 			}
 			
@@ -161,6 +156,23 @@ class reminder extends CI_Controller{
 		}
 
 		return $params;
+		
+	}
+
+	function _mail_headers(){
+		
+		$from_name = $GLOBALS['config']['from_name'] ?? '';
+		$from_email = $GLOBALS['config']['email'] ?? '';
+		
+		$headers = 'From: '.$from_name.' <'.$from_email.'>' . "\r\n";
+		
+		if (!empty($GLOBALS['config']['sender_email'])){
+			$headers .= 'Sender: '.$GLOBALS['config']['sender_name'].' <'.$GLOBALS['config']['sender_email'].'>' . "\r\n";
+		}
+		
+		$headers .= 'Reply-To: '.$GLOBALS['config']['reply_name'].' <'.$GLOBALS['config']['reply_email'].'>' . "\r\n";
+		
+		return $headers;
 		
 	}
 
