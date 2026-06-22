@@ -183,8 +183,11 @@ function cms_input_textarea_init(){
 			    		ed.on('init', function(ed) {
 			    			ed.pasteAsPlainText = true;
 			    	    });
-			    		ed.on('change', function () {
+			    		ed.on('change keyup', function () {
 			                ed.save();
+			                if (typeof cms_page_panel_schedule_title_preview === 'function'){
+			                	cms_page_panel_schedule_title_preview()
+			                }
 			            });
 			    		$.each(setup, function(key, value){
 			    			value(ed);

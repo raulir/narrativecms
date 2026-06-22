@@ -32,7 +32,7 @@
 						'value' => $block['title'],
 						'name_clean' => 'block_title',
 						'label' => 'Title',
-						'help' => '[Page panel title]||Not visible in frontend. When page panel has {heading} field, this is overwritten from there',
+						'help' => '[Page panel title]||Not visible in frontend',
 						'extra_class' => 'cms_page_panel_title',
 				]); ?>
 				

@@ -27,6 +27,7 @@ function cms_page_panel_save(params){
 			
 			$.extend(data_to_submit, {
 				'success': function(data){
+					cms_page_panel_title_preview_on_save(data)
 					params.success(data);
 				}
 			});
@@ -35,6 +36,8 @@ function cms_page_panel_save(params){
 			
 			$.extend(data_to_submit, {
 				'success': function(data){
+
+					cms_page_panel_title_preview_on_save(data)
 
 					if ($('.cms_page_panel_mode').val() == 'panel_settings'){
 							

@@ -7,8 +7,8 @@
 		
 				<?php foreach($breadcrumb as $element): ?>
 					
-					<<?= !empty($element['url']) ? 'a' : 'div' ?> class="cms_tool_text cms_page_panel_toolbar_text" 
-							<?php _lh($element['url']); ?> <?= !empty($element['field']) ? 'data-title_field="'.$element['field'].'"' : '' ?>>
+					<<?= !empty($element['url']) ? 'a' : 'div' ?> class="cms_tool_text cms_page_panel_toolbar_text<?= !empty($element['class']) ? ' '.$element['class'] : '' ?>" 
+							<?php _lh($element['url']); ?>>
 						
 						<?= $element['text'] ?>
 					

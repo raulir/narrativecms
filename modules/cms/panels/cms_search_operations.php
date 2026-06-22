@@ -42,13 +42,10 @@ class cms_search_operations extends CI_Controller {
 					
 					list($panel_name, $cms_page_panel_id) = explode('=', $page_id);
 
-					// get heading
 					$data = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
 
-					$title = $this->run_panel_method($panel_name, 'panel_heading', $data);
-
 					$return['result']['pages']['lists'][$page_id] = [
-							'title' => $title,
+							'title' => $data['title'],
 							'page_id' => $page_id,
 							'edit_url' => 'cms_page_panel/' . $cms_page_panel_id . '/',
 							'slug' => $this->cms_slug_model->get_cms_slug_by_target($page_id),
@@ -99,15 +96,10 @@ class cms_search_operations extends CI_Controller {
 
 					$data = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
 					
-					// get main heading
 					if (!empty($result['panel_data'][$cms_page_panel_id]['parent_id'])){
 
 						$parent_data = $this->cms_page_panel_model->get_cms_page_panel($result['panel_data'][$cms_page_panel_id]['parent_id']);
-						if (empty($parent_data['_panel_heading'])){
-							$parent_title = $this->run_panel_method($result['panel_data'][$cms_page_panel_id]['panel_name'], 'panel_heading', $parent_data);
-						} else {
-							$parent_title = $parent_data['_panel_heading'];
-						}
+						$parent_title = $parent_data['title'];
 						if (mb_strlen($parent_title) > 25){
 							$parent_title = mb_substr($parent_title, 0, 22).'..';
 						}
@@ -116,12 +108,7 @@ class cms_search_operations extends CI_Controller {
 						
 					} else {
 
-						if (empty($data['_panel_heading'])){
-							$title = $this->run_panel_method($result['panel_data'][$cms_page_panel_id]['panel_name'], 'panel_heading', $data);
-						} else {
-							$title = $data['_panel_heading'];
-						}
-						$title = $result['panel_data'][$cms_page_panel_id]['panel_name'] . ' - ' . $title;
+						$title = $result['panel_data'][$cms_page_panel_id]['panel_name'] . ' - ' . $data['title'];
 						
 					}
 								

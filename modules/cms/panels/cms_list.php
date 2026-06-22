@@ -14,6 +14,7 @@ class cms_list extends CI_Controller {
 
 		$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
 		$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/cms_cookie.js', );
+		$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/cms_page_panel_button_show.js', );
 		
 	}
 
@@ -74,7 +75,7 @@ class cms_list extends CI_Controller {
 							$params['filter_fields_values'][$filter_field] = [];
 							foreach($target_a as $key => $row){
 								
-								$params['filter_fields_values'][$filter_field][$key] = $this->run_panel_method($panel_field['list'], 'panel_heading', $row);
+								$params['filter_fields_values'][$filter_field][$key] = $row['title'];
 									
 							}
 						

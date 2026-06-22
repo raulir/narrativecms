@@ -72,6 +72,128 @@ function cms_page_panel_format_mandatory(mandatory_result, colour){
 
 }
 
+var cms_page_panel_title_preview_timer = null
+var cms_page_panel_title_preview_extend = 0
+var cms_page_panel_title_preview_last_update = 0
+var cms_page_panel_title_preview_request_id = 0
+var cms_page_panel_title_preview_min_interval = 3000
+var cms_page_panel_title_preview_extend_per_change = 1000
+
+function cms_page_panel_update_breadcrumb_title(text){
+
+	var $title = $('.cms_page_panel_toolbar_title')
+
+	if ($title.length){
+		$title.html(strip_tags(text))
+	}
+
+}
+
+function cms_page_panel_title_preview_enabled(){
+
+	return $('.cms_page_id').val() == '0'
+		&& $('input[name="sort"]').val() != '0'
+		&& $('.cms_page_panel_panel_name').val() != ''
+
+}
+
+function cms_page_panel_onpage_title_sync_enabled(){
+
+	return parseInt($('.cms_page_id').val()) > 0
+
+}
+
+function cms_page_panel_fetch_title_preview(){
+
+	if (!cms_page_panel_title_preview_enabled()){
+		return
+	}
+
+	if (typeof tinyMCE !== 'undefined'){
+		tinyMCE.triggerSave()
+	}
+
+	var request_id = ++cms_page_panel_title_preview_request_id
+	var data_to_submit = cms_page_panel_save_serialize_form('.admin_form')
+
+	data_to_submit['do'] = 'cms_page_panel_preview_title'
+	data_to_submit['language'] = $('.cms_language_select_current').data('language')
+
+	get_ajax('cms/cms_page_panel_operations', $.extend({}, data_to_submit, {
+		success: function(data){
+			if (request_id != cms_page_panel_title_preview_request_id){
+				return
+			}
+			if (data.result && data.result.title){
+				cms_page_panel_update_breadcrumb_title(data.result.title)
+				cms_page_panel_title_preview_last_update = Date.now()
+				cms_page_panel_title_preview_extend = 0
+			}
+		}
+	}))
+
+}
+
+function cms_page_panel_schedule_title_preview(){
+
+	if (!cms_page_panel_title_preview_enabled()){
+		return
+	}
+
+	clearTimeout(cms_page_panel_title_preview_timer)
+
+	var now = Date.now()
+	var elapsed = now - cms_page_panel_title_preview_last_update
+
+	if (elapsed >= cms_page_panel_title_preview_min_interval){
+		cms_page_panel_title_preview_extend = 0
+		cms_page_panel_title_preview_timer = setTimeout(cms_page_panel_fetch_title_preview, 0)
+		return
+	}
+
+	cms_page_panel_title_preview_extend += cms_page_panel_title_preview_extend_per_change
+	var delay = (cms_page_panel_title_preview_min_interval - elapsed) + cms_page_panel_title_preview_extend
+
+	cms_page_panel_title_preview_timer = setTimeout(function(){
+		cms_page_panel_title_preview_extend = 0
+		cms_page_panel_fetch_title_preview()
+	}, delay)
+
+}
+
+function cms_page_panel_title_preview_on_save(data){
+
+	if (cms_page_panel_title_preview_enabled() && data.result && data.result.title){
+		cms_page_panel_update_breadcrumb_title(data.result.title)
+		cms_page_panel_title_preview_last_update = Date.now()
+		cms_page_panel_title_preview_extend = 0
+	} else if (cms_page_panel_onpage_title_sync_enabled()){
+		cms_page_panel_update_breadcrumb_title($('input', '.cms_page_panel_title').val())
+	}
+
+}
+
+function cms_page_panel_title_preview_init(){
+
+	if (cms_page_panel_title_preview_enabled()){
+
+		$('.admin_form').off('input.title_preview change.title_preview')
+			.on('input.title_preview change.title_preview', 'input, textarea, select', function(){
+				cms_page_panel_schedule_title_preview()
+			})
+
+	}
+
+	if (cms_page_panel_onpage_title_sync_enabled()){
+
+		$('input', '.cms_page_panel_title').off('input.title_sync').on('input.title_sync', function(){
+			cms_page_panel_update_breadcrumb_title($(this).val())
+		})
+
+	}
+
+}
+
 function cms_page_panel_init(){
 
 	var $title = $('input', '.cms_page_panel_title');
@@ -89,15 +211,8 @@ function cms_page_panel_init(){
 		
 	})
 	
-	var title_field = $('.admin_title_text').data('title_field');
-	var $title_field = $('textarea,input,select').filter('[name="panel_params[' + title_field + ']"]');
-	if ($title_field.length){
-		$('.admin_title_text').html(strip_tags($title_field.val()));
-		$title_field.on('keyup.r', function(){
-			$('.admin_title_text').html(strip_tags($title_field.val()));
-		});
-	}
-	
+	cms_page_panel_title_preview_init()
+
 	// limit length of text inputs
 	$('.admin_max_chars').each(function(){
 		var $this = $(this);

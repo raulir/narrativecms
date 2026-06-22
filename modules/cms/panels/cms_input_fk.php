@@ -29,21 +29,10 @@ class cms_input_fk extends CI_Controller {
 				$params['values'][0] = '-- not specified --';
 			}
 			
-			$definition = $this->cms_panel_model->get_cms_panel_config($params['list']);
 			$list = $this->cms_page_panel_model->get_list($params['list'], ['show' => [0,1]]);
-			
-			if (empty($definition['list']['title_field'])){
-				$title_field = '_panel_heading';
-			} else {
-				$title_field = $definition['list']['title_field'];
-			}
-			
+
 			foreach($list as $item_id => $item){
-				if (!empty($item[$title_field])){
-					$params['values'][$item_id] = $item[$title_field];
-				} else {
-					$params['values'][$item_id] = $this->run_panel_method($item['panel_name'], 'panel_heading', $item);
-				}
+				$params['values'][$item_id] = $item['title'];
 			}
 			
 			if(empty($params['values'])){

@@ -14,13 +14,15 @@
 				
 					<input type="hidden" class="block_id" value="<?php print($block[$id_field]); ?>">
 					
-					<div class="cms_list_list_item_heading"><?= $block['_panel_heading'] ?></div>
+					<div class="cms_list_list_item_heading"><?= $block['title'] ?></div>
 					
 					<div class="cms_list_list_item_buttons">
 					
 						<div class="cms_small_button cms_page_panel_copy" data-cms_page_panel_id="<?= $block['cms_page_panel_id'] ?>">copy</div>
 	
-						<?php _panel('cms/cms_page_panel_button_show', ['cms_page_panel_id' => $block['cms_page_panel_id'], ]) ?>
+						<div class="cms_tool_button cms_right cms_page_panel_show" data-cms_page_panel_id="<?= $block['cms_page_panel_id'] ?>" data-cms_ctrl="h">
+							<div class="cms_page_panel_show_label"><?= $block['show'] ? 'hide' : 'show' ?></div>
+						</div>
 		
 						<a class="cms_small_button cms_list_list_edit" href="<?= $edit_base.$block[$id_field] ?>/">edit</a>
 						

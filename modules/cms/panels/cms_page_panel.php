@@ -66,10 +66,6 @@ class cms_page_panel extends CI_Controller {
 			$return['base_title'] = $params['base_title'];
 		}
 
-		if (!empty($params['title_field'])){
-			$return['title_field'] = $params['title_field'];
-		}
-
 		if (!empty($params['_mode'])){
 			$return['_mode'] = $params['_mode'];
 		}

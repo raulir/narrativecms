@@ -24,7 +24,7 @@ class cms_input_multifk extends CI_Controller {
 		foreach($params['targets'] as $target){
 			$items = $this->cms_page_panel_model->get_list($target);
 			foreach($items as $id => $value){
-				$params['values'][$id] = $value['_panel_heading'];
+				$params['values'][$id] = $value['title'];
 			}
 		}
 		

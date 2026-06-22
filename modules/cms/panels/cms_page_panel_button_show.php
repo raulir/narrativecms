@@ -16,9 +16,20 @@ class cms_page_panel_button_show extends CI_Controller {
 
 	function panel_params($params){
 
-		$this->load->model('cms/cms_page_panel_model');
+		if (!empty($params['_list_item']) && isset($params['show'])){
 
-		$params['cms_page_panel'] = $this->cms_page_panel_model->get_cms_page_panel($params['cms_page_panel_id']);
+			$params['cms_page_panel'] = [
+				'cms_page_panel_id' => $params['cms_page_panel_id'],
+				'show' => $params['show'],
+			];
+
+		} else {
+
+			$this->load->model('cms/cms_page_panel_model');
+
+			$params['cms_page_panel'] = $this->cms_page_panel_model->get_cms_page_panel($params['cms_page_panel_id']);
+
+		}
 
 		return $params;
 

@@ -88,23 +88,13 @@ class cms_input_link extends CI_Controller {
 						|| ($special_targets && in_array($list, $targets))){		// if special targets
 								
 					$params['targets'][$list] = $block_config['list']['item_title'];
-					if (empty($block_config['list']['title_field'])){
-						$block_config['list']['title_field'] = 'heading';
-					}
-					
+
 					$list_pages = $this->cms_page_panel_model->get_list($list);
 						
 					// put together list select data
 					foreach($list_pages as $list_page){
 
-						// if no title field, use title
-						if (empty($list_page[$block_config['list']['title_field']])){
-							$block_title = $list_page['_panel_heading'];
-						} else {
-							$block_title = !empty($list_page['heading']) ? $list_page['heading'] : ($list.'='.$list_page['cms_page_panel_id']);
-						}
-
-						$params['lists'][$list][$list_page['cms_page_panel_id']] = mb_substr(strip_tags($block_title), 0, 40);
+						$params['lists'][$list][$list_page['cms_page_panel_id']] = mb_substr(strip_tags($list_page['title']), 0, 40);
 						
 						// slug data
 						$block_target = $list.'='.$list_page['cms_page_panel_id'];

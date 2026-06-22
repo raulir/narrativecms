@@ -195,7 +195,7 @@ class cms_panel_model extends Model {
 								
 						} else {
 							
-							$return[$struct['target']] = $this->cms_page_panel_model->get_fk_data($struct['list'], $struct['filter'], (!empty($struct['label_field']) ? $struct['label_field'] : 'heading'));
+							$return[$struct['target']] = $this->cms_page_panel_model->get_fk_data($struct['list'], $struct['filter'], (!empty($struct['label_field']) ? $struct['label_field'] : 'title'));
 
 						}
 					
@@ -222,7 +222,7 @@ class cms_panel_model extends Model {
 								} else {
 										
 									$return[(!empty($r_struct['field']) ? $r_struct['field'] : $r_struct['name'])] = 
-									$this->cms_page_panel_model->get_fk_data($r_struct['list'], $r_struct['filter'], (!empty($r_struct['label_field']) ? $r_struct['label_field'] : 'heading'));
+									$this->cms_page_panel_model->get_fk_data($r_struct['list'], $r_struct['filter'], (!empty($r_struct['label_field']) ? $r_struct['label_field'] : 'title'));
 								
 								}
 							}

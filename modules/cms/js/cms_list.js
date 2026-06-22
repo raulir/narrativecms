@@ -265,7 +265,7 @@ function cms_list_init_limit(){
 	if ($('.cms_list_container').data('orig_limit') == '1'){
 		$('.cms_list_container').data('limit', Math.floor(($(window).innerHeight() - (17.2 * _cms_rem))/(3.4 * _cms_rem)))
 	} else {
-		$('.cms_list_container').data('limit', '1000')
+		$('.cms_list_container').data('limit', '10000')
 	}
 	
 }
@@ -424,6 +424,9 @@ function cms_list_load(start, limit, after){
 		
 		// activate list buttons
 		setTimeout(function(){
+			if (typeof cms_page_panel_button_show_activate == 'function'){
+				cms_page_panel_button_show_activate()
+			}
 			activate_cms_page_panel_copy({'after':function(){
 				cms_list_load(start, limit, after);
 			}});

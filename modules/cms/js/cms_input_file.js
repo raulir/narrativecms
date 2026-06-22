@@ -77,6 +77,10 @@ function cms_input_file_upload(params){
 	    	$('.cms_input_file_form_file').val('');
 	    	
 			cms_notification('File uploaded', 3);
+
+			if (typeof cms_page_panel_schedule_title_preview === 'function'){
+				cms_page_panel_schedule_title_preview()
+			}
 	    	
 	    },
 	    xhr: function() {

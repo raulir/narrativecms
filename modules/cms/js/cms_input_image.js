@@ -181,6 +181,9 @@ function cms_input_image_load_images(params){
 					$(params.container_selector).data('name');
 
 					params.after({'name':data.result.filename});
+					if (typeof cms_page_panel_schedule_title_preview === 'function'){
+						cms_page_panel_schedule_title_preview()
+					}
 					after();
 					
 				});

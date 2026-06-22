@@ -41,13 +41,13 @@ class cms_list_move extends CI_Controller {
 					$filters = $this->input->post('filters');
 					$list_order = $this->input->post('list_order');
 
-					$filter = array('panel_name' => $block['panel_name'], 'cms_page_id' => [999999,0], );
+					$filter = array('panel_name' => $block['panel_name'], 'cms_page_id' => 0, 'sort!' => '0', );
 					if (is_array($filters)){
 						$filter = array_merge($filter, $filters);
 					}
 						
 					// get previous on this position
-					$old_block_a = $this->cms_page_panel_model->get_cms_page_panels_by(array_merge($filter, array('_start' => $start - 1, '_limit' => 1, )));
+					$old_block_a = $this->cms_page_panel_model->get_cms_page_panels_list_by(array_merge($filter, array('_start' => $start - 1, '_limit' => 1, )));
 
 					// get reusable sorts and updated list sort
 					$previous_sort = array(); // free sorts
@@ -79,13 +79,13 @@ class cms_list_move extends CI_Controller {
 				$filters = $this->input->post('filters');
 				$list_order = $this->input->post('list_order');
 
-				$filter = array('panel_name' => $block['panel_name'], 'cms_page_id' => [999999,0], );
+				$filter = array('panel_name' => $block['panel_name'], 'cms_page_id' => 0, 'sort!' => '0', );
 				if (is_array($filters)){
 					$filter = array_merge($filter, $filters);
 				}
 
 				// get previous on this position
-				$old_block_a = $this->cms_page_panel_model->get_cms_page_panels_by(
+				$old_block_a = $this->cms_page_panel_model->get_cms_page_panels_list_by(
 						array_merge($filter, array('_start' => $start + $limit, '_limit' => 1, )));
 
 				if (!empty($old_block_a[0])){

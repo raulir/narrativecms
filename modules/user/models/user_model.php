@@ -146,12 +146,6 @@ class user_model extends Model {
 				$return['loginname'] = $return['username'];
 			}
 			
-			if (empty($return['_panel_heading'])){
-				$c = &get_instance();
-				$return['_panel_heading'] = $c->run_panel_method('user/user', 'panel_heading', $return);
-				$this->load->model('cms/cms_page_panel_model');
-			}
-			
 			return $return;
 		
 		} else {

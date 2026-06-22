@@ -84,9 +84,10 @@ class cms_page_panel_toolbar extends CI_Controller {
 					'url' => 'admin/cms_page_panel/'.$parent['cms_page_panel_id'].'/',
 			];
 			
-			$params['breadcrumb'][] = [ // current block
+			$params['breadcrumb'][] = [
 					'text' => $params['target_id'] ? $cms_page_panel['title'] : 'New panel',
 					'url' => '',
+					'class' => 'cms_page_panel_toolbar_title',
 			];
 				
 		} else if (!empty($params['target_page_id'])){ // normal panel on page
@@ -102,9 +103,10 @@ class cms_page_panel_toolbar extends CI_Controller {
 							'text' => !empty($params['page']['title']) ? $params['page']['title'] : '[ no title ]',
 							'url' => 'admin/page/'.$params['target_page_id'].'/',
 					],
-					[ // current block
+					[
 							'text' => $params['target_id'] ? $cms_page_panel['title'] : 'New panel',
 							'url' => '',
+							'class' => 'cms_page_panel_toolbar_title',
 					],
 			];
 
@@ -116,7 +118,7 @@ class cms_page_panel_toolbar extends CI_Controller {
 				if (empty($panel_config['parent'])){
 					
 					$params['breadcrumb'] = [
-							[ // url to list root
+							[
 									'text' => $panel_config['list']['list_title'],
 									'url' => 'admin/cms_list/'.str_replace('/', '__', $cms_page_panel['panel_name']).'/',
 							],
@@ -125,28 +127,30 @@ class cms_page_panel_toolbar extends CI_Controller {
 				} else {
 					
 					$params['breadcrumb'] = [
-							[ // url to list root
+							[
 									'text' => $panel_config['parent']['label'],
 									'url' => $panel_config['parent']['url'],
 							],
 					];
 					
 				}
-				
-				// current block
+
 				if ($cms_page_panel['sort']){
-					// not settings
-					$heading = $this->run_panel_method($cms_page_panel['panel_name'], 'panel_heading', 
-							array_merge($cms_page_panel, ['_heading_type' => 'short']));
+					$heading = $cms_page_panel['title'];
 				} else {
 					$heading = (!empty($panel_config['label']) ? $panel_config['label'] : $cms_page_panel['panel_name']) . ' settings';
 				}
-				
-				$params['breadcrumb'][] = [
+
+				$breadcrumb_item = [
 						'text' => $heading,
 						'url' => '',
-						'field' => !empty($panel_config['list']['title_field']) ? $panel_config['list']['title_field'] : 'heading', // title field
 				];
+
+				if ($cms_page_panel['sort']){
+					$breadcrumb_item['class'] = 'cms_page_panel_toolbar_title';
+				}
+
+				$params['breadcrumb'][] = $breadcrumb_item;
 
 			} else { // must be global settings panel
 

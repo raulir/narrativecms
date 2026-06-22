@@ -75,32 +75,6 @@ class CI_Controller {
 		
 	}
 	
-	function panel_heading($params){
-		
-		if (!is_array($params)){
-			return $params;
-		}
-
-		$this->load->model('cms/cms_panel_model');
-		
-		$config = $this->cms_panel_model->get_cms_panel_config($params['panel_name']);
-		
-		$title_field = !empty($config['list']['title_field']) ? $config['list']['title_field'] : 'heading';
-
-		if (!isset($params[$title_field]) && !empty($params['cms_page_panel_id'])){
-			$return = $params['panel_name'].'='.$params['cms_page_panel_id'];
-		} elseif(!empty($params[$title_field])) {
-			$return = $params[$title_field];
-		} elseif(!empty($config['label'])) {
-			$return = $config['label'];
-		} else {
-			$return = $params['panel_name'].('='.$params['cms_page_panel_id']);
-		}
-
-		return $return;
-		 
-	}
-	
 	function run_action($name, $params){
 		 
 		return $this->run_panel_method($name, 'panel_action', $params);
