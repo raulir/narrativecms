@@ -135,6 +135,18 @@ if ( !function_exists('_iw')) {
 			$params = ['width' => $params]; 
 		}
 
+		if (pathinfo($image, PATHINFO_EXTENSION) === 'gif'){
+
+			$ci =& get_instance();
+			if ($ci === null) {
+				new CI_Controller();
+				$ci =& get_instance();
+			}
+			$ci->load->model('cms/cms_image_model');
+			$image = $ci->cms_image_model->normalise_gif_original($image);
+
+		}
+
 		$name_a = pathinfo($image);
 		
 		// if image missing or can't resize, return image

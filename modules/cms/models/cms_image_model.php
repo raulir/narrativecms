@@ -420,6 +420,228 @@ class cms_image_model extends CI_Model {
 
 	}
 
+	function gif_is_animated($filepath){
+
+		$content = @file_get_contents($filepath);
+		if ($content === false || strlen($content) < 10){
+			return false;
+		}
+
+		return preg_match_all('/\x00\x2C/', $content, $matches) > 1;
+
+	}
+
+	function ffmpeg_is_available(){
+
+		if (empty($GLOBALS['config']['ffmpeg'])){
+			return false;
+		}
+
+		$ffmpeg_name = str_replace('<filename>', 'ffmpeg', $GLOBALS['config']['ffmpeg']);
+
+		return is_file($ffmpeg_name);
+
+	}
+
+	function normalise_gif_original($filename){
+
+		if (empty($filename)){
+			return $filename;
+		}
+
+		$name_a = pathinfo($filename);
+		if (($name_a['extension'] ?? '') !== 'gif'){
+			return $filename;
+		}
+
+		$filepath = $GLOBALS['config']['upload_path'].$filename;
+		if (!file_exists($filepath) || is_dir($filepath)){
+			return $filename;
+		}
+
+		$image = $this->get_cms_image_by_filename($filename);
+		$meta = $this->_get_image_meta_array($image);
+		if (!empty($meta['converted_from'])){
+			return $filename;
+		}
+
+		$lockfile = $GLOBALS['config']['base_path'].'cache/gif_normalise_lock.json';
+		if (file_exists($lockfile)){
+			$locked = json_decode(file_get_contents($lockfile), true);
+		} else {
+			$locked = [];
+		}
+
+		if (in_array($filename, $locked)){
+
+			$time_locked = array_search($filename, $locked);
+			list($time_was, $file) = explode('|', $time_locked);
+
+			if ((time() - $time_was) <= 300){
+				return $filename;
+			}
+
+			unset($locked[$time_locked]);
+
+		}
+
+		$time = time();
+		$lock_key = $time.'|'.$filename;
+		$locked[$lock_key] = $filename;
+		file_put_contents($lockfile, json_encode($locked, JSON_PRETTY_PRINT));
+
+		if ($this->gif_is_animated($filepath)){
+
+			if ($this->ffmpeg_is_available()){
+				$filename = $this->_convert_animated_gif_to_mp4($filename);
+			}
+
+		} else {
+
+			$filename = $this->_convert_static_gif_to_png($filename);
+
+		}
+
+		unset($locked[$lock_key]);
+		file_put_contents($lockfile, json_encode($locked, JSON_PRETTY_PRINT));
+
+		return $filename;
+
+	}
+
+	function _convert_static_gif_to_png($filename){
+
+		$gif_path = $GLOBALS['config']['upload_path'].$filename;
+		$name_a = pathinfo($filename);
+		$new_filename = $name_a['dirname'].'/'.$name_a['filename'].'.png';
+		$png_path = $GLOBALS['config']['upload_path'].$new_filename;
+
+		$src = @imagecreatefromgif($gif_path);
+		if (empty($src)){
+			return $filename;
+		}
+
+		imagealphablending($src, false);
+		imagesavealpha($src, true);
+
+		if (!imagepng($src, $png_path)){
+			imagedestroy($src);
+			return $filename;
+		}
+
+		imagedestroy($src);
+		unlink($gif_path);
+
+		$meta_extra = ['converted_from' => 'gif'];
+		list($meta_extra['original_width'], $meta_extra['original_height']) = getimagesize($png_path);
+
+		return $this->_update_image_filename($filename, $new_filename, $meta_extra);
+
+	}
+
+	function _convert_animated_gif_to_mp4($filename){
+
+		$gif_path = $GLOBALS['config']['upload_path'].$filename;
+		$name_a = pathinfo($filename);
+		$new_filename = $name_a['dirname'].'/'.$name_a['filename'].'.mp4';
+		$mp4_path = $GLOBALS['config']['upload_path'].$new_filename;
+
+		$image = $this->get_cms_image_by_filename($filename);
+		$cms_image_id = !empty($image['cms_image_id']) ? $image['cms_image_id'] : 0;
+
+		$ffmpeg_name = str_replace('<filename>', 'ffmpeg', $GLOBALS['config']['ffmpeg']);
+		$cmd = $ffmpeg_name.' -y -i '.escapeshellarg($gif_path).' -movflags +faststart -pix_fmt yuv420p -an '.
+				escapeshellarg($mp4_path).' 2>&1';
+
+		exec($cmd, $out, $ret);
+
+		if ($ret !== 0 || !file_exists($mp4_path)){
+			return $filename;
+		}
+
+		$meta_extra = ['converted_from' => 'gif'];
+
+		try {
+			$metadata = $this->get_video_metadata($mp4_path);
+			$meta_extra['original_width'] = $metadata['width'];
+			$meta_extra['original_height'] = $metadata['height'];
+		} catch (Exception $e) {
+		}
+
+		unlink($gif_path);
+
+		$new_filename = $this->_update_image_filename($filename, $new_filename, $meta_extra);
+
+		if ($cms_image_id){
+			$this->video_add_queue($cms_image_id);
+		}
+
+		return $new_filename;
+
+	}
+
+	function _get_image_meta_array($image){
+
+		if (!empty($image['meta']) && is_string($image['meta'])){
+			return json_decode($image['meta'], true) ?: [];
+		}
+
+		$meta = [];
+		foreach (['author', 'copyright', 'description', 'original_width', 'original_height', 'converted_from'] as $key){
+			if (isset($image[$key])){
+				$meta[$key] = $image[$key];
+			}
+		}
+
+		return $meta;
+
+	}
+
+	function _update_image_filename($old_filename, $new_filename, $meta_merge = []){
+
+		$image = $this->get_cms_image_by_filename($old_filename);
+		if (empty($image['cms_image_id'])){
+			return $new_filename;
+		}
+
+		$meta = array_merge($this->_get_image_meta_array($image), $meta_merge);
+
+		if (empty($meta['original_width']) && file_exists($GLOBALS['config']['upload_path'].$new_filename)){
+			$size = @getimagesize($GLOBALS['config']['upload_path'].$new_filename);
+			if (!empty($size)){
+				list($meta['original_width'], $meta['original_height']) = $size;
+			}
+		}
+
+		$type = pathinfo($new_filename, PATHINFO_EXTENSION) == 'mp4' ? 'video' : 'image';
+
+		$this->update_cms_image($old_filename, [
+				'filename' => $new_filename,
+				'type' => $type,
+				'meta' => json_encode($meta, JSON_PRETTY_PRINT),
+		]);
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->cms_page_panel_model->swap_param_value($old_filename, $new_filename);
+
+		$this->load->model('cms/cms_page_model');
+		$pages = $this->cms_page_model->get_cms_pages();
+		foreach ($pages as $page){
+			if (!empty($page['image']) && $page['image'] == $old_filename){
+				$this->cms_page_model->update_page($page['cms_page_id'], ['image' => $new_filename]);
+			}
+		}
+
+		if (!empty($GLOBALS['cache']['images_by_filename'][$old_filename])){
+			unset($GLOBALS['cache']['images_by_filename'][$old_filename]);
+		}
+
+		$this->refresh_cms_image_hash($new_filename);
+
+		return $new_filename;
+
+	}
+
 	function update_cms_image($filename, $data){
 
 		foreach($data as $field => $value){

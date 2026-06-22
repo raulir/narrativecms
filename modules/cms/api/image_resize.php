@@ -7,6 +7,16 @@
 	if ($_POST['do'] == 'resize'){
 		
 		$name = $_POST['name'];
+
+		if (!empty($name) && pathinfo($name, PATHINFO_EXTENSION) === 'gif'){
+
+			include_once($GLOBALS['config']['base_path'].'system/core/Common.php');
+			include($GLOBALS['config']['base_path'].'system/core/controller.php');
+			$ci = new CI_Controller();
+			$ci->load->model('cms/cms_image_model');
+			$name = $ci->cms_image_model->normalise_gif_original($name);
+
+		}
 		
 		$output = !empty($_POST['output']) ? $_POST['output'] : '';
 		$width = !empty($_POST['width']) ? $_POST['width'] : '';

@@ -46,11 +46,18 @@ class cms_images_operations extends CI_Controller {
 			 
 			$filename = $this->input->post('filename');
 			$category = $this->input->post('category');
-			$meta = array(
+
+			$existing = $this->cms_image_model->get_cms_image_by_filename($filename);
+			$existing_meta = [];
+			if (!empty($existing['meta']) && is_string($existing['meta'])){
+				$existing_meta = json_decode($existing['meta'], true) ?: [];
+			}
+
+			$meta = array_merge($existing_meta, array(
 					'author' => $this->input->post('author'),
 					'copyright' => $this->input->post('copyright'),
 					'description' => $this->input->post('description'),
-			);
+			));
 			 
 			$this->cms_image_model->update_cms_image($filename, array(
 					'category' => empty($category) ? '' : $category,

@@ -117,6 +117,19 @@ if ( !function_exists('_i')) {
 		}
 		
 		$extension = pathinfo($image, PATHINFO_EXTENSION);
+
+		if ($extension == 'gif'){
+
+			$ci =& get_instance();
+			if ($ci === null) {
+				new CI_Controller();
+				$ci =& get_instance();
+			}
+			$ci->load->model('cms/cms_image_model');
+			$image = $ci->cms_image_model->normalise_gif_original($image);
+			$extension = pathinfo($image, PATHINFO_EXTENSION);
+
+		}
 		
 		// if gif or svg
 		if (($extension == 'gif' || $extension == 'svg') && file_exists($GLOBALS['config']['upload_path'].$image) && 
