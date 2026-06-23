@@ -13,6 +13,9 @@ class cms_input_image extends CI_Controller {
 		}
 		
 		add_css('modules/cms/css/cms_input.scss');
+		add_css('modules/cms/css/cms_video_view.scss');
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_media_view.js';
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_video.js';
 		
 	}
 
@@ -57,8 +60,33 @@ class cms_input_image extends CI_Controller {
 
 		}
 
-		if(!file_exists($GLOBALS['config']['upload_path'].$params['value'])){
-			$params['error'] = 'Missing image file<br>Update resources or database<br>or select a different image';
+		if (!file_exists($GLOBALS['config']['upload_path'].$params['value'])){
+
+			$missing_error = true;
+
+			if (strtolower(pathinfo($params['value'], PATHINFO_EXTENSION)) === 'mp4'){
+
+				$this->load->model('cms/cms_image_model');
+				$view_meta = $this->cms_image_model->get_video_view_meta($params['value']);
+
+				if (!empty($view_meta['source_filename'])){
+
+					$video_source = $view_meta['source_filename'];
+					$has_source = file_exists($GLOBALS['config']['upload_path'].$video_source) && !is_dir($GLOBALS['config']['upload_path'].$video_source);
+					$has_fallback = file_exists($GLOBALS['config']['upload_path'].$video_source.'.data/fallback.mp4');
+
+					if ($has_source || $has_fallback){
+						$missing_error = false;
+					}
+
+				}
+
+			}
+
+			if ($missing_error){
+				$params['error'] = 'Missing image file<br>Update resources or database<br>or select a different image';
+			}
+
 		}
 		
 		if (!empty($params['params']['meta']) && $params['params']['meta'] == 'image'){

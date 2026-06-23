@@ -103,7 +103,7 @@ class cms_user_model extends CI_Model {
 
 	function get_cms_user_all_access_keys(){
 
-		$this->load->model('cms_module_model');
+		$this->load->model('cms/cms_module_model');
 		
 		$return = [];
 

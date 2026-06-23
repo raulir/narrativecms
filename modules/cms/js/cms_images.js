@@ -2,9 +2,56 @@
 var cms_images_loading = false;
 var cms_images_load_parameters = {};
 
+function cms_image_open(filename){
+
+	$('.cms_image_overlay,.cms_image_container').remove()
+
+	get_ajax_panel('cms/cms_image', {'filename': filename}, function(data){
+		$('body').append('<div class="cms_image_overlay"></div>')
+		$('body').append(data.result._html)
+		if (typeof cms_image_init === 'function'){
+			cms_image_init()
+		}
+		if (typeof cms_image_video_init === 'function'){
+			cms_image_video_init()
+		}
+		if (typeof cms_image_resize === 'function'){
+			cms_image_resize()
+		}
+		if (typeof cms_image_scroll === 'function'){
+			cms_image_scroll()
+		}
+	})
+
+}
+
 function cms_images_mark() {
 	$('.cms_images_mark').remove();
 	$('.cms_images_selected').append('<img class="cms_images_mark" src="' + _cms_base + 'modules/cms/img/green_tick.png">');
+}
+
+function cms_images_get_selected_filename(){
+
+	var $selected = $('.cms_images_selected')
+	if ($selected.length){
+		return $selected.first().data('filename') || ''
+	}
+	if (cms_images_load_parameters && cms_images_load_parameters.filename){
+		return cms_images_load_parameters.filename
+	}
+	return $('.cms_images_area').data('filename') || ''
+
+}
+
+function cms_images_set_popup_selection(filename){
+
+	if (!filename){
+		return
+	}
+
+	$('.popup_select').data('value', filename)
+	$('.cms_images_area').data('filename', filename)
+
 }
 
 /*
@@ -15,9 +62,11 @@ function cms_images_activate() {
 	$('.cms_images_image')
 		.off('click.r,mouseenter.r,mouseleave.r')
 		.on('click.r', function(){
+			var filename = $(this).data('filename')
 			$('.cms_images_selected').removeClass('cms_images_selected');
 			$(this).addClass('cms_images_selected');
-			$('.popup_select').data('value', $(this).data('filename'));
+			$('.popup_select').data('value', filename);
+			$('.cms_images_area').data('filename', filename);
 			cms_images_mark();
 		})
 		.on('mouseenter.r', function(){
@@ -26,12 +75,13 @@ function cms_images_activate() {
 				e.stopPropagation();
 				
 				var text = 'Are you sure?';
-				var usage = $('.cms_images_image_usage', $that).html();
-				if (usage == '1'){
-					text = text + '<div class="cms_images_warning">This image is in use!</div>' +
-							'<div class="cms_images_warning_extra">Deleting this image may cause missing images in the front end.</div>';
-				} else if (usage != '0'){
-					text = text + '<div class="cms_images_warning">This image is in use at ' + usage + ' places!</div>' +
+				var $usage = $('.cms_images_image_usage', $that);
+				var self_usage = parseInt($usage.data('usage_self'), 10) || 0;
+				var children_usage = parseInt($usage.data('usage_children'), 10) || 0;
+				var total_usage = self_usage + children_usage;
+				if (total_usage > 0){
+					var place_word = total_usage == 1 ? 'place' : 'places';
+					text = text + '<div class="cms_images_warning">This image is in use at ' + total_usage + ' ' + place_word + '!</div>' +
 							'<div class="cms_images_warning_extra">Deleting this image may cause missing images in the front end.</div>';
 				}
 				
@@ -60,10 +110,7 @@ function cms_images_activate() {
 			
 			$('.cms_images_image_edit', this).on('click.r', function(e){
 				e.stopPropagation();
-				get_ajax_panel('cms/cms_image', {'filename': $that.data('filename')}, function(data){
-					$('body').append('<div class="cms_image_overlay"></div>')
-					$('body').append(data.result._html)
-				})
+				cms_image_open($that.data('filename'))
 			})
 			
 		})
@@ -183,7 +230,7 @@ function cms_images_load_images(page, limit, filename){
 	
 	get_ajax_panel('cms/cms_images_page', cms_images_load_parameters, function(data){
 		
-		$('.cms_images_area').html(data.result._html).data('page', page);
+		$('.cms_images_area').html(data.result._html).data('page', page).data('filename', filename);
 		
 		// update buttons etc - first
 		if (parseInt(data.result.cms_images_max_page) >= 1 && parseInt(data.result.cms_images_current) > 0){
@@ -214,6 +261,12 @@ function cms_images_load_images(page, limit, filename){
 		
 		// activate functionality
 		cms_images_activate();
+
+		if (typeof cms_video_init_when_ready === 'function'){
+			cms_video_init_when_ready($('.cms_images_area'))
+		} else if (typeof cms_video_init === 'function'){
+			cms_video_init()
+		}
 		
 		cms_images_loading = false;
 		

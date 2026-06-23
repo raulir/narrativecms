@@ -9,7 +9,14 @@
 				
 				<div class="cms_images_hover cms_images_image_delete">Delete</div>
 				<div class="cms_images_hover cms_images_image_edit" <?php _ib('cms/cms_edit.png', 16) ?>></div>
-				<div class="cms_images_hover cms_images_image_usage"><?= $cms_image['number'] ?></div>
+				<?php
+					$usage_self = (int)$cms_image['number'];
+					$usage_children = (int)($cms_image['children_number'] ?? 0);
+					$usage_total = $usage_self + $usage_children;
+				?>
+				<div class="cms_images_hover cms_images_image_usage"
+						data-usage_self="<?= $usage_self ?>"
+						data-usage_children="<?= $usage_children ?>"><?= $cms_image['usage_label'] ?? $usage_self ?></div>
 			
 			</div>
 		</div>

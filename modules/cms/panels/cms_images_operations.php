@@ -14,6 +14,16 @@ class cms_images_operations extends CI_Controller {
 
 	}
 
+	function panel_params($params){
+
+		add_css('modules/cms/css/cms_video_view.scss');
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_media_view.js';
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_video.js';
+
+		return $params;
+
+	}
+
 	function panel_action($params){
 
 		$this->load->model('cms/cms_image_model');
@@ -46,6 +56,7 @@ class cms_images_operations extends CI_Controller {
 			 
 			$filename = $this->input->post('filename');
 			$category = $this->input->post('category');
+			$return = array();
 
 			$existing = $this->cms_image_model->get_cms_image_by_filename($filename);
 			$existing_meta = [];
@@ -58,13 +69,42 @@ class cms_images_operations extends CI_Controller {
 					'copyright' => $this->input->post('copyright'),
 					'description' => $this->input->post('description'),
 			));
+
+			if (empty($existing_meta['parent_cms_image_id'])){
+				unset($meta['crop']);
+			}
 			 
 			$this->cms_image_model->update_cms_image($filename, array(
 					'category' => empty($category) ? '' : $category,
 					'meta' => json_encode($meta),
 			));
-			 
-			$return = array();
+
+			$source_cms_image_id = (int)$this->input->post('source_cms_image_id');
+			if ($source_cms_image_id){
+				$child_filename = $this->cms_image_model->save_cms_image_child($source_cms_image_id, array(
+					'x1' => $this->input->post('crop_x1'),
+					'y1' => $this->input->post('crop_y1'),
+					'x2' => $this->input->post('crop_x2'),
+					'y2' => $this->input->post('crop_y2'),
+				), $filename, array(
+					'author' => $this->input->post('author'),
+					'copyright' => $this->input->post('copyright'),
+					'description' => $this->input->post('description'),
+				), array(
+					'zoom' => $this->input->post('zoom'),
+					'pan_x' => $this->input->post('pan_x'),
+					'pan_y' => $this->input->post('pan_y'),
+					'brightness' => $this->input->post('brightness'),
+					'contrast' => $this->input->post('contrast'),
+					'overlay_colour' => $this->input->post('overlay_colour'),
+					'overlay_opacity' => $this->input->post('overlay_opacity'),
+					'rotation' => $this->input->post('rotation'),
+					'rotation_fixed' => $this->input->post('rotation_fixed'),
+				));
+				if (!empty($child_filename)){
+					$return['child_filename'] = $child_filename;
+				}
+			}
 			 
 		}
 

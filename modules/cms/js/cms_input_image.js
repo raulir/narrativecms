@@ -125,6 +125,67 @@ function cms_input_image_clear($element){
 	
 }
 
+function cms_input_image_apply_selection(params, filename, path, callback){
+
+	get_ajax_panel('cms/cms_images_operations', {
+		'filename': filename,
+		'do': 'cms_images_check_by_filename'
+	}, function(data){
+
+		$(params.input_selector).val(path + data.result.filename);
+
+		if (typeof params.container_selector != 'undefined'){
+			if (data.result.filename == ''){
+				$(params.container_selector).html('-- no image --');
+			} else {
+				$(params.container_selector).html(data.result._html);
+			}
+			if (typeof cms_video_init_when_ready === 'function'){
+				cms_video_init_when_ready($(params.container_selector))
+			} else if (typeof cms_video_init === 'function'){
+				cms_video_init()
+			}
+		}
+
+		var $container = $(params.container_selector).closest('.cms_input_image');
+		$container.siblings('.cms_input').each(function(){
+			$('.cms_meta', this).each(function(){
+				var $this = $(this);
+				if ($this.data('meta_src') == $container.data('name')){
+					if ($this.val() == '' && data.result[$this.data('meta_field')]){
+						$this.val(data.result[$this.data('meta_field')]);
+					}
+				}
+			});
+		});
+
+		$container.data('h', data.result.original_height)
+		$container.data('w', data.result.original_width)
+
+		$(params.container_selector).data('name');
+
+		if (typeof callback === 'function'){
+			callback(data);
+		}
+
+	});
+
+}
+
+function cms_input_image_resume_preview_videos(params){
+
+	if (!params || !params.container_selector){
+		return
+	}
+
+	if (typeof cms_video_init_when_ready === 'function'){
+		cms_video_init_when_ready($(params.container_selector))
+	} else if (typeof cms_video_resume_all === 'function'){
+		cms_video_resume_all($(params.container_selector))
+	}
+
+}
+
 function cms_input_image_load_images(params){
 	
 	params = $.extend(true, {
@@ -144,53 +205,35 @@ function cms_input_image_load_images(params){
 	get_ajax_panel('cms/cms_images', {'filename': original_filename, 'category': params.category}, function(data){
 		panels_display_popup(data.result._html, {
 			'select': function(after){
-				// just before closing (select), check, if selected value is still a valid image
 				$(document).off('keyup.cms');
-				get_ajax_panel('cms/cms_images_operations', {
-					'filename': $('.popup_select').data('value'),
-					'do': 'cms_images_check_by_filename'
-				}, function(data){
-
-					// select process from here
-					$(params.input_selector).val(path + data.result.filename);
-
-					if (typeof params.container_selector != 'undefined'){
-						if (data.result.filename == ''){
-							$(params.container_selector).html('-- no image --');
-						} else {
-							$(params.container_selector).html(data.result._html);
-						}
-					}
-
-					// update meta fields
-					var $container = $(params.container_selector).closest('.cms_input_image');
-					$container.siblings('.cms_input').each(function(){
-						$('.cms_meta', this).each(function(){
-							var $this = $(this);
-							if ($this.data('meta_src') == $container.data('name')){
-								if ($this.val() == '' && data.result[$this.data('meta_field')]){
-									$this.val(data.result[$this.data('meta_field')]);
-								}
-							}
-						});
-					});
-					
-					$container.data('h', data.result.original_height)
-					$container.data('w', data.result.original_width)
-					
-					$(params.container_selector).data('name');
-
-					params.after({'name':data.result.filename});
+				cms_input_image_apply_selection(params, $('.popup_select').data('value'), path, function(data){
+					params.after({'name': data.result.filename});
 					if (typeof cms_page_panel_schedule_title_preview === 'function'){
 						cms_page_panel_schedule_title_preview()
 					}
 					after();
-					
 				});
 			},
 			'cancel': function(after){
-				// check if currently in input image still ok?
 				$(document).off('keyup.cms');
+
+				var edited_filename = $('.cms_images_area').data('edited_filename') || ''
+				var edited_from_filename = $('.cms_images_area').data('edited_from_filename') || ''
+				var refresh_filename = ''
+				if (edited_filename && edited_filename === original_filename){
+					refresh_filename = edited_filename
+				} else if (edited_filename && edited_from_filename === original_filename){
+					refresh_filename = edited_filename
+				}
+
+				if (refresh_filename){
+					cms_input_image_apply_selection(params, refresh_filename, path, function(data){
+						params.after({'name': data.result.filename});
+						after();
+					});
+					return;
+				}
+
 				get_ajax_panel('cms/cms_images_operations', {
 					'filename': original_filename,
 					'do': 'cms_images_check_by_filename'
@@ -202,10 +245,27 @@ function cms_input_image_load_images(params){
 						}
 					}
 					params.after();
+					cms_input_image_resume_preview_videos(params);
 					after();
-				});					
+				});
 			}
-		}); 
+		});
+		$('.cms_images_area').removeData('edited_filename')
+		$('.cms_images_area').removeData('edited_from_filename')
+
+		var $popup = $('.popup_container.cms_images_container').last()
+		var $area = $popup.find('.cms_images_area')
+
+		if ($area.length && $area.find('.cms_images_area_loading').length && typeof cms_images_load_images === 'function'){
+			cms_images_load_images(
+				$area.data('page') || 0,
+				$area.data('limit'),
+				$area.data('filename')
+			)
+		} else if (typeof cms_video_init_when_ready === 'function'){
+			cms_video_init_when_ready($popup)
+		}
+
 	});
 
 }

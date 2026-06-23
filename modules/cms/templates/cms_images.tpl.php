@@ -44,8 +44,8 @@
 		
 		</div>
 		
-		<div class="cms_images_area" data-page="0" data-limit="<?= 6 * $GLOBALS['config']['images_rows'] ?>" data-filename="<?= $filename ?>">
-			<div style="text-align: center; ">Loading ...</div>
+		<div class="cms_images_area" data-page="0" data-limit="<?= 6 * $GLOBALS['config']['images_rows'] ?>" data-filename="<?= $filename ?>" style="--cms_images_rows: <?= (int)$GLOBALS['config']['images_rows'] ?>;">
+			<div class="cms_images_area_loading">Loading ...</div>
 		</div>
 	
 	</div>

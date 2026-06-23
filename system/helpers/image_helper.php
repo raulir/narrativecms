@@ -144,8 +144,17 @@ if ( !function_exists('_i')) {
 		// if video
 		if ($extension == 'mp4'){
 
-			$has_source = file_exists($GLOBALS['config']['upload_path'].$image) && !is_dir($GLOBALS['config']['upload_path'].$image);
-			$has_fallback = file_exists($GLOBALS['config']['upload_path'].$image.'.data/fallback.mp4');
+			$ci =& get_instance();
+			$ci->load->model('cms/cms_image_model');
+
+			$video_source = $image;
+			$view_meta = $ci->cms_image_model->get_video_view_meta($image);
+			if (!empty($view_meta['source_filename'])){
+				$video_source = $view_meta['source_filename'];
+			}
+
+			$has_source = file_exists($GLOBALS['config']['upload_path'].$video_source) && !is_dir($GLOBALS['config']['upload_path'].$video_source);
+			$has_fallback = file_exists($GLOBALS['config']['upload_path'].$video_source.'.data/fallback.mp4');
 
 			if (!$has_source && !$has_fallback){
 
@@ -155,16 +164,16 @@ if ( !function_exists('_i')) {
 
 			}
 			
-			if (file_exists($GLOBALS['config']['upload_path'].$image.'.data/fallback.mp4')){
-				$video_file = $GLOBALS['config']['upload_url'].$image.'.data/fallback.mp4';
+			if (file_exists($GLOBALS['config']['upload_path'].$video_source.'.data/fallback.mp4')){
+				$video_file = $GLOBALS['config']['upload_url'].$video_source.'.data/fallback.mp4';
 			} else {
-				$video_file = $GLOBALS['config']['upload_url'].$image;
+				$video_file = $GLOBALS['config']['upload_url'].$video_source;
 			}
 			
-			if (file_exists($GLOBALS['config']['upload_path'].$image.'.data/fallback_hd.mp4')){
-				$video_hd_file = $GLOBALS['config']['upload_url'].$image.'.data/fallback_hd.mp4';
+			if (file_exists($GLOBALS['config']['upload_path'].$video_source.'.data/fallback_hd.mp4')){
+				$video_hd_file = $GLOBALS['config']['upload_url'].$video_source.'.data/fallback_hd.mp4';
 			} else {
-				$video_hd_file = $GLOBALS['config']['upload_url'].$image;
+				$video_hd_file = $GLOBALS['config']['upload_url'].$video_source;
 			}
 				
 			$params['video'] = ' data-cms_video="'.$video_file.'" data-cms_video_hd="'.$video_hd_file.'" ';
@@ -173,22 +182,48 @@ if ( !function_exists('_i')) {
 				$params['video'] .= ' data-cms_video_width="'.((int)max(($params['width']*$GLOBALS['config']['images_2x']), 360)).'" ';
 			}
 			
-			if (file_exists($GLOBALS['config']['upload_path'].$image.'.data/manifest.mpd')){
-				$params['video'] .= ' data-cms_video_manifest="'.$GLOBALS['config']['upload_url'].$image.'.data/manifest.mpd" ';
+			if (file_exists($GLOBALS['config']['upload_path'].$video_source.'.data/manifest.mpd')){
+				$params['video'] .= ' data-cms_video_manifest="'.$GLOBALS['config']['upload_url'].$video_source.'.data/manifest.mpd" ';
 			}
-			if (file_exists($GLOBALS['config']['upload_path'].$image.'.data/libx264/manifest.mpd')){
-				$params['video'] .= ' data-cms_video_manifest_old="'.$GLOBALS['config']['upload_url'].$image.'.data/libx264/manifest.mpd" ';
+			if (file_exists($GLOBALS['config']['upload_path'].$video_source.'.data/libx264/manifest.mpd')){
+				$params['video'] .= ' data-cms_video_manifest_old="'.$GLOBALS['config']['upload_url'].$video_source.'.data/libx264/manifest.mpd" ';
 			}
 			
-			$cover = $GLOBALS['config']['upload_path'].$image.'.data/cover.jpg';
+			$cover_base = $video_source;
+			if (!empty($view_meta)){
+				$child_cover_path = $GLOBALS['config']['upload_path'].$image.'.data/cover.jpg';
+				if (file_exists($child_cover_path)){
+					$cover_base = $image;
+				}
+			}
+
+			$cover = $GLOBALS['config']['upload_path'].$cover_base.'.data/cover.jpg';
 			if (!file_exists($cover)){
 				$cover = $GLOBALS['config']['base_url'].'modules/cms/img/cms_video_loading.png';
 			} else {
-				$cover = $GLOBALS['config']['upload_url'].$image.'.data/cover.jpg';
+				$cover = $GLOBALS['config']['upload_url'].$cover_base.'.data/cover.jpg';
+			}
+
+			add_css('modules/cms/css/cms_video_view.scss');
+
+			if (!empty($view_meta)){
+				$params['video'] .= ' data-cms_video_view="1"';
+				$params['video'] .= ' data-crop_x1="'.$view_meta['crop']['x1'].'"';
+				$params['video'] .= ' data-crop_y1="'.$view_meta['crop']['y1'].'"';
+				$params['video'] .= ' data-crop_x2="'.$view_meta['crop']['x2'].'"';
+				$params['video'] .= ' data-crop_y2="'.$view_meta['crop']['y2'].'"';
+				$params['video'] .= ' data-brightness="'.$view_meta['brightness'].'"';
+				$params['video'] .= ' data-contrast="'.$view_meta['contrast'].'"';
+				$params['video'] .= ' data-overlay_colour="'.$view_meta['overlay_colour'].'"';
+				$params['video'] .= ' data-overlay_opacity="'.$view_meta['overlay_opacity'].'"';
+				$params['video'] .= ' data-rotation="'.$view_meta['rotation'].'"';
+				$params['video'] .= ' data-source_w="'.(int)$view_meta['source_width'].'"';
+				$params['video'] .= ' data-source_h="'.(int)$view_meta['source_height'].'"';
 			}
 			
 			print($params['video'].' data-cms_video_poster="'.$cover.'" style="background-image:  url('.$cover.'); '.$params['css'].'" ');
 			
+			$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_media_view.js';
 			$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_video.js';
 			$GLOBALS['_panel_js'][] = 'modules/cms/js/dash/dash.min.js';
 			
@@ -210,8 +245,7 @@ if ( !function_exists('_i')) {
 			// if not in uploads, copy over
 			if (!file_exists($filepath)){
 				
-				// $original_path = /* ($GLOBALS['config']['base_site']??''). */ $GLOBALS['config']['base_path'].'modules/'.$params['module'].'/img/'.$image;
-				$original_path = ($GLOBALS['config']['base_site']??'').$GLOBALS['config']['base_path'].'modules/'.$params['module'].'/img/'.$image;
+				$original_path = $GLOBALS['config']['base_path'].'modules/'.$params['module'].'/img/'.$image;
 				
 				if (!file_exists($GLOBALS['config']['upload_path'].$params['module'].'/')){
 					mkdir($GLOBALS['config']['upload_path'].$params['module'].'/');

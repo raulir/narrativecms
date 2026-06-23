@@ -641,4 +641,30 @@ class cms_video_model extends CI_Model {
 
 	}
 
+	function extract_cover_frame($video_path, $output_jpg_path, $seek_sec = 0.1){
+
+		if (!$this->ffmpeg_is_available()){
+			return false;
+		}
+
+		if (!file_exists($video_path) || is_dir($video_path)){
+			return false;
+		}
+
+		$output_dir = pathinfo($output_jpg_path, PATHINFO_DIRNAME);
+		if (!is_dir($output_dir)){
+			mkdir($output_dir, 0777, true);
+		}
+
+		$cmd = $this->_ffmpeg_path().' -y -ss '.escapeshellarg((string)$seek_sec).
+			' -i '.escapeshellarg($video_path).
+			' -frames:v 1 -q:v 2 '.
+			escapeshellarg($output_jpg_path);
+
+		exec($cmd.' 2>&1', $output, $ret);
+
+		return $ret === 0 && file_exists($output_jpg_path);
+
+	}
+
 }

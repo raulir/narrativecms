@@ -24,7 +24,17 @@
 }
 
 .cms_images_area {
+	box-sizing: border-box;
+	min-height: calc(var(--cms_images_rows) * 15.8rem);
+}
 
+.cms_images_area_loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: calc(var(--cms_images_rows) * 15.8rem);
+	font-size: 1.6rem;
+	line-height: 2.4rem;
 }
 
 .cms_images_toolbar {

@@ -31,6 +31,10 @@ class cms_images extends CI_Controller {
 			$params['category'] = '';
 		}
 
+		add_css('modules/cms/css/cms_video_view.scss');
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_media_view.js';
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_video.js';
+
 		return $params;
 
 	}

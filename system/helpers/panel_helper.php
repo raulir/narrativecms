@@ -147,7 +147,7 @@ if ( !function_exists('get_position')) {
     function _t($cms_text_id, $omit_html = false){
     	
     	$ci =& get_instance();
-    	$ci->load->model('cms_text_model');
+    	$ci->load->model('cms/cms_text_model');
     	$text = $ci->cms_text_model->get_cms_text($cms_text_id);
     	
     	if (empty($text['text'])){
@@ -165,7 +165,7 @@ if ( !function_exists('get_position')) {
     function t($cms_text_id, $omit_html = false){
     	
     	$ci =& get_instance();
-    	$ci->load->model('cms_text_model');
+    	$ci->load->model('cms/cms_text_model');
     	$text = $ci->cms_text_model->get_cms_text($cms_text_id);
     	
     	if (empty($text['text'])){

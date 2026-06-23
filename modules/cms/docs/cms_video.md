@@ -68,6 +68,24 @@ Output folder: `img/<path>/<name>.mp4.data/`
 - Uses `fallback.mp4` / `fallback_hd.mp4` when present, else original upload
 - Adds DASH manifest attributes when `.data/manifest.mpd` exists
 - Missing source and no fallback → `cms_no_image.png` (broken image behaviour)
+- **Video child** (meta-only `_vN.mp4`): resolves parent file for URLs; emits `data-cms_video_view="1"` and crop/adjust meta for [`cms_video_init()`](../../modules/cms/js/cms_video.js) view branch + [`cms_media_view.js`](../../modules/cms/js/cms_media_view.js). Poster uses `{child}.data/cover.jpg` when exported on save (ffmpeg required for that step; skipped otherwise), else parent cover.
+
+**Background fit on host div** — panel CSS `background-size` / `background-position` on the `_ib()` element controls layout (same as images):
+
+- `cover`, `contain`, and explicit sizes (`4rem auto`, `auto 30%`, etc.)
+- Two numeric sizes → width only, height from cropped aspect ratio (no stretch)
+- Cover poster `background-image` cleared when video plays
+
+Player init uses `cms_video_init()` / DASH / native fallback only. Legacy `video_play()` / carousel helpers in `cms_video.js` are unused for `_ib` embeds.
+
+### Playback resilience (`cms_video.js`)
+
+Muted `_ib()` loops attach a **viewport gate** and **playback warden** (not used inside the image editor `.cms_image_container`):
+
+- **Off-screen** — `IntersectionObserver` pauses the video and keeps `currentTime` (reduces Chrome decoder pressure in the image grid).
+- **On-screen** — resumes with `play()` from the current position.
+- **Stuck while visible** — warden detects unexpected `pause`, `stalled` / `waiting`, or frozen `currentTime`; recovery resumes from the same position (`play()` → tiny seek nudge → rare `load()` with time restore). Does **not** seek back to the start.
+- **Tab visibility** — when the document becomes visible again, on-screen ready hosts resume from their current time.
 
 ## Panel
 
