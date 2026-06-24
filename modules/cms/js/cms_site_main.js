@@ -388,6 +388,12 @@ String.prototype.to_title_case = function () {
  * 
  */
 
+function _cms_get_base(){
+	
+	return (typeof _cms_base !== 'undefined' ? _cms_base : '/')
+	
+}
+
 function get_ajax(name, params){
 
 	return new Promise((resolve, reject) => {
@@ -421,6 +427,24 @@ var _cms_test_localstorage = function() {
 
 };
 
+function cms_access_denied_popup(error){
+	
+	if ($('.cms_access_denied_container').length){
+		return
+	}
+	
+	error = error || {}
+	
+	get_ajax_panel('cms/cms_access_denied', {
+		login_url: error.login_url || (typeof _cms_login_url !== 'undefined' ? _cms_login_url : _cms_get_base()),
+		login_text: error.login_text || (typeof _cms_login_text !== 'undefined' ? _cms_login_text : 'Login'),
+		text: 'System error: access denied',
+	}, function(data){
+		$('body').append(data.result._html)
+	})
+	
+}
+
 function get_ajax_panel(name, args, action_on_success){
 
 	var params = Object.assign({
@@ -441,7 +465,7 @@ function get_ajax_panel(name, args, action_on_success){
 		
 		// try to read from storage
 		if (_cms_test_localstorage() && cache > 0 && !admin_logged_in){
-			var key = md5(_cms_base + name + JSON.stringify(params));
+			var key = md5(_cms_get_base() + name + JSON.stringify(params));
 			var local_data = localStorage.getItem(key);
 			if (local_data){
 				data = $.parseJSON(local_data);
@@ -462,11 +486,18 @@ function get_ajax_panel(name, args, action_on_success){
 			params.panel_id = name;
 			$.ajax({
 				type: 'POST',
-			  	url: _cms_base + 'ajax_api/get_panel/',
+			  	url: _cms_get_base() + 'ajax_api/get_panel/',
 			  	data: params,
 			  	dataType: 'json',
 			  	context: this,
 			  	success: function( returned_data ) {
+			  		
+			  		if (returned_data.error && returned_data.error.message === 'access_denied'){
+			  			if (name !== 'cms/cms_access_denied'){
+			  				cms_access_denied_popup(returned_data.error)
+			  			}
+			  			return
+			  		}
 			  		
 			  		if ((typeof returned_data.result != 'undefined') && (typeof returned_data.result._html != 'undefined') && !returned_data.result.html){
 			  			returned_data.result.html = returned_data.result._html
@@ -512,7 +543,7 @@ function get_ajax_panel_anchor(anchor, params){
 
 		$.ajax({
 			type: 'POST',
-		  	url: _cms_base + 'ajax_api/get_panel_anchor/',
+		  	url: _cms_get_base() + 'ajax_api/get_panel_anchor/',
 		  	data: params,
 		  	dataType: 'json',
 		  	context: this,
@@ -548,7 +579,7 @@ function get_ajax_page(url, params, action_on_success){
 
 	// try to read from storage
 	if (_cms_test_localstorage() && cache > 0 && !admin_logged_in){
-		var key = md5(_cms_base + name + JSON.stringify(params));
+		var key = md5(_cms_get_base() + name + JSON.stringify(params));
 		var local_data = localStorage.getItem(key);
 		if (local_data){
 			data = $.parseJSON(local_data);
@@ -571,6 +602,11 @@ function get_ajax_page(url, params, action_on_success){
 		  	dataType: 'json',
 		  	context: this,
 		  	success: function( returned_data ) {
+
+		  		if (returned_data.error && returned_data.error.message === 'access_denied'){
+		  			cms_access_denied_popup(returned_data.error)
+		  			return
+		  		}
 
 		  		/*
 		  		// save to local storage
@@ -606,6 +642,11 @@ function get_ajax_positions(url, params, action_on_success){
 		  	context: this,
 		  	success: function( returned_data ) {
 
+		  		if (returned_data.error && returned_data.error.message === 'access_denied'){
+		  			cms_access_denied_popup(returned_data.error)
+		  			return
+		  		}
+
 		  		action_on_success(returned_data);
 
 		  	}
@@ -618,6 +659,8 @@ function get_ajax_positions(url, params, action_on_success){
 function panels_display_popup(html, params){
 	
 	$('body').append(html);
+
+	var $popup = $('.cms_popup_container, .popup_container').last();
 	
 	params = $.extend({
 		'yes': function(after){
@@ -638,13 +681,36 @@ function panels_display_popup(html, params){
 	}, params);
 	
 	var clean_up = function(){
+
+		$popup.removeData('cms_popup_dismiss');
+		$(document).off('keyup.cms_popup_dismiss');
+
 		$('.popup_container,.popup_overlay').css({'opacity':'0'});
+		$popup.css({'opacity':'0'});
 		setTimeout(function(){
 			$('.popup_container,.popup_overlay,.cms_popup_container,.cms_popup_overlay').remove();
 		}, 300);
+
 	};
-	
-	$('.popup_yes').off('click.r').on('click.r', function(){
+
+	var dismiss_popup = function(){
+
+		params.pre_close(function(){
+			params.cancel(function(){
+				clean_up();
+				params.clean_up();
+			});
+		});
+
+	};
+
+	$popup.data('cms_popup_dismiss', dismiss_popup);
+
+	if ($popup.hasClass('cms_popup_container')){
+		$popup.css({'opacity':'1'});
+	}
+
+	$popup.find('.popup_yes').off('click.r').on('click.r', function(){
 		params.pre_close(function(){
 			params.yes(function(){
 				clean_up();
@@ -653,22 +719,34 @@ function panels_display_popup(html, params){
 		});
 	});
 
-	$('.popup_cancel').off('click.r').on('click.r', function(){
-		params.pre_close(function(){
-			params.cancel(function(){
-				clean_up();
-				params.clean_up();
-			});
-		});
-	});
+	$popup.find('.popup_cancel').off('click.r').on('click.r', dismiss_popup);
 
-	$('.popup_select').off('click.r').on('click.r', function(){
+	$popup.find('.popup_no, .popup_close').off('click.r').on('click.r', dismiss_popup);
+
+	$popup.find('.popup_select').off('click.r').on('click.r', function(){
 		params.pre_close(function(){
 			params.select(function(){
 				clean_up();
 				params.clean_up();
 			});
 		});
+	});
+
+	$(document).off('keyup.cms_popup_dismiss').on('keyup.cms_popup_dismiss', function(e){
+
+		if (e.which !== 27){
+			return;
+		}
+
+		var dismiss = $popup.data('cms_popup_dismiss');
+		if (!dismiss || !$popup.closest('body').length){
+			return;
+		}
+
+		e.preventDefault();
+		e.stopImmediatePropagation();
+		dismiss();
+
 	});
 	
 }
@@ -756,7 +834,7 @@ function get_api(name, params){
 
 	$.ajax({
 		type: 'POST',
-	  	url: _cms_base + name,
+	  	url: _cms_get_base() + name,
 	  	data: ext_params,
 	  	dataType: 'json',
 	  	context: this,

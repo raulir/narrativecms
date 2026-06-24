@@ -37,6 +37,18 @@ class Index extends CI_Controller {
 		return $blocks;
 	
    	}
+   	
+   	function _enforce_main_page_access($page){
+   		
+   		if (empty($page['cms_page_id'])){
+   			return;
+   		}
+   		
+   		$this->load->model('cms/cms_access_model');
+   		$is_ajax = !empty($this->input->post('_ajax'));
+   		$this->cms_access_model->enforce_page_access($page, ['no_html' => $is_ajax ? 1 : 0]);
+   		
+   	}
 
     function index($page_id = 0, $extra = ''){
 // _print_r($page_id);
@@ -72,6 +84,8 @@ class Index extends CI_Controller {
     	if (!stristr($page_id, '=')){ // direct page id
 
     		$page = $this->cms_page_model->get_page($page_id, 'auto');
+    		
+    		$this->_enforce_main_page_access($page);
 
 			if (!empty($page['seo_title'])){
     			$GLOBALS['_panel_titles'][] = $page['seo_title'];
@@ -141,6 +155,8 @@ class Index extends CI_Controller {
     		}
 
     		if (!empty($page['page_id'])){
+    			
+    			$this->_enforce_main_page_access($page);
 
     			// if page exists, overload this
 	    		$blocks = $this->_get_cms_page_panels($page['page_id']);
@@ -199,9 +215,26 @@ class Index extends CI_Controller {
     	// add headers, footers, etc
     	if($cms_page_id && !empty($page['positions'])){
 
+    		$this->load->model('cms/cms_access_model');
+
     		foreach($page['positions'] as $position){
     			
     			if (!empty($position['value'])){
+    				
+    				$position_page = $this->cms_page_model->get_page($position['value']);
+    				
+    				if (!$this->cms_access_model->user_has_page_access($position_page['access'] ?? '')){
+    					
+    					$page_config[] = [
+    							'position' => $position['name'],
+    							'_inline_access_denied' => 1,
+    							'params' => ['cms_page_id' => $position['value']],
+    							'_cms_page_id' => $cms_page_id,
+    					];
+    					
+    					continue;
+    					
+    				}
 
     				$blocks = $this->_get_cms_page_panels($position['value']);
 		    		
@@ -233,6 +266,9 @@ class Index extends CI_Controller {
 			if (!stristr($page['layout'], '/')){
 				$page['layout'] = 'cms/'.$page['layout'];
 			}
+			if ($page['layout'] === 'cms/default'){
+				$page['layout'] = 'cms/fixed';
+			}
 			$this->output($page['layout'], $page_id, $panel_data);
 		
 		} else {
@@ -248,18 +284,31 @@ class Index extends CI_Controller {
 
 				$positions_needed = array_keys($positions);
 // _print_r($page_config);
+				$this->load->model('cms/cms_access_model');
+				
 				foreach($page_config as $key => $panel_config){
-					if (in_array($panel_config['position'], $positions_needed)){
-						if ($panel_config['params']['cms_page_id'] != $positions[$panel_config['position']]) {
-							
-							$panel_data = $this->ajax_panel($panel_config['panel'], $panel_config['params']);
-							if (empty($return[$panel_config['position']])){
-								$return[$panel_config['position']]['_html'] = '';
-							}
-							$return[$panel_config['position']]['_html'] .= $panel_data['_html'];
-							$return[$panel_config['position']]['cms_page_id'] = $panel_config['params']['cms_page_id'];
-							
+					
+					if (!in_array($panel_config['position'], $positions_needed)){
+						continue;
+					}
+					
+					if (!empty($panel_config['_inline_access_denied'])){
+						
+						$return[$panel_config['position']]['_html'] = $this->cms_access_model->get_access_denied_inline_html();
+						$return[$panel_config['position']]['cms_page_id'] = (int)$panel_config['params']['cms_page_id'];
+						continue;
+						
+					}
+					
+					if ($panel_config['params']['cms_page_id'] != $positions[$panel_config['position']]) {
+						
+						$panel_data = $this->ajax_panel($panel_config['panel'], $panel_config['params']);
+						if (empty($return[$panel_config['position']])){
+							$return[$panel_config['position']]['_html'] = '';
 						}
+						$return[$panel_config['position']]['_html'] .= $panel_data['_html'];
+						$return[$panel_config['position']]['cms_page_id'] = $panel_config['params']['cms_page_id'];
+						
 					}
 				}
 
@@ -273,11 +322,21 @@ class Index extends CI_Controller {
 				$return = '';
 	
 				$_positions = $this->input->post('_positions');
+				$this->load->model('cms/cms_access_model');
+				
 				foreach($page_config as $key => $panel_config){
-					if (in_array($panel_config['position'], $_positions)) {
-						$panel_data = $this->ajax_panel($panel_config['panel'], $panel_config['params']);
-						$return .= $panel_data['_html'];
+					
+					if (!in_array($panel_config['position'], $_positions)){
+						continue;
 					}
+					
+					if (!empty($panel_config['_inline_access_denied'])){
+						$return .= $this->cms_access_model->get_access_denied_inline_html();
+						continue;
+					}
+					
+					$panel_data = $this->ajax_panel($panel_config['panel'], $panel_config['params']);
+					$return .= $panel_data['_html'];
 				}
 				
 				// top level menu item id if exists

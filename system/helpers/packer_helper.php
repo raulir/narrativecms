@@ -66,6 +66,14 @@ if ( !function_exists('pack_css')) {
 					$scsss_item['css'] = $scsss_item['script'];
 				}
 			}
+
+			if (empty($scsss_item['module_path']) && strpos($scsss_item['script'], 'modules/') === 0){
+				list(, $m_path) = explode('modules/', $scsss_item['script'], 2);
+				list($m_module,) = explode('/', $m_path, 2);
+				if (!empty($m_module)){
+					$scsss_item['module_path'] = 'modules/'.$m_module.'/';
+				}
+			}
 				
 			// check if needed to compile, happens when any of files in set is newer than cache
 			$css_file_update_needed = false;

@@ -429,3 +429,47 @@ if ( !function_exists('get_position')) {
     }
     
 }
+
+if ( !function_exists('_user_login_url')) {
+	
+	function _user_login_url($print = true){
+		
+		if (!in_array('user', $GLOBALS['config']['modules'])){
+			$url = $GLOBALS['config']['base_url'];
+		} else {
+			$ci =& get_instance();
+			$ci->load->model('user/user_model');
+			$url = $ci->user_model->get_login_redirect_url();
+		}
+		
+		if ($print){
+			print($url);
+		} else {
+			return $url;
+		}
+		
+	}
+	
+}
+
+if ( !function_exists('_user_login_text')) {
+	
+	function _user_login_text($print = true){
+		
+		if (!in_array('user', $GLOBALS['config']['modules'])){
+			$text = 'Login';
+		} else {
+			$ci =& get_instance();
+			$ci->load->model('user/user_model');
+			$text = $ci->user_model->get_login_redirect_text();
+		}
+		
+		if ($print){
+			print($text);
+		} else {
+			return $text;
+		}
+		
+	}
+	
+}

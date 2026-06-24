@@ -10,6 +10,11 @@ class register extends CI_Controller {
 
 		if ($do == 'register'){
 			
+			if (!empty($_SESSION['user'])){
+				$params['errors'] = ['loggedin'];
+				return $params;
+			}
+			
 			$errors = [];
 			
 			$fields = $this->input->post('fields');
@@ -86,7 +91,8 @@ class register extends CI_Controller {
 						$session_user = $this->user_model->get_user($user['data']['user_id']);
 						
 						if (!empty($session_user['cms_page_panel_id'])){
-							$_SESSION['user'] = $session_user;
+							$this->load->model('cms/cms_access_model');
+							$this->cms_access_model->refresh_user_session($session_user);
 						}
 						
 					}

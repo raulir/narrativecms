@@ -56,6 +56,9 @@ class user_model extends Model {
 			return $return;
 		}
 
+		$this->load->model('cms/cms_access_model');
+		$default_access = $this->cms_access_model->get_default_access_for_new_user();
+		
 		$user = [
 				'panel_name' => 'user/user',
 				'show' => 1,
@@ -69,6 +72,10 @@ class user_model extends Model {
 				'image' => '',
 				'meta' => json_encode($data['meta'], JSON_PRETTY_PRINT),
 		];
+		
+		if (!empty($default_access)){
+			$user['access'] = $this->cms_access_model->keys_to_repeater($default_access);
+		}
 		 
 		$user_id = $this->cms_page_panel_model->create_cms_page_panel($user);
 		$user['user_id'] = $user_id;
@@ -222,6 +229,51 @@ class user_model extends Model {
 		
 		return $user;
 	
+	}
+	
+	function get_header_settings(){
+		
+		if (!in_array('user', $GLOBALS['config']['modules'])){
+			return [];
+		}
+		
+		$this->load->model('cms/cms_page_panel_model');
+		
+		return $this->cms_page_panel_model->get_cms_page_panel_settings('user/header');
+		
+	}
+	
+	function get_login_redirect_url(){
+		
+		$settings = $this->get_header_settings();
+		
+		if (!empty($settings['login_link'])){
+			return _l($settings['login_link'], false);
+		}
+		
+		return $GLOBALS['config']['base_url'];
+		
+	}
+	
+	function get_login_redirect_text(){
+		
+		$settings = $this->get_header_settings();
+		
+		if (!empty($settings['login_text'])){
+			return $settings['login_text'];
+		}
+		
+		return 'Login';
+		
+	}
+	
+	function get_login_redirect(){
+		
+		return [
+			'url' => $this->get_login_redirect_url(),
+			'text' => $this->get_login_redirect_text(),
+		];
+		
 	}
 
 }

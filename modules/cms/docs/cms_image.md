@@ -2,7 +2,9 @@
 
 ## Overview
 
-The `cms_image` panel edits a single image from the resource manager (`cms_images`). It opens as a second overlay on top of the image picker grid.
+The `cms_image` panel is the crop/adjust editor overlay. It opens on top of the image selector grid (`cms_images`).
+
+Full stack (input field → popup → grid → this editor): [`cms_input_image.md`](cms_input_image.md). Architecture rules: [`Agents.md`](../../../Agents.md).
 
 ## Crop editor
 
@@ -213,27 +215,13 @@ On save, a matching cover frame is exported to `{child}.data/cover.jpg` when ffm
 
 ### Frontend view (child transforms)
 
-When `_ib()` is called with a video child filename, [`get_video_view_meta()`](modules/cms/models/cms_image_model.php) resolves the parent mp4 for playback URLs and emits `data-cms_video_view="1"` plus crop/adjust `data-*` attributes on the host element.
-
-[`cms_video_init()`](modules/cms/js/cms_video.js) view branch builds a clip/pan/rotate/source/overlay structure inside the host box and applies transforms via [`cms_media_view.js`](modules/cms/js/cms_media_view.js) (shared filter math with the editor). Works on the public site, image picker grid, and `cms_input_image` preview.
-
-**Background fit** — child and parent `_ib()` mp4 hosts use the same CSS signals as background images on the host div:
-
-| Host `background-size` | Behaviour |
-|------------------------|-----------|
-| `cover` | Cropped viewport fills the box; overflow clipped |
-| `contain` | Full cropped viewport visible; letterbox/pillarbox |
-| Explicit (`4rem auto`, `auto 30%`, `50% auto`) | Size from the numeric axis; other axis from cropped aspect ratio |
-| Two numeric values (`12rem 8rem`) | Width (first value) only; height from aspect ratio — never stretch |
-
-`background-position` (center, edges, custom %) positions the fitted video. The poster uses `{child}.data/cover.jpg` when present (exported on save), otherwise the parent cover. Poster `background-image` is removed when playback starts. Stretch (`100% 100%`) is not supported.
-
-Editor-only **zoom / pan** are not applied on the frontend. Legacy `video_play` / carousel code is not used.
+Playback, background fit, poster, and warden behaviour: [`cms_video.md`](cms_video.md) (frontend serving). Editor-only **zoom / pan** are not applied on the frontend.
 
 ## Files
 
 | Role | Path |
 |------|------|
+| Input field + selector | [`cms_input_image.md`](cms_input_image.md) |
 | Controller | `modules/cms/panels/cms_image.php` |
 | Template | `modules/cms/templates/cms_image.tpl.php` |
 | Model | `modules/cms/models/cms_image_model.php` |

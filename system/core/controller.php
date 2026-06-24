@@ -159,6 +159,9 @@ class CI_Controller {
 	 */
 	function panel($name, $params = []){
 
+		$this->load->model('cms/cms_access_model');
+		$this->cms_access_model->enforce_panel_access($name, $params);
+
 		if (!empty($params['_extends'])){
 			$files = $this->get_panel_filenames($name, $params, $params['_extends']);
 		} else {
@@ -630,6 +633,9 @@ class CI_Controller {
 		// get page panel settings
 		$params = array_merge($this->cms_page_panel_model->get_cms_page_panel_settings($name), $params);
 
+		$this->load->model('cms/cms_access_model');
+		$this->cms_access_model->enforce_panel_access($name, $params);
+
 		// do panel action
 		$action_result = $this->run_action($name, $params);
 		if (is_array($action_result)){
@@ -741,6 +747,11 @@ class CI_Controller {
 		$this->load->model('cms/cms_page_panel_model');
 
 		foreach($page_config as $key => $panel_config){
+			
+			if (!empty($panel_config['_inline_access_denied'])){
+				continue;
+			}
+			
 			if (stristr($panel_config['panel'], '/')){
 				list($module, $panel_name) = explode('/', $panel_config['panel']);
 				$page_config[$key]['module'] = $module;
@@ -766,10 +777,17 @@ class CI_Controller {
 		}
 	
 		// do panel actions
+		$this->load->model('cms/cms_access_model');
 		foreach($page_config as $key => $panel_config){
+			
+			if (!empty($panel_config['_inline_access_denied'])){
+				continue;
+			}
+			
 			if (empty($panel_config['params'])){
 				$panel_config['params'] = array();
 			}
+			$this->cms_access_model->enforce_panel_access($panel_config['panel'], $panel_config['params']);
 			$action_result = $this->run_action($panel_config['panel'], (!empty($panel_config['params']) ? $panel_config['params'] : array()));
 			$page_config[$key]['params'] =
 					(!empty($action_result) && is_array($action_result) ? array_merge($panel_config['params'], $action_result) : $panel_config['params']);
@@ -782,6 +800,14 @@ class CI_Controller {
 			$params = !empty($panel_config['params']) ? $panel_config['params'] : array();
 			if (empty($params['cms_page_panel_id'])) $params['cms_page_panel_id'] = 0;
 			
+			if (!empty($panel_config['_inline_access_denied'])){
+				
+				$return[$panel_config['position'].'_'.$key.'_'.(int)$params['cms_page_id']] =
+						$this->cms_access_model->get_access_denied_inline_html();
+				continue;
+				
+			}
+			
 			// add _page_id for real page id
 			if (empty($params['_cms_page_id'])) $params['_cms_page_id'] = 
 					(!empty($panel_config['_cms_page_id']) ? $panel_config['_cms_page_id'] : 
@@ -791,6 +817,8 @@ class CI_Controller {
 			if (!empty($params['_images'])){
 				$GLOBALS['_panel_images'] = array_merge(array_values($GLOBALS['_panel_images']), array_values($params['_images']));
 			}
+
+			$access_cache_hash = $this->cms_access_model->get_cache_access_hash($panel_config['panel']);
 
 			// check for cache
 			if (empty($action_result['_no_cache']) && !(!empty($params['module']) && $params['module'] == 'cms')
@@ -802,7 +830,7 @@ class CI_Controller {
 				// if cache file exists
 				$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.str_replace('/', '__', $panel_config['panel']).
 						'_'.substr(md5($panel_config['panel'].serialize($params).$_SESSION['config']['targets']['hash'].
-						$_SESSION['webp']), 0, 6).'.txt';
+						$_SESSION['webp'].$access_cache_hash), 0, 6).'.txt';
 						
 				if (is_file($filename)){
 
@@ -847,7 +875,7 @@ class CI_Controller {
 	
 							$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.
 									str_replace('/', '__', $panel_config['panel']).'_'.substr(md5($panel_config['panel'].serialize($params).
-									$_SESSION['config']['targets']['hash'].$_SESSION['webp']), 0, 6).'.txt';
+									$_SESSION['config']['targets']['hash'].$_SESSION['webp'].$access_cache_hash), 0, 6).'.txt';
 										
 							$panel_data['_html'] .= '<!-- cached: '.date('Y-m-d H:i:s').' -->'."\n";
 							file_put_contents($filename, serialize($panel_data));

@@ -20,23 +20,24 @@ class cms_input_page_panels extends CI_Controller {
 
 	function panel_params($params){
 
-		$params['cms_page_panels'] = [];
-
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_page_model');
 
-		if (!is_array($params['value'])){
-			$params['value'] = explode(',', $params['value']);
-		}
+		if (empty($params['cms_page_panels']) || !is_array($params['cms_page_panels'])){
 
-		// check if panels exist
-		$bad_ids = array();
-		$good_ids = array();
-		foreach($params['value'] as $block_id){
-			$panel = $this->cms_page_panel_model->get_cms_page_panel($block_id);
-			if (is_array($panel)){
-				$params['cms_page_panels'][] = $panel;
+			$params['cms_page_panels'] = [];
+
+			if (!is_array($params['value'])){
+				$params['value'] = explode(',', $params['value']);
 			}
+
+			foreach($params['value'] as $block_id){
+				$panel = $this->cms_page_panel_model->get_cms_page_panel($block_id);
+				if (is_array($panel)){
+					$params['cms_page_panels'][] = $panel;
+				}
+			}
+
 		}
 
 		// check for shortcuts

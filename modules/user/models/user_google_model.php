@@ -95,11 +95,13 @@ class user_google_model extends Model {
 			return ['error' => reset($result['errors'])];
 		}
 		
-		if (empty($result['data']['cms_page_panel_id'])) {
+		$user_id = $result['data']['user_id'] ?? $result['data']['cms_page_panel_id'] ?? 0;
+		
+		if (empty($user_id)) {
 			return ['error' => 'create_failed'];
 		}
 		
-		$user = $this->user_model->get_user($result['data']['cms_page_panel_id']);
+		$user = $this->user_model->get_user($user_id);
 		
 		if (empty($user)) {
 			return ['error' => 'create_failed'];

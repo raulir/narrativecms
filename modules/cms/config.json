@@ -93,7 +93,7 @@
 	],
 	"layouts":[
 		{
-			"id":"default",
+			"id":"fixed",
 			"name":"Default fixed"
 		},
 		{

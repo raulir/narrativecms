@@ -53,6 +53,20 @@
 		},
 		{
 			"type":"repeater",
+			"name":"access",
+			"label":"Access",
+			"fields":[
+				{
+					"type":"text",
+					"name":"key",
+					"label":"Key",
+					"mandatory":"1",
+					"help":"e.g. music_student or music_*"
+				}
+			]
+		},
+		{
+			"type":"repeater",
 			"name":"usergroups",
 			"label":"User groups",
 			"fields":[

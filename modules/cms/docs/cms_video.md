@@ -1,5 +1,7 @@
 # CMS video encoding
 
+**See also:** [`Agents.md`](../../../Agents.md) (architecture rules), [`cms_input_image.md`](cms_input_image.md) (selector/preview), [`cms_image.md`](cms_image.md) (video-as-image editor).
+
 ## Overview
 
 Uploaded `.mp4` files and animated GIFs converted to `.mp4` are stored in `cms_image` like images. DASH adaptive streaming assets are built lazily by a cron task — not at upload time.

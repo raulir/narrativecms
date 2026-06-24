@@ -3,8 +3,43 @@
 class cms_page_model extends CI_Model {
 	
 	function get_cms_pages(){
+
+		$this->_ensure_cms_page_schema();
 		
-		// check structure
+		$sql = "select * from cms_page order by sort asc";
+    	$query = $this->db->query($sql);
+    	$result = $query->result_array();
+    	
+    	foreach ($result as $key => $row){
+    		
+    		$result[$key]['number'] = sprintf('%02d', $row['sort']);
+    		$result[$key]['page_id'] = $row['cms_page_id'];
+			$result[$key]['title'] = $result[$key]['slug'];
+    		
+    	}
+    	
+    	foreach ($result as $key => $row){
+    		
+    		if (!empty($row['meta'])){
+    			$meta = json_decode($row['meta'], true);
+    			if (!empty($meta)){
+    				$result[$key] = array_merge($row, $meta);
+    			}
+    		}
+    		
+    	}
+    	
+    	return $result;
+	}
+
+	function _ensure_cms_page_schema(){
+
+		$flag = $GLOBALS['config']['base_path'].'cache/schema_cms_page.ok';
+
+		if (file_exists($flag)){
+			return;
+		}
+
 		$sql = "show columns from `cms_page` like 'position'";
 		$query = $this->db->query($sql);
 		if (!$query->num_rows()){
@@ -33,7 +68,6 @@ class cms_page_model extends CI_Model {
 			$query = $this->db->query($sql);
 		}
 		
-		// page panel params for language
 		$sql = "show columns from `cms_page_panel_param` like 'language'";
 		$query = $this->db->query($sql);
 		if (!$query->num_rows()){
@@ -49,31 +83,9 @@ class cms_page_model extends CI_Model {
 			$query = $this->db->query($sql);
 			
 		}
-		
-		$sql = "select * from cms_page order by sort asc";
-    	$query = $this->db->query($sql);
-    	$result = $query->result_array();
-    	
-    	foreach ($result as $key => $row){
-    		
-    		$result[$key]['number'] = sprintf('%02d', $row['sort']);
-    		$result[$key]['page_id'] = $row['cms_page_id'];
-			$result[$key]['title'] = $result[$key]['slug'];
-    		
-    	}
-    	
-    	foreach ($result as $key => $row){
-    		
-    		if (!empty($row['meta'])){
-    			$meta = json_decode($row['meta'], true);
-    			if (!empty($meta)){
-    				$result[$key] = array_merge($row, $meta);
-    			}
-    		}
-    		
-    	}
-    	
-    	return $result;
+
+		file_put_contents($flag, date('c'));
+
 	}
 	
 	function get_page($cms_page_id, $language = false){

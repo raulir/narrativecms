@@ -1,0 +1,61 @@
+.cms_access_denied_container {
+	position: fixed;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 9998;
+}
+
+.cms_access_denied_overlay {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.45);
+}
+
+.cms_access_denied_content {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	background-color: #fff;
+	border: 0.12rem solid #c00;
+	padding: 2.0rem 2.5rem;
+	border-radius: 0.4rem;
+	z-index: 1;
+	min-width: 24.0rem;
+	max-width: 90vw;
+	box-sizing: border-box;
+	text-align: center;
+}
+
+.cms_access_denied_text {
+	font-size: 1.4rem;
+	line-height: 1.6rem;
+	color: #c00;
+	padding: 0 0 1.5rem 0;
+}
+
+.cms_access_denied_home {
+	display: inline-block;
+	font-size: 1.3rem;
+	line-height: 1.5rem;
+	text-decoration: underline;
+}
+
+.cms_access_denied_close {
+	box-sizing: border-box;
+	position: absolute;
+	right: 0.5rem;
+	top: 0.5rem;
+	width: 2.0rem;
+	height: 2.0rem;
+	cursor: pointer;
+	background-size: 1.0rem auto;
+	background-position: center;
+	background-repeat: no-repeat;
+	z-index: 1;
+}

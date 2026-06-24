@@ -44,8 +44,10 @@ class cms_menu extends CI_Controller {
 			return true;
 		}
 
+		$this->load->model('cms/cms_access_model');
+
 		foreach($_SESSION['cms_user']['access'] as $access){
-			if (preg_match('/'.str_replace('*', '.*?', $access).'/', $menu_item['access'])){
+			if ($this->cms_access_model->_access_key_matches($access, $menu_item['access'])){
 				return true;
 			}
 		}

@@ -6,6 +6,21 @@
 	],
 	"settings":[
 		{
+			"type":"repeater",
+			"name":"default_access",
+			"label":"Default access",
+			"help":"Granted to new users on register (merged with existing keys)",
+			"fields":[
+				{
+					"type":"text",
+					"name":"key",
+					"label":"Key",
+					"mandatory":"1",
+					"help":"e.g. music_student"
+				}
+			]
+		},
+		{
 			"type":"select",
 			"name":"show_username",
 			"label":"Login username",

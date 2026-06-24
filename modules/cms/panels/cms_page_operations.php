@@ -39,6 +39,7 @@ class cms_page_operations extends CI_Controller {
 			$data['sort'] = $this->input->post('sort');
 			$data['title'] = $this->input->post('title');
 			$data['slug'] = $this->input->post('slug');
+			$data['access'] = trim($this->input->post('access'));
 			
 			$data['position'] = $this->input->post('position');
 			if (empty($data['position'])) {

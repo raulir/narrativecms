@@ -224,10 +224,10 @@
 		},
 		{
 			"type":"textarea",
-			"name":"loggedin_text",
-			"label":"Logged in message",
+			"name":"message_loggedin",
+			"label":"Already logged in",
 			"lines":"2",
-			"default": "You are currently logged in. Please log out to register a new account.",
+			"default": "You are already logged in. Please log out to register a new account.",
 			"translate":"1"
 		},
 		{

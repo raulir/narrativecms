@@ -12,16 +12,7 @@ Shared logic:
 
 App WebView login was verified on Android emulator (separate app project).
 
-## Done
-
-- [x] `user_google_model` with `verify_web_credential`,
-  `login_from_web_payload`, `login_from_app_profile`
-- [x] `user/auth_google` and `user/auth_gapp` use `user_google_model`
-- [x] Fixes new-user session bug (`create_user` return shape)
-- [x] Unifies meta/image handling across web and app
-- [x] App panel moved from `music/auth_google` to `user/auth_gapp`
-
-## Deferred — web (`user/auth_google`)
+## MVP — Google web
 
 - [ ] **Success redirect** — after GSI POST to `/auth-google/`, session
   is set but [`auth_google.tpl.php`](../templates/auth_google.tpl.php) only
@@ -31,11 +22,12 @@ App WebView login was verified on Android emulator (separate app project).
   [`login.tpl.php`](../templates/login.tpl.php).
 - [ ] **Error display** — show a readable message for `google_error`, not
   a raw key.
-- [ ] **`vendor/autoload.php` path** — already uses
-  `$GLOBALS['config']['base_path'].'vendor/autoload.php'` in
-  `user_google_model`.
 
-## Deferred — app (`user/auth_gapp`)
+## MVP QA
+
+See consolidated checklist in [`user_register.md`](user_register.md) § MVP QA (Google rows).
+
+## Post-MVP — native app (`user/auth_gapp`)
 
 App flow works via native `google_login()` bridge (not in this repo).
 
@@ -45,15 +37,6 @@ App flow works via native `google_login()` bridge (not in this repo).
   bridge switches to `get_ajax()` (`no_html: 1` skips `panel_params`)
 - [ ] Document native bridge contract in app project (payload shape,
   `no_html` flag, redirect on `login_success`)
-
-## Verification checklist (when web deferred items done)
-
-- [ ] Web: `/login/` → `/login-google/` → Google sign-in → redirect to
-  `/start/` logged in
-- [ ] Web: first-time Google user — `$_SESSION['user']` has `user_id`,
-  `email`, etc.
-- [ ] Google Cloud Console: web client `270024484737-…` authorised
-  origins + redirect URI `/auth-google/`
 
 ## Context
 

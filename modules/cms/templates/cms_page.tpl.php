@@ -35,6 +35,14 @@
 						'meta_class' => 'cms_page_title',
 				]); ?>
 				
+				<?php _panel('cms/cms_input_text', [
+						'name' => 'access',
+						'value' => !empty($page['access']) ? $page['access'] : '',
+						'name_clean' => 'cms_page_access',
+						'label' => 'Access',
+						'help' => '[Page access]||Empty = public. Comma-separated access keys (e.g. music_student, music_*). User needs any one key. On header/footer position pages, denied access shows an error in that slot only.',
+				]); ?>
+				
 				<?php if (in_array($page['position'], ['', 'main', ])): ?>
 				
 					<?php if(!$is_list_item): ?>
@@ -63,8 +71,8 @@
 								'label' => 'Layout', 
 								'value' => $cms_page_layout, 
 								'name' => 'cms_page_layout', 
-								'help' => '[Page layout]||CMS "Default fixed" is fixed pixel size layout.||'.
-										'CMS "Default rems" layout changes rem size with page size.||'.
+								'help' => '[Page layout]||CMS "Default fixed" (cms/fixed) uses a fixed viewport size.||'.
+										'CMS "Default rems" (cms/rem) scales rem size with page width.||'.
 										'There might be more layouts available, defined in other modules.',
 						]);
 					?>
@@ -155,11 +163,11 @@
 			<div class="cms_column">
 				
 				<?php
-					_panel('cms/cms_input_page_panels', array(
-							'value' => $block_list,
+					_panel('cms/cms_input_page_panels', [
+							'cms_page_panels' => $cms_page_panels,
 							'page_id' => $page['page_id'],
 							'sortable_class' => 'cms_page_sortable',
-					)); 
+					]); 
 				?>
 
 			</div>

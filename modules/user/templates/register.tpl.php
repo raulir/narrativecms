@@ -1,13 +1,7 @@
 <?php if(empty($loggedin)): ?>
 
-	<div class="register_container" <?php if($redirect_link['target'] != '_none'): ?> data-success="<?= _l($redirect_link) ?>" <?php endif ?>>
+	<div class="register_container" data-cms_page_panel_id="<?= $cms_page_panel_id ?>" <?php if($redirect_link['target'] != '_none'): ?> data-success="<?= _l($redirect_link) ?>" <?php endif ?>>
 		<div class="register_content">
-		
-			<?php if($loggedin): ?>
-			
-				<div class="register_loggedin_text"><?= $loggedin_text ?></div>
-			
-			<?php else: ?>
 		
 				<div class="register_heading"><?= $heading ?></div>
 				
@@ -151,10 +145,9 @@
 					<div class="register_error register_error_usernamelength"><?= $message_usernamelength ?></div>
 					<div class="register_error register_error_bademail"><?= $message_bademail ?></div>
 					<div class="register_error register_error_password_mismatch"><?= $message_password_mismatch ?></div>
+					<div class="register_error register_error_loggedin"><?= $message_loggedin ?></div>
 				
 				</div>
-				
-			<?php endif ?>
 	
 		</div>
 	</div>

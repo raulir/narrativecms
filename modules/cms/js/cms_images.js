@@ -81,8 +81,8 @@ function cms_images_activate() {
 				var total_usage = self_usage + children_usage;
 				if (total_usage > 0){
 					var place_word = total_usage == 1 ? 'place' : 'places';
-					text = text + '<div class="cms_images_warning">This image is in use at ' + total_usage + ' ' + place_word + '!</div>' +
-							'<div class="cms_images_warning_extra">Deleting this image may cause missing images in the front end.</div>';
+					text = text + '<div class="cms_images_warning">This resource is in use at ' + total_usage + ' ' + place_word + '!</div>' +
+							'<div class="cms_images_warning_extra">Deleting this may cause missing images and videos in the front end.</div>';
 				}
 				
 				get_ajax_panel('cms/cms_popup_yes_no', {'text':text}, function(data){

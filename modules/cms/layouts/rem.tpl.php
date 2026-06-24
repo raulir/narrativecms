@@ -17,8 +17,10 @@
 <?php endif ?>
 </style>
 <script type="text/javascript">
-	var _cms_base = '<?= $GLOBALS['config']['base_url'] ?>'
-	var config_url = _cms_base
+	var _cms_base = '<?= $GLOBALS['config']['base_url'] ?>';
+	var _cms_login_url = <?= json_encode(_user_login_url(false)) ?>;
+	var _cms_login_text = <?= json_encode(_user_login_text(false)) ?>;
+	var config_url = _cms_base;
 	<?= !empty($_SESSION['cms_user']['cms_user_id']) ? 'var admin_logged_in = 1;' : '' ?>
 	setInterval(() => {_cms_rem = parseFloat(getComputedStyle(document.documentElement).fontSize)}, 1000)
 	var _cms_rem = parseFloat(getComputedStyle(document.documentElement).fontSize)

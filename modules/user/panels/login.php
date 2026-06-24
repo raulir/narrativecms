@@ -44,8 +44,8 @@ class login extends \CI_Controller{
 		
 			// if process reaches this, the login was success, put user data to session
 			
-			$_SESSION['user'] = $user;
-
+			$this->load->model('cms/cms_access_model');
+			$this->cms_access_model->refresh_user_session($user);
 			
 		}
 		

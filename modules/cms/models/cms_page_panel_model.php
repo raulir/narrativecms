@@ -295,6 +295,32 @@ class cms_page_panel_model extends Model {
 			
 	}
 	
+	function is_list_slug($slug){
+
+		if ($slug === '' || $slug === null){
+			return false;
+		}
+
+		foreach ($GLOBALS['config']['modules'] as $module){
+
+			$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/'.$slug.'.json';
+
+			if (!file_exists($filename)){
+				continue;
+			}
+
+			$config = cms_json_decode(file_get_contents($filename), $filename);
+
+			if (!empty($config['list'])){
+				return true;
+			}
+
+		}
+
+		return false;
+
+	}
+
 	function get_lists(){
 	
 		$this->load->model('cms/cms_panel_model');
@@ -1218,6 +1244,16 @@ class cms_page_panel_model extends Model {
 		} else {
 			$order = 'asc';
 		}
+
+		$fields_only = false;
+		$select_fields = [];
+
+		if (isset($filter['_fields'])){
+			$select_fields = $filter['_fields'];
+			unset($filter['_fields']);
+			$base_table_fields = ['cms_page_panel_id', 'cms_page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title'];
+			$fields_only = !array_diff($select_fields, $base_table_fields);
+		}
 				
 		// separate filters
 		$sql_filter = array();
@@ -1314,10 +1350,25 @@ class cms_page_panel_model extends Model {
 
 		$table_join = $use_panel_table ? " join `{$panel_table}` t on t.cms_page_panel_id = a.cms_page_panel_id " : '';
 
-		$sql = "select a.*, b.value as _params from `cms_page_panel` a ".$table_join.
-				"left join cms_page_panel_param b on b.name = '' and b.cms_page_panel_id = a.cms_page_panel_id ".
-				($where_str ? " where ".$where_str." " : " ").
-				"order by a.sort ".$order;
+		if ($fields_only){
+
+			$select_parts = [];
+			foreach ($select_fields as $field){
+				$select_parts[] = 'a.`'.$field.'`';
+			}
+
+			$sql = "select ".implode(', ', $select_parts)." from `cms_page_panel` a ".$table_join.
+					($where_str ? " where ".$where_str." " : " ").
+					"order by a.sort ".$order;
+
+		} else {
+
+			$sql = "select a.*, b.value as _params from `cms_page_panel` a ".$table_join.
+					"left join cms_page_panel_param b on b.name = '' and b.cms_page_panel_id = a.cms_page_panel_id ".
+					($where_str ? " where ".$where_str." " : " ").
+					"order by a.sort ".$order;
+
+		}
 
 		$bind = array_merge(array_values($sql_filter), array_values($table_filter));
 		$query = $this->db->query($sql, $bind);
@@ -1333,20 +1384,24 @@ class cms_page_panel_model extends Model {
     		$return = array();
     	}
     	
-    	// replace with translated versions
-    	foreach($return as $key => $page_panel){
-    		$return[$key] = $this->get_cms_page_panel($page_panel['cms_page_panel_id'], $this->get_current_language(), false);
-    	}
-    	
-    	// unpack params - not needed
-    	foreach ($return as $key => $row){
-    		if(!empty($row['_params'])){
-    			$_params = json_decode($row['_params'], true);
-    			if (is_array($_params)){
-	    			$return[$key] = array_merge($_params, $row);
-    			}
-    		}
-    		unset($return[$key]['_params']);
+    	if (!$fields_only){
+
+	    	// replace with translated versions
+	    	foreach($return as $key => $page_panel){
+	    		$return[$key] = $this->get_cms_page_panel($page_panel['cms_page_panel_id'], $this->get_current_language(), false);
+	    	}
+	    	
+	    	// unpack params - not needed
+	    	foreach ($return as $key => $row){
+	    		if(!empty($row['_params'])){
+	    			$_params = json_decode($row['_params'], true);
+	    			if (is_array($_params)){
+		    			$return[$key] = array_merge($_params, $row);
+	    			}
+	    		}
+	    		unset($return[$key]['_params']);
+	    	}
+
     	}
 
     	foreach ($return as $key => $row){
@@ -1398,10 +1453,12 @@ class cms_page_panel_model extends Model {
     	}
     	
     	// check for page panel settings
-    	foreach($return as $key => $cms_page_panel){
-    		if ($cms_page_panel['cms_page_id']){
-    			$return[$key] = array_merge($this->get_cms_page_panel_settings($cms_page_panel['panel_name']), $cms_page_panel);
-   			}
+    	if (!$fields_only){
+	    	foreach($return as $key => $cms_page_panel){
+	    		if ($cms_page_panel['cms_page_id']){
+	    			$return[$key] = array_merge($this->get_cms_page_panel_settings($cms_page_panel['panel_name']), $cms_page_panel);
+	   			}
+	    	}
     	}
 
 		return $return;

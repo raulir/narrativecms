@@ -27,6 +27,21 @@
 	box-shadow: 0.2rem 0.4rem 1.0rem rgba(0,0,0,0.5);
 	background-color: white;
 	margin: 0 auto;
+	position: relative;
+}
+
+.cms_popup_close {
+	box-sizing: border-box;
+	position: absolute;
+	right: 0.5rem;
+	top: 0.5rem;
+	width: 2.0rem;
+	height: 2.0rem;
+	cursor: pointer;
+	background-size: 1.0rem auto;
+	background-position: center;
+	background-repeat: no-repeat;
+	z-index: 1;
 }
 
 .cms_popup_text {

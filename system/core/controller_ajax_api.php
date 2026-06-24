@@ -22,8 +22,8 @@ class Ajax_api extends CI_Controller {
 
 		}
 		
-		// if list item, load data
-		if (!empty($this->params['cms_page_panel_id']) && empty($this->params['no_html']) && empty($this->params['do'])){
+		// load page panel instance settings (list items and panel actions such as register)
+		if (!empty($this->params['cms_page_panel_id'])){
 			
 			$this->load->model('cms/cms_panel_model');
 			$this->load->model('cms/cms_page_panel_model');
@@ -37,7 +37,7 @@ class Ajax_api extends CI_Controller {
 				die();
 			}
 			
-			if (empty($this->params['show'])){
+			if (empty($this->params['show']) && empty($this->params['do'])){
 				print(json_encode(array('result' => array(), 'error' => array('message' => 'Can\'t show', ))));
 				die();
 			}

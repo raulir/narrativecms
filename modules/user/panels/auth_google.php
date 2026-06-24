@@ -24,7 +24,8 @@ class auth_google extends CI_Controller{
 			return $params;
 		}
 		
-		$_SESSION['user'] = $result['user'];
+		$this->load->model('cms/cms_access_model');
+		$this->cms_access_model->refresh_user_session($result['user']);
 
 		return $params;
 		

@@ -2,13 +2,18 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
-   		<meta name="viewport" content="width=1000,user-scalable=no">
+   		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
    		<style type="text/css">
-			html {font-size: 10px!important;}
+			html {font-size: 1vw !important;}
+			@media (min-width: 1001px) {
+				html {font-size: 10px !important;}
+			}
 		</style>
 		<script type="text/javascript">
 			var _cms_base = '<?php print($GLOBALS['config']['base_url']); ?>'
- 			var _cms_rem = 10
+			setInterval(() => {_cms_rem = parseFloat(getComputedStyle(document.documentElement).fontSize)}, 1000)
+			var _cms_rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
+			var _cms_mobile = false
 		</script>
    	</head>
 	<body <?php (!empty($GLOBALS['config']['cms_background'])) ? 

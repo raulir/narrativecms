@@ -8,6 +8,11 @@ function register_init(){
 				'do': 'register',
 				'fields': [],
 		}
+
+		var cms_page_panel_id = $('.register_container').data('cms_page_panel_id')
+		if (cms_page_panel_id){
+			data.cms_page_panel_id = cms_page_panel_id
+		}
 		
 		var error_fields = []
 		
