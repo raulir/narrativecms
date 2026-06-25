@@ -43,7 +43,9 @@ function cms_page_panel_check_mandatory(colour){
 			
 		} else if ($this.hasClass('cms_input_select')){ // includes fk and repeater_select
 			
-			if (!$('select', $this).val()){
+			var val = $('select', $this).val()
+			
+			if (!val || val === '0'){
 				ret.push(label);
 				$('label', $this).css({'color':colour});
 			}

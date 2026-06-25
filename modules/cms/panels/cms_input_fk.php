@@ -22,12 +22,11 @@ class cms_input_fk extends CI_Controller {
 		$this->load->model('cms/cms_panel_model');
 		$this->load->model('cms/cms_page_panel_model');
 		
-		// get fk data
+		$add_empty = !empty($params['add_empty']) || !empty($params['mandatory']);
+		
 		if (!empty($params['list'])){
 			
-			if (!empty($params['add_empty'])){
-				$params['values'][0] = '-- not specified --';
-			}
+			$params['values'] = [];
 			
 			$list = $this->cms_page_panel_model->get_list($params['list'], ['show' => [0,1]]);
 
@@ -35,21 +34,27 @@ class cms_input_fk extends CI_Controller {
 				$params['values'][$item_id] = $item['title'];
 			}
 			
-			if(empty($params['values'])){
-				$params['values'] = ['0' => '-- no values --'];
+			if ($add_empty){
+				$params['values'] = ['' => '-- not specified --'] + $params['values'];
+			}
+			
+			if (empty($params['values'])){
+				$params['values'] = ['' => '-- no values --'];
 			}
 		
 		} else {
 
 			$fk_data = $this->cms_panel_model->get_cms_panel_fk_data($params['panel_structure']);
 			
-			if (empty($params['add_empty'])){
-				if (isset($fk_data[$params['name_clean']][0]) && $fk_data[$params['name_clean']][0] == '-- not specified --'){
-					unset($fk_data[$params['name_clean']][0]);
-				}
+			$params['values'] = !empty($fk_data[$params['target']]) ? $fk_data[$params['target']] : ($fk_data[$params['name_clean']] ?? []);
+			
+			if (isset($params['values'][0]) && $params['values'][0] == '-- not specified --'){
+				unset($params['values'][0]);
 			}
-
-			$params['values'] = !empty($fk_data[$params['target']]) ? $fk_data[$params['target']] : $fk_data[$params['name_clean']];
+			
+			if ($add_empty){
+				$params['values'] = ['' => '-- not specified --'] + $params['values'];
+			}
 
 		}
 
