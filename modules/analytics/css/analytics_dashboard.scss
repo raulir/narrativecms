@@ -1,0 +1,65 @@
+.analytics_dashboard_container {
+	padding: 1.5rem 2rem;
+}
+
+.analytics_dashboard_title {
+	margin: 0 0 1.5rem;
+	font-size: 1.5rem;
+}
+
+.analytics_dashboard_summary {
+	display: flex;
+	gap: 2rem;
+	margin-bottom: 1.5rem;
+}
+
+.analytics_dashboard_summary_item {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.analytics_dashboard_summary_label {
+	font-size: 0.85rem;
+	color: #666;
+}
+
+.analytics_dashboard_summary_value {
+	font-size: 1.5rem;
+	font-weight: bold;
+}
+
+.analytics_dashboard_chart_wrap {
+	width: 100%;
+	margin-bottom: 2rem;
+}
+
+.analytics_dashboard_chart {
+	width: 100%;
+	height: auto;
+	max-height: 33vh;
+	object-fit: contain;
+}
+
+.analytics_dashboard_heading {
+	margin: 2rem 0 0.75rem;
+	font-size: 1.1rem;
+}
+
+.analytics_dashboard_table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-bottom: 1rem;
+	font-size: 0.9rem;
+}
+
+.analytics_dashboard_table th,
+.analytics_dashboard_table td {
+	padding: 0.5rem 0.75rem;
+	border: 1px solid #ccc;
+	text-align: left;
+}
+
+.analytics_dashboard_table th {
+	background: #f5f5f5;
+}

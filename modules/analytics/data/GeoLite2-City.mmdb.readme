@@ -1,0 +1,7 @@
+Place GeoLite2-City.mmdb in this directory (same folder as this file, named GeoLite2-City.mmdb).
+
+Download from MaxMind GeoLite2 free tier: https://dev.maxmind.com/geoip/geolite2-free-geolocation-data
+
+The file is not redistributed with the core CMS repo because of MaxMind licensing. Per-project installs (e.g. music) may commit the file locally; other distributions may omit it.
+
+Without this file, analytics geo columns show Unknown until a future cross-installation GeoIP RPC is configured (see modules/cms/docs/cms_todo.md).

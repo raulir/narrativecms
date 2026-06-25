@@ -64,7 +64,7 @@
 	"cms_menu":[
 		{
 			"id":"basic_gtag",
-			"name":"Analytics settings",
+			"name":"Google Analytics settings",
 			"url":"admin/panel_settings/basic__gtag/",
 			"parent":"cms_tools",
 			"access":"basic_analytics"

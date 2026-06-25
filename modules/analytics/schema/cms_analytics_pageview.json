@@ -1,0 +1,139 @@
+{
+	"table": "cms_analytics_pageview",
+	"migrate_from": {
+		"table": "cms_analytics_visit",
+		"columns": {
+			"cms_analytics_visit_id": "cms_analytics_pageview_id",
+			"visit_token": "pageview_token"
+		},
+		"indexes": {
+			"visit_token_idx": "pageview_token_idx"
+		}
+	},
+	"engine": "InnoDB",
+	"charset": "utf8mb4",
+	"collation": "utf8mb4_general_ci",
+	"columns": {
+		"cms_analytics_pageview_id": {
+			"type": "INT",
+			"constraint": 10,
+			"unsigned": true,
+			"null": false,
+			"auto_increment": true
+		},
+		"pageview_token": {
+			"type": "VARCHAR",
+			"constraint": 36,
+			"null": false
+		},
+		"session_id": {
+			"type": "VARCHAR",
+			"constraint": 36,
+			"null": false,
+			"default": ""
+		},
+		"created": {
+			"type": "DATETIME",
+			"null": false,
+			"default": "CURRENT_TIMESTAMP"
+		},
+		"updated": {
+			"type": "DATETIME",
+			"null": false,
+			"default": "CURRENT_TIMESTAMP"
+		},
+		"page": {
+			"type": "VARCHAR",
+			"constraint": 500,
+			"null": false
+		},
+		"ip_anonymised": {
+			"type": "VARCHAR",
+			"constraint": 45,
+			"null": false,
+			"default": ""
+		},
+		"user_agent": {
+			"type": "VARCHAR",
+			"constraint": 500,
+			"null": false,
+			"default": ""
+		},
+		"viewport_w": {
+			"type": "SMALLINT",
+			"constraint": 5,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
+		"viewport_h": {
+			"type": "SMALLINT",
+			"constraint": 5,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
+		"seconds": {
+			"type": "SMALLINT",
+			"constraint": 5,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
+		"scroll_pct": {
+			"type": "TINYINT",
+			"constraint": 3,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
+		"country": {
+			"type": "VARCHAR",
+			"constraint": 100,
+			"null": true
+		},
+		"region": {
+			"type": "VARCHAR",
+			"constraint": 100,
+			"null": true
+		},
+		"city": {
+			"type": "VARCHAR",
+			"constraint": 100,
+			"null": true
+		},
+		"geo_resolved": {
+			"type": "DATETIME",
+			"null": true
+		}
+	},
+	"indexes": {
+		"PRIMARY": {
+			"columns": ["cms_analytics_pageview_id"],
+			"type": "primary"
+		},
+		"pageview_token_idx": {
+			"columns": ["pageview_token"],
+			"type": "unique"
+		},
+		"session_id_idx": {
+			"columns": ["session_id"]
+		},
+		"session_created_idx": {
+			"columns": ["session_id", "created"]
+		},
+		"created_idx": {
+			"columns": ["created"]
+		},
+		"page_idx": {
+			"columns": ["page"],
+			"length": 50
+		},
+		"ip_anonymised_idx": {
+			"columns": ["ip_anonymised"]
+		},
+		"geo_resolved_idx": {
+			"columns": ["geo_resolved"]
+		}
+	}
+}

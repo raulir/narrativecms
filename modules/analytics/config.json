@@ -1,0 +1,65 @@
+{
+	"name":"Analytics",
+	"panels":[
+		{
+			"id":"beacon",
+			"name":"Analytics beacon",
+			"flags":[
+				"hidden"
+			]
+		},
+		{
+			"id":"analytics_dashboard",
+			"name":"Analytics dashboard"
+		},
+		{
+			"id":"analytics_settings",
+			"name":"Analytics settings"
+		},
+		{
+			"id":"analytics_geo_resolve",
+			"name":"Analytics geo resolve",
+			"flags":[
+				"hidden",
+				"cron"
+			]
+		}
+	],
+	"cms_menu":[
+		{
+			"id":"analytics_dashboard",
+			"name":"Analytics",
+			"url":"admin/analytics/",
+			"parent":"cms_tools",
+			"access":"analytics_dashboard",
+			"order":"5"
+		},
+		{
+			"id":"analytics_settings",
+			"name":"Analytics settings",
+			"url":"admin/panel_settings/analytics__analytics_settings/",
+			"parent":"cms_tools",
+			"access":"analytics_settings",
+			"order":"6"
+		}
+	],
+	"access":[
+		{
+			"access":"analytics_*",
+			"name":"Analytics ALL"
+		},
+		{
+			"access":"analytics_dashboard",
+			"name":"Analytics dashboard"
+		},
+		{
+			"access":"analytics_settings",
+			"name":"Analytics settings"
+		}
+	],
+	"api":[
+		{
+			"id":"beacon"
+		}
+	]
+}

@@ -1,0 +1,32 @@
+{
+	"version":"2",
+	"label":"Analytics settings",
+	"item":[],
+	"settings":[
+		{
+			"type":"text",
+			"name":"delay",
+			"label":"Delay in ms",
+			"default":"0",
+			"help":"[Delay]||Delay after pageload before first beacon fires"
+		},
+		{
+			"type":"text",
+			"name":"session_minutes",
+			"label":"Session minutes",
+			"default":"60",
+			"help":"[Session]||Sliding expiry for beacon cookie, refreshed on each pageview||0 = browser session (ends when browser closes)"
+		},
+		{
+			"type":"select",
+			"name":"collect_engagement",
+			"label":"Collect engagement",
+			"values":{
+				"1":"Yes",
+				"0":"No"
+			},
+			"default":"1",
+			"help":"[Engagement]||When yes, send scroll and time-on-page heartbeats"
+		}
+	]
+}

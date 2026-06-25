@@ -16,7 +16,12 @@ class cms_schema_model extends Model {
 			$base_key = $module . ':' . $table;
 
 			if (!$this->db->table_exists($table)) {
-				$errors[$base_key] = "Table {$table} not found";
+				$migrate_from = $def['migrate_from']['table'] ?? '';
+				if ($migrate_from && $this->db->table_exists($migrate_from)) {
+					$errors[$base_key] = "Table {$table} not found — migrate from {$migrate_from}";
+				} else {
+					$errors[$base_key] = "Table {$table} not found";
+				}
 				continue;
 			}
 
@@ -505,7 +510,11 @@ class cms_schema_model extends Model {
 
 	private function _fix_table($table, $def) {
 		if (!$this->db->table_exists($table)) {
-			return $this->_create_table($table, $def);
+			if ($this->_migrate_table_from($table, $def)) {
+				// table migrated — continue with column/index fixes below
+			} else {
+				return $this->_create_table($table, $def);
+			}
 		}
 
 		$ok = true;
@@ -627,6 +636,8 @@ class cms_schema_model extends Model {
 		if (array_key_exists('default', $spec)) {
 			if ($spec['default'] === null) {
 				$sql .= " DEFAULT NULL";
+			} elseif ($this->_is_timestamp_default($spec['default'])) {
+				$sql .= " DEFAULT CURRENT_TIMESTAMP";
 			} else {
 				$sql .= " DEFAULT " . $this->db->escape($spec['default']);
 			}
@@ -736,8 +747,8 @@ class cms_schema_model extends Model {
 
         // default
         if (array_key_exists('default', $expected)) {
-            $want = $expected['default'] === null ? 'NULL' : (string)$expected['default'];
-            $have = $actual['Default'] === null ? 'NULL' : (string)$actual['Default'];
+            $want = $this->_normalise_default_value($expected['default']);
+            $have = $this->_normalise_default_value($actual['Default']);
             if ($want !== $have) {
                 $errors[$base_key . ':default'] = "Default should be '{$want}' (current '{$have}')";
             }
@@ -813,6 +824,67 @@ class cms_schema_model extends Model {
         }
     }
     
+	private function _normalise_default_value($value) {
+
+		if ($value === null) {
+			return 'NULL';
+		}
+
+		$s = trim((string)$value);
+		if ($this->_is_timestamp_default($s)) {
+			return 'CURRENT_TIMESTAMP';
+		}
+
+		return $s;
+
+	}
+
+	private function _is_timestamp_default($value) {
+
+		return (bool)preg_match('/^current_timestamp(\(\))?$/i', trim((string)$value));
+
+	}
+
+	private function _migrate_table_from($table, $def) {
+
+		$migrate = $def['migrate_from'] ?? null;
+		if (empty($migrate['table'])) {
+			return false;
+		}
+
+		$old_table = $migrate['table'];
+		if (!$this->db->table_exists($old_table) || $this->db->table_exists($table)) {
+			return false;
+		}
+
+		$this->_execute('RENAME TABLE `'.$old_table.'` TO `'.$table.'`');
+
+		if (!empty($migrate['columns']) && !empty($def['columns'])) {
+			foreach ($migrate['columns'] as $old_col => $new_col) {
+				if (!isset($def['columns'][$new_col])) {
+					continue;
+				}
+				$col_def = $this->_build_column_definition($new_col, $def['columns'][$new_col]);
+				$this->_execute('ALTER TABLE `'.$table.'` CHANGE `'.$old_col.'` '.$col_def);
+			}
+		}
+
+		if (!empty($migrate['indexes']) && !empty($def['indexes'])) {
+			$db_idx = $this->_get_db_indexes($table);
+			foreach ($migrate['indexes'] as $old_idx => $new_idx) {
+				if (isset($db_idx[$old_idx])) {
+					$this->_drop_index($table, $old_idx);
+				}
+				if (isset($def['indexes'][$new_idx])) {
+					$this->_create_index($table, $new_idx, $def['indexes'][$new_idx]);
+				}
+			}
+		}
+
+		return true;
+
+	}
+
     protected function _get_after_clause($table, $new_column, $def) {
     	if (empty($def['columns']) || !is_array($def['columns'])) {
     		return '';

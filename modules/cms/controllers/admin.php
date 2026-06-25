@@ -229,6 +229,35 @@ class admin extends CI_Controller {
 		$this->output('cms/admin', 'admin/search', $panel_data);
 			
 	}
+
+	function analytics($param = ''){
+
+		if ($param === 'chart') {
+
+			$width = !empty($_GET['width']) ? (int)$_GET['width'] : 900;
+			$height = (int)round($width / 3);
+
+			$this->load->model('analytics/analytics_model');
+			$png = $this->analytics_model->chart_pageviews_by_hour_png($width, $height);
+
+			header('Content-Type: image/png');
+			header('Cache-Control: no-cache, no-store, must-revalidate');
+			print($png);
+			exit();
+
+		}
+
+		$page_config = array(
+				array('position' => 'header', 'panel' => 'cms/cms_user', ),
+				array('position' => 'header', 'panel' => 'cms/cms_menu', ),
+				array('position' => 'main', 'panel' => 'analytics/analytics_dashboard', ),
+		);
+
+		$panel_data = $this->render($page_config);
+
+		$this->output('cms/admin', 'admin/analytics', $panel_data);
+
+	}
 	
 	function export($filename){
 		 
