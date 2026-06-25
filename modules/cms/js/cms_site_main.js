@@ -642,13 +642,22 @@ function get_ajax_positions(url, params, action_on_success){
 		  	context: this,
 		  	success: function( returned_data ) {
 
+		  		if (returned_data.redirect){
+		  			get_ajax_positions(returned_data.redirect, params, action_on_success)
+		  			return
+		  		}
+
 		  		if (returned_data.error && returned_data.error.message === 'access_denied'){
 		  			cms_access_denied_popup(returned_data.error)
 		  			return
 		  		}
 
+		  		returned_data._final_url = params._url
 		  		action_on_success(returned_data);
 
+		  	},
+		  	error: function(){
+		  		$('.cms_position_main').css({'opacity':''})
 		  	}
 		})
 
@@ -712,10 +721,17 @@ function panels_display_popup(html, params){
 
 	$popup.find('.popup_yes').off('click.r').on('click.r', function(){
 		params.pre_close(function(){
-			params.yes(function(){
+			var finished = false;
+			var finish = function(){
+				if (finished){
+					return;
+				}
+				finished = true;
 				clean_up();
 				params.clean_up();
-			});
+			};
+			params.yes(finish);
+			finish();
 		});
 	});
 

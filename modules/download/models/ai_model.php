@@ -19,7 +19,7 @@ class ai_model extends Model {
 		if (!file_exists($filename) || (time() - filemtime($filename)) > 300){
 		
 			$headers = 	[
-					'Authorization: Bearer xai-QRTjZ6zLtQYqGtjEHs75lRBsGrH20Cq65zLuaRq3jZW6AfDuqqJK3oW6OOmEEE6HLJrt1uJsnlEkhq1E',
+					'Authorization: Bearer ',
 					'Content-Type: application/json',
 			];
 			 

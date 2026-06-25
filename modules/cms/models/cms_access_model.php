@@ -341,6 +341,10 @@ class cms_access_model extends Model {
 		
 		$login_redirect = $this->_get_login_redirect();
 		
+		if (!empty($params['no_html']) && _position_links_active() && _is_position_ajax()){
+			_position_link_redirect($login_redirect['url']);
+		}
+		
 		if (!empty($params['no_html'])){
 			
 			header('Content-Type: application/json');
@@ -358,6 +362,74 @@ class cms_access_model extends Model {
 		
 		header('Location: '.$login_redirect['url'], true, 302);
 		exit();
+		
+	}
+	
+	function _page_has_userforward($blocks){
+		
+		if (empty($blocks) || !is_array($blocks)){
+			return false;
+		}
+		
+		foreach ($blocks as $block){
+			
+			if (!empty($block['panel_name']) && $block['panel_name'] === 'user/userforward'){
+				return true;
+			}
+			
+		}
+		
+		return false;
+		
+	}
+	
+	function _is_auth_redirect_slug($slug){
+		
+		$auth_slugs = ['login', 'register', 'login-google', 'auth-google'];
+		
+		return in_array(strtolower(trim($slug)), $auth_slugs, true);
+		
+	}
+	
+	function resolve_auth_redirect_url($page, $blocks = []){
+		
+		if (empty($page['cms_page_id'])){
+			return null;
+		}
+		
+		$logged_in = !empty($_SESSION['user']);
+		
+		if (!$logged_in && !empty($page['access']) && trim($page['access']) !== ''){
+			
+			if (!$this->user_has_page_access($page['access'])){
+				
+				if (!in_array('user', $GLOBALS['config']['modules'])){
+					return $GLOBALS['config']['base_url'];
+				}
+				
+				$this->load->model('user/user_model');
+				
+				return $this->user_model->get_login_redirect_url();
+				
+			}
+			
+		}
+		
+		if ($logged_in && in_array('user', $GLOBALS['config']['modules'])){
+			
+			$slug = strtolower(trim($page['slug'] ?? ''));
+			
+			if ($this->_is_auth_redirect_slug($slug) || $this->_page_has_userforward($blocks)){
+				
+				$this->load->model('user/user_model');
+				
+				return $this->user_model->get_user_redirect_url();
+				
+			}
+			
+		}
+		
+		return null;
 		
 	}
 	

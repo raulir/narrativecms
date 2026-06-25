@@ -24,6 +24,11 @@ function cms_input_textarea_init(){
 			return;
 		}
 		
+		if ($this.hasClass('cms_input_textarea_readonly')){
+			$this.addClass('cms_input_textarea_ok');
+			return;
+		}
+		
 		if ($this.closest('.cms_repeater_target').length){
 
 			$this.addClass('cms_input_textarea_ok');

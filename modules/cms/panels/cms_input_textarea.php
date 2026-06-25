@@ -50,7 +50,7 @@ class cms_input_textarea extends CI_Controller {
 		$params['max_chars_class'] = $max_chars_class;
 		$params['meta_class'] = $meta_class;
 
-		if (!empty($params['html'])){
+		if (!empty($params['html']) && empty($params['readonly'])){
 			
 			$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/tinymce/tinymce.min.js', 'no_pack' => 1, 'sync' => '', );
 			

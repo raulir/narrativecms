@@ -10,6 +10,9 @@
 		font-family: asap;
 		font-size: 1.7rem;
 		line-height: 2.1rem;
+		.cms_input_textarea_readonly & {
+			background-color: $colour_light_shadow;
+		}
 	}
 	
 	& > .cms_input.cms_input_wide_textarea {

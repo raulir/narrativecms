@@ -1,5 +1,6 @@
 <div class="cms_input cms_input_textarea <?= !empty($width) && $width == 'wide' ? 'cms_input_wide_textarea' : '' ?>
-		<?= !empty($mandatory_class) ? $mandatory_class : '' ?>" 
+		<?= !empty($mandatory_class) ? $mandatory_class : '' ?>
+		<?= !empty($readonly) ? ' cms_input_textarea_readonly ' : '' ?>"
 		data-cms_input_height="<?= ceil((21 * (!empty($lines) ? $lines : 3 ) + 32)/35) ?>"
 		data-cms_input_width="<?= !empty($width) && $width == 'wide' ? '2' : '1' ?>">
 
@@ -11,9 +12,10 @@
 		<div class="cms_translate_icon" <?php _ib('cms/cms_translate.png', 12) ?>></div>
 	<?php endif ?>
 
-	<textarea name="<?= $name ?>" class="<?= $name ?> <?= !empty($html) ? ' cms_tinymce ' : '' ?>
+	<textarea name="<?= $name ?>" class="<?= $name ?> <?= !empty($html) && empty($readonly) ? ' cms_tinymce ' : '' ?>
 			<?= !empty($max_chars_class) ? $max_chars_class : '' ?> <?= !empty($meta_class) ? $meta_class : '' ?>" 
 			data-lines="<?= !empty($lines) ? $lines : '3' ?>"
-			<?= !empty($extra_data) ? $extra_data : '' ?>><?= !empty($value) ? $value : '' ?></textarea>
+			<?= !empty($extra_data) ? $extra_data : '' ?>
+			<?= !empty($readonly) ? ' readonly="readonly" ' : '' ?>><?= !empty($value) ? $value : '' ?></textarea>
 
 </div>
