@@ -452,6 +452,50 @@ if ( !function_exists('_user_login_url')) {
 	
 }
 
+if ( !function_exists('_user_dashboard_url')) {
+	
+	function _user_dashboard_url($print = true){
+		
+		if (!in_array('user', $GLOBALS['config']['modules'])){
+			$url = $GLOBALS['config']['base_url'];
+		} else {
+			$ci =& get_instance();
+			$ci->load->model('user/user_model');
+			$url = $ci->user_model->get_user_redirect_url();
+		}
+		
+		if ($print){
+			print($url);
+		} else {
+			return $url;
+		}
+		
+	}
+	
+}
+
+if ( !function_exists('_user_logout_url')) {
+	
+	function _user_logout_url($print = true){
+		
+		if (!in_array('user', $GLOBALS['config']['modules'])){
+			$url = $GLOBALS['config']['base_url'];
+		} else {
+			$ci =& get_instance();
+			$ci->load->model('user/user_model');
+			$url = $ci->user_model->get_logout_redirect_url();
+		}
+		
+		if ($print){
+			print($url);
+		} else {
+			return $url;
+		}
+		
+	}
+	
+}
+
 if ( !function_exists('_user_login_text')) {
 	
 	function _user_login_text($print = true){
@@ -469,6 +513,37 @@ if ( !function_exists('_user_login_text')) {
 		} else {
 			return $text;
 		}
+		
+	}
+	
+	function _position_links_active(){
+		
+		return !empty($GLOBALS['config']['position_wrappers']) && !empty($GLOBALS['config']['position_links']);
+		
+	}
+	
+	function _is_position_ajax(){
+		
+		$ci =& get_instance();
+		
+		if (!empty($ci)){
+			return !empty($ci->input->post('_ajax')) && !empty($ci->input->post('cms_positions'));
+		}
+		
+		return !empty($_POST['_ajax']) && !empty($_POST['cms_positions']);
+		
+	}
+	
+	function _position_link_redirect($url){
+		
+		if (!_position_links_active() || !_is_position_ajax()){
+			header('Location: '.$url, true, 302);
+			exit();
+		}
+		
+		header('Content-Type: application/json');
+		print(json_encode(['redirect' => $url]));
+		exit();
 		
 	}
 	

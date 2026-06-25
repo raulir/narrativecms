@@ -59,12 +59,13 @@ function cms_position_link_init(){
 						$('.cms_position_' + i).html(posdata._html).data('cms_page_id', posdata.cms_page_id)
 					})
 					
-					change_url($this.attr('href'))
+					change_url(before_result[1]._final_url || $this.attr('href'))
 					document.title = before_result[1].title
 
 					if (typeof gtag != 'undefined'){
 							
-						let $a = $('<a href="' + $this.attr('href') + '"></a>');
+						let final_url = before_result[1]._final_url || $this.attr('href')
+						let $a = $('<a href="' + final_url + '"></a>');
 						let page = $a[0].pathname + $a[0].hash
 
 						gtag('event', 'page_view', {
