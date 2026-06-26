@@ -448,7 +448,7 @@ function cms_access_denied_popup(error){
 function get_ajax_panel(name, args, action_on_success){
 
 	var params = Object.assign({
-		'cache': ''
+		'_ajax_cache': ''
 	}, args)
 
 	return new Promise ((resolve, reject) => {
@@ -457,19 +457,23 @@ function get_ajax_panel(name, args, action_on_success){
 		
 		var data = false;
 		
-		var cache = 0;
-		if (typeof params.cache != 'undefined'){
-			cache = parseInt(params.cache);
+		var ajax_cache = 0;
+		if (typeof params._ajax_cache != 'undefined' && params._ajax_cache !== ''){
+			ajax_cache = parseInt(params._ajax_cache);
 		}
-		params.cache = '';
-		
+		delete params._ajax_cache;
+
+		var admin_session = (typeof admin_logged_in !== 'undefined' && admin_logged_in);
+		var use_local_storage = _cms_test_localstorage() && ajax_cache > 0 && !admin_session;
+		var key = '';
+
 		// try to read from storage
-		if (_cms_test_localstorage() && cache > 0 && !admin_logged_in){
-			var key = md5(_cms_get_base() + name + JSON.stringify(params));
+		if (use_local_storage){
+			key = md5(_cms_get_base() + name + JSON.stringify(params));
 			var local_data = localStorage.getItem(key);
 			if (local_data){
 				data = $.parseJSON(local_data);
-				if (data.storage_timestamp > +new Date() - (cache * 1000)){
+				if (data.storage_timestamp > +new Date() - (ajax_cache * 1000)){
 					if (action_on_success){
 						action_on_success(data);
 					} else {
@@ -504,7 +508,7 @@ function get_ajax_panel(name, args, action_on_success){
 			  		}
 			  		
 			  		// save to local storage
-			  		if (_cms_test_localstorage() && cache > 0){
+			  		if (use_local_storage && key){
 			  			returned_data.storage_timestamp = new Date().getTime();
 			  			localStorage.setItem(key, JSON.stringify(returned_data));
 			  		}

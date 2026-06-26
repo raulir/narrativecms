@@ -27,6 +27,13 @@
 			},
 			"default":"1",
 			"help":"[Engagement]||When yes, send scroll and time-on-page heartbeats"
+		},
+		{
+			"type":"file",
+			"name":"geoip_database",
+			"label":"GeoIP database",
+			"accept":".mmdb",
+			"help":"[GeoIP database]||Upload GeoLite2-City.mmdb for IP geolocation on the analytics dashboard.||Download from MaxMind GeoLite2 free tier: https://dev.maxmind.com/geoip/geolite2-free-geolocation-data — free account required.||The file is not redistributed with the core CMS repo because of MaxMind licensing. Per-project installs may include it locally; other distributions may omit it.||Without this file, geo reports on the dashboard show an error until the file is uploaded here."
 		}
 	]
 }

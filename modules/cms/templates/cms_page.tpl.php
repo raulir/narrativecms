@@ -42,6 +42,18 @@
 						'label' => 'Access',
 						'help' => '[Page access]||Empty = public. Comma-separated access keys (e.g. music_student, music_*). User needs any one key. On header/footer position pages, denied access shows an error in that slot only.',
 				]); ?>
+
+				<?php if (in_array($page['position'], ['', 'main', 'header', 'footer'])): ?>
+
+					<?php _panel('cms/cms_input_text', [
+							'name' => 'cache',
+							'value' => !empty($page['cache']) ? $page['cache'] : '',
+							'name_clean' => 'cms_page_cache',
+							'label' => 'Cache',
+							'help' => '[Cache]||How many seconds to cache this page.',
+					]); ?>
+
+				<?php endif ?>
 				
 				<?php if (in_array($page['position'], ['', 'main', ])): ?>
 				

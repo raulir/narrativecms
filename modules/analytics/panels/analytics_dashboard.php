@@ -11,12 +11,18 @@ class analytics_dashboard extends CI_Controller {
 		$params['pageviews_30_days'] = $this->analytics_model->get_pageviews_last_30_days();
 
 		$last_pageviews = $this->analytics_model->get_last_pageviews(50);
-		$params['last_pageviews'] = $this->analytics_model->resolve_pageviews_geo($last_pageviews);
+
+		if (!$this->analytics_model->geoip_database_configured()) {
+			$params['geoip_error'] = $this->analytics_model->get_geoip_error_message();
+			$params['last_pageviews'] = $last_pageviews;
+			$params['geo_top'] = [];
+		} else {
+			$params['last_pageviews'] = $this->analytics_model->resolve_pageviews_geo($last_pageviews);
+			$this->analytics_model->resolve_unresolved_batch(500);
+			$params['geo_top'] = $this->analytics_model->get_geo_top(50);
+		}
 
 		$params['top_pages'] = $this->analytics_model->get_top_pages(20);
-
-		$this->analytics_model->resolve_unresolved_batch(500);
-		$params['geo_top'] = $this->analytics_model->get_geo_top(50);
 
 		$params['chart_url'] = $GLOBALS['config']['base_url'].'admin/analytics/chart/?t='.time();
 

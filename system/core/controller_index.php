@@ -38,6 +38,26 @@ class Index extends CI_Controller {
 	
    	}
    	
+   	function _auth_redirect_if_needed($page, $panels_page_id = 0){
+   		
+   		if (empty($page['cms_page_id'])){
+   			return;
+   		}
+   		
+   		if (empty($panels_page_id)){
+   			$panels_page_id = $page['cms_page_id'];
+   		}
+   		
+   		$this->load->model('cms/cms_access_model');
+   		$blocks = $this->_get_cms_page_panels($panels_page_id);
+   		$redirect_url = $this->cms_access_model->resolve_auth_redirect_url($page, $blocks);
+   		
+   		if ($redirect_url){
+   			_position_link_redirect($redirect_url);
+   		}
+   		
+   	}
+   	
    	function _enforce_main_page_access($page){
    		
    		if (empty($page['cms_page_id'])){
@@ -85,6 +105,7 @@ class Index extends CI_Controller {
 
     		$page = $this->cms_page_model->get_page($page_id, 'auto');
     		
+    		$this->_auth_redirect_if_needed($page, $page_id);
     		$this->_enforce_main_page_access($page);
 
 			if (!empty($page['seo_title'])){
@@ -156,6 +177,7 @@ class Index extends CI_Controller {
 
     		if (!empty($page['page_id'])){
     			
+    			$this->_auth_redirect_if_needed($page, $page['page_id']);
     			$this->_enforce_main_page_access($page);
 
     			// if page exists, overload this
@@ -212,6 +234,8 @@ class Index extends CI_Controller {
     		
     	}
 
+    	$position_pages = [];
+
     	// add headers, footers, etc
     	if($cms_page_id && !empty($page['positions'])){
 
@@ -222,6 +246,9 @@ class Index extends CI_Controller {
     			if (!empty($position['value'])){
     				
     				$position_page = $this->cms_page_model->get_page($position['value']);
+    				if (!empty($position['name'])) {
+    					$position_pages[$position['name']] = $position_page;
+    				}
     				
     				if (!$this->cms_access_model->user_has_page_access($position_page['access'] ?? '')){
     					
@@ -259,8 +286,26 @@ class Index extends CI_Controller {
 		$_ajax = $this->input->post('_ajax');
 		if (empty($_ajax)){
 
+			$page_cache_ttl = 0;
+			$main_cache = trim((string)($page['cache'] ?? ''));
+			if ($main_cache !== '' && ctype_digit($main_cache) && (int)$main_cache > 0) {
+				$this->load->library('cache');
+				$page_cache_ttl = $this->cache->should_write($page, $position_pages);
+			}
+			if ($page_cache_ttl > 0) {
+				$GLOBALS['cms_page_cache_write'] = true;
+			}
+
 			// render panels
 			$panel_data = $this->render($page_config);
+
+			if (!empty($GLOBALS['page_cache_deferred_meta']['panels'])) {
+				$this->panel('cms/cms_cache', ['cms_page_panel_id' => 0]);
+			}
+
+			if ($page_cache_ttl > 0) {
+				$this->cache->write_partial_caches($page, $position_pages, $panel_data, $page_cache_ttl);
+			}
 
 			//  output to the template, deprecated - layout without module name
 			if (!stristr($page['layout'], '/')){
@@ -269,7 +314,19 @@ class Index extends CI_Controller {
 			if ($page['layout'] === 'cms/default'){
 				$page['layout'] = 'cms/fixed';
 			}
-			$this->output($page['layout'], $page_id, $panel_data);
+
+			$page_cache_context = null;
+			if ($page_cache_ttl > 0) {
+				$page_cache_context = [
+					'ttl' => $page_cache_ttl,
+					'page' => $page,
+					'position_pages' => $position_pages,
+					'route_target' => $page_id,
+					'request_uri' => $this->cache->request_uri(),
+				];
+			}
+
+			$this->output($page['layout'], $page_id, $panel_data, $page_cache_context);
 		
 		} else {
 			
@@ -283,12 +340,50 @@ class Index extends CI_Controller {
 				$return = [];
 
 				$positions_needed = array_keys($positions);
-// _print_r($page_config);
 				$this->load->model('cms/cms_access_model');
-				
+				if (_position_links_active()) {
+					$this->load->library('cache');
+				}
+				$position_page_ids = [];
+				$served_from_cache = [];
+
+				foreach ($page_config as $panel_config) {
+					if (!in_array($panel_config['position'], $positions_needed)) {
+						continue;
+					}
+					if (!empty($panel_config['params']['cms_page_id'])) {
+						$position_page_ids[$panel_config['position']] = (int)$panel_config['params']['cms_page_id'];
+					}
+				}
+
+				if (_position_links_active()) {
+					foreach ($positions_needed as $position_name) {
+						if (empty($position_page_ids[$position_name])) {
+							continue;
+						}
+						if ((int)$position_page_ids[$position_name] === (int)($positions[$position_name] ?? 0)) {
+							continue;
+						}
+
+						$cached_position = $this->cache->try_serve_position($position_page_ids[$position_name]);
+						if ($cached_position !== false) {
+							$served_from_cache[$position_name] = true;
+							$return[$position_name] = [
+								'_html' => $cached_position['html'],
+								'cms_page_id' => (int)$position_page_ids[$position_name],
+								'has_deferred' => (int)($cached_position['meta']['has_deferred'] ?? 0),
+							];
+						}
+					}
+				}
+
 				foreach($page_config as $key => $panel_config){
 					
 					if (!in_array($panel_config['position'], $positions_needed)){
+						continue;
+					}
+
+					if (!empty($served_from_cache[$panel_config['position']])) {
 						continue;
 					}
 					
@@ -296,6 +391,7 @@ class Index extends CI_Controller {
 						
 						$return[$panel_config['position']]['_html'] = $this->cms_access_model->get_access_denied_inline_html();
 						$return[$panel_config['position']]['cms_page_id'] = (int)$panel_config['params']['cms_page_id'];
+						$return[$panel_config['position']]['has_deferred'] = 0;
 						continue;
 						
 					}
@@ -305,6 +401,7 @@ class Index extends CI_Controller {
 						$panel_data = $this->ajax_panel($panel_config['panel'], $panel_config['params']);
 						if (empty($return[$panel_config['position']])){
 							$return[$panel_config['position']]['_html'] = '';
+							$return[$panel_config['position']]['has_deferred'] = 0;
 						}
 						$return[$panel_config['position']]['_html'] .= $panel_data['_html'];
 						$return[$panel_config['position']]['cms_page_id'] = $panel_config['params']['cms_page_id'];

@@ -301,7 +301,7 @@ class CI_Controller {
 	 * @param panel_data
 	 * 
 	 */
-	function output($layout_name, $page_id, $panel_data = array()){
+	function output($layout_name, $page_id, $panel_data = array(), $page_cache_context = null){
 		
 		$page = $this->load->layout($layout_name, $panel_data);
 
@@ -386,7 +386,7 @@ class CI_Controller {
 		$_url = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443)
 						? 'https://' : 'http://' ).$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
 
-		print(str_replace(
+		$html = str_replace(
 	
 				'</head>',
 	
@@ -420,7 +420,24 @@ class CI_Controller {
 	
 				$page
 	
-				));
+				);
+
+		print($html);
+
+		if (!empty($page_cache_context['ttl']) && !empty($page_cache_context['page'])) {
+			$this->load->library('cache');
+			$stem = $this->cache->build_stem($page_cache_context['route_target'] ?? '', $page_cache_context['request_uri'] ?? '');
+			if ($stem !== '') {
+				$meta = $this->cache->build_write_meta(
+						$page_cache_context['page'],
+						$page_cache_context['position_pages'] ?? [],
+						$page_cache_context['route_target'] ?? '',
+						$page_cache_context['request_uri'] ?? '',
+						$page_cache_context['ttl']
+				);
+				$this->cache->write($this->cache->stem_with_hash($stem), $html, $meta);
+			}
+		}
 	
 	}
 	
@@ -776,11 +793,41 @@ class CI_Controller {
 			}
 		}
 	
+		$page_cache_deferred = [];
+		if (!empty($GLOBALS['cms_page_cache_write'])) {
+			$this->load->library('cache');
+			$this->load->model('cms/cms_panel_model');
+			$GLOBALS['page_cache_deferred_meta'] = [
+				'panels' => [],
+				'positions' => [],
+				'panels_by_position' => [],
+			];
+			foreach ($page_config as $key => $panel_config) {
+				if (!empty($panel_config['_inline_access_denied'])) {
+					continue;
+				}
+				$panel_definition = $this->cms_panel_model->get_cms_panel_config($panel_config['panel']);
+				if ($this->cache->panel_is_deferred($panel_definition)) {
+					$page_cache_deferred[$key] = true;
+					$GLOBALS['page_cache_deferred_meta']['panels'][] = $panel_config['panel'];
+					$GLOBALS['page_cache_deferred_meta']['positions'][$panel_config['position']] = 1;
+					if (empty($GLOBALS['page_cache_deferred_meta']['panels_by_position'][$panel_config['position']])) {
+						$GLOBALS['page_cache_deferred_meta']['panels_by_position'][$panel_config['position']] = [];
+					}
+					$GLOBALS['page_cache_deferred_meta']['panels_by_position'][$panel_config['position']][] = $panel_config['panel'];
+				}
+			}
+		}
+
 		// do panel actions
 		$this->load->model('cms/cms_access_model');
 		foreach($page_config as $key => $panel_config){
 			
 			if (!empty($panel_config['_inline_access_denied'])){
+				continue;
+			}
+
+			if (!empty($page_cache_deferred[$key])) {
 				continue;
 			}
 			
@@ -806,6 +853,12 @@ class CI_Controller {
 						$this->cms_access_model->get_access_denied_inline_html();
 				continue;
 				
+			}
+
+			if (!empty($page_cache_deferred[$key])) {
+				$return[$panel_config['position'].'_'.$key.'_'.(!empty($params['cms_page_id']) ? $params['cms_page_id'] : '0')] =
+						$this->cache->deferred_mount_html($panel_config['panel']);
+				continue;
 			}
 			
 			// add _page_id for real page id

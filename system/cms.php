@@ -63,6 +63,7 @@ if (stristr($string, '?')){
 }
 
 $request_uri = trim($string, '/');
+$GLOBALS['cms_request_uri'] = $request_uri;
 
 if (stristr($request_uri, '/')){
 	
@@ -125,6 +126,17 @@ if (!empty($GLOBALS['config']['targets_enabled'])){
 	
 	include($GLOBALS['config']['base_path'].'system/core/targets.php');
 	
+}
+
+if (is_file($GLOBALS['config']['base_path'].'cache/page_cache_registry.json')
+		&& $_SERVER['REQUEST_METHOD'] === 'GET'
+		&& empty($_POST)
+		&& empty($_REQUEST['_ajax'])
+		&& empty($_SESSION['cms_user']['cms_user_id'])
+		&& empty($GLOBALS['config']['cache']['force_download'])) {
+	require_once($GLOBALS['config']['base_path'].'system/helpers/json_helper.php');
+	require_once($GLOBALS['config']['base_path'].'system/libraries/cache.php');
+	(new cache())->try_serve();
 }
 
 require_once BASEPATH.'core/CodeIgniter.php';

@@ -25,6 +25,8 @@ class cms_page_operations extends CI_Controller {
 			 
 			$page_id = $this->input->post('page_id');
 			 
+			$this->load->model('cms/cms_page_cache_model');
+			$this->cms_page_cache_model->invalidate_page($page_id);
 			$this->cms_page_model->delete_page($page_id);
 			 
 		} else if ($do == 'cms_page_save'){
@@ -40,6 +42,7 @@ class cms_page_operations extends CI_Controller {
 			$data['title'] = $this->input->post('title');
 			$data['slug'] = $this->input->post('slug');
 			$data['access'] = trim($this->input->post('access'));
+			$data['cache'] = trim($this->input->post('cache'));
 			
 			$data['position'] = $this->input->post('position');
 			if (empty($data['position'])) {
@@ -58,6 +61,12 @@ class cms_page_operations extends CI_Controller {
 				$data['positions'] = $this->input->post('positions');
 			}
 			 
+			$old_slug = '';
+			if (!empty($page_id)) {
+				$old_page = $this->cms_page_model->get_page($page_id);
+				$old_slug = !empty($old_page['slug']) ? $old_page['slug'] : '';
+			}
+
 			// save data
 			if(!empty($page_id)){
 				$this->cms_page_model->update_page($page_id, $data, $language);
@@ -69,7 +78,14 @@ class cms_page_operations extends CI_Controller {
 
 			if ($data['position'] == 'main'){
 				$return['slug'] = $this->cms_page_model->update_page_visibility($page_id);
+				if ($old_slug !== '' && $old_slug !== $return['slug']) {
+					$this->load->model('cms/cms_page_cache_model');
+					$this->cms_page_cache_model->invalidate_slug($old_slug);
+				}
 			}
+
+			$this->load->model('cms/cms_page_cache_model');
+			$this->cms_page_cache_model->invalidate_page($page_id);
 			
 			return $return;
 

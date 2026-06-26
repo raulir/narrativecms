@@ -42,7 +42,42 @@ class analytics_model extends Model {
 
 	}
 
+	function get_geoip_database_path() {
+
+		$this->load->model('cms/cms_page_panel_model');
+		$settings = $this->cms_page_panel_model->get_cms_page_panel_settings('analytics/analytics_settings');
+		$filename = trim((string)($settings['geoip_database'] ?? ''));
+
+		if ($filename === '') {
+			return '';
+		}
+
+		$path = $GLOBALS['config']['upload_path'].$filename;
+		if (!is_file($path)) {
+			return '';
+		}
+
+		return $path;
+
+	}
+
+	function geoip_database_configured() {
+
+		return $this->get_geoip_database_path() !== '';
+
+	}
+
+	function get_geoip_error_message() {
+
+		return 'geoip database file is not set, check analytics module settings';
+
+	}
+
 	function resolve_pageviews_geo($pageviews) {
+
+		if (!$this->geoip_database_configured()) {
+			return $pageviews;
+		}
 
 		foreach ($pageviews as $key => $pageview) {
 			if (!$this->_pageview_needs_geo_resolve($pageview)) {
@@ -63,6 +98,10 @@ class analytics_model extends Model {
 	}
 
 	function resolve_unresolved_batch($limit = 500) {
+
+		if (!$this->geoip_database_configured()) {
+			return 0;
+		}
 
 		$limit = (int)$limit;
 		$query = $this->db->query('SELECT cms_analytics_pageview_id, ip_anonymised FROM cms_analytics_pageview WHERE ip_anonymised != "" AND (geo_resolved IS NULL OR country IS NULL OR country = "" OR country = "Unknown" OR country = "Local") GROUP BY ip_anonymised LIMIT '.$limit);
@@ -300,8 +339,8 @@ class analytics_model extends Model {
 
 		$unknown = array('country' => 'Unknown', 'region' => '', 'city' => '');
 
-		$mmdb = $GLOBALS['config']['base_path'].'modules/analytics/data/GeoLite2-City.mmdb';
-		if (!file_exists($mmdb)) {
+		$mmdb = $this->get_geoip_database_path();
+		if ($mmdb === '') {
 			return $unknown;
 		}
 

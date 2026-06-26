@@ -13,14 +13,14 @@ First-party, self-hosted pageview tracking for the CMS. Lightweight beacon API (
 
 1. Enable module **analytics** in **Site settings → Modules**.
 2. Run **CMS → Schema** (fix module **analytics**). On a fresh install this creates `cms_analytics_pageview`. When `cms_analytics_visit` still exists, the schema tool migrates it automatically (`migrate_from` in `cms_analytics_pageview.json` — renames table, columns, and indexes).
-3. Place **GeoLite2-City.mmdb** in `modules/analytics/data/` (see `modules/analytics/data/GeoLite2-City.mmdb.readme`; download from [MaxMind GeoLite2](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) — free account required). Without this file, geo columns show `Unknown`. The mmdb is per-installation data — not shipped with every CMS distribution.
+3. Upload **GeoLite2-City.mmdb** in **Tools → Analytics settings → GeoIP database** (download from [MaxMind GeoLite2](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) — free account required). The file is stored under `img/`. Without it, geo reports on the dashboard show an error. The mmdb is per-installation data — not shipped with every CMS distribution.
 4. Embed panel **analytics/beacon** on the site layout (same way as gtag). JS loads automatically as panel JS (`beacon.js`).
 5. Optional: add **analytics/analytics_geo_resolve** under **Repeating tasks** for background geo backfill.
 
 ## Admin
 
 - **Tools → Analytics** — dashboard (last 50 pageviews, top pages, geo top 50, 7-day hourly chart).
-- **Tools → Analytics settings** — delay (ms), collect engagement (heartbeats).
+- **Tools → Analytics settings** — delay (ms), collect engagement (heartbeats), GeoIP database file.
 
 ## Beacon session
 
@@ -50,6 +50,7 @@ The music engine uses this when a user starts a new exercise set (`engine/unit/{
 
 ## GeoIP
 
+- Database file path from **Analytics settings → GeoIP database** (`img/` upload).
 - Lookup only on dashboard/cron, not on beacon.
 - Cache: `cache/analytics_geo_cache.json` (30-day TTL per IP entry).
 - `_resolve_geo()` is abstracted so a future third-party or **cross-installation CMS RPC** GeoIP endpoint can replace local MaxMind behind the same cache (see [`cms_todo.md`](../../cms/docs/cms_todo.md)).

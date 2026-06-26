@@ -89,6 +89,10 @@
 		{
 			"id":"auth_gapp",
 			"name":"Google app auth"
+		},
+		{
+			"id":"verify_email",
+			"name":"Verify email"
 		}
 	]
 }

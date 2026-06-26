@@ -157,6 +157,13 @@
 	],
 	"panels":[
 		{
+			"id":"cms_cache",
+			"name":"Page cache",
+			"flags":[
+				"hidden"
+			]
+		},
+		{
 			"id":"cms_normalise",
 			"name":"CMS normalise css",
 			"flags":[

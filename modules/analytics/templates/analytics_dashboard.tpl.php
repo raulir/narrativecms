@@ -19,15 +19,20 @@
 		</div>
 
 		<h2 class="analytics_dashboard_heading">Last 50 pageviews</h2>
+		<?php if (!empty($geoip_error)): ?>
+		<p class="analytics_dashboard_geoip_error"><?= htmlentities($geoip_error) ?></p>
+		<?php endif ?>
 		<table class="analytics_dashboard_table">
 			<thead>
 				<tr>
 					<th>Time</th>
 					<th>Session</th>
 					<th>Page</th>
+					<?php if (empty($geoip_error)): ?>
 					<th>Country</th>
 					<th>Area</th>
 					<th>City</th>
+					<?php endif ?>
 					<th>Seconds</th>
 					<th>Scroll %</th>
 				</tr>
@@ -38,9 +43,11 @@
 					<td><?= htmlentities($pageview['created']) ?></td>
 					<td><?= htmlentities(analytics_session_hash_display($pageview['session_id'] ?? '')) ?></td>
 					<td><?= htmlentities($pageview['page']) ?></td>
+					<?php if (empty($geoip_error)): ?>
 					<td><?= htmlentities($pageview['country'] ?? '') ?></td>
 					<td><?= htmlentities($pageview['region'] ?? '') ?></td>
 					<td><?= htmlentities($pageview['city'] ?? '') ?></td>
+					<?php endif ?>
 					<td><?= (int)($pageview['seconds'] ?? 0) ?></td>
 					<td><?= (int)($pageview['scroll_pct'] ?? 0) ?></td>
 				</tr>
@@ -71,6 +78,9 @@
 		</table>
 
 		<h2 class="analytics_dashboard_heading">Geographic top 50</h2>
+		<?php if (!empty($geoip_error)): ?>
+		<p class="analytics_dashboard_geoip_error"><?= htmlentities($geoip_error) ?></p>
+		<?php else: ?>
 		<table class="analytics_dashboard_table">
 			<thead>
 				<tr>
@@ -91,6 +101,7 @@
 				<?php endforeach ?>
 			</tbody>
 		</table>
+		<?php endif ?>
 
 	</div>
 </div>

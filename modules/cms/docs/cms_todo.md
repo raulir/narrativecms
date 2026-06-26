@@ -10,7 +10,7 @@ Planned mechanism for one CMS installation to request work from another, RPC-sty
 
 **GeoIP lookup (analytics)**
 
-- Site A has no local `modules/analytics/data/GeoLite2-City.mmdb` (or prefers not to host MaxMind data).
+- Site A has no GeoIP database uploaded in **Analytics settings** (or prefers not to host MaxMind data).
 - Site B has the database and exposes a GeoIP resolve endpoint.
 - Analytics `_resolve_geo()` on site A can call site B; results still pass through `cache/analytics_geo_cache.json` on site A.
 - Request carries anonymised IP only (same format as stored in `cms_analytics_pageview`).
@@ -35,13 +35,13 @@ Planned mechanism for one CMS installation to request work from another, RPC-sty
 | Area | Location |
 |------|----------|
 | Local GeoIP | `modules/analytics/models/analytics_model.php` — `_lookup_maxmind()`, `_resolve_geo()` |
-| Geo data file | `modules/analytics/data/GeoLite2-City.mmdb` (per-project; see `modules/analytics/data/GeoLite2-City.mmdb.readme`) |
+| Geo data file | Analytics settings → GeoIP database (`img/` upload; help text in settings panel) |
 | Video queue / cron | [`cms_video_model`](../models/cms_video_model.php), [`cms_video_encode`](../panels/cms_video_encode.php) |
 | Public API routing | [`system/cms.php`](../../../system/cms.php) — `modules/<module>/api/<id>.php` |
 
 ### Implementation order (suggested)
 
 1. Core RPC auth + request/response envelope in `cms` module (shared by all services).
-2. GeoIP provider API on installations that host `modules/analytics/data/GeoLite2-City.mmdb`.
+2. GeoIP provider API on installations that host a GeoIP database file.
 3. Analytics consumer path in `_resolve_geo()` when local mmdb missing.
 4. Video encode remote worker protocol (heavier; build on same RPC layer).

@@ -36,13 +36,6 @@ class Output {
 	 */
 	protected $final_output;
 	/**
-	 * Cache expiration time
-	 *
-	 * @var int
-	 * @access 	protected
-	 */
-	protected $cache_expiration	= 0;
-	/**
 	 * List of server headers
 	 *
 	 * @var array
@@ -184,22 +177,6 @@ class Output {
 	}
 
 	/**
-	 * Set Cache
-	 *
-	 * @access	public
-	 * @param	integer
-	 * @return	void
-	 */
-	function cache($time)
-	{
-		$this->cache_expiration = ( ! is_numeric($time)) ? 0 : $time;
-
-		return $this;
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Display Output
 	 *
 	 * All "view" data is automatically put into this variable by the controller class:
@@ -245,40 +222,9 @@ class Output {
 
 		// --------------------------------------------------------------------
 
-		// Does the $CI object exist?
-		// If not we know we are dealing with a cache file so we'll
-		// simply echo out the data and exit.
-		if ( ! isset($CI))
-		{
-			echo $output;
-			return TRUE;
-		}
-
-		// --------------------------------------------------------------------
-
-		echo $output;  // Send it to the browser!
+		echo $output;
 
 	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * Update/serve a cached file
-	 *
-	 * @access	public
-	 * @param 	object	config class
-	 * @param 	object	uri class
-	 * @return	void
-	 * 
-	 * deprecated!
-	 * 
-	 */
-	function _display_cache(&$CFG, &$URI) {
-		
-		return false;
-
-	}
-
 
 }
 // END Output Class

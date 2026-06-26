@@ -55,9 +55,18 @@ function cms_position_link_init(){
 				
 					let $backup_this = before_result[0].clone(true, true)
 
+					var needs_cache_hydrate = false
+
 					$.each(before_result[1].positions, function(i, posdata){
 						$('.cms_position_' + i).html(posdata._html).data('cms_page_id', posdata.cms_page_id)
+						if (posdata.has_deferred) {
+							needs_cache_hydrate = true
+						}
 					})
+
+					if (needs_cache_hydrate && typeof cms_cache_hydrate === 'function') {
+						cms_cache_hydrate()
+					}
 					
 					change_url(before_result[1]._final_url || $this.attr('href'))
 					document.title = before_result[1].title

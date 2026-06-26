@@ -792,7 +792,25 @@ class cms_page_panel_model extends Model {
 		}
 		
 		$this->invalidate_html_cache($cms_page_panel_id);
+		$this->_invalidate_page_cache($cms_page_panel_id);
 		
+	}
+
+	function _invalidate_page_cache($cms_page_panel_id) {
+
+		$block = $this->get_cms_page_panel($cms_page_panel_id);
+		if (empty($block)) {
+			return;
+		}
+
+		$this->load->model('cms/cms_page_cache_model');
+
+		if (!empty($block['cms_page_id'])) {
+			$this->cms_page_cache_model->invalidate_page($block['cms_page_id']);
+		} elseif (!empty($block['panel_name'])) {
+			$this->cms_page_cache_model->invalidate_list_item($block['panel_name'], $cms_page_panel_id);
+		}
+
 	}
 	
 	function invalidate_html_cache($cms_page_panel_id){
@@ -925,6 +943,7 @@ class cms_page_panel_model extends Model {
 		}
 		
 		$this->invalidate_html_cache($insert_id);
+		$this->_invalidate_page_cache($insert_id);
 		
 		return $insert_id;
 		
@@ -954,6 +973,7 @@ class cms_page_panel_model extends Model {
 		}
 		
 		$this->invalidate_html_cache($cms_page_panel_id);
+		$this->_invalidate_page_cache($cms_page_panel_id);
 		
 		// delete children
 		$sql = "select cms_page_panel_id from cms_page_panel where parent_id = ? ";
