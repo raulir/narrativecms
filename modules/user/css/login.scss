@@ -5,3 +5,9 @@
 .login_error_active {
 	display: block;
 }
+
+.login_resend_verification {
+	cursor: pointer;
+	text-decoration: underline;
+	margin-top: 0.5rem;
+}

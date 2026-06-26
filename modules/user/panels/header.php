@@ -33,6 +33,12 @@ class header extends \CI_Controller{
 			$params['loggedin'] = 0;
 		}
 		
+		$links = $this->user_model->get_link_settings();
+		
+		if (!empty($links['login_link'])){
+			$params['login_link'] = $links['login_link'];
+		}
+		
 		
 		return $params;
 	

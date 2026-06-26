@@ -1,6 +1,6 @@
 <?php if(empty($loggedin)): ?>
 
-	<div class="login_container" <?php if($redirect_link['target'] != '_none'): ?> data-success="<?= _l($redirect_link) ?>" <?php endif ?>>
+	<div class="login_container" data-cms_page_panel_id="<?= $cms_page_panel_id ?>" data-success="<?= $success_url ?>">
 		<div class="login_content">
 		
 			<div class="login_heading"><?= $heading ?></div>
@@ -53,7 +53,10 @@
 			<div class="login_error login_error_bad_username"><?= $message_bad_username ?></div>
 			<div class="login_error login_error_bad_password"><?= $message_bad_password ?></div>
 			<div class="login_error login_error_missing_credential"><?= $message_missing_credential ?></div>
-			
+			<div class="login_error login_error_unverified_email">
+				<?= $message_unverified_email ?>
+				<div class="login_resend_verification"><?= $resend_verification_label ?></div>
+			</div>
 			<?php if(!empty($message)): ?>
 				<div class="login_message"><?= $message ?></div>
 			<?php endif ?>
@@ -80,6 +83,8 @@
 	
 <?php else: ?>
 
-	<script type="text/javascript">window.location.href = "<?= _l($redirect_link) ?>"</script>
+	<?php if (!_is_position_ajax()): ?>
+	<script type="text/javascript">window.location.href = "<?= $success_url ?>"</script>
+	<?php endif ?>
 
 <?php endif ?>

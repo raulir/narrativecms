@@ -11,11 +11,11 @@ Related email auth (login, reminder): [`auth_email.md`](auth_email.md)
 1. Page render — panel block on `/register/` supplies form HTML and `data-cms_page_panel_id` + `data-success` on `.register_container`
 2. Submit — `register.js` POSTs to `ajax_api/get_panel/` with `panel_id=user/register`, `do=register`, `fields[]`, and `cms_page_panel_id`
 3. Server — `register::panel_action` validates against **page block** settings, `create_user()`, optional `log_in_after` session, optional mailing lists
-4. Success — client redirects to Success URL (`redirect_link`)
+4. Success — client redirects to **user/user_settings** → **Links** → **Link to user** (`user_link`)
 
 ## CMS configuration
 
-- **Success URL** (`redirect_link`) — post-register destination (e.g. `/start/`)
+- **Link to user** — set in `user/user_settings` → **Links** (post-register/login destination, e.g. `/start/`)
 - **Log in after** — auto-login after successful register
 - Field visibility, extra fields, mailing lists — configured on the page block
 
@@ -50,10 +50,9 @@ Four-path smoke test (email + Google register/login):
 ## Post-MVP
 
 - Audit [`profile.tpl.php`](../templates/profile.tpl.php) — legacy register-form markup; check if `user/profile` is deployed anywhere
-- Email verification pipeline — [`auth_email.md`](auth_email.md)
-- `password_hash` migration from SHA1 — [`auth_email.md`](auth_email.md)
 - Rate limits, honeypot/CAPTCHA on register
-- Replace `alert('registration successful')` fallback with inline success message (only when Success URL unset)
 - Consent `text` field enforcement (currently display-only)
 - Central mail helper in user module (wrap `mail()` / future SMTP)
 - Native app Google auth (`auth_gapp`) — [`auth_google.md`](auth_google.md)
+
+See also [`auth_email.md`](auth_email.md) Post-MVP (mail helper, validation, rate limits).

@@ -18,12 +18,6 @@
 			"translate":"1"
 		},
 		{
-			"type":"link",
-			"name":"redirect_link",
-			"label":"Success URL",
-			"help": "Redirect to this URL after successful login"
-		},
-		{
 			"type":"select",
 			"label":"Log in after",
 			"name":"log_in_after",
@@ -228,6 +222,14 @@
 			"label":"Already logged in",
 			"lines":"2",
 			"default": "You are already logged in. Please log out to register a new account.",
+			"translate":"1"
+		},
+		{
+			"type":"textarea",
+			"name":"message_success",
+			"label":"Success",
+			"lines":"2",
+			"default": "Registration successful",
 			"translate":"1"
 		},
 		{

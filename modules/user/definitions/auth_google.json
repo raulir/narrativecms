@@ -9,10 +9,40 @@
 			"label":"Google Client ID"
 		},
 		{
-			"type":"link",
-			"name":"redirect_link",
-			"label":"Success URL",
-			"help": "Redirect to this URL after successful login"
+			"type":"subtitle",
+			"label":"Messages"
+		},
+		{
+			"type":"textarea",
+			"name":"message_google_error",
+			"label":"Google sign-in failed",
+			"lines":"2",
+			"default": "Google sign-in failed. Please try again from the login page.",
+			"translate":"1"
+		},
+		{
+			"type":"textarea",
+			"name":"message_user_hidden",
+			"label":"Account disabled",
+			"lines":"2",
+			"default": "This account is disabled. Contact support if you need access.",
+			"translate":"1"
+		},
+		{
+			"type":"textarea",
+			"name":"message_create_failed",
+			"label":"Account creation failed",
+			"lines":"2",
+			"default": "Could not create your account. Please try again or register with email.",
+			"translate":"1"
+		},
+		{
+			"type":"textarea",
+			"name":"message_emailexists",
+			"label":"Email exists",
+			"lines":"2",
+			"default": "This email is already registered. Try logging in with email or Google again.",
+			"translate":"1"
 		}
 	]
 }

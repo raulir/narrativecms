@@ -8,7 +8,7 @@
 				<div class="user_header_dropdown">
 					<a class="user_header_dropdown_item user_header_settings" <?php _lh($settings_link) ?>><?= $settings_text ?></a>
 					<div class="user_header_dropdown_item user_header_logout">
-						<?php _panel('user/logout', ['label' => $logout_text, 'link' => $logout_link]) ?>
+						<?php _panel('user/logout', ['label' => $logout_text]) ?>
 					</div>
 				</div>
 			</div>

@@ -1,6 +1,6 @@
 <?php if(empty($loggedin)): ?>
 
-	<div class="register_container" data-cms_page_panel_id="<?= $cms_page_panel_id ?>" <?php if($redirect_link['target'] != '_none'): ?> data-success="<?= _l($redirect_link) ?>" <?php endif ?>>
+	<div class="register_container" data-cms_page_panel_id="<?= $cms_page_panel_id ?>" data-success="<?= $success_url ?>">
 		<div class="register_content">
 		
 				<div class="register_heading"><?= $heading ?></div>
@@ -148,12 +148,16 @@
 					<div class="register_error register_error_loggedin"><?= $message_loggedin ?></div>
 				
 				</div>
+				
+				<div class="register_success"><?= $message_success ?></div>
 	
 		</div>
 	</div>
 	
 <?php else: ?>
 
-	<script type="text/javascript">window.location.href = "<?= _l($redirect_link) ?>"</script>
+	<?php if (!_is_position_ajax()): ?>
+	<script type="text/javascript">window.location.href = "<?= $success_url ?>"</script>
+	<?php endif ?>
 
 <?php endif ?>

@@ -1,3 +1,1 @@
-<div class="user_logout_container" <?= !empty($link) ? ' data-link="'.$link['url'].'" ' : '' ?>>
-	<?= $label ?>
-</div>
+<div class="user_logout_container" data-success="<?= $success_url ?>"><?php print(!empty($label) ? $label : 'Log out'); ?></div>

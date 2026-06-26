@@ -1,23 +1,7 @@
 {
 	"version":"2",
 	"label":"User forwarder",
-	"description":"If user is logged in or out, forwards to another page",
+	"description":"Redirects logged-in users to Link to user in user settings. Add to login, register, or other guest pages.",
 	"image":"",
-	"item":[
-		{
-			"type":"select",
-			"label":"User logged in",
-			"name":"status",
-			"values":{
-				"0":"Not logged in",
-				"1":"Logged in"
-			},
-			"default":"0"
-		},
-		{
-			"type":"link",
-			"name":"link",
-			"label":"Forward target"
-		}
-	]
+	"item":[]
 }

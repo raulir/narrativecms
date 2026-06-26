@@ -53,12 +53,7 @@ function register_init(){
 
 			} else {
 				
-				// redirect to success url
-				if ($('.register_container').data('success')){
-					window.location.href = $('.register_container').data('success')
-				} else {
-					alert('registration successful')
-				}
+				register_show_success()
 				
 			}
 		}
@@ -88,7 +83,21 @@ function register_hide_error(){
 	$('.register_error_active').removeClass('register_error_active')
 	$('.register_errors_active').removeClass('register_errors_active')
 	$('.register_input_error').removeClass('register_input_error')
+	$('.register_success_active').removeClass('register_success_active')
 
+}
+
+function register_show_success(){
+	
+	register_hide_error()
+	
+	if ($('.register_container').data('success')){
+		window.location.href = $('.register_container').data('success')
+	} else {
+		$('.register_form').hide()
+		$('.register_success').addClass('register_success_active')
+	}
+	
 }
 
 function register_resize(){

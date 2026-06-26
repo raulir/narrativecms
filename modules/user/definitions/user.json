@@ -41,6 +41,16 @@
 			"label":"Password hash"
 		},
 		{
+			"type":"select",
+			"name":"email_verified",
+			"label":"Email verified",
+			"values":{
+				"yes":"Yes",
+				"no":"No"
+			},
+			"default":"yes"
+		},
+		{
 			"type":"text",
 			"name":"phone",
 			"label":"Phone"

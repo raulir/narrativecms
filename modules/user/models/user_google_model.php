@@ -87,6 +87,7 @@ class user_google_model extends Model {
 						'google_id' => $data['google_id'],
 				],
 				'password' => '',
+				'email_verified' => 'yes',
 		];
 		
 		$result = $this->user_model->create_user($create_data);

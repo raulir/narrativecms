@@ -40,12 +40,6 @@
 			"translate":"1"
 		},
 		{
-			"type":"link",
-			"name":"redirect_link",
-			"label":"Success URL",
-			"help": "Redirect to this URL after successful login"
-		},
-		{
 			"type":"subtitle",
 			"label":"Forgot password"
 		},
@@ -134,17 +128,24 @@
 		{
 			"type":"textarea",
 			"lines":"2",
-			"name":"loggedin_text",
-			"label":"Logged in text",
-			"default": "You are already logged in",
+			"name":"message_missing_credential",
+			"label":"Empty username or password",
+			"default": "Empty username or password submitted",
 			"translate":"1"
 		},
 		{
 			"type":"textarea",
 			"lines":"2",
-			"name":"message_missing_credential",
-			"label":"Empty username or password",
-			"default": "Empty username or password submitted",
+			"name":"message_unverified_email",
+			"label":"Unverified email",
+			"default": "Please confirm your email before logging in. Check your inbox for the confirmation link.",
+			"translate":"1"
+		},
+		{
+			"type":"text",
+			"name":"resend_verification_label",
+			"label":"Resend confirmation",
+			"default": "Resend confirmation email",
 			"translate":"1"
 		},
 		{

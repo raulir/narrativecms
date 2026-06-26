@@ -86,11 +86,17 @@ class register extends CI_Controller {
 					
 				} else {
 					
+					if (!empty($user['data']['user_id']) && !empty($data['email'])){
+						$this->user_model->send_email_verification($user['data']['user_id']);
+					}
+					
 					if (!empty($params['log_in_after']) && !empty($user['data']['user_id'])){
 						
 						$session_user = $this->user_model->get_user($user['data']['user_id']);
 						
-						if (!empty($session_user['cms_page_panel_id'])){
+						$allow_session = $this->user_model->login_allowed($session_user);
+						
+						if ($allow_session && !empty($session_user['cms_page_panel_id'])){
 							$this->load->model('cms/cms_access_model');
 							$this->cms_access_model->refresh_user_session($session_user);
 						}
@@ -176,7 +182,10 @@ class register extends CI_Controller {
 	
 	function panel_params($params){
 
+		$this->load->model('user/user_model');
+		
 		$params['loggedin'] = !empty($_SESSION['user']);
+		$params['success_url'] = $this->user_model->get_user_redirect_url();
 		
 		return $params;
 	

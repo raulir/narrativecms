@@ -6,6 +6,50 @@
 	],
 	"settings":[
 		{
+			"type":"select",
+			"name":"show_username",
+			"label":"Login username",
+			"values":{
+				"0":"Email is login name",
+				"1":"Username is login name"
+			},
+			"default":"0",
+			"help":"What field user uses to log in"
+		},
+		{
+			"type":"select",
+			"name":"email_confirmation",
+			"label":"Email confirmation",
+			"values":{
+				"0":"No",
+				"1":"Yes"
+			},
+			"default":"0",
+			"help":"If yes, user must confirm email before login. If no, confirmation email is still sent but login is allowed."
+		},
+		{
+			"type":"subtitle",
+			"label":"Links"
+		},
+		{
+			"type":"link",
+			"name":"login_link",
+			"label":"Link to login",
+			"help":"Guest redirect target and header login CTA"
+		},
+		{
+			"type":"link",
+			"name":"user_link",
+			"label":"Link to user",
+			"help":"Redirect after successful login or registration"
+		},
+		{
+			"type":"link",
+			"name":"logout_link",
+			"label":"Log out redirect",
+			"help":"Redirect after logout"
+		},
+		{
 			"type":"repeater",
 			"name":"default_access",
 			"label":"Default access",
@@ -19,17 +63,6 @@
 					"help":"e.g. music_student"
 				}
 			]
-		},
-		{
-			"type":"select",
-			"name":"show_username",
-			"label":"Login username",
-			"values":{
-				"0":"Email is login name",
-				"1":"Username is login name"
-			},
-			"default":"0",
-			"help":"What field user uses to log in"
 		}
 	]
 }

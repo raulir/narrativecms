@@ -68,7 +68,8 @@ class user_model extends Model {
 				'last_name' => $data['last_name'],
 				'email' => $data['email'],
 				'phone' => $data['phone'],
-				'password' => sha1((!empty($GLOBALS['settings']['salt']) ? $GLOBALS['settings']['salt'] : 'cms').$data['password']),
+				'password' => !empty($data['password']) ? $this->hash_password($data['password']) : '',
+				'email_verified' => !empty($data['email_verified']) ? $data['email_verified'] : 'no',
 				'image' => '',
 				'meta' => json_encode($data['meta'], JSON_PRETTY_PRINT),
 		];
@@ -117,7 +118,7 @@ class user_model extends Model {
 		$this->load->model('cms/cms_page_panel_model');
 		
 		$this->cms_page_panel_model->update_cms_page_panel($user_id, [
-				'password' => sha1((!empty($GLOBALS['settings']['salt']) ? $GLOBALS['settings']['salt'] : 'cms').$password)
+				'password' => $this->hash_password($password)
 		]);
 
 	}
@@ -243,12 +244,24 @@ class user_model extends Model {
 		
 	}
 	
+	function get_link_settings(){
+		
+		$settings = $this->get_user_settings();
+		
+		return [
+				'login_link' => $settings['login_link'] ?? [],
+				'user_link' => $settings['user_link'] ?? [],
+				'logout_link' => $settings['logout_link'] ?? [],
+		];
+		
+	}
+	
 	function get_login_redirect_url(){
 		
-		$settings = $this->get_header_settings();
+		$links = $this->get_link_settings();
 		
-		if (!empty($settings['login_link'])){
-			return _l($settings['login_link'], false);
+		if (!empty($links['login_link'])){
+			return _l($links['login_link'], false);
 		}
 		
 		return $GLOBALS['config']['base_url'];
@@ -273,6 +286,171 @@ class user_model extends Model {
 			'url' => $this->get_login_redirect_url(),
 			'text' => $this->get_login_redirect_text(),
 		];
+		
+	}
+	
+	function get_user_redirect_url(){
+		
+		$links = $this->get_link_settings();
+		
+		if (!empty($links['user_link'])){
+			return _l($links['user_link'], false);
+		}
+		
+		return $GLOBALS['config']['base_url'];
+		
+	}
+	
+	function get_logout_redirect_url(){
+		
+		$links = $this->get_link_settings();
+		
+		if (!empty($links['logout_link'])){
+			return _l($links['logout_link'], false);
+		}
+		
+		return $GLOBALS['config']['base_url'];
+		
+	}
+	
+	function hash_password($password){
+		
+		return password_hash($password, PASSWORD_DEFAULT);
+		
+	}
+	
+	function verify_password($password, $stored_hash){
+		
+		if (empty($stored_hash)){
+			return false;
+		}
+		
+		if (strpos($stored_hash, '$2y$') === 0 || strpos($stored_hash, '$argon2') === 0){
+			return password_verify($password, $stored_hash);
+		}
+		
+		$legacy = sha1((!empty($GLOBALS['settings']['salt']) ? $GLOBALS['settings']['salt'] : 'cms').$password);
+		
+		return hash_equals($legacy, $stored_hash);
+		
+	}
+	
+	function upgrade_password_hash($user_id, $password){
+		
+		$this->set_user_password($user_id, $password);
+		
+	}
+	
+	function get_user_settings(){
+		
+		$this->load->model('cms/cms_page_panel_model');
+		
+		return $this->cms_page_panel_model->get_cms_page_panel_settings('user/user_settings');
+		
+	}
+	
+	function email_confirmation_required(){
+		
+		$settings = $this->get_user_settings();
+		
+		return !empty($settings['email_confirmation']);
+		
+	}
+	
+	function is_email_verified($user){
+		
+		return empty($user['email_verified']) || $user['email_verified'] === 'yes';
+		
+	}
+	
+	function login_allowed($user){
+		
+		if (!$this->email_confirmation_required()){
+			return true;
+		}
+		
+		return $this->is_email_verified($user);
+		
+	}
+	
+	function send_email_verification($user_id){
+		
+		$user = $this->get_user($user_id);
+		
+		if (empty($user['email'])){
+			return false;
+		}
+		
+		$filename = $GLOBALS['config']['base_path'].'cache/user_email_verifications.json';
+		
+		if (file_exists($filename)){
+			$tokens = cms_json_decode(file_get_contents($filename), $filename);
+		} else {
+			$tokens = [];
+		}
+		
+		$token = sha1(mt_rand(0, mt_getrandmax()).$user_id.time());
+		
+		$tokens[$token] = [
+				'token' => $token,
+				'user_id' => $user_id,
+				'email' => $user['email'],
+				'time' => time(),
+		];
+		
+		file_put_contents($filename, json_encode($tokens, JSON_PRETTY_PRINT));
+		
+		$verify_url = $GLOBALS['config']['base_site'].$GLOBALS['config']['base_url'].'verify-email/?token='.$token;
+		
+		$title = trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), $GLOBALS['config']['site_title_delimiter'].' ');
+		$title = (!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').$title;
+		
+		$headers = 'From: '.(!empty($GLOBALS['config']['email']) ? $GLOBALS['config']['email'] : 'noreply@localhost')."\r\n";
+		$headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+		
+		mail(
+				$user['email'],
+				(!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').
+				'Confirm your email for '.$title,
+				"Please confirm your email by opening this link:\n\n".$verify_url,
+				$headers
+		);
+		
+		return true;
+		
+	}
+	
+	function verify_email_token($token){
+		
+		$filename = $GLOBALS['config']['base_path'].'cache/user_email_verifications.json';
+		
+		if (!file_exists($filename)){
+			return ['error' => 'invalid_token'];
+		}
+		
+		$tokens = cms_json_decode(file_get_contents($filename), $filename);
+		
+		if (empty($tokens[$token])){
+			return ['error' => 'invalid_token'];
+		}
+		
+		$row = $tokens[$token];
+		
+		if ((time() - $row['time']) >= 604800){
+			unset($tokens[$token]);
+			file_put_contents($filename, json_encode($tokens, JSON_PRETTY_PRINT));
+			return ['error' => 'expired_token'];
+		}
+		
+		$this->load->model('cms/cms_page_panel_model');
+		$this->cms_page_panel_model->update_cms_page_panel($row['user_id'], [
+				'email_verified' => 'yes',
+		]);
+		
+		unset($tokens[$token]);
+		file_put_contents($filename, json_encode($tokens, JSON_PRETTY_PRINT));
+		
+		return ['user_id' => $row['user_id']];
 		
 	}
 

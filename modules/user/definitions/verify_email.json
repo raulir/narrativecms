@@ -1,0 +1,35 @@
+{
+	"version": "2",
+	"label": "Verify email",
+	"image": "",
+	"item": [
+		{
+			"type":"subtitle",
+			"label":"Messages"
+		},
+		{
+			"type":"textarea",
+			"name":"message_missing_token",
+			"label":"Missing token",
+			"lines":"2",
+			"default": "Verification link is invalid.",
+			"translate":"1"
+		},
+		{
+			"type":"textarea",
+			"name":"message_invalid_token",
+			"label":"Invalid token",
+			"lines":"2",
+			"default": "This verification link is not valid.",
+			"translate":"1"
+		},
+		{
+			"type":"textarea",
+			"name":"message_expired_token",
+			"label":"Expired token",
+			"lines":"2",
+			"default": "This verification link has expired. Log in and request a new one.",
+			"translate":"1"
+		}
+	]
+}

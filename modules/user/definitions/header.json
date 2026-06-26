@@ -1,14 +1,9 @@
 {
 	"version":"2",
+	"deferred":"1",
 	"label":"User header",
 	"image":"user/panel_header.png",
 	"settings":[
-		{
-			"type":"link",
-			"name":"login_link",
-			"label":"Link to login",
-			"help":"Link to login page"
-		},
 		{
 			"type":"image",
 			"name":"icon",
@@ -50,12 +45,6 @@
 			"label":"Logged in"
 		},
 		{
-			"type":"link",
-			"name":"user_link",
-			"label":"Link to user",
-			"help":"Link to user dashboard"
-		},
-		{
 			"type":"image",
 			"name":"icon_loggedin",
 			"label":"Icon logged in",
@@ -87,12 +76,6 @@
 			"label":"Settings label",
 			"default":"Settings",
 			"translate":"1"
-		},
-		{
-			"type":"link",
-			"name":"logout_link",
-			"label":"Log out",
-			"help":"Link to log out"
 		},
 		{
 			"type":"text",

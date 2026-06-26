@@ -14,14 +14,7 @@ App WebView login was verified on Android emulator (separate app project).
 
 ## MVP — Google web
 
-- [ ] **Success redirect** — after GSI POST to `/auth-google/`, session
-  is set but [`auth_google.tpl.php`](../templates/auth_google.tpl.php) only
-  prints `$error`. User sees a blank page. Use `redirect_link` from panel
-  settings (`start/`) — pattern in
-  [`userforward.php`](../panels/userforward.php) or logged-in branch in
-  [`login.tpl.php`](../templates/login.tpl.php).
-- [ ] **Error display** — show a readable message for `google_error`, not
-  a raw key.
+Done — success redirect via **user/user_settings** → **Links** → **Link to user**; readable error messages from panel settings in [`auth_google.tpl.php`](../templates/auth_google.tpl.php).
 
 ## MVP QA
 

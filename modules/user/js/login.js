@@ -8,6 +8,11 @@ function login_init(){
 				'password': $('.login_input_password').val()
 		}
 
+		var cms_page_panel_id = $('.login_container').data('cms_page_panel_id')
+		if (cms_page_panel_id){
+			data.cms_page_panel_id = cms_page_panel_id
+		}
+
 		data.success = function(result){
 
 			if (result.result.error){
@@ -16,12 +21,7 @@ function login_init(){
 				
 			} else {
 				
-				// redirect to success url
-				if ($('.login_container').data('success')){
-					window.location.href = $('.login_container').data('success')
-				} else {
-					alert('login successful')
-				}
+				login_show_success()
 				
 			}
 		}
@@ -35,6 +35,22 @@ function login_init(){
 	if ($('.login_app_google').length){
 		$('.login_app_google').on('click.cms', google_login)
 	}
+	
+	$('.login_resend_verification').on('click.cms', function(){
+		
+		var data = {
+				'do': 'resend_verification',
+				'username': $('.login_input_username').val(),
+		}
+		
+		var cms_page_panel_id = $('.login_container').data('cms_page_panel_id')
+		if (cms_page_panel_id){
+			data.cms_page_panel_id = cms_page_panel_id
+		}
+		
+		get_ajax('user/login', data)
+		
+	})
 
 }
 
@@ -42,6 +58,13 @@ function login_show_error(error){
 	
 	$('.login_error_active').removeClass('login_error_active')
 	$('.login_error_' + error).addClass('login_error_active')
+	
+}
+
+function login_show_success(){
+	
+	$('.login_error_active').removeClass('login_error_active')
+	window.location.href = $('.login_container').data('success')
 	
 }
 

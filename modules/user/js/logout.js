@@ -1,5 +1,3 @@
-var base_url = _cms_base
-
 function logout_init(){
 	
 	$('.user_logout_container').on('click.cms', function(){
@@ -8,13 +6,14 @@ function logout_init(){
 				'do': 'logout'
 		}
 		
-		data.success = function(result){
-
-			// redirect to success url
-			window.location.href = base_url + $('.user_logout_container').data('link')
-
+		data.success = function(){
+			
+			if ($('.user_logout_container').data('success')){
+				window.location.href = $('.user_logout_container').data('success')
+			}
+			
 		}
-
+		
 		get_ajax('user/logout', data);
 
 	})
@@ -38,4 +37,4 @@ $(document).ready(function() {
 	logout_resize()
 	logout_scroll()
 
-})
+});

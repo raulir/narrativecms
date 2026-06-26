@@ -13,5 +13,14 @@ class logout extends CI_Controller{
 		return $params;
 		
 	}
+	
+	function panel_params($params){
+		
+		$this->load->model('user/user_model');
+		$params['success_url'] = $this->user_model->get_logout_redirect_url();
+		
+		return $params;
+		
+	}
 
 }

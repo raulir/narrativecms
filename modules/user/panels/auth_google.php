@@ -32,6 +32,20 @@ class auth_google extends CI_Controller{
 	}
 	
 	function panel_params($params){
+		
+		$this->load->model('user/user_model');
+		
+		$params['loggedin'] = !empty($_SESSION['user']);
+		$params['success_url'] = $this->user_model->get_user_redirect_url();
+		
+		if (!empty($params['error'])) {
+			$message_key = 'message_'.$params['error'];
+			if (!empty($params[$message_key])) {
+				$params['error_message'] = $params[$message_key];
+			} else {
+				$params['error_message'] = !empty($params['message_google_error']) ? $params['message_google_error'] : 'Google sign-in failed';
+			}
+		}
 				
 		return $params;
 	
