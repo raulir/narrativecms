@@ -1,3 +1,36 @@
+function get_ajax_positions(url, params, action_on_success) {
+
+	params._url = url
+	params._ajax = 1
+
+	$.ajax({
+		type: 'POST',
+		url: params._url,
+		data: params,
+		dataType: 'json',
+		success: function(returned_data) {
+
+			if (returned_data.redirect) {
+				get_ajax_positions(returned_data.redirect, params, action_on_success)
+				return
+			}
+
+			if (returned_data.error && returned_data.error.message === 'access_denied') {
+				cms_access_denied_popup(returned_data.error)
+				return
+			}
+
+			returned_data._final_url = params._url
+			action_on_success(returned_data)
+
+		},
+		error: function() {
+			$('.cms_position_main').css({'opacity':''})
+		}
+	})
+
+}
+
 function cms_position_link_init(){
 	
 	$('a[data-_pl="1"]').each(function(){

@@ -187,5 +187,24 @@
 		</div>
 	
 	</form>
+
+	<?php if (!empty($page['cms_page_id'])): ?>
+	<div class="cms_page_info">
+		<div class="cms_page_info_column">
+			<div class="cms_page_info_label">page:</div>
+			<div class="cms_page_info_value"><?= (int)$page['cms_page_id'] ?></div>
+		</div>
+		<div class="cms_page_info_column">
+			<div class="cms_page_info_label">created:</div>
+			<div class="cms_page_info_value"><?= !empty($page['create_time']) ? date('Y-m-d H:i:s', $page['create_time']) : '' ?>
+			<?= !empty($page['create_user']['username']) ? $page['create_user']['username'] : '-' ?></div>
+		</div>
+		<div class="cms_page_info_column">
+			<div class="cms_page_info_label">updated:</div>
+			<div class="cms_page_info_value"><?= !empty($page['update_time']) ? date('Y-m-d H:i:s', $page['update_time']) : '' ?>
+			<?= !empty($page['update_user']['username']) ? $page['update_user']['username'] : '-' ?></div>
+		</div>
+	</div>
+	<?php endif ?>
 	
 </div>

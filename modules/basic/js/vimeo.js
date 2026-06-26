@@ -1,3 +1,5 @@
+const zero_pad = (num, places) => String(num).padStart(places || 2, '0')
+
 var cms_fullscreen_open = function(){
 
 	if (document.fullscreenElement !== null){

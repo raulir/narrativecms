@@ -20,6 +20,7 @@ class cms_page extends CI_Controller {
 
 		$this->load->model('cms/cms_page_model');
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_user_model');
 
 		$return['block_list'] = [];
 		$return['cms_page_panels'] = [];
@@ -43,6 +44,19 @@ class cms_page extends CI_Controller {
 		}
 
 		$return['is_list_item'] = !empty($return['page']['slug']) && $this->cms_page_panel_model->is_list_slug($return['page']['slug']) ? 1 : 0;
+
+		if (!empty($return['page']['create_cms_user_id'])) {
+			$return['page']['create_user'] = $this->cms_user_model->get_cms_user($return['page']['create_cms_user_id']);
+		}
+		if (empty($return['page']['create_user'])) {
+			$return['page']['create_user'] = [];
+		}
+		if (!empty($return['page']['update_cms_user_id'])) {
+			$return['page']['update_user'] = $this->cms_user_model->get_cms_user($return['page']['update_cms_user_id']);
+		}
+		if (empty($return['page']['update_user'])) {
+			$return['page']['update_user'] = [];
+		}
 		
 		// layout
 		$return['cms_page_layout'] = !empty($return['page']['layout']) ? $return['page']['layout'] : 

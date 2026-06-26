@@ -178,7 +178,22 @@ class cms_page_model extends CI_Model {
 		);
 	}
 	
-	function update_page($cms_page_id, $data, $language = false){
+	function _stamp_page_audit_meta(&$meta, $is_create = false) {
+
+		$cms_user_id = !empty($_SESSION['cms_user']['cms_user_id']) ? (int)$_SESSION['cms_user']['cms_user_id'] : 0;
+		$now = (new DateTime())->getTimestamp();
+
+		if ($is_create) {
+			$meta['create_cms_user_id'] = $cms_user_id;
+			$meta['create_time'] = $now;
+		}
+
+		$meta['update_cms_user_id'] = $cms_user_id;
+		$meta['update_time'] = $now;
+
+	}
+
+	function update_page($cms_page_id, $data, $language = false, $audit_create = false){
 		
 		if ($language !== false && $language == $GLOBALS['language']['default']){
 			$language = false;
@@ -215,6 +230,8 @@ class cms_page_model extends CI_Model {
 			
 			}
 		}
+
+		$this->_stamp_page_audit_meta($meta, $audit_create);
 		
 		$data['meta'] = json_encode($meta);
 
@@ -231,7 +248,7 @@ class cms_page_model extends CI_Model {
 		$this->db->query($sql);
 		$cms_page_id = $this->db->insert_id();
 
-		$this->update_page($cms_page_id, $data);
+		$this->update_page($cms_page_id, $data, false, true);
 
 		return $cms_page_id;
 	

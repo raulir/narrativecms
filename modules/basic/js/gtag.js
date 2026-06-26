@@ -1,5 +1,32 @@
 window.dataLayer = window.dataLayer || []
 
+function injectScript(src, id) {
+
+	return new Promise((resolve, reject) => {
+
+		var s = 'script'
+		var js, fjs = document.getElementsByTagName(s)[0]
+
+		if (!id) {
+			id = src
+		}
+
+		if (document.getElementById(id)) {
+			reject('Script loaded already: ' + src)
+			return
+		}
+
+		js = document.createElement(s)
+		js.id = id
+		js.addEventListener('load', resolve)
+		js.addEventListener('error', () => reject('Script loading error: ' + src))
+		js.src = src
+		fjs.parentNode.insertBefore(js, fjs)
+
+	})
+
+}
+
 function gtag(){
 	dataLayer.push(arguments)
 }

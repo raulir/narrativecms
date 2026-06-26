@@ -3,7 +3,9 @@
 class cms_input_mask extends CI_Controller {
 
 	function panel_params($params){
-		
+
+		add_js('modules/cms/js/cms_md5.js');
+
 		$this->load->model('cms/cms_page_panel_model');
 
 		$cms_page_panel = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
