@@ -60,29 +60,33 @@
 
 .cms_grid_area {
     padding: 1.0rem 0 5.0rem 0;
-    font-size: 0;
-    letter-spacing: 0;
-    line-height: 0;
+    font-size: 1.5rem;
+    line-height: 1.55rem;
 }
 
 .cms_grid_row,.cms_grid_header {
-	height: 3.5rem;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: stretch;
+	min-height: 3.5rem;
 	border-bottom: 0.12rem solid $cms_border;
 	box-sizing: border-box;
 }
 
 .cms_grid_field {
-	height: 3.38rem;
+	flex: 1 1 auto;
+	min-width: 0;
 	box-sizing: border-box;
-	display: inline-block;
+	display: flex;
+	align-items: center;
 	font-size: 1.5rem;
 	line-height: 1.55rem;
 	padding: 0.2rem 0.5rem;
 	position: relative;
-	vertical-align: top;
 	&::after {
 		content: '';
-		height: 3.38rem;
+		height: 100%;
 		position: absolute;
 		display: block;
 		width: 0.12rem;
@@ -96,30 +100,31 @@
 	}
 	.cms_grid_header & {
 		font-size: 1.5rem;
+		font-weight: bold;
 		&::after {
 			display: none;
 		}
 	}
 }
 
+.cms_grid_field_delete {
+	flex: 0 0 7.0rem;
+	width: 7.0rem;
+	max-width: 7.0rem;
+}
+
 .cms_grid_field_inner {
-	width: 100rem;
-	max-width: calc(100% - 2.0rem);
-	max-height: 3.5rem;
-	position: absolute;
+	position: relative;
+	left: auto;
+	top: auto;
+	transform: none;
+	width: 100%;
+	max-width: 100%;
 	overflow: hidden;
-	left: 50%;
-	top: 50%;
-	transform: translate(-50%, -50%);
 	.cms_grid_field_left & {
-		left: 1.0rem;
-		transform: translate(0, -50%);
 		text-align: left;
 	}
 	.cms_grid_field_right & {
-		right: 1.0rem;
-		left: auto;
-		transform: translate(0, -50%);
 		text-align: right;
 	}
 	.cms_grid_field_center & {
@@ -151,7 +156,13 @@
 }
 
 .cms_grid_delete {
-	margin: 0.5rem 0 0 0;
+	margin: 0;
     float: none;
     display: inline-block;
+}
+
+.cms_grid_header_delete {
+	flex: 0 0 7.0rem;
+	width: 7.0rem;
+	max-width: 7.0rem;
 }

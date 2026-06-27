@@ -218,7 +218,28 @@ CMS page selector (all pages).
 
 ### grid
 
-Data-grid editor tied to panel model `ds_*` methods. Used by specialised panels; not typical in standard definitions.
+Table grid tied to panel model `ds_*` data-source methods. Can be embedded in a template (`form/form_grid`) or used in panel `settings` via `type: grid` (see [`note_names.json`](../../music/definitions/note_names.json)).
+
+| Property | Description |
+|----------|-------------|
+| `ds` * | Data source name — panel implements `ds_{name}()` |
+| `fields` | Column definitions (`text`, `id`, `cms/cms_grid_editable`, or `module/panel`) |
+| `operations` | `S` schema, `L` list, `C` create row, `D` delete row |
+| `base_name` | Panel name when `base_id` not available |
+
+**`ds_*` operations:**
+
+| Op | Meaning |
+|----|---------|
+| `S` | Return column `fields` (may merge dynamic columns — see `form/basic` `ds_subscribers`) |
+| `L` | Return row arrays; each row needs `id` |
+| `C` | Create row; `id` = parent `base_id` |
+| `D` | Delete row; with `base_id`, `id` = parent and `row_id` = line to remove |
+| `U` | Update cell (ajax via `cms/cms_grid_editable` when `ds` + `base_id` set) |
+
+**Editable cells:** `cms/cms_grid_editable` — blur-save. With `ds` + `base_id`, calls `U` on the data source; otherwise updates a `cms_page_panel` list item.
+
+**Reference:** [`form/basic.php`](../../form/panels/basic.php) `ds_subscribers` (read-only grid, `form_data` table). [`music/note_names.php`](../../music/panels/note_names.php) `ds_rows` (editable grid, `headers` + `rows` in panel settings JSON).
 
 ---
 

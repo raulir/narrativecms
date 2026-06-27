@@ -21,7 +21,7 @@ All frontend auth redirects use **User settings** → **Links** (no per-panel su
 - After login / register / Google → **Link to user** (`user_link`)
 - After logout → **Log out** (`logout_link`)
 
-Header **Login label** (`login_text`) remains on **user/header** for display only.
+Logged-out **Login label** (`login_text`) is on each page **music/hheader** panel (Pages → header position). Logged-in header dropdown: **Settings → User header settings** (`music/userheader`) — Dashboard, Settings, Log out labels and links.
 
 ## Email verification
 

@@ -34,9 +34,9 @@ class cms_page_operations extends CI_Controller {
 			// collect data
 			$page_id = $this->input->post('cms_page_id');
 			$language = $this->input->post('language');
-			if (empty($GLOBALS['language']['languages'][$language])){
-				$language = false;
-			}
+			$this->load->model('cms/cms_language_model');
+			$resolved_language = $this->cms_language_model->resolve_language_id($language, $GLOBALS['language']['languages'] ?? []);
+			$language = $resolved_language !== false ? $resolved_language : false;
 			
 			$data['sort'] = $this->input->post('sort');
 			$data['title'] = $this->input->post('title');

@@ -13,7 +13,8 @@ class cms_input_grid extends CI_Controller {
 		}
 
 		add_css('modules/cms/css/cms_input.scss');
-		
+		add_css('modules/cms/css/cms_input_grid.scss');
+
 	}
 	
 	function panel_action($params){
@@ -41,14 +42,20 @@ class cms_input_grid extends CI_Controller {
 				if(!empty($params['base_id'])){
 					$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
 					$base_name = $base['panel_name'];
+					$ds_params = [
+							'do' => 'D',
+							'id' => $params['base_id'],
+							'row_id' => $params['id'],
+					];
 				} else {
 					$base_name = $params['base_name'];
+					$ds_params = [
+							'do' => 'D',
+							'id' => $params['id'],
+					];
 				}
 				
-				$params['data'] = $this->run_panel_method($base_name, 'ds_'.$params['ds'], [
-						'do' => 'D',
-						'id' => $params['id'],
-				]);
+				$params['data'] = $this->run_panel_method($base_name, 'ds_'.$params['ds'], $ds_params);
 				
 				print(json_encode(['result' => $params['data']], JSON_PRETTY_PRINT));
 				
@@ -73,6 +80,7 @@ class cms_input_grid extends CI_Controller {
 				
 			if (!empty($params['base_id'])){
 				$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
+				$params['base_name'] = $base['panel_name'];
 			} else {
 				$panel_config = $this->cms_panel_model->get_cms_panel_config($params['base_name']);
 				$base['panel_name'] = $params['base_name'];
@@ -105,6 +113,17 @@ class cms_input_grid extends CI_Controller {
 				
 				if (!empty($fields['_no_cache'])) unset($params['fields']['_no_cache']);
 
+			}
+
+			$cms_language = '';
+			if (!empty($params['base_id'])){
+				$cms_language = $this->cms_page_panel_model->get_cms_language();
+			}
+
+			foreach ($params['fields'] as $field_key => $field){
+				if (!empty($field['label']) && stristr($field['label'], '{cms_language}')){
+					$params['fields'][$field_key]['label'] = str_replace('{cms_language}', $cms_language, $field['label']);
+				}
 			}
 
 			usort($params['fields'], function($a, $b){

@@ -6,30 +6,26 @@
 			<div class="cms_page_panel_targets_message"><?= $message ?></div>
 		<?php endif ?>
 		
-		<div class="cms_page_panel_targets_table">
-			<div class="cms_page_panel_targets_cell">
+		<div class="cms_page_panel_targets_list">
+		
+			<?php foreach($groups as $group): ?>
 			
-				<?php foreach($groups as $group): ?>
-				
-					<div class="cms_page_panel_targets_col1"><?= $group['heading'] ?> (<?= $group['strategy'] ?>)</div>
-					<div class="cms_page_panel_targets_col2">
+				<div class="cms_page_panel_targets_row">
+					<div class="cms_page_panel_targets_label"><?= $group['heading'] ?> (<?= $group['strategy'] ?>)</div>
+					<div class="cms_page_panel_targets_field">
 					
 						<select class="cms_page_panel_targets_select" data-group="<?= $group['heading'] ?>">
 							<option value=""><b>all</b></option>
 							<?php foreach($group['values'] as $value): ?>
-								<option value="<?= $value ?>" <?= $group['selected'] == $value ? ' selected="selected" ' : '' ?>><?= $value ?></option>
+								<option value="<?= $value['id'] ?>" <?= $group['selected'] == $value['id'] ? ' selected="selected" ' : '' ?>><?= $value['label'] ?></option>
 							<?php endforeach ?>
 						</select>
 		
 					</div>
-				
-				<?php endforeach ?>
-		
-			</div>
-		</div>
-		
-		<div class="cms_page_panel_targets_buttons">
-			<div class="cms_tool_button cms_page_panel_targets_close">Save</div>
+				</div>
+			
+			<?php endforeach ?>
+	
 		</div>
 	
 	</div>

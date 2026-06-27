@@ -1,4 +1,11 @@
-<div class="cms_input cms_grid_container" data-cms_input_height="<?= !empty($lines) ? $lines + 4 : count($data) + 4 ?>" data-cms_input_width="2" 
+<?php
+	$row_count = !empty($data) ? count($data) : 0;
+	$grid_height = 1 + $row_count + 2;
+	if (!empty($operations) && stristr($operations, 'C')){
+		$grid_height += 1;
+	}
+?>
+<div class="cms_input cms_grid_container" data-cms_input_height="<?= !empty($lines) ? $lines + 4 : $grid_height ?>" data-cms_input_width="2" 
 		data-cms_page_panel_id="<?= $base_id ?? 0 ?>">
 
 	<div class="cms_grid_label"><?= $label ?></div>
@@ -17,6 +24,9 @@
 					
 					</div>
 				<?php endforeach ?>
+				<?php if(!empty($operations) && stristr($operations, 'D')): ?>
+					<div class="cms_grid_field cms_grid_header_delete"></div>
+				<?php endif ?>
 			</div>
 
 			<?php if (!empty($data)): ?>
@@ -43,9 +53,12 @@
 										</div>
 									<?php elseif(stristr($field['type'],'/')): ?>
 										<?php _panel($field['type'], $field + [
-												'base_id' => $base_id, 
-												'item_id' => $line_data['id'], 
+												'base_id' => $base_id ?? 0,
+												'base_name' => $base_name ?? '',
+												'ds' => $ds ?? '',
+												'item_id' => $line_data['id'],
 												'id' => $line_data['id'],
+												'value' => $line_data[$field['name']] ?? '',
 										]) ?>
 									<?php endif ?>
 								</div>
@@ -55,10 +68,11 @@
 						<?php endforeach ?>
 						
 						<?php if(!empty($operations) && stristr($operations, 'D')): ?>
-							<div class="cms_grid_field cms_grid_field_left ">
+							<div class="cms_grid_field cms_grid_field_delete cms_grid_field_left">
 								
 								<div class="cms_small_button cms_grid_delete"
-										<?= !empty($base_name) ? ' data-base_name="'.$base_name.'" ' : ''?> 
+										<?= !empty($base_name) ? ' data-base_name="'.$base_name.'" ' : '' ?>
+										<?= !empty($base_id) ? ' data-base_id="'.$base_id.'" ' : '' ?>
 										data-ds="<?= $ds ?>" data-line_id="<?= $line_data['id'] ?>">
 										
 									Delete

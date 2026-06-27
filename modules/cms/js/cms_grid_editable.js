@@ -16,6 +16,14 @@ function cms_grid_editable_init(){
 					'name': $this.data('name'),
 					'value': $this.val()
 			}
+
+			if ($this.data('base_id')){
+				data.base_id = $this.data('base_id')
+			}
+
+			if ($this.data('ds')){
+				data.ds = $this.data('ds')
+			}
 	
 			get_ajax_panel('cms/cms_grid_editable', data, function(result){
 	

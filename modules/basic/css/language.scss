@@ -25,26 +25,53 @@
 }
 
 .language_button {
+	position: relative;
 	display: inline-block;
 	vertical-align: top;
-	padding: 0.2rem 0.5rem 0.2rem 0;
+	padding: 0.2rem 2.4rem 0.2rem 0.5rem;
 	box-sizing: border-box;
+	max-width: 12.0rem;
+	text-align: left;
+
+	&::after,
+	&::before {
+		content: '';
+		display: block;
+		width: 0.6rem;
+		height: 0.16rem;
+		background-color: $colour_black;
+		position: absolute;
+		right: 0.8rem;
+		top: 1.0rem;
+		transform: translate(0, -50%) rotate(-45deg);
+	}
+
+	&::before {
+		transform: translate(0, -50%) rotate(45deg);
+		right: 1.2rem;
+	}
 }
 
-.language_button_label{
-	display: inline;
+.language_button_label {
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .language_languages {
 
 	position: absolute;
 	right: 0;
-	top: 1.9rem;
+	left: 0;
+	top: 100%;
+	margin-top: 0.1rem;
 	padding: 0.2rem 0.5rem;
 	background-color: $colour_white;
 	opacity: 0;
 	height: 0;
 	overflow: hidden;
+	box-sizing: border-box;
 	
 	.language_button:hover & {
 		height: auto;
@@ -54,6 +81,9 @@
 }
 
 .language_language {
+	text-align: left;
+	padding: 0.2rem 0;
+	white-space: nowrap;
 
 	&:hover {
 		color: $colour_red;

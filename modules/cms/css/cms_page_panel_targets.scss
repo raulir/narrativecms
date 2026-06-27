@@ -1,58 +1,35 @@
-.cms_page_panel_targets_container {
-	height: 350.5rem;
-}
-
 .cms_page_panel_targets_content {
-	height: 100%;
-	position: relative;
-	font-size: 0;
-	line-height: 0;
-	letter-spacing: 0;
-	padding: 0 4.6rem;
+	padding: 0 0.5rem 0.5rem;
 }
 
 .cms_page_panel_targets_message {
-	position: absolute;
-	left: 0;
-	width: 100%;
-	top: 2.0rem;
 	font-size: 2.0rem;
 	line-height: 3.0rem;
+	margin-bottom: 1.5rem;
 }
 
-.cms_page_panel_targets_table {
-	display: table;
-	table-layout: fixed;
-	width: 100%;
-	height: calc(100% - 5.0rem);	
+.cms_page_panel_targets_list {
+	display: flex;
+	flex-direction: column;
+	gap: 1.0rem;
 }
 
-.cms_page_panel_targets_cell {
-	display: table-cell;
-	vertical-align: middle;
+.cms_page_panel_targets_row {
+	display: flex;
+	align-items: center;
+	gap: 1.0rem;
 }
 
-.cms_page_panel_targets_line {
-	height: 0.8rem;
-	background-color: #cccccc;
-	width: 75%;
-	margin: 1.0rem auto;
-}
-
-.cms_page_panel_targets_col1,.cms_page_panel_targets_col2,.cms_page_panel_targets_col3 {
-	display: inline-block;
+.cms_page_panel_targets_label {
+	flex: 1;
+	min-width: 0;
 	font-size: 1.7rem;
 	line-height: 2.2rem;
-}
-
-.cms_page_panel_targets_col1 {
-	width: 50%;
 	text-align: left;
 }
 
-.cms_page_panel_targets_col2 {
-	width: 50%;
-	text-align: right;
+.cms_page_panel_targets_field {
+	flex-shrink: 0;
 }
 
 .cms_page_panel_targets_select {
@@ -69,16 +46,4 @@
 		border: 0.1rem solid gray;
 	}
 
-}
-
-.cms_page_panel_targets_buttons {
-	position: absolute;
-	bottom: 2.0rem;
-	left: 0;
-	width: 100%;
-}
-
-.cms_page_panel_targets_close {
-	width: 11.0rem;
-	margin: 0 0.2rem;
 }

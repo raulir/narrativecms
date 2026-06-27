@@ -72,7 +72,7 @@ class cms_page_model extends CI_Model {
 		$query = $this->db->query($sql);
 		if (!$query->num_rows()){
 			
-			$sql = "alter table `cms_page_panel_param` add `language` varchar(2) ".
+			$sql = "alter table `cms_page_panel_param` add `language` varchar(10) ".
 					"character set ascii collate ascii_bin not null default '' after `cms_page_panel_id`";
 			$query = $this->db->query($sql);
 			

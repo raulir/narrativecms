@@ -86,6 +86,21 @@ if (!function_exists('print_fields')){
 						'readonly' => $field['readonly'] ?? '0',
 				));
 				
+			} elseif ($field['type'] == 'grid' && $prefix == ''){
+
+				$return .= '<div class="cms_input_container cms_input_container_full">';
+				$return .= _panel('cms/cms_input_grid', [
+						'label' => $field['label'],
+						'name' => $field['name'],
+						'ds' => $field['ds'],
+						'operations' => $field['operations'] ?? 'SL',
+						'fields' => $field['fields'] ?? [],
+						'base_id' => !empty($data['cms_page_panel_id']) ? $data['cms_page_panel_id'] : '',
+						'base_name' => !empty($data['panel_name']) ? $data['panel_name'] : (!empty($field['base_name']) ? $field['base_name'] : ''),
+						'_return' => true,
+				]);
+				$return .= '</div>';
+
 			} elseif ($field['type'] == 'repeater_select'){
 				
 				$repeater_select_data = [

@@ -1,4 +1,4 @@
-<div class="cms_container mimage_container mimage_responsiveness_<?= $responsiveness ?? 'all' ?>" 
+<div class="cms_container mimage_container" 
 		<?= !empty($colour) ? ('style="background-color: '.$colour.';"') : '' ?>>
 		
 	<div class="mimage_content" <?= !empty($width) ? 'style="max-width: '.$width.'rem; "' : '' ?>>

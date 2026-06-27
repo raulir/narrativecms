@@ -6,7 +6,7 @@
   "columns": {
     "cms_page_panel_param_id": { "type": "INT", "constraint": 10, "unsigned": true, "null": false, "auto_increment": true },
     "cms_page_panel_id": { "type": "INT", "constraint": 10, "unsigned": true, "null": false },
-    "language": { "type": "VARCHAR", "constraint": 2, "null": false, "default": "" },
+    "language": { "type": "VARCHAR", "constraint": 10, "null": false, "default": "" },
     "name": { "type": "VARCHAR", "constraint": 50, "null": false },
     "value": { "type": "MEDIUMTEXT", "null": false },
     "search": { "type": "INT", "constraint": 10, "unsigned": true, "null": false }

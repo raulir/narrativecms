@@ -136,6 +136,61 @@ class user_model extends Model {
 		return $return;
 		
 	}
+
+	function _parse_user_meta($user){
+
+		if (empty($user['meta'])){
+			return [];
+		}
+
+		$meta = cms_json_decode($user['meta'], 'user meta');
+
+		return is_array($meta) ? $meta : [];
+
+	}
+
+	function get_user_meta_value($key, $default = ''){
+
+		$user = $this->get_current();
+
+		if (empty($user)){
+			return $default;
+		}
+
+		$meta = $this->_parse_user_meta($user);
+
+		return $meta[$key] ?? $default;
+
+	}
+
+	function set_user_meta_value($key, $value){
+
+		$user = $this->get_current();
+
+		if (empty($user)){
+			return false;
+		}
+
+		$meta = $this->_parse_user_meta($user);
+		$meta[$key] = $value;
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->cms_page_panel_model->update_cms_page_panel($user['user_id'], [
+				'meta' => json_encode($meta, JSON_PRETTY_PRINT),
+		]);
+
+		return true;
+
+	}
+
+	function get_user_naming(){
+
+		$allowed = ['anglo_american', 'german', 'solfege'];
+		$naming = $this->get_user_meta_value('naming', 'anglo_american');
+
+		return in_array($naming, $allowed, true) ? $naming : 'anglo_american';
+
+	}
 	
 	function get_user($user_id){
 		
@@ -232,18 +287,6 @@ class user_model extends Model {
 	
 	}
 	
-	function get_header_settings(){
-		
-		if (!in_array('user', $GLOBALS['config']['modules'])){
-			return [];
-		}
-		
-		$this->load->model('cms/cms_page_panel_model');
-		
-		return $this->cms_page_panel_model->get_cms_page_panel_settings('user/header');
-		
-	}
-	
 	function get_link_settings(){
 		
 		$settings = $this->get_user_settings();
@@ -269,12 +312,6 @@ class user_model extends Model {
 	}
 	
 	function get_login_redirect_text(){
-		
-		$settings = $this->get_header_settings();
-		
-		if (!empty($settings['login_text'])){
-			return $settings['login_text'];
-		}
 		
 		return 'Login';
 		

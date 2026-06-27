@@ -81,13 +81,21 @@ var cms_page_panel_title_preview_request_id = 0
 var cms_page_panel_title_preview_min_interval = 3000
 var cms_page_panel_title_preview_extend_per_change = 1000
 
-function cms_page_panel_update_breadcrumb_title(text){
+function cms_page_panel_apply_breadcrumb_title(title){
 
 	var $title = $('.cms_page_panel_toolbar_title')
 
-	if ($title.length){
-		$title.html(strip_tags(text))
+	if (!$title.length){
+		return
 	}
+
+	$title.html(strip_tags(title))
+
+}
+
+function cms_page_panel_update_breadcrumb_title(text){
+
+	cms_page_panel_apply_breadcrumb_title(text)
 
 }
 
@@ -126,8 +134,8 @@ function cms_page_panel_fetch_title_preview(){
 			if (request_id != cms_page_panel_title_preview_request_id){
 				return
 			}
-			if (data.result && data.result.title){
-				cms_page_panel_update_breadcrumb_title(data.result.title)
+			if (data.result && data.result._title){
+				cms_page_panel_apply_breadcrumb_title(data.result._title)
 				cms_page_panel_title_preview_last_update = Date.now()
 				cms_page_panel_title_preview_extend = 0
 			}
@@ -165,8 +173,8 @@ function cms_page_panel_schedule_title_preview(){
 
 function cms_page_panel_title_preview_on_save(data){
 
-	if (cms_page_panel_title_preview_enabled() && data.result && data.result.title){
-		cms_page_panel_update_breadcrumb_title(data.result.title)
+	if (data.result && data.result._title){
+		cms_page_panel_apply_breadcrumb_title(data.result._title)
 		cms_page_panel_title_preview_last_update = Date.now()
 		cms_page_panel_title_preview_extend = 0
 	} else if (cms_page_panel_onpage_title_sync_enabled()){

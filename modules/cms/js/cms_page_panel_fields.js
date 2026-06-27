@@ -43,12 +43,40 @@ function cms_page_panel_fields_init(){
 				
 			}
 			
-			$input.css({
-				'height':h * 3.5 + 'rem', 
-				'top': t * 3.5 + top_extra + 'rem', 
-				'left': pos + '%',
-				'width': 50 * w + '%'
-			})
+			var input_height = h * 3.5 + 'rem'
+			
+			if (w == 1){
+				
+				$input.css({
+					'position': 'absolute',
+					'height': input_height,
+					'top': t * 3.5 + top_extra + 'rem',
+					'left': pos + '%',
+					'width': '50%'
+				})
+				
+			} else if ($this.hasClass('cms_input_container_full')) {
+				
+				$this.css({
+					'display': 'block',
+					'position': 'absolute',
+					'top': t * 3.5 + top_extra + 'rem',
+					'left': '0',
+					'width': '100%',
+					'height': input_height
+				})
+				
+			} else {
+				
+				$input.css({
+					'position': 'absolute',
+					'height': input_height,
+					'top': t * 3.5 + top_extra + 'rem',
+					'left': pos + '%',
+					'width': '100%'
+				})
+				
+			}
 		
 		} else if ($this.hasClass('cms_repeater_container')){
 			

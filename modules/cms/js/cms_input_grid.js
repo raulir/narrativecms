@@ -1,3 +1,24 @@
+function cms_input_grid_resize_height($grid){
+
+	if (!$grid || !$grid.length){
+		return
+	}
+
+	var row_count = $grid.find('.cms_grid_row').length
+	var grid_height = 1 + row_count + 2
+
+	if ($grid.find('.cms_grid_new').length){
+		grid_height += 1
+	}
+
+	$grid.data('cms_input_height', grid_height)
+
+	if (typeof cms_page_panel_fields_init === 'function'){
+		cms_page_panel_fields_init()
+	}
+
+}
+
 function cms_input_grid_init(){
 	
 	$('.cms_grid_new').on('click.cms', function(){
@@ -30,7 +51,7 @@ function cms_input_grid_init(){
 		get_ajax_panel('cms/cms_popup_yes_no', {'text':'Are you sure?'}, function(data){
 			panels_display_popup(data.result._html, {
 				'yes': function(){
-					get_ajax('cms/cms_input_grid', {
+					var delete_data = {
 						'do':'delete_row',
 						'ds': $this.data('ds'),
 						'id': $this.data('line_id'),
@@ -38,9 +59,14 @@ function cms_input_grid_init(){
 						'success': function(data){
 							if (data.result.web){
 								$this.closest('.cms_grid_row').remove()
+								cms_input_grid_resize_height($this.closest('.cms_grid_container'))
 							}
 						}
-					})
+					}
+					if ($this.data('base_id')){
+						delete_data.base_id = $this.data('base_id')
+					}
+					get_ajax('cms/cms_input_grid', delete_data)
 				}
 			})
 		})

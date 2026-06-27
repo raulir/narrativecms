@@ -21,13 +21,6 @@
 			"access":"user_usergroups"
 		},
 		{
-			"id":"user_header",
-			"name":"User header settings",
-			"parent":"user_user",
-			"url":"admin/panel_settings/user__header/",
-			"access":"user_settings"
-		},
-		{
 			"id":"user_settings",
 			"name":"User settings",
 			"parent":"user_user",
@@ -60,7 +53,10 @@
 		},
 		{
 			"id":"header",
-			"name":"Header"
+			"name":"Header",
+			"flags":[
+				"hidden"
+			]
 		},
 		{
 			"id":"register",

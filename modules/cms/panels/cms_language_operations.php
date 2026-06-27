@@ -21,8 +21,9 @@ class cms_language_operations extends CI_Controller {
 		if ($do == 'cms_language_set'){
 			 
 			$cms_language = $this->input->post('language');
-
-			$_SESSION['cms_language'] = $cms_language;
+			$this->load->model('cms/cms_language_model');
+			$resolved_language = $this->cms_language_model->resolve_language_id($cms_language, $GLOBALS['language']['languages'] ?? []);
+			$_SESSION['cms_language'] = $resolved_language !== false ? $resolved_language : $cms_language;
 			 
 		}
 

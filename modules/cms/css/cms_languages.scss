@@ -1,0 +1,21 @@
+.cms_languages_id_container,
+.cms_languages_local_label_container {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.cms_languages_id_readonly {
+	padding: 0.2rem 0.4rem;
+	line-height: 2.4rem;
+	font-size: 1.4rem;
+}
+
+.cms_languages_id_input,
+.cms_languages_local_label_input {
+	width: 100%;
+	box-sizing: border-box;
+	border: 0.1rem solid $cms_border;
+	padding: 0.2rem 0.4rem;
+	line-height: 2.0rem;
+	font-size: 1.4rem;
+}

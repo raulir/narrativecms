@@ -176,7 +176,7 @@
 				
 				<?php
 					_panel('cms/cms_input_page_panels', [
-							'cms_page_panels' => $cms_page_panels,
+							'value' => $block_list,
 							'page_id' => $page['page_id'],
 							'sortable_class' => 'cms_page_sortable',
 					]); 

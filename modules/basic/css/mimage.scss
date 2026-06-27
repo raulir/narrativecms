@@ -22,26 +22,4 @@
 	z-index: 20;
 }
 
-.mimage_responsiveness_all {
-	
-}
 
-.mimage_responsiveness_mobile {
-	display: none;
-}
-
-.mimage_responsiveness_desktop {
-	
-}
-
-@media screen and (max-width: $mobile_width) {
-
-	.mimage_responsiveness_mobile {
-		display: block;
-	}
-	
-	.mimage_responsiveness_desktop {
-		display: none;
-	}
-
-}

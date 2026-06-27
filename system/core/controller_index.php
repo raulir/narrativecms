@@ -26,6 +26,12 @@ class Index extends CI_Controller {
    		$blocks = $this->cms_page_panel_model->get_cms_page_panels_by(['cms_page_id' => $page_id, 'show' => 1, ]);
 	    
 		foreach($blocks as $key => $block){
+
+			if (!$this->cms_page_panel_model->panel_matches_visitor_targets($block)){
+				unset($blocks[$key]);
+				continue;
+			}
+
 	    	// check for shorcut panels
     		if (is_numeric($block['panel_name']) && (int)$block['panel_name'] == $block['panel_name']){
     			// get real panel data

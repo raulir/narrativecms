@@ -1,7 +1,8 @@
 {
 	"version":"2",
 	"label":"CMS target groups",
-	"item":[
+	"item":[],
+	"settings":[
 		{
 			"type":"repeater",
 			"name":"groups",
@@ -37,9 +38,9 @@
 					"type":"text",
 					"name":"settings",
 					"label":"Settings",
-					"help":"Group settings||For random percentage numbers separated by pipes"
+					"help":"Group settings||For random: positive weights separated by pipes (proportional, e.g. 20|30 — need not sum to 100)"
 				}
 			]
 		}
- 	]
+	]
 }

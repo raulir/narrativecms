@@ -31,9 +31,23 @@ class cms_page_panel_model extends Model {
 	
 	function __construct(){
 		
-		$this->load->model('cms/cms_language_model');
-		
+		$this->_ensure_language_model();
 		$this->default_language = $this->cms_language_model->get_default();
+
+	}
+
+	function _ensure_language_model(){
+
+		if (!empty($this->cms_language_model)){
+			return;
+		}
+
+		$CI =& get_instance();
+		if (empty($CI->cms_language_model)){
+			$this->load->model('cms/cms_language_model');
+		}
+
+		$this->cms_language_model = $CI->cms_language_model;
 
 	}
 
@@ -409,6 +423,8 @@ class cms_page_panel_model extends Model {
 
 	function _insert_or_update_param($cms_page_panel_id, $name, $value, $search = 0, $translate = ''){
 
+		$this->_ensure_language_model();
+
 		if (is_array($value)){
 			
 			if (isset($value['panel_params'])){
@@ -464,7 +480,7 @@ class cms_page_panel_model extends Model {
 			// if not to translate or default language, update in main
 			if ($query->num_rows()){
 				
-				if (empty($translate) || $translate == $this->default_language){
+				if (empty($translate) || $this->cms_language_model->normalise_language_id($translate) === $this->cms_language_model->normalise_language_id($this->default_language)){
 					$row = $query->row_array();
 					$sql = "update cms_page_panel_param set value = ? , search = ? where cms_page_panel_param_id = ? ";
 					$this->db->query($sql, [$value, $search, $row['cms_page_panel_param_id']]);
@@ -595,8 +611,12 @@ class cms_page_panel_model extends Model {
 
 	    	$return = json_decode($row['value'], true);
 
-	    	if($language && !empty($return['_translations'][$language])){
-    			$return = array_merge_recursive_ex($return, $return['_translations'][$language]);
+	    	if ($language){
+    			$this->_ensure_language_model();
+    			$translation_branch = $this->cms_language_model->resolve_translation_branch($language, $return['_translations'] ?? []);
+    			if (!empty($translation_branch)){
+    				$return = array_merge_recursive_ex($return, $translation_branch);
+    			}
     		}
 
 			$sql = "select panel_name from cms_page_panel where cms_page_panel_id = ? limit 1 ";
@@ -617,6 +637,189 @@ class cms_page_panel_model extends Model {
 		
 	}
 	
+	function build_visitor_target_badges($targets){
+
+		$badges = [];
+
+		if (empty($targets) || !is_array($targets)){
+			return $badges;
+		}
+
+		foreach($targets as $heading => $value){
+			if ($value !== '' && $value !== null){
+				$badges[] = '['.$heading.':'.$value.']';
+			}
+		}
+
+		return $badges;
+
+	}
+
+	function build_visitor_target_badge_prefix($targets){
+
+		$badges = $this->build_visitor_target_badges($targets);
+
+		if (empty($badges)){
+			return '';
+		}
+
+		return implode(' ', $badges).' ';
+
+	}
+
+	function _compute_cached_title($base_title, $targets){
+
+		$base_title = substr(strip_tags((string)$base_title), 0, 98);
+
+		return $this->build_visitor_target_badge_prefix($targets).$base_title;
+
+	}
+
+	function _is_list_item_row($row){
+
+		return empty($row['cms_page_id']) && !empty($row['sort']);
+
+	}
+
+	function _resolve_panel_base_title($cms_page_panel_id, $row, $base_title = null){
+
+		if ($base_title !== null && $base_title !== ''){
+			return $base_title;
+		}
+
+		if (is_numeric($row['panel_name']) && (int)$row['panel_name'] == $row['panel_name']){
+			return '';
+		}
+
+		if (($row['title'] ?? '') !== ''){
+			return $row['title'];
+		}
+
+		if ($this->_is_list_item_row($row)){
+			$panel = $this->get_cms_page_panel($cms_page_panel_id, '', false);
+			if (is_array($panel)){
+				return $this->get_list_item_title($panel);
+			}
+		}
+
+		return $row['title'] ?? '';
+
+	}
+
+	function _refresh_cached_title($cms_page_panel_id, $base_title = null){
+
+		static $refreshing = [];
+
+		$cms_page_panel_id = (int)$cms_page_panel_id;
+
+		if (empty($cms_page_panel_id) || !empty($refreshing[$cms_page_panel_id])){
+			return '';
+		}
+
+		$refreshing[$cms_page_panel_id] = 1;
+
+		$sql = 'select title, panel_name, cms_page_id, sort from cms_page_panel where cms_page_panel_id = ? limit 1';
+		$query = $this->db->query($sql, [$cms_page_panel_id]);
+
+		if (!$query->num_rows()){
+			unset($refreshing[$cms_page_panel_id]);
+			return '';
+		}
+
+		$row = $query->row_array();
+		$params = $this->get_cms_page_panel_params($cms_page_panel_id, '');
+
+		if (!is_array($params)){
+			$params = [];
+		}
+
+		$base_title = $this->_resolve_panel_base_title($cms_page_panel_id, $row, $base_title);
+
+		$cached_title = $this->_compute_cached_title($base_title, $params['_targets'] ?? []);
+
+		if (($params['_title'] ?? '') !== $cached_title){
+			$this->_insert_or_update_param($cms_page_panel_id, '_title', $cached_title, 0);
+			$this->_update_cached_params($cms_page_panel_id);
+		}
+
+		unset($refreshing[$cms_page_panel_id]);
+
+		return $cached_title;
+
+	}
+
+	function get_panel_admin_title($row, $lazy_refresh = true){
+
+		if (!empty($row['_title'])){
+			return $row['_title'];
+		}
+
+		if ($lazy_refresh && !empty($row['cms_page_panel_id'])){
+			$cached_title = $this->_refresh_cached_title($row['cms_page_panel_id'], $row['title'] ?? null);
+			if ($cached_title !== ''){
+				return $cached_title;
+			}
+		}
+
+		if (!empty($row['title'])){
+			return $row['title'];
+		}
+
+		if (!empty($row['cms_page_panel_id']) && $this->_is_list_item_row($row)){
+			$panel = $this->get_cms_page_panel($row['cms_page_panel_id'], '', false);
+			if (is_array($panel)){
+				return $this->get_list_item_title($panel);
+			}
+		}
+
+		return '';
+
+	}
+
+	function refresh_all_cached_titles(){
+
+		$query = $this->db->query('select cms_page_panel_id from cms_page_panel order by cms_page_panel_id');
+		$count = 0;
+
+		foreach($query->result_array() as $row){
+			$this->_refresh_cached_title($row['cms_page_panel_id']);
+			$count++;
+		}
+
+		return $count;
+
+	}
+
+	function panel_matches_visitor_targets($panel){
+
+		if (empty($GLOBALS['config']['targets_enabled']) || empty($_SESSION['targets'])){
+			return true;
+		}
+
+		if (empty($panel['_targets']) || !is_array($panel['_targets'])){
+			return true;
+		}
+
+		foreach($panel['_targets'] as $heading => $required_label){
+
+			if ($required_label === '' || $required_label === null){
+				continue;
+			}
+
+			if (empty($_SESSION['targets'][$heading])){
+				return false;
+			}
+
+			if ($_SESSION['targets'][$heading] !== $required_label){
+				return false;
+			}
+
+		}
+
+		return true;
+
+	}
+
 	function get_cms_page_panel($cms_page_panel_id, $language = false, $settings = true){
 		
 		// defaults to frontend language
@@ -737,6 +940,15 @@ class cms_page_panel_model extends Model {
 			
 			if ($purge){
 
+				$existing_params = $this->get_cms_page_panel_params($cms_page_panel_id);
+				if (is_array($existing_params)){
+					foreach($existing_params as $preserve_key => $preserve_value){
+						if ($preserve_key !== '' && $preserve_key[0] === '_' && !array_key_exists($preserve_key, $params)){
+							$params[$preserve_key] = $preserve_value;
+						}
+					}
+				}
+
 				if (!function_exists('recursive_keys')){
 				
 					// remove keys not existing in new value array
@@ -791,6 +1003,8 @@ class cms_page_panel_model extends Model {
 			$this->db->query($sql, $data);
 		}
 		
+		$this->_refresh_cached_title($cms_page_panel_id, $data['title'] ?? null);
+
 		$this->invalidate_html_cache($cms_page_panel_id);
 		$this->_invalidate_page_cache($cms_page_panel_id);
 		
@@ -941,6 +1155,8 @@ class cms_page_panel_model extends Model {
 			$this->_write_panel_table_row($insert_id, $data['panel_name'], $table_data);
 			$this->_update_cached_params($insert_id);
 		}
+
+		$this->_refresh_cached_title($insert_id, $data['title'] ?? null);
 		
 		$this->invalidate_html_cache($insert_id);
 		$this->_invalidate_page_cache($insert_id);
@@ -1184,8 +1400,11 @@ class cms_page_panel_model extends Model {
 			return $this->get_cms_page_panels_by($filter);
 		}
 
-		$sql = 'select a.cms_page_panel_id, a.cms_page_id, a.parent_id, a.show, a.sort, a.title, a.panel_name, a.submenu_anchor, a.submenu_title'.$ctx['table_select'].
-				' from `cms_page_panel` a '.$ctx['table_join'].
+		$sql = 'select a.cms_page_panel_id, a.cms_page_id, a.parent_id, a.show, a.sort, a.title, a.panel_name, a.submenu_anchor, a.submenu_title, '.
+				'JSON_UNQUOTE(JSON_EXTRACT(p.value, \'$._title\')) as _title'.$ctx['table_select'].
+				' from `cms_page_panel` a '.
+				'left join cms_page_panel_param p on p.cms_page_panel_id = a.cms_page_panel_id and p.name = \'\' '.
+				$ctx['table_join'].
 				($ctx['where_str'] ? ' where '.$ctx['where_str'].' ' : ' ').
 				'order by a.sort '.$ctx['order'];
 
@@ -1263,6 +1482,12 @@ class cms_page_panel_model extends Model {
 			unset($filter['_order']);
 		} else {
 			$order = 'asc';
+		}
+
+		$list_language = false;
+		if (!empty($filter['_default_language'])){
+			$list_language = '';
+			unset($filter['_default_language']);
 		}
 
 		$fields_only = false;
@@ -1377,7 +1602,10 @@ class cms_page_panel_model extends Model {
 				$select_parts[] = 'a.`'.$field.'`';
 			}
 
-			$sql = "select ".implode(', ', $select_parts)." from `cms_page_panel` a ".$table_join.
+			$sql = "select ".implode(', ', $select_parts).", JSON_UNQUOTE(JSON_EXTRACT(p.value, '$._title')) as _title ".
+					"from `cms_page_panel` a ".
+					"left join cms_page_panel_param p on p.cms_page_panel_id = a.cms_page_panel_id and p.name = '' ".
+					$table_join.
 					($where_str ? " where ".$where_str." " : " ").
 					"order by a.sort ".$order;
 
@@ -1408,7 +1636,8 @@ class cms_page_panel_model extends Model {
 
 	    	// replace with translated versions
 	    	foreach($return as $key => $page_panel){
-	    		$return[$key] = $this->get_cms_page_panel($page_panel['cms_page_panel_id'], $this->get_current_language(), false);
+	    		$language = ($list_language === false) ? $this->get_current_language() : $list_language;
+	    		$return[$key] = $this->get_cms_page_panel($page_panel['cms_page_panel_id'], $language, false);
 	    	}
 	    	
 	    	// unpack params - not needed
@@ -1659,13 +1888,8 @@ class cms_page_panel_model extends Model {
 	 */
 	function get_cms_language(){
 		
-		if (!empty($_SESSION['cms_language'])){
-			$return = $_SESSION['cms_language'];
- 		} else {
- 			$return = $this->get_default_language();
- 		}
- 		
- 		return $return;
+		$this->_ensure_language_model();
+		return $this->cms_language_model->get_cms_language();
 		
 	}
 	

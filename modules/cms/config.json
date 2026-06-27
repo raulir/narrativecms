@@ -70,6 +70,13 @@
 			"url":"admin/panel_settings/cms__cms_cron/"
 		},
 		{
+			"id":"cms_languages",
+			"name":"Languages",
+			"parent":"cms_cms",
+			"access":"cms_languages",
+			"url":"admin/panel_settings/cms__cms_languages/"
+		},
+		{
 			"id":"cms_targets",
 			"name":"Target groups",
 			"parent":"cms_cms",
@@ -153,6 +160,10 @@
 		{
 			"access":"cms_targets",
 			"name":"CMS target groups"
+		},
+		{
+			"access":"cms_languages",
+			"name":"CMS languages"
 		}
 	],
 	"panels":[

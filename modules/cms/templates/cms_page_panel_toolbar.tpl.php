@@ -5,7 +5,7 @@
 		
 			<div class="cms_page_panel_toolbar_breadcrumb">
 		
-				<?php foreach($breadcrumb as $element): ?>
+				<?php foreach($breadcrumb as $i => $element): ?>
 					
 					<<?= !empty($element['url']) ? 'a' : 'div' ?> class="cms_tool_text cms_page_panel_toolbar_text<?= !empty($element['class']) ? ' '.$element['class'] : '' ?>" 
 							<?php _lh($element['url']); ?>>
@@ -14,7 +14,9 @@
 					
 					</<?= !empty($element['url']) ? 'a' : 'div' ?>>
 					
-					<div class="cms_tool_text cms_page_panel_toolbar_gt">&nbsp; &gt; &nbsp;</div>
+					<?php if ($i < count($breadcrumb) - 1): ?>
+						<div class="cms_tool_text cms_page_panel_toolbar_gt">&nbsp; &gt; &nbsp;</div>
+					<?php endif ?>
 				
 				<?php endforeach ?>
 		
@@ -34,7 +36,10 @@
 							<?php foreach($buttons as $button): ?>
 							
 								<?php if($button['position'] == 'hidden'): ?>
-									<?php _panel($button['name'], ['cms_page_panel_id' => $cms_page_panel_id, 'panel_name' => $button['panel_name'], ]); ?>
+									<?php _panel($button['name'], [
+											'cms_page_panel_id' => !empty($button['cms_page_panel_id']) ? $button['cms_page_panel_id'] : $cms_page_panel_id,
+											'panel_name' => $button['panel_name'] ?? '',
+									]); ?>
 								<?php endif ?>
 							
 							<?php endforeach ?>

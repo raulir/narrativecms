@@ -38,6 +38,20 @@ class cms_panel_model extends Model {
 		return !empty($return['item']) ? $return['item'] : array();
 
 	}
+
+	function get_cms_panel_edit_structure($panel_config, $cms_page_id = 0, $parent_id = 0, $sort = 0){
+
+		if (!empty($panel_config['list']) && !empty($cms_page_id)){
+			return !empty($panel_config['settings']) ? $panel_config['settings'] : [];
+		}
+
+		if (!empty($cms_page_id) || !empty($parent_id) || !empty($sort)){
+			return !empty($panel_config['item']) ? $panel_config['item'] : [];
+		}
+
+		return !empty($panel_config['settings']) ? $panel_config['settings'] : [];
+
+	}
 	
 	function get_cms_panel_config($cms_panel){
 

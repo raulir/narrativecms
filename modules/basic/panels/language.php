@@ -9,14 +9,16 @@ class language extends CI_Controller {
 		if ($do == 'language_set'){
 			 
 			$language_id = $this->input->post('language_id');
+			$this->load->model('cms/cms_language_model');
+			$resolved_language_id = $this->cms_language_model->resolve_language_id($language_id, $GLOBALS['language']['languages'] ?? []);
 
-			if (!empty($GLOBALS['language']['languages'][$language_id])){
+			if ($resolved_language_id !== false){
 				
-				$GLOBALS['language']['label'] = $GLOBALS['language']['languages'][$language_id];
-				$GLOBALS['language']['language_id'] = $language_id;
+				$GLOBALS['language']['label'] = $GLOBALS['language']['languages'][$resolved_language_id];
+				$GLOBALS['language']['language_id'] = $resolved_language_id;
 				
 				$this->load->helper('cookie_helper');
-				cms_cookie_create('language', $language_id, 90);
+				cms_cookie_create('language', $resolved_language_id, 90);
 
 				print(json_encode(['result' => 'ok'], JSON_PRETTY_PRINT));
 				
@@ -32,19 +34,30 @@ class language extends CI_Controller {
 	
 	function panel_params($params){
 		
+		$this->load->model('cms/cms_page_panel_model');
+
+		$params['languages'] = [];
 		foreach($GLOBALS['language']['languages'] as $language_id => $language_name){
 			$params['languages'][$language_id] = [
 					'label' => $language_name,
-					'icon' => '',
 					'language_id' => $language_id,
 			];
 		}
-		
-		// reorder language settings
-		foreach($params['language_settings'] as $setting){
-			if (!empty($params['languages'][$setting['language_id']])){
-				$params['languages'][$setting['language_id']] = $setting;
+
+		if (empty($params['select_label'])){
+			$basic_settings = $this->cms_page_panel_model->get_cms_page_panel_settings('basic/language');
+			if (!empty($basic_settings['select_label'])){
+				$params['select_label'] = $basic_settings['select_label'];
+			} else {
+				$cms_languages = $this->cms_page_panel_model->get_cms_page_panel_settings('cms/cms_languages');
+				if (!empty($cms_languages['select_label'])){
+					$params['select_label'] = $cms_languages['select_label'];
+				}
 			}
+		}
+
+		if (empty($params['select_label'])){
+			$params['select_label'] = 'Select language:';
 		}
 
 		$params['active_language'] = $GLOBALS['language']['language_id'];

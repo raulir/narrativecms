@@ -149,18 +149,18 @@ class cms_page_panel_operations extends CI_Controller {
 		} elseif ($do == 'cms_page_panel_preview_title'){
 
 			$block_id = $this->input->post('cms_page_panel_id');
-			$language = $this->input->post('language');
+			$language = $this->_resolve_cms_language($this->input->post('language'));
 			$built = $this->_build_merged_panel_data_from_post($block_id, $language);
 			$compiled_title = $this->_compile_list_item_title($built['data_merged'], $built['panel_config'], $block_id, $language);
 
 			if ($compiled_title !== false){
-				$params['title'] = $compiled_title;
+				$params['_title'] = $this->cms_page_panel_model->_compute_cached_title($compiled_title, $built['data_merged']['_targets'] ?? []);
 			}
 
 		} elseif ($do == 'cms_page_panel_save'){
 			 
 			$block_id = $this->input->post('cms_page_panel_id');
-			$language = $this->input->post('language');
+			$language = $this->_resolve_cms_language($this->input->post('language'));
 
 			$old_data = $this->cms_page_panel_model->get_cms_page_panel($block_id, $language);
 
@@ -181,7 +181,6 @@ class cms_page_panel_operations extends CI_Controller {
 
 			if ($compiled_title !== false){
 				$data_merged['title'] = $compiled_title;
-				$params['title'] = $compiled_title;
 			}
 			
 			// on_update hook
@@ -256,6 +255,11 @@ class cms_page_panel_operations extends CI_Controller {
 			 
 			$params['cms_page_panel_id'] = $block_id;
 
+			$saved_panel = $this->cms_page_panel_model->get_cms_page_panel($block_id, $language);
+			if (is_array($saved_panel)){
+				$params['_title'] = $this->cms_page_panel_model->get_panel_admin_title($saved_panel);
+			}
+
 		} elseif ($do == 'cms_page_panel_delete'){
 			 
 			$block_id = $this->input->post('cms_page_panel_id');
@@ -263,7 +267,7 @@ class cms_page_panel_operations extends CI_Controller {
 			// data for filenames
 			$data = $this->cms_page_panel_model->get_cms_page_panel($block_id);
 			$panel_config = $this->cms_panel_model->get_cms_panel_config($data['panel_name']);
-			$panel_structure = !empty($panel_config['item']) ? $panel_config['item'] : array();
+			$panel_structure = $this->cms_panel_model->get_cms_panel_edit_structure($panel_config, $data['cms_page_id'], $data['parent_id'], $data['sort']);
 				
 			$this->cms_page_panel_model->delete_cms_page_panel($block_id);
 
@@ -282,6 +286,14 @@ class cms_page_panel_operations extends CI_Controller {
 		}
 		
 		return $params;
+
+	}
+
+	function _resolve_cms_language($language){
+
+		$this->load->model('cms/cms_language_model');
+		$resolved_language = $this->cms_language_model->resolve_language_id($language, $GLOBALS['language']['languages'] ?? []);
+		return $resolved_language !== false ? $resolved_language : $language;
 
 	}
 
@@ -330,7 +342,7 @@ class cms_page_panel_operations extends CI_Controller {
 		$data['search_params'] = [];
 		$data['translate_params'] = [];
 
-		$panel_structure = !empty($panel_config['item']) ? $panel_config['item'] : [];
+		$panel_structure = $this->cms_panel_model->get_cms_panel_edit_structure($panel_config, $data['cms_page_id'], $data['parent_id'], $data['sort']);
 		foreach($panel_structure as $struct){
 			if (!empty($struct['search'])){
 				$data['search_params'][$struct['name']] = $struct['search'];

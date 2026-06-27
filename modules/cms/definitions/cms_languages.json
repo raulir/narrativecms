@@ -1,0 +1,48 @@
+{
+	"version":"2",
+	"label":"Languages",
+	"item":[],
+	"settings":[
+		{
+			"type":"text",
+			"name":"select_label",
+			"label":"Select label",
+			"default":"Select language:",
+			"translate":"1",
+			"help":"Label for language selection dropdown on frontend"
+		},
+		{
+			"type":"grid",
+			"name":"languages",
+			"label":"Languages",
+			"ds":"languages",
+			"operations":"CD",
+			"fields":[
+				{
+					"type":"cms/cms_languages_id",
+					"name":"language_id",
+					"label":"Language ID",
+					"width":"22",
+					"align":"left",
+					"order":"10"
+				},
+				{
+					"type":"cms/cms_grid_editable",
+					"name":"label",
+					"label":"Label",
+					"width":"28",
+					"align":"left",
+					"order":"20"
+				},
+				{
+					"type":"cms/cms_languages_local_label",
+					"name":"local_label",
+					"label":"Name ({cms_language})",
+					"width":"35",
+					"align":"left",
+					"order":"30"
+				}
+			]
+		}
+	]
+}

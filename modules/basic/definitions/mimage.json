@@ -15,17 +15,6 @@
 		},
 		{
 			"type":"select",
-			"name":"responsiveness",
-			"label":"Responsiveness",
-			"values": {
-				"all":"All",
-				"mobile":"Mobile only",
-				"desktop":"Desktop only"
-			},
-			"default":""
-		},
-		{
-			"type":"select",
 			"name":"optimise",
 			"label":"Optimise",
 			"values": {

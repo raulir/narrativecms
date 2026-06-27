@@ -56,6 +56,10 @@ class cms_list_list extends CI_Controller {
 		$filter['_limit'] = !empty($params['limit']) ? $params['limit'] : 0;
 		$return['list'] = $this->cms_page_panel_model->get_cms_page_panels_list_by($filter);
 
+		foreach($return['list'] as $key => $block){
+			$return['list'][$key]['title'] = $this->cms_page_panel_model->get_panel_admin_title($block, false);
+		}
+
 		return $return;
 
 	}

@@ -1,0 +1,33 @@
+.cms_popup_targets .cms_popup_cell {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+}
+
+.cms_popup_targets .cms_popup_content {
+	display: flex;
+	flex-direction: column;
+	height: auto;
+	min-height: 20.0rem;
+	max-height: 62.0rem;
+	width: 58.0rem;
+	max-width: calc(100vw - 4.0rem);
+	margin: 0 auto;
+	overflow: hidden;
+}
+
+.cms_popup_targets .cms_popup_area {
+	flex: 1;
+	min-height: 0;
+	font-size: 1.7rem;
+	line-height: 2.2rem;
+	padding-top: 1.0rem;
+	overflow-y: auto;
+	max-height: calc(62.0rem - 6.0rem);
+}
+
+.cms_popup_targets .cms_page_panel_targets_close {
+	width: auto;
+}

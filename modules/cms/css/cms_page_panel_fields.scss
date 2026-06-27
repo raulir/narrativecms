@@ -20,6 +20,20 @@
 		position: absolute;
 	}
 
+	.cms_input_container_full {
+		display: block;
+		position: relative;
+		width: 100%;
+		box-sizing: border-box;
+
+		.cms_input {
+			position: relative;
+			top: auto;
+			left: auto;
+			width: 100%;
+		}
+	}
+
 	.cms_repeater_container {
 		position: absolute;
 		width: 100%;

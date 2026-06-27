@@ -20,10 +20,12 @@ class cms_page_panel_toolbar extends CI_Controller {
 		$this->load->model('cms/cms_page_model');
 		$this->load->model('cms/cms_panel_model');
 
-		$cms_page_panel = $this->cms_page_panel_model->get_cms_page_panel($params['target_id']);
+		$cms_page_panel = $this->cms_page_panel_model->get_cms_page_panel($params['target_id'], $this->cms_page_panel_model->get_cms_language());
 		if (empty($cms_page_panel)){
 			$cms_page_panel = [];
 		}
+
+		$params['cms_page_panel_id'] = !empty($cms_page_panel['cms_page_panel_id']) ? $cms_page_panel['cms_page_panel_id'] : (int)($params['target_id'] ?? 0);
 
 		if (!empty($params['target_parent_id'])) {
 			$cms_page_panel['target_parent_id'] = $params['target_parent_id'];
@@ -38,6 +40,21 @@ class cms_page_panel_toolbar extends CI_Controller {
 
 		// breadcrumb
 		$params['breadcrumb'] = [];
+
+		$toolbar_title_item = function($title) use ($cms_page_panel){
+			if (empty($cms_page_panel['cms_page_panel_id'])){
+				return [
+						'text' => $title,
+						'url' => '',
+						'class' => 'cms_page_panel_toolbar_title',
+				];
+			}
+			return [
+					'text' => $this->cms_page_panel_model->get_panel_admin_title(array_merge($cms_page_panel, ['title' => $title])),
+					'url' => '',
+					'class' => 'cms_page_panel_toolbar_title',
+			];
+		};
 
 		if (!empty($cms_page_panel['parent_id'])){
 
@@ -84,11 +101,7 @@ class cms_page_panel_toolbar extends CI_Controller {
 					'url' => 'admin/cms_page_panel/'.$parent['cms_page_panel_id'].'/',
 			];
 			
-			$params['breadcrumb'][] = [
-					'text' => $params['target_id'] ? $cms_page_panel['title'] : 'New panel',
-					'url' => '',
-					'class' => 'cms_page_panel_toolbar_title',
-			];
+			$params['breadcrumb'][] = $toolbar_title_item($params['target_id'] ? $cms_page_panel['title'] : 'New panel');
 				
 		} else if (!empty($params['target_page_id'])){ // normal panel on page
 
@@ -103,11 +116,7 @@ class cms_page_panel_toolbar extends CI_Controller {
 							'text' => !empty($params['page']['title']) ? $params['page']['title'] : '[ no title ]',
 							'url' => 'admin/page/'.$params['target_page_id'].'/',
 					],
-					[
-							'text' => $params['target_id'] ? $cms_page_panel['title'] : 'New panel',
-							'url' => '',
-							'class' => 'cms_page_panel_toolbar_title',
-					],
+					$toolbar_title_item($params['target_id'] ? $cms_page_panel['title'] : 'New panel'),
 			];
 
 		} else {
@@ -141,16 +150,14 @@ class cms_page_panel_toolbar extends CI_Controller {
 					$heading = (!empty($panel_config['label']) ? $panel_config['label'] : $cms_page_panel['panel_name']) . ' settings';
 				}
 
-				$breadcrumb_item = [
-						'text' => $heading,
-						'url' => '',
-				];
-
 				if ($cms_page_panel['sort']){
-					$breadcrumb_item['class'] = 'cms_page_panel_toolbar_title';
+					$params['breadcrumb'][] = $toolbar_title_item($heading);
+				} else {
+					$params['breadcrumb'][] = [
+							'text' => $heading,
+							'url' => '',
+					];
 				}
-
-				$params['breadcrumb'][] = $breadcrumb_item;
 
 			} else { // must be global settings panel
 
@@ -233,6 +240,7 @@ class cms_page_panel_toolbar extends CI_Controller {
 			$params['buttons'][] = [
 					'name' => 'cms/cms_page_panel_button_targets', 
 					'position' => 'hidden', 
+					'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
 					'panel_name' => $cms_page_panel['panel_name'],
 			];
 			$params['hidden_section'] = 1;

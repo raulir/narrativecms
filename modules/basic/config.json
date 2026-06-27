@@ -83,13 +83,7 @@
 			"parent":"cms_tools",
 			"access":"basic_analytics"
 		},
-		{
-			"id":"basic_language",
-			"name":"Language settings",
-			"url":"admin/panel_settings/basic__language/",
-			"parent":"cms_tools",
-			"access":"basic_language"
-		},
+
 		{
 			"id":"basic_pageshare",
 			"name":"Sharing settings",

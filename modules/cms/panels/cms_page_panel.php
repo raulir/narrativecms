@@ -153,7 +153,7 @@ class cms_page_panel extends CI_Controller {
 					$panel_structure = [
 							[
 									'type' => 'subtitle',
-									'label' => 'No settings'
+									'label' => 'This panel doesn\'t have settings fields'
 							]
 					];
 				}
