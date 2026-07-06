@@ -13,6 +13,9 @@ class cms_input_textarea extends CI_Controller {
 		}
 
 		add_css('modules/cms/css/cms_input.scss');
+		add_css('modules/cms/css/cms_input_textarea.scss');
+
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_translate_string.js';
 		
 	}
 
@@ -50,17 +53,62 @@ class cms_input_textarea extends CI_Controller {
 		$params['max_chars_class'] = $max_chars_class;
 		$params['meta_class'] = $meta_class;
 
-		if (!empty($params['html']) && empty($params['readonly'])){
+		if (!empty($params['md']) && empty($params['readonly'])){
+
+			if (empty($params['extra_data'])){
+				$params['extra_data'] = '';
+			}
+
+			$params['extra_data'] .= ' data-md="1"';
+
+			if (!empty($params['md_filter'])){
+				$params['extra_data'] .= ' data-md_filter="'.$params['md_filter'].'"';
+			}
+
+		} else if (!empty($params['html']) && empty($params['readonly'])){
 			
 			$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/tinymce/tinymce.min.js', 'no_pack' => 1, 'sync' => '', );
 			
 			if (stristr($params['html'], 'M')){
 				$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_input_image.js';
+				add_css('modules/cms/css/cms_images.scss');
+				add_css('modules/cms/css/cms_images_page.scss');
+				add_css('modules/cms/css/cms_video_view.scss');
+				$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_images.js';
+				$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_media_view.js';
+				$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_video.js';
 			}
 
 		}
 
 		return $params;
+
+	}
+
+	function panel_action($params){
+
+		if (empty($params['md_preview'])){
+			return $params;
+		}
+
+		$text = (string)($params['text'] ?? '');
+		$cms_page_panel_id = (int)($params['cms_page_panel_id'] ?? 0);
+		$md_filter = trim((string)($params['md_filter'] ?? ''));
+
+		$this->load->helper('markdown_helper');
+
+		$filter_params = [
+			'text' => $text,
+			'cms_page_panel_id' => $cms_page_panel_id,
+		];
+
+		if ($md_filter !== ''){
+			$filter_params = markdown_apply_md_filter($md_filter, $filter_params);
+		}
+
+		return [
+			'html' => markdown_render_body($filter_params['text'] ?? $text, $filter_params['images'] ?? []),
+		];
 
 	}
 

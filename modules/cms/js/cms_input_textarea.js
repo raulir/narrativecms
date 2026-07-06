@@ -14,6 +14,94 @@ function cms_input_textarea_srcconverter(url, node, on_save, name) {
 	
 }
 
+function cms_input_textarea_md_collect_scope($wrap){
+
+	var $scope = $wrap.closest('.cms_page_panel_container');
+
+	if (!$scope.length){
+		$scope = $wrap.closest('form');
+	}
+
+	if (!$scope.length){
+		$scope = $wrap.closest('.cms_page_panel_fields');
+	}
+
+	return $scope;
+
+}
+
+function cms_input_textarea_md_preview($wrap){
+
+	var $textarea = $('textarea', $wrap).first();
+	var $button = $('.cms_input_textarea_md_button', $wrap);
+	var $preview = $('.cms_input_textarea_md_preview', $wrap);
+	var $scope = cms_input_textarea_md_collect_scope($wrap);
+	var cms_page_panel_id = ($scope.find('input.cms_page_panel_id').val() || '').trim();
+	var md_filter = ($textarea.attr('data-md_filter') || '').trim();
+	var ajax_params = {
+		'no_html': '1',
+		'md_preview': '1',
+		'text': $textarea.val(),
+		'md_filter': md_filter,
+	};
+
+	if (cms_page_panel_id){
+		ajax_params.cms_page_panel_id = cms_page_panel_id;
+	}
+
+	$button.prop('disabled', true).text('Preview ...');
+
+	get_ajax_panel('cms/cms_input_textarea', ajax_params, function(result){
+
+		$preview.html(result.result.html || '');
+		$preview.show();
+		$textarea.hide();
+		$button.prop('disabled', false).text('Edit');
+		$wrap.addClass('cms_input_textarea_md_preview_active');
+
+	});
+
+}
+
+function cms_input_textarea_md_edit($wrap){
+
+	var $textarea = $('textarea', $wrap).first();
+	var $button = $('.cms_input_textarea_md_button', $wrap);
+	var $preview = $('.cms_input_textarea_md_preview', $wrap);
+
+	$preview.hide().empty();
+	$textarea.show();
+	$button.text('Preview');
+	$wrap.removeClass('cms_input_textarea_md_preview_active');
+
+}
+
+function cms_input_textarea_md_init(){
+
+	$('.cms_input_textarea_md').each(function(){
+
+		var $wrap = $(this);
+
+		if ($wrap.data('cms_input_textarea_md_init')){
+			return;
+		}
+
+		$wrap.data('cms_input_textarea_md_init', 1);
+
+		$('.cms_input_textarea_md_button', $wrap).on('click.cms', function(){
+
+			if ($wrap.hasClass('cms_input_textarea_md_preview_active')){
+				cms_input_textarea_md_edit($wrap);
+			} else {
+				cms_input_textarea_md_preview($wrap);
+			}
+
+		});
+
+	});
+
+}
+
 function cms_input_textarea_init(){
 
 	$('.cms_input_textarea').each(function(){
@@ -217,6 +305,8 @@ function cms_input_textarea_init(){
 			}
 		});
 	}, 30)
+
+	cms_input_textarea_md_init();
 
 }
 

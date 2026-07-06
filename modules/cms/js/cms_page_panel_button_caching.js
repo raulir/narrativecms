@@ -9,7 +9,6 @@ function cms_page_panel_button_caching_init(){
 
 					// defined in panel js file
 					cms_page_panel_caching_save(function(){
-						$('.popup_container,.popup_overlay').remove();
 						cms_notification('Panel caching settings saved', 3);
 					});
 				},
