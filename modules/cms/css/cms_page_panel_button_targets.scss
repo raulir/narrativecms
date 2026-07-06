@@ -16,9 +16,10 @@
 	max-width: calc(100vw - 4.0rem);
 	margin: 0 auto;
 	overflow: hidden;
+	text-align: left;
 }
 
-.cms_popup_targets .cms_popup_area {
+.cms_popup_targets .cms_page_panel_targets_container {
 	flex: 1;
 	min-height: 0;
 	font-size: 1.7rem;

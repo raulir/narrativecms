@@ -1,25 +1,127 @@
-.cms_page_panel_export_container {
+.cms_page_panel_export_container,
+.cms_page_panel_export_settings_container {
 	height: 100%;
+	position: relative;
 }
 
-.cms_page_panel_export_content {
+.cms_page_panel_export_content,
+.cms_page_panel_export_settings_content {
 	height: 100%;
 	position: relative;
 	font-size: 0;
 	line-height: 0;
 	letter-spacing: 0;
-	padding: 0 4.6rem;
+	padding: 2.0rem 4.0rem 1.5rem;
+	overflow-y: auto;
 }
 
 .cms_page_panel_export_message {
 	font-size: 2.0rem;
 	line-height: 3.0rem;
 	margin-bottom: 1.8rem;
-    margin-top: 20.5rem;
+	margin-top: 0;
+}
+
+.cms_page_panel_export_settings_heading {
+	font-size: 2.0rem;
+	line-height: 3.0rem;
+	margin-bottom: 1.5rem;
+	font-weight: bold;
+}
+
+.cms_page_panel_export_settings_row {
+	display: grid;
+	grid-template-columns: 3.0rem 1fr 16.0rem 11.0rem;
+	align-items: center;
+	column-gap: 1.0rem;
+	font-size: 1.4rem;
+	line-height: 2.2rem;
+	margin-bottom: 0.8rem;
+	min-height: 2.6rem;
+}
+
+.cms_page_panel_export_col_check {
+	position: relative;
+	text-align: center;
+}
+
+.cms_page_panel_export_col_label {
+	min-width: 0;
+	text-align: left;
+}
+
+.cms_page_panel_export_col_label_sub {
+	padding-left: 2.4rem;
+}
+
+.cms_page_panel_export_col_opts {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.6rem;
+	min-height: 2.6rem;
+}
+
+.cms_page_panel_export_col_size {
+	text-align: right;
+	font-size: 1.3rem;
+	color: #555555;
+}
+
+.cms_page_panel_export_affected_dim {
+	opacity: 0.5;
+}
+
+.cms_page_panel_export_fake_check {
+	font-family: monospace;
+	font-size: 1.4rem;
+	line-height: 2.2rem;
+	cursor: pointer;
+	user-select: none;
+}
+
+.cms_page_panel_export_settings_text {
+	cursor: pointer;
+}
+
+.cms_page_panel_export_opt_hidden {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+	width: 0;
+	height: 0;
+}
+
+.cms_page_panel_export_settings_cutoff_label {
+	font-size: 1.2rem;
+	color: #666666;
+}
+
+.cms_page_panel_export_image_cutoff {
+	width: 5.5rem;
+	font-size: 1.3rem;
+	line-height: 2.2rem;
+	padding: 0 0.4rem;
+	border: 0.1rem solid #cccccc;
+}
+
+.cms_page_panel_export_video_quality {
+	font-size: 1.3rem;
+	line-height: 2.2rem;
+	padding: 0 0.4rem;
+	border: 0.1rem solid #cccccc;
+}
+
+.cms_page_panel_export_settings_total {
+	font-size: 1.5rem;
+	line-height: 2.4rem;
+	margin-top: 1.2rem;
+	margin-bottom: 1.0rem;
+	font-weight: bold;
 }
 
 .cms_page_panel_export_line {
-	height: 0..8rem;
+	height: 0.8rem;
 	background-color: #cccccc;
 	width: 75%;
 	margin: 1.0rem auto;
@@ -47,10 +149,40 @@
 }
 
 .cms_page_panel_export_buttons {
-	padding-top: 2.3rem;
+	padding-top: 1.5rem;
 }
 
-.cms_page_panel_export_download {
+.cms_page_panel_export_settings_last_divider {
+	display: block;
+	height: 0.1rem;
+	min-height: 1px;
+	background-color: #cccccc;
+	margin: 1.5rem 0 1.2rem;
+	width: 100%;
+}
+
+.cms_page_panel_export_settings_last {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1.0rem;
+	font-size: 1.4rem;
+	line-height: 2.2rem;
+	color: #000000;
+}
+
+.cms_page_panel_export_settings_last_label {
+	display: block;
+	flex: 1;
+	min-width: 0;
+	text-align: left;
+	font-size: 1.4rem;
+	line-height: 2.2rem;
+	color: #000000;
+}
+
+.cms_page_panel_export_download,
+.cms_page_panel_export_run {
 	width: 11.0rem;
 	margin: 0 0.2rem;
 }
@@ -58,4 +190,48 @@
 .cms_page_panel_export_close {
 	width: 11.0rem;
 	margin: 0 0.2rem;
+}
+
+.cms_page_panel_export_overlay {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 50;
+	background-color: white;
+	opacity: 0;
+	transition: opacity 0.3s;
+	pointer-events: none;
+}
+
+.cms_page_panel_export_overlay_visible {
+	opacity: 0.85;
+	pointer-events: all;
+}
+
+.cms_page_panel_export_overlay_label {
+	display: none;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 1.8rem;
+	color: #000000;
+}
+
+.cms_page_panel_export_overlay_show_label .cms_page_panel_export_overlay_label {
+	display: block;
+}
+
+.cms_page_panel_export_optim_images_row.cms_page_panel_export_disabled,
+.cms_page_panel_export_optim_videos_row.cms_page_panel_export_disabled {
+	opacity: 0.45;
+}
+
+.cms_page_panel_export_optim_images_row.cms_page_panel_export_disabled .cms_page_panel_export_fake_check,
+.cms_page_panel_export_optim_videos_row.cms_page_panel_export_disabled .cms_page_panel_export_fake_check,
+.cms_page_panel_export_optim_images_row.cms_page_panel_export_disabled .cms_page_panel_export_settings_text,
+.cms_page_panel_export_optim_videos_row.cms_page_panel_export_disabled .cms_page_panel_export_settings_text {
+	cursor: default;
 }

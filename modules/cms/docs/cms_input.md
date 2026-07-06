@@ -47,7 +47,9 @@ Panel definition fields live in `modules/<module>/definitions/<panel>.json` unde
 | `default` | Default value |
 | `lines` * | Height in CMS line-heights |
 | `width` | `"wide"` — double-column width |
-| `html` | Enables WYSIWYG editor. String of feature letters: `H` header, `L` list, `A` link, `B` bold, `I` italic, `U` underline, `C` colour, `Q` quote, `P` line breaks as `<p>` (default is `<br>`), `M` media (image upload) |
+| `md` | `"1"` — plain textarea with **Preview** / **Edit** toggle; markdown rendered server-side via `cms/cms_input_textarea`. No TinyMCE. Works with `translate`. |
+| `md_filter` | `"module/panel/function"` — optional pre-markdown filter; receives live `text` and caller `cms_page_panel_id`, returns filtered `text` and optionally `images` for `![alt](id)` resolution. Example: `"music/material/md_filter_preview_text"`. |
+| `html` | Enables WYSIWYG editor. String of feature letters: `H` header, `L` list, `A` link, `B` bold, `I` italic, `U` underline, `C` colour, `Q` quote, `P` line breaks as `<p>` (default is `<br>`), `M` media (image upload). Ignored when `md` is set. |
 | `html_class` | CSS class on TinyMCE body |
 | `html_css` | Stylesheet URL for TinyMCE content |
 | `styles` | With `M` — image style formats, e.g. `[{"name":"Left","style":{"float":"left"}}]` |
