@@ -21,7 +21,10 @@ class cms_language_select extends Controller {
 		
 		$this->load->model('cms/cms_page_panel_model');
 		
+		$this->load->model('cms/cms_language_model');
+
 		$params['selected'] = $this->cms_page_panel_model->get_cms_language();
+		$params['default_language'] = $this->cms_language_model->get_default();
 		
 		return $params;
 		

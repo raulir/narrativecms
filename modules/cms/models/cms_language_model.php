@@ -105,4 +105,73 @@ class cms_language_model extends Model {
 	
 	}
 
+	function get_language_endonyms(){
+
+		$allowed = $GLOBALS['language']['languages'] ?? [];
+
+		if (!is_array($allowed) || !$allowed){
+			return [];
+		}
+
+		$CI =& get_instance();
+		$CI->load->model('cms/cms_page_panel_model');
+
+		$panels = $CI->cms_page_panel_model->get_cms_page_panels_by([
+			'panel_name' => 'cms/cms_languages',
+			'cms_page_id' => 0,
+			'parent_id' => 0,
+			'sort' => 0,
+		]);
+
+		$translations = [];
+
+		if (!empty($panels[0]['cms_page_panel_id'])){
+			$panel = $CI->cms_page_panel_model->get_cms_page_panel($panels[0]['cms_page_panel_id']);
+			$translations = $panel['_translations'] ?? [];
+			if (!is_array($translations)){
+				$translations = [];
+			}
+		}
+
+		$endonyms = [];
+
+		foreach ($allowed as $language_id => $canonical_label){
+
+			$branch = $this->resolve_translation_branch($language_id, $translations);
+			$local_labels = $branch['local_labels'] ?? [];
+
+			if (!is_array($local_labels)){
+				$local_labels = [];
+			}
+
+			$endonym = '';
+
+			if (isset($local_labels[$language_id]) && trim((string)$local_labels[$language_id]) !== ''){
+				$endonym = trim((string)$local_labels[$language_id]);
+			} else {
+				$normalised = $this->normalise_language_id($language_id);
+				foreach ($local_labels as $key => $value){
+					if ($this->normalise_language_id($key) === $normalised && trim((string)$value) !== ''){
+						$endonym = trim((string)$value);
+						break;
+					}
+				}
+			}
+
+			if ($endonym === ''){
+				$endonym = is_string($canonical_label) ? trim($canonical_label) : '';
+			}
+
+			if ($endonym === ''){
+				$endonym = (string)$language_id;
+			}
+
+			$endonyms[$language_id] = $endonym;
+
+		}
+
+		return $endonyms;
+
+	}
+
 }

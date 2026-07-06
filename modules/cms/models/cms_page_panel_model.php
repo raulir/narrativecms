@@ -681,7 +681,53 @@ class cms_page_panel_model extends Model {
 
 	}
 
+	function _is_default_language($language){
+
+		$this->_ensure_language_model();
+
+		if ($language === null || $language === '' || $language === false){
+			return true;
+		}
+
+		return $this->cms_language_model->normalise_language_id($language) === $this->cms_language_model->normalise_language_id($this->default_language);
+
+	}
+
+	function get_list_item_title_row($cms_page_panel_id, $post_merged = null, $language = null){
+
+		$cms_page_panel_id = (int)$cms_page_panel_id;
+
+		if ($cms_page_panel_id > 0){
+			$row = $this->get_cms_page_panel($cms_page_panel_id, $this->default_language, false);
+			if (!is_array($row)){
+				return false;
+			}
+			if (is_array($post_merged) && $this->_is_default_language($language)){
+				$row = array_merge($row, $post_merged);
+				$row['cms_page_panel_id'] = $cms_page_panel_id;
+			}
+		} else if (is_array($post_merged) && $this->_is_default_language($language)){
+			$row = $post_merged;
+		} else {
+			return false;
+		}
+
+		if (!$this->_is_list_item_row($row)){
+			return false;
+		}
+
+		return $row;
+
+	}
+
 	function _resolve_panel_base_title($cms_page_panel_id, $row, $base_title = null){
+
+		if ($this->_is_list_item_row($row)){
+			$title_row = $this->get_list_item_title_row($cms_page_panel_id);
+			if (is_array($title_row)){
+				return $this->get_list_item_title($title_row);
+			}
+		}
 
 		if ($base_title !== null && $base_title !== ''){
 			return $base_title;
@@ -693,13 +739,6 @@ class cms_page_panel_model extends Model {
 
 		if (($row['title'] ?? '') !== ''){
 			return $row['title'];
-		}
-
-		if ($this->_is_list_item_row($row)){
-			$panel = $this->get_cms_page_panel($cms_page_panel_id, '', false);
-			if (is_array($panel)){
-				return $this->get_list_item_title($panel);
-			}
 		}
 
 		return $row['title'] ?? '';
@@ -755,20 +794,21 @@ class cms_page_panel_model extends Model {
 		}
 
 		if ($lazy_refresh && !empty($row['cms_page_panel_id'])){
-			$cached_title = $this->_refresh_cached_title($row['cms_page_panel_id'], $row['title'] ?? null);
+			$base_title = $this->_is_list_item_row($row) ? null : ($row['title'] ?? null);
+			$cached_title = $this->_refresh_cached_title($row['cms_page_panel_id'], $base_title);
 			if ($cached_title !== ''){
 				return $cached_title;
 			}
 		}
 
-		if (!empty($row['title'])){
+		if (!$this->_is_list_item_row($row) && !empty($row['title'])){
 			return $row['title'];
 		}
 
 		if (!empty($row['cms_page_panel_id']) && $this->_is_list_item_row($row)){
-			$panel = $this->get_cms_page_panel($row['cms_page_panel_id'], '', false);
-			if (is_array($panel)){
-				return $this->get_list_item_title($panel);
+			$title_row = $this->get_list_item_title_row($row['cms_page_panel_id']);
+			if (is_array($title_row)){
+				return $this->get_list_item_title($title_row);
 			}
 		}
 
@@ -1717,11 +1757,16 @@ class cms_page_panel_model extends Model {
 	/**
 	 * 
 	 * @param unknown $cms_panel_name - module/panel_name
+	 * @param string $language - CMS language id for translated settings fields
 	 */
-	function get_cms_page_panel_settings($cms_panel_name){
+	function get_cms_page_panel_settings($cms_panel_name, $language = ''){
+
+		if ($language === ''){
+			$language = $this->get_current_language();
+		}
 		
 		if (is_numeric($cms_panel_name)){
-			$panel_data = $this->get_cms_page_panel($cms_panel_name);
+			$panel_data = $this->get_cms_page_panel($cms_panel_name, $language, false);
 			$cms_panel_name = $panel_data['panel_name'];
 		}
 		
@@ -1737,13 +1782,16 @@ class cms_page_panel_model extends Model {
 		
 		$settings_a = $this->get_cms_page_panels_by(['panel_name' => $cms_panel_name, 'cms_page_id' => 0, 'parent_id' => 0, 'sort' => 0, ]);
 
-		if (!empty($settings_a[0])){
-			$return = $settings_a[0];
+		if (!empty($settings_a[0]['cms_page_panel_id'])){
+			$params = $this->get_cms_page_panel_params($settings_a[0]['cms_page_panel_id'], $language);
+			if (is_array($params)){
+				$return = $params;
+			}
 		}
 
 		if (!empty($config['extends'])){
 			
-			$extends_settings = $this->get_cms_page_panel_settings($config['extends']['panel']);
+			$extends_settings = $this->get_cms_page_panel_settings($config['extends']['panel'], $language);
 			$return = array_merge_recursive_ex($extends_settings, $return);
 			
 		}
@@ -1872,6 +1920,324 @@ class cms_page_panel_model extends Model {
 
 	}
 	
+	function _param_path_from_name($name){
+
+		$name = (string)$name;
+
+		if (strpos($name, 'panel_params[') !== 0){
+			return $name;
+		}
+
+		if (!preg_match_all('/\[([^\]]*)\]/', $name, $matches)){
+			return '';
+		}
+
+		return implode('.', $matches[1]);
+
+	}
+
+	function _get_param_by_path($params, $path){
+
+		if ($path === '' || $path === null || !is_array($params)){
+			return '';
+		}
+
+		$keys = explode('.', $path);
+		$arr = $params;
+
+		foreach ($keys as $key){
+			if (!is_array($arr)){
+				return '';
+			}
+			if (!array_key_exists($key, $arr)){
+				if (is_numeric($key)){
+					$padded = str_pad($key, 6, '0', STR_PAD_LEFT);
+					if (array_key_exists($padded, $arr)){
+						$arr = $arr[$padded];
+						continue;
+					}
+				}
+				return '';
+			}
+			$arr = $arr[$key];
+		}
+
+		if (is_array($arr)){
+			return '';
+		}
+
+		return (string)$arr;
+
+	}
+
+	function _resolve_field_default_display($default){
+
+		if (!isset($default) || is_array($default)){
+			return '';
+		}
+
+		$default = (string)$default;
+
+		if (substr($default, 0, 6) == ':date:'){
+			$defparams = explode(':', $default);
+			if (empty($defparams[3])){
+				return date(substr($default, 6));
+			}
+			return date($defparams[2], time() + (int)$defparams[3]);
+		}
+
+		if (substr($default, 0, 5) == ':rnd:'){
+			$length = (int)substr($default, 5);
+			if ($length < 1){
+				return '';
+			}
+			$chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+			$return = '';
+			while (strlen($return) < $length){
+				$pos = mt_rand(0, strlen($chars) - 1);
+				$return .= $chars[$pos];
+			}
+			return $return;
+		}
+
+		return $default;
+
+	}
+
+	function _get_configured_languages(){
+
+		$this->_ensure_language_model();
+
+		$languages = [];
+
+		if (!empty($GLOBALS['language']['languages']) && is_array($GLOBALS['language']['languages'])){
+			foreach ($GLOBALS['language']['languages'] as $language_id => $label){
+				$languages[] = [
+						'language_id' => $this->cms_language_model->normalise_language_id($language_id),
+						'label' => $label,
+				];
+			}
+			return $languages;
+		}
+
+		$targets = $this->get_cms_page_panel_settings('cms/cms_targets');
+		$groups = $targets['groups'] ?? [];
+
+		if (is_array($groups)){
+			foreach ($groups as $group){
+				if (($group['heading'] ?? '') !== 'language' || ($group['strategy'] ?? '') !== 'language'){
+					continue;
+				}
+				$ids = array_map('trim', explode('|', $group['settings'] ?? ''));
+				$labels = array_map('trim', explode('|', $group['labels'] ?? ''));
+				foreach ($ids as $key => $language_id){
+					if ($language_id === ''){
+						continue;
+					}
+					$languages[] = [
+							'language_id' => $this->cms_language_model->normalise_language_id($language_id),
+							'label' => $labels[$key] ?? $language_id,
+					];
+				}
+				break;
+			}
+		}
+
+		if (empty($languages)){
+			$languages[] = [
+					'language_id' => $this->cms_language_model->normalise_language_id($this->default_language),
+					'label' => '',
+			];
+		}
+
+		return $languages;
+
+	}
+
+	function _find_field_definition($panel_name, $path, $panel_row = []){
+
+		$this->load->model('cms/cms_panel_model');
+
+		$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+		$structure = $this->cms_panel_model->get_cms_panel_edit_structure(
+				$config,
+				$panel_row['cms_page_id'] ?? 0,
+				$panel_row['parent_id'] ?? 0,
+				$panel_row['sort'] ?? 0
+		);
+
+		$keys = explode('.', $path);
+		$fields = $structure;
+		$struct = null;
+
+		foreach ($keys as $key){
+			if ($key === '' || is_numeric($key) || preg_match('/^0+\d+$/', $key)){
+				continue;
+			}
+			foreach ($fields as $field){
+				if (($field['name'] ?? '') !== $key){
+					continue;
+				}
+				$struct = $field;
+				if (($field['type'] ?? '') === 'repeater'){
+					$fields = $field['fields'] ?? [];
+				}
+				break;
+			}
+		}
+
+		return $struct;
+
+	}
+
+	function get_translate_string_data($cms_page_panel_id, $field_name, $field_type = ''){
+
+		$cms_page_panel_id = (int)$cms_page_panel_id;
+		$path = $this->_param_path_from_name($field_name);
+
+		$sql = "select panel_name, cms_page_id, parent_id, sort from cms_page_panel where cms_page_panel_id = ? limit 1 ";
+		$query = $this->db->query($sql, [$cms_page_panel_id]);
+
+		if (!$query->num_rows()){
+			return ['error' => 'Panel not found'];
+		}
+
+		$row = $query->row_array();
+		$params = $this->get_cms_page_panel_params($cms_page_panel_id, '');
+		if (!is_array($params)){
+			$params = [];
+		}
+
+		$struct = $this->_find_field_definition($row['panel_name'], $path, $row);
+		$definition_default = '';
+		if (is_array($struct) && array_key_exists('default', $struct)){
+			$definition_default = $this->_resolve_field_default_display($struct['default']);
+		}
+
+		if ($field_type === '' && is_array($struct) && !empty($struct['type'])){
+			$field_type = $struct['type'];
+			if ($field_type == 'color'){
+				$field_type = 'colour';
+			}
+		}
+
+		$default_lang = $this->cms_language_model->normalise_language_id($this->default_language);
+		$main_value = $this->_get_param_by_path($params, $path);
+		$translations = $params['_translations'] ?? [];
+		$stored_main = '';
+		if (!empty($translations[$default_lang])){
+			$stored_main = $this->_get_param_by_path($translations[$default_lang], $path);
+		}
+		if ($stored_main === ''){
+			foreach ($translations as $lang_key => $branch){
+				if ($this->cms_language_model->normalise_language_id($lang_key) === $default_lang){
+					$stored_main = $this->_get_param_by_path($branch, $path);
+					break;
+				}
+			}
+		}
+		$main_resolved = $stored_main !== '' ? $stored_main : $main_value;
+
+		$other_rows = [];
+		foreach ($this->_get_configured_languages() as $language_row){
+			$language_id = $language_row['language_id'];
+			if ($this->cms_language_model->normalise_language_id($language_id) === $default_lang){
+				continue;
+			}
+			$stored = '';
+			if (!empty($translations[$language_id])){
+				$stored = $this->_get_param_by_path($translations[$language_id], $path);
+			} else {
+				foreach ($translations as $lang_key => $branch){
+					if ($this->cms_language_model->normalise_language_id($lang_key) === $this->cms_language_model->normalise_language_id($language_id)){
+						$stored = $this->_get_param_by_path($branch, $path);
+						break;
+					}
+				}
+			}
+			$other_rows[] = [
+					'language_id' => $language_id,
+					'value' => $stored,
+			];
+		}
+
+		return [
+				'field_name' => $field_name,
+				'field_path' => $path,
+				'field_type' => $field_type,
+				'definition_default' => $definition_default,
+				'default_language' => $default_lang,
+				'main_value' => $main_resolved,
+				'other_rows' => $other_rows,
+				'readonly' => !empty($struct['readonly']),
+		];
+
+	}
+
+	function save_translate_string($cms_page_panel_id, $field_name, $values, $cms_language = ''){
+
+		$cms_page_panel_id = (int)$cms_page_panel_id;
+		$path = $this->_param_path_from_name($field_name);
+
+		if ($cms_page_panel_id < 1 || $path === ''){
+			return ['error' => 'Invalid save request'];
+		}
+
+		if (!is_array($values)){
+			$values = [];
+		}
+
+		$this->_ensure_language_model();
+
+		$default_lang = $this->cms_language_model->normalise_language_id($this->default_language);
+
+		foreach ($values as $language_id => $value){
+			$language_id = $this->cms_language_model->normalise_language_id($language_id);
+			$value = is_scalar($value) ? (string)$value : '';
+
+			if ($language_id === $default_lang){
+				$this->_insert_or_update_param($cms_page_panel_id, $path, $value, 0, $default_lang);
+				continue;
+			}
+
+			$sql = "select cms_page_panel_param_id from cms_page_panel_param where cms_page_panel_id = ? and name = ? and language = ? limit 1 ";
+			$query = $this->db->query($sql, [$cms_page_panel_id, $path, $language_id]);
+
+			if ($query->num_rows()){
+				$row = $query->row_array();
+				$sql = "update cms_page_panel_param set value = ? , search = 0 where cms_page_panel_param_id = ? ";
+				$this->db->query($sql, [$value, $row['cms_page_panel_param_id']]);
+			} else {
+				$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = ? , value = ? , search = 0 , language = ? ";
+				$this->db->query($sql, [$cms_page_panel_id, $path, $value, $language_id]);
+			}
+
+		}
+
+		$this->_update_cached_params($cms_page_panel_id);
+
+		if ($cms_language === null || $cms_language === ''){
+			$cms_language = $this->cms_language_model->get_cms_language();
+		}
+
+		$normalised_cms = $this->cms_language_model->normalise_language_id($cms_language);
+		$sync_value = null;
+
+		foreach ($values as $language_id => $value){
+			if ($this->cms_language_model->normalise_language_id($language_id) === $normalised_cms){
+				$sync_value = is_scalar($value) ? (string)$value : '';
+				break;
+			}
+		}
+
+		return [
+				'ok' => 1,
+				'sync_language' => $cms_language,
+				'sync_value' => $sync_value,
+		];
+
+	}
+
 	/* DEPRECATED */
 	
 	/**

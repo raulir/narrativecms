@@ -80,6 +80,12 @@
 
 }
 
+.language_button.language_dropdown_closed .language_languages {
+	opacity: 0;
+	height: 0;
+	overflow: hidden;
+}
+
 .language_language {
 	text-align: left;
 	padding: 0.2rem 0;

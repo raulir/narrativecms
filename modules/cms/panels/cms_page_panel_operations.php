@@ -150,11 +150,21 @@ class cms_page_panel_operations extends CI_Controller {
 
 			$block_id = $this->input->post('cms_page_panel_id');
 			$language = $this->_resolve_cms_language($this->input->post('language'));
-			$built = $this->_build_merged_panel_data_from_post($block_id, $language);
-			$compiled_title = $this->_compile_list_item_title($built['data_merged'], $built['panel_config'], $block_id, $language);
 
-			if ($compiled_title !== false){
-				$params['_title'] = $this->cms_page_panel_model->_compute_cached_title($compiled_title, $built['data_merged']['_targets'] ?? []);
+			if (!$this->cms_page_panel_model->_is_default_language($language)){
+				if (!empty($block_id)){
+					$saved_panel = $this->cms_page_panel_model->get_cms_page_panel($block_id, $this->cms_page_panel_model->default_language);
+					if (is_array($saved_panel)){
+						$params['_title'] = $this->cms_page_panel_model->get_panel_admin_title($saved_panel);
+					}
+				}
+			} else {
+				$built = $this->_build_merged_panel_data_from_post($block_id, $language);
+				$compiled_title = $this->_compile_list_item_title($built['data_merged'], $built['panel_config'], $block_id, $language);
+
+				if ($compiled_title !== false){
+					$params['_title'] = $this->cms_page_panel_model->_compute_cached_title($compiled_title, $built['data_merged']['_targets'] ?? []);
+				}
 			}
 
 		} elseif ($do == 'cms_page_panel_save'){
@@ -179,7 +189,7 @@ class cms_page_panel_operations extends CI_Controller {
 
 			$compiled_title = $this->_compile_list_item_title($data_merged, $panel_config, $block_id, $language);
 
-			if ($compiled_title !== false){
+			if ($compiled_title !== false && $this->cms_page_panel_model->_is_default_language($language)){
 				$data_merged['title'] = $compiled_title;
 			}
 			
@@ -215,8 +225,13 @@ class cms_page_panel_operations extends CI_Controller {
 
 			// if link target, update slug
 			if (!empty($panel_config['list']['link_target'])){
-				
-				if (!empty($data_merged['title'])){
+
+				$title_row = $this->cms_page_panel_model->get_list_item_title_row($block_id);
+				$list_title = is_array($title_row) ? $this->cms_page_panel_model->get_list_item_title($title_row) : '';
+
+				if (!empty($list_title)){
+					$slug_string = $list_title;
+				} else if (!empty($data_merged['title'])){
 					$slug_string = $data_merged['title'];
 				} else if (!empty($data_merged['heading'])){
 					$slug_string = $data_merged['heading'];
@@ -443,19 +458,10 @@ class cms_page_panel_operations extends CI_Controller {
 			return false;
 		}
 
-		$title_row = $data_merged;
+		$title_row = $this->cms_page_panel_model->get_list_item_title_row($block_id, $data_merged, $language);
 
-		if (!$this->cms_page_panel_model->_has_panel_heading($data_merged['panel_name'], $data_merged)
-				&& $this->cms_page_panel_model->_definition_has_heading_field($data_merged['panel_name'])
-				&& $language != $this->cms_page_panel_model->default_language
-				&& $block_id){
-
-			$base_data = $this->cms_page_panel_model->get_cms_page_panel($block_id, $this->cms_page_panel_model->default_language);
-
-			if (!empty($base_data['heading'])){
-				$title_row['heading'] = $base_data['heading'];
-			}
-
+		if (!is_array($title_row)){
+			return false;
 		}
 
 		return $this->cms_page_panel_model->get_list_item_title($title_row);

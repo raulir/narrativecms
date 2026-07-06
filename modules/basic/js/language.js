@@ -1,8 +1,23 @@
+function language_close_dropdown($button){
+
+	if ($button && $button.length){
+		$button.addClass('language_dropdown_closed')
+	}
+
+}
+
 function language_init(){
+
+	$('.language_button').on('mouseenter.cms', function(){
+		$(this).removeClass('language_dropdown_closed')
+	})
 
 	$('.language_language').on('click.cms', function(){
 
-		var $this = $(this);
+		var $this = $(this)
+		var $button = $this.closest('.language_button')
+
+		language_close_dropdown($button)
 		
 		cms_cookie_create('language', $this.data('language_id'), 365)
 		

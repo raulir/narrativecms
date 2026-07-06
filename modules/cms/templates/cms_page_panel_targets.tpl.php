@@ -1,3 +1,8 @@
+<?php
+	$heading = 'Page panel target groups';
+	$save_button = 'Save';
+	include __DIR__.'/cms_popup_toolbar.tpl.php';
+?>
 <div class="cms_page_panel_targets_container">
 
 	<div class="cms_page_panel_targets_content">

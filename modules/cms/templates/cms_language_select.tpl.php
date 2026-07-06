@@ -2,7 +2,7 @@
 	<div class="cms_right cms_language_select_container">
 		<div class="cms_toolbar_buttons_hidden cms_language_select_content">
 			
-			<div class="cms_tool_button cms_language_select_current" data-language="<?= $_SESSION['cms_language'] ?>">
+			<div class="cms_tool_button cms_language_select_current" data-language="<?= $_SESSION['cms_language'] ?>" data-default_language="<?= $default_language ?>">
 				<?= $_SESSION['cms_language'] ?>
 				<div class="cms_toolbar_buttons_hidden_arrow" style="background-image: url('/modules/cms/img/cms_down.png'); "></div>	
 			</div>

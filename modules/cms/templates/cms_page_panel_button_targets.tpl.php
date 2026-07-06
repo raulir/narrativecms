@@ -4,5 +4,3 @@
 	Target groups
 
 </div>
-
-<?php _panel('cms/cms_popup', ['heading' => 'Page panel target groups', 'name' => 'targets', ]) ?>

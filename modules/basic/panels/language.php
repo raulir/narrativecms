@@ -35,11 +35,14 @@ class language extends CI_Controller {
 	function panel_params($params){
 		
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_language_model');
+
+		$endonyms = $this->cms_language_model->get_language_endonyms();
 
 		$params['languages'] = [];
 		foreach($GLOBALS['language']['languages'] as $language_id => $language_name){
 			$params['languages'][$language_id] = [
-					'label' => $language_name,
+					'label' => $endonyms[$language_id] ?? $language_name,
 					'language_id' => $language_id,
 			];
 		}
