@@ -3,6 +3,24 @@ var analytics_beacon_timers = []
 var analytics_beacon_max_scroll = 0
 var analytics_beacon_engagement = false
 var analytics_beacon_heartbeat_seconds = [5, 10, 20, 30, 60, 120, 180, 240, 300]
+var analytics_beacon_last_page = ''
+var analytics_beacon_last_page_at = 0
+var analytics_beacon_record_promise = null
+var analytics_beacon_record_promise_page = ''
+
+function analytics_beacon_get_container() {
+
+	return $('.analytics_beacon_container').filter(function() {
+		return $(this).data('js_tracking') == 1
+	}).first()
+
+}
+
+function analytics_beacon_js_enabled() {
+
+	return analytics_beacon_get_container().length > 0
+
+}
 
 function analytics_beacon_get_scroll_pct() {
 
@@ -17,6 +35,10 @@ function analytics_beacon_get_scroll_pct() {
 }
 
 function analytics_beacon_on_scroll() {
+
+	if (!analytics_beacon_js_enabled()) {
+		return
+	}
 
 	var pct = analytics_beacon_get_scroll_pct()
 	if (pct > analytics_beacon_max_scroll) {
@@ -34,7 +56,7 @@ function analytics_beacon_clear_timers() {
 
 function analytics_beacon_send_heartbeat(seconds) {
 
-	if (!analytics_beacon_pageview_token) {
+	if (!analytics_beacon_js_enabled() || !analytics_beacon_pageview_token) {
 		return
 	}
 
@@ -69,20 +91,52 @@ function analytics_beacon_schedule_heartbeats() {
 
 }
 
+function analytics_beacon_reset_page_dedup() {
+
+	analytics_beacon_last_page = ''
+	analytics_beacon_last_page_at = 0
+	analytics_beacon_record_promise = null
+	analytics_beacon_record_promise_page = ''
+
+}
+
 function analytics_beacon_record_pageview(page) {
+
+	if (!analytics_beacon_js_enabled()) {
+		return Promise.resolve()
+	}
+
+	page = page || (window.location.pathname + window.location.hash)
+	var now = Date.now()
+
+	if (analytics_beacon_record_promise && analytics_beacon_record_promise_page === page) {
+		return analytics_beacon_record_promise
+	}
+
+	if (page === analytics_beacon_last_page && analytics_beacon_pageview_token && (now - analytics_beacon_last_page_at) < 2000) {
+		return Promise.resolve()
+	}
 
 	analytics_beacon_clear_timers()
 	analytics_beacon_pageview_token = ''
 	analytics_beacon_max_scroll = analytics_beacon_get_scroll_pct()
+	analytics_beacon_last_page = page
+	analytics_beacon_last_page_at = now
 
 	var params = {
 		do: 'hit',
-		page: page || (window.location.pathname + window.location.hash),
+		page: page,
 		viewport_w: window.innerWidth || 0,
 		viewport_h: window.innerHeight || 0,
 	}
 
-	return fetch(_cms_get_base() + 'analytics/beacon', {
+	var $beacon_container = analytics_beacon_get_container()
+	if ($beacon_container.length && $beacon_container.data('beacon_id')) {
+		params.beacon_id = $beacon_container.data('beacon_id')
+	}
+
+	analytics_beacon_record_promise_page = page
+	analytics_beacon_record_promise = fetch(_cms_get_base() + 'analytics/beacon', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 		body: new URLSearchParams(params),
@@ -96,6 +150,14 @@ function analytics_beacon_record_pageview(page) {
 			}
 		})
 		.catch(() => {})
+		.finally(() => {
+			if (analytics_beacon_record_promise_page === page) {
+				analytics_beacon_record_promise = null
+				analytics_beacon_record_promise_page = ''
+			}
+		})
+
+	return analytics_beacon_record_promise
 
 }
 
@@ -115,7 +177,7 @@ function analytics_beacon_on_position_nav(final_url, title) {
 
 function analytics_beacon_init() {
 
-	var $container = $('.analytics_beacon_container')
+	var $container = analytics_beacon_get_container()
 	if (!$container.length) {
 		return
 	}

@@ -1,0 +1,77 @@
+{
+	"table": "cms_analytics_pageview_php",
+	"engine": "InnoDB",
+	"charset": "utf8mb4",
+	"collation": "utf8mb4_general_ci",
+	"columns": {
+		"cms_analytics_pageview_php_id": {
+			"type": "INT",
+			"constraint": 10,
+			"unsigned": true,
+			"null": false,
+			"auto_increment": true
+		},
+		"pageview_token": {
+			"type": "VARCHAR",
+			"constraint": 36,
+			"null": false
+		},
+		"beacon_id": {
+			"type": "VARCHAR",
+			"constraint": 36,
+			"null": false,
+			"default": ""
+		},
+		"page": {
+			"type": "VARCHAR",
+			"constraint": 500,
+			"null": false
+		},
+		"language": {
+			"type": "VARCHAR",
+			"constraint": 20,
+			"null": false,
+			"default": ""
+		},
+		"ip_anonymised": {
+			"type": "VARCHAR",
+			"constraint": 45,
+			"null": false,
+			"default": ""
+		},
+		"user_agent": {
+			"type": "VARCHAR",
+			"constraint": 500,
+			"null": false,
+			"default": ""
+		},
+		"created": {
+			"type": "DATETIME",
+			"null": false,
+			"default": "CURRENT_TIMESTAMP"
+		}
+	},
+	"indexes": {
+		"PRIMARY": {
+			"columns": ["cms_analytics_pageview_php_id"],
+			"type": "primary"
+		},
+		"pageview_token_idx": {
+			"columns": ["pageview_token"],
+			"type": "unique"
+		},
+		"beacon_id_idx": {
+			"columns": ["beacon_id"]
+		},
+		"beacon_id_created_idx": {
+			"columns": ["beacon_id", "created"]
+		},
+		"created_idx": {
+			"columns": ["created"]
+		},
+		"page_idx": {
+			"columns": ["page"],
+			"length": 50
+		}
+	}
+}

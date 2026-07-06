@@ -1,0 +1,96 @@
+{
+	"table": "cms_analytics_session",
+	"engine": "InnoDB",
+	"charset": "utf8mb4",
+	"collation": "utf8mb4_general_ci",
+	"columns": {
+		"session_id": {
+			"type": "VARCHAR",
+			"constraint": 36,
+			"null": false
+		},
+		"started": {
+			"type": "DATETIME",
+			"null": false
+		},
+		"last_activity": {
+			"type": "DATETIME",
+			"null": false
+		},
+		"pageviews": {
+			"type": "SMALLINT",
+			"constraint": 5,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
+		"total_seconds": {
+			"type": "INT",
+			"constraint": 10,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
+		"language": {
+			"type": "VARCHAR",
+			"constraint": 20,
+			"null": false,
+			"default": ""
+		},
+		"first_page": {
+			"type": "VARCHAR",
+			"constraint": 500,
+			"null": false,
+			"default": ""
+		},
+		"last_page": {
+			"type": "VARCHAR",
+			"constraint": 500,
+			"null": false,
+			"default": ""
+		},
+		"ip_anonymised": {
+			"type": "VARCHAR",
+			"constraint": 45,
+			"null": false,
+			"default": ""
+		},
+		"user_agent": {
+			"type": "VARCHAR",
+			"constraint": 500,
+			"null": false,
+			"default": ""
+		},
+		"country": {
+			"type": "VARCHAR",
+			"constraint": 100,
+			"null": true
+		},
+		"region": {
+			"type": "VARCHAR",
+			"constraint": 100,
+			"null": true
+		},
+		"city": {
+			"type": "VARCHAR",
+			"constraint": 100,
+			"null": true
+		},
+		"geo_resolved": {
+			"type": "DATETIME",
+			"null": true
+		}
+	},
+	"indexes": {
+		"PRIMARY": {
+			"columns": ["session_id"],
+			"type": "primary"
+		},
+		"last_activity_idx": {
+			"columns": ["last_activity"]
+		},
+		"geo_resolved_idx": {
+			"columns": ["geo_resolved"]
+		}
+	}
+}

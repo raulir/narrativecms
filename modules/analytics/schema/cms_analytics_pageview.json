@@ -32,6 +32,18 @@
 			"null": false,
 			"default": ""
 		},
+		"beacon_id": {
+			"type": "VARCHAR",
+			"constraint": 36,
+			"null": false,
+			"default": ""
+		},
+		"language": {
+			"type": "VARCHAR",
+			"constraint": 20,
+			"null": false,
+			"default": ""
+		},
 		"created": {
 			"type": "DATETIME",
 			"null": false,
@@ -87,6 +99,13 @@
 			"null": false,
 			"default": 0
 		},
+		"bot": {
+			"type": "TINYINT",
+			"constraint": 1,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
 		"country": {
 			"type": "VARCHAR",
 			"constraint": 100,
@@ -121,6 +140,12 @@
 		},
 		"session_created_idx": {
 			"columns": ["session_id", "created"]
+		},
+		"beacon_id_idx": {
+			"columns": ["beacon_id"]
+		},
+		"beacon_id_created_idx": {
+			"columns": ["beacon_id", "created"]
 		},
 		"created_idx": {
 			"columns": ["created"]

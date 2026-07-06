@@ -15,30 +15,69 @@ First-party, self-hosted pageview tracking for the CMS. Lightweight beacon API (
 2. Run **CMS → Schema** (fix module **analytics**). On a fresh install this creates `cms_analytics_pageview`. When `cms_analytics_visit` still exists, the schema tool migrates it automatically (`migrate_from` in `cms_analytics_pageview.json` — renames table, columns, and indexes).
 3. Upload **GeoLite2-City.mmdb** in **Tools → Analytics settings → GeoIP database** (download from [MaxMind GeoLite2](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) — free account required). The file is stored under `img/`. Without it, geo reports on the dashboard show an error. The mmdb is per-installation data — not shipped with every CMS distribution.
 4. Embed panel **analytics/beacon** on the site layout (same way as gtag). JS loads automatically as panel JS (`beacon.js`).
-5. Optional: add **analytics/analytics_geo_resolve** under **Repeating tasks** for background geo backfill.
+5. Add **analytics/analytics_process** under **Repeating tasks** for background session assignment, aggregation, and geo resolve (replaces the old `analytics_geo_resolve` task if present).
 
 ## Admin
 
-- **Tools → Analytics** — dashboard (last 50 pageviews, top pages, geo top 50, 7-day hourly chart).
-- **Tools → Analytics settings** — delay (ms), collect engagement (heartbeats), GeoIP database file.
+- **Tools → Analytics** — dashboard (7-day dual-axis chart, last 50 sessions, last 50 pageviews, top pages, geo top 50). Opening the dashboard runs **analytics_process** first; all pageview stats and charts read **`cms_analytics_pageview` only** (php staging is not queried). **Details** on each session/pageview row opens a floating panel with the full database row (including **User agent**).
+- **Tools → Analytics settings** — delay (ms), session minutes, collect engagement, GeoIP database file, GeoIP diagnostics (show debug block on dashboard, default No).
+- **analytics/beacon** panel (per instance on page or layout position) — **JS tracking** (default No), **PHP tracking** (default Yes). Edit on the embedded panel block (e.g. **Pages → footer → Beacon**), not under **Analytics settings**.
 
 ## Beacon session
 
-- Cookie **`beacon`** — links pageviews into one browsing session (separate from PHP session).
-- **`session_id`** column stores the cookie value; dashboard shows first 8 chars of `md5(session_id)` in the Session column.
+- Cookie **`beacon`** — visitor session cookie (separate from PHP session). Stored on each pageview as **`beacon_id`** at hit time.
+- **`session_id`** on pageviews is set by **analytics_process** once the pageview is assigned to a row in **`cms_analytics_session`** (same UUID as `beacon_id`). Dashboard shows first 8 chars of `md5(session_id)` in the Session column.
 - **`pageview_token`** — single pageview + heartbeats only.
 - **Session minutes** in Analytics settings (default 60): sliding expiry, refreshed on each `do=hit`. `0` = browser session cookie.
 
+## Session table (`cms_analytics_session`)
+
+Cached aggregates per beacon session: started, last activity, pageview count, total seconds, final language, first/last page, geo and **user agent** from the **first** pageview. Updated by **analytics_process** (cron and on each dashboard load). Beacon only writes pageviews.
+
+## User agent and bot handling
+
+- **`user_agent`** (VARCHAR 500) is stored on every **`cms_analytics_pageview`** row (JS beacon API and promoted PHP rows).
+- **`cms_analytics_session.user_agent`** is copied from the first non-bot pageview on session sync.
+- **`bot`** (TINYINT, default 0) on **`cms_analytics_pageview`**: set on JS `do=hit` when viewport is **0×0** or the user agent matches **`analytics_is_bot_user_agent()`** (empty UA, `curl`, `googlebot`, `go-http-client`, etc.). JS hits are always stored; bot rows are excluded from sessions, charts, and totals.
+- **PHP tracking** still skips recording when **`analytics_is_bot()`** (server UA only — no viewport).
+- **`analytics_process`** deletes bot pageviews older than **300 seconds** (last step each run). PHP dedup: if a matching main row exists (including a JS bot row), the php staging row is dropped only.
+- Dashboard **Details** on pageviews shows **`bot`** (0/1). Bot rows may appear briefly in the last-50 list before purge.
+
+## Per-panel tracking (`analytics/beacon`)
+
+Each beacon panel instance controls how that embed tracks:
+
+| Setting | Default | Effect |
+|---------|---------|--------|
+| **PHP tracking** | Yes | `panel_action` writes **`cms_analytics_pageview_php`** whenever this panel is rendered — full page load or partial position load |
+| **JS tracking** | No | `beacon.js` loads but sends **no** API requests unless Yes |
+
+Recommended layout: public/footer pages → PHP yes, JS no (pageviews only, no scroll/time); engine/interactive pages → JS yes.
+
+**PHP path** (when **PHP tracking** is Yes):
+
+- **`panel_action`** records navigation from `cms_request_uri` on any render that includes the panel (full page or position).
+- **`music/prepare`** records `engine/unit/{unit_id}` whenever **PHP tracking** is Yes (JS may also record when **JS tracking** is Yes; process dedupes).
+- Visitor key: cookie `beacon` → else `$_SESSION['analytics_beacon_id']` → else new UUID; persisted to cookie + PHP session on server record only (beacon API does **not** use PHP session).
+- **`analytics_process`** runs php normalisation first: on rows older than **30 seconds**, if a matching main row exists (same `beacon_id` + `page` within ±30s), **delete** the php row; otherwise **promote** into `cms_analytics_pageview` and delete the php row. Session sync then uses the main table only — php staging stays nearly empty between cron runs.
+
+Does not run when **page cache** serves HTML without bootstrapping CI (no `panel_action`).
+
+**JS path** (when **JS tracking** is Yes):
+
+- Template exposes `data-beacon_id`, delay, and collect engagement; `beacon.js` POSTs to `analytics/beacon`.
+- Global **collect engagement** in Analytics settings applies only when JS tracking is on.
+
 ## Beacon behaviour
 
-- First POST `do=hit`: page path, viewport size, anonymised IP (server); sets/refreshes `beacon` cookie.
+- First POST `do=hit`: page path, viewport size, anonymised IP (server); optional POST `beacon_id`; sets/refreshes `beacon` cookie.
 - Heartbeats at 5s, 10s, 20s, 30s, 60s, 120s, 180s, 240s, 300s when engagement enabled.
 - Position-link navigation: new pageview via `cms_position_link_after` hook (no unload beacons).
-- Bot user-agents filtered on server.
+- Bot-like JS hits recorded with **`bot = 1`** (see **User agent and bot handling** above).
 
 ## Virtual pageviews
 
-Other modules can record pageviews without a full navigation. Call from JS when the beacon panel is on the layout:
+Other modules can record pageviews without a full navigation. Call from JS when the beacon panel is on the layout and **JS tracking** is Yes (otherwise `beacon_pageview` is a no-op):
 
 ```javascript
 if (typeof beacon_pageview === 'function') {
@@ -46,18 +85,55 @@ if (typeof beacon_pageview === 'function') {
 }
 ```
 
-The music engine uses this when a user starts a new exercise set (`engine/unit/{unit_id}`).
+The music engine uses JS when **JS tracking** is on. **`music/prepare`** always writes a php backup row for `engine/unit/{unit_id}` when **PHP tracking** is on (even if JS also runs).
 
 ## GeoIP
 
 - Database file path from **Analytics settings → GeoIP database** (`img/` upload).
-- Lookup only on dashboard/cron, not on beacon.
+- Lookup only in **analytics_process**, not on beacon. Resolved country/region/city stored on **`cms_analytics_session`** only (legacy geo columns on pageviews are unused).
 - Cache: `cache/analytics_geo_cache.json` (30-day TTL per IP entry).
+- **GeoIP diagnostics** on the dashboard (bottom block) is off by default; enable in Analytics settings when debugging.
 - `_resolve_geo()` is abstracted so a future third-party or **cross-installation CMS RPC** GeoIP endpoint can replace local MaxMind behind the same cache (see [`cms_todo.md`](../../cms/docs/cms_todo.md)).
 
 City-level accuracy is approximate (metro area), not street-level. Anonymised IP (/24) is sufficient for aggregate reporting.
 
 **Local/private visitors** store the full IP (not anonymised). Dashboard shows country **Localhost**, area from the range (`127`, `10`, `192.168`, `172.16`, `::1`, …), and city as the exact address.
+
+## Backlog — Turnstile fallback for blocked JS beacon
+
+**Status:** not implemented — design only.
+
+**Problem:** On pages with **JS tracking = Yes**, `beacon.js` POSTs to the lightweight `analytics/beacon` API. Ad blockers and privacy tools often block that URL. The hit fails silently today (`.catch(() => {})`), so real users can be missing from analytics even though they are not bots. PHP tracking covers full page loads when CI runs, but not cache HITs or JS-only paths.
+
+**Idea:** Keep all behaviour inside **`analytics/beacon`** (panel JS + `panel_action`). On the **first pageview only**, if the `do=hit` `fetch` fails (network / blocked) or returns no `pageview_token` (but not a clean 204 when beacon is disabled), run **Cloudflare Turnstile** (invisible/hidden widget). If Turnstile succeeds, recover the pageview via **`get_ajax('analytics/beacon', …)`** → `panel_action` with `do=turnstile_hit`, which verifies the token server-side and inserts the row. Ad blockers are less likely to block `ajax_api/get_panel` than `/analytics/beacon`.
+
+**Flow:**
+
+1. Normal path unchanged: `fetch` `do=hit` → `pageview_token` → heartbeats.
+2. Failure path (once per page load): load Turnstile only when configured → `turnstile.execute()` → POST token to beacon panel ajax.
+3. Server: `POST https://challenges.cloudflare.com/turnstile/v0/siteverify` (secret from settings); on success insert pageview with **`bot = 0`**.
+
+**Settings** (planned: **Analytics settings**, global — like GeoIP):
+
+- `turnstile_enabled` (Yes/No, default No)
+- `turnstile_site_key`
+- `turnstile_secret_key`
+
+**Schema** (planned): add **`verified`** TINYINT on `cms_analytics_pageview` (default 0). Successful JS paths set **`verified = 1`** when **`bot = 0`** — both normal `fetch` hits and Turnstile-recovered hits. PHP-promoted rows stay **`verified = 0`**. Bot rows stay **`bot = 1`**, **`verified = 0`**, purged as today.
+
+**Scope:**
+
+- Only when **JS tracking = Yes** on the embed and Turnstile is enabled + keys set.
+- Turnstile script loads **only after** beacon `fetch` failure (no extra third-party load for successful hits).
+- Heartbeats stay on the lightweight API in v1; if that remains blocked after recovery, engagement may be missing but the verified pageview remains.
+
+**Limitations:**
+
+- Cannot distinguish ad-block vs offline vs server error — all trigger fallback when configured.
+- Turnstile failure or second block → no pageview (by design: prefer under-counting bots over counting them).
+- Requires Cloudflare Turnstile widget + server verify (similar integration pattern to reCAPTCHA in `modules/form`).
+
+**Key files to touch when implementing:** [`beacon.js`](../js/beacon.js), [`panels/beacon.php`](../panels/beacon.php), [`templates/beacon.tpl.php`](../templates/beacon.tpl.php), [`helpers/analytics_api_helper.php`](../helpers/analytics_api_helper.php), [`api/beacon.php`](../api/beacon.php), [`definitions/analytics_settings.json`](../definitions/analytics_settings.json), [`schema/cms_analytics_pageview.json`](../schema/cms_analytics_pageview.json).
 
 ## Third-party alternatives
 

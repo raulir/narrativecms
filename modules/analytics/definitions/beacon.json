@@ -1,6 +1,29 @@
 {
 	"version":"2",
 	"label":"Analytics beacon",
-	"item":[],
+	"item":[
+		{
+			"type":"select",
+			"name":"js_tracking",
+			"label":"JS tracking",
+			"values":{
+				"1":"Yes",
+				"0":"No"
+			},
+			"default":"0",
+			"help":"[JS tracking]||Send pageviews and engagement via beacon.js||When no, beacon.js loads but does not call the API"
+		},
+		{
+			"type":"select",
+			"name":"php_tracking",
+			"label":"PHP tracking",
+			"values":{
+				"1":"Yes",
+				"0":"No"
+			},
+			"default":"1",
+			"help":"[PHP tracking]||Record pageviews on server when this panel is rendered (full page or position load)||Default on when the beacon panel is present"
+		}
+	],
 	"settings":[]
 }

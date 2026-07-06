@@ -10,6 +10,17 @@ function analytics_beacon_enabled() {
 
 }
 
+function analytics_beacon_tracking_flags($params) {
+
+	$params = is_array($params) ? $params : array();
+
+	return array(
+		'js_tracking' => isset($params['js_tracking']) && $params['js_tracking'] !== '' && !empty($params['js_tracking']),
+		'php_tracking' => !isset($params['php_tracking']) || $params['php_tracking'] === '' || !empty($params['php_tracking']),
+	);
+
+}
+
 function analytics_get_mysqli() {
 
 	if (empty($GLOBALS['config']['database'])) {
@@ -27,18 +38,21 @@ function analytics_get_mysqli() {
 
 }
 
-function analytics_is_bot() {
+function analytics_is_bot_user_agent($user_agent) {
 
-	if (empty($_SERVER['HTTP_USER_AGENT'])) {
+	$user_agent = trim((string)$user_agent);
+
+	if ($user_agent === '') {
 		return true;
 	}
 
-	$ua = strtolower($_SERVER['HTTP_USER_AGENT']);
+	$ua = strtolower($user_agent);
 
 	$bot_keywords = array('bot','crawl','spider','slurp','googlebot','bingbot','baiduspider','duckduckbot','yandex',
 			'facebookexternalhit','twitterbot','rogerbot','linkedinbot','embedly','quora','pinterest','whatsapp',
 			'telegram','mediapartners','ahrefs','semrush','mj12bot','dotbot','petalbot','crawler','scanner','headless',
-			'httpclient','python-requests','curl','wget');
+			'go-http-client','httpclient','python-requests','curl','wget','okhttp','apache-httpclient','l9scan','leakix','sppb','rce-poc',
+			'palo alto','paloaltonetworks','xpanse','cortex-xpanse','visionheight','rootevidence');
 
 	foreach ($bot_keywords as $bot) {
 		if (strpos($ua, $bot) !== false) {
@@ -51,6 +65,29 @@ function analytics_is_bot() {
 	}
 
 	return false;
+
+}
+
+function analytics_is_bot() {
+
+	return analytics_is_bot_user_agent($_SERVER['HTTP_USER_AGENT'] ?? '');
+
+}
+
+function analytics_is_pageview_bot($viewport_w, $viewport_h, $user_agent = '') {
+
+	$viewport_w = (int)$viewport_w;
+	$viewport_h = (int)$viewport_h;
+
+	if ($viewport_w === 0 && $viewport_h === 0) {
+		return true;
+	}
+
+	if ($user_agent === '') {
+		$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+	}
+
+	return analytics_is_bot_user_agent($user_agent);
 
 }
 
@@ -155,6 +192,33 @@ function analytics_local_geo($ip) {
 
 }
 
+function analytics_normalise_page($page) {
+
+	$page = trim((string)$page);
+
+	if ($page === '' || $page === '/') {
+		return '/';
+	}
+
+	if ($page[0] !== '/') {
+		$page = '/'.$page;
+	}
+
+	if ($page === '/index.php') {
+		return '/';
+	}
+
+	if (strpos($page, '/index.php/') === 0) {
+		$page = substr($page, strlen('/index.php'));
+		if ($page === '') {
+			$page = '/';
+		}
+	}
+
+	return substr($page, 0, 500);
+
+}
+
 function analytics_generate_pageview_token() {
 
 	return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
@@ -243,6 +307,73 @@ function analytics_get_beacon_settings() {
 
 }
 
+function analytics_resolve_beacon_id_for_php() {
+
+	$name = analytics_beacon_cookie_name();
+	$cookie = $_COOKIE[$name] ?? '';
+
+	if (analytics_is_valid_session_id($cookie)) {
+		return $cookie;
+	}
+
+	if (!empty($_SESSION['analytics_beacon_id']) && analytics_is_valid_session_id($_SESSION['analytics_beacon_id'])) {
+		return $_SESSION['analytics_beacon_id'];
+	}
+
+	return analytics_generate_pageview_token();
+
+}
+
+function analytics_resolve_beacon_id_for_api($posted_beacon_id = '') {
+
+	$posted_beacon_id = trim((string)$posted_beacon_id);
+
+	if (analytics_is_valid_session_id($posted_beacon_id)) {
+		return $posted_beacon_id;
+	}
+
+	$name = analytics_beacon_cookie_name();
+	$cookie = $_COOKIE[$name] ?? '';
+
+	if (analytics_is_valid_session_id($cookie)) {
+		return $cookie;
+	}
+
+	return analytics_generate_pageview_token();
+
+}
+
+function analytics_persist_beacon_id_for_php($beacon_id) {
+
+	if (!analytics_is_valid_session_id($beacon_id)) {
+		return;
+	}
+
+	$settings = analytics_get_beacon_settings();
+	$minutes = (int)$settings['session_minutes'];
+
+	analytics_beacon_set_cookie($beacon_id, $minutes);
+	$_SESSION['analytics_beacon_id'] = $beacon_id;
+
+}
+
+function analytics_get_template_beacon_id() {
+
+	$name = analytics_beacon_cookie_name();
+	$cookie = $_COOKIE[$name] ?? '';
+
+	if (analytics_is_valid_session_id($cookie)) {
+		return $cookie;
+	}
+
+	if (!empty($_SESSION['analytics_beacon_id']) && analytics_is_valid_session_id($_SESSION['analytics_beacon_id'])) {
+		return $_SESSION['analytics_beacon_id'];
+	}
+
+	return '';
+
+}
+
 function analytics_beacon_set_cookie($session_id, $minutes) {
 
 	$name = analytics_beacon_cookie_name();
@@ -266,24 +397,29 @@ function analytics_beacon_set_cookie($session_id, $minutes) {
 
 }
 
-function analytics_get_or_create_beacon_session() {
+function analytics_get_beacon_language() {
 
-	$settings = analytics_get_beacon_settings();
-	$minutes = (int)$settings['session_minutes'];
-	$name = analytics_beacon_cookie_name();
-	$session_id = $_COOKIE[$name] ?? '';
+	$language = $_COOKIE['language'] ?? '';
+	$language = strtolower(trim((string)$language));
+	$language = preg_replace('/[^a-z0-9\-]/', '', $language);
 
-	if (!analytics_is_valid_session_id($session_id)) {
-		$session_id = analytics_generate_pageview_token();
-	}
-
-	analytics_beacon_set_cookie($session_id, $minutes);
-
-	return $session_id;
+	return substr($language, 0, 20);
 
 }
 
-function analytics_insert_pageview($page, $viewport_w, $viewport_h) {
+function analytics_get_or_create_beacon_session($posted_beacon_id = '') {
+
+	$settings = analytics_get_beacon_settings();
+	$minutes = (int)$settings['session_minutes'];
+	$beacon_id = analytics_resolve_beacon_id_for_api($posted_beacon_id);
+
+	analytics_beacon_set_cookie($beacon_id, $minutes);
+
+	return $beacon_id;
+
+}
+
+function analytics_insert_pageview($page, $viewport_w, $viewport_h, $posted_beacon_id = '') {
 
 	$db = analytics_get_mysqli();
 	if ($db === false) {
@@ -294,19 +430,22 @@ function analytics_insert_pageview($page, $viewport_w, $viewport_h) {
 	$ip_anonymised = analytics_store_ip($ip);
 	$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
 	$pageview_token = analytics_generate_pageview_token();
-	$session_id = analytics_get_or_create_beacon_session();
-	$page = substr($page, 0, 500);
+	$beacon_id = analytics_get_or_create_beacon_session($posted_beacon_id);
+	$session_id = '';
+	$language = analytics_get_beacon_language();
+	$page = analytics_normalise_page($page);
 	$viewport_w = (int)$viewport_w;
 	$viewport_h = (int)$viewport_h;
+	$bot = analytics_is_pageview_bot($viewport_w, $viewport_h, $user_agent) ? 1 : 0;
 
-	$sql = 'INSERT INTO cms_analytics_pageview (pageview_token, session_id, page, ip_anonymised, user_agent, viewport_w, viewport_h, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
+	$sql = 'INSERT INTO cms_analytics_pageview (pageview_token, session_id, beacon_id, language, page, ip_anonymised, user_agent, viewport_w, viewport_h, bot, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
 
 	$stmt = mysqli_prepare($db, $sql);
 	if ($stmt === false) {
 		return false;
 	}
 
-	mysqli_stmt_bind_param($stmt, 'sssssii', $pageview_token, $session_id, $page, $ip_anonymised, $user_agent, $viewport_w, $viewport_h);
+	mysqli_stmt_bind_param($stmt, 'sssssssiii', $pageview_token, $session_id, $beacon_id, $language, $page, $ip_anonymised, $user_agent, $viewport_w, $viewport_h, $bot);
 
 	if (!mysqli_stmt_execute($stmt)) {
 		mysqli_stmt_close($stmt);

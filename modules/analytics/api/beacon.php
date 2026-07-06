@@ -9,11 +9,6 @@ if (!analytics_beacon_enabled()) {
 	die();
 }
 
-if (analytics_is_bot()) {
-	http_response_code(204);
-	die();
-}
-
 $_POST = filter_input_array(INPUT_POST, FILTER_UNSAFE_RAW) ?: array();
 
 $do = $_POST['do'] ?? '';
@@ -28,7 +23,8 @@ if ($do === 'hit') {
 	$viewport_w = $_POST['viewport_w'] ?? 0;
 	$viewport_h = $_POST['viewport_h'] ?? 0;
 
-	$pageview_token = analytics_insert_pageview($page, $viewport_w, $viewport_h);
+	$posted_beacon_id = $_POST['beacon_id'] ?? '';
+	$pageview_token = analytics_insert_pageview($page, $viewport_w, $viewport_h, $posted_beacon_id);
 
 	if ($pageview_token === false) {
 		http_response_code(204);

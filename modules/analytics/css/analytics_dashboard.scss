@@ -9,7 +9,8 @@
 
 .analytics_dashboard_summary {
 	display: flex;
-	gap: 2rem;
+	flex-wrap: wrap;
+	gap: 1.5rem 2rem;
 	margin-bottom: 1.5rem;
 }
 
@@ -71,4 +72,101 @@
 
 .analytics_dashboard_table th {
 	background: #f5f5f5;
+}
+
+.analytics_dashboard_geoip_debug_help {
+	margin: 0 0 0.5rem;
+	font-size: 0.85rem;
+	color: #666;
+}
+
+.analytics_dashboard_geoip_debug {
+	margin: 0 0 1rem;
+	padding: 0.75rem 1rem;
+	max-height: 24rem;
+	overflow: auto;
+	background: #f8f8f8;
+	border: 1px solid #ccc;
+	font-family: monospace;
+	font-size: 0.8rem;
+	line-height: 1.35;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.analytics_dashboard_details_button {
+	padding: 0.2rem 0.5rem;
+	border: 1px solid #999;
+	border-radius: 0.2rem;
+	background: #fff;
+	color: #333;
+	font-size: 0.8rem;
+	line-height: 1.3;
+	cursor: pointer;
+}
+
+.analytics_dashboard_details_button:hover,
+.analytics_dashboard_details_button_active {
+	background: #eef3ff;
+	border-color: #4466aa;
+}
+
+.analytics_dashboard_detail_panel {
+	position: fixed;
+	z-index: 200;
+	max-height: 28rem;
+	overflow: auto;
+	box-sizing: border-box;
+	background: #fff;
+	border: 1px solid #ccc;
+	border-radius: 0.25rem;
+	padding: 0.6rem 0.75rem;
+	font-family: monospace;
+	font-size: 0.8rem;
+	line-height: 1.4;
+	color: #222;
+	box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.analytics_dashboard_detail_header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	margin: 0 0 0.5rem;
+}
+
+.analytics_dashboard_detail_title {
+	color: #333;
+	margin: 0;
+	font-size: 0.85rem;
+	font-weight: bold;
+}
+
+.analytics_dashboard_detail_delete_button {
+	flex-shrink: 0;
+}
+
+.analytics_dashboard_detail_table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.analytics_dashboard_detail_table th,
+.analytics_dashboard_detail_table td {
+	padding: 0.25rem 0.4rem;
+	border: 1px solid #ccc;
+	text-align: left;
+	vertical-align: top;
+}
+
+.analytics_dashboard_detail_table th {
+	width: 38%;
+	background: #f5f5f5;
+	color: #555;
+	font-weight: normal;
+}
+
+.analytics_dashboard_detail_value {
+	word-break: break-all;
 }

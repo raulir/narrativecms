@@ -29,6 +29,17 @@
 			"help":"[Engagement]||When yes, send scroll and time-on-page heartbeats"
 		},
 		{
+			"type":"select",
+			"name":"show_geoip_debug",
+			"label":"GeoIP diagnostics",
+			"values":{
+				"1":"Yes",
+				"0":"No"
+			},
+			"default":"0",
+			"help":"[GeoIP diagnostics]||Show the GeoIP diagnostics block at the bottom of the analytics dashboard"
+		},
+		{
 			"type":"file",
 			"name":"geoip_database",
 			"label":"GeoIP database",
