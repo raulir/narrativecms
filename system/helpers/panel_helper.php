@@ -516,6 +516,34 @@ if ( !function_exists('_user_login_text')) {
 		
 	}
 	
+	function _merge_panel_css_urls(&$css_urls, &$css_force, $source){
+
+		if (empty($source) || !is_array($source)){
+			return;
+		}
+
+		if (!empty($source['_panel_css']) && is_array($source['_panel_css'])){
+			foreach ($source['_panel_css'] as $url){
+				$css_urls[$url] = $url;
+			}
+		}
+
+		if (!empty($source['panel_css']) && is_array($source['panel_css'])){
+			foreach ($source['panel_css'] as $url){
+				$css_urls[$url] = $url;
+			}
+		}
+
+		if (!empty($source['_panel_css_force'])){
+			$css_force = 1;
+		}
+
+		if (!empty($source['panel_css_force'])){
+			$css_force = 1;
+		}
+
+	}
+
 	function _position_links_active(){
 		
 		return !empty($GLOBALS['config']['position_wrappers']) && !empty($GLOBALS['config']['position_links']);

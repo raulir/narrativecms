@@ -228,7 +228,10 @@ function cms_images_load_images(page, limit, filename){
 		cms_video_cleanup($('.cms_images_area'))
 	}
 	
-	get_ajax_panel('cms/cms_images_page', cms_images_load_parameters, function(data){
+	get_ajax_panel('cms/cms_images_page', $.extend({}, cms_images_load_parameters, {
+		'_no_js': '1',
+		'_no_css': '1',
+	}), function(data){
 		
 		$('.cms_images_area').html(data.result._html).data('page', page).data('filename', filename);
 		
@@ -282,65 +285,77 @@ function cms_images_load_images(page, limit, filename){
 	
 }
 
-$(document).ready(function() {
-	
-	$('.cms_images_upload').on('click.r', function(){
-		$('.cms_images_new_image').click();
-	});
-	
-	// manipulates hidden image upload form
-	$('.cms_images_new_image').on('change.r', function(){
-		$('.cms_images_new_image').off('change.r');
-		cms_images_upload();
-	});
-	
-	// load overlay
-	$('.cms_images_container').detach().appendTo('body').css({'display':''});
-	setTimeout(function(){
-		$('.cms_images_container').css({'opacity':'1'});
-	}, 30);
-	
-	// category select
-	$('.cms_images_category').on('change.cms', function(){
-		cms_images_load_images('0', $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
-	});
-	
-	// load first page
-	cms_images_load_images($('.cms_images_area').data('page'), $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
-	
-	// init search input
-	$('.cms_images_search_input').on('keyup.cms', function(e){
-		if (e.which != 37 && e.which != 38 && e.which != 39)
-			cms_images_load_images('0', $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
-	});
-	
-	// init keys
+function cms_images_popup_init($popup){
+
+	if (!$popup || !$popup.length){
+		$popup = $('.popup_container.cms_images_container').last()
+	}
+
+	if (!$popup.length){
+		return
+	}
+
+	if (!$popup.parent().is('body')){
+		$popup.detach().appendTo('body')
+	}
+
+	$popup.css({'display': '', 'opacity': '1'})
+
+	$('.cms_images_upload', $popup).off('click.cms_images_popup').on('click.cms_images_popup', function(){
+		$('.cms_images_new_image', $popup).click()
+	})
+
+	$('.cms_images_new_image', $popup).off('change.cms_images_popup').on('change.cms_images_popup', function(){
+		$('.cms_images_new_image', $popup).off('change.cms_images_popup')
+		cms_images_upload()
+	})
+
+	$('.cms_images_category', $popup).off('change.cms_images_popup').on('change.cms_images_popup', function(){
+		cms_images_load_images('0', $('.cms_images_area', $popup).data('limit'), $('.cms_images_area', $popup).data('filename'))
+	})
+
+	$('.cms_images_search_input', $popup).off('keyup.cms_images_popup').on('keyup.cms_images_popup', function(e){
+		if (e.which != 37 && e.which != 38 && e.which != 39){
+			cms_images_load_images('0', $('.cms_images_area', $popup).data('limit'), $('.cms_images_area', $popup).data('filename'))
+		}
+	})
+
 	$(document).off('keyup.cms').on('keyup.cms', function(e) {
-		
+
+		if (!$popup.closest('body').length){
+			return true
+		}
+
 	    switch(e.which) {
 
 	    	case 37: // left
-	        	$('.cms_images_paging_previous').click();
-	    		e.preventDefault();
-	        	return false;
-	        break;
+	        	$('.cms_images_paging_previous', $popup).click()
+	    		e.preventDefault()
+	        	return false
+	        break
 
 	        case 38: // up
-	        	$('.cms_images_search_input').val('');
-	        	cms_images_load_images('0', $('.cms_images_area').data('limit'), $('.cms_images_area').data('filename'));
-	    		e.preventDefault();
-	        	return false;
-	        break;
+	        	$('.cms_images_search_input', $popup).val('')
+	        	cms_images_load_images('0', $('.cms_images_area', $popup).data('limit'), $('.cms_images_area', $popup).data('filename'))
+	    		e.preventDefault()
+	        	return false
+	        break
 
 	        case 39: // right
-	        	$('.cms_images_paging_next').click();
-	    		e.preventDefault();
-	        	return false;
-	        break;
+	        	$('.cms_images_paging_next', $popup).click()
+	    		e.preventDefault()
+	        	return false
+	        break
 
-	        default: return true; // exit this handler for other keys
+	        default: return true
 	    }
 
-	});
+	})
 
-})
+	cms_images_load_images(
+		$('.cms_images_area', $popup).data('page') || 0,
+		$('.cms_images_area', $popup).data('limit'),
+		$('.cms_images_area', $popup).data('filename')
+	)
+
+}

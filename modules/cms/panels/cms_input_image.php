@@ -13,13 +13,22 @@ class cms_input_image extends CI_Controller {
 		}
 		
 		add_css('modules/cms/css/cms_input.scss');
+		add_css('modules/cms/css/cms_images.scss');
+		add_css('modules/cms/css/cms_images_page.scss');
 		add_css('modules/cms/css/cms_video_view.scss');
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_images.js';
 		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_media_view.js';
 		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_video.js';
 		
 	}
 
 	function panel_params($params){
+
+		$this->load->helper('markdown_helper');
+
+		if (!empty($params['value'])){
+			$params['value'] = markdown_image_field_filename($params['value']);
+		}
 
 		if (empty($params['name_clean'])){
 			$params['name_clean'] = $params['name'];

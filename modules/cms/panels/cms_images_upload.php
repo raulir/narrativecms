@@ -20,8 +20,13 @@ class cms_images_upload extends CI_Controller {
 	// common functionality of file uploading
 	function image_upload($input_name, $category){
 
-		$this->load->library('upload', array('allowed_types' => 'svg|gif|jpg|png|jpeg|mp4', 'upload_path' => $GLOBALS['config']['upload_path'], ));
-		
+		$upload_config = array('allowed_types' => 'svg|gif|jpg|png|jpeg|mp4', 'upload_path' => $GLOBALS['config']['upload_path'], );
+		if (!isset($this->upload)) {
+			$this->load->library('upload', $upload_config);
+		} else {
+			$this->upload->initialize($upload_config);
+		}
+
 		$new_image = $this->upload->upload_image($input_name);
 		
 		$filename = '';

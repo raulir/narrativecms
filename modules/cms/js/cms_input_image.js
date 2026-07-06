@@ -202,7 +202,11 @@ function cms_input_image_load_images(params){
 		original_filename = original_filename.replace(path, '');
 	}
 
-	get_ajax_panel('cms/cms_images', {'filename': original_filename, 'category': params.category}, function(data){
+	get_ajax_panel('cms/cms_images', {
+		'filename': original_filename,
+		'category': params.category,
+		'_no_js': '1',
+	}, function(data){
 		panels_display_popup(data.result._html, {
 			'select': function(after){
 				$(document).off('keyup.cms');
@@ -250,20 +254,13 @@ function cms_input_image_load_images(params){
 				});
 			}
 		});
-		$('.cms_images_area').removeData('edited_filename')
-		$('.cms_images_area').removeData('edited_from_filename')
-
 		var $popup = $('.popup_container.cms_images_container').last()
-		var $area = $popup.find('.cms_images_area')
 
-		if ($area.length && $area.find('.cms_images_area_loading').length && typeof cms_images_load_images === 'function'){
-			cms_images_load_images(
-				$area.data('page') || 0,
-				$area.data('limit'),
-				$area.data('filename')
-			)
-		} else if (typeof cms_video_init_when_ready === 'function'){
-			cms_video_init_when_ready($popup)
+		$popup.find('.cms_images_area').removeData('edited_filename')
+		$popup.find('.cms_images_area').removeData('edited_from_filename')
+
+		if (typeof cms_images_popup_init === 'function'){
+			cms_images_popup_init($popup)
 		}
 
 	});
