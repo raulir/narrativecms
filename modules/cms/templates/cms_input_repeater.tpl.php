@@ -2,7 +2,7 @@
 
 	<div class="cms_repeater_label"><?= $label ?></div>
 	<div class="cms_repeater_line cms_repeater_line_top"></div>
-	<div class="cms_repeater_area cms_repeater_area_<?= $name ?>">
+	<div class="cms_repeater_area cms_repeater_area_<?= $name ?>" data-label="<?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?>">
 
 		<?php if (!empty($data)): ?>
 			<?php foreach($data as $repeater_key => $repeater_data): ?>
@@ -22,7 +22,8 @@
 	</div>
 
 	<?php if(!$readonly): ?>
-		<div class="admin_small_button cms_repeater_button" data-name="<?= $name ?>" data-fields="<?= base64_encode(json_encode($fields)) ?>">
+		<?php $init_hooks = cms_repeater_field_init_hooks($fields); ?>
+		<div class="admin_small_button cms_repeater_button" data-name="<?= $name ?>" data-fields="<?= base64_encode(json_encode($fields)) ?>" data-init_hooks="<?= htmlspecialchars(implode(',', $init_hooks), ENT_QUOTES, 'UTF-8') ?>">
 			Add element
 		</div>
 	<?php endif ?>

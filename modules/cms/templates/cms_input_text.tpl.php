@@ -8,8 +8,8 @@
 		
 		<?php if (!empty($help)) _panel('cms/cms_help', ['help' => $help, ]); ?>
 		
-		<?php if (!empty($translate) && !empty($GLOBALS['language'])): ?>
-			<div class="cms_translate_icon" <?php _ib('cms/cms_translate.png', 14) ?>></div>
+		<?php if (!empty($translate) && !empty($GLOBALS['language']) && empty($readonly)): ?>
+			<button type="button" class="cms_translate_icon" data-field_type="text" <?php _ib('cms/cms_translate.png', 14) ?>></button>
 		<?php endif ?>
 		
 		<input id="<?= $name_clean ?>" type="text" class="cms_input_text_input <?= $max_chars_class ?> <?= $meta_class ?> <?= $extra_data ?>"

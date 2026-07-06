@@ -19,6 +19,7 @@ class cms_page_panel_toolbar extends CI_Controller {
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_page_model');
 		$this->load->model('cms/cms_panel_model');
+		$this->load->model('cms/cms_slug_model');
 
 		$cms_page_panel = $this->cms_page_panel_model->get_cms_page_panel($params['target_id'], $this->cms_page_panel_model->get_cms_language());
 		if (empty($cms_page_panel)){
@@ -49,8 +50,9 @@ class cms_page_panel_toolbar extends CI_Controller {
 						'class' => 'cms_page_panel_toolbar_title',
 				];
 			}
+			$admin_title = $this->cms_page_panel_model->get_panel_admin_title($cms_page_panel);
 			return [
-					'text' => $this->cms_page_panel_model->get_panel_admin_title(array_merge($cms_page_panel, ['title' => $title])),
+					'text' => $admin_title !== '' ? $admin_title : $title,
 					'url' => '',
 					'class' => 'cms_page_panel_toolbar_title',
 			];
@@ -96,12 +98,17 @@ class cms_page_panel_toolbar extends CI_Controller {
 
 			}
 
+			$parent_title = $this->cms_page_panel_model->get_panel_admin_title($parent);
+			if ($parent_title === ''){
+				$parent_title = $parent['title'];
+			}
+
 			$params['breadcrumb'][] = [ // parent block
-					'text' => $parent['title'],
+					'text' => $parent_title,
 					'url' => 'admin/cms_page_panel/'.$parent['cms_page_panel_id'].'/',
 			];
 			
-			$params['breadcrumb'][] = $toolbar_title_item($params['target_id'] ? $cms_page_panel['title'] : 'New panel');
+			$params['breadcrumb'][] = $toolbar_title_item($params['target_id'] ? '' : 'New panel');
 				
 		} else if (!empty($params['target_page_id'])){ // normal panel on page
 
@@ -116,7 +123,7 @@ class cms_page_panel_toolbar extends CI_Controller {
 							'text' => !empty($params['page']['title']) ? $params['page']['title'] : '[ no title ]',
 							'url' => 'admin/page/'.$params['target_page_id'].'/',
 					],
-					$toolbar_title_item($params['target_id'] ? $cms_page_panel['title'] : 'New panel'),
+					$toolbar_title_item($params['target_id'] ? '' : 'New panel'),
 			];
 
 		} else {
@@ -145,7 +152,10 @@ class cms_page_panel_toolbar extends CI_Controller {
 				}
 
 				if ($cms_page_panel['sort']){
-					$heading = $cms_page_panel['title'];
+					$heading = $this->cms_page_panel_model->get_panel_admin_title($cms_page_panel);
+					if ($heading === ''){
+						$heading = $cms_page_panel['title'];
+					}
 				} else {
 					$heading = (!empty($panel_config['label']) ? $panel_config['label'] : $cms_page_panel['panel_name']) . ' settings';
 				}
@@ -209,15 +219,38 @@ class cms_page_panel_toolbar extends CI_Controller {
 					'panel_name' => $cms_page_panel['panel_name'],
 			];
 			
-			$params['buttons'][] = [
-					'name' => 'cms/cms_page_panel_button_export', 
-					'position' => 'hidden', 
-					'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
-					'panel_name' => $cms_page_panel['panel_name'],
-			];
-			
 			$params['hidden_section'] = 1;
 		
+		}
+
+		if (!empty($cms_page_panel['cms_page_panel_id'])){
+
+			$params['buttons'][] = [
+					'name' => 'cms/cms_page_panel_button_export',
+					'position' => 'hidden',
+					'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
+					'panel_name' => $cms_page_panel['panel_name'] ?? '',
+			];
+			$params['hidden_section'] = 1;
+
+			if (empty($cms_page_panel['cms_page_id']) && !empty($cms_page_panel['sort'])
+					&& !empty($panel_config['list']['link_target'])){
+
+				$slug_target = $cms_page_panel['panel_name'].'='.$cms_page_panel['cms_page_panel_id'];
+				$current_slug = $this->cms_slug_model->get_cms_slug_by_target($slug_target);
+
+				if ($current_slug !== ''){
+					$params['buttons'][] = [
+							'name' => 'cms/cms_page_panel_button_edit_slug',
+							'position' => 'hidden',
+							'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
+							'panel_name' => $cms_page_panel['panel_name'] ?? '',
+					];
+					$params['hidden_section'] = 1;
+				}
+
+			}
+
 		}
 		
 		// if panel has global settings

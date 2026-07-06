@@ -13,6 +13,8 @@ class cms_input_colour extends CI_Controller {
 		}
 
 		add_css('modules/cms/css/cms_input.scss');
+
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_translate_string.js';
 		
 	}
 	
