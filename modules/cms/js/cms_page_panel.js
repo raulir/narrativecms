@@ -14,7 +14,14 @@ function cms_page_panel_check_mandatory(colour){
 		// check if inside repeater
 		if ($this.closest('.cms_repeater_area').length){
 			
-			label_extra = $this.closest('.cms_repeater_area').data('label') + ' &gt; ' + ($this.closest('.cms_repeater_block').prevAll('.cms_repeater_block').length + 1) + ': ';
+			var $repeater_area = $this.closest('.cms_repeater_area');
+			var repeater_label = $repeater_area.data('label');
+
+			if (!repeater_label){
+				repeater_label = $repeater_area.closest('.cms_repeater_container').find('.cms_repeater_label').first().text();
+			}
+
+			label_extra = repeater_label + ' &gt; ' + ($this.closest('.cms_repeater_block').prevAll('.cms_repeater_block').length + 1) + ': ';
 			
 		}
 		
@@ -99,6 +106,18 @@ function cms_page_panel_update_breadcrumb_title(text){
 
 }
 
+function cms_page_panel_is_default_language(){
+
+	var $lang = $('.cms_language_select_current')
+
+	if (!$lang.length){
+		return true
+	}
+
+	return $lang.data('language') === $lang.data('default_language')
+
+}
+
 function cms_page_panel_title_preview_enabled(){
 
 	return $('.cms_page_id').val() == '0'
@@ -115,7 +134,7 @@ function cms_page_panel_onpage_title_sync_enabled(){
 
 function cms_page_panel_fetch_title_preview(){
 
-	if (!cms_page_panel_title_preview_enabled()){
+	if (!cms_page_panel_title_preview_enabled() || !cms_page_panel_is_default_language()){
 		return
 	}
 
@@ -146,7 +165,7 @@ function cms_page_panel_fetch_title_preview(){
 
 function cms_page_panel_schedule_title_preview(){
 
-	if (!cms_page_panel_title_preview_enabled()){
+	if (!cms_page_panel_title_preview_enabled() || !cms_page_panel_is_default_language()){
 		return
 	}
 
@@ -173,7 +192,7 @@ function cms_page_panel_schedule_title_preview(){
 
 function cms_page_panel_title_preview_on_save(data){
 
-	if (data.result && data.result._title){
+	if (data.result && data.result._title && cms_page_panel_is_default_language()){
 		cms_page_panel_apply_breadcrumb_title(data.result._title)
 		cms_page_panel_title_preview_last_update = Date.now()
 		cms_page_panel_title_preview_extend = 0

@@ -101,6 +101,12 @@
     background-position: center;
     background-repeat: no-repeat;
     opacity: 0.7;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
     .cms_page_panel_container & {
 		left: 12.7rem;
 	    .cms_repeater_block & {
@@ -114,4 +120,33 @@
 			right: 0.7rem;
 		}
 	}
+}
+
+.cms_input_textarea_md_button {
+	position: absolute;
+	top: 1.2rem;
+	right: 2.4rem;
+	z-index: 100;
+	padding: 0.2rem 0.6rem;
+	border: 0.1rem solid #a0a0a0;
+	border-radius: 0.2rem;
+	background-color: white;
+	font-size: 1.2rem;
+	line-height: 1.6rem;
+	cursor: pointer;
+	.cms_page_panel_container & {
+		right: 3.1rem;
+	}
+}
+
+.cms_input_textarea_md_preview {
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 12rem;
+	padding: 0.8rem 1.0rem;
+	border: 0.1rem solid #d0d0d0;
+	background-color: white;
+	overflow: auto;
+	font-size: 1.4rem;
+	line-height: 1.5;
 }

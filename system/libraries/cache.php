@@ -208,7 +208,7 @@ class cache {
 			$html = $this->_collect_position_html($panel_data, 'main');
 			if ($html !== '') {
 				$deferred_panels = $deferred_meta['panels_by_position']['main'] ?? [];
-				$meta = $this->_build_partial_meta($page, $deferred_panels);
+				$meta = $this->_build_partial_meta($page, $deferred_panels, 'main');
 				$meta['ttl'] = (int)$page_cache_ttl;
 				$this->write_partial((int)$page['cms_page_id'], $html, $meta);
 			}
@@ -226,7 +226,7 @@ class cache {
 			}
 
 			$deferred_panels = $deferred_meta['panels_by_position'][$position_name] ?? [];
-			$meta = $this->_build_partial_meta($position_page, $deferred_panels);
+			$meta = $this->_build_partial_meta($position_page, $deferred_panels, $position_name);
 			$meta['ttl'] = $ttl;
 			$this->write_partial((int)$position_page['cms_page_id'], $html, $meta);
 		}
@@ -647,11 +647,36 @@ class cache {
 
 	}
 
-	function _build_partial_meta($page, $deferred_panels = []) {
+	function _partial_meta_panel_css($position_name){
+
+		$scss = $GLOBALS['position_panel_scss'][$position_name] ?? [];
+
+		if (empty($scss)){
+			return [
+				'panel_css' => [],
+				'panel_css_force' => 0,
+			];
+		}
+
+		$css_arr = pack_css($scss);
+		$urls = [];
+
+		foreach ($css_arr as $css_inc){
+			$urls[] = $css_inc['script'];
+		}
+
+		return [
+			'panel_css' => $urls,
+			'panel_css_force' => !empty($GLOBALS['config']['cache']['force_download']) ? 1 : 0,
+		];
+
+	}
+
+	function _build_partial_meta($page, $deferred_panels = [], $position_name = '') {
 
 		$cms_page_id = (int)($page['cms_page_id'] ?? 0);
 
-		return [
+		$meta = [
 			'type' => 'partial',
 			'ttl' => 0,
 			'cms_page_id' => $cms_page_id,
@@ -662,6 +687,12 @@ class cache {
 			'has_deferred' => !empty($deferred_panels) ? 1 : 0,
 			'deferred_panels' => array_values($deferred_panels),
 		];
+
+		if ($position_name !== ''){
+			$meta = array_merge($meta, $this->_partial_meta_panel_css($position_name));
+		}
+
+		return $meta;
 
 	}
 

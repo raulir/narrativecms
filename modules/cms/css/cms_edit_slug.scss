@@ -1,0 +1,50 @@
+.cms_popup_edit_slug .cms_popup_content {
+	height: auto;
+	width: 45.0rem;
+	font-size: 1.4rem;
+	line-height: 2.0rem;
+}
+
+.cms_edit_slug_container {
+	text-align: left;
+}
+
+.cms_edit_slug_label {
+	margin-top: 1.2rem;
+	font-weight: bold;
+}
+
+.cms_edit_slug_current {
+	margin-bottom: 0.4rem;
+	word-break: break-all;
+}
+
+.cms_edit_slug_input {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	margin-top: 0.4rem;
+	padding: 0.4rem 0.6rem;
+	border: 1px solid #a0a0a0;
+	font-size: 1.4rem;
+	line-height: 2.0rem;
+	font-family: inherit;
+}
+
+.cms_edit_slug_status {
+	min-height: 2.0rem;
+	margin-top: 0.6rem;
+}
+
+.cms_edit_slug_status_success {
+	color: #228b22;
+}
+
+.cms_edit_slug_status_error {
+	color: #c00;
+}
+
+.cms_edit_slug_actions {
+	margin-top: 1.6rem;
+	text-align: right;
+}

@@ -73,14 +73,16 @@ if (!function_exists('print_fields')){
 				
 				$name = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
 				$name_clean = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
+				$mandatory_class = !empty($field['mandatory']) ? ' cms_input_mandatory ' : '';
+				$label = $field['label'].(!empty($field['mandatory']) ? ' *' : '');
 				$return .= _panel('cms/cms_input_select', array(
-						'label' => $field['label'], // .$mandatory_label, 
+						'label' => $label,
 						'value' => ($field_empty && isset($field['default']) ? $field['default'] : $field_data ), 
 						'values' => $field['values'],
 						'name' => $name, 
 						'name_clean' => !empty($name_clean) ? $name_clean : $name, 
 						'_return' => true, 
-						'mandatory_class' => '', // $mandatory_class,
+						'mandatory_class' => $mandatory_class,
 						'help' => !empty($field['help']) ? $field['help'] : '', 
 						'params' => $field,
 						'readonly' => $field['readonly'] ?? '0',
@@ -132,7 +134,11 @@ if (!function_exists('print_fields')){
 			} else {
 				
 				$field['_return'] = true;
-				$field['value'] = ($field_empty && isset($field['default']) ? $field['default'] : str_replace('"', '&quot;', $field_data) );
+				$field_value = ($field_empty && isset($field['default']) ? $field['default'] : $field_data);
+				if (empty($field['type']) || !stristr($field['type'], '/')){
+					$field_value = is_string($field_value) ? str_replace('"', '&quot;', $field_value) : $field_value;
+				}
+				$field['value'] = $field_value;
 				$field['name_clean'] = ($prefix ? $prefix.'_'.$field['name'].'_'.$key : $field['name']);
 				$field['name'] = 'panel_params'.($prefix ? '['.$prefix.']['.$field['name'].'][]' : '['.$field['name'].']');
 				$field['panel_structure'] = $structure;

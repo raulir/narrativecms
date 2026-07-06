@@ -13,7 +13,6 @@
 		<?php if($GLOBALS['config']['environment'] == 'NOP'): ?>
 		
 			<div class="admin_tool_button cms_right cms_list_import">Import</div>
-			<?php _panel('cms/cms_popup', ['heading' => 'Import', 'name' => 'import', ]) ?>
 			 
 		<?php endif ?>
 		
