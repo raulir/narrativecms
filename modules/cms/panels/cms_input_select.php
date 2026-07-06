@@ -21,6 +21,13 @@ class cms_input_select extends CI_Controller {
 		if(!empty($params['params']['add_empty'])){
 			$params['add_empty'] = $params['params']['add_empty'];
 		}
+
+		if (!empty($params['params']['mandatory'])){
+			$params['mandatory'] = $params['params']['mandatory'];
+			if (empty($params['mandatory_class'])){
+				$params['mandatory_class'] = ' cms_input_mandatory ';
+			}
+		}
 		
 		$add_empty = !empty($params['add_empty']) || !empty($params['mandatory']);
 		
