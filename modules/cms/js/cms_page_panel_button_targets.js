@@ -28,9 +28,17 @@ function cms_page_panel_button_targets_bind_save($popup, cms_page_panel_id){
 
 }
 
-function cms_page_panel_button_targets_init(){
+function cms_page_panel_button_targets_init($root){
 
-	$('.cms_page_panel_button_targets').off('click.cms').on('click.cms', function(e){
+	var $scope = $root ? $root.find('.cms_page_panel_button_targets') : $('.cms_page_panel_button_targets');
+
+	$scope.not('.cms_page_panel_button_targets_ok').each(function(){
+
+		var $button = $(this);
+
+		$button.addClass('cms_page_panel_button_targets_ok');
+
+		$button.on('click.cms', function(e){
 
 		e.preventDefault()
 		e.stopPropagation()
@@ -54,7 +62,9 @@ function cms_page_panel_button_targets_init(){
 
 		})
 
-	})
+		})
+
+	});
 
 }
 

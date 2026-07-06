@@ -1,9 +1,21 @@
 var cms_mask_mousedown = 0
 var cms_mask_mode = 0
 
-function cms_mask_picker_init(){
-	
-	cms_popup_run('mask_picker', function(){
+function cms_mask_picker_init($root){
+
+	if ($root && $root.length && $root.hasClass('cms_mask_picker_ok')){
+		return;
+	}
+
+	cms_popup_run('mask_picker', function($popup){
+
+		var $container = $popup ? $popup.find('.cms_mask_picker_container').addBack('.cms_mask_picker_container').first() : $('.cms_mask_picker_container');
+
+		if ($container.hasClass('cms_mask_picker_ok')){
+			return;
+		}
+
+		$container.addClass('cms_mask_picker_ok');
 	
 		$('.cms_mask_picker_image_inner').each(function(){
 		

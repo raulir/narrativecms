@@ -11,7 +11,7 @@
     		
     		var $this = $(this);
     		
-    		if (!$this.data('cms_scroll_down_init')){
+    		if (!$this.hasClass('cms_scroll_down_ok')){
 
     			$this.on('click.cms', function(){
     				
@@ -76,7 +76,7 @@
     				
     			});
     			
-    			$this.data('cms_scroll_down_init', true);
+    			$this.addClass('cms_scroll_down_ok');
 
     		}
 

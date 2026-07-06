@@ -1,8 +1,15 @@
-function cms_popup_yes_no_init($popup){
+function cms_popup_yes_no_init($root){
 
-	if ($popup && $popup.length){
+	var $popups = $root ? ($root.hasClass('cms_popup_container') ? $root : $root.find('.cms_popup_container')) : $('.cms_popup_container');
+
+	$popups.not('.cms_popup_yes_no_ok').each(function(){
+
+		var $popup = $(this);
+
+		$popup.addClass('cms_popup_yes_no_ok');
 		$popup.css({'opacity':'1'});
-	}
+
+	});
 
 }
 

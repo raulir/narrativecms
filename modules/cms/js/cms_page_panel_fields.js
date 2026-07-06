@@ -1,11 +1,13 @@
-function cms_page_panel_fields_init(){
-	
+function cms_page_panel_fields_init($root){
+
+	var $fields = $root ? $root.find('.cms_page_panel_fields') : $('.cms_page_panel_fields');
+
 	var left = 0;
 	var right = 0;
-	
+
 	var top_extra = 0;
 
-	$('.cms_page_panel_fields > div').each(function(){
+	$fields.find('> div').each(function(){
 		
 		var $this = $(this);
 		var t = 0
@@ -186,7 +188,7 @@ function cms_page_panel_fields_init(){
 		
 	})
 	
-	$('.cms_page_panel_fields').css({'height': Math.max(left, right)*3.5 + 'rem'}).removeClass('cms_page_panel_fields_hidden')
+	$fields.css({'height': Math.max(left, right)*3.5 + 'rem'}).removeClass('cms_page_panel_fields_hidden')
 	
 }
 

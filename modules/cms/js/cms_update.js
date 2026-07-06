@@ -1,6 +1,14 @@
-function cms_update_init(){
-	
-	$('.cms_update_button').on('click.cms', function(){
+function cms_update_init($root){
+
+	var $scope = $root ? $root.find('.cms_update_table') : $('.cms_update_table');
+
+	$scope.not('.cms_update_ok').each(function(){
+
+		var $container = $(this);
+
+		$container.addClass('cms_update_ok');
+
+		$('.cms_update_button', $container).on('click.cms', function(){
 		
 		var area = $(this).data('area');
 		
@@ -78,7 +86,7 @@ function cms_update_init(){
 
 			}
 		});
-		
+
 	});
 
 }

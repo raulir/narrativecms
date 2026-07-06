@@ -12,11 +12,9 @@
 		$set.each(function(){
 			
 			var $this = $(this);
-			if ($this.data('cms_wh_ok') != '1' && $this.data('cms_window_height')){
-				
-				$this.addClass('cms_window_height');
-				
-				$this.data('cms_wh_ok', '1');
+			if (!$this.hasClass('cms_window_height_ok') && $this.data('cms_window_height')){
+
+				$this.addClass('cms_window_height cms_window_height_ok');
 
 			}
 			
@@ -98,12 +96,14 @@
     
 }( jQuery ));
 
-function cms_window_height_init(){
-	
+function cms_window_height_init($root){
+
+	var $scope = $root ? $root.find('[data-cms_window_height]') : $('[data-cms_window_height]');
+
 	// delay to be sure
 	setTimeout(function(){
-		
-		$('[data-cms_window_height]').cms_window_height();
+
+		$scope.cms_window_height();
 
 	}, 100);
 

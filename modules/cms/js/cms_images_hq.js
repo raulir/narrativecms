@@ -13,10 +13,10 @@
 		$set.each(function(){
 			
 			var $this = $(this);
-			if ($this.data('cms_hq_ok') != '1' && $this.data('cms_hq_background')){
+			if (!$this.hasClass('cms_images_hq_ok') && $this.data('cms_hq_background')){
 				var image = $this.data('cms_hq_background');
 				images.push(image);
-				$this.data('cms_hq_ok', '1');
+				$this.addClass('cms_images_hq_ok');
 			}
 			
 		});
@@ -37,12 +37,14 @@
     
 }( jQuery ));
 
-function cms_images_hq_init(){
-	
+function cms_images_hq_init($root){
+
+	var $scope = $root ? $root.find('[data-cms_hq_background]') : $('[data-cms_hq_background]');
+
 	// delay to be sure, that lq images get loaded first
 	setTimeout(function(){
-		
-		$('[data-cms_hq_background]').cms_hq_background();
+
+		$scope.cms_hq_background();
 
 	}, 100);
 

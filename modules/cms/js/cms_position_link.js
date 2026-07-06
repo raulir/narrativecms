@@ -31,14 +31,15 @@ function get_ajax_positions(url, params, action_on_success) {
 
 }
 
-function cms_position_link_init(){
-	
-	$('a[data-_pl="1"]').each(function(){
-		
+function cms_position_link_init($root){
+
+	var $scope = $root ? $root.find('a[data-_pl="1"]') : $('a[data-_pl="1"]');
+
+	$scope.not('.cms_position_link_ok').each(function(){
+
 		var $link = $(this);
 
-		if (!$link.data('cms_position_link_ok')){
-			$link.data('cms_position_link_ok', true)
+		$link.addClass('cms_position_link_ok');
 			
 			$link.on('click.cms', function(){
 			
@@ -84,42 +85,53 @@ function cms_position_link_init(){
 
 				})
 				
-				var update_page = before_result => new Promise ( resolve => {
-				
+				var update_page = before_result => new Promise(resolve => {
+
 					let $backup_this = before_result[0].clone(true, true)
+					var result = before_result[1]
 
-					var needs_cache_hydrate = false
+					var apply_positions = function() {
 
-					$.each(before_result[1].positions, function(i, posdata){
-						$('.cms_position_' + i).html(posdata._html).data('cms_page_id', posdata.cms_page_id)
-						if (posdata.has_deferred) {
-							needs_cache_hydrate = true
-						}
-					})
+						var needs_cache_hydrate = false
 
-					if (needs_cache_hydrate && typeof cms_cache_hydrate === 'function') {
-						cms_cache_hydrate()
-					}
-					
-					change_url(before_result[1]._final_url || $this.attr('href'))
-					document.title = before_result[1].title
-
-					if (typeof gtag != 'undefined'){
-							
-						let final_url = before_result[1]._final_url || $this.attr('href')
-						let $a = $('<a href="' + final_url + '"></a>');
-						let page = $a[0].pathname + $a[0].hash
-
-						gtag('event', 'page_view', {
-							page_title: before_result[1].title,
-  							page_path: page
+						$.each(result.positions, function(i, posdata){
+							$('.cms_position_' + i).html(posdata._html).data('cms_page_id', posdata.cms_page_id)
+							if (posdata.has_deferred) {
+								needs_cache_hydrate = true
+							}
 						})
 
+						if (needs_cache_hydrate && typeof cms_cache_hydrate === 'function') {
+							cms_cache_hydrate()
+						}
+
+						change_url(result._final_url || $this.attr('href'))
+						document.title = result.title
+
+						if (typeof gtag != 'undefined'){
+
+							let final_url = result._final_url || $this.attr('href')
+							let $a = $('<a href="' + final_url + '"></a>')
+							let page = $a[0].pathname + $a[0].hash
+
+							gtag('event', 'page_view', {
+								page_title: result.title,
+								page_path: page
+							})
+
+						}
+
+						setTimeout(() => {
+							resolve($backup_this)
+						}, 100)
+
 					}
 
-					setTimeout(() => {
-						resolve($backup_this)
-					}, 100)
+					if (typeof cms_apply_panel_css === 'function') {
+						cms_apply_panel_css(result, apply_positions)
+					} else {
+						apply_positions()
+					}
 
 				})
 				
@@ -137,9 +149,7 @@ function cms_position_link_init(){
 				return false;
 				
 			});
-			
-		}
-		
+
 	});
 
 }

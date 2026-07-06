@@ -1,10 +1,22 @@
 
 var admin_main_menu_template = '';
 
-function admin_main_menu_delete_init(){
-	$('.admin_main_menu_item_delete').off('click.r').on('click.r', function(){
-		$(this).closest('li').remove();
+function cms_main_menu_delete_init($root){
+
+	var $buttons = $root ? $root.find('.admin_main_menu_item_delete') : $('.admin_main_menu_item_delete');
+
+	$buttons.not('.cms_main_menu_delete_ok').each(function(){
+
+		var $button = $(this);
+
+		$button.addClass('cms_main_menu_delete_ok');
+
+		$button.on('click.cms', function(){
+			$button.closest('li').remove();
+		})
+
 	})
+
 }
 
 function admin_main_menu_prepare(template, data){
@@ -154,8 +166,16 @@ function set_mode($menu_list_item){
 	
 }
 
-function admin_main_menu_init() {
-	
+function cms_main_menu_init($root) {
+
+	var $scope = $root ? $root.find('.admin_main_menu_form') : $('.admin_main_menu_form');
+
+	$scope.not('.cms_main_menu_ok').each(function(){
+
+		var $form = $(this);
+
+		$form.addClass('cms_main_menu_ok');
+
 	// load template
 	admin_main_menu_template = $('.menu_item_template').html();
 
@@ -202,20 +222,22 @@ function admin_main_menu_init() {
 		
 		admin_main_menu_list_item_activate($('.menu_items_list').last());
 		
-		admin_main_menu_delete_init();
-		
+		cms_main_menu_delete_init($form);
+
 		$('.menu_items_list').sortable().disableSelection();
 
 	});
-	
-	admin_main_menu_delete_init();
+
+	cms_main_menu_delete_init($form);
 
 	$('.menu_items_list').sortable().disableSelection();
+
+	});
 
 }
 
 $(document).ready(function() {
-	
-	admin_main_menu_init();
-	
+
+	cms_main_menu_init();
+
 });

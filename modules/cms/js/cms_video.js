@@ -491,7 +491,7 @@ function cms_video_bind_visibility(){
 function cms_video_resume_visible(){
 
 	$('[data-cms_video]').filter(function(){
-		return cms_video_host_is_init_root(this) && $(this).data('cms_video_inited') && $(this).hasClass('cms_video_ready')
+		return cms_video_host_is_init_root(this) && $(this).hasClass('cms_video_ok') && $(this).hasClass('cms_video_ready')
 	}).each(function(){
 
 		var $host = $(this)
@@ -523,8 +523,8 @@ function cms_video_cleanup($element) {
 
 		cms_video_viewport_detach($host)
 
-		$host.removeClass('cms_video_pending cms_video_ready')
-		$host.removeData('cms_video_inited cms_video_view_ready cms_video_player_ready cms_video_bg_size_raw cms_video_reveal_timer cms_video_reveal_min_timer cms_video_pending_since')
+		$host.removeClass('cms_video_pending cms_video_ready cms_video_ok')
+		$host.removeData('cms_video_view_ready cms_video_player_ready cms_video_bg_size_raw cms_video_reveal_timer cms_video_reveal_min_timer cms_video_pending_since')
 
 	})
 
@@ -875,14 +875,14 @@ function cms_video_init_player($container){
 
 function cms_video_init_plain($host){
 
-	if ($host.data('cms_video_inited')){
+	if ($host.hasClass('cms_video_ok')){
 		return
 	}
 
 	cms_video_mark_pending($host)
 	$host.empty().append(cms_video_wrapper($host, $host))
 	cms_video_init_player($host)
-	$host.data('cms_video_inited', 1)
+	$host.addClass('cms_video_ok')
 
 	setTimeout(function(){
 		cms_video_try_reveal($host)
@@ -942,7 +942,7 @@ function cms_video_init_view($host){
 	}
 
 	$host.data('cms_video_view_ready', 1)
-	$host.data('cms_video_inited', 1)
+	$host.addClass('cms_video_ok')
 
 	setTimeout(function(){
 		cms_video_try_reveal($host)
@@ -950,19 +950,23 @@ function cms_video_init_view($host){
 
 }
 
-function cms_video_init(){
+function cms_video_init($root){
 
-	var $cms_video = $('[data-cms_video]').filter(function(){
-		return cms_video_host_is_init_root(this)
-	})
+	var $cms_video
 
-	$cms_video.each(function() {
+	if ($root){
+		$cms_video = $root.find('[data-cms_video]').filter(function(){
+			return cms_video_host_is_init_root(this)
+		})
+	} else {
+		$cms_video = $('[data-cms_video]').filter(function(){
+			return cms_video_host_is_init_root(this)
+		})
+	}
+
+	$cms_video.not('.cms_video_ok').each(function() {
 
 		var $this = $(this)
-
-		if ($this.data('cms_video_inited')){
-			return
-		}
 
 		if ($this.data('cms_video_view') == 1){
 			cms_video_init_view($this)
@@ -974,12 +978,20 @@ function cms_video_init(){
 
 }
 
+function cms_video_destroy($root){
+
+	var $scope = $root || $(document)
+
+	cms_video_cleanup($scope)
+
+}
+
 function cms_video_resume_all($root){
 
 	$root = $root || $(document)
 
 	$root.find('[data-cms_video]').filter(function(){
-		return cms_video_host_is_init_root(this) && $(this).data('cms_video_inited')
+		return cms_video_host_is_init_root(this) && $(this).hasClass('cms_video_ok')
 	}).each(function(){
 
 		var $host = $(this)
@@ -1056,7 +1068,7 @@ function cms_video_init_when_ready($root, callback){
 function cms_video_resize(){
 
 	$('[data-cms_video]').filter(function(){
-		return cms_video_host_is_init_root(this) && $(this).data('cms_video_inited')
+		return cms_video_host_is_init_root(this) && $(this).hasClass('cms_video_ok')
 	}).each(function(){
 
 		var $host = $(this)

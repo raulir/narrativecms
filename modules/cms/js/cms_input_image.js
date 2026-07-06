@@ -1,33 +1,44 @@
-function cms_input_image_init(){
-	
-	var $cms_input_image_containers = $('.cms_input_image_container');
-	
-	$cms_input_image_containers.each(function(){
-		
+function cms_input_image_init($root){
+
+	var $cms_input_image_containers = $root ? $root.find('.cms_input_image_container') : $('.cms_input_image_container');
+
+	$cms_input_image_containers.not('.cms_input_image_ok').each(function(){
+
 		var $cms_input_image_container = $(this);
-		
-		if (!$cms_input_image_container.data('cms_initiated')){
 
-			$('.cms_input_image_button', $cms_input_image_container).on('click.cms', function(){
-				cms_input_image_popup($(this));
-			});
-			$('.cms_input_image_clear', $cms_input_image_container).on('click.cms', function(){
-				cms_input_image_clear($(this));
-			});
-		
-			$('.cms_input_image_size_small .cms_input_image_overlay', $cms_input_image_container)
-				.on('mouseenter.cms', function(){
-					$(this).closest('.cms_input_image_size_small').addClass('cms_input_image_hover');
-				})
-				.on('mouseleave.cms', function(){
-					$(this).closest('.cms_input_image_size_small').removeClass('cms_input_image_hover');
-				});
-			
-			$cms_input_image_container.data('cms_initiated', true);
+		$cms_input_image_container.addClass('cms_input_image_ok');
 
-		}
-		
-	})
+		$('.cms_input_image_button', $cms_input_image_container).on('click.cms', function(){
+			cms_input_image_popup($(this));
+		});
+		$('.cms_input_image_clear', $cms_input_image_container).on('click.cms', function(){
+			cms_input_image_clear($(this));
+		});
+
+		$('.cms_input_image_size_small .cms_input_image_overlay', $cms_input_image_container)
+			.on('mouseenter.cms', function(){
+				$(this).closest('.cms_input_image_size_small').addClass('cms_input_image_hover');
+			})
+			.on('mouseleave.cms', function(){
+				$(this).closest('.cms_input_image_size_small').removeClass('cms_input_image_hover');
+			});
+
+	});
+
+}
+
+function cms_input_image_destroy($root){
+
+	var $cms_input_image_containers = $root ? $root.find('.cms_input_image_container') : $('.cms_input_image_container');
+
+	$cms_input_image_containers.filter('.cms_input_image_ok').each(function(){
+
+		var $cms_input_image_container = $(this);
+
+		$cms_input_image_container.removeClass('cms_input_image_ok');
+		$cms_input_image_container.off('.cms');
+
+	});
 
 }
 

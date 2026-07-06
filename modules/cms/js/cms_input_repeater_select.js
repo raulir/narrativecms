@@ -6,18 +6,16 @@ function cms_input_repeater_select_reinit(){
 	
 }
 
-function cms_input_repeater_select_init(){
+function cms_input_repeater_select_init($root){
 
 	setTimeout(function(){
-		
-		$('.cms_input_repeater_select').each( function(){
+
+		var $scope = $root ? $root.find('.cms_input_repeater_select') : $('.cms_input_repeater_select');
+
+		$scope.not('.cms_input_repeater_select_ok').each( function(){
 						
 			var $this = $(this);
 
-			if ($this.hasClass('cms_input_repeater_select_ok')){
-				return;
-			}
-			
 			$this.addClass('cms_input_repeater_select_ok')
 			
 			var selected = $this.data('selected');
@@ -69,8 +67,8 @@ function cms_input_repeater_select_init(){
 			});
 			
 			// update selected value data for repeater select, as html content gets reset when rebuilding
-			if (!$select.hasClass('cms_repeater_select_select_change_ok')){
-				$select.addClass('cms_repeater_select_select_change_ok');
+			if (!$select.hasClass('cms_input_repeater_select_change_ok')){
+				$select.addClass('cms_input_repeater_select_change_ok');
 				$select.on('change.cms', function(){
 					$(this).closest('.cms_input_repeater_select').data('selected', $(this).val());
 				})

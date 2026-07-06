@@ -1,5 +1,11 @@
-function cms_page_panel_toolbar_init(){
-	
+function cms_page_panel_toolbar_init($root){
+
+	var $scope = $root ? $root.find('.cms_page_panel_toolbar_container') : $('.cms_page_panel_toolbar_container');
+
+	$scope.not('.cms_page_panel_toolbar_ok').each(function(){
+		$(this).addClass('cms_page_panel_toolbar_ok');
+	});
+
 }
 
 function cms_page_panel_toolbar_resize(){

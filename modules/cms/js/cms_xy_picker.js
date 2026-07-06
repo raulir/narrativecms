@@ -1,7 +1,19 @@
 
-function cms_xy_picker_init(){
-	
-	cms_popup_run('xy_picker', function(){
+function cms_xy_picker_init($root){
+
+	if ($root && $root.length && $root.hasClass('cms_xy_picker_ok')){
+		return;
+	}
+
+	cms_popup_run('xy_picker', function($popup){
+
+		var $container = $popup ? $popup.find('.cms_xy_picker_container').addBack('.cms_xy_picker_container').first() : $('.cms_xy_picker_container');
+
+		if ($container.hasClass('cms_xy_picker_ok')){
+			return;
+		}
+
+		$container.addClass('cms_xy_picker_ok');
 	
 		$('.cms_xy_picker_image_inner').each(function(){
 		

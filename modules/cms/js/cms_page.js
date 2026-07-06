@@ -83,20 +83,28 @@ function cms_page_delete(){
 
 }
 
-function cms_page_init(){
+function cms_page_init($root){
 
-	$('.cms_page_save').on('click.cms', function(){
-		cms_page_save();
-	});
-	
-	$('.cms_page_delete').on('click.cms', function(){
-		cms_page_delete();
-	});
-	
-	cms_page_toolbar_title();
-	$('.cms_page_title').on('keyup.cms', cms_page_toolbar_title);
-	
-	$('.cms_page_panel_delete').on('click.cms', function(){
+	var $scope = $root ? $root.find('.cms_page_container') : $('.cms_page_container');
+
+	$scope.not('.cms_page_ok').each(function(){
+
+		var $container = $(this);
+
+		$container.addClass('cms_page_ok');
+
+		$('.cms_page_save', $container).on('click.cms', function(){
+			cms_page_save();
+		});
+
+		$('.cms_page_delete', $container).on('click.cms', function(){
+			cms_page_delete();
+		});
+
+		cms_page_toolbar_title();
+		$('.cms_page_title', $container).on('keyup.cms', cms_page_toolbar_title);
+
+		$('.cms_page_panel_delete', $container).on('click.cms', function(){
 		var $this = $(this);
 		var cms_page_panel_id = $this.data('cms_page_panel_id');
 		get_ajax_panel('cms/cms_popup_yes_no', {'text':'Delete block shortcut?'}, function(data){
@@ -111,10 +119,10 @@ function cms_page_init(){
 				}
 			}); 
 		});
-	});
-	
-	// cms page saves block order automatically
-	$('.cms_page_sortable').sortable({
+		});
+
+		// cms page saves block order automatically
+		$('.cms_page_sortable', $container).sortable({
 		'stop': function(event, ui){
 			// save order
 			var block_orders = {};
@@ -127,8 +135,10 @@ function cms_page_init(){
 				'cms_page_id': $('.cms_page_id').val()
 			});
 		},
-	}).disableSelection();
-	
+		}).disableSelection();
+
+	});
+
 }
 
 function cms_page_resize(){

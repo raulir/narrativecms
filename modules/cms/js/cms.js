@@ -61,10 +61,10 @@ function cms_scroll(){
 	
 }
 
-function cms_init(){
-	
+function cms_init($root){
+
 	// ctrl keybindings
-	var $cms_ctrl = $('*[data-cms_ctrl]')
+	var $cms_ctrl = $root ? $root.find('*[data-cms_ctrl]') : $('*[data-cms_ctrl]')
 	$cms_ctrl.each(function(){
 		
 		var $this = $(this)

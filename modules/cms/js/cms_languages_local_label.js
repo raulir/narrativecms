@@ -1,42 +1,50 @@
-function cms_languages_local_label_init(){
+function cms_languages_local_label_init($root){
 
-	$(document).off('focus.cms.cms_languages_local_label', '.cms_languages_local_label_input')
-	$(document).on('focus.cms.cms_languages_local_label', '.cms_languages_local_label_input', function(){
-		$(this).data('old_value', $(this).val())
-	})
+	var $scope = $root ? $root.find('.cms_languages_local_label_container') : $('.cms_languages_local_label_container');
 
-	$(document).off('blur.cms.cms_languages_local_label', '.cms_languages_local_label_input')
-	$(document).on('blur.cms.cms_languages_local_label', '.cms_languages_local_label_input', function(){
+	$scope.not('.cms_languages_local_label_ok').each(function(){
 
-		var $this = $(this)
+		var $container = $(this);
 
-		if ($this.val() == $this.data('old_value')){
-			return
-		}
+		$container.addClass('cms_languages_local_label_ok');
 
-		var data = {
-				'do': 'update_field',
-				'item_id': $this.data('item_id'),
-				'name': 'local_label',
-				'value': $this.val()
-		}
+		$container.find('.cms_languages_local_label_input').on('focus.cms', function(){
+			$(this).data('old_value', $(this).val())
+		})
 
-		if ($this.data('base_id')){
-			data.base_id = $this.data('base_id')
-		}
+		$container.find('.cms_languages_local_label_input').on('blur.cms', function(){
 
-		if ($this.data('ds')){
-			data.ds = $this.data('ds')
-		}
+			var $this = $(this)
 
-		if ($('.cms_language_select_current').length){
-			data.cms_language = $('.cms_language_select_current').data('language')
-		}
+			if ($this.val() == $this.data('old_value')){
+				return
+			}
 
-		get_ajax_panel('cms/cms_languages_local_label', data, function(result){
+			var data = {
+					'do': 'update_field',
+					'item_id': $this.data('item_id'),
+					'name': 'local_label',
+					'value': $this.val()
+			}
 
-			$this.closest('.cms_grid_field_inner').html(result.result._html)
-			cms_notification('Name updated', 2)
+			if ($this.data('base_id')){
+				data.base_id = $this.data('base_id')
+			}
+
+			if ($this.data('ds')){
+				data.ds = $this.data('ds')
+			}
+
+			if ($('.cms_language_select_current').length){
+				data.cms_language = $('.cms_language_select_current').data('language')
+			}
+
+			get_ajax_panel('cms/cms_languages_local_label', data, function(result){
+
+				$this.closest('.cms_grid_field_inner').html(result.result._html)
+				cms_notification('Name updated', 2)
+
+			})
 
 		})
 

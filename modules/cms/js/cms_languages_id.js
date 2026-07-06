@@ -1,38 +1,46 @@
-function cms_languages_id_init(){
+function cms_languages_id_init($root){
 
-	$(document).off('focus.cms.cms_languages_id', '.cms_languages_id_input')
-	$(document).on('focus.cms.cms_languages_id', '.cms_languages_id_input', function(){
-		$(this).data('old_value', $(this).val())
-	})
+	var $scope = $root ? $root.find('.cms_languages_id_container') : $('.cms_languages_id_container');
 
-	$(document).off('blur.cms.cms_languages_id', '.cms_languages_id_input')
-	$(document).on('blur.cms.cms_languages_id', '.cms_languages_id_input', function(){
+	$scope.not('.cms_languages_id_ok').each(function(){
 
-		var $this = $(this)
+		var $container = $(this);
 
-		if ($this.val() == $this.data('old_value')){
-			return
-		}
+		$container.addClass('cms_languages_id_ok');
 
-		var data = {
-				'do': 'update_field',
-				'item_id': $this.data('item_id'),
-				'name': 'language_id',
-				'value': $this.val()
-		}
+		$container.find('.cms_languages_id_input').on('focus.cms', function(){
+			$(this).data('old_value', $(this).val())
+		})
 
-		if ($this.data('base_id')){
-			data.base_id = $this.data('base_id')
-		}
+		$container.find('.cms_languages_id_input').on('blur.cms', function(){
 
-		if ($this.data('ds')){
-			data.ds = $this.data('ds')
-		}
+			var $this = $(this)
 
-		get_ajax_panel('cms/cms_languages_id', data, function(result){
+			if ($this.val() == $this.data('old_value')){
+				return
+			}
 
-			$this.closest('.cms_grid_field_inner').html(result.result._html)
-			cms_notification('Language ID updated', 2)
+			var data = {
+					'do': 'update_field',
+					'item_id': $this.data('item_id'),
+					'name': 'language_id',
+					'value': $this.val()
+			}
+
+			if ($this.data('base_id')){
+				data.base_id = $this.data('base_id')
+			}
+
+			if ($this.data('ds')){
+				data.ds = $this.data('ds')
+			}
+
+			get_ajax_panel('cms/cms_languages_id', data, function(result){
+
+				$this.closest('.cms_grid_field_inner').html(result.result._html)
+				cms_notification('Language ID updated', 2)
+
+			})
 
 		})
 

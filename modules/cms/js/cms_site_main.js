@@ -392,31 +392,40 @@ function change_url(new_url) {
 	}
 }
 
-function cms_hover_init() {
+function cms_hover_init($root) {
 
-	$('.cms_hover_button').each(function() {
-		if (!$(this).data('normal_image')) {
-			$(this).data('normal_image', $(this).css('background-image'))
-		}
-	})
-	$('.cms_hover_button').on('mouseenter.sc', function() {
+	var $scope = $root ? $root.find('.cms_hover_button') : $('.cms_hover_button');
+
+	$scope.not('.cms_hover_ok').each(function() {
+
 		var $this = $(this)
-		if (!$this.hasClass('cms_hover_disabled')) {
-			$this.addClass($this.data('hover_class'))
-			setTimeout(function() {
-				$this.css({'background-image':$this.data('hover_image')})
-			}, 150)
+
+		if (!$this.data('normal_image')) {
+			$this.data('normal_image', $this.css('background-image'))
 		}
+
+		$this.addClass('cms_hover_ok')
+
+		$this.on('mouseenter.cms', function() {
+			if (!$this.hasClass('cms_hover_disabled')) {
+				$this.addClass($this.data('hover_class'))
+				setTimeout(function() {
+					$this.css({'background-image':$this.data('hover_image')})
+				}, 150)
+			}
+		})
+
+		$this.on('mouseleave.cms', function() {
+			if (!$this.hasClass('cms_hover_disabled')) {
+				$this.removeClass($this.data('hover_class'))
+				setTimeout(function() {
+					$this.css({'background-image':$this.data('normal_image')})
+				}, 150)
+			}
+		})
+
 	})
-	$('.cms_hover_button').on('mouseleave.sc', function() {
-		var $this = $(this)
-		if (!$this.hasClass('cms_hover_disabled')) {
-			$this.removeClass($this.data('hover_class'))
-			setTimeout(function() {
-				$this.css({'background-image':$this.data('normal_image')})
-			}, 150)
-		}
-	})
+
 }
 
 if (!window.console) {

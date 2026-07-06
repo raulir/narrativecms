@@ -10,9 +10,9 @@
 			
 			var $this = $(this);
 			
-			if (!$this.data('cms_scroll_to_init')){
-				
-				$this.data('cms_scroll_to_init', true);
+			if (!$this.hasClass('cms_scroll_to_ok')){
+
+				$this.addClass('cms_scroll_to_ok');
 				
 				$this.on('click.cms', function(e){
 					e.stopPropagation();

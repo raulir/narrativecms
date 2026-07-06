@@ -1,11 +1,19 @@
-function cms_list_init(){
-	
-	cms_list_init_filters()
-	
-	cms_list_init_limit()
+function cms_list_init($root){
 
-	// load initially
-	cms_list_load(0, $('.cms_list_container').data('limit'));
+	var $scope = $root ? $root.find('.cms_list_container') : $('.cms_list_container');
+
+	$scope.not('.cms_list_ok').each(function(){
+
+		var $container = $(this);
+
+		$container.addClass('cms_list_ok');
+
+		cms_list_init_filters()
+
+		cms_list_init_limit()
+
+		// load initially
+		cms_list_load(0, $container.data('limit'));
 	
 	// init filters
 	$('.admin_tool_filter').on('change.cms', function(){
@@ -213,7 +221,9 @@ function cms_list_init(){
 		
 	});
 	*/
-	
+
+	});
+
 }
 
 function cms_list_resize(){

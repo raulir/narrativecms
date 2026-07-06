@@ -1,14 +1,12 @@
-function cms_input_groups_init(){
+function cms_input_groups_init($root){
 
-	$('.cms_input_groups').each(function(){
-		
+	var $scope = $root ? $root.find('.cms_input_groups') : $('.cms_input_groups');
+
+	$scope.not('.cms_input_groups_ok').each(function(){
+
 		var $this = $(this);
-		
-		if($this.hasClass('cms_input_groups_init')){
-			return;
-		}
-		
-		$this.addClass('cms_input_groups_init');
+
+		$this.addClass('cms_input_groups_ok');
 		
 		var value = $('.cms_input_groups_value_selected', $this).data('value');
 		

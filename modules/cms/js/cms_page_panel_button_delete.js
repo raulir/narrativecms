@@ -1,6 +1,14 @@
-function cms_page_panel_button_delete_init(){
-	
-	$('.cms_page_panel_button_delete').on('click.cms', function(event){
+function cms_page_panel_button_delete_init($root){
+
+	var $scope = $root ? $root.find('.cms_page_panel_button_delete') : $('.cms_page_panel_button_delete');
+
+	$scope.not('.cms_page_panel_button_delete_ok').each(function(){
+
+		var $button = $(this);
+
+		$button.addClass('cms_page_panel_button_delete_ok');
+
+		$button.on('click.cms', function(event){
 		// ask are you sure
 		get_ajax_panel('cms/cms_popup_yes_no', {}, function(data){
 			panels_display_popup(data.result._html, {
@@ -16,6 +24,8 @@ function cms_page_panel_button_delete_init(){
 				}
 			}); 
 		});
+		});
+
 	});
 
 }

@@ -93,7 +93,13 @@ function cms_popup_run(name, after){
 
 }
 
-function cms_popup_init(){
+function cms_popup_init($root){
+
+	var $scope = $root ? $root.find('.cms_popup_container') : $('.cms_popup_container');
+
+	$scope.not('.cms_popup_ok').each(function(){
+		$(this).addClass('cms_popup_ok');
+	});
 
 }
 

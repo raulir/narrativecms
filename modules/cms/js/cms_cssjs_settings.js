@@ -6,9 +6,17 @@ function cms_cssjs_settings_scroll(){
 	
 }
 
-function cms_cssjs_settings_init(){
-	
-	$('.cms_cssjs_settings_css_add').on('click.cms', function(){
+function cms_cssjs_settings_init($root){
+
+	var $scope = $root ? $root.find('.cms_cssjs_settings_csss') : $('.cms_cssjs_settings_csss');
+
+	$scope.not('.cms_cssjs_settings_ok').each(function(){
+
+		var $panel = $(this);
+
+		$panel.addClass('cms_cssjs_settings_ok');
+
+		$('.cms_cssjs_settings_css_add').on('click.cms', function(){
 		
 		var $select = $('.cms_cssjs_settings_css_select');
 		var value = $select.val();
@@ -24,11 +32,11 @@ function cms_cssjs_settings_init(){
 			
 		}
 	
-	});
-	
-	cms_cssjs_settings_item_init();
-	
-	$('.cms_cssjs_settings_save').on('click.cms', function(){
+		});
+
+		cms_cssjs_settings_item_init();
+
+		$('.cms_cssjs_settings_save').on('click.cms', function(){
 		
 		// collect data
 		var panels = [];
@@ -45,15 +53,27 @@ function cms_cssjs_settings_init(){
 			location.reload();
 		});
 
+		});
+
 	});
-	
+
 }
 
-function cms_cssjs_settings_item_init(){
-	
-	$('.cms_cssjs_settings_csss_item_delete').off('click.cms').on('click.cms', function(){
-		$('.cms_cssjs_settings_css_select').append('<option value="' + $(this).parent().data('value') + '">' + $(this).parent().data('text') + '</option>');
-		$(this).parent().remove();
+function cms_cssjs_settings_item_init($root){
+
+	var $items = $root ? $root.find('.cms_cssjs_settings_csss_item') : $('.cms_cssjs_settings_csss_item');
+
+	$items.not('.cms_cssjs_settings_item_ok').each(function(){
+
+		var $item = $(this);
+
+		$item.addClass('cms_cssjs_settings_item_ok');
+
+		$('.cms_cssjs_settings_csss_item_delete', $item).on('click.cms', function(){
+			$('.cms_cssjs_settings_css_select').append('<option value="' + $item.data('value') + '">' + $item.data('text') + '</option>');
+			$item.remove();
+		});
+
 	});
 
 }

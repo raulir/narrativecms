@@ -1,6 +1,8 @@
-function cms_input_link_init(){
+function cms_input_link_init($root){
 
-	$('.cms_input_link_container').not('.cms_input_link_ok').each(function(){
+	var $scope = $root ? $root.find('.cms_input_link_container') : $('.cms_input_link_container');
+
+	$scope.not('.cms_input_link_ok').each(function(){
 	
 		var $container = $(this);
 		$container.addClass('cms_input_link_ok');

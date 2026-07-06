@@ -1,9 +1,17 @@
-function cms_input_page_panels_init(){
-	
-	$('.cms_list_sortable').sortable().disableSelection();
-	
-	// save before adding a new panel
-	$('.cms_input_page_panels_add').on('click.cms', function(){
+function cms_input_page_panels_init($root){
+
+	var $scope = $root ? $root.find('.cms_input_page_panels') : $('.cms_input_page_panels');
+
+	$scope.not('.cms_input_page_panels_ok').each(function(){
+
+		var $panel = $(this);
+
+		$panel.addClass('cms_input_page_panels_ok');
+
+		$('.cms_list_sortable', $panel).sortable().disableSelection();
+
+		// save before adding a new panel
+		$('.cms_input_page_panels_add', $panel).on('click.cms', function(){
 		
 		var $this = $(this);
 		
@@ -90,9 +98,11 @@ function cms_input_page_panels_init(){
 			window.location.href = $this.data('target');
 
 		}
-		
+
+		});
+
 	});
-	
+
 }
 
 function cms_input_page_panel_selector(target_type, target_id, target_name, filter_panels){

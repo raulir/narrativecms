@@ -76,17 +76,15 @@ function cms_input_textarea_md_edit($wrap){
 
 }
 
-function cms_input_textarea_md_init(){
+function cms_input_textarea_md_init($root){
 
-	$('.cms_input_textarea_md').each(function(){
+	var $scope = $root ? $root.find('.cms_input_textarea_md') : $('.cms_input_textarea_md');
+
+	$scope.not('.cms_input_textarea_md_ok').each(function(){
 
 		var $wrap = $(this);
 
-		if ($wrap.data('cms_input_textarea_md_init')){
-			return;
-		}
-
-		$wrap.data('cms_input_textarea_md_init', 1);
+		$wrap.addClass('cms_input_textarea_md_ok');
 
 		$('.cms_input_textarea_md_button', $wrap).on('click.cms', function(){
 
@@ -102,35 +100,33 @@ function cms_input_textarea_md_init(){
 
 }
 
-function cms_input_textarea_init(){
+function cms_input_textarea_init($root){
 
-	$('.cms_input_textarea').each(function(){
-		
+	var $scope = $root ? $root.find('.cms_input_textarea') : $('.cms_input_textarea');
+
+	$scope.not('.cms_input_textarea_ok').each(function(){
+
 		var $this = $(this);
-		
-		if ($this.hasClass('cms_input_textarea_ok')){
-			return;
-		}
-		
+
 		if ($this.hasClass('cms_input_textarea_readonly')){
 			$this.addClass('cms_input_textarea_ok');
 			return;
 		}
-		
+
 		if ($this.closest('.cms_repeater_target').length){
 
-			$this.addClass('cms_input_textarea_ok');
-			
 			$('textarea', $this).on('focus.cms', function(){
 				$this.data('old_value', $(this).val());
 			});
-			
+
 			$('textarea', $this).on('change.cms', function(){
 				cms_input_repeater_select_reinit();
 			});
-			
+
 		}
-		
+
+		$this.addClass('cms_input_textarea_ok');
+
 	});
 	
 	setTimeout(function(){
@@ -306,7 +302,7 @@ function cms_input_textarea_init(){
 		});
 	}, 30)
 
-	cms_input_textarea_md_init();
+	cms_input_textarea_md_init($root);
 
 }
 

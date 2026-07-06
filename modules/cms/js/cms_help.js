@@ -1,25 +1,25 @@
-function cms_help_init(){
-	
-	$('.cms_help').each(function(){
-		
-		if ($(this).hasClass('cms_help_ok')){
-			return
-		}
-		
-		$(this).addClass('cms_help_ok')
+function cms_help_init($root){
+
+	var $scope = $root ? $root.find('.cms_help') : $('.cms_help');
+
+	$scope.not('.cms_help_ok').each(function(){
+
+		var $this = $(this);
+
+		$this.addClass('cms_help_ok')
 		
 		var $clone;
 		
-		$(this).on('mouseenter.cms', function(){
+		$this.on('mouseenter.cms', function(){
 		    var scrollTop = ($('html').scrollTop()) ? $('html').scrollTop() : $('body').scrollTop()
-			$clone = $('.cms_help_text', $(this)).clone().css({
-				'left': $(this).offset().left / _cms_rem + 'rem',
-				'top': (($(this).offset().top - scrollTop) / _cms_rem) + 1.6 + 'rem',
+			$clone = $('.cms_help_text', $this).clone().css({
+				'left': $this.offset().left / _cms_rem + 'rem',
+				'top': (($this.offset().top - scrollTop) / _cms_rem) + 1.6 + 'rem',
 				'display': 'block'
 			}).appendTo('body')
 		})
 		
-		$(this).on('mouseleave.cms', function(){
+		$this.on('mouseleave.cms', function(){
 			$clone.remove()
 		})
 		

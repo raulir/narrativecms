@@ -179,9 +179,17 @@ function cms_page_panel_export_bind_settings($popup, export_id){
 
 }
 
-function cms_page_panel_button_export_init(){
+function cms_page_panel_button_export_init($root){
 
-	$('.cms_page_panel_export').off('click.cms').on('click.cms', function(e){
+	var $scope = $root ? $root.find('.cms_page_panel_export') : $('.cms_page_panel_export');
+
+	$scope.not('.cms_page_panel_button_export_ok').each(function(){
+
+		var $button = $(this);
+
+		$button.addClass('cms_page_panel_button_export_ok');
+
+		$button.on('click.cms', function(e){
 
 		e.preventDefault()
 		e.stopPropagation()
@@ -205,7 +213,9 @@ function cms_page_panel_button_export_init(){
 
 		})
 
-	})
+		})
+
+	});
 
 }
 

@@ -10,7 +10,7 @@ function cms_image_open(filename){
 		$('body').append('<div class="cms_image_overlay"></div>')
 		$('body').append(data.result._html)
 		if (typeof cms_image_init === 'function'){
-			cms_image_init()
+			cms_image_init($('.cms_image_container').last())
 		}
 		if (typeof cms_image_video_init === 'function'){
 			cms_image_video_init()
@@ -285,6 +285,18 @@ function cms_images_load_images(page, limit, filename){
 	
 }
 
+function cms_images_popup_destroy($popup){
+
+	if (!$popup || !$popup.length){
+		return
+	}
+
+	$popup.removeClass('cms_images_popup_ok')
+	$popup.off('.cms_images_popup')
+	$(document).off('keyup.cms')
+
+}
+
 function cms_images_popup_init($popup){
 
 	if (!$popup || !$popup.length){
@@ -294,6 +306,12 @@ function cms_images_popup_init($popup){
 	if (!$popup.length){
 		return
 	}
+
+	if ($popup.hasClass('cms_images_popup_ok')){
+		return
+	}
+
+	$popup.addClass('cms_images_popup_ok')
 
 	if (!$popup.parent().is('body')){
 		$popup.detach().appendTo('body')

@@ -104,41 +104,54 @@ function cms_input_file_upload(params){
 
 }
 
-function cms_input_file_init(){
+function cms_input_file_init($root){
 
-	if(!$('.cms_input_file_form').length){
+	var $scope = $root ? $root.find('.cms_input_file') : $('.cms_input_file');
+	var $context = $root || $(document);
+
+	if(!$context.find('.cms_input_file_form').length){
 		$('.cms_admin_content').append('<form class="cms_input_file_form" method="post" enctype="multipart/form-data" style="display: none; ">' +
 				'<input type="hidden" name="do" value="cms_input_file_upload"><input type="file" name="new_file" class="cms_input_file_form_file"></form>');
 	}
-	
-	$('.cms_input_file_form_file').off('change.r').on('change.r', function(){
-		if ($('.cms_input_file_form_file').val()){
-			var input_name = $(this).data('name');
-			cms_input_file_upload({
-				'input_selector': '.cms_file_input_' + input_name,
-				'name_selector': '.cms_input_file_content_' + input_name,
-				'name': input_name
-			});
-		}
-	});
-	
-	// upload
-	$('.cms_input_file_button').off('click.r').on('click.r', function(event){
 
-		var $this = $(this);
-	
-		if($this.data('accept')){
-			$('.cms_input_file_form_file').attr('accept', $this.data('accept'))
-		} else {
-			$('.cms_input_file_form_file').attr('accept', '');
-		}
-		
-		$('.cms_input_file_form_file').data('name', $this.data('name')).click();			
-	
-	});
-	
-	// clear
-	$('.cms_input_file_clear').off('click.r').on('click.r', function(event){
+	if (!$('body').hasClass('cms_input_file_form_ok')){
+		$('body').addClass('cms_input_file_form_ok');
+
+		$('.cms_input_file_form_file').off('change.cms').on('change.cms', function(){
+			if ($('.cms_input_file_form_file').val()){
+				var input_name = $(this).data('name');
+				cms_input_file_upload({
+					'input_selector': '.cms_file_input_' + input_name,
+					'name_selector': '.cms_input_file_content_' + input_name,
+					'name': input_name
+				});
+			}
+		});
+	}
+
+	$scope.not('.cms_input_file_ok').each(function(){
+
+		var $container = $(this);
+
+		$container.addClass('cms_input_file_ok');
+
+		// upload
+		$('.cms_input_file_button', $container).on('click.cms', function(event){
+
+			var $this = $(this);
+
+			if($this.data('accept')){
+				$('.cms_input_file_form_file').attr('accept', $this.data('accept'))
+			} else {
+				$('.cms_input_file_form_file').attr('accept', '');
+			}
+
+			$('.cms_input_file_form_file').data('name', $this.data('name')).click();
+
+		});
+
+		// clear
+		$('.cms_input_file_clear', $container).on('click.cms', function(event){
 		
 		if ($(this).hasClass('cms_input_file_button_disabled')){
 			return;
@@ -156,21 +169,23 @@ function cms_input_file_init(){
 		
     	// update download button
     	$('.cms_input_file_download' ,'.cms_input_file_container_' + input_name).addClass('cms_input_file_button_disabled');
-    	
+
+		});
+
+		// rename
+		$('.cms_input_file_rename', $container).on('click.cms', function(event){
+
+			if ($(this).hasClass('cms_input_file_button_disabled')){
+				return;
+			}
+
+			var input_name = $(this).data('name');
+			cms_input_file_rename(input_name);
+
+		});
+
 	});
 
-	// rename
-	$('.cms_input_file_rename').off('click.r').on('click.r', function(event){
-		
-		if ($(this).hasClass('cms_input_file_button_disabled')){
-			return;
-		}
-		
-		var input_name = $(this).data('name');
-		cms_input_file_rename(input_name);
-    	
-	});
-	
 }
 
 $(document).ready(function() {

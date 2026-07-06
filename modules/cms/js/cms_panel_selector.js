@@ -1,7 +1,19 @@
 
-function cms_panel_selector_init(){
-	
-	cms_popup_run('panel_selector', function(){
+function cms_panel_selector_init($root){
+
+	if ($root && $root.length && $root.hasClass('cms_panel_selector_ok')){
+		return;
+	}
+
+	cms_popup_run('panel_selector', function($popup){
+
+		var $container = $popup ? $popup.find('.cms_panel_selector_container').addBack('.cms_panel_selector_container').first() : $('.cms_panel_selector_container');
+
+		if ($container.hasClass('cms_panel_selector_ok')){
+			return;
+		}
+
+		$container.addClass('cms_panel_selector_ok');
 		
 		$('.cms_panel_selector_item').on('mouseenter.cms', function(){
 

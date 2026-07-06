@@ -10,11 +10,11 @@
 			
 			var $this = $(this);
 			
-			if ($this.hasClass('cms_keep_ratio_init')){
+			if ($this.hasClass('cms_keep_ratio_ok')){
 				return;
 			}
-			
-			$this.addClass('cms_keep_ratio_init');
+
+			$this.addClass('cms_keep_ratio_ok');
 			
 			if (!$this.data('keep_width') && !$this.data('keep_height')){
 				$this.data({'keep_width':100});

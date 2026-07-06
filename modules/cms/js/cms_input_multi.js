@@ -1,12 +1,12 @@
-function cms_input_multi_init(){
-	
-	$('.cms_input_multi').each(function(){
-		
+function cms_input_multi_init($root){
+
+	var $scope = $root ? $root.find('.cms_input_multi') : $('.cms_input_multi');
+
+	$scope.not('.cms_input_multi_ok').each(function(){
+
 		var $input = $(this);
-		
-		if ($input.data('init_ok')) return;
-		
-		$input.data('init_ok', true);
+
+		$input.addClass('cms_input_multi_ok');
 		
 		$('.cms_input_multi_add', $input).on('click.cms', function(){
 			
@@ -34,7 +34,7 @@ function cms_input_multi_init(){
 }
 
 function cms_input_multi_item_init($input){
-	
+
 	$('.cms_input_multi_item', $input).css({'background-image': 'url(' + $input.data('bg') + ')'});
 	
 	$('.cms_input_multi_item', $input).off('click.cms').on('click.cms', function(){

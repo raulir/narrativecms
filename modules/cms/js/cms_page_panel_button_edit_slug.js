@@ -116,9 +116,17 @@ function cms_edit_slug_bind($popup){
 
 }
 
-function cms_page_panel_button_edit_slug_init(){
+function cms_page_panel_button_edit_slug_init($root){
 
-	$('.cms_page_panel_edit_slug').off('click.cms').on('click.cms', function(e){
+	var $scope = $root ? $root.find('.cms_page_panel_edit_slug') : $('.cms_page_panel_edit_slug');
+
+	$scope.not('.cms_page_panel_button_edit_slug_ok').each(function(){
+
+		var $button = $(this);
+
+		$button.addClass('cms_page_panel_button_edit_slug_ok');
+
+		$button.on('click.cms', function(e){
 
 		e.preventDefault()
 		e.stopPropagation()
@@ -142,7 +150,9 @@ function cms_page_panel_button_edit_slug_init(){
 
 		})
 
-	})
+		})
+
+	});
 
 }
 

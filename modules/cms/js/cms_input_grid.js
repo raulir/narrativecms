@@ -19,9 +19,17 @@ function cms_input_grid_resize_height($grid){
 
 }
 
-function cms_input_grid_init(){
-	
-	$('.cms_grid_new').on('click.cms', function(){
+function cms_input_grid_init($root){
+
+	var $scope = $root ? $root.find('.cms_grid_container') : $('.cms_grid_container');
+
+	$scope.not('.cms_input_grid_ok').each(function(){
+
+		var $grid = $(this);
+
+		$grid.addClass('cms_input_grid_ok');
+
+		$('.cms_grid_new', $grid).on('click.cms', function(){
 		
 		var $this = $(this)
 		
@@ -42,9 +50,9 @@ function cms_input_grid_init(){
 
 		})
 
-	})
-	
-	$('.cms_grid_delete').on('click.cms', function(){
+		})
+
+		$('.cms_grid_delete', $grid).on('click.cms', function(){
 
 		var $this = $(this)
 
@@ -71,7 +79,9 @@ function cms_input_grid_init(){
 			})
 		})
 
-	})
+		})
+
+	});
 
 }
 

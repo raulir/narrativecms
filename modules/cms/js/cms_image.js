@@ -465,14 +465,21 @@ function cms_image_video_cleanup(){
 
 }
 
-function cms_image_video_init(){
+function cms_image_video_init($root){
 
-	var $container = $('.cms_image_container')
+	var $containers = $root ? ($root.hasClass('cms_image_container') ? $root : $root.find('.cms_image_container')) : $('.cms_image_container');
+
+	$containers.not('.cms_image_video_ok').each(function(){
+
+	var $container = $(this)
+
 	if ($container.data('is_source_video') != 1){
 		return
 	}
 
-	var $source = $('.cms_image_image_source[data-cms_video]')
+	$container.addClass('cms_image_video_ok')
+
+	var $source = $('.cms_image_image_source[data-cms_video]', $container)
 	if (!$source.length){
 		return
 	}
@@ -519,6 +526,8 @@ function cms_image_video_init(){
 
 	cms_video_fallback($video_el, true)
 	$source.data('cms_image_video_ready', 1)
+
+	})
 
 }
 
@@ -880,9 +889,15 @@ function cms_image_crop_bind_document_drag(){
 
 }
 
-function cms_image_crop_init(){
+function cms_image_crop_init($root){
 
-	var $container = $('.cms_image_container')
+	var $containers = $root ? ($root.hasClass('cms_image_container') ? $root : $root.find('.cms_image_container')) : $('.cms_image_container');
+
+	$containers.not('.cms_image_crop_ok').each(function(){
+
+	var $container = $(this)
+
+	$container.addClass('cms_image_crop_ok')
 
 	cms_image_pan_x = parseFloat($container.data('pan_x')) || 0
 	cms_image_pan_y = parseFloat($container.data('pan_y')) || 0
@@ -927,16 +942,26 @@ function cms_image_crop_init(){
 	cms_image_apply_view()
 	cms_image_apply_overlay()
 
+	})
+
 }
 
-function cms_image_init(){
+function cms_image_init($root){
+
+	var $containers = $root ? ($root.hasClass('cms_image_container') ? $root : $root.find('.cms_image_container')) : $('.cms_image_container');
+
+	$containers.not('.cms_image_ok').each(function(){
+
+	var $container = $(this)
+
+	$container.addClass('cms_image_ok')
 
 	$('.cms_image_cancel').off('click.cms').on('click.cms', function(){
-		cms_image_video_cleanup()
+		cms_image_destroy($container)
 		$('.cms_image_overlay,.cms_image_container').remove()
 	})
 
-	$('.cms_image_save').off('click.cms').on('click.cms', function(){
+	$('.cms_image_save', $container).off('click.cms').on('click.cms', function(){
 
 		if ($(this).hasClass('cms_image_save_disabled')){
 			return
@@ -1019,8 +1044,39 @@ function cms_image_init(){
 
 	})
 
-	cms_image_crop_init()
-	cms_image_video_init()
+	cms_image_crop_init($container)
+	cms_image_video_init($container)
+
+	})
+
+	if ($containers.filter('.cms_image_ok').length){
+		$(window).off('resize.cms_image').on('resize.cms_image', cms_image_resize)
+		$(window).off('scroll.cms_image').on('scroll.cms_image', cms_image_scroll)
+	}
+
+}
+
+function cms_image_destroy($root){
+
+	var $scope = $root ? ($root.hasClass('cms_image_container') ? $root : $root.find('.cms_image_container')) : $('.cms_image_container');
+
+	cms_image_video_cleanup()
+
+	$scope.filter('.cms_image_ok').each(function(){
+
+		var $container = $(this)
+
+		$container.removeClass('cms_image_ok cms_image_crop_ok cms_image_video_ok')
+		$container.off('.cms')
+
+	})
+
+	$('.cms_image_cancel, .cms_image_save').off('.cms')
+
+	$(document).off('mousemove.cms_image_crop mouseup.cms_image_crop')
+	$(window).off('resize.cms_image scroll.cms_image')
+
+	cms_image_crop_drag = null
 
 }
 
@@ -1078,11 +1134,11 @@ function cms_image_scroll(){
 
 $(document).ready(function() {
 
-	$(window).off('resize.cms_image').on('resize.cms_image', cms_image_resize)
-	$(window).off('scroll.cms_image').on('scroll.cms_image', cms_image_scroll)
-
 	cms_image_init()
-	cms_image_resize()
-	cms_image_scroll()
+
+	if ($('.cms_image_container').length){
+		cms_image_resize()
+		cms_image_scroll()
+	}
 
 })

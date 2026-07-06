@@ -1,12 +1,10 @@
-function cms_cache_hydrate() {
+function cms_cache_hydrate($root) {
 
-	$('[data-cache_ajax]').each(function() {
+	var $mounts = $root ? $root.find('[data-cache_ajax]') : $('[data-cache_ajax]');
+
+	$mounts.not('.cms_cache_ok').each(function() {
 
 		var $mount = $(this)
-
-		if ($mount.data('cache_ajax_ok')) {
-			return
-		}
 
 		var panel = $mount.data('cache_ajax')
 
@@ -14,7 +12,7 @@ function cms_cache_hydrate() {
 			return
 		}
 
-		$mount.data('cache_ajax_ok', 1)
+		$mount.addClass('cms_cache_ok')
 
 		get_ajax_panel(panel, {}, function(result) {
 			if (result && result.result && result.result.html) {
@@ -29,9 +27,9 @@ function cms_cache_hydrate() {
 
 }
 
-function cms_cache_init() {
+function cms_cache_init($root) {
 
-	cms_cache_hydrate()
+	cms_cache_hydrate($root)
 
 	if (!window.cms_cache_position_hook_ok) {
 		window.cms_cache_position_hook_ok = true

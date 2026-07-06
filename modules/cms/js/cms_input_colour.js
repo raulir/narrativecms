@@ -1,13 +1,11 @@
-function cms_input_colour_init(){
-	
-	$('.cms_input_colour').each(function(){
-		
+function cms_input_colour_init($root){
+
+	var $scope = $root ? $root.find('.cms_input_colour') : $('.cms_input_colour');
+
+	$scope.not('.cms_input_colour_ok').each(function(){
+
 		var $this = $(this)
-		
-		if ($this.hasClass('cms_input_colour_ok')){
-			return
-		}
-		
+
 		$this.addClass('cms_input_colour_ok')
 
 		$('.cms_input_colour_default', $this).on('click.cms', function(){

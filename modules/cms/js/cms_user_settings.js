@@ -1,6 +1,14 @@
-function cms_user_settings_init(){
+function cms_user_settings_init($root){
 
-	$('.cms_user_settings_rights_add').on('click.cms', function(){
+	var $scope = $root ? $root.find('.cms_user_settings_container') : $('.cms_user_settings_container');
+
+	$scope.not('.cms_user_settings_ok').each(function(){
+
+		var $container = $(this);
+
+		$container.addClass('cms_user_settings_ok');
+
+		$('.cms_user_settings_rights_add', $container).on('click.cms', function(){
 		var value = $('.cms_user_settings_user_rights_select_' + $(this).data('target')).val();
 		if (value != null){
 			
@@ -19,33 +27,45 @@ function cms_user_settings_init(){
 			cms_user_settings_item_init(); // reinit all items again, as this is easier
 			
 		}
-	});
-	
-	cms_user_settings_item_init();
-	
-	// save / add button
-	$('.cms_user_settings_user_save').on('click.cms', function(){
+		});
+
+		cms_user_settings_item_init($container);
+
+		// save / add button
+		$('.cms_user_settings_user_save', $container).on('click.cms', function(){
 		cms_user_settings_user_save($(this), function(){
 			location.reload();
 		});
-	});
-	
-	// delete button
-	$('.cms_user_settings_user_delete').on('click.cms', function(){
+		});
+
+		// delete button
+		$('.cms_user_settings_user_delete', $container).on('click.cms', function(){
 		cms_user_settings_user_delete($(this), function(){
 			location.reload();
 		});
+		});
+
 	});
-	
+
 }
 
-function cms_user_settings_item_init(){
-	
-	$('.cms_user_settings_user_access_item').off('click.cms').on('click.cms', function(){
-		$('.cms_user_settings_user_rights_select_' + $(this).data('target')).append('<option value="' + $(this).data('value') + '">' + $(this).data('text') + '</option>');
-		$(this).remove();
+function cms_user_settings_item_init($root){
+
+	var $items = $root ? $root.find('.cms_user_settings_user_access_item') : $('.cms_user_settings_user_access_item');
+
+	$items.not('.cms_user_settings_item_ok').each(function(){
+
+		var $item = $(this);
+
+		$item.addClass('cms_user_settings_item_ok');
+
+		$item.on('click.cms', function(){
+			$('.cms_user_settings_user_rights_select_' + $item.data('target')).append('<option value="' + $item.data('value') + '">' + $item.data('text') + '</option>');
+			$item.remove();
+		});
+
 	});
-	
+
 }
 
 function cms_user_settings_user_save($this, after){

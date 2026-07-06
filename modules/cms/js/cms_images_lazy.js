@@ -15,9 +15,9 @@
 			
 			var $this = $(this);
 			
-			if (!($this.hasClass('cms_images_lazy_init'))){
-				
-				$this.addClass('cms_images_lazy_init').addClass('cms_images_lazy_waiting');
+			if (!$this.hasClass('cms_images_lazy_ok')){
+
+				$this.addClass('cms_images_lazy_ok').addClass('cms_images_lazy_waiting');
 
 			}
 			
@@ -83,12 +83,14 @@ function cms_images_lazy_next($this){
 	
 }
 
-function cms_images_lazy_init(){
-	
+function cms_images_lazy_init($root){
+
+	var $scope = $root ? $root.find('[data-cms_images_lazy]') : $('[data-cms_images_lazy]');
+
 	// delay to be sure, that lq images get loaded first
 	setTimeout(function(){
-		
-		$('[data-cms_images_lazy]').cms_images_lazy();
+
+		$scope.cms_images_lazy();
 
 	}, 100);
 

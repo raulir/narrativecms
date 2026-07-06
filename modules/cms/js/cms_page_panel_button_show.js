@@ -92,10 +92,25 @@ function cms_page_panel_button_show_activate(){
 }
 
 
-function cms_page_panel_button_show_init(){
-	
-	cms_page_panel_button_show_activate();
-	
+function cms_page_panel_button_show_init($root){
+
+	var $scope = $root ? $root.find('.cms_list_container, .cms_page_container') : $('.cms_list_container, .cms_page_container');
+
+	$scope.not('.cms_page_panel_button_show_ok').each(function(){
+
+		$(this).addClass('cms_page_panel_button_show_ok');
+
+		cms_page_panel_button_show_activate();
+
+	});
+
+	if (!$scope.length){
+		if (!$('body').hasClass('cms_page_panel_button_show_ok')){
+			$('body').addClass('cms_page_panel_button_show_ok');
+			cms_page_panel_button_show_activate();
+		}
+	}
+
 }
 
 function cms_page_panel_button_show_resize(){

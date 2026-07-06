@@ -1,5 +1,14 @@
-function cms_schema_init() {
-	$('.cms_schema_fix').on('click.cms', function(e) {
+function cms_schema_init($root) {
+
+	var $scope = $root ? $root.find('.cms_schema_container') : $('.cms_schema_container');
+
+	$scope.not('.cms_schema_ok').each(function(){
+
+		var $container = $(this);
+
+		$container.addClass('cms_schema_ok');
+
+		$('.cms_schema_fix', $container).on('click.cms', function(e) {
 		e.preventDefault()
 		
 		var $this = $(this)
@@ -29,9 +38,9 @@ function cms_schema_init() {
 				cms_error(msg, 6)
 			}
 		})
-	})
+		})
 
-	$('.cms_schema_sync').on('click.cms', function(e) {
+		$('.cms_schema_sync', $container).on('click.cms', function(e) {
 		e.preventDefault()
 
 		var $this = $(this)
@@ -65,7 +74,10 @@ function cms_schema_init() {
 				cms_error(res.message || 'Sync failed', 8)
 			}
 		})
-	})
+		})
+
+	});
+
 }
 
 function cms_schema_resize() {

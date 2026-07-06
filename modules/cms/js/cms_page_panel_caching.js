@@ -1,27 +1,47 @@
-function cms_page_panel_caching_init(){
-	
-	$('.cms_page_panel_caching_add').on('click.cms', function(){
+function cms_page_panel_caching_init($root){
+
+	var $scope = $root ? $root.find('.cms_page_panel_caching_container') : $('.cms_page_panel_caching_container');
+
+	$scope.not('.cms_page_panel_caching_ok').each(function(){
+
+		var $panel = $(this);
+
+		$panel.addClass('cms_page_panel_caching_ok');
+
+		$('.cms_page_panel_caching_add', $panel).on('click.cms', function(){
 		var value = $('.cms_page_panel_caching_lists_select').val();
 		if (value != null){
 			$('.cms_page_panel_caching_values').append('<div class="cms_page_panel_caching_item" data-value="' + value + '">' + 
 					value + '<div class="cms_page_panel_caching_item_close">x</div></div>');
 			$('.cms_page_panel_caching_lists_option_' + value).remove();
-			cms_page_panel_caching_item_init();
+			cms_page_panel_caching_item_init($panel);
 		}
+		});
+
+		cms_page_panel_caching_item_init($panel);
+
 	});
-	
-	cms_page_panel_caching_item_init();
-	
+
 }
 
-function cms_page_panel_caching_item_init(){
-	
-	$('.cms_page_panel_caching_item').off('click.cms').on('click.cms', function(){
-		var value = $(this).data('value');
-		$(this).remove();
-		$('.cms_page_panel_caching_lists_select').append('<option class="cms_page_panel_caching_lists_option_' + value + '" value="' + value + '">' + value + '</option>');
+function cms_page_panel_caching_item_init($root){
+
+	var $items = $root ? $root.find('.cms_page_panel_caching_item') : $('.cms_page_panel_caching_item');
+
+	$items.not('.cms_page_panel_caching_item_ok').each(function(){
+
+		var $item = $(this);
+
+		$item.addClass('cms_page_panel_caching_item_ok');
+
+		$item.on('click.cms', function(){
+			var value = $item.data('value');
+			$item.remove();
+			$('.cms_page_panel_caching_lists_select').append('<option class="cms_page_panel_caching_lists_option_' + value + '" value="' + value + '">' + value + '</option>');
+		});
+
 	});
-	
+
 }
 
 // called from admin_block.js

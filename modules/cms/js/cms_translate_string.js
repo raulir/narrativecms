@@ -334,13 +334,19 @@ function cms_translate_string_close(){
 
 }
 
-function cms_translate_string_init($container){
+function cms_translate_string_init($root){
 
-	$container = $container || $('.cms_translate_string_container')
+	var $containers = $root ? $root.find('.cms_translate_string_container') : $('.cms_translate_string_container')
 
-	if (!$container.length){
+	if (!$containers.length){
 		return
 	}
+
+	$containers.not('.cms_translate_string_ok').each(function(){
+
+		var $container = $(this)
+
+		$container.addClass('cms_translate_string_ok')
 
 	cms_translate_string_init_colour($container)
 
@@ -367,6 +373,8 @@ function cms_translate_string_init($container){
 
 	$container.find('.cms_translate_string_close').off('click.cms_translate').on('click.cms_translate', function(){
 		cms_translate_string_close()
+	})
+
 	})
 
 }
