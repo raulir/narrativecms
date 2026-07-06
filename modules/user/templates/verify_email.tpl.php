@@ -3,7 +3,8 @@
 
 		<?php if (!empty($verified)): ?>
 
-			<script type="text/javascript">window.location.href = "<?= $success_url ?>"</script>
+			<div class="verify_email_success"><?= $message_success ?></div>
+			<a class="verify_email_continue" <?php _lh($success_url) ?>><?= $continue_text ?></a>
 
 		<?php elseif (!empty($error)): ?>
 

@@ -303,6 +303,29 @@ if ( !function_exists('pack_css')) {
 		return $csss; // as array
 		 
 	}
+
+	function pack_css_inline($scsss){
+
+		if (empty($scsss)){
+			return '';
+		}
+
+		$css_arr = pack_css($scsss);
+		$css_text = '';
+
+		foreach ($css_arr as $css_item){
+
+			if (empty($css_item['filename']) || !is_file($css_item['filename'])){
+				continue;
+			}
+
+			$css_text .= file_get_contents($css_item['filename'])."\n";
+
+		}
+
+		return trim($css_text);
+
+	}
 	
 	function pack_js($js){
 	
@@ -411,6 +434,81 @@ if ( !function_exists('pack_css')) {
 	
 		return implode("\n", $js_strs)."\n".$js_cache;
 	
+	}
+
+	function pack_js_inline($js){
+
+		if (empty($js)){
+			return '';
+		}
+
+		foreach ($js as $key => $value){
+			if (!is_array($value)){
+				$js[$key] = [
+					'script' => $value,
+					'sync' => 'defer',
+					'no_pack' => 0,
+				];
+			} else {
+				if (empty($value['no_pack'])){
+					$js[$key]['no_pack'] = 0;
+				}
+				if (!isset($value['sync'])){
+					$js[$key]['sync'] = 'defer';
+				}
+			}
+		}
+
+		$js = array_intersect_key($js, array_unique(array_map('serialize', $js)));
+		$js_string = '';
+
+		foreach ($js as $_js){
+
+			$_js['script'] = str_replace('\\', '/', $_js['script']);
+
+			if (substr($_js['script'], 0, 4) === 'http'){
+				continue;
+			}
+
+			$js_file = $GLOBALS['config']['base_path'].trim($_js['script'], '/');
+
+			if (!is_file($js_file)){
+				continue;
+			}
+
+			$js_file_content = trim(file_get_contents($js_file));
+
+			if (mb_substr($js_file_content, -1) === ')'){
+				$js_file_content .= ';';
+			}
+
+			$js_string .= $js_file_content."\n";
+
+		}
+
+		$js_string = trim($js_string);
+
+		if ($js_string === ''){
+			return '';
+		}
+
+		if (!empty($GLOBALS['config']['cache']['pack_js'])){
+
+			require_once($GLOBALS['config']['base_path'].'system/vendor/minify/src/Minify.php');
+			require_once($GLOBALS['config']['base_path'].'system/vendor/minify/src/JS.php');
+
+			$minifier = new Minify\JS($js_string);
+
+			try {
+				return $minifier->minify();
+			} catch (Exception $e){
+				return $js_string;
+			}
+
+		}
+
+		return $js_string;
+
 	}
 	
 	function add_css($file){

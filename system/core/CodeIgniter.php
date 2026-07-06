@@ -144,6 +144,10 @@
 
 	$CI = new $class();
 
+	if (defined('CMS_CLI_BOOTSTRAP')){
+		return;
+	}
+
 /*
  * ------------------------------------------------------
  *  Call the requested method

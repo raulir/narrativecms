@@ -49,6 +49,23 @@ class cms_access_model extends Model {
 	
 	function get_session_access_keys(){
 		
+		if (in_array('user', $GLOBALS['config']['modules'])){
+			
+			$this->load->model('user/user_model');
+			$user = $this->user_model->get_current();
+			
+			if (empty($user)){
+				return [];
+			}
+			
+			if (!empty($_SESSION['access_keys']) && is_array($_SESSION['access_keys'])){
+				return array_values(array_filter(array_map('trim', $_SESSION['access_keys'])));
+			}
+			
+			return $this->parse_access_keys($user);
+			
+		}
+		
 		if (!empty($_SESSION['access_keys']) && is_array($_SESSION['access_keys'])){
 			return array_values(array_filter(array_map('trim', $_SESSION['access_keys'])));
 		}
@@ -333,7 +350,14 @@ class cms_access_model extends Model {
 	
 	function _reject_access($params = []){
 		
-		$was_logged_in = !empty($_SESSION['user']);
+		$was_logged_in = false;
+		
+		if (in_array('user', $GLOBALS['config']['modules'])){
+			$this->load->model('user/user_model');
+			$was_logged_in = $this->user_model->is_logged_in();
+		} else if (!empty($_SESSION['user'])){
+			$was_logged_in = true;
+		}
 		
 		if ($was_logged_in){
 			$this->_clear_user_session();
@@ -397,7 +421,14 @@ class cms_access_model extends Model {
 			return null;
 		}
 		
-		$logged_in = !empty($_SESSION['user']);
+		$logged_in = false;
+		
+		if (in_array('user', $GLOBALS['config']['modules'])){
+			$this->load->model('user/user_model');
+			$logged_in = $this->user_model->is_logged_in();
+		} else if (!empty($_SESSION['user'])){
+			$logged_in = true;
+		}
 		
 		if (!$logged_in && !empty($page['access']) && trim($page['access']) !== ''){
 			

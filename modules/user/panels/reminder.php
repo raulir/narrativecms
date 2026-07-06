@@ -5,6 +5,7 @@ class reminder extends CI_Controller{
 	function panel_action($params){
 		
 		$this->load->model('user/user_model');
+		$this->load->model('cms/cms_email_model');
 		
 		$filename = $GLOBALS['config']['base_path'].'cache/user_reminders.json';
 		
@@ -51,11 +52,13 @@ class reminder extends CI_Controller{
 				
 				$content = $url.'?token='.$token;
 				
-				mail($user['email'],
+				$this->cms_email_model->send_mail(
+						$user['email'],
 						(!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').
 						'Password reminder from '.$title,
 						$content,
-						$this->_mail_headers());
+						['auto_submitted' => 1]
+				);
 
 			}
 			
@@ -114,12 +117,13 @@ class reminder extends CI_Controller{
 				
 				$title = trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), $GLOBALS['config']['site_title_delimiter'].' ');
 				
-				mail(
+				$this->cms_email_model->send_mail(
 						$user['email'],
 						(!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').
 						'Password update at '.$title,
 						'Password associated with this email updated.',
-						$this->_mail_headers());
+						['auto_submitted' => 1]
+				);
 
 			}
 			
@@ -156,23 +160,6 @@ class reminder extends CI_Controller{
 		}
 
 		return $params;
-		
-	}
-
-	function _mail_headers(){
-		
-		$from_name = $GLOBALS['config']['from_name'] ?? '';
-		$from_email = $GLOBALS['config']['email'] ?? '';
-		
-		$headers = 'From: '.$from_name.' <'.$from_email.'>' . "\r\n";
-		
-		if (!empty($GLOBALS['config']['sender_email'])){
-			$headers .= 'Sender: '.$GLOBALS['config']['sender_name'].' <'.$GLOBALS['config']['sender_email'].'>' . "\r\n";
-		}
-		
-		$headers .= 'Reply-To: '.$GLOBALS['config']['reply_name'].' <'.$GLOBALS['config']['reply_email'].'>' . "\r\n";
-		
-		return $headers;
 		
 	}
 

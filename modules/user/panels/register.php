@@ -10,8 +10,9 @@ class register extends CI_Controller {
 
 		if ($do == 'register'){
 			
-			if (!empty($_SESSION['user'])){
-				$params['errors'] = ['loggedin'];
+			if ($this->user_model->is_logged_in()){
+				$params['success'] = 1;
+				$params['redirect_url'] = $this->user_model->get_user_redirect_url();
 				return $params;
 			}
 			
@@ -120,6 +121,9 @@ class register extends CI_Controller {
 						
 					}
 					
+					$params['success'] = 1;
+					$params['redirect_url'] = $this->user_model->get_user_redirect_url();
+					
 				}
 				
 			}
@@ -184,7 +188,7 @@ class register extends CI_Controller {
 
 		$this->load->model('user/user_model');
 		
-		$params['loggedin'] = !empty($_SESSION['user']);
+		$params['loggedin'] = $this->user_model->is_logged_in();
 		$params['success_url'] = $this->user_model->get_user_redirect_url();
 		
 		return $params;

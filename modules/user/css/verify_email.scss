@@ -1,3 +1,23 @@
+.verify_email_content {
+	text-align: center;
+	padding: 2.0rem 1.5rem;
+}
+
 .verify_email_error {
 	display: block;
+}
+
+.verify_email_success {
+	display: block;
+	font-size: 1.2rem;
+	line-height: 1.6rem;
+	margin: 0 auto 2.0rem auto;
+	max-width: 35.0rem;
+}
+
+.verify_email_continue {
+	display: inline-block;
+	margin: 0 auto;
+	cursor: pointer;
+	text-decoration: none;
 }

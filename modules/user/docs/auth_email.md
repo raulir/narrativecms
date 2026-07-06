@@ -9,7 +9,7 @@ Created: 2026-06-21
 - `user/reminder` — forgot-password email + token reset
 - `user/verify_email` — email confirmation link handler
 
-Shared model: [`user_model.php`](../models/user_model.php)
+Shared models: [`user_model.php`](../models/user_model.php) (verification tokens, auth state), [`cms_email_model.php`](../../cms/models/cms_email_model.php) (all outbound mail transport)
 
 Related: Google auth in [`auth_google.md`](auth_google.md)
 
@@ -53,7 +53,7 @@ See consolidated checklist in [`user_register.md`](user_register.md) § MVP QA.
 
 ## Post-MVP
 
-- Central mail helper in user module (wrap `mail()` / future SMTP); document SMTP or host `mail()` setup
+- ~~Central mail helper~~ — done: [`cms_email.md`](../../cms/docs/cms_email.md)
 - Stronger email validation (`filter_var(FILTER_VALIDATE_EMAIL)`)
 - Rate limits on register and reminder endpoints
 - Optional honeypot or CAPTCHA on register

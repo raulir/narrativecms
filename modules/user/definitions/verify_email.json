@@ -30,6 +30,21 @@
 			"lines":"2",
 			"default": "This verification link has expired. Log in and request a new one.",
 			"translate":"1"
+		},
+		{
+			"type":"textarea",
+			"name":"message_success",
+			"label":"Success",
+			"lines":"2",
+			"default": "Your email has been confirmed.",
+			"translate":"1"
+		},
+		{
+			"type":"text",
+			"name":"continue_text",
+			"label":"Continue",
+			"default": "Continue",
+			"translate":"1"
 		}
 	]
 }

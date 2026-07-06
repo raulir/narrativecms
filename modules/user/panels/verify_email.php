@@ -23,7 +23,16 @@ class verify_email extends \CI_Controller{
 			return $params;
 		}
 		
+		$this->user_model->refresh_session_for_user_id($result['user_id']);
+		
+		$header_page_id = $this->user_model->get_logged_in_header_page_id();
+		
 		$params['verified'] = 1;
+		$params['_no_cache'] = 1;
+		
+		if ($header_page_id){
+			$params['_swap_header_page_id'] = $header_page_id;
+		}
 		
 		return $params;
 		
@@ -33,6 +42,14 @@ class verify_email extends \CI_Controller{
 		
 		$this->load->model('user/user_model');
 		$params['success_url'] = $this->user_model->get_user_redirect_url();
+		
+		if (empty($params['message_success'])){
+			$params['message_success'] = 'Your email has been confirmed.';
+		}
+		
+		if (empty($params['continue_text'])){
+			$params['continue_text'] = 'Continue';
+		}
 		
 		if (!empty($params['error'])) {
 			$message_key = 'message_'.$params['error'];

@@ -344,6 +344,8 @@ class Index extends CI_Controller {
 				
 				// new position_links functionality
 				$return = [];
+				$response_css = [];
+				$response_css_force = 0;
 
 				$positions_needed = array_keys($positions);
 				$this->load->model('cms/cms_access_model');
@@ -374,6 +376,7 @@ class Index extends CI_Controller {
 						$cached_position = $this->cache->try_serve_position($position_page_ids[$position_name]);
 						if ($cached_position !== false) {
 							$served_from_cache[$position_name] = true;
+							_merge_panel_css_urls($response_css, $response_css_force, $cached_position['meta']);
 							$return[$position_name] = [
 								'_html' => $cached_position['html'],
 								'cms_page_id' => (int)$position_page_ids[$position_name],
@@ -405,6 +408,7 @@ class Index extends CI_Controller {
 					if ($panel_config['params']['cms_page_id'] != $positions[$panel_config['position']]) {
 						
 						$panel_data = $this->ajax_panel($panel_config['panel'], $panel_config['params']);
+						_merge_panel_css_urls($response_css, $response_css_force, $panel_data);
 						if (empty($return[$panel_config['position']])){
 							$return[$panel_config['position']]['_html'] = '';
 							$return[$panel_config['position']]['has_deferred'] = 0;
@@ -418,6 +422,8 @@ class Index extends CI_Controller {
 				print(json_encode(array(
 						'positions' => $return,
 						'title' => $this->compile_page_title(),
+						'_panel_css' => array_values($response_css),
+						'_panel_css_force' => $response_css_force,
 				)));
 
 			} else {

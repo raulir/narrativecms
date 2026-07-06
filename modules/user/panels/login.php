@@ -83,8 +83,13 @@ class login extends \CI_Controller{
 		
 		$this->load->model('user/user_model');
 		
-		$params['loggedin'] = !empty($_SESSION['user']);
+		$params['loggedin'] = $this->user_model->is_logged_in();
 		$params['success_url'] = $this->user_model->get_user_redirect_url();
+
+		// web google auth disabled — hide login-google alternative buttons
+		if (empty($GLOBALS['config']['inapp'])) {
+			$params['alternatives'] = [];
+		}
 
 		return $params;
 	

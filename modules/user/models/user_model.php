@@ -1,5 +1,4 @@
-<?php
-if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 class user_model extends Model {
 	
@@ -129,11 +128,36 @@ class user_model extends Model {
 			return false;
 		}
 		
-		$return = $this->get_user($_SESSION['user']['cms_page_panel_id']);
+		$user_id = $_SESSION['user']['cms_page_panel_id'] ?? 0;
+		
+		if (empty($user_id)){
+			$this->_clear_stale_user_session();
+			return false;
+		}
+		
+		$return = $this->get_user($user_id);
+		
+		if (empty($return['cms_page_panel_id']) || ($return['panel_name'] ?? '') !== 'user/user' || empty($return['show'])){
+			$this->_clear_stale_user_session();
+			return false;
+		}
 		
 		$return['user_id'] = $return['cms_page_panel_id'];
 		
 		return $return;
+		
+	}
+	
+	function is_logged_in(){
+		
+		return $this->get_current() !== false;
+		
+	}
+	
+	function _clear_stale_user_session(){
+		
+		$this->load->model('cms/cms_access_model');
+		$this->cms_access_model->_clear_user_session();
 		
 	}
 
@@ -174,10 +198,16 @@ class user_model extends Model {
 		$meta = $this->_parse_user_meta($user);
 		$meta[$key] = $value;
 
+		$meta_json = json_encode($meta, JSON_PRETTY_PRINT);
+
 		$this->load->model('cms/cms_page_panel_model');
 		$this->cms_page_panel_model->update_cms_page_panel($user['user_id'], [
-				'meta' => json_encode($meta, JSON_PRETTY_PRINT),
+				'meta' => $meta_json,
 		]);
+
+		if (!empty($_SESSION['user']['cms_page_panel_id']) && (int)$_SESSION['user']['cms_page_panel_id'] === (int)$user['user_id']){
+			$_SESSION['user']['meta'] = $meta_json;
+		}
 
 		return true;
 
@@ -437,23 +467,21 @@ class user_model extends Model {
 		
 		file_put_contents($filename, json_encode($tokens, JSON_PRETTY_PRINT));
 		
-		$verify_url = $GLOBALS['config']['base_site'].$GLOBALS['config']['base_url'].'verify-email/?token='.$token;
+		$base_site = $GLOBALS['config']['base_site'] ?? $GLOBALS['config']['base_host'] ?? '';
+		$verify_url = $base_site.$GLOBALS['config']['base_url'].'verify-email/?token='.$token;
 		
 		$title = trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), $GLOBALS['config']['site_title_delimiter'].' ');
 		$title = (!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').$title;
 		
-		$headers = 'From: '.(!empty($GLOBALS['config']['email']) ? $GLOBALS['config']['email'] : 'noreply@localhost')."\r\n";
-		$headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-		
-		mail(
+		$this->load->model('cms/cms_email_model');
+
+		return $this->cms_email_model->send_mail(
 				$user['email'],
 				(!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').
 				'Confirm your email for '.$title,
 				"Please confirm your email by opening this link:\n\n".$verify_url,
-				$headers
+				['auto_submitted' => 1]
 		);
-		
-		return true;
 		
 	}
 	
@@ -488,6 +516,52 @@ class user_model extends Model {
 		file_put_contents($filename, json_encode($tokens, JSON_PRETTY_PRINT));
 		
 		return ['user_id' => $row['user_id']];
+		
+	}
+	
+	function refresh_session_for_user_id($user_id){
+		
+		$user = $this->get_user($user_id);
+		
+		if (empty($user)){
+			return;
+		}
+		
+		$this->load->model('cms/cms_access_model');
+		$this->cms_access_model->refresh_user_session($user);
+		
+	}
+	
+	function get_logged_in_header_page_id(){
+		
+		$this->load->model('cms/cms_page_model');
+		
+		$links = $this->get_link_settings();
+		$user_page_id = 0;
+		
+		if (!empty($links['user_link']['cms_page_id'])){
+			$user_page_id = (int)$links['user_link']['cms_page_id'];
+		} else if (!empty($links['user_link']['url']) && ctype_digit((string)$links['user_link']['url'])){
+			$user_page_id = (int)$links['user_link']['url'];
+		}
+		
+		if (!$user_page_id){
+			$user_page_id = 2;
+		}
+		
+		$page = $this->cms_page_model->get_page($user_page_id);
+		
+		if (empty($page['positions'])){
+			return 0;
+		}
+		
+		foreach ($page['positions'] as $position){
+			if (!empty($position['name']) && $position['name'] === 'header' && !empty($position['value'])){
+				return (int)$position['value'];
+			}
+		}
+		
+		return 0;
 		
 	}
 

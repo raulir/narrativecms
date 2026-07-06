@@ -1,3 +1,5 @@
+<?php // web google auth disabled
+if (false): ?>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <div id="g_id_onload"
@@ -13,3 +15,4 @@
 	data-shape="rectangular"
 	data-logo_alignment="left">
 </div>
+<?php endif ?>

@@ -6,6 +6,11 @@ class auth_google extends CI_Controller{
 	
 	function panel_action($params){
 		
+		// web google auth disabled
+		$params['error'] = 'google_error';
+		return $params;
+		
+		/*
 		$id_token = $this->input->post('credential');
 		
 		$this->load->model('user/user_google_model');
@@ -28,6 +33,7 @@ class auth_google extends CI_Controller{
 		$this->cms_access_model->refresh_user_session($result['user']);
 
 		return $params;
+		*/
 		
 	}
 	
@@ -35,7 +41,7 @@ class auth_google extends CI_Controller{
 		
 		$this->load->model('user/user_model');
 		
-		$params['loggedin'] = !empty($_SESSION['user']);
+		$params['loggedin'] = $this->user_model->is_logged_in();
 		$params['success_url'] = $this->user_model->get_user_redirect_url();
 		
 		if (!empty($params['error'])) {

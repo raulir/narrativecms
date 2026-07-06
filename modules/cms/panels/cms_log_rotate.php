@@ -1,15 +1,4 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-if (file_exists($GLOBALS['config']['base_path'] . 'vendor/autoload.php')){
-	require_once($GLOBALS['config']['base_path'] . 'vendor/autoload.php');
-}
-
-require_once('system/vendor/phpmailer/Exception.php');
-require_once('system/vendor/phpmailer/PHPMailer.php');
-require_once('system/vendor/phpmailer/SMTP.php');
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 class cms_log_rotate extends CI_Controller {
 
@@ -96,46 +85,24 @@ class cms_log_rotate extends CI_Controller {
 		file_put_contents($filename, '');
 		
 		if (!empty($GLOBALS['config']['admin_email'])){
-			
-			if(empty($GLOBALS['config']['smtp_server'])){
-				 
-				// send email
-				@mail($GLOBALS['config']['admin_email'], 'PHP errors from '.$email_filename, $text,
-						'From: '.$GLOBALS['config']['from_name'].'<'.$GLOBALS['config']['email'].'>'."\r\n".
-						'Reply-to: '.$GLOBALS['config']['reply_name'].'<'.$GLOBALS['config']['reply_email'].'>'."\r\n");
-				 
-			} else {
-			
-				$text = str_replace(["\n", "\r\n"], '<br>', $text);
-				 
-				$from = $GLOBALS['config']['email'];
-			
-				$mail = new PHPMailer(true);
-			
-				$mail->isSMTP();
-				$mail->Host = $GLOBALS['config']['smtp_server'];
-				$mail->SMTPAuth = true;
-				$mail->Username = $GLOBALS['config']['smtp_username'];
-				$mail->Password = $GLOBALS['config']['smtp_password'];
-				$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-				$mail->Port = $GLOBALS['config']['smtp_port'];
-				 
-				$mail->setFrom($GLOBALS['config']['email'], strtolower($_SERVER['SERVER_NAME']));
-				$mail->addAddress($GLOBALS['config']['admin_email']);
-				 
-				$mail->CharSet = 'utf-8';
-			
-				$mail->addCustomHeader('Auto-Submitted', 'auto-generated');
-			
-				$mail->Subject = 'PHP errors '.(!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].']' : '').' '.
-						str_replace(['#page#',' - '], '', $GLOBALS['config']['site_title']).' ('.strtolower($_SERVER['SERVER_NAME'].')');
-				
-				$mail->Body = '<html><body>'.$text.'</body></html>';
-				$mail->IsHTML(true); // $autoreply_html);
-				 
-				$mail->send();
-				 
-			}
+
+			$this->load->model('cms/cms_email_model');
+
+			$html_text = str_replace(["\n", "\r\n"], '<br>', $text);
+
+			$subject = 'PHP errors '.(!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].']' : '').' '.
+					str_replace(['#page#',' - '], '', $GLOBALS['config']['site_title']).' ('.strtolower($_SERVER['SERVER_NAME']).')';
+
+			$this->cms_email_model->send_mail(
+					$GLOBALS['config']['admin_email'],
+					$subject,
+					'<html><body>'.$html_text.'</body></html>',
+					[
+						'is_html' => 1,
+						'alt_body' => $text,
+						'auto_submitted' => 1,
+					]
+			);
 
 		}
 	

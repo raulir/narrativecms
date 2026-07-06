@@ -1,15 +1,4 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-if (file_exists($GLOBALS['config']['base_path'] . 'vendor/autoload.php')){
-	require_once($GLOBALS['config']['base_path'] . 'vendor/autoload.php');
-}
-
-require_once('system/vendor/phpmailer/Exception.php');
-require_once('system/vendor/phpmailer/PHPMailer.php');
-require_once('system/vendor/phpmailer/SMTP.php');
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 class form_model extends CI_Model {
 	
@@ -399,53 +388,17 @@ class form_model extends CI_Model {
     	}
     	
     	if (!empty($data['email'])){
-    		
-    		if(empty($GLOBALS['config']['smtp_server'])){
-    			
-		   		// send email
-		    	@mail($data['email'], $autoreply_subject, $autoreply_text, 
-						'From: '.$GLOBALS['config']['from_name'].'<'.$GLOBALS['config']['email'].'>'."\r\n".
-		    			'Reply-to: '.$GLOBALS['config']['reply_name'].'<'.$GLOBALS['config']['reply_email'].'>'."\r\n");
-		    	
-    		} else {
-    			    			
-    			$autoreply_text = str_replace(["\n", "\r\n"], '<br>', $autoreply_text);
-    			
-    			$from = $GLOBALS['config']['email'];
 
-    			$mail = new PHPMailer(true);
-    			 
-    			$mail->isSMTP();
-    			$mail->Host = $GLOBALS['config']['smtp_server'];
-    			$mail->SMTPAuth = true;
-    			$mail->Username = $GLOBALS['config']['smtp_username'];
-    			$mail->Password = $GLOBALS['config']['smtp_password'];
-    			$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    			$mail->Port = $GLOBALS['config']['smtp_port'];
-    			
-    			$mail->setFrom($GLOBALS['config']['email'], strtolower($_SERVER['SERVER_NAME']));
-    			$mail->addAddress($data['email']);
-    			
-   				$mail->addReplyTo($GLOBALS['config']['reply_email'], $GLOBALS['config']['reply_name']);
-    			
-				$mail->CharSet = 'utf-8';
-				
-				$mail->addCustomHeader('Auto-Submitted', 'auto-generated');
-				
-				$mail->Subject = $autoreply_subject;
-    			$mail->Body = '<html><body>'.$autoreply_text.'</body></html>';
-    			$mail->IsHTML(true); // $autoreply_html);
-    			
-//    			if (!empty($plaintext)){
-    				$mail->AltBody = $plaintext;
-//    			}
-    			
-    			// $mail->XMailer = 'Narrative CMS';
-    			
-    			$mail->send();
-    			
-    		}
-    		
+    		$this->load->model('cms/cms_email_model');
+
+    		$html_body = '<html><body>'.str_replace(["\n", "\r\n"], '<br>', $autoreply_text).'</body></html>';
+
+    		$this->cms_email_model->send_mail($data['email'], $autoreply_subject, $html_body, [
+    			'is_html' => 1,
+    			'alt_body' => $plaintext,
+    			'auto_submitted' => 1,
+    		]);
+
     	}
 
     }
@@ -490,48 +443,15 @@ class form_model extends CI_Model {
     		$plaintext = str_replace('['.$key.']', $val, $plaintext);
     	}
     	
-    	if(empty($GLOBALS['config']['smtp_server'])){
-    			
-	   		// send email
-	    	@mail($row_unpacked['email'], $panel['autoreply_subject'], $email_text, 
-					'From: '.$GLOBALS['config']['from_name'].'<'.$GLOBALS['config']['email'].'>'."\r\n".
-	    			'Reply-to: '.$GLOBALS['config']['reply_name'].'<'.$GLOBALS['config']['reply_email'].'>'."\r\n");
-		    	
-   		} else {
+    	$this->load->model('cms/cms_email_model');
 
-   			$mail = new PHPMailer(true);
-    			 
-    		$mail->isSMTP();
-    		$mail->Host = $GLOBALS['config']['smtp_server'];
-   			$mail->SMTPAuth = true;
-   			$mail->Username = $GLOBALS['config']['smtp_username'];
-   			$mail->Password = $GLOBALS['config']['smtp_password'];
-   			$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-   			$mail->Port = $GLOBALS['config']['smtp_port'];
-    			
-   			$mail->setFrom($GLOBALS['config']['email'], strtolower($_SERVER['SERVER_NAME']));
-   			$mail->addAddress($row_unpacked['email']);
-    			
-			$mail->addReplyTo($GLOBALS['config']['reply_email'], $GLOBALS['config']['reply_name']);
-			
-			$mail->CharSet = 'utf-8';
-			
-			$mail->addCustomHeader('Auto-Submitted', 'auto-generated');
-				
-    		$mail->Subject = $panel['confirm_subject'];
-   			$mail->Body = $email_text;
-   			$mail->IsHTML($email_html);
-   			
-   		    if (!empty($plaintext)){
-    			$mail->AltBody = $plaintext;
-    		}
-   			
-    		$mail->XMailer = 'Narrative CMS';
-    	
-    		$mail->send();
-    			
-   		}
-   		
+    	$this->cms_email_model->send_mail($row_unpacked['email'], $panel['confirm_subject'], $email_text, [
+    		'is_html' => $email_html,
+    		'alt_body' => $plaintext,
+    		'auto_submitted' => 1,
+    		'x_mailer' => 'Narrative CMS',
+    	]);
+
    		$this->send_info_confirmation($panel['emails'], $row_unpacked['email'], 
    				['reply_to' => ['email' => $row_unpacked['email'], ['name' => $row_unpacked['name'] ?? $row_unpacked['email']]]]);
     		
@@ -556,65 +476,28 @@ class form_model extends CI_Model {
    		"\n\n".'UNSUBSCRIBE: Please contact site webmaster, developer or your IT-support to unsubscribe. Do not mark this email as a spam, '.
    		'because you or other recipients may not receive any website notifications after that.';
    	
-   		foreach($emails as $email){
-   	
-   			// send email
-   			if(empty($GLOBALS['config']['smtp_server'])){
-   			  
-   				@mail($email['email'], $title, $content, 'From: '.$GLOBALS['config']['email']."\r\n".'Auto-Submitted: auto-generated'."\r\n");
-   	
-   			} else {
-   		   
-   				$mail = new PHPMailer(true);
-   		   
-   				if (!empty($GLOBALS['config']['smtp_debug'])){
-	   				$GLOBALS['smtp_debug'] = [];
-	   				$mail->SMTPDebug = 2;
-	   				$mail->Debugoutput = function($line, $level) {
-	   					$GLOBALS['smtp_debug'][] = $line;
-	   				};
-   				}
-   	
-   				$mail->isSMTP();
-   				$mail->Host = $GLOBALS['config']['smtp_server'];
-   				$mail->SMTPAuth = true;
-   				$mail->Username = $GLOBALS['config']['smtp_username'];
-   				$mail->Password = $GLOBALS['config']['smtp_password'];
-   				$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-   				$mail->Port = $GLOBALS['config']['smtp_port'];
-   		   
-   				$mail->setFrom($GLOBALS['config']['email'], strtolower($_SERVER['SERVER_NAME']));
-   				$mail->addAddress($email['email']);
-   		   
-   				if(!empty($params['reply_to']['email'])){
-   					$mail->addReplyTo($params['reply_to']['email'], $params['reply_to']['name']);
-   				}
-   		   
-   				$mail->addCustomHeader('Auto-Submitted', 'auto-generated');
-   		   
-   				$mail->Subject = $title;
-   				$mail->Body = $content;
-   		   
-   				try {
-	   				$mail->send();
-   				} catch (Exception $e) {
-   					
-   					
-   					
-   				}
-   				
-   				if (isset($GLOBALS['smtp_debug'])){
-   					$debug_output = implode("\r\n", $GLOBALS['smtp_debug']);
-   					file_put_contents($GLOBALS['config']['base_path'].'/cache/smtp_debug_'.$GLOBALS['config']['smtp_server'].'_'.time().'.txt', $debug_output);
-   					unset($GLOBALS['smtp_debug']);
-   				}
-   		   
-   			}
-   	
+   		$this->load->model('cms/cms_email_model');
+
+   		$mail_params = [
+   			'auto_submitted' => 1,
+   			'mail_from_email_only' => 1,
+   		];
+
+   		if (!empty($params['reply_to']['email'])){
+   			$mail_params['reply_to'] = [
+   				'email' => $params['reply_to']['email'],
+   				'name' => $params['reply_to']['name'] ?? $params['reply_to']['email'],
+   			];
    		}
-   		 
+
+   		foreach($emails as $email){
+
+   			$this->cms_email_model->send_mail($email['email'], $title, $content, $mail_params);
+
+   		}
+
    	}
-   	
+
    	function send_info_confirmation($emails, $confirmed_email, $params){
    		
    		$title = (!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').
@@ -631,44 +514,26 @@ class form_model extends CI_Model {
    		"\n\n".'UNSUBSCRIBE: Please contact site webmaster, developer or your IT-support to unsubscribe. Do not mark this email as a spam, '.
    		'because you or other recipients may not receive any website notifications after that.';
    		
-   		foreach($emails as $email){
-   		
-   			// send email
-   			if(empty($GLOBALS['config']['smtp_server'])){
-   		
-   				@mail($email['email'], $title, $content, 'From: '.$GLOBALS['config']['email']."\r\n".'Auto-Submitted: auto-generated'."\r\n");
-   		
-   			} else {
-   		
-   				$mail = new PHPMailer(true);
+   		$this->load->model('cms/cms_email_model');
 
-   				$mail->isSMTP();
-   				$mail->Host = $GLOBALS['config']['smtp_server'];
-   				$mail->SMTPAuth = true;
-   				$mail->Username = $GLOBALS['config']['smtp_username'];
-   				$mail->Password = $GLOBALS['config']['smtp_password'];
-   				$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-   				$mail->Port = $GLOBALS['config']['smtp_port'];
-   		
-   				$mail->setFrom($GLOBALS['config']['email'], strtolower($_SERVER['SERVER_NAME']));
-   				$mail->addAddress($email['email']);
-   		
-   				if(!empty($params['reply_to']['email'])){
-   					$mail->addReplyTo($params['reply_to']['email'], ($params['reply_to']['name'] ?? $params['reply_to']['email']));
-   				}
-   		
-   				$mail->addCustomHeader('Auto-Submitted', 'auto-generated');
-   		
-   				$mail->Subject = $title;
-   				$mail->Body = $content;
-   		
-   				$mail->send();
-   		
-   			}
-   		
+   		$mail_params = [
+   			'auto_submitted' => 1,
+   			'mail_from_email_only' => 1,
+   		];
+
+   		if (!empty($params['reply_to']['email'])){
+   			$mail_params['reply_to'] = [
+   				'email' => $params['reply_to']['email'],
+   				'name' => $params['reply_to']['name'] ?? $params['reply_to']['email'],
+   			];
    		}
-   		
-   		 
+
+   		foreach($emails as $email){
+
+   			$this->cms_email_model->send_mail($email['email'], $title, $content, $mail_params);
+
+   		}
+
    	}
 
 }

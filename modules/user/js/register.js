@@ -1,6 +1,12 @@
+var register_submitting = false
+
 function register_init(){
 	
 	$('.register_submit').on('click.cms', function(){
+		
+		if (register_submitting){
+			return
+		}
 		
 		register_hide_error()
 		
@@ -45,9 +51,19 @@ function register_init(){
 			
 		}
 		
+		register_submitting = true
+		$('.register_submit').addClass('register_submit_disabled')
+		
 		data.success = function(result){
 
-			if (result.result.errors){
+			register_submitting = false
+			$('.register_submit').removeClass('register_submit_disabled')
+
+			if (result.result.success || result.result.redirect_url){
+				
+				register_show_success(result.result.redirect_url)
+				
+			} else if (result.result.errors){
 				
 				result.result.errors.forEach(error => register_show_error(error))
 
@@ -58,7 +74,10 @@ function register_init(){
 			}
 		}
 		
-		get_ajax('user/register', data);
+		get_ajax('user/register', data).catch(function(){
+			register_submitting = false
+			$('.register_submit').removeClass('register_submit_disabled')
+		});
 
 	})
 	
@@ -87,12 +106,14 @@ function register_hide_error(){
 
 }
 
-function register_show_success(){
+function register_show_success(redirect_url){
 	
 	register_hide_error()
 	
-	if ($('.register_container').data('success')){
-		window.location.href = $('.register_container').data('success')
+	var url = redirect_url || $('.register_container').data('success')
+	
+	if (url){
+		window.location.href = url
 	} else {
 		$('.register_form').hide()
 		$('.register_success').addClass('register_success_active')

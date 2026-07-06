@@ -648,7 +648,7 @@ class CI_Controller {
 		}
 		 
 		// get page panel settings
-		$params = array_merge($this->cms_page_panel_model->get_cms_page_panel_settings($name), $params);
+		$params = array_merge($this->cms_page_panel_model->get_cms_page_panel_settings($name, $this->cms_page_panel_model->get_current_language()), $params);
 
 		$this->load->model('cms/cms_access_model');
 		$this->cms_access_model->enforce_panel_access($name, $params);
@@ -694,35 +694,24 @@ class CI_Controller {
 					$scss = array_merge($scss, $GLOBALS['_panel_scss']);
 				}
 				
-				// prepare css for onpage loading
 				$css_arr = pack_css($scss);
 	
 				if (count($css_arr)){
 		
 					$css_arr_prep = [];
 					foreach ($css_arr as $css_inc){
-						$css_arr_prep[] = (empty($_SERVER['HTTPS']) ? 'http' : 'https').'://'.$_SERVER['HTTP_HOST'].$css_inc['script'];
+						$css_arr_prep[] = $css_inc['script'];
 					}
-					$css_arr_str = implode('\', \'', $css_arr_prep);
-					$rand_id = md5($css_arr_str);
-					
-					$return['_html'] = '<span class="_cms_load_container_'.$rand_id.'" style="opacity: 0; ">'.$return['_html'].'</span>';
-		
-					$css_str .= '<script class="cms_load_css cms_load_css_'.$rand_id.'" type="text/javascript">'."\n";
-//					$css_str .= '$_cms_css_'.$rand_id.' = $(".cms_load_css_'.$rand_id.'").parent().css("opacity", "0"); ';
-//					$css_str .= 'console.log($_cms_css_'.$rand_id.');';
-					$css_str .= 'cms_load_css([\'';
-					$css_str .=	$css_arr_str;
-					$css_str .= '\'], '. (!empty($GLOBALS['config']['cache']['force_download']) ? 'true' : 'false') .','.
-							' \'cms_load_css_'. $rand_id .
-							'\').then(() => {$("._cms_load_container_'.$rand_id.'").css("opacity", "")});'."\n".'</script>'."\n";
+					$return['_panel_css'] = $css_arr_prep;
+					$return['_panel_css_force'] = !empty($GLOBALS['config']['cache']['force_download']) ? 1 : 0;
 		
 				}
 			
 			}
 
-			// get js
-			$js_str = pack_js($js);
+			if (empty($params['_no_js'])){
+				$js_str = pack_js($js);
+			}
 	
 		}
 	
@@ -802,6 +791,7 @@ class CI_Controller {
 				'positions' => [],
 				'panels_by_position' => [],
 			];
+			$GLOBALS['position_panel_scss'] = [];
 			foreach ($page_config as $key => $panel_config) {
 				if (!empty($panel_config['_inline_access_denied'])) {
 					continue;
@@ -839,6 +829,8 @@ class CI_Controller {
 			$page_config[$key]['params'] =
 					(!empty($action_result) && is_array($action_result) ? array_merge($panel_config['params'], $action_result) : $panel_config['params']);
 		}
+
+		$page_config = $this->_swap_page_config_header($page_config);
 	
 		$return = array();
 		// output panels
@@ -872,6 +864,10 @@ class CI_Controller {
 			}
 
 			$access_cache_hash = $this->cms_access_model->get_cache_access_hash($panel_config['panel']);
+
+			if (!empty($GLOBALS['cms_page_cache_write'])){
+				$scss_count_before = count($GLOBALS['_panel_scss'] ?? []);
+			}
 
 			// check for cache
 			if (empty($action_result['_no_cache']) && !(!empty($params['module']) && $params['module'] == 'cms')
@@ -938,6 +934,16 @@ class CI_Controller {
 			}
 
 			$return[$panel_config['position'].'_'.$key.'_'.(!empty($params['cms_page_id']) ? $params['cms_page_id'] : '0')] = $panel_data['_html'];
+
+			if (!empty($GLOBALS['cms_page_cache_write'])){
+				$new_scss = array_slice($GLOBALS['_panel_scss'] ?? [], $scss_count_before);
+				if (!empty($new_scss)){
+					if (empty($GLOBALS['position_panel_scss'][$panel_config['position']])){
+						$GLOBALS['position_panel_scss'][$panel_config['position']] = [];
+					}
+					array_push($GLOBALS['position_panel_scss'][$panel_config['position']], ...$new_scss);
+				}
+			}
 	
 			unset($panel_data);
 	
@@ -1009,6 +1015,15 @@ class CI_Controller {
 	
 		// collect panel related js files
 		$return['js'] = [];
+
+		$this->load->model('cms/cms_panel_model');
+		$panel_config = $this->cms_panel_model->get_cms_panel_config($module.'/'.$return['name']);
+		if (!empty($panel_config['js'])){
+			foreach($panel_config['js'] as $js){
+				list($js_module, $js_file) = explode('/', $js);
+				$return['js'][] = 'modules/'.$js_module.'/js/'.$js_file.'.js';
+			}
+		}
 
 		if (!empty($params['_js'])){
 			$return['js'] = array_merge($return['js'], array_values($params['_js']));
@@ -1116,6 +1131,92 @@ class CI_Controller {
 	
 		return $return;
 	
+	}
+
+	function _swap_page_config_header($page_config){
+
+		$header_page_id = 0;
+		$main_cms_page_id = 0;
+
+		foreach ($page_config as $panel_config){
+			if (!empty($panel_config['params']['_swap_header_page_id'])){
+				$header_page_id = (int)$panel_config['params']['_swap_header_page_id'];
+				if (!empty($panel_config['_cms_page_id'])){
+					$main_cms_page_id = (int)$panel_config['_cms_page_id'];
+				} else if (!empty($panel_config['params']['cms_page_id'])){
+					$main_cms_page_id = (int)$panel_config['params']['cms_page_id'];
+				}
+				break;
+			}
+		}
+
+		if (!$header_page_id){
+			return $page_config;
+		}
+
+		$header_insert_at = null;
+		$new_config = [];
+
+		foreach ($page_config as $key => $panel_config){
+
+			if ($header_insert_at === null && !empty($panel_config['position']) && $panel_config['position'] === 'header'){
+				$header_insert_at = count($new_config);
+				continue;
+			}
+
+			if (!empty($panel_config['position']) && $panel_config['position'] === 'header'){
+				continue;
+			}
+
+			if (!empty($panel_config['params']['_swap_header_page_id'])){
+				unset($panel_config['params']['_swap_header_page_id']);
+			}
+
+			$new_config[] = $panel_config;
+
+		}
+
+		if ($header_insert_at === null){
+			$header_insert_at = 0;
+		}
+
+		$header_panels = $this->_load_position_page_panels($header_page_id, $main_cms_page_id);
+
+		array_splice($new_config, $header_insert_at, 0, $header_panels);
+
+		return $new_config;
+
+	}
+
+	function _load_position_page_panels($page_id, $main_cms_page_id = 0){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$blocks = $this->cms_page_panel_model->get_cms_page_panels_by(['cms_page_id' => $page_id, 'show' => 1, ]);
+		$panels = [];
+
+		foreach ($blocks as $block){
+
+			if (!$this->cms_page_panel_model->panel_matches_visitor_targets($block)){
+				continue;
+			}
+
+			if (is_numeric($block['panel_name']) && (int)$block['panel_name'] == $block['panel_name']){
+				$block = $this->cms_page_panel_model->get_cms_page_panel($block['panel_name']);
+				$block['cms_page_id'] = $page_id;
+			}
+
+			$panels[] = [
+				'position' => 'header',
+				'panel' => $block['panel_name'],
+				'params' => $block,
+				'_cms_page_id' => $main_cms_page_id,
+			];
+
+		}
+
+		return $panels;
+
 	}
 
 }
