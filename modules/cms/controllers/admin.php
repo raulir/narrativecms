@@ -16,6 +16,8 @@ class admin extends CI_Controller {
 
 		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_preloader.js';
 		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms.js';
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_preview.js';
+		add_css('modules/cms/css/cms_preview.scss');
 
 		$GLOBALS['_panel_titles'][] = 'ADMIN';
 
@@ -26,6 +28,7 @@ class admin extends CI_Controller {
 		$page_config = [
 				['position' => 'header', 'panel' => 'cms/cms_user', ],
 				['position' => 'header', 'panel' => 'cms/cms_menu', ],
+				['position' => 'preview', 'panel' => 'cms/cms_preview', ],
 		];
 		
 		$page_config[] = ['position' => 'main', 'panel' => $panel, 'params' => $params, ];

@@ -933,7 +933,15 @@ class CI_Controller {
 	
 			}
 
-			$return[$panel_config['position'].'_'.$key.'_'.(!empty($params['cms_page_id']) ? $params['cms_page_id'] : '0')] = $panel_data['_html'];
+			$panel_html = $panel_data['_html'];
+
+			if (!empty($_COOKIE['cms_preview_highlight'])
+					&& (int)$_COOKIE['cms_preview_highlight'] === (int)$params['cms_page_panel_id']
+					&& (int)$params['cms_page_panel_id'] > 0) {
+				$panel_html = '<div class="cms_preview_site_marker"></div>'.$panel_html;
+			}
+
+			$return[$panel_config['position'].'_'.$key.'_'.(!empty($params['cms_page_id']) ? $params['cms_page_id'] : '0')] = $panel_html;
 
 			if (!empty($GLOBALS['cms_page_cache_write'])){
 				$new_scss = array_slice($GLOBALS['_panel_scss'] ?? [], $scss_count_before);

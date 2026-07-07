@@ -23,6 +23,10 @@
 			<div class="cms_header_content">
 				<div class="cms_header_area">
 					<?= get_position('header', $data) ?>
+					<div class="cms_preview_toolbar">
+						<div class="cms_preview_toggle cms_preview_toggle_desktop" title="Desktop preview">D</div>
+						<div class="cms_preview_toggle cms_preview_toggle_mobile" title="Mobile preview">M</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -31,6 +35,16 @@
 
 			<div class="cms_admin_content">
 				<?= get_position('main', $data) ?>
+			</div>
+			<div class="cms_admin_preview">
+				<?php
+				$preview_position = get_position('preview', $data);
+				if (strpos($preview_position, 'cms_preview_container') !== false) {
+					print($preview_position);
+				} else {
+					_panel('cms/cms_preview');
+				}
+				?>
 			</div>
 			
 		</div>

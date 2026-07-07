@@ -42,6 +42,18 @@ function cms_page_save(params){
 			$('.cms_page_id').val(data.result.cms_page_id)
 			$('.cms_page_slug').val(data.result.slug),
 			cms_notification('Page saved', 3);
+
+			if (data.result && data.result.slug){
+				var $preview = $('.cms_preview_container').first();
+				if ($preview.length){
+					$preview.data('preview_url', _cms_base + data.result.slug + '/');
+					$preview.attr('data-preview_url', _cms_base + data.result.slug + '/');
+				}
+			}
+
+			if (typeof cms_preview_reload === 'function'){
+				cms_preview_reload();
+			}
 			
 			// update url in browser when page has changed
 			change_url(_cms_base + 'admin/page/' + $('.cms_page_id').val() + '/');

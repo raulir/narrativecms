@@ -56,6 +56,10 @@ function cms_page_panel_save_submit(params){
 				} else {
 				
 					cms_notification('Panel saved', 3);
+
+					if (typeof cms_preview_reload === 'function'){
+						cms_preview_reload();
+					}
 				
 				}
 				

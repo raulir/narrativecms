@@ -39,6 +39,18 @@ Planned mechanism for one CMS installation to request work from another, RPC-sty
 | Video queue / cron | [`cms_video_model`](../models/cms_video_model.php), [`cms_video_encode`](../panels/cms_video_encode.php) |
 | Public API routing | [`system/cms.php`](../../../system/cms.php) — `modules/<module>/api/<id>.php` |
 
+## Page panel preview (#15)
+
+Implemented: admin split-view (`cms/cms_preview`), D|M toggle, saved-data iframe. Highlight stub: `cms_preview_highlight` cookie, `cms_preview_site_marker`, `cms/cms_preview_site` panel (outline + scroll disabled).
+
+### Follow-ups
+
+- Panel highlight in preview — re-enable when multi-panel marketing-style pages make it useful (`cms_preview_site.js` / `.scss`)
+- Live unsaved preview (POST merge before save)
+- Toolbar link to open public page in new tab
+- Scroll preview iframe to `submenu_anchor`
+- Sync CMS navigation with iframe preview (explicitly not planned)
+
 ### Implementation order (suggested)
 
 1. Core RPC auth + request/response envelope in `cms` module (shared by all services).

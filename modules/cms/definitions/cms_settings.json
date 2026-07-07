@@ -135,6 +135,20 @@
 			"help":"Default language for the site"
 		},
 		{
+			"type":"text",
+			"name":"desktop_preview_width",
+			"label":"Desktop preview width",
+			"default":"40",
+			"help":"Width of preview pane when desktop preview (D) is open in admin"
+		},
+		{
+			"type":"text",
+			"name":"mobile_preview_width",
+			"label":"Mobile preview width",
+			"default":"40",
+			"help":"Width of preview pane when mobile preview (M) is open in admin"
+		},
+		{
 			"type":"subtitle",
 			"label":"Layout",
 			"width":"wide",

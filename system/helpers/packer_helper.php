@@ -511,6 +511,32 @@ if ( !function_exists('pack_css')) {
 
 	}
 	
+	function add_js($file){
+
+		if (!empty($file['script'])){
+			$filename = $file['script'];
+		} else {
+			$filename = $file;
+		}
+
+		if (empty($GLOBALS['_panel_js'])){
+			$GLOBALS['_panel_js'] = [];
+		}
+
+		$exists = false;
+		foreach ($GLOBALS['_panel_js'] as $entry){
+			if ($entry === $file || $entry === $filename || (!empty($entry['script']) && $entry['script'] === $filename)){
+				$exists = true;
+				break;
+			}
+		}
+
+		if (!$exists){
+			$GLOBALS['_panel_js'][] = $file;
+		}
+
+	}
+
 	function add_css($file){
 
 		if (!empty($file['script'])){

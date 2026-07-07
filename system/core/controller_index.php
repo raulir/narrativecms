@@ -289,6 +289,14 @@ class Index extends CI_Controller {
     		
     	}
 
+		if (!empty($_COOKIE['cms_preview_highlight'])) {
+			$page_config[] = [
+				'position' => 'footer',
+				'panel' => 'cms/cms_preview_site',
+				'params' => ['cms_page_panel_id' => (int)$_COOKIE['cms_preview_highlight']],
+			];
+		}
+
 		$_ajax = $this->input->post('_ajax');
 		if (empty($_ajax)){
 
