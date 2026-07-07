@@ -1,7 +1,7 @@
 {
     "version": "2",
 	"label": "Reminder",
-	"image":"user/panel_reminder.png",
+	"image":"",
     "item": [
 		{
 			"type":"text",

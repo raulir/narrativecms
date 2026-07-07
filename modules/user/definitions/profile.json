@@ -1,7 +1,7 @@
 {
     "version": "2",
 	"label": "Profile",
-	"image":"user/panel_profile.png",
+	"image":"",
     "item": [
 		{
 			"type":"text",
