@@ -116,47 +116,31 @@ class cms_language_model extends Model {
 		$CI =& get_instance();
 		$CI->load->model('cms/cms_page_panel_model');
 
-		$panels = $CI->cms_page_panel_model->get_cms_page_panels_by([
-			'panel_name' => 'cms/cms_languages',
-			'cms_page_id' => 0,
-			'parent_id' => 0,
-			'sort' => 0,
-		]);
+		$cms_languages = $CI->cms_page_panel_model->get_cms_page_panel_settings('cms/cms_languages');
+		$rows = $cms_languages['languages'] ?? [];
 
-		$translations = [];
+		if (!is_array($rows)){
+			$rows = [];
+		}
 
-		if (!empty($panels[0]['cms_page_panel_id'])){
-			$panel = $CI->cms_page_panel_model->get_cms_page_panel($panels[0]['cms_page_panel_id']);
-			$translations = $panel['_translations'] ?? [];
-			if (!is_array($translations)){
-				$translations = [];
+		$endonym_by_id = [];
+
+		foreach ($rows as $row){
+			if (!is_array($row)){
+				continue;
 			}
+			$language_id = $this->resolve_language_id($row['language_id'] ?? '', $allowed);
+			if ($language_id === false){
+				continue;
+			}
+			$endonym_by_id[$language_id] = trim((string)($row['endonym'] ?? ''));
 		}
 
 		$endonyms = [];
 
 		foreach ($allowed as $language_id => $canonical_label){
 
-			$branch = $this->resolve_translation_branch($language_id, $translations);
-			$local_labels = $branch['local_labels'] ?? [];
-
-			if (!is_array($local_labels)){
-				$local_labels = [];
-			}
-
-			$endonym = '';
-
-			if (isset($local_labels[$language_id]) && trim((string)$local_labels[$language_id]) !== ''){
-				$endonym = trim((string)$local_labels[$language_id]);
-			} else {
-				$normalised = $this->normalise_language_id($language_id);
-				foreach ($local_labels as $key => $value){
-					if ($this->normalise_language_id($key) === $normalised && trim((string)$value) !== ''){
-						$endonym = trim((string)$value);
-						break;
-					}
-				}
-			}
+			$endonym = $endonym_by_id[$language_id] ?? '';
 
 			if ($endonym === ''){
 				$endonym = is_string($canonical_label) ? trim($canonical_label) : '';

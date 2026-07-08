@@ -20,7 +20,8 @@ The frontend `basic/language` panel (page composition) reads language list from 
 |--------|-----------|-------|
 | Language ID | `languages[].language_id` | Lowercase; locked after first save. First row = default language. |
 | Label | `languages[].label` | Canonical name (e.g. `Estonian`). Synced to target group `labels` pipe. |
-| Name (current CMS language) | `_translations.{cms_language}.local_labels.{language_id}` | Per-admin-language display names. Stored for future use (admin toolbar / frontend switcher not wired yet). |
+| Endonym | `languages[].endonym` | Native language name for frontend switcher (e.g. `Eesti`). `basic/language` uses endonym, falls back to Label. |
+| Name (current CMS language) | `_translations.{cms_language}.local_labels.{language_id}` | Per-admin-language display names. Planned for CMS admin toolbar (`cms_language_select`). |
 
 ### Example after save
 
@@ -59,7 +60,7 @@ Cached panel JSON uses `_translations.{language_id}.{field}`.
 
 ## Frontend display
 
-- [`basic/language`](../../modules/basic/panels/language.php) panel — visitor language switcher (cookie). Text dropdown with chevron (no flag icons).
+- [`basic/language`](../../modules/basic/panels/language.php) panel — visitor language switcher (cookie). Option labels from Languages grid **Endonym**, fallback **Label**. Text dropdown with chevron (no flag icons).
 - Translatable panel/page content — translation merged over default in [`get_cms_page_panel_params()`](../models/cms_page_panel_model.php)
 - **Missing translation falls back to the default language** (`en` content shown when `en-us` has no value)
 

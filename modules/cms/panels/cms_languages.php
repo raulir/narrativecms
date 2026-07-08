@@ -28,7 +28,7 @@ class cms_languages extends CI_Controller {
 		} else if ($params['do'] == 'C'){
 
 			$languages = $this->_load_languages($cms_page_panel_id);
-			$languages[] = ['language_id' => '', 'label' => ''];
+			$languages[] = ['language_id' => '', 'label' => '', 'endonym' => ''];
 			$this->_save_languages($cms_page_panel_id, $languages);
 
 			return ['web' => 1];
@@ -94,6 +94,10 @@ class cms_languages extends CI_Controller {
 
 				$languages[$row_id]['label'] = trim($params['value'] ?? '');
 
+			} else if ($col == 'endonym'){
+
+				$languages[$row_id]['endonym'] = trim($params['value'] ?? '');
+
 			} else {
 
 				return ['web' => 1];
@@ -124,7 +128,11 @@ class cms_languages extends CI_Controller {
 			return $data;
 		}
 
-		$languages = $this->_load_languages($cms_page_panel_id);
+		if (empty($data['languages']) || !is_array($data['languages'])){
+			$data['languages'] = $this->_load_languages($cms_page_panel_id);
+		}
+
+		$languages = $data['languages'];
 		$this->_sync_targets($languages);
 		$this->_enable_targets();
 		$this->_sync_basic_select_label($cms_page_panel_id, $data);
@@ -169,6 +177,7 @@ class cms_languages extends CI_Controller {
 			$return[] = [
 					'language_id' => $this->_normalise_language_id($row['language_id'] ?? ''),
 					'label' => trim($row['label'] ?? ''),
+					'endonym' => trim($row['endonym'] ?? ''),
 			];
 		}
 
@@ -199,6 +208,7 @@ class cms_languages extends CI_Controller {
 					'id' => $row_index,
 					'language_id' => $language_id,
 					'label' => $row['label'] ?? '',
+					'endonym' => $row['endonym'] ?? '',
 					'local_label' => ($language_id !== '' && !empty($local_labels[$language_id])) ? $local_labels[$language_id] : '',
 			];
 
@@ -228,6 +238,7 @@ class cms_languages extends CI_Controller {
 					$languages[] = [
 							'language_id' => $this->_normalise_language_id($language_id),
 							'label' => $labels[$key] ?? $language_id,
+							'endonym' => '',
 					];
 				}
 				break;
@@ -243,7 +254,7 @@ class cms_languages extends CI_Controller {
 			if ($default_id === ''){
 				$default_id = 'en';
 			}
-			$languages[] = ['language_id' => $default_id, 'label' => ''];
+			$languages[] = ['language_id' => $default_id, 'label' => '', 'endonym' => ''];
 		}
 
 		$update = ['languages' => $languages];

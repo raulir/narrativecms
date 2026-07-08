@@ -62,7 +62,7 @@ class cms_grid_editable extends CI_Controller {
 
 			if (is_array($rows)){
 				foreach ($rows as $row){
-					if (!empty($row['id']) && (string)$row['id'] === (string)$params['item_id'] && isset($row[$params['name']])){
+					if (isset($row['id']) && (string)$row['id'] === (string)$params['item_id'] && array_key_exists($params['name'], $row)){
 						$params['value'] = $row[$params['name']];
 						break;
 					}

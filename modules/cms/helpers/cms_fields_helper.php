@@ -264,6 +264,10 @@ if (!function_exists('print_fields')){
 				
 			} elseif ($field['type'] == 'grid' && $prefix == ''){
 
+				if (!empty($field['fields'])){
+					cms_repeater_preload_field_js($field['fields']);
+				}
+
 				$return .= '<div class="cms_input_container cms_input_container_full">';
 				$return .= _panel('cms/cms_input_grid', [
 						'label' => $field['label'],

@@ -30,15 +30,24 @@
 					"type":"cms/cms_grid_editable",
 					"name":"label",
 					"label":"Label",
-					"width":"28",
+					"width":"22",
 					"align":"left",
 					"order":"20"
+				},
+				{
+					"type":"cms/cms_grid_editable",
+					"name":"endonym",
+					"label":"Endonym",
+					"width":"22",
+					"align":"left",
+					"order":"25",
+					"help":"Native language name for frontend switcher, e.g. Eesti"
 				},
 				{
 					"type":"cms/cms_languages_local_label",
 					"name":"local_label",
 					"label":"Name ({cms_language})",
-					"width":"35",
+					"width":"28",
 					"align":"left",
 					"order":"30"
 				}
