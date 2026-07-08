@@ -436,6 +436,13 @@ class cms_page_panel_operations extends CI_Controller {
 				$data['panel_params'][$struct['name']] = [];
 			}
 
+			if ($struct['type'] == 'grid' && !empty($struct['ds']) && empty($data['panel_params'][$struct['name']]) && $block_id){
+				$existing = $this->cms_page_panel_model->get_cms_page_panel($block_id, $language, false);
+				if (!empty($existing[$struct['name']]) && is_array($existing[$struct['name']])){
+					$data['panel_params'][$struct['name']] = $existing[$struct['name']];
+				}
+			}
+
 		}
 
 		$data_merged = $data;

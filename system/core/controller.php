@@ -961,6 +961,25 @@ class CI_Controller {
 		 
 	}
 	
+	function _append_extend_module_js(&$js, $ext_module, $ext_panel){
+
+		$ext_config = $this->cms_panel_model->get_cms_panel_config($ext_module.'/'.$ext_panel);
+		if (!empty($ext_config['js'])){
+			foreach($ext_config['js'] as $js_entry){
+				list($js_module, $js_file) = explode('/', $js_entry);
+				$js[] = 'modules/'.$js_module.'/js/'.$js_file.'.js';
+			}
+		}
+
+		if (file_exists($GLOBALS['config']['base_path'].'modules/'.$ext_module.'/js/'.$ext_module.'.js')) {
+			$js[] = 'modules/'.$ext_module.'/js/'.$ext_module.'.js';
+		}
+		if (file_exists($GLOBALS['config']['base_path'].'modules/'.$ext_module.'/js/'.$ext_panel.'.js')) {
+			$js[] = 'modules/'.$ext_module.'/js/'.$ext_panel.'.js';
+		}
+
+	}
+
 	function get_panel_filenames($panel_name, $params = [], $extends = []){
 
 		if (!empty($GLOBALS['_panel_files'][$panel_name])){
@@ -1097,7 +1116,7 @@ class CI_Controller {
 			$panel_css_exists = true; // scss replaces css here
 		}
 		
-		// any extensions from module definition
+		// extensions from module config.json (definition + scss + js)
 		foreach($GLOBALS['config']['extends'] as $item){
 			if ($item['target'] == $return['module'].'/'.$return['name']){
 				
@@ -1126,6 +1145,8 @@ class CI_Controller {
 					$panel_css_exists = true; // scss replaces css here
 					
 				}
+
+				$this->_append_extend_module_js($return['js'], $ext_module, $ext_panel);
 			}
 		}
 

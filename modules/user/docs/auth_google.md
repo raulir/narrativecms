@@ -36,7 +36,7 @@ App flow works via native `google_login()` bridge (not in this repo).
 - Web client ID (CMS):
   `270024484737-2vdk9rl0186254ul2ve2qdbv1ejcpmau.apps.googleusercontent.com`
 - Pages: `login-google` (9), `auth-google` (10)
-- Login panel 86 (`music/login` extends `user/login`) — web alternative
+- Login panel 86 (`user/login` + music `config.json` extend) — web alternative
   links to `/login-google/`
 - `inapp: "1"` only in [`config/10.0.2.2.json`](../../../config/10.0.2.2.json)
   — app emulator config

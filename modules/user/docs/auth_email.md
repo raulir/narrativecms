@@ -4,7 +4,7 @@ Created: 2026-06-21
 
 ## Panels
 
-- `user/register` — email/password sign-up (music extends via `music/register`)
+- `user/register` — email/password sign-up (music extends via `config.json` → `//user_register`)
 - `user/login` — email or username login (`user/user_settings` → login username)
 - `user/reminder` — forgot-password email + token reset
 - `user/verify_email` — email confirmation link handler

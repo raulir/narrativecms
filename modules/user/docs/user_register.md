@@ -2,7 +2,7 @@
 
 Created: 2026-06-24
 
-Music extends via `music/register` (SCSS only). Core panel: [`register.php`](../panels/register.php), [`register.js`](../js/register.js), [`register.tpl.php`](../templates/register.tpl.php).
+Music extends via `music/config.json` → `user/register` + `//user_register` (SCSS in [`user_register.scss`](../../music/css/user_register.scss)). Core panel: [`register.php`](../panels/register.php), [`register.js`](../js/register.js), [`register.tpl.php`](../templates/register.tpl.php).
 
 Related email auth (login, reminder): [`auth_email.md`](auth_email.md)
 
@@ -28,8 +28,8 @@ Frontend panel access is enforced by [`cms_access_model.php`](../../cms/models/c
 
 ## Music layer
 
-- `music/register` — extends `user/register`, `join_css:1`, `join_js:1`; theme in [`register.scss`](../../music/css/register.scss) only
-- Entry CTAs — `music/landing` and `music/login` (each has its own CMS `register_link`)
+- CMS page block: `user/register` (panel #87); theme in [`user_register.scss`](../../music/css/user_register.scss)
+- Entry CTAs — `music/landing` and `user/login` (each has its own CMS `register_link`)
 - Logged-in visitors on `/register/` — immediate redirect to Success URL (no inline message)
 
 ## MVP QA
