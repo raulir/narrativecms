@@ -68,7 +68,7 @@ AJAX `panel_id` stays on **target** (e.g. `user/login`), not the extension panel
 
 ## CMS usage
 
-Place the **target** panel on pages (`user/login`), not a duplicate panel id in the extending module. Music example: panels #86 / #87 use `user/login` and `user/register`; theme in `music/css/user_login.scss`.
+Place the **target** panel on pages (`user/login`), not a duplicate panel id in the extending module. Music example: login / register / reminder use `user/login`, `user/register`, `user/reminder`; themes in `music/css/user_login.scss`, `user_register.scss`, `user_reminder.scss`.
 
 ## Deprecated — do not use
 

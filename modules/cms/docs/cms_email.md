@@ -48,3 +48,7 @@ Returns `bool`. Failures are logged with prefix `cms_email_model send_mail:`.
 | `cms_log_rotate` | PHP error log summary to `admin_email` |
 
 Domain-specific content (tokens, templates, form field substitution) stays in the calling model or panel.
+
+## TODO (future)
+
+- [ ] **Asynchronous sending** — `send_mail()` is synchronous today (SMTP round-trip blocks the request). Reminder, verification, form autoreply, and similar flows wait on the mail server, which can make saves feel slow. Improve the emailer with a queue + background worker (or similar) so callers enqueue and return quickly; actual SMTP/`mail()` runs off the request path. Keep failure logging obvious; no silent drops.

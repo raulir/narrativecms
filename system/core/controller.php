@@ -647,8 +647,8 @@ class CI_Controller {
 			$params = array('data' => $params, );
 		}
 		 
-		// get page panel settings
-		$params = array_merge($this->cms_page_panel_model->get_cms_page_panel_settings($name, $this->cms_page_panel_model->get_current_language()), $params);
+		// get page panel settings (admin request → CMS language; site → visitor language)
+		$params = array_merge($this->cms_page_panel_model->get_cms_page_panel_settings($name, $this->cms_page_panel_model->get_content_language()), $params);
 
 		$this->load->model('cms/cms_access_model');
 		$this->cms_access_model->enforce_panel_access($name, $params);

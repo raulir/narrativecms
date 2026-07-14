@@ -107,7 +107,7 @@
 				"1":"Enabled"
 			},
 			"default":"0",
-			"help":"Enable ajax loading any panel. Usually not secure"
+			"help":"Allow public AJAX HTML render of page panel instances by cms_page_panel_id. Does not affect do actions, no_html API calls, CMS admin, or position partials."
 		},
 		{
 			"type":"text",
@@ -162,25 +162,14 @@
 		},
 		{
 			"type":"select",
-			"name":"position_wrappers",
-			"label":"Position wrappers",
+			"name":"single_page_mode",
+			"label":"Single page mode",
 			"values":{
 				"0":"No",
 				"1":"Yes"
 			},
 			"default":"0",
-			"help":"{Position wrappers} to be added to layout positions. Eg div named [cms_position_main] around main position."
-		},
-		{
-			"type":"select",
-			"name":"position_links",
-			"label":"Position links",
-			"values":{
-				"0":"No",
-				"1":"Yes"
-			},
-			"default":"0",
-			"help":"{Position links} - when position wrappers are enabled, in site links will load page positions"
+			"help":"{Single page mode} wraps layout positions and loads only changed positions via ajax on in-site links (SPA-style). Default off."
 		},
 		{
 			"type":"select",

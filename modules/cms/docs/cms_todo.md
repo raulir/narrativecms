@@ -2,6 +2,10 @@
 
 Backlog and design notes for core CMS functionality not yet implemented.
 
+## Email — async sending
+
+`cms_email_model::send_mail()` is synchronous (SMTP blocks the request). Plan: queue + background worker so reminder, verification, form mail, etc. return quickly. Full note: [`cms_email.md`](cms_email.md) § TODO.
+
 ## Cross-installation RPC
 
 Planned mechanism for one CMS installation to request work from another, RPC-style, over HTTPS. Each installation has an **installation API key** (or key pair); requests are authenticated and limited to an allowlist of operations.

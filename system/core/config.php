@@ -157,6 +157,49 @@ while($result = mysqli_fetch_assoc($query)){
 	
 }
 
+// Track whether single_page_mode was stored in CMS settings (before definition defaults)
+$_single_page_mode_from_db = array_key_exists('single_page_mode', $GLOBALS['config']);
+
+$_settings_def_file = $working_directory.'modules/cms/definitions/cms_settings.json';
+if (file_exists($_settings_def_file)) {
+	$_settings_def = json_decode(file_get_contents($_settings_def_file), true);
+	if (is_array($_settings_def) && !empty($_settings_def['settings'])) {
+		foreach ($_settings_def['settings'] as $_field) {
+			$_name = $_field['name'] ?? '';
+			if (!$_name) {
+				continue;
+			}
+			if (($_field['type'] ?? '') === 'modules') {
+				if (empty($GLOBALS['config']['modules']) || !is_array($GLOBALS['config']['modules']) || count($GLOBALS['config']['modules']) <= 1) {
+					$_mods = ['cms'];
+					foreach (glob($working_directory.'modules/*', GLOB_ONLYDIR) as $_dir) {
+						$_mod = basename($_dir);
+						if ($_mod !== 'cms') {
+							$_mods[] = $_mod;
+						}
+					}
+					$GLOBALS['config']['modules'] = $_mods;
+				}
+				continue;
+			}
+			if (!isset($GLOBALS['config'][$_name]) && array_key_exists('default', $_field)) {
+				$GLOBALS['config'][$_name] = $_field['default'];
+			}
+		}
+	}
+}
+
+// TODO: remove legacy position_wrappers / position_links → single_page_mode translation once all envs migrated
+// (also listed in project todo.md). Legacy translation only happens here — not in _single_page_mode() / call sites.
+if (!$_single_page_mode_from_db) {
+	if (!empty($GLOBALS['config']['position_wrappers']) && !empty($GLOBALS['config']['position_links'])) {
+		$GLOBALS['config']['single_page_mode'] = '1';
+	} else {
+		$GLOBALS['config']['single_page_mode'] = '0';
+	}
+}
+unset($_single_page_mode_from_db);
+
 // check if email exists
 if (empty($GLOBALS['config']['email'])){
 	$GLOBALS['config']['email'] = $_SERVER['SERVER_NAME'].'@narrativecms.com';

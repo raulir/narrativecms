@@ -179,7 +179,7 @@ class cache {
 		$meta['has_deferred'] = !empty($deferred_meta['panels']) ? 1 : 0;
 		$meta['deferred_panels'] = $deferred_meta['panels'] ?? [];
 
-		if (!empty($GLOBALS['config']['position_wrappers']) && !empty($GLOBALS['config']['position_links'])) {
+		if (_single_page_mode()) {
 			$meta['deferred_positions'] = $deferred_meta['positions'] ?? [];
 		}
 
@@ -198,7 +198,7 @@ class cache {
 
 	function write_partial_caches($page, $position_pages, $panel_data, $page_cache_ttl = 0) {
 
-		if (empty($GLOBALS['config']['position_wrappers']) || empty($GLOBALS['config']['position_links'])) {
+		if (!_single_page_mode()) {
 			return;
 		}
 

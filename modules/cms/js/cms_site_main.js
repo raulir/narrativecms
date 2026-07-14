@@ -382,16 +382,6 @@ function get_api(name, params) {
 
 }
 
-function change_url(new_url) {
-	if (history && history.pushState) {
-
-		if (!window.location.href.endsWith(new_url) || new_url == '/') {
-			history.pushState({}, '', new_url)
-		}
-
-	}
-}
-
 function cms_hover_init($root) {
 
 	var $scope = $root ? $root.find('.cms_hover_button') : $('.cms_hover_button');

@@ -336,7 +336,10 @@ function cms_translate_string_close(){
 
 function cms_translate_string_init($root){
 
-	var $containers = $root ? $root.find('.cms_translate_string_container') : $('.cms_translate_string_container')
+	// $root may be the container itself (open) or a parent (find descendants)
+	var $containers = (!$root || !$root.length)
+		? $('.cms_translate_string_container')
+		: $root.filter('.cms_translate_string_container').add($root.find('.cms_translate_string_container'))
 
 	if (!$containers.length){
 		return
@@ -348,32 +351,32 @@ function cms_translate_string_init($root){
 
 		$container.addClass('cms_translate_string_ok')
 
-	cms_translate_string_init_colour($container)
+		cms_translate_string_init_colour($container)
 
-	$container.find('.cms_translate_string_save').off('click.cms_translate').on('click.cms_translate', function(){
+		$container.find('.cms_translate_string_save').off('click.cms_translate').on('click.cms_translate', function(){
 
-		var values = cms_translate_string_collect_values($container)
+			var values = cms_translate_string_collect_values($container)
 
-		get_ajax_panel('cms/cms_translate_string_operations', {
-			'do': 'cms_translate_string_save',
-			'cms_page_panel_id': $container.data('cms_page_panel_id'),
-			'field_name': $container.data('field_name'),
-			'cms_language': cms_translate_string_get_cms_language(),
-			'values': JSON.stringify(values),
-		}, function(data){
+			get_ajax_panel('cms/cms_translate_string_operations', {
+				'do': 'cms_translate_string_save',
+				'cms_page_panel_id': $container.data('cms_page_panel_id'),
+				'field_name': $container.data('field_name'),
+				'cms_language': cms_translate_string_get_cms_language(),
+				'values': JSON.stringify(values),
+			}, function(data){
 
-			if (data.result && data.result.ok){
-				cms_translate_string_sync_origin(values, $container, data.result)
-				cms_translate_string_notification('Translations saved', 3)
-			}
+				if (data.result && data.result.ok){
+					cms_translate_string_sync_origin(values, $container, data.result)
+					cms_translate_string_notification('Translations saved', 3)
+				}
+
+			})
 
 		})
 
-	})
-
-	$container.find('.cms_translate_string_close').off('click.cms_translate').on('click.cms_translate', function(){
-		cms_translate_string_close()
-	})
+		$container.find('.cms_translate_string_close').off('click.cms_translate').on('click.cms_translate', function(){
+			cms_translate_string_close()
+		})
 
 	})
 

@@ -26,16 +26,13 @@ function cms_schema_init($root) {
 		}
 		
 		get_ajax_panel('cms/cms_schema', data, function(result) {
-			if (result && result.result && result.result.success) {
-				$('.cms_schema_container').parent().html(result.result._html)
+			var res = result && result.result ? result.result : {}
+			if (res._html) {
+				$('.cms_schema_container').parent().html(res._html)
+				cms_schema_init()
+			}
+			if (res.success) {
 				cms_notification('Schema fixed successfully', 4, 'success')
-			} else {
-				$this.removeClass('cms_disabled').text('fix')
-				var msg = 'Fix failed'
-				if (result && result.result && result.result.message) {
-					msg += ': ' + result.result.message
-				}
-				cms_error(msg, 6)
 			}
 		})
 		})
@@ -66,12 +63,12 @@ function cms_schema_init($root) {
 			var stats = res.stats || {}
 			var ok = res.success == 1 || res.success === true || (Array.isArray(stats.errors) && stats.errors.length === 0 && (stats.synced > 0 || stats.skipped > 0))
 
-			if (ok) {
+			if (res._html) {
 				$('.cms_schema_container').parent().html(res._html)
+				cms_schema_init()
+			}
+			if (ok) {
 				cms_notification(res.message || 'Panel tables synchronised', 5, 'success')
-			} else {
-				$this.removeClass('cms_disabled').text('sync panel tables')
-				cms_error(res.message || 'Sync failed', 8)
 			}
 		})
 		})

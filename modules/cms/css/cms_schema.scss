@@ -96,3 +96,38 @@
 	border-radius: 0.4rem;
 	margin: 1rem;
 }
+
+.cms_schema_latest_errors {
+	padding: 1.0rem 1.0rem 2.0rem;
+	border-top: 0.2rem solid $cms_border;
+	margin-top: 1.0rem;
+}
+
+.cms_schema_latest_errors_title {
+	font-size: 1.6rem;
+	font-weight: 700;
+	padding-bottom: 0.8rem;
+	color: #b71c1c;
+}
+
+.cms_schema_latest_errors_row {
+	border-top: 0.1rem solid $cms_border;
+}
+
+.cms_schema_latest_errors_module {
+	flex: 0 0 8rem;
+	font-weight: 700;
+	padding-right: 1.6rem;
+}
+
+.cms_schema_latest_errors_message {
+	color: #b71c1c;
+}
+
+.cms_schema_latest_errors_sql {
+	margin-top: 0.6rem;
+	font-family: monospace;
+	font-size: 1.2rem;
+	color: #555;
+	word-break: break-all;
+}

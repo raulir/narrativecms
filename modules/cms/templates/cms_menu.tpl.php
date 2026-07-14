@@ -14,12 +14,31 @@
 					</a>
 					
 					<?php if(!empty($children[$menu_item['id']])): ?>
-						<div class="cms_menu_children">
+						<div class="cms_menu_children cms_menu_children_l2">
 							<?php foreach($children[$menu_item['id']] as $child): ?>
-								
-								<a class="cms_menu_child cms_menu_link" <?php (!empty($child['url']) ? _lh($child['url']) : ''); ?>>
-									<?php print($child['name']); ?>
-								</a>
+
+								<?php if (!empty($children[$child['id']])): ?>
+
+									<div class="cms_menu_child cms_menu_child_parent">
+										<a class="cms_menu_link cms_menu_child_label" <?php if (!empty($child['url'])): ?><?php _lh($child['url']); ?><?php else: ?>href="javascript:void(0)"<?php endif ?>>
+											<?= $child['name'] ?>
+										</a>
+										<div class="cms_menu_children cms_menu_children_l3">
+											<?php foreach($children[$child['id']] as $grandchild): ?>
+												<a class="cms_menu_child cms_menu_link" <?php (!empty($grandchild['url']) ? _lh($grandchild['url']) : ''); ?>>
+													<?= $grandchild['name'] ?>
+												</a>
+											<?php endforeach ?>
+										</div>
+									</div>
+
+								<?php else: ?>
+
+									<a class="cms_menu_child cms_menu_link" <?php (!empty($child['url']) ? _lh($child['url']) : ''); ?>>
+										<?= $child['name'] ?>
+									</a>
+
+								<?php endif ?>
 							
 							<?php endforeach ?>
 						</div>

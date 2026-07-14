@@ -32,7 +32,7 @@ if ( !function_exists('get_position')) {
     		$cms_page_id = 0;
     	}
 
-    	if (!empty($GLOBALS['config']['position_wrappers'])){
+    	if (_single_page_mode()){
     		$return = "\n".'<div class="cms_position cms_position_'.$name.
     				'" data-position="'.$name.'" data-cms_page_id="'.$cms_page_id.'">'.$return.'</div>'."\n";
     	}
@@ -296,7 +296,7 @@ if ( !function_exists('get_position')) {
     	}
     	
     	$data = '';
-    	if (!empty($GLOBALS['config']['position_wrappers']) && !empty($GLOBALS['config']['position_links']) && !stristr($url, 'admin/')){
+    	if (_single_page_mode() && !stristr($url, 'admin/')){
     		if ((is_array($params_url) && !in_array($params_url['target'], ['_none', '_manual']) 
     				|| (!is_array($params_url) && stristr($params_url, '/') && stristr($params_url, '=') ))){
     		
@@ -544,9 +544,13 @@ if ( !function_exists('_user_login_text')) {
 
 	}
 
-	function _position_links_active(){
+	/**
+	 * Single page mode: position wrappers + ajax position loads (SPA-style).
+	 * Config value only — legacy key mapping lives solely in system/core/config.php.
+	 */
+	function _single_page_mode(){
 		
-		return !empty($GLOBALS['config']['position_wrappers']) && !empty($GLOBALS['config']['position_links']);
+		return !empty($GLOBALS['config']['single_page_mode']);
 		
 	}
 	
@@ -563,8 +567,23 @@ if ( !function_exists('_user_login_text')) {
 	}
 	
 	function _position_link_redirect($url){
+
+		// Never redirect while loading CMS admin UI (panel edit form, etc.)
+		if (!empty($GLOBALS['cms_admin_request'])){
+			return;
+		}
+		$uri = $GLOBALS['cms_request_uri'] ?? '';
+		if ($uri !== '' && (strpos($uri, 'admin') === 0 || strpos($uri, 'admin/') === 0)
+				&& !empty($_SESSION['cms_user']['cms_user_id'])){
+			return;
+		}
+		$ref = $_SERVER['HTTP_REFERER'] ?? '';
+		if ($ref !== '' && preg_match('#/admin(/|$|\?)#', $ref)
+				&& !empty($_SESSION['cms_user']['cms_user_id'])){
+			return;
+		}
 		
-		if (!_position_links_active() || !_is_position_ajax()){
+		if (!_single_page_mode() || !_is_position_ajax()){
 			header('Location: '.$url, true, 302);
 			exit();
 		}

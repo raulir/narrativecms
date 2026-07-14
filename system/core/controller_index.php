@@ -350,14 +350,14 @@ class Index extends CI_Controller {
 			$positions = $this->input->post('cms_positions');
 			if (!empty($positions)){
 				
-				// new position_links functionality
+				// single page mode — ajax position payloads
 				$return = [];
 				$response_css = [];
 				$response_css_force = 0;
 
 				$positions_needed = array_keys($positions);
 				$this->load->model('cms/cms_access_model');
-				if (_position_links_active()) {
+				if (_single_page_mode()) {
 					$this->load->library('cache');
 				}
 				$position_page_ids = [];
@@ -372,7 +372,7 @@ class Index extends CI_Controller {
 					}
 				}
 
-				if (_position_links_active()) {
+				if (_single_page_mode()) {
 					foreach ($positions_needed as $position_name) {
 						if (empty($position_page_ids[$position_name])) {
 							continue;

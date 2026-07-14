@@ -365,7 +365,7 @@ class cms_access_model extends Model {
 		
 		$login_redirect = $this->_get_login_redirect();
 		
-		if (!empty($params['no_html']) && _position_links_active() && _is_position_ajax()){
+		if (!empty($params['no_html']) && _single_page_mode() && _is_position_ajax()){
 			_position_link_redirect($login_redirect['url']);
 		}
 		

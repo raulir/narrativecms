@@ -16,18 +16,10 @@ class cms_page_panel_fields extends CI_Controller {
 
 	}
 
-	function panel_params($params){
-
-		if (!empty($params['block']['panel_name'])){
-			$block = $params['block'];
-			$result = $this->run_panel_method($block['panel_name'], 'panel_params', $block);
-			if (is_array($result)){
-				$params['block'] = array_merge($block, $result);
-			}
-		}
-
-		return $params;
-
-	}
+	// Admin form uses definition fields + stored block only.
+	// Do not call the page panel's panel_params here — that is frontend-only
+	// (redirects, score HTML, etc.). Custom field types prepare themselves via
+	// their own panel_params when print_fields() renders them with _panel().
+	// See modules/cms/docs/cms_panel_params.md
 
 }

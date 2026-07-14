@@ -160,9 +160,10 @@ class cms_languages extends CI_Controller {
 
 	function _save_languages($cms_page_panel_id, $languages){
 
+		// Purge so removed grid indices drop from cms_page_panel_param (e.g. languages.000004.*)
 		$this->cms_page_panel_model->update_cms_page_panel($cms_page_panel_id, [
 				'languages' => $this->_normalise_languages_list($languages),
-		]);
+		], true);
 
 	}
 

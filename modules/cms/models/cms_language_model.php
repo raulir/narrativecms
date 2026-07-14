@@ -74,6 +74,9 @@ class cms_language_model extends Model {
 		
 	}
 	
+	/**
+	 * Frontend / visitor language (cookie). Never use for CMS admin UI content.
+	 */
 	function get_current_language(){
 	
 		if (!empty($_COOKIE['language'])){
@@ -84,6 +87,9 @@ class cms_language_model extends Model {
 	
 	}
 	
+	/**
+	 * CMS admin working language (session). Independent of visitor cookie.
+	 */
 	function get_cms_language(){
 	
 		if (!empty($_SESSION['cms_language']) && is_string($_SESSION['cms_language'])){
@@ -103,6 +109,48 @@ class cms_language_model extends Model {
 		$_SESSION['cms_language'] = 'en';
 		return 'en';
 	
+	}
+
+	/**
+	 * True for CMS admin UI requests only (not public site, even if admin is logged in).
+	 * Flag set by admin controller; also URI admin/* or ajax with Referer /admin/.
+	 */
+	function is_cms_admin_request(){
+
+		if (!empty($GLOBALS['cms_admin_request'])){
+			return true;
+		}
+
+		if (empty($_SESSION['cms_user']['cms_user_id'])){
+			return false;
+		}
+
+		$uri = $GLOBALS['cms_request_uri'] ?? '';
+		if ($uri !== '' && (strpos($uri, 'admin') === 0 || strpos($uri, 'admin/') === 0)){
+			return true;
+		}
+
+		$ref = $_SERVER['HTTP_REFERER'] ?? '';
+		if ($ref !== '' && preg_match('#/admin(/|$|\?)#', $ref)){
+			return true;
+		}
+
+		return false;
+
+	}
+
+	/**
+	 * Content language for this request: CMS session in admin UI, visitor cookie on site.
+	 * Keeps admin and frontend language environments separate.
+	 */
+	function get_content_language(){
+
+		if ($this->is_cms_admin_request()){
+			return $this->get_cms_language();
+		}
+
+		return $this->get_current_language();
+
 	}
 
 	function get_language_endonyms(){

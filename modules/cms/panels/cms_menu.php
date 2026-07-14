@@ -148,6 +148,40 @@ class cms_menu extends CI_Controller {
 			}
 		}
 
+		// Prune mid-level parents (L2+) that have no children left after access/hide filters
+		// Walk deepest-first so empty L3 parents drop before their L2 group is cleaned
+		$changed = true;
+		while ($changed){
+			$changed = false;
+			foreach($return['children'] as $parent_id => $group){
+				foreach($group as $gkey => $child){
+					$child_id = $child['id'] ?? '';
+					if ($child_id === ''){
+						continue;
+					}
+					// Child is a structural parent (no url) but has no descendants
+					if (empty($child['url']) && empty($return['children'][$child_id])){
+						unset($return['children'][$parent_id][$gkey]);
+						$changed = true;
+					}
+				}
+				if (isset($return['children'][$parent_id])){
+					$return['children'][$parent_id] = array_values($return['children'][$parent_id]);
+					if (empty($return['children'][$parent_id])){
+						unset($return['children'][$parent_id]);
+						$changed = true;
+					}
+				}
+			}
+			// Re-prune top-level empty parents
+			foreach($return['menu_items'] as $key => $value){
+				if (empty($return['children'][$key]) && empty($value['url'])){
+					unset($return['menu_items'][$key]);
+					$changed = true;
+				}
+			}
+		}
+
 		uasort($return['menu_items'], function($a, $b){
 			return ((int)($a['order'] ?? 9999)) <=> ((int)($b['order'] ?? 9999));
 		});

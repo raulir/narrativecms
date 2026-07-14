@@ -2,6 +2,27 @@
 
 class cms_schema_model extends Model {
 
+	private $_fix_sql_errors = [];
+	private $_fix_key = '';
+
+	function clear_fix_errors() {
+		$this->_fix_sql_errors = [];
+	}
+
+	function get_fix_errors() {
+		return $this->_fix_sql_errors;
+	}
+
+	function record_fix_error($key, $message, $sql = '') {
+		$parts = explode(':', $key);
+		$this->_fix_sql_errors[] = [
+			'module' => $parts[0] ?? '',
+			'key' => $key,
+			'message' => $message,
+			'sql' => $sql,
+		];
+	}
+
 	function check_schema() {
 		$errors = [];
 		list($merged, $owner) = $this->_build_merged_schemas();
@@ -26,10 +47,16 @@ class cms_schema_model extends Model {
 			}
 
 			$db_cols = $this->_get_db_columns($table);
+			$migrate_cols = $def['migrate_from']['columns'] ?? [];
 			if (!empty($def['columns'])) {
 				foreach ($def['columns'] as $col_name => $spec) {
 					$col_key = $base_key . ':columns:' . $col_name;
 					if (!isset($db_cols[$col_name])) {
+						$legacy_col = $this->_migrate_from_legacy_column($col_name, $migrate_cols, $db_cols);
+						if ($legacy_col) {
+							$this->_compare_column($errors, $col_key, $spec, $db_cols[$legacy_col]);
+							continue;
+						}
 						$errors[$col_key] = "Field \"{$col_name}\" not found";
 						continue;
 					}
@@ -45,7 +72,11 @@ class cms_schema_model extends Model {
 						$errors[$idx_key] = "Index \"{$idx_name}\" not found";
 						continue;
 					}
-					$this->_compare_index($errors, $idx_key, $spec, $db_idx[$idx_name]);
+					$actual_idx = $db_idx[$idx_name];
+					if (!empty($migrate_cols) && !empty($actual_idx['columns'])) {
+						$actual_idx['columns'] = $this->_map_migrated_column_names($actual_idx['columns'], $migrate_cols);
+					}
+					$this->_compare_index($errors, $idx_key, $spec, $actual_idx);
 				}
 			}
 		}
@@ -58,6 +89,9 @@ class cms_schema_model extends Model {
 		if (empty($path)) {
 			return false;
 		}
+
+		$this->clear_fix_errors();
+		$this->_fix_key = $path;
 
 		$parts = explode(':', $path);
 		$module = $parts[0] ?? '';
@@ -80,7 +114,7 @@ class cms_schema_model extends Model {
 					}
 				}
 			}
-			return $count > 0;
+			return $count > 0 && empty($this->_fix_sql_errors);
 		}
 
 		$table = $parts[1] ?? '';
@@ -92,25 +126,14 @@ class cms_schema_model extends Model {
 
 		// 2. Table level
 		if (count($parts) === 2) {
-			return $this->_fix_table($table, $def);
+			return $this->_fix_table($table, $def) && empty($this->_fix_sql_errors);
 		}
 
 		$section = $parts[2] ?? '';
 
-		// 3. Column level (full column even if specific property is in path)
-		if ($section === 'columns') {
-			$column = $parts[3] ?? '';
-			if (isset($def['columns'][$column])) {
-				return $this->_fix_column($table, $column, $def['columns'][$column], $def);
-			}
-		}
-
-		// 4. Index level (full index even if specific property)
-		if ($section === 'indexes') {
-			$index = $parts[3] ?? '';
-			if (isset($def['indexes'][$index])) {
-				return $this->_fix_index($table, $index, $def['indexes'][$index]);
-			}
+		// 3–4. Column / index level — run full phased table fix (auto_increment needs index phase)
+		if ($section === 'columns' || $section === 'indexes') {
+			return $this->_fix_table($table, $def) && empty($this->_fix_sql_errors);
 		}
 
 		return false;
@@ -517,18 +540,37 @@ class cms_schema_model extends Model {
 			}
 		}
 
-		$ok = true;
+		return $this->_fix_table_phased($table, $def);
+	}
 
-		// columns – processed in exact JSON order
+	private function _fix_table_phased($table, $def) {
+		$ok = true;
+		$deferred_auto = [];
+
+		if (!$this->_reconcile_migrated_columns($table, $def, $deferred_auto)) {
+			return false;
+		}
+
+		if (!$this->_migrate_columns_from($table, $def, $deferred_auto)) {
+			return false;
+		}
+
 		if (!empty($def['columns'])) {
 			foreach ($def['columns'] as $col => $spec) {
-				if (!$this->_fix_column($table, $col, $spec, $def)) {
+				if (!$this->_fix_column_phase1($table, $col, $spec, $def, $deferred_auto)) {
 					$ok = false;
 				}
 			}
 		}
 
-		// indexes stay unchanged
+		if (!$ok || !empty($this->_fix_sql_errors)) {
+			return false;
+		}
+
+		if (!$this->_prepare_auto_increment_for_indexes($table, $def)) {
+			return false;
+		}
+
 		if (!empty($def['indexes'])) {
 			foreach ($def['indexes'] as $idx => $spec) {
 				if (!$this->_fix_index($table, $idx, $spec)) {
@@ -537,24 +579,320 @@ class cms_schema_model extends Model {
 			}
 		}
 
-		return $ok;
-	}
-	
-	private function _fix_column($table, $column, $spec, $def) {
-		$db_cols = $this->_get_db_columns($table);
-	
-		if (!isset($db_cols[$column])) {
-			return $this->_add_column($table, $column, $spec, $def);
+		if (!$ok || !empty($this->_fix_sql_errors)) {
+			return false;
 		}
-	
-		$tmp_errors = [];
-		$this->_compare_column($tmp_errors, 'temp', $spec, $db_cols[$column]);
-		if (empty($tmp_errors)) {
+
+		foreach ($deferred_auto as $col => $spec) {
+			if (!$this->_apply_auto_increment($table, $col, $spec)) {
+				$ok = false;
+			}
+		}
+
+		return $ok && empty($this->_fix_sql_errors);
+	}
+
+	private function _fix_column_phase1($table, $column, $spec, $def, &$deferred_auto) {
+		$db_cols = $this->_get_db_columns($table);
+		$defer = $this->_should_defer_auto_increment($table, $column, $spec, $def);
+
+		if (!isset($db_cols[$column])) {
+			$opts = $defer ? ['include_auto_increment' => false] : [];
+			if (!$this->_add_column($table, $column, $spec, $def, $opts)) {
+				return false;
+			}
+			if ($defer) {
+				$deferred_auto[$column] = $spec;
+			}
 			return true;
 		}
-	
-		$this->_modify_column($table, $column, $spec);
+
+		$compare_spec = $spec;
+		if ($defer) {
+			$compare_spec = $spec;
+			unset($compare_spec['auto_increment']);
+		}
+
+		$tmp_errors = [];
+		$this->_compare_column($tmp_errors, 'temp', $compare_spec, $db_cols[$column]);
+		if (empty($tmp_errors)) {
+			if ($defer) {
+				$deferred_auto[$column] = $spec;
+			}
+			return true;
+		}
+
+		$opts = $defer ? ['include_auto_increment' => false] : [];
+		if (!$this->_modify_column($table, $column, $spec, $opts)) {
+			return false;
+		}
+		if ($defer) {
+			$deferred_auto[$column] = $spec;
+		}
 		return true;
+	}
+
+	private function _get_auto_increment_column($table) {
+		foreach ($this->_get_db_columns($table) as $name => $col) {
+			if (($col['Extra'] ?? '') === 'auto_increment') {
+				return $name;
+			}
+		}
+		return null;
+	}
+
+	private function _column_is_keyed($table, $column) {
+		foreach ($this->_get_db_indexes($table) as $idx) {
+			if (in_array($column, $idx['columns'] ?? [], true)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private function _schema_primary_column($def) {
+		$cols = $def['indexes']['PRIMARY']['columns'] ?? [];
+		if (empty($cols) || !is_array($cols)) {
+			return null;
+		}
+		return $cols[0];
+	}
+
+	private function _should_defer_auto_increment($table, $column, $spec, $def) {
+		if (empty($spec['auto_increment'])) {
+			return false;
+		}
+
+		if (!$this->_column_is_keyed($table, $column)) {
+			return true;
+		}
+
+		$existing_auto = $this->_get_auto_increment_column($table);
+		if ($existing_auto && $existing_auto !== $column) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private function _prepare_auto_increment_for_indexes($table, $def) {
+		$schema_primary = $this->_schema_primary_column($def);
+		$existing_auto = $this->_get_auto_increment_column($table);
+
+		if ($existing_auto && $schema_primary && $existing_auto !== $schema_primary) {
+			if (!empty($def['columns'][$existing_auto])) {
+				if (!$this->_strip_auto_increment($table, $existing_auto, $def['columns'][$existing_auto])) {
+					return false;
+				}
+			} else {
+				if (!$this->_strip_auto_increment_raw($table, $existing_auto)) {
+					return false;
+				}
+			}
+		}
+
+		$db_idx = $this->_get_db_indexes($table);
+		$schema_pk_cols = $def['indexes']['PRIMARY']['columns'] ?? null;
+		if ($schema_pk_cols && isset($db_idx['PRIMARY'])) {
+			$db_pk = implode(',', $db_idx['PRIMARY']['columns']);
+			$schema_pk = implode(',', (array)$schema_pk_cols);
+			if ($db_pk !== $schema_pk) {
+				if (!$this->_drop_index($table, 'PRIMARY')) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	private function _strip_auto_increment($table, $column, $spec) {
+		$col_def = $this->_build_column_definition($column, $spec, ['include_auto_increment' => false]);
+		$sql = "ALTER TABLE `{$table}` MODIFY COLUMN {$col_def}";
+		return $this->_execute($sql);
+	}
+
+	private function _strip_auto_increment_raw($table, $column) {
+		$db_cols = $this->_get_db_columns($table);
+		if (!isset($db_cols[$column])) {
+			return true;
+		}
+
+		$col = $db_cols[$column];
+		$sql = "ALTER TABLE `{$table}` MODIFY COLUMN `{$column}` {$col['Type']}";
+		$sql .= ($col['Null'] === 'YES') ? ' NULL' : ' NOT NULL';
+
+		if ($col['Default'] !== null) {
+			if ($this->_is_timestamp_default($col['Default'])) {
+				$sql .= ' DEFAULT CURRENT_TIMESTAMP';
+			} else {
+				$sql .= ' DEFAULT '.$this->db->escape($col['Default']);
+			}
+		} elseif ($col['Null'] === 'YES') {
+			$sql .= ' DEFAULT NULL';
+		}
+
+		return $this->_execute($sql);
+	}
+
+	private function _migrate_from_legacy_column($new_col, $migrate_cols, $db_cols) {
+		foreach ($migrate_cols as $old_col => $mapped_new_col) {
+			if ($mapped_new_col === $new_col && isset($db_cols[$old_col])) {
+				return $old_col;
+			}
+		}
+		return null;
+	}
+
+	private function _map_migrated_column_names($columns, $migrate_cols) {
+		$mapped = [];
+		foreach ((array)$columns as $col) {
+			$mapped[] = $migrate_cols[$col] ?? $col;
+		}
+		return $mapped;
+	}
+
+	private function _reconcile_migrated_columns($table, $def, &$deferred_auto) {
+		$migrate_cols = $def['migrate_from']['columns'] ?? [];
+		if (empty($migrate_cols) || empty($def['columns'])) {
+			return true;
+		}
+
+		$db_cols = $this->_get_db_columns($table);
+		foreach ($migrate_cols as $old_col => $new_col) {
+			if (!isset($db_cols[$old_col]) || !isset($db_cols[$new_col])) {
+				continue;
+			}
+			if (!isset($def['columns'][$new_col])) {
+				continue;
+			}
+
+			if (!$this->_execute(
+				'UPDATE `'.$table.'` SET `'.$new_col.'` = `'.$old_col.'` WHERE `'.$new_col.'` = 0 OR `'.$new_col.'` IS NULL'
+			)) {
+				return false;
+			}
+
+			$existing_auto = $this->_get_auto_increment_column($table);
+			if ($existing_auto === $old_col) {
+				if (!$this->_strip_auto_increment_raw($table, $old_col)) {
+					return false;
+				}
+			}
+
+			$db_idx = $this->_get_db_indexes($table);
+			$pk_cols = $db_idx['PRIMARY']['columns'] ?? [];
+			if (in_array($old_col, $pk_cols, true)) {
+				if (!$this->_drop_index($table, 'PRIMARY')) {
+					return false;
+				}
+			}
+
+			if (!$this->_execute('ALTER TABLE `'.$table.'` DROP COLUMN `'.$old_col.'`')) {
+				return false;
+			}
+
+			$col_spec = $def['columns'][$new_col];
+			if (!empty($col_spec['auto_increment']) && !$this->_get_auto_increment_column($table)) {
+				$defer = $this->_should_defer_auto_increment($table, $new_col, $col_spec, $def);
+				if ($defer) {
+					$deferred_auto[$new_col] = $col_spec;
+				}
+			}
+		}
+
+		return empty($this->_fix_sql_errors);
+	}
+
+	private function _repair_primary_column_values($table, $column) {
+		$db_cols = $this->_get_db_columns($table);
+		if (!isset($db_cols[$column])) {
+			return true;
+		}
+
+		$problem_groups = $this->db->query(
+			'SELECT `'.$column.'` AS val, COUNT(*) AS cnt FROM `'.$table.'` GROUP BY `'.$column.'` HAVING cnt > 1 OR val = 0'
+		)->result_array();
+
+		if (empty($problem_groups)) {
+			return true;
+		}
+
+		$max_row = $this->db->query('SELECT COALESCE(MAX(`'.$column.'`), 0) AS m FROM `'.$table.'`')->row_array();
+		$next_id = max(1, (int)($max_row['m'] ?? 0) + 1);
+
+		foreach ($problem_groups as $group) {
+			$val = $group['val'];
+			$rows = $this->db->query('SELECT * FROM `'.$table.'` WHERE `'.$column.'` = ?', [$val])->result_array();
+			$keep_first = ((int)$val > 0);
+
+			foreach ($rows as $i => $row) {
+				if ($keep_first && $i === 0) {
+					continue;
+				}
+
+				$where_parts = [];
+				$binds = [];
+				foreach ($db_cols as $col_name => $_) {
+					$where_parts[] = '`'.$col_name.'` = ?';
+					$binds[] = $row[$col_name];
+				}
+
+				$sql = 'UPDATE `'.$table.'` SET `'.$column.'` = ? WHERE '.implode(' AND ', $where_parts).' LIMIT 1';
+				array_unshift($binds, $next_id);
+				if (!$this->_execute($sql, $binds)) {
+					return false;
+				}
+				$next_id++;
+			}
+		}
+
+		return empty($this->_fix_sql_errors);
+	}
+
+	private function _migrate_columns_from($table, $def, &$deferred_auto) {
+		$migrate = $def['migrate_from'] ?? null;
+		if (empty($migrate['columns']) || empty($def['columns'])) {
+			return true;
+		}
+
+		$db_cols = $this->_get_db_columns($table);
+		foreach ($migrate['columns'] as $old_col => $new_col) {
+			if (!isset($db_cols[$old_col]) || isset($db_cols[$new_col])) {
+				continue;
+			}
+			if (!isset($def['columns'][$new_col])) {
+				continue;
+			}
+
+			$col_spec = $def['columns'][$new_col];
+			$defer = $this->_should_defer_auto_increment($table, $new_col, $col_spec, $def);
+			$opts = $defer ? ['include_auto_increment' => false] : [];
+			$col_def = $this->_build_column_definition($new_col, $col_spec, $opts);
+			if (!$this->_execute('ALTER TABLE `'.$table.'` CHANGE `'.$old_col.'` '.$col_def)) {
+				return false;
+			}
+			if ($defer) {
+				$deferred_auto[$new_col] = $col_spec;
+			}
+		}
+
+		return empty($this->_fix_sql_errors);
+	}
+
+	private function _apply_auto_increment($table, $column, $spec) {
+		if (!$this->_column_is_keyed($table, $column)) {
+			$this->record_fix_error(
+				$this->_fix_key,
+				'Cannot apply AUTO_INCREMENT — column "'.$column.'" is not indexed yet',
+				''
+			);
+			return false;
+		}
+
+		$col_def = $this->_build_column_definition($column, $spec, ['include_auto_increment' => true]);
+		$sql = "ALTER TABLE `{$table}` MODIFY COLUMN {$col_def}";
+		return $this->_execute($sql);
 	}
 
 	private function _fix_index($table, $index_name, $spec) {
@@ -601,23 +939,22 @@ class cms_schema_model extends Model {
 	    return $this->_execute($sql);
 	}
 
-	private function _add_column($table, $column, $spec, $def) {
-		$col_def = $this->_build_column_definition($column, $spec);
+	private function _add_column($table, $column, $spec, $def, $opts = []) {
+		$col_def = $this->_build_column_definition($column, $spec, $opts);
 		$after   = $this->_get_after_clause($table, $column, $def);
-	
+
 		$sql = "ALTER TABLE `{$table}` ADD COLUMN {$col_def}{$after}";
-		$this->db->query($sql);
-	
-		return true;
+		return $this->_execute($sql);
 	}
 
-	private function _modify_column($table, $column, $spec) {
-		$def = $this->_build_column_definition($column, $spec);
+	private function _modify_column($table, $column, $spec, $opts = []) {
+		$def = $this->_build_column_definition($column, $spec, $opts);
 		$sql = "ALTER TABLE `{$table}` MODIFY COLUMN {$def}";
 		return $this->_execute($sql);
 	}
 
-	private function _build_column_definition($name, $spec) {
+	private function _build_column_definition($name, $spec, $opts = []) {
+		$include_auto = $opts['include_auto_increment'] ?? true;
 		$type = strtoupper($spec['type']);
 		if (isset($spec['constraint'])) {
 			$type .= "({$spec['constraint']})";
@@ -643,7 +980,9 @@ class cms_schema_model extends Model {
 			}
 		}
 
-		if (!empty($spec['auto_increment'])) $sql .= " AUTO_INCREMENT";
+		if ($include_auto && !empty($spec['auto_increment'])) {
+			$sql .= " AUTO_INCREMENT";
+		}
 
 		return $sql;
 	}
@@ -669,25 +1008,37 @@ class cms_schema_model extends Model {
 
 	private function _drop_index($table, $index_name) {
 		if ($index_name === 'PRIMARY') {
-			$this->db->query("ALTER TABLE `{$table}` DROP PRIMARY KEY");
-		} else {
-			$this->db->query("ALTER TABLE `{$table}` DROP INDEX IF EXISTS `{$index_name}`");
+			return $this->_execute("ALTER TABLE `{$table}` DROP PRIMARY KEY");
 		}
+		return $this->_execute("ALTER TABLE `{$table}` DROP INDEX IF EXISTS `{$index_name}`");
 	}
 	
 	private function _create_index($table, $index_name, $spec) {
+		if ($index_name === 'PRIMARY' && !empty($spec['columns'])) {
+			foreach ((array)$spec['columns'] as $col) {
+				if (!$this->_repair_primary_column_values($table, $col)) {
+					return false;
+				}
+			}
+		}
+
 		$def = $this->_build_index_definition($index_name, $spec);
 		$sql = "ALTER TABLE `{$table}` ADD {$def}";
 		return $this->_execute($sql);
 	}
 
 	private function _execute($sql, $bind = []) {
-		if (!empty($bind)) {
-			$this->db->query($sql, $bind);
-		} else {
-			$this->db->query($sql);
+		try {
+			if (!empty($bind)) {
+				$this->db->query($sql, $bind);
+			} else {
+				$this->db->query($sql);
+			}
+			return true;
+		} catch (\mysqli_sql_exception $e) {
+			$this->record_fix_error($this->_fix_key, $e->getMessage(), $sql);
+			return false;
 		}
-		return true;
 	}
 
     function _deep_merge($a, $b) {
@@ -857,15 +1208,22 @@ class cms_schema_model extends Model {
 			return false;
 		}
 
-		$this->_execute('RENAME TABLE `'.$old_table.'` TO `'.$table.'`');
+		if (!$this->_execute('RENAME TABLE `'.$old_table.'` TO `'.$table.'`')) {
+			return false;
+		}
 
 		if (!empty($migrate['columns']) && !empty($def['columns'])) {
 			foreach ($migrate['columns'] as $old_col => $new_col) {
 				if (!isset($def['columns'][$new_col])) {
 					continue;
 				}
-				$col_def = $this->_build_column_definition($new_col, $def['columns'][$new_col]);
-				$this->_execute('ALTER TABLE `'.$table.'` CHANGE `'.$old_col.'` '.$col_def);
+				$col_spec = $def['columns'][$new_col];
+				$defer = $this->_should_defer_auto_increment($table, $new_col, $col_spec, $def);
+				$opts = $defer ? ['include_auto_increment' => false] : [];
+				$col_def = $this->_build_column_definition($new_col, $col_spec, $opts);
+				if (!$this->_execute('ALTER TABLE `'.$table.'` CHANGE `'.$old_col.'` '.$col_def)) {
+					return false;
+				}
 			}
 		}
 
@@ -873,15 +1231,19 @@ class cms_schema_model extends Model {
 			$db_idx = $this->_get_db_indexes($table);
 			foreach ($migrate['indexes'] as $old_idx => $new_idx) {
 				if (isset($db_idx[$old_idx])) {
-					$this->_drop_index($table, $old_idx);
+					if (!$this->_drop_index($table, $old_idx)) {
+						return false;
+					}
 				}
 				if (isset($def['indexes'][$new_idx])) {
-					$this->_create_index($table, $new_idx, $def['indexes'][$new_idx]);
+					if (!$this->_create_index($table, $new_idx, $def['indexes'][$new_idx])) {
+						return false;
+					}
 				}
 			}
 		}
 
-		return true;
+		return empty($this->_fix_sql_errors);
 
 	}
 

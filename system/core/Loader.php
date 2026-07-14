@@ -764,8 +764,8 @@ class Loader {
 						}
 					}
 
+					// Already loaded — ignore (e.g. model re-loads cache after controller did)
 					$is_duplicate = TRUE;
-					_html_error('Unable to load the requested class: '.$class);
 					return;
 				}
 

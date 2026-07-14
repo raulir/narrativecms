@@ -1,6 +1,8 @@
 # CMS panel inputs
 
-Panel definition fields live in `modules/<module>/definitions/<panel>.json` under `item` (per-instance panel params) or `settings` (global panel settings). The admin UI renders them via [`print_fields()`](../helpers/cms_fields_helper.php), which routes each field to a `cms/cms_input_*` panel.
+Panel definition fields live in `modules/<module>/definitions/<panel>.json` under `item` (per-instance panel params) or `settings` (global panel settings). The admin UI renders them via [`print_fields()`](../helpers/cms_fields_helper.php), which routes each field to a `cms/cms_input_*` panel (or a custom module field panel such as `music/exercise_params`).
+
+**Admin vs frontend:** preparing values for these **field** panels may use that field’s own `panel_params`. Do **not** run the **page panel’s** frontend `panel_params` when building the admin form — see [`cms_panel_params.md`](cms_panel_params.md).
 
 Client behaviour follows [`cms_panel_js.md`](cms_panel_js.md): each input panel has `cms_input_<type>_init($root)` and a `cms_input_<type>_ok` guard class on its root element. Repeater fields preload the panel JS and call the matching init hook when a row is added.
 
@@ -222,7 +224,7 @@ CMS page selector (all pages).
 
 ### grid
 
-Table grid tied to panel model `ds_*` data-source methods. Can be embedded in a template (`form/form_grid`) or used in panel `settings` via `type: grid` (see [`note_names.json`](../../music/definitions/note_names.json)).
+Table grid tied to panel model `ds_*` data-source methods. Can be embedded in a template (`form/form_grid`) or used in panel `settings` via `type: grid` (see [`note_system.json`](../../music/definitions/note_system.json)).
 
 | Property | Description |
 |----------|-------------|
@@ -243,7 +245,7 @@ Table grid tied to panel model `ds_*` data-source methods. Can be embedded in a 
 
 **Editable cells:** `cms/cms_grid_editable` — blur-save. With `ds` + `base_id`, calls `U` on the data source; otherwise updates a `cms_page_panel` list item.
 
-**Reference:** [`form/basic.php`](../../form/panels/basic.php) `ds_subscribers` (read-only grid, `form_data` table). [`music/note_names.php`](../../music/panels/note_names.php) `ds_rows` (editable grid, `headers` + `rows` in panel settings JSON).
+**Reference:** [`form/basic.php`](../../form/panels/basic.php) `ds_subscribers` (read-only grid, `form_data` table). [`music/note_system.php`](../../music/panels/note_system.php) `ds_rows` (editable grid, `headers` + `rows` in panel settings JSON).
 
 ---
 

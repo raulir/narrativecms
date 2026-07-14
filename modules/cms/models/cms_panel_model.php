@@ -52,6 +52,35 @@ class cms_panel_model extends Model {
 		return !empty($panel_config['settings']) ? $panel_config['settings'] : [];
 
 	}
+
+	function get_settings_defaults($panel_name) {
+
+		$panel_config = $this->get_cms_panel_config($panel_name);
+		$defaults = [];
+
+		foreach ($panel_config['settings'] ?? [] as $field) {
+			if (empty($field['name'])) {
+				continue;
+			}
+
+			if (($field['type'] ?? '') === 'modules') {
+				$modules = [];
+				foreach (glob($GLOBALS['config']['base_path'].'modules/*', GLOB_ONLYDIR) as $dir) {
+					$module = basename($dir);
+					if ($module !== 'cms') {
+						$modules[] = $module;
+					}
+				}
+				sort($modules);
+				$defaults[$field['name']] = $modules;
+			} elseif (array_key_exists('default', $field)) {
+				$defaults[$field['name']] = $field['default'];
+			}
+		}
+
+		return $defaults;
+
+	}
 	
 	function get_cms_panel_config($cms_panel){
 

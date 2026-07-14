@@ -18,7 +18,7 @@ class cms_preview extends CI_Controller {
 		$params['mobile_preview_width'] = !empty($settings['mobile_preview_width']) ? (int)$settings['mobile_preview_width'] : 40;
 		$params['rem_px'] = !empty($GLOBALS['config']['rem_px']) ? (int)$GLOBALS['config']['rem_px'] : 1000;
 		$params['rem_m_px'] = !empty($GLOBALS['config']['rem_m_px']) ? (int)$GLOBALS['config']['rem_m_px'] : 500;
-		$params['rem_k'] = !empty($GLOBALS['config']['rem_k']) ? (int)$GLOBALS['config']['rem_k'] : 10;
+		$params['rem_k'] = !empty($GLOBALS['config']['rem_k']) ? (int)$GLOBALS['config']['rem_k'] : 100;
 
 		$context = $this->_resolve_admin_preview_context();
 

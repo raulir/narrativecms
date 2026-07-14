@@ -55,8 +55,10 @@ function cms_page_save(params){
 				cms_preview_reload();
 			}
 			
-			// update url in browser when page has changed
-			change_url(_cms_base + 'admin/page/' + $('.cms_page_id').val() + '/');
+			// update url in browser when page has changed (admin only — not SPA positions)
+			if (history && history.pushState) {
+				history.pushState({}, '', _cms_base + 'admin/page/' + $('.cms_page_id').val() + '/');
+			}
 			
 			// update new page panel target
 			$('.cms_input_page_panels_add').data('page', $('.cms_page_id').val());
@@ -97,6 +99,20 @@ function cms_page_delete(){
 
 function cms_page_init($root){
 
+	var $page_scope = $root || $(document);
+
+	$page_scope.find('.cms_page_save').not('.cms_page_save_ok').each(function() {
+		$(this).addClass('cms_page_save_ok').on('click.cms', function() {
+			cms_page_save();
+		});
+	});
+
+	$page_scope.find('.cms_page_delete').not('.cms_page_delete_ok').each(function() {
+		$(this).addClass('cms_page_delete_ok').on('click.cms', function() {
+			cms_page_delete();
+		});
+	});
+
 	var $scope = $root ? $root.find('.cms_page_container') : $('.cms_page_container');
 
 	$scope.not('.cms_page_ok').each(function(){
@@ -104,14 +120,6 @@ function cms_page_init($root){
 		var $container = $(this);
 
 		$container.addClass('cms_page_ok');
-
-		$('.cms_page_save', $container).on('click.cms', function(){
-			cms_page_save();
-		});
-
-		$('.cms_page_delete', $container).on('click.cms', function(){
-			cms_page_delete();
-		});
 
 		cms_page_toolbar_title();
 		$('.cms_page_title', $container).on('keyup.cms', cms_page_toolbar_title);

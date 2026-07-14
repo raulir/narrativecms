@@ -862,9 +862,9 @@ class cms_page_panel_model extends Model {
 
 	function get_cms_page_panel($cms_page_panel_id, $language = false, $settings = true){
 		
-		// defaults to frontend language
+		// Admin UI → CMS language; public site → visitor language (never mix)
 		if ($language === false){
-			$language = $this->get_current_language();
+			$language = $this->get_content_language();
 		}
 
 		$sql = "select * from cms_page_panel where cms_page_panel_id = ? ";
@@ -913,6 +913,46 @@ class cms_page_panel_model extends Model {
 		
 	}
 	
+	function restore_panel_settings_defaults($panel_name, $merge_existing = true) {
+
+		$this->load->model('cms/cms_panel_model');
+		$defaults = $this->cms_panel_model->get_settings_defaults($panel_name);
+		if (empty($defaults)) {
+			return false;
+		}
+
+		$settings_rows = $this->get_cms_page_panels_by([
+			'panel_name' => $panel_name,
+			'cms_page_id' => 0,
+			'parent_id' => 0,
+			'sort' => 0,
+		]);
+		if (empty($settings_rows[0]['cms_page_panel_id'])) {
+			return false;
+		}
+
+		$cms_page_panel_id = (int)$settings_rows[0]['cms_page_panel_id'];
+		$params = $defaults;
+
+		if ($merge_existing) {
+			$existing = $this->get_cms_page_panel_params($cms_page_panel_id);
+			if (is_array($existing)) {
+				foreach ($defaults as $key => $value) {
+					if (!array_key_exists($key, $existing) || $existing[$key] === '' || $existing[$key] === null) {
+						$params[$key] = $value;
+					} else {
+						$params[$key] = $existing[$key];
+					}
+				}
+			}
+		}
+
+		$this->update_cms_page_panel($cms_page_panel_id, ['panel_params' => $params], true);
+
+		return true;
+
+	}
+
 	function update_cms_page_panel($cms_page_panel_id, $data, $purge = false){
 
 		if (isset($data['search_params'])){
@@ -979,6 +1019,21 @@ class cms_page_panel_model extends Model {
 		if (!empty($params)){
 			
 			if ($purge){
+
+				$this->load->model('cms/cms_panel_model');
+				$panel_config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+				if (!empty($panel_config['settings'])) {
+					$has_setting_field = false;
+					foreach ($panel_config['settings'] as $field) {
+						if (!empty($field['name']) && array_key_exists($field['name'], $params)) {
+							$has_setting_field = true;
+							break;
+						}
+					}
+					if (!$has_setting_field) {
+						$purge = false;
+					}
+				}
 
 				$existing_params = $this->get_cms_page_panel_params($cms_page_panel_id);
 				if (is_array($existing_params)){
@@ -1676,7 +1731,7 @@ class cms_page_panel_model extends Model {
 
 	    	// replace with translated versions
 	    	foreach($return as $key => $page_panel){
-	    		$language = ($list_language === false) ? $this->get_current_language() : $list_language;
+	    		$language = ($list_language === false) ? $this->get_content_language() : $list_language;
 	    		$return[$key] = $this->get_cms_page_panel($page_panel['cms_page_panel_id'], $language, false);
 	    	}
 	    	
@@ -1757,12 +1812,12 @@ class cms_page_panel_model extends Model {
 	/**
 	 * 
 	 * @param unknown $cms_panel_name - module/panel_name
-	 * @param string $language - CMS language id for translated settings fields
+	 * @param string $language - language id for translated settings (empty = content language for this request)
 	 */
 	function get_cms_page_panel_settings($cms_panel_name, $language = ''){
 
 		if ($language === ''){
-			$language = $this->get_current_language();
+			$language = $this->get_content_language();
 		}
 		
 		if (is_numeric($cms_panel_name)){
@@ -2250,7 +2305,7 @@ class cms_page_panel_model extends Model {
 	}
 	
 	/**
-	 * get cms working language
+	 * CMS admin working language (session). Independent of visitor cookie.
 	 */
 	function get_cms_language(){
 		
@@ -2259,14 +2314,31 @@ class cms_page_panel_model extends Model {
 		
 	}
 	
+	/**
+	 * Frontend / visitor language (cookie). Do not use for CMS admin UI content.
+	 */
 	function get_current_language(){
 		
-		if (!empty($_COOKIE['language'])){
-			return $_COOKIE['language'];
-		}
+		$this->_ensure_language_model();
+		return $this->cms_language_model->get_current_language();
 		
-		return $this->get_default_language();
-		
+	}
+
+	/**
+	 * Content language for this request (admin → CMS session, site → visitor cookie).
+	 */
+	function get_content_language(){
+
+		$this->_ensure_language_model();
+		return $this->cms_language_model->get_content_language();
+
+	}
+
+	function is_cms_admin_request(){
+
+		$this->_ensure_language_model();
+		return $this->cms_language_model->is_cms_admin_request();
+
 	}
 	
 }

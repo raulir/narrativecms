@@ -24,3 +24,4 @@ npm-debug.log*
 /agent-tools/
 /grok/
 /grok_cms/
+config/update.narrativecms.com.php

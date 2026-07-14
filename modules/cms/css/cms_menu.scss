@@ -39,16 +39,30 @@
 .cms_menu_children {
 	position: absolute;
 	min-width: 100%;
-	top: 3.3rem;
-	left: -1.5rem;
-	overflow: hidden;
 	box-sizing: border-box;
 	background-color: white;
-	z-index: 101;
 	display: none;
 	padding: 0.6rem 0;
 	border: 0.1rem solid #a0a0a0;
 	box-shadow: 0.1rem 0.2rem 0.6rem #b0b0b0;
+}
+
+// L2 flyout under top bar item
+.cms_menu_children_l2 {
+	top: 3.3rem;
+	left: -1.5rem;
+	z-index: 101;
+	// allow L3 to stick out to the right
+	overflow: visible;
+}
+
+// L3 flyout to the right of L2 parent row; overlaps L2 by 0.5rem, above L2
+.cms_menu_children_l3 {
+	top: 0;
+	left: calc(100% - 0.5rem);
+	z-index: 102;
+	min-width: 12rem;
+	overflow: hidden;
 }
 
 .cms_menu_child {
@@ -65,7 +79,58 @@
 		background-color: #efefef;
 	}
 }
-	
+
+// L2 row that opens L3
+.cms_menu_child_parent {
+	position: relative;
+	// room for caret inside (1rem from right + arm length)
+	padding-right: 3.2rem;
+	overflow: visible;
+	background-color: white;
+	transition: background-color 0.3s;
+	&:hover {
+		background-color: #efefef;
+	}
+
+	.cms_menu_child_label {
+		color: #404040;
+		font-size: 2.0rem;
+		line-height: 3.4rem;
+		// no extra left pad — outer .cms_menu_child already indents; caret marks parent
+		padding-left: 0;
+		padding-right: 0;
+		white-space: nowrap;
+	}
+
+	// Small ">" from two line segments (::before top arm, ::after bottom arm)
+	// Center both arms on mid-row; origin centre so nothing sticks past right: 1rem
+	&::before,
+	&::after {
+		content: '';
+		position: absolute;
+		right: 1.0rem;
+		top: 50%;
+		width: 0.55rem;
+		height: 0.12rem;
+		margin-right: 0;
+		background-color: #606060;
+		pointer-events: none;
+		z-index: 2;
+	}
+
+	&::before {
+		// top arm of >
+		transform: translateY(-50%) translateY(-0.16rem) rotate(40deg);
+		transform-origin: center center;
+	}
+
+	&::after {
+		// bottom arm of >
+		transform: translateY(-50%) translateY(0.16rem) rotate(-40deg);
+		transform-origin: center center;
+	}
+}
+
 .cms_menu_children_hover {
 	display: block;
 }

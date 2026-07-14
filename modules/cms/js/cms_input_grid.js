@@ -59,15 +59,18 @@ function cms_input_grid_init($root){
 		get_ajax_panel('cms/cms_popup_yes_no', {'text':'Are you sure?'}, function(data){
 			panels_display_popup(data.result._html, {
 				'yes': function(){
+					var $row = $this.closest('.cms_grid_row')
+					var $grid = $this.closest('.cms_grid_container')
 					var delete_data = {
 						'do':'delete_row',
 						'ds': $this.data('ds'),
 						'id': $this.data('line_id'),
 						'base_name': $this.data('base_name'),
 						'success': function(data){
-							if (data.result.web){
-								$this.closest('.cms_grid_row').remove()
-								cms_input_grid_resize_height($this.closest('.cms_grid_container'))
+							// ds delete returns {web:1}; remove row from DOM
+							if (data && !data.error && data.result && data.result.web){
+								$row.remove()
+								cms_input_grid_resize_height($grid)
 							}
 						}
 					}

@@ -171,25 +171,105 @@ function cms_video_fallback($video_el, higher_quality = false){
 	
 }
 
-function cms_video_waitdash(callback, timeout = 5000, interval = 20) {
+// Shared dash.js load queue for SPA / ajax-injected video (image selector, etc.)
+var cms_video_dash_load_queue = null
 
-	if (typeof dashjs !== 'undefined') {
-		callback()
+function cms_video_dash_script_url(){
+
+	var base = (typeof _cms_base !== 'undefined' && _cms_base) ? String(_cms_base) : '/'
+	if (base.slice(-1) !== '/'){
+		base += '/'
+	}
+
+	return base + 'modules/cms/js/dash/dash.min.js'
+
+}
+
+function cms_video_ensure_dashjs(callback){
+
+	// callback(true) when dashjs is available; callback(false) if load fails
+	if (typeof dashjs !== 'undefined'){
+		callback(true)
 		return
 	}
 
-    let elapsed = 0;
-    const timer = setInterval(() => {
-        elapsed += interval
-        if (typeof dashjs !== 'undefined') {
-            clearInterval(timer)
-            callback()
-        } else if (elapsed >= timeout) {
-            clearInterval(timer)
-            callback()
-        }
-    }, interval)
-    
+	if (cms_video_dash_load_queue){
+		cms_video_dash_load_queue.push(callback)
+		return
+	}
+
+	cms_video_dash_load_queue = [callback]
+
+	var finish = function(ok){
+
+		var queue = cms_video_dash_load_queue || []
+		cms_video_dash_load_queue = null
+		queue.forEach(function(cb){
+			cb(!!ok && typeof dashjs !== 'undefined')
+		})
+
+	}
+
+	// Already injecting (another tag from packer / concurrent call)
+	var existing = document.querySelector('script[src*="dash/dash.min.js"],script[src*="dash.min.js"]')
+	if (existing){
+		cms_video_waitdash_poll(finish, 10000, 20)
+		return
+	}
+
+	var script = document.createElement('script')
+	script.src = cms_video_dash_script_url()
+	script.async = true
+	script.onload = function(){
+		// give UMD a tick to assign global
+		setTimeout(function(){
+			finish(typeof dashjs !== 'undefined')
+		}, 0)
+	}
+	script.onerror = function(){
+		if (video_debug) console.log('Failed to load dash.min.js from', script.src)
+		finish(false)
+	}
+	document.head.appendChild(script)
+
+}
+
+function cms_video_waitdash_poll(callback, timeout, interval){
+
+	timeout = timeout || 10000
+	interval = interval || 20
+
+	if (typeof dashjs !== 'undefined'){
+		callback(true)
+		return
+	}
+
+	var elapsed = 0
+	var timer = setInterval(function(){
+		elapsed += interval
+		if (typeof dashjs !== 'undefined'){
+			clearInterval(timer)
+			callback(true)
+		} else if (elapsed >= timeout){
+			clearInterval(timer)
+			callback(false)
+		}
+	}, interval)
+
+}
+
+function cms_video_waitdash(callback, timeout, interval){
+
+	// Ensures dashjs is loaded (dynamic script if missing), then callback(true|false)
+	cms_video_ensure_dashjs(function(ok){
+		if (ok || typeof dashjs !== 'undefined'){
+			callback(true)
+			return
+		}
+		// Script may still be parsing — short poll before giving up
+		cms_video_waitdash_poll(callback, timeout || 3000, interval || 20)
+	})
+
 }
 
 function cms_video_safe_play($video_el){
@@ -798,15 +878,23 @@ function cms_video_init_player($container){
 
 	if ($container.data('cms_video_manifest') && !cms_video_is_iphone()){
 
-		cms_video_waitdash(function(){
+		cms_video_waitdash(function(dash_ok){
+
+			if (!dash_ok || typeof dashjs === 'undefined'){
+				if (video_debug) console.log('dashjs not available — native fallback')
+				cms_video_fallback($video_el, true)
+				return
+			}
 
 			var video_width = parseInt($container.data('cms_video_width'))
 			var player = dashjs.MediaPlayer().create()
 
 			player.on(dashjs.MediaPlayer.events.ERROR, function(e) {
 				console.error('dash.js error:', e)
-				if (e.error.code === dashjs.MediaPlayer.errors.MANIFEST_PARSING_ERROR ||
-					e.error.code === dashjs.MediaPlayer.errors.MANIFEST_LOADED_WITH_ERRORS) {
+				if (e.error && (
+					e.error.code === dashjs.MediaPlayer.errors.MANIFEST_PARSING_ERROR ||
+					e.error.code === dashjs.MediaPlayer.errors.MANIFEST_LOADED_WITH_ERRORS
+				)) {
 					console.log('Loading issue - trying native fallback')
 					cms_video_fallback($video_el)
 				}

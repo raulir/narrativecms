@@ -34,6 +34,18 @@ class cms_schema extends Controller {
 				if ($stats['synced'] === 0 && $stats['skipped'] === 0 && count($stats['errors']) === 1 && stristr($stats['errors'][0], 'table not found')) {
 					$message .= ' — use "fix module" first to create the table';
 				}
+				$latest = [];
+				foreach ($stats['errors'] as $err) {
+					$latest[] = [
+						'module' => $module,
+						'key' => $module.':sync_panel_tables',
+						'message' => $err,
+						'sql' => '',
+					];
+				}
+				$_SESSION['cms_schema_latest_errors'] = $latest;
+			} elseif ($success) {
+				unset($_SESSION['cms_schema_latest_errors']);
 			}
 
 			unset($params['do'], $params['module']);
@@ -58,14 +70,34 @@ class cms_schema extends Controller {
 		}
 		
 		$success = $this->cms_schema_model->fix_schema($key);
-		
+		$sql_errors = $this->cms_schema_model->get_fix_errors();
+
+		if (!empty($sql_errors)) {
+			$_SESSION['cms_schema_latest_errors'] = $sql_errors;
+		} elseif ($success) {
+			unset($_SESSION['cms_schema_latest_errors']);
+		} else {
+			$parts = explode(':', $key);
+			$_SESSION['cms_schema_latest_errors'] = [[
+				'module' => $parts[0] ?? '',
+				'key' => $key,
+				'message' => 'Fix failed or no changes were needed',
+				'sql' => '',
+			]];
+		}
+
 		if ($success) {
 			return ['success' => true];
 		}
-		
+
+		$message = 'Fix failed or no changes were needed';
+		if (!empty($sql_errors)) {
+			$message = $sql_errors[0]['message'];
+		}
+
 		return [
 			'success' => false,
-			'message' => 'Fix failed or no changes were needed'
+			'message' => $message,
 		];
 	}
 	
@@ -82,6 +114,7 @@ class cms_schema extends Controller {
 	    $params['grouped_errors'] = $data['grouped'];
 	    $params['has_errors']     = $data['has_errors'];
 	    $params['panel_table_modules_pending'] = $this->cms_schema_model->get_panel_table_modules_pending();
+	    $params['latest_fix_errors'] = $_SESSION['cms_schema_latest_errors'] ?? [];
 
 		if ($action_success !== null) {
 			$params['success'] = $action_success;

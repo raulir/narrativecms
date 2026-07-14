@@ -9,7 +9,7 @@
 	data-mobile_preview_width="<?= (int)($mobile_preview_width ?? 40) ?>"
 	data-rem_px="<?= (int)($rem_px ?? 1000) ?>"
 	data-rem_m_px="<?= (int)($rem_m_px ?? 500) ?>"
-	data-rem_k="<?= (int)($rem_k ?? 10) ?>">
+	data-rem_k="<?= (int)($rem_k ?? 100) ?>">
 	<div class="cms_preview_content">
 		<div class="cms_preview_unavailable">
 			<div class="cms_preview_unavailable_box">No preview available</div>
