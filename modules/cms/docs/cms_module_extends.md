@@ -37,7 +37,7 @@ Use `module/…` when referring to another module. Use `//…` only for assets o
 | `target` | Base panel rendered on the page (`module/panel`) |
 | `source` | Extension panel in the declaring module — use `//<panel>` (see above): `//user_login` → `music/user_login` |
 
-Boot: [`system/core/config.php`](../../../system/core/config.php) aggregates all module `extends` into `$GLOBALS['config']['extends']`.
+Boot: [`system/core/config.php`](../../../system/core/config.php) aggregates all module `extends` into `$GLOBALS['config']['extends']`. Request lifecycle / Loader: [`system.md`](system.md).
 
 ## Extension panel naming
 

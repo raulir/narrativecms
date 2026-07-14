@@ -56,7 +56,7 @@ This CMS has several hard layers. Crossing them causes subtle bugs (admin redire
 
 | Layer | Responsibility |
 |-------|----------------|
-| **System** (`system/`) | Core bootstrap, routing, panel render pipeline, helpers (`_panel`, `_lh`, …) |
+| **System** (`system/`) | Core bootstrap, routing, panel render pipeline, helpers (`_panel`, `_lh`, …) — detail: [`system.md`](system.md) |
 | **CMS module** (`modules/cms/`) | Admin UI, definitions, page/panel storage, languages, images, access |
 | **Site modules** (`music/`, `user/`, `basic/`, …) | Visitor-facing panels, business logic, site settings |
 

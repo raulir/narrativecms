@@ -2,6 +2,8 @@
 
 Public URLs are resolved from the `cms_slug` table. Each row maps a unique **slug** (`cms_slug_id`) to a **target** string that the front controller understands.
 
+**System bootstrap / Router / main controllers:** see [`system.md`](system.md). This file is about **slug storage, generation, admin edit, and route cache content**.
+
 ## Storage
 
 | Column | Role |

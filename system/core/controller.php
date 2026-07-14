@@ -922,8 +922,8 @@ class Controller {
 						 
 						$panel_data = unserialize(file_get_contents($filename));
 
-						// add js, css, scss to global page files
-						$this->js = array_merge($this->js, $panel_data['js']);
+						// add js, css, scss to global page files (same source of truth as live panel())
+						$GLOBALS['_panel_js'] = array_merge($GLOBALS['_panel_js'] ?? [], $panel_data['js']);
 
 						foreach($panel_data['scss'] as $scss_file){
 							add_css($scss_file);
