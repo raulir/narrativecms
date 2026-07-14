@@ -4,7 +4,7 @@ namespace user;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class login extends \CI_Controller{
+class login extends \Controller{
 	
 	function panel_action($params){
 		
@@ -86,10 +86,8 @@ class login extends \CI_Controller{
 		$params['loggedin'] = $this->user_model->is_logged_in();
 		$params['success_url'] = $this->user_model->get_user_redirect_url();
 
-		// web google auth disabled — hide login-google alternative buttons
-		if (empty($GLOBALS['config']['inapp'])) {
-			$params['alternatives'] = [];
-		}
+		// Web: alternatives from CMS (link to /login-google/ GSI).
+		// Inapp: same repeater shown as .login_app_google in login.tpl.php — do not clear either path.
 
 		return $params;
 	

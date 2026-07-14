@@ -1,48 +1,120 @@
 {
-    "version": "2",
+	"version": "2",
 	"label": "Login by Google",
-	"image":"",
-    "item": [
+	"image": "",
+	"item": [
 		{
-			"type":"text",
-			"name":"google_client_id",
-			"label":"Google Client ID"
+			"type": "text",
+			"name": "heading",
+			"label": "Heading",
+			"default": "Google account result",
+			"help": "Shared callback for login and register journeys (session intent)",
+			"translate": "1"
 		},
 		{
-			"type":"subtitle",
-			"label":"Messages"
+			"type": "text",
+			"name": "error_heading",
+			"label": "Error heading",
+			"default": "ERROR",
+			"translate": "1"
 		},
 		{
-			"type":"textarea",
-			"name":"message_google_error",
-			"label":"Google sign-in failed",
-			"lines":"2",
+			"type": "text",
+			"name": "google_client_id",
+			"label": "Google Client ID"
+		},
+		{
+			"type": "subtitle",
+			"label": "Login links"
+		},
+		{
+			"type": "text",
+			"name": "login_text",
+			"label": "Login prompt",
+			"default": "Try login again?",
+			"help": "Also secondary CTA after a failed Google register",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "login_cta",
+			"label": "Login CTA",
+			"default": "Click here to login",
+			"translate": "1"
+		},
+		{
+			"type": "link",
+			"name": "login_link",
+			"label": "Login link"
+		},
+		{
+			"type": "subtitle",
+			"label": "Register links"
+		},
+		{
+			"type": "text",
+			"name": "register_text",
+			"label": "Register prompt",
+			"default": "Not registered? / Try registering again?",
+			"help": "Shown for login journey (not registered) and register journey (retry). Adjust copy to suit both or prefer one tone.",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "register_cta",
+			"label": "Register CTA",
+			"default": "Click here to register",
+			"translate": "1"
+		},
+		{
+			"type": "link",
+			"name": "register_link",
+			"label": "Register link",
+			"help": "e.g. /register/ or /register-google/"
+		},
+		{
+			"type": "subtitle",
+			"label": "Messages"
+		},
+		{
+			"type": "textarea",
+			"name": "message_google_error",
+			"label": "Google sign-in failed",
+			"lines": "2",
 			"default": "Google sign-in failed. Please try again from the login page.",
-			"translate":"1"
+			"translate": "1"
 		},
 		{
-			"type":"textarea",
-			"name":"message_user_hidden",
-			"label":"Account disabled",
-			"lines":"2",
+			"type": "textarea",
+			"name": "message_user_hidden",
+			"label": "Account disabled",
+			"lines": "2",
 			"default": "This account is disabled. Contact support if you need access.",
-			"translate":"1"
+			"translate": "1"
 		},
 		{
-			"type":"textarea",
-			"name":"message_create_failed",
-			"label":"Account creation failed",
-			"lines":"2",
+			"type": "textarea",
+			"name": "message_not_registered",
+			"label": "Not registered",
+			"lines": "2",
+			"default": "No account for this Google email. Register with email first, then sign in with Google.",
+			"translate": "1"
+		},
+		{
+			"type": "textarea",
+			"name": "message_create_failed",
+			"label": "Account creation failed",
+			"lines": "2",
 			"default": "Could not create your account. Please try again or register with email.",
-			"translate":"1"
+			"translate": "1"
 		},
 		{
-			"type":"textarea",
-			"name":"message_emailexists",
-			"label":"Email exists",
-			"lines":"2",
+			"type": "textarea",
+			"name": "message_emailexists",
+			"label": "Email exists",
+			"lines": "2",
 			"default": "This email is already registered. Try logging in with email or Google again.",
-			"translate":"1"
+			"translate": "1"
 		}
 	]
 }

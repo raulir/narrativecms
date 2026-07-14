@@ -57,12 +57,26 @@ class Loader {
 	 */
 	protected $_ci_loaded_files		= array();
 	/**
-	 * List of loaded models
+	 * List of loaded model names (registry keys)
 	 *
 	 * @var array
 	 * @access protected
 	 */
 	protected $_ci_models			= array();
+	/**
+	 * Shared model instances for this request (name => object) — created once
+	 *
+	 * @var array
+	 * @access protected
+	 */
+	protected $_ci_model_instances	= array();
+	/**
+	 * Whether initialize() has completed for the main request controller
+	 *
+	 * @var bool
+	 * @access protected
+	 */
+	protected $_ci_initialized		= false;
 	/**
 	 * List of loaded helpers
 	 *
@@ -98,16 +112,22 @@ class Loader {
 	/**
 	 * Initialize the Loader
 	 *
-	 * This method is called once in CI_Controller.
+	 * Called once from the main request Controller. Panel controllers must not
+	 * re-run this (would wipe shared model registry).
 	 *
-	 * @param 	array
 	 * @return 	object
 	 */
 	public function initialize()
 	{
+		if ($this->_ci_initialized) {
+			return $this;
+		}
+
+		$this->_ci_initialized = true;
 		$this->_ci_classes = array();
 		$this->_ci_loaded_files = array();
 		$this->_ci_models = [];
+		$this->_ci_model_instances = [];
 		$this->_base_classes =& is_loaded();
 
 		$this->database();
@@ -141,6 +161,10 @@ class Loader {
 
 	// --------------------------------------------------------------------
 
+	/**
+	 * Load a model once per request and attach the shared instance to the current parent.
+	 * Never reports “already loaded” without ensuring $parent->$name is set.
+	 */
 	function model($model, $name = ''){
 
 		if (!stristr($model, '/')) {
@@ -157,33 +181,57 @@ class Loader {
 		}
 
 		$CI =& $this->parent;
-		if (in_array($name, $this->_ci_models, true) && isset($CI->$name)) {
-			return;
+		if (empty($CI)) {
+			$CI =& get_instance();
+			$this->parent =& $CI;
 		}
 
-		if (isset($CI->$name)) {
-			_html_error('The model name you are loading is the name of a resource that is already being used: '.$name, 500);
-		}
+		// Create the instance only once for this request
+		if (!isset($this->_ci_model_instances[$name])) {
 
-		if (file_exists($GLOBALS['config']['base_path'].'modules/'.$module.'/models/'.$model.'.php')){
-			
-			if ( ! class_exists('Model'))				{
+			$path = $GLOBALS['config']['base_path'].'modules/'.$module.'/models/'.$model.'.php';
+			if (!file_exists($path)) {
+				_html_error('Unable to locate the model you have specified: '.$module.'/'.$model, 500, ['backtrace' => 1]);
+				return;
+			}
+
+			if (isset($CI->$name) && !($CI->$name instanceof Model)) {
+				_html_error('The model name you are loading is the name of a resource that is already being used: '.$name, 500);
+				return;
+			}
+
+			if ( ! class_exists('Model')) {
 				load_class('Model');
 			}
-			
-			require_once($GLOBALS['config']['base_path'].'modules/'.$module.'/models/'.$model.'.php');
-			
-			$CI->$name = new $model();
-			
-			$this->_ci_models[] = $name;
 
-			return;
-			
+			require_once($path);
+
+			$this->_ci_model_instances[$name] = new $model();
+			if (!in_array($name, $this->_ci_models, true)) {
+				$this->_ci_models[] = $name;
+			}
+
 		}
 
-		// couldn't find the model
-		_html_error('Unable to locate the model you have specified: '.$module.'/'.$model, 500, ['backtrace' => 1]);
-		
+		$instance = $this->_ci_model_instances[$name];
+
+		// Always ensure current parent can use $this->model_name
+		if (!isset($CI->$name)) {
+			$CI->$name = $instance;
+		} else if ($CI->$name !== $instance && !($CI->$name instanceof Model)) {
+			_html_error('The model name you are loading is the name of a resource that is already being used: '.$name, 500);
+			return;
+		} else if ($CI->$name !== $instance) {
+			// Replace accidental second instance with the shared one
+			$CI->$name = $instance;
+		}
+
+		// Also attach on main request controller when parent is something else
+		$main = Controller::get_instance();
+		if (is_object($main) && $main !== $CI && !isset($main->$name)) {
+			$main->$name = $instance;
+		}
+
 	}
 
 	/**
@@ -678,19 +726,24 @@ class Loader {
 	 */
 	protected function _ci_load_class($class, $params = NULL, $object_name = NULL) {
 
-		// load from anywhere if file exists
+		// Panel controllers: modules/<module>/panels/<name>.php (+ optional namespace module\name)
 		if (!empty($params['module']) && !empty($params['name'])){
 
-			if (!in_array($class, $this->_ci_loaded_files)){
+			$filepath = $GLOBALS['config']['base_path'].'modules/'.$params['module'].'/panels/'.$params['name'].'.php';
+			if (!file_exists($filepath)) {
+				_html_error('Unable to load the requested panel class: '.$params['module'].'/'.$params['name'], 500);
+				return;
+			}
 
-				$filepath = $GLOBALS['config']['base_path'].'modules/'.$params['module'].'/panels/'.$params['name'].'.php';
+			// Track by filepath (not the $class arg, which is often the full path too)
+			if (!in_array($filepath, $this->_ci_loaded_files, true)) {
 				include_once($filepath);
 				$this->_ci_loaded_files[] = $filepath;
-
-				return $this->_ci_init_class($params['name'], '', NULL, $object_name, $params);
-				
 			}
-			
+
+			// Always init/attach under $object_name — do not fall through to system/libraries/
+			return $this->_ci_init_class($params['name'], '', NULL, $object_name, $params);
+
 		} else if (stristr($class, 'modules/') && file_exists($class)){
 				
 			$filepath = $class;
@@ -846,10 +899,14 @@ class Loader {
 		// Save the class name and object name
 		$this->_ci_classes[$class] = $classvar;
 
-// if ($params['name'] == 'user') _pri nt_r($this);
-// _pri nt_r(class_parents($name));	
-		// Instantiate the class
+		// Instantiate the class on the main request controller
 		$CI =& get_instance();
+
+		// Re-use existing panel library instance when already attached
+		if (!is_null($object_name) && isset($CI->$object_name) && is_object($CI->$object_name)) {
+			return;
+		}
+
 		if ($config !== NULL)
 		{
 			$CI->$classvar = new $name($config);
@@ -858,8 +915,6 @@ class Loader {
 		{
 			$CI->$classvar = new $name;
 		}
-		
-//		if ($params['name'] == 'user') _pri nt_r($this);
 		
 	}
 

@@ -1,8 +1,8 @@
-<div class="login_google_container">
-	<div class="login_google_content">
+<div class="register_google_container">
+	<div class="register_google_content">
 
-		<div class="login_google_heading"><?= $heading ?></div>
-		<div class="login_google_intro"><?= $intro_text ?></div>
+		<div class="register_google_heading"><?= $heading ?></div>
+		<div class="register_google_intro"><?= $intro_text ?></div>
 
 		<script src="https://accounts.google.com/gsi/client" async defer></script>
 
@@ -12,12 +12,12 @@
 			data-auto_prompt="false">
 		</div>
 
-		<div class="login_google_button">
+		<div class="register_google_button">
 			<div class="g_id_signin"
 				data-type="standard"
 				data-size="large"
 				data-theme="outline"
-				data-text="sign_in_with"
+				data-text="signup_with"
 				data-shape="rectangular"
 				data-logo_alignment="left">
 			</div>

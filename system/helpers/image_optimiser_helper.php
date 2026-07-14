@@ -9,7 +9,7 @@ if ( !function_exists('_iw')) {
 		include($GLOBALS['config']['base_path'] . 'system/core/controller.php');
 		
 		function &get_instance(){
-			return CI_Controller::get_instance();
+			return Controller::get_instance();
 		}
 
 	}
@@ -18,7 +18,7 @@ if ( !function_exists('_iw')) {
 		
 		$ci =& get_instance();
 		if ($ci === null) {
-			new CI_Controller();
+			new Controller();
 			$ci =& get_instance();
 		}
 		
@@ -139,7 +139,7 @@ if ( !function_exists('_iw')) {
 
 			$ci =& get_instance();
 			if ($ci === null) {
-				new CI_Controller();
+				new Controller();
 				$ci =& get_instance();
 			}
 			$ci->load->model('cms/cms_image_model');

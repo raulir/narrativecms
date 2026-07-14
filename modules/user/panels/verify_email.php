@@ -4,7 +4,7 @@ namespace user;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class verify_email extends \CI_Controller{
+class verify_email extends \Controller{
 	
 	function panel_action($params){
 		

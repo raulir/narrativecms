@@ -50,6 +50,16 @@ function register_init(){
 			return
 			
 		}
+
+		var $password = $('.register_input_password')
+		if ($password.length){
+			var min_length = parseInt($password.data('min_length'), 10)
+			if (min_length > 0 && $password.val().length < min_length){
+				register_show_error('password_length')
+				$password.addClass('register_input_error')
+				return
+			}
+		}
 		
 		register_submitting = true
 		$('.register_submit').addClass('register_submit_disabled')

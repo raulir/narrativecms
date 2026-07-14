@@ -26,6 +26,13 @@
 			"parent":"user_user",
 			"url":"admin/panel_settings/user__user_settings/",
 			"access":"user_settings"
+		},
+		{
+			"id":"user_password_change_settings",
+			"name":"Password change",
+			"parent":"user_user",
+			"url":"admin/panel_settings/user__password_change/",
+			"access":"user_settings"
 		}
 	],
 	"access":[
@@ -67,6 +74,13 @@
 			"name":"Reminder"
 		},
 		{
+			"id":"password_change",
+			"name":"Password change",
+			"flags":[
+				"hidden"
+			]
+		},
+		{
 			"id":"profile",
 			"name":"Profile"
 		},
@@ -81,6 +95,10 @@
 		{
 			"id":"auth_google",
 			"name":"Auth by Google"
+		},
+		{
+			"id":"register_google",
+			"name":"Register by Google"
 		},
 		{
 			"id":"auth_gapp",

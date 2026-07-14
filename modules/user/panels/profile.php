@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class profile extends CI_Controller{
+class profile extends Controller{
 	
 	function panel_action($params){
 

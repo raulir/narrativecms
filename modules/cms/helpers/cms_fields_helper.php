@@ -189,8 +189,9 @@ if (!function_exists('print_fields')){
 				$field['name'] = '_noname';
 			}
 			
-			$field_empty = !isset($data[$field['name']]);
-			$field_data = !empty($data[$field['name']]) ? $data[$field['name']] : '';
+			// Use isset/array_key_exists — do not use empty(): select "0" / "No" is a valid value
+			$field_empty = !array_key_exists($field['name'], $data);
+			$field_data = $field_empty ? '' : $data[$field['name']];
 			
 			if (!empty($field['default']) && substr($field['default'],0,6) == ':date:'){
 				$defparams = explode(':',$field['default']);

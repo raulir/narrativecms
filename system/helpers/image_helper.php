@@ -122,7 +122,7 @@ if ( !function_exists('_i')) {
 
 			$ci =& get_instance();
 			if ($ci === null) {
-				new CI_Controller();
+				new Controller();
 				$ci =& get_instance();
 			}
 			$ci->load->model('cms/cms_image_model');

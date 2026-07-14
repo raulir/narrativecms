@@ -18,6 +18,85 @@
 			"translate":"1"
 		},
 		{
+			"type":"text",
+			"name":"separator_label",
+			"label":"Separator",
+			"default":"or",
+			"help":"Text between Google alternative and form; theme draws lines beside it",
+			"translate":"1"
+		},
+		{
+			"type":"repeater",
+			"name":"alternatives",
+			"label":"Alternatives",
+			"help":"e.g. Register with Google → /register-google/",
+			"fields":[
+				{
+					"type":"text",
+					"name":"label",
+					"label":"Label",
+					"mandatory":"1",
+					"translate":"1"
+				},
+				{
+					"type":"link",
+					"name":"link",
+					"label":"Link"
+				},
+				{
+					"type":"image",
+					"label":"Icon",
+					"name":"icon",
+					"category":"icon"
+				},
+				{
+					"type":"colour",
+					"label":"Background",
+					"name":"background",
+					"default":"white"
+				},
+				{
+					"type":"colour",
+					"label":"Text colour",
+					"name":"colour",
+					"default":"black"
+				}
+			]
+		},
+		{
+			"type":"subtitle",
+			"label":"Login CTA"
+		},
+		{
+			"type":"select",
+			"label":"Show login CTA",
+			"name":"show_login",
+			"values":{
+				"yes":"Yes",
+				"no":"No"
+			},
+			"default":"yes"
+		},
+		{
+			"type":"link",
+			"name":"login_link",
+			"label":"Login URL"
+		},
+		{
+			"type":"text",
+			"name":"login_text",
+			"label":"Login text",
+			"default":"Already registered?",
+			"translate":"1"
+		},
+		{
+			"type":"text",
+			"name":"login_cta",
+			"label":"Login CTA",
+			"default":"Back to login page",
+			"translate":"1"
+		},
+		{
 			"type":"select",
 			"label":"Log in after",
 			"name":"log_in_after",
@@ -25,7 +104,8 @@
 				"1":"Yes",
 				"0":"No"
 			},
-			"default":"0"
+			"default":"0",
+			"help":"Yes = start session after register when login is allowed. If User settings → Email confirmation is Yes, new users stay logged out until they verify."
 		},
 		{
 			"type":"select",
@@ -150,11 +230,26 @@
 			"default":"1"
 		},
 		{
+			"type":"select",
+			"label":"Minimum length",
+			"name":"password_min_length",
+			"values":{
+				"8":"8",
+				"9":"9",
+				"10":"10",
+				"11":"11",
+				"12":"12"
+			},
+			"default":"8",
+			"help":"Minimum characters when password is asked. Use {{min_length}} in help and error messages."
+		},
+		{
 			"type":"textarea",
 			"label":"Help information",
 			"name":"password_info",
 			"lines":"2",
-			"help":"Leave empty when not needed",
+			"default":"Must be at least {{min_length}} characters",
+			"help":"Leave empty when not needed. {{min_length}} is replaced with the minimum length setting.",
 			"translate":"1"
 		},
 		{
@@ -238,6 +333,15 @@
 			"label":"Password mismatch",
 			"lines":"2",
 			"default": "Your entered passwords didn't match",
+			"translate":"1"
+		},
+		{
+			"type":"textarea",
+			"name":"message_password_length",
+			"label":"Password too short",
+			"lines":"2",
+			"default": "Password must be at least {{min_length}} characters",
+			"help":"{{min_length}} is replaced with the minimum length setting",
 			"translate":"1"
 		},
 		{

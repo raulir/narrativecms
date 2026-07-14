@@ -1,13 +1,13 @@
 {
 	"version": "2",
-	"label": "Login by Google",
+	"label": "Register by Google",
 	"image": "",
 	"item": [
 		{
 			"type": "text",
 			"name": "heading",
 			"label": "Heading",
-			"default": "Google login",
+			"default": "Google register",
 			"translate": "1"
 		},
 		{
@@ -15,7 +15,7 @@
 			"name": "intro_text",
 			"label": "Intro",
 			"lines": "2",
-			"default": "Please use button below to sign in",
+			"default": "Please use the button below to create your account with Google",
 			"translate": "1"
 		},
 		{
@@ -26,7 +26,8 @@
 		{
 			"type": "link",
 			"name": "google_auth_page",
-			"label": "Google Auth Page"
+			"label": "Google Auth Page",
+			"help": "Same as login Google: /auth-google/ (intent is stored in session on this page)"
 		}
 	]
 }

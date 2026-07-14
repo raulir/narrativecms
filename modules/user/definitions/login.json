@@ -14,7 +14,8 @@
 			"type":"text",
 			"name":"separator_label",
 			"label":"Separator label",
-			"default":"--- or ---",
+			"default":"or",
+			"help": "Text between Google button and form; green lines are drawn on each side in the theme",
 			"translate":"1"
 		},
 		{

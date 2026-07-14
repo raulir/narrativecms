@@ -13,6 +13,8 @@ Related email auth (login, reminder): [`auth_email.md`](auth_email.md)
 3. Server — `register::panel_action` validates against **page block** settings, `create_user()`, optional `log_in_after` session, optional mailing lists
 4. Success — client redirects to **user/user_settings** → **Links** → **Link to user** (`user_link`)
 
+**Log in after** (`log_in_after` = Yes): calls `refresh_user_session` only when `login_allowed()` is true. If **User settings → Email confirmation** is Yes, new accounts stay logged out until `/verify-email/` (by design).
+
 ## CMS configuration
 
 - **Link to user** — set in `user/user_settings` → **Links** (post-register/login destination, e.g. `/start/`)
@@ -43,9 +45,11 @@ Four-path smoke test (email + Google register/login):
 - [ ] Extra register field (if configured) saved in user `meta`
 - [ ] Register while logged in (AJAX) → `message_loggedin` error
 - [ ] Forgot password → token in `cache/user_reminders.json`; email sends if host mail works
-- [ ] Web: `/login/` → `/login-google/` → Google sign-in → redirect to `/start/` logged in
-- [ ] Web: first-time Google user — `$_SESSION['user']` has `user_id`, `email`, etc.
-- [ ] Google Cloud Console: web client `270024484737-…` authorised origins + redirect URI `/auth-google/`
+- [ ] Web login Google — existing email → `/start/` logged in
+- [ ] Web login Google — unknown email → not registered
+- [ ] Web register Google — `/register/` → `/register-google/` → same `/auth-google/` → new email → account + session
+- [ ] Web register Google — existing email → emailexists, not logged in; retry + login links
+- [ ] Google Cloud Console: origins + single login URI `/auth-google/` (session intent for register vs login)
 
 ## Post-MVP
 

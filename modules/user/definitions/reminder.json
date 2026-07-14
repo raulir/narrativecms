@@ -14,7 +14,16 @@
 			"name":"username_label",
 			"label":"Username label",
 			"default":"username",
-			"help": "Label for username input.||If email is used as username, change accordingly"
+			"help": "Label when User settings → Login username = Username is login name",
+			"translate":"1"
+		},
+		{
+			"type":"text",
+			"name":"email_label",
+			"label":"Email label",
+			"default":"email",
+			"help": "Label when User settings → Login username = Email is login name (used automatically)",
+			"translate":"1"
 		},
 		{
 			"type":"text",
@@ -62,7 +71,18 @@
 			"name":"message_bad_username",
 			"label":"Bad username",
 			"lines":"2",
-			"default": "Not a proper username entered"
+			"default": "Not a proper username entered",
+			"help": "Shown when Login username = Username is login name",
+			"translate":"1"
+		},
+		{
+			"type":"textarea",
+			"name":"message_bad_email",
+			"label":"Bad email",
+			"lines":"2",
+			"default": "Not a proper email entered",
+			"help": "Shown when Login username = Email is login name",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
@@ -108,7 +128,7 @@
 			"name":"message_timeout",
 			"label":"Token timeout",
 			"lines":"2",
-			"default": "Reminder link is invalid or older than 30 minutes"
+			"default": "Reminder link is invalid or older than 30 minutes. Request a new link."
 		},
 		{
 			"type":"text",

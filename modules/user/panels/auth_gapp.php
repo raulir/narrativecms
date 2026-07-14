@@ -4,7 +4,7 @@ namespace user;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class auth_gapp extends \CI_Controller{
+class auth_gapp extends \Controller{
 	
 	function panel_params($params){
 		

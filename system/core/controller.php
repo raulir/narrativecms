@@ -2,7 +2,11 @@
 
 #[AllowDynamicProperties]
 
-class CI_Controller {
+/**
+ * Main / panel controller base.
+ * Prefer `extends Controller`. `CI_Controller` remains a class_alias for older panels.
+ */
+class Controller {
 
 	static $instance;
 
@@ -16,57 +20,84 @@ class CI_Controller {
 	var $db;
 	var $panel_name;
 	var $panel_controller;
+	/** @var Controller|null temporary handle while running a panel controller (not a separate CI sandbox) */
+	var $panel_ci;
 	
 	/**
 	 * Constructor
+	 *
+	 * First instance in the request is the main controller (get_instance / Loader parent).
+	 * Panel controllers loaded as libraries must not steal instance, rebind Loader parent,
+	 * or copy core services with =& (that triggers “indirect modification of overloaded property”).
 	 */
 	public function __construct()
 	{
 
-		self::$instance =& $this;
+		$is_main = !(self::$instance instanceof self);
 
-		// Assign all the class objects that were instantiated by the
-		// bootstrap file (CodeIgniter.php) to local class variables
-		// so that CI can run as one big super object.
-		foreach (is_loaded() as $var => $class)
-		{
-			$this->$var =& load_class($class);
+		if ($is_main) {
+			self::$instance =& $this;
+
+			// Assign bootstrap classes onto the main controller only
+			foreach (is_loaded() as $var => $class)
+			{
+				$this->$var =& load_class($class);
+			}
+
+			$this->load =& load_class('Loader', 'core');
+			$this->load->parent =& $this;
+			$this->load->initialize();
+			$this->load->helper('panel_helper');
+			$this->load->helper('image_helper');
+			$this->load->helper('packer_helper');
+
+			if (!isset($GLOBALS['_panel_titles'])){
+				$GLOBALS['_panel_titles'] = array();
+			}
+			if (!isset($GLOBALS['_panel_descriptions'])){
+				$GLOBALS['_panel_descriptions'] = array();
+			}
+			if (!isset($GLOBALS['_panel_images'])){
+				$GLOBALS['_panel_images'] = [];
+			}
+			if (!isset($GLOBALS['_panel_videos'])){
+				$GLOBALS['_panel_videos'] = [];
+			}
+			if (empty($GLOBALS['_panel_js'])){
+				$GLOBALS['_panel_js'] = [];
+			}
+		} else {
+			// Panel library: share main services by object handle (not =& — avoids overloaded property notices).
+			// Models stay on main via Loader; undeclared model props resolve through __get.
+			$main = self::$instance;
+			if (is_object($main)) {
+				$this->load = $main->load;
+				$this->input = $main->input;
+				$this->db = $main->db;
+				$this->uri = $main->uri;
+				$this->router = $main->router;
+				$this->output = $main->output;
+			}
 		}
-
-		$this->load =& load_class('Loader', 'core');
-		$this->load->parent =& $this;
-
-		$this->load->initialize();
-		/**
-		 * past in MY Controller
-		 */
-		// $this->load->model('cms/cms_update_model');
-		// $this->cms_update_model->up();
-		
-		$this->load->helper('panel_helper');
-		$this->load->helper('image_helper');
-		$this->load->helper('packer_helper');
 		
 		// panels stuff
 		$this->init_panel();
 		
-		if (!isset($GLOBALS['_panel_titles'])){
-			$GLOBALS['_panel_titles'] = array();
+	}
+
+	/**
+	 * Panel libraries: resolve load, input, models, etc. from the main request controller.
+	 * Do not assign by reference into these names on panel instances.
+	 */
+	public function __get($key) {
+
+		$main = self::$instance;
+		if (is_object($main) && $main !== $this && isset($main->$key)) {
+			return $main->$key;
 		}
-		if (!isset($GLOBALS['_panel_descriptions'])){
-			$GLOBALS['_panel_descriptions'] = array();
-		}
-		if (!isset($GLOBALS['_panel_images'])){
-			$GLOBALS['_panel_images'] = [];
-		}
-		if (!isset($GLOBALS['_panel_videos'])){
-			$GLOBALS['_panel_videos'] = [];
-		}
-		
-		if (empty($GLOBALS['_panel_js'])){
-			$GLOBALS['_panel_js'] = [];
-		}
-		
+
+		return null;
+
 	}
 
 	static function &get_instance(){
@@ -182,8 +213,8 @@ class CI_Controller {
 			// if extended, run extended controller first
 			if (!empty($files['extends_controller'])){
 				 
-				// temporarily create new ci sandbox for panel
-				$this->panel_ci =& get_instance();
+				// Panel controllers are libraries on the main controller (same get_instance())
+				$this->panel_ci = get_instance();
 				 
 				$extends_panel_name = $files['extends_module'].'_'.$files['extends_name'].'_panel';
 				$this->panel_ci->load->library(
@@ -194,18 +225,16 @@ class CI_Controller {
 				$this->panel_ci->{$extends_panel_name}->init_panel(array('name' => $files['extends_name'], 'controller' => $files['extends_controller'], ));
 				$params = $this->panel_ci->{$extends_panel_name}->panel_params($params);
 	
-				// clear temporary resource
-				unset($this->panel_ci);
+				$this->panel_ci = null;
 				 
 			}
 	
 			// if there is a normal controller, do this
 			if (!empty($files['controller'])){
 	
-				// temporarily create new ci sandbox for panel
-				$this->panel_ci =& get_instance();
+				$this->panel_ci = get_instance();
 				 
-				// load panel stuff into this sandbox - it will be the same as sandbox is singleton for itself
+				// load panel controller as library on main instance
 				$panel_name = $files['module'].'_'.$files['name'].'_panel';
 	
 				$this->panel_ci->load->library(
@@ -220,8 +249,7 @@ class CI_Controller {
 				// get params through panel controller
 				$params = $this->panel_ci->{$panel_name}->panel_params($params);
 	
-				// clear temporary resource
-				unset($this->panel_ci);
+				$this->panel_ci = null;
 	
 			}
 	
@@ -1250,4 +1278,5 @@ class CI_Controller {
 
 }
 
-class_alias('CI_Controller', 'Controller');
+// Legacy name — prefer extends Controller; CI_Controller kept for older panels
+class_alias('Controller', 'CI_Controller');

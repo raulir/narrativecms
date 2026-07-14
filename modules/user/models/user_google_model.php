@@ -1,6 +1,31 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 class user_google_model extends Model {
+
+	/**
+	 * Website GSI journey: set before showing login_google / register_google.
+	 * Cleared in auth_google after handling the credential.
+	 */
+	function set_web_auth_intent($mode) {
+
+		$mode = ($mode === 'register') ? 'register' : 'login';
+		$_SESSION['google_auth_intent'] = $mode;
+
+	}
+
+	function get_web_auth_intent() {
+
+		$mode = $_SESSION['google_auth_intent'] ?? 'login';
+
+		return ($mode === 'register') ? 'register' : 'login';
+
+	}
+
+	function clear_web_auth_intent() {
+
+		unset($_SESSION['google_auth_intent']);
+
+	}
 	
 	function verify_web_credential($credential, $google_client_id) {
 		
@@ -23,53 +48,121 @@ class user_google_model extends Model {
 		
 	}
 	
+	/**
+	 * Website GSI login: existing active users only.
+	 */
 	function login_from_web_payload($payload) {
 		
-		return $this->_login_or_create_user([
-				'email' => $payload['email'],
+		return $this->_resolve_web_user([
+				'email' => $payload['email'] ?? '',
 				'google_id' => $payload['sub'] ?? '',
 				'given_name' => $payload['given_name'] ?? '',
 				'family_name' => $payload['family_name'] ?? '',
 				'name' => $payload['name'] ?? '',
 				'picture' => $payload['picture'] ?? '',
-		]);
+		], 'login');
 		
 	}
 	
+	/**
+	 * Website GSI register: create new user only; existing email → emailexists (no session).
+	 */
+	function register_from_web_payload($payload) {
+		
+		return $this->_resolve_web_user([
+				'email' => $payload['email'] ?? '',
+				'google_id' => $payload['sub'] ?? '',
+				'given_name' => $payload['given_name'] ?? '',
+				'family_name' => $payload['family_name'] ?? '',
+				'name' => $payload['name'] ?? '',
+				'picture' => $payload['picture'] ?? '',
+		], 'register');
+		
+	}
+	
+	/**
+	 * Native app: may create account on first Google sign-in.
+	 */
 	function login_from_app_profile($profile) {
 		
 		if (empty($profile['email'])) {
 			return ['error' => 'missing_email'];
 		}
 		
-		return $this->_login_or_create_user([
+		return $this->_resolve_web_user([
 				'email' => $profile['email'],
 				'google_id' => $profile['id'] ?? '',
 				'given_name' => $profile['givenName'] ?? '',
 				'family_name' => $profile['familyName'] ?? '',
 				'name' => $profile['name'] ?? '',
 				'picture' => $profile['imageUrl'] ?? '',
-		]);
+		], 'app');
 		
 	}
 	
-	function _login_or_create_user($data) {
+	/**
+	 * @param array $data profile fields
+	 * @param string $mode login|register|app
+	 */
+	function _resolve_web_user($data, $mode = 'login') {
 		
 		$this->load->model('user/user_model');
 		$this->load->model('cms/cms_image_model');
 		$this->load->model('cms/cms_page_panel_model');
 		
+		if (empty($data['email'])) {
+			return ['error' => 'google_error'];
+		}
+		
 		$user = $this->user_model->get_user_by_email($data['email']);
 		
 		if (!empty($user) && !empty($user['show'])) {
 			
-			return ['user' => $this->_ensure_user_image($user, $data['picture'])];
+			if ($mode === 'register') {
+				return ['error' => 'emailexists'];
+			}
+			
+			return ['user' => $this->_ensure_user_image($user, $data['picture'] ?? '')];
 			
 		}
 		
 		if (!empty($user) && empty($user['show'])) {
 			return ['error' => 'user_hidden'];
 		}
+		
+		// No user row yet
+		if ($mode === 'login') {
+			return ['error' => 'not_registered'];
+		}
+		
+		// register or app: create
+		return $this->_create_user_from_google_data($data);
+		
+	}
+	
+	/**
+	 * Display name from Google given_name. Collisions are fine when email is login name.
+	 * If username is login name, create_user still enforces uniqueness/length.
+	 */
+	function _username_from_google_data($data) {
+
+		$username = trim((string)($data['given_name'] ?? ''));
+
+		if ($username === '') {
+			$email = (string)($data['email'] ?? '');
+			$at = strpos($email, '@');
+			$username = $at !== false ? substr($email, 0, $at) : $email;
+		}
+
+		return $username;
+
+	}
+
+	function _create_user_from_google_data($data) {
+		
+		$this->load->model('user/user_model');
+		$this->load->model('cms/cms_image_model');
+		$this->load->model('cms/cms_page_panel_model');
 		
 		$image = '';
 		if (!empty($data['picture'])) {
@@ -78,13 +171,13 @@ class user_google_model extends Model {
 		
 		$create_data = [
 				'email' => $data['email'],
-				'username' => $data['email'],
-				'first_name' => $data['given_name'],
-				'last_name' => $data['family_name'],
+				'username' => $this->_username_from_google_data($data),
+				'first_name' => $data['given_name'] ?? '',
+				'last_name' => $data['family_name'] ?? '',
 				'phone' => '',
 				'meta' => [
 						'google' => 1,
-						'google_id' => $data['google_id'],
+						'google_id' => $data['google_id'] ?? '',
 				],
 				'password' => '',
 				'email_verified' => 'yes',
@@ -114,6 +207,9 @@ class user_google_model extends Model {
 			]);
 			$user['image'] = $image;
 		}
+
+		// Google email is already verified — welcome immediately
+		$this->user_model->send_registration_welcome_email($user_id);
 		
 		return ['user' => $user];
 		
@@ -129,6 +225,10 @@ class user_google_model extends Model {
 		$this->load->model('cms/cms_page_panel_model');
 		
 		$image = $this->cms_image_model->scrape_image($picture_url, 'user', 'user');
+		if ($image === '' || $image === false) {
+			return $user;
+		}
+		
 		$this->cms_page_panel_model->update_cms_page_panel($user['cms_page_panel_id'], [
 				'image' => $image,
 		]);

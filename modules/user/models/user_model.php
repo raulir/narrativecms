@@ -21,24 +21,23 @@ class user_model extends Model {
 			
 		}
 		 
-		// check if username exists
-		if (!empty($data['username'])){
-		
+		// Username uniqueness/length only when username is the login name (not email)
+		$settings = $this->cms_page_panel_model->get_cms_page_panel_settings('user/user_settings');
+		$username_is_login = !empty($settings['show_username']);
+
+		if (!empty($data['username']) && $username_is_login){
+
 			$check_user = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'user/user', 'username' => $data['username'], ]);
 			$check_user = reset($check_user);
-			
+
 			if ($check_user !== false){
-				 
 				$return['errors'][] = 'usernameexists';
-				 
 			}
-			
+
 			if (strlen($data['username']) < 3) {
-			
 				$return['errors'][] = 'usernamelength';
-				
 			}
-		
+
 		}
 		
 		if (!empty($data['email'])){
@@ -58,6 +57,13 @@ class user_model extends Model {
 		$this->load->model('cms/cms_access_model');
 		$default_access = $this->cms_access_model->get_default_access_for_new_user();
 		
+		$meta = !empty($data['meta']) && is_array($data['meta']) ? $data['meta'] : [];
+
+		if (in_array('music', $GLOBALS['config']['modules'] ?? [])){
+			$this->load->model('music/music_user_model');
+			$meta = $this->music_user_model->merge_new_user_meta($meta);
+		}
+
 		$user = [
 				'panel_name' => 'user/user',
 				'show' => 1,
@@ -70,7 +76,7 @@ class user_model extends Model {
 				'password' => !empty($data['password']) ? $this->hash_password($data['password']) : '',
 				'email_verified' => !empty($data['email_verified']) ? $data['email_verified'] : 'no',
 				'image' => '',
-				'meta' => json_encode($data['meta'], JSON_PRETTY_PRINT),
+				'meta' => json_encode($meta, JSON_PRETTY_PRINT),
 		];
 		
 		if (!empty($default_access)){
@@ -119,6 +125,57 @@ class user_model extends Model {
 		$this->cms_page_panel_model->update_cms_page_panel($user_id, [
 				'password' => $this->hash_password($password)
 		]);
+
+	}
+
+	/**
+	 * Validate new password + confirmation (reminder and logged-in change).
+	 * Returns error key or empty string when ok.
+	 */
+	function validate_new_password($password, $password2){
+
+		if ((string)$password !== (string)$password2){
+			return 'passwords_mismatch';
+		}
+
+		if (strlen((string)$password) < 5){
+			return 'bad_save';
+		}
+
+		return '';
+
+	}
+
+	/**
+	 * Set password for a user panel id (same as set_user_password; named for call-site clarity).
+	 */
+	function change_user_password($user_id, $password){
+
+		$this->set_user_password($user_id, $password);
+
+	}
+
+	/**
+	 * Notify user that password associated with their email was updated.
+	 */
+	function send_password_updated_email($user){
+
+		if (empty($user['email'])){
+			return false;
+		}
+
+		$this->load->model('cms/cms_email_model');
+
+		$title = trim(str_replace('#page#', '', $GLOBALS['config']['site_title'] ?? ''),
+				($GLOBALS['config']['site_title_delimiter'] ?? '').' ');
+
+		return $this->cms_email_model->send_mail(
+				$user['email'],
+				(!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').
+				'Password update at '.$title,
+				'Password associated with this email updated.',
+				['auto_submitted' => 1]
+		);
 
 	}
 	
@@ -440,6 +497,18 @@ class user_model extends Model {
 		
 	}
 	
+	function _site_title_for_email(){
+
+		return trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), $GLOBALS['config']['site_title_delimiter'].' ');
+
+	}
+
+	function _email_subject_prefix(){
+
+		return !empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '';
+
+	}
+
 	function send_email_verification($user_id){
 		
 		$user = $this->get_user($user_id);
@@ -470,19 +539,65 @@ class user_model extends Model {
 		$base_site = $GLOBALS['config']['base_site'] ?? $GLOBALS['config']['base_host'] ?? '';
 		$verify_url = $base_site.$GLOBALS['config']['base_url'].'verify-email/?token='.$token;
 		
-		$title = trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), $GLOBALS['config']['site_title_delimiter'].' ');
-		$title = (!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').$title;
+		$title = $this->_site_title_for_email();
 		
 		$this->load->model('cms/cms_email_model');
 
 		return $this->cms_email_model->send_mail(
 				$user['email'],
-				(!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').
-				'Confirm your email for '.$title,
+				$this->_email_subject_prefix().'Confirm your email for '.$title,
 				"Please confirm your email by opening this link:\n\n".$verify_url,
 				['auto_submitted' => 1]
 		);
 		
+	}
+
+	/**
+	 * Welcome mail after registration (Google, or form when login is allowed without confirm).
+	 * Subject/body from user/user_settings; {{name}} replaced. Plain text.
+	 * When email confirmation is mandatory, send only after successful verify (see verify_email_token).
+	 */
+	function send_registration_welcome_email($user_id){
+
+		$user = $this->get_user($user_id);
+
+		if (empty($user['email'])){
+			return false;
+		}
+
+		$settings = $this->get_user_settings();
+
+		$subject = trim((string)($settings['welcome_email_subject'] ?? ''));
+		if ($subject === ''){
+			$subject = 'Welcome';
+		}
+
+		$body = (string)($settings['welcome_email_body'] ?? '');
+		if ($body === ''){
+			$body = "Hello {{name}},\n\nWelcome. Your account has been created successfully. ".
+					'You can sign in any time with the email address you registered with.';
+		}
+
+		$name = trim((string)($user['first_name'] ?? ''));
+		if ($name === ''){
+			$name = trim((string)($user['username'] ?? ''));
+		}
+		if ($name === ''){
+			$name = $user['email'];
+		}
+
+		$subject = str_replace('{{name}}', $name, $subject);
+		$body = str_replace('{{name}}', $name, $body);
+
+		$this->load->model('cms/cms_email_model');
+
+		return $this->cms_email_model->send_mail(
+				$user['email'],
+				$this->_email_subject_prefix().$subject,
+				$body,
+				['auto_submitted' => 1]
+		);
+
 	}
 	
 	function verify_email_token($token){
@@ -514,6 +629,11 @@ class user_model extends Model {
 		
 		unset($tokens[$token]);
 		file_put_contents($filename, json_encode($tokens, JSON_PRETTY_PRINT));
+
+		// Deferred welcome when confirmation was required (not sent at form register)
+		if ($this->email_confirmation_required()){
+			$this->send_registration_welcome_email($row['user_id']);
+		}
 		
 		return ['user_id' => $row['user_id']];
 		

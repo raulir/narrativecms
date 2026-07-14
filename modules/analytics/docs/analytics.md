@@ -100,7 +100,7 @@ Do not put `user_id` in cacheable page HTML (`data-*`).
 
 - **`user_agent`** (VARCHAR 500) is stored on every **`cms_analytics_pageview`** row (JS beacon API and promoted PHP rows).
 - **`cms_analytics_session.user_agent`** is copied from the first non-bot pageview on session sync.
-- **`bot`** (TINYINT, default 0) on **`cms_analytics_pageview`**: set on JS `do=hit` when viewport is **0×0** or the user agent matches **`analytics_is_bot_user_agent()`** (empty UA, `curl`, `googlebot`, `go-http-client`, `scandash`, `pr-cy`, `cms-checker`, etc.). JS hits are always stored; bot rows are excluded from sessions, charts, and totals.
+- **`bot`** (TINYINT, default 0) on **`cms_analytics_pageview`**: set on JS `do=hit` when viewport is **0×0** or the user agent matches **`analytics_is_bot_user_agent()`** (empty UA, `curl`, `googlebot`, `go-http-client`, `scandash`, `pr-cy`, `cms-checker`, `forestengine`, etc.). JS hits are always stored; bot rows are excluded from sessions, charts, and totals.
 - **PHP tracking** still skips recording when **`analytics_is_bot()`** (server UA only — no viewport).
 - **`analytics_process`** deletes bot pageviews older than **300 seconds** (last step each run). PHP dedup: if a matching main row exists (including a JS bot row), the php staging row is dropped only.
 - Dashboard **Details** on pageviews shows **`bot`** (0/1). Bot rows may appear briefly in the last-50 list before purge.

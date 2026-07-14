@@ -72,7 +72,7 @@
 	require BASEPATH.'core/controller.php';
 
 	function &get_instance(){
-		return CI_Controller::get_instance();
+		return Controller::get_instance();
 	}
 
 	// Load the local application controller
@@ -118,7 +118,7 @@
 
 	if ( ! class_exists($class)
 		OR strncmp($method, '_', 1) == 0
-		OR in_array(strtolower($method), array_map('strtolower', get_class_methods('CI_Controller')))
+		OR in_array(strtolower($method), array_map('strtolower', get_class_methods('Controller')))
 		)
 	{
 		if ( ! empty($RTR->routes['404_override']))

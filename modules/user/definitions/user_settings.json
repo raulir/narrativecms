@@ -29,6 +29,25 @@
 		},
 		{
 			"type":"subtitle",
+			"label":"Welcome email"
+		},
+		{
+			"type":"text",
+			"name":"welcome_email_subject",
+			"label":"Subject",
+			"default":"Welcome",
+			"help":"Plain text. Use {{name}} for the user's name. Non-live environments get [ENV] prefixed automatically."
+		},
+		{
+			"type":"textarea",
+			"name":"welcome_email_body",
+			"label":"Body",
+			"lines":"8",
+			"default":"Hello {{name}},\n\nWelcome. Your account has been created successfully. You can sign in any time with the email address you registered with.",
+			"help":"Plain text. Use {{name}} for the user's name (first name, else username, else email)."
+		},
+		{
+			"type":"subtitle",
 			"label":"Links"
 		},
 		{

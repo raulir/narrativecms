@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class register extends CI_Controller {
+class register extends Controller {
 	
 	function panel_action($params){
 		
@@ -89,15 +89,18 @@ class register extends CI_Controller {
 					
 					if (!empty($user['data']['user_id']) && !empty($data['email'])){
 						$this->user_model->send_email_verification($user['data']['user_id']);
+						// Welcome now only if login is allowed without confirm; otherwise after verify
+						if (!$this->user_model->email_confirmation_required()){
+							$this->user_model->send_registration_welcome_email($user['data']['user_id']);
+						}
 					}
 					
-					if (!empty($params['log_in_after']) && !empty($user['data']['user_id'])){
+					// log_in_after: "1" = Yes (string select). Skip session if email confirmation blocks login.
+					if ((string)($params['log_in_after'] ?? '') === '1' && !empty($user['data']['user_id'])){
 						
 						$session_user = $this->user_model->get_user($user['data']['user_id']);
 						
-						$allow_session = $this->user_model->login_allowed($session_user);
-						
-						if ($allow_session && !empty($session_user['cms_page_panel_id'])){
+						if (!empty($session_user['cms_page_panel_id']) && $this->user_model->login_allowed($session_user)){
 							$this->load->model('cms/cms_access_model');
 							$this->cms_access_model->refresh_user_session($session_user);
 						}
@@ -156,8 +159,17 @@ class register extends CI_Controller {
 			$errors[] = 'mandatory';
 		}
 		
-		if (!empty($params['show_password']) && $params['show_password'] == 1 && $password[1] === ''){
-			$errors[] = 'password_mismatch';
+		if ((int)($params['show_password'] ?? 0) > 0){
+
+			if ($password[1] === ''){
+				$errors[] = 'password_mismatch';
+			} else {
+				$min_length = (int)($params['password_min_length'] ?? 8);
+				if (strlen((string)$password[1]) < $min_length){
+					$errors[] = 'password_length';
+				}
+			}
+
 		}
 		
 		if (!empty($params['fields']) && is_array($params['fields'])){
