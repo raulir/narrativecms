@@ -45,6 +45,13 @@
 			"null": false,
 			"default": ""
 		},
+		"user_id": {
+			"type": "INT",
+			"constraint": 10,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
 		"created": {
 			"type": "DATETIME",
 			"null": false,

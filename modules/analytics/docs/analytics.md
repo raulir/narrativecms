@@ -12,33 +12,95 @@ First-party, self-hosted pageview tracking for the CMS. Lightweight beacon API (
 ## Setup
 
 1. Enable module **analytics** in **Site settings → Modules**.
-2. Run **CMS → Schema** (fix module **analytics**). On a fresh install this creates `cms_analytics_pageview`. When `cms_analytics_visit` still exists, the schema tool migrates it automatically (`migrate_from` in `cms_analytics_pageview.json` — renames table, columns, and indexes).
+2. Run **CMS → Schema** (fix module **analytics**). On a fresh install this creates pageview / session / php staging tables. After upgrading, re-run Schema so pageview `user_id` and session `user_id` / `username` / `meta` columns exist. When `cms_analytics_visit` still exists, the schema tool migrates it automatically (`migrate_from` in `cms_analytics_pageview.json` — renames table, columns, and indexes).
 3. Upload **GeoLite2-City.mmdb** in **Tools → Analytics settings → GeoIP database** (download from [MaxMind GeoLite2](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) — free account required). The file is stored under `img/`. Without it, geo reports on the dashboard show an error. The mmdb is per-installation data — not shipped with every CMS distribution.
 4. Embed panel **analytics/beacon** on the site layout (same way as gtag). JS loads automatically as panel JS (`beacon.js`).
 5. Add **analytics/analytics_process** under **Repeating tasks** for background session assignment, aggregation, and geo resolve (replaces the old `analytics_geo_resolve` task if present).
 
 ## Admin
 
-- **Tools → Analytics** — dashboard (7-day dual-axis chart, last 50 sessions, last 50 pageviews, top pages, geo top 50). Opening the dashboard runs **analytics_process** first; all pageview stats and charts read **`cms_analytics_pageview` only** (php staging is not queried). **Details** on each session/pageview row opens a floating panel with the full database row (including **User agent**).
+- **Tools → Analytics** — dashboard (7-day dual-axis chart, last 50 sessions, last 50 pageviews, top pages, geo top 50). Opening the dashboard runs **analytics_process** first; all pageview stats and charts read **`cms_analytics_pageview` only** (php staging is not queried). Last-50 sessions show **User** (login email/username) when the user module is installed. **Details** on each session/pageview row opens a floating panel with the full database row (including **User agent**, session **user_id** / **meta**, pageview **user_id**).
 - **Tools → Analytics settings** — delay (ms), session minutes, collect engagement, GeoIP database file, GeoIP diagnostics (show debug block on dashboard, default No).
 - **analytics/beacon** panel (per instance on page or layout position) — **JS tracking** (default No), **PHP tracking** (default Yes). Edit on the embedded panel block (e.g. **Pages → footer → Beacon**), not under **Analytics settings**.
 
 ## Beacon session
 
 - Cookie **`beacon`** — visitor session cookie (separate from PHP session). Stored on each pageview as **`beacon_id`** at hit time.
-- **`session_id`** on pageviews is set by **analytics_process** once the pageview is assigned to a row in **`cms_analytics_session`** (same UUID as `beacon_id`). Dashboard shows first 8 chars of `md5(session_id)` in the Session column.
+- **`session_id`** on pageviews is set by **analytics_process** once the pageview is assigned to a row in **`cms_analytics_session`**. Dashboard shows first 8 chars of `md5(session_id)` in the Session column.
 - **`pageview_token`** — single pageview + heartbeats only.
 - **Session minutes** in Analytics settings (default 60): sliding expiry, refreshed on each `do=hit`. `0` = browser session cookie.
 
+### Language on pageviews
+
+| Path | Language source |
+|------|-----------------|
+| **JS beacon** | Cookie `language` only (`analytics_get_beacon_language`) |
+| **PHP tracking** | CMS request language: `$GLOBALS['language']['language_id']` after targets (cookie → config → Accept-Language → first allowed), else content/default language |
+| **PHP + JS merge** | If the main JS row has empty language and the php row has a value, process copies PHP language onto the main pageview |
+| **Session** | Latest non-bot pageview language preferring **non-empty** (`ORDER BY (language = '') ASC, updated DESC`) |
+
+### Session source (`cms_analytics_session.source`)
+
+Recomputed on each session sync:
+
+| Value | Dashboard | Meaning |
+|-------|-----------|---------|
+| `beacon` | Normal | Continuous beacon path (default) |
+| `php` | PHP only | All non-bot hits have viewport 0×0 (no JS engagement hits) |
+| `ip_ua` | IP+UA | More than one distinct `beacon_id` in the session (orphan cluster) |
+
+Priority when computing: **ip_ua > php > beacon**.
+
+### How `session_id` is assigned (`analytics_process`)
+
+Only pageviews with **empty `session_id`** (and `bot = 0`) are assigned. Rows that already have a `session_id` from a working cookie/beacon path are **never** reassigned or merged by IP+UA.
+
+For unassigned non-bot pageviews (grouped by `beacon_id`):
+
+1. **Beacon key (primary)** — normally `session_id = beacon_id` (cookie continuity).
+2. **IP + user agent fallback (orphans only)** — among **still-unassigned** pageviews only, same **`ip_anonymised`** + **`user_agent`** within **session minutes** of each other (if session minutes is `0`, a **60 minute** window is used for this match only) are clustered. The **oldest `beacon_id`** in that cluster becomes the shared `session_id` for all of them. Empty IP or empty UA is never used.
+
+**Not done:** attaching a new beacon into an **existing** session that already has assigned hits (e.g. another user on the same IP with a working cookie). Two visitors with different beacon cookies therefore stay two sessions even on the same IP+UA.
+
+Bot rows are excluded. Orphan clusters that share IP+UA can still false-merge (NAT + same browser); that only affects unassigned traffic.
+
 ## Session table (`cms_analytics_session`)
 
-Cached aggregates per beacon session: started, last activity, pageview count, total seconds, final language, first/last page, geo and **user agent** from the **first** pageview. Updated by **analytics_process** (cron and on each dashboard load). Beacon only writes pageviews.
+Cached aggregates per session: started, last activity, pageview count, total seconds, final language, first/last page, geo and **user agent** from the **first** pageview. Updated by **analytics_process** (cron and on each dashboard load). Beacon only writes pageviews.
+
+### User identity (optional `user` module)
+
+When the **user** module is installed, analytics stores CMS login identity. If `user` is not in site modules, all of the following stay empty/`0` and no PHP user session is read.
+
+| Store | Columns | Notes |
+|-------|---------|--------|
+| **Pageview** | `user_id` | Set at hit time when visitor is logged in (`$_SESSION['user']`). Guests → `0`. |
+| **Session** | `user_id`, `username`, `meta` | Aggregated on session sync. Last-50 table shows **User** (`username`) only; Details shows all three. |
+
+**Capture**
+
+| Path | How `user_id` is set |
+|------|----------------------|
+| PHP tracking | `record_php_pageview()` → `cms_analytics_pageview_php.user_id` via `analytics_current_user_id()` |
+| PHP → main | On match: fill main `user_id` if empty; on promote: copy from php row |
+| JS beacon API | `analytics_insert_pageview()` may start PHP session lightly (same `session_name` rules as `session.php`) and read logged-in user — not baked into HTML |
+
+Do not put `user_id` in cacheable page HTML (`data-*`).
+
+**Known gap:** full page-cache HIT without `panel_action` and without a usable session cookie on the beacon request can leave pageview `user_id = 0` until a later PHP-tracked or session-aware JS hit. Session sticky identity still applies once any hit has a user id.
+
+**Session sticky rules**
+
+- Latest non-zero pageview `user_id` (by `updated`) becomes the session’s current user.
+- Pageviews with `user_id = 0` (logout) **do not** clear session `user_id` / `username`.
+- Display name: `user/user_settings` — if **Login username** / `show_username` is off → **email**, else **username** (same idea as `user_model` `loginname`). Re-resolved on each sync (latest name only).
+- When session `user_id` changes from one non-zero id to another, append a meta line: `Other user id: <previous_id>` (shared device / multiple logins). Append is driven by transition vs **stored** session row so process re-runs do not spam meta.
 
 ## User agent and bot handling
 
 - **`user_agent`** (VARCHAR 500) is stored on every **`cms_analytics_pageview`** row (JS beacon API and promoted PHP rows).
 - **`cms_analytics_session.user_agent`** is copied from the first non-bot pageview on session sync.
-- **`bot`** (TINYINT, default 0) on **`cms_analytics_pageview`**: set on JS `do=hit` when viewport is **0×0** or the user agent matches **`analytics_is_bot_user_agent()`** (empty UA, `curl`, `googlebot`, `go-http-client`, etc.). JS hits are always stored; bot rows are excluded from sessions, charts, and totals.
+- **`bot`** (TINYINT, default 0) on **`cms_analytics_pageview`**: set on JS `do=hit` when viewport is **0×0** or the user agent matches **`analytics_is_bot_user_agent()`** (empty UA, `curl`, `googlebot`, `go-http-client`, `scandash`, `pr-cy`, `cms-checker`, etc.). JS hits are always stored; bot rows are excluded from sessions, charts, and totals.
 - **PHP tracking** still skips recording when **`analytics_is_bot()`** (server UA only — no viewport).
 - **`analytics_process`** deletes bot pageviews older than **300 seconds** (last step each run). PHP dedup: if a matching main row exists (including a JS bot row), the php staging row is dropped only.
 - Dashboard **Details** on pageviews shows **`bot`** (0/1). Bot rows may appear briefly in the last-50 list before purge.
@@ -72,8 +134,19 @@ Does not run when **page cache** serves HTML without bootstrapping CI (no `panel
 
 - First POST `do=hit`: page path, viewport size, anonymised IP (server); optional POST `beacon_id`; sets/refreshes `beacon` cookie.
 - Heartbeats at 5s, 10s, 20s, 30s, 60s, 120s, 180s, 240s, 300s when engagement enabled.
-- Position-link navigation: new pageview via `cms_position_link_after` hook (no unload beacons).
+- Single page mode (position ajax navigation): new pageview via `cms_position_link_after` hook (no unload beacons).
 - Bot-like JS hits recorded with **`bot = 1`** (see **User agent and bot handling** above).
+
+## Page path normalisation
+
+All hits (JS beacon, PHP tracking, virtual `beacon_pageview`) pass through **`analytics_normalise_page()`** at **record time**:
+
+- Leading `/`
+- Trailing `/` (CMS canonical `/<slug>/`), except home stays `/`
+- Strip query string and hash if present
+- Strip `/index.php` prefix
+
+No cron rewrite of stored paths — only new hits are canonical.
 
 ## Virtual pageviews
 
@@ -81,11 +154,11 @@ Other modules can record pageviews without a full navigation. Call from JS when 
 
 ```javascript
 if (typeof beacon_pageview === 'function') {
-  beacon_pageview('engine/unit/' + unit_id)
+  beacon_pageview(window.location.pathname)
 }
 ```
 
-The music engine uses JS when **JS tracking** is on. **`music/prepare`** always writes a php backup row for `engine/unit/{unit_id}` when **PHP tracking** is on (even if JS also runs).
+**Music unit sets:** after start, the browser URL is the unit public slug (e.g. `/1a-counts-and-rhythm/`). JS records that path via `beacon_pageview`; **`music/prepare`** records the same slug path when **PHP tracking** is on (via `music_model::get_unit_public_path()`). No separate `engine/unit/{id}` path.
 
 ## GeoIP
 

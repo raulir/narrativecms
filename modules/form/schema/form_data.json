@@ -1,5 +1,10 @@
 {
   "table": "form_data",
+  "migrate_from": {
+    "columns": {
+      "form_data_id": "webform_data_id"
+    }
+  },
   "engine": "InnoDB",
   "charset": "utf8mb4",
   "collation": "utf8mb4_general_ci",

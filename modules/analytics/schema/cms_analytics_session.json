@@ -61,6 +61,29 @@
 			"null": false,
 			"default": ""
 		},
+		"source": {
+			"type": "VARCHAR",
+			"constraint": 20,
+			"null": false,
+			"default": "beacon"
+		},
+		"user_id": {
+			"type": "INT",
+			"constraint": 10,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
+		"username": {
+			"type": "VARCHAR",
+			"constraint": 255,
+			"null": false,
+			"default": ""
+		},
+		"meta": {
+			"type": "TEXT",
+			"null": true
+		},
 		"country": {
 			"type": "VARCHAR",
 			"constraint": 100,

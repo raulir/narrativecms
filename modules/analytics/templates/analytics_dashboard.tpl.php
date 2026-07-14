@@ -44,9 +44,11 @@
 					<th>Started</th>
 					<th>Last activity</th>
 					<th>Session</th>
+					<th>User</th>
 					<th>Pages</th>
 					<th>Total seconds</th>
 					<th>Language</th>
+					<th>Source</th>
 					<?php if (empty($geoip_error)): ?>
 					<th>Country</th>
 					<th>Area</th>
@@ -63,9 +65,11 @@
 					<td><?= htmlentities($session['started']) ?></td>
 					<td><?= htmlentities($session['last_activity']) ?></td>
 					<td><?= htmlentities(analytics_session_hash_display($session['session_id'] ?? '')) ?></td>
+					<td><?= htmlentities($session['username'] ?? '') ?></td>
 					<td><?= (int)($session['pageviews'] ?? 0) ?></td>
 					<td><?= (int)($session['total_seconds'] ?? 0) ?></td>
 					<td><?= htmlentities($session['language'] ?? '') ?></td>
+					<td><?= htmlentities(analytics_session_source_label($session['source'] ?? 'beacon')) ?></td>
 					<?php if (empty($geoip_error)): ?>
 					<td><?= htmlentities($session['country'] ?? '') ?></td>
 					<td><?= htmlentities($session['region'] ?? '') ?></td>

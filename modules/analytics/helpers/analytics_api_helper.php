@@ -52,7 +52,7 @@ function analytics_is_bot_user_agent($user_agent) {
 			'facebookexternalhit','twitterbot','rogerbot','linkedinbot','embedly','quora','pinterest','whatsapp',
 			'telegram','mediapartners','ahrefs','semrush','mj12bot','dotbot','petalbot','crawler','scanner','headless',
 			'go-http-client','httpclient','python-requests','curl','wget','okhttp','apache-httpclient','l9scan','leakix','sppb','rce-poc',
-			'palo alto','paloaltonetworks','xpanse','cortex-xpanse','visionheight','rootevidence');
+			'palo alto','paloaltonetworks','xpanse','cortex-xpanse','visionheight','rootevidence','scandash','pr-cy','cms-checker');
 
 	foreach ($bot_keywords as $bot) {
 		if (strpos($ua, $bot) !== false) {
@@ -88,6 +88,37 @@ function analytics_is_pageview_bot($viewport_w, $viewport_h, $user_agent = '') {
 	}
 
 	return analytics_is_bot_user_agent($user_agent);
+
+}
+
+/**
+ * Logged-in CMS user id when the user module is installed; otherwise 0.
+ * Safe for beacon API (may start PHP session lightly — same name rules as session.php).
+ */
+function analytics_current_user_id() {
+
+	if (empty($GLOBALS['config']['modules']) || !is_array($GLOBALS['config']['modules'])) {
+		return 0;
+	}
+
+	if (!in_array('user', $GLOBALS['config']['modules'], true)) {
+		return 0;
+	}
+
+	if (!session_id()) {
+		if (!empty($GLOBALS['config']['base_url']) && $GLOBALS['config']['base_url'] !== '/') {
+			session_name('s_'.md5($GLOBALS['config']['base_url']));
+		}
+		session_start();
+	}
+
+	if (empty($_SESSION['user']) || !is_array($_SESSION['user'])) {
+		return 0;
+	}
+
+	$user_id = (int)($_SESSION['user']['cms_page_panel_id'] ?? $_SESSION['user']['user_id'] ?? 0);
+
+	return $user_id > 0 ? $user_id : 0;
 
 }
 
@@ -196,6 +227,16 @@ function analytics_normalise_page($page) {
 
 	$page = trim((string)$page);
 
+	// Drop query/fragment if present (JS sometimes sends pathname only; keep safe)
+	if (($q = strpos($page, '?')) !== false) {
+		$page = substr($page, 0, $q);
+	}
+	if (($h = strpos($page, '#')) !== false) {
+		$page = substr($page, 0, $h);
+	}
+
+	$page = trim($page);
+
 	if ($page === '' || $page === '/') {
 		return '/';
 	}
@@ -210,9 +251,14 @@ function analytics_normalise_page($page) {
 
 	if (strpos($page, '/index.php/') === 0) {
 		$page = substr($page, strlen('/index.php'));
-		if ($page === '') {
-			$page = '/';
+		if ($page === '' || $page === '/') {
+			return '/';
 		}
+	}
+
+	// CMS canonical: /<slug>/ (and /path/to/page/)
+	if (substr($page, -1) !== '/') {
+		$page .= '/';
 	}
 
 	return substr($page, 0, 500);
@@ -249,6 +295,20 @@ function analytics_session_hash_display($session_id) {
 	}
 
 	return substr(md5($session_id), 0, 8);
+
+}
+
+function analytics_session_source_label($source) {
+
+	$source = trim((string)$source);
+
+	$labels = array(
+		'beacon' => 'Normal',
+		'php' => 'PHP only',
+		'ip_ua' => 'IP+UA',
+	);
+
+	return $labels[$source] ?? ($source !== '' ? $source : 'Normal');
 
 }
 
@@ -397,13 +457,21 @@ function analytics_beacon_set_cookie($session_id, $minutes) {
 
 }
 
-function analytics_get_beacon_language() {
+function analytics_normalise_language_code($language) {
 
-	$language = $_COOKIE['language'] ?? '';
 	$language = strtolower(trim((string)$language));
 	$language = preg_replace('/[^a-z0-9\-]/', '', $language);
 
 	return substr($language, 0, 20);
+
+}
+
+/**
+ * Language for JS beacon API only: cookie language (no Accept-Language / CMS fallbacks).
+ */
+function analytics_get_beacon_language() {
+
+	return analytics_normalise_language_code($_COOKIE['language'] ?? '');
 
 }
 
@@ -437,15 +505,16 @@ function analytics_insert_pageview($page, $viewport_w, $viewport_h, $posted_beac
 	$viewport_w = (int)$viewport_w;
 	$viewport_h = (int)$viewport_h;
 	$bot = analytics_is_pageview_bot($viewport_w, $viewport_h, $user_agent) ? 1 : 0;
+	$user_id = analytics_current_user_id();
 
-	$sql = 'INSERT INTO cms_analytics_pageview (pageview_token, session_id, beacon_id, language, page, ip_anonymised, user_agent, viewport_w, viewport_h, bot, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
+	$sql = 'INSERT INTO cms_analytics_pageview (pageview_token, session_id, beacon_id, language, page, ip_anonymised, user_agent, viewport_w, viewport_h, bot, user_id, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
 
 	$stmt = mysqli_prepare($db, $sql);
 	if ($stmt === false) {
 		return false;
 	}
 
-	mysqli_stmt_bind_param($stmt, 'sssssssiii', $pageview_token, $session_id, $beacon_id, $language, $page, $ip_anonymised, $user_agent, $viewport_w, $viewport_h, $bot);
+	mysqli_stmt_bind_param($stmt, 'sssssssiiii', $pageview_token, $session_id, $beacon_id, $language, $page, $ip_anonymised, $user_agent, $viewport_w, $viewport_h, $bot, $user_id);
 
 	if (!mysqli_stmt_execute($stmt)) {
 		mysqli_stmt_close($stmt);

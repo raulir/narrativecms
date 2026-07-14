@@ -106,6 +106,13 @@
 			"null": false,
 			"default": 0
 		},
+		"user_id": {
+			"type": "INT",
+			"constraint": 10,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
 		"country": {
 			"type": "VARCHAR",
 			"constraint": 100,

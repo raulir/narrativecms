@@ -71,11 +71,12 @@ class analytics_model extends Model {
 		$ip = $_SERVER['REMOTE_ADDR'] ?? '';
 		$ip_anonymised = analytics_store_ip($ip);
 		$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
-		$language = analytics_get_beacon_language();
+		$language = $this->_php_pageview_language();
 		$pageview_token = analytics_generate_pageview_token();
+		$user_id = analytics_current_user_id();
 
-		$this->db->query('INSERT INTO cms_analytics_pageview_php (pageview_token, beacon_id, page, language, ip_anonymised, user_agent, created) VALUES (?, ?, ?, ?, ?, ?, NOW())',
-				array($pageview_token, $beacon_id, $page, $language, $ip_anonymised, $user_agent));
+		$this->db->query('INSERT INTO cms_analytics_pageview_php (pageview_token, beacon_id, page, language, ip_anonymised, user_agent, user_id, created) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())',
+				array($pageview_token, $beacon_id, $page, $language, $ip_anonymised, $user_agent, $user_id));
 
 		return $beacon_id;
 
@@ -233,9 +234,10 @@ class analytics_model extends Model {
 
 		$this->db->query('UPDATE cms_analytics_pageview SET beacon_id = session_id WHERE session_id != "" AND beacon_id = ""');
 
+		// Unassigned non-bot pageviews: beacon cookie first, else same IP + UA within session window
 		$query = $this->db->query('SELECT DISTINCT beacon_id FROM cms_analytics_pageview WHERE beacon_id != "" AND session_id = "" AND bot = 0 LIMIT '.$limit);
 		foreach ($query->result_array() as $row) {
-			if ($this->_sync_session($row['beacon_id'], true)) {
+			if ($this->_assign_session_for_beacon($row['beacon_id'])) {
 				$processed++;
 			}
 		}
@@ -689,17 +691,38 @@ class analytics_model extends Model {
 		$rows = $query->result_array();
 
 		foreach ($rows as $row) {
-			$match = $this->db->query('SELECT cms_analytics_pageview_id FROM cms_analytics_pageview WHERE beacon_id = ? AND page = ? AND ABS(TIMESTAMPDIFF(SECOND, created, ?)) <= ? LIMIT 1',
+			$match = $this->db->query('SELECT cms_analytics_pageview_id, language, user_id FROM cms_analytics_pageview WHERE beacon_id = ? AND page = ? AND ABS(TIMESTAMPDIFF(SECOND, created, ?)) <= ? LIMIT 1',
 					array($row['beacon_id'], $row['page'], $row['created'], $match_window))->row_array();
 
 			if (!empty($match['cms_analytics_pageview_id'])) {
+				$php_language = trim((string)($row['language'] ?? ''));
+				$main_language = trim((string)($match['language'] ?? ''));
+
+				// JS hit empty language, PHP has CMS request language → fill main row
+				if ($main_language === '' && $php_language !== '') {
+					$this->db->query(
+							'UPDATE cms_analytics_pageview SET language = ? WHERE cms_analytics_pageview_id = ? LIMIT 1',
+							array($php_language, (int)$match['cms_analytics_pageview_id'])
+					);
+				}
+
+				// JS hit empty user_id, PHP has logged-in user → fill main row
+				$php_user_id = (int)($row['user_id'] ?? 0);
+				$main_user_id = (int)($match['user_id'] ?? 0);
+				if ($main_user_id < 1 && $php_user_id > 0) {
+					$this->db->query(
+							'UPDATE cms_analytics_pageview SET user_id = ? WHERE cms_analytics_pageview_id = ? LIMIT 1',
+							array($php_user_id, (int)$match['cms_analytics_pageview_id'])
+					);
+				}
+
 				$this->db->query('DELETE FROM cms_analytics_pageview_php WHERE cms_analytics_pageview_php_id = ? LIMIT 1',
 						array((int)$row['cms_analytics_pageview_php_id']));
 				$processed++;
 				continue;
 			}
 
-			$this->db->query('INSERT INTO cms_analytics_pageview (pageview_token, session_id, beacon_id, language, page, ip_anonymised, user_agent, viewport_w, viewport_h, seconds, scroll_pct, bot, created, updated) VALUES (?, "", ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, ?, ?)',
+			$this->db->query('INSERT INTO cms_analytics_pageview (pageview_token, session_id, beacon_id, language, page, ip_anonymised, user_agent, viewport_w, viewport_h, seconds, scroll_pct, bot, user_id, created, updated) VALUES (?, "", ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, ?, ?, ?)',
 					array(
 						$row['pageview_token'],
 						$row['beacon_id'],
@@ -707,6 +730,7 @@ class analytics_model extends Model {
 						$row['page'],
 						$row['ip_anonymised'] ?? '',
 						$row['user_agent'] ?? '',
+						(int)($row['user_id'] ?? 0),
 						$row['created'],
 						$row['created'],
 					));
@@ -720,14 +744,57 @@ class analytics_model extends Model {
 
 	}
 
+	/**
+	 * Language for PHP-tracked pageviews: CMS request language (targets / content), not cookie-only.
+	 */
+	private function _php_pageview_language() {
+
+		$language = '';
+
+		if (!empty($GLOBALS['language']['language_id'])) {
+			$language = $GLOBALS['language']['language_id'];
+		} else {
+			$this->load->model('cms/cms_language_model');
+			$language = $this->cms_language_model->get_content_language();
+		}
+
+		return analytics_normalise_language_code($language);
+
+	}
+
+	/**
+	 * How the session was gathered (recomputed on sync).
+	 * Priority: ip_ua > php > beacon
+	 */
+	private function _session_source_from_stats($beacon_count, $js_hits) {
+
+		$beacon_count = (int)$beacon_count;
+		$js_hits = (int)$js_hits;
+
+		if ($beacon_count > 1) {
+			return 'ip_ua';
+		}
+
+		if ($js_hits < 1) {
+			return 'php';
+		}
+
+		return 'beacon';
+
+	}
+
 	private function _aggregate_pageviews_for_visitor($visitor_id) {
 
+		// Language: prefer latest non-empty; source stats for session.source
 		$sql = 'SELECT MIN(created) AS started, MAX(updated) AS last_activity, COUNT(*) AS pageviews, COALESCE(SUM(seconds), 0) AS total_seconds, '
-				.'(SELECT language FROM cms_analytics_pageview p2 WHERE (p2.beacon_id = ? OR p2.session_id = ?) AND p2.bot = 0 ORDER BY p2.updated DESC LIMIT 1) AS language, '
+				.'(SELECT language FROM cms_analytics_pageview p2 WHERE (p2.beacon_id = ? OR p2.session_id = ?) AND p2.bot = 0 '
+				.'ORDER BY (p2.language = "" OR p2.language IS NULL) ASC, p2.updated DESC LIMIT 1) AS language, '
 				.'(SELECT page FROM cms_analytics_pageview p2 WHERE (p2.beacon_id = ? OR p2.session_id = ?) AND p2.bot = 0 ORDER BY p2.created ASC LIMIT 1) AS first_page, '
 				.'(SELECT page FROM cms_analytics_pageview p2 WHERE (p2.beacon_id = ? OR p2.session_id = ?) AND p2.bot = 0 ORDER BY p2.updated DESC LIMIT 1) AS last_page, '
 				.'(SELECT ip_anonymised FROM cms_analytics_pageview p2 WHERE (p2.beacon_id = ? OR p2.session_id = ?) AND p2.bot = 0 ORDER BY p2.created ASC LIMIT 1) AS ip_anonymised, '
-				.'(SELECT user_agent FROM cms_analytics_pageview p2 WHERE (p2.beacon_id = ? OR p2.session_id = ?) AND p2.bot = 0 ORDER BY p2.created ASC LIMIT 1) AS user_agent '
+				.'(SELECT user_agent FROM cms_analytics_pageview p2 WHERE (p2.beacon_id = ? OR p2.session_id = ?) AND p2.bot = 0 ORDER BY p2.created ASC LIMIT 1) AS user_agent, '
+				.'COUNT(DISTINCT beacon_id) AS beacon_count, '
+				.'SUM(CASE WHEN viewport_w > 0 OR viewport_h > 0 THEN 1 ELSE 0 END) AS js_hits '
 				.'FROM cms_analytics_pageview WHERE (beacon_id = ? OR session_id = ?) AND bot = 0';
 
 		$row = $this->db->query($sql, array(
@@ -743,7 +810,134 @@ class analytics_model extends Model {
 			return false;
 		}
 
+		$row['source'] = $this->_session_source_from_stats($row['beacon_count'] ?? 1, $row['js_hits'] ?? 0);
+
 		return $row;
+
+	}
+
+	/**
+	 * Assign session_id for unassigned pageviews of this beacon_id.
+	 *
+	 * Primary: session_id = beacon_id (cookie / beacon continuity).
+	 * Fallback: only among other still-unassigned beacons with same IP + UA
+	 * within the session window — never attach into an existing session that
+	 * already has a continuous cookie/beacon identity (session_id set).
+	 */
+	private function _assign_session_for_beacon($beacon_id) {
+
+		$beacon_id = trim((string)$beacon_id);
+
+		if ($beacon_id === '' || !analytics_is_valid_session_id($beacon_id)) {
+			return false;
+		}
+
+		$pv = $this->db->query(
+				'SELECT ip_anonymised, user_agent, created FROM cms_analytics_pageview '.
+				'WHERE beacon_id = ? AND session_id = "" AND bot = 0 ORDER BY created ASC LIMIT 1',
+				array($beacon_id)
+		)->row_array();
+
+		if (empty($pv)) {
+			return false;
+		}
+
+		$settings = analytics_get_beacon_settings();
+		$session_minutes = (int)($settings['session_minutes'] ?? 60);
+		$canonical = $this->_find_unassigned_beacon_cluster_canonical(
+				$pv['ip_anonymised'] ?? '',
+				$pv['user_agent'] ?? '',
+				$pv['created'] ?? '',
+				$session_minutes
+		);
+
+		if ($canonical === '' || !analytics_is_valid_session_id($canonical)) {
+			$canonical = $beacon_id;
+		}
+
+		// Orphan cluster: same IP+UA among still-unassigned only (never into cookie sessions)
+		$this->_assign_unassigned_ip_ua_cluster($canonical, $pv, $session_minutes);
+
+		// Ensure this beacon is assigned even when IP/UA empty (no cluster update ran)
+		$this->db->query(
+				'UPDATE cms_analytics_pageview SET session_id = ? WHERE beacon_id = ? AND session_id = "" AND bot = 0',
+				array($canonical, $beacon_id)
+		);
+
+		return $this->_sync_session($canonical, false);
+
+	}
+
+	/**
+	 * Among unassigned non-bot pageviews only: same IP + UA near $around_time.
+	 * Returns oldest beacon_id in the cluster (stable session key), or ''.
+	 * Never looks at already-assigned (cookie) sessions.
+	 */
+	private function _find_unassigned_beacon_cluster_canonical($ip_anonymised, $user_agent, $around_time, $session_minutes) {
+
+		$ip_anonymised = trim((string)$ip_anonymised);
+		$user_agent = trim((string)$user_agent);
+		$around_time = trim((string)$around_time);
+
+		if ($ip_anonymised === '' || $user_agent === '' || $around_time === '') {
+			return '';
+		}
+
+		$minutes = (int)$session_minutes;
+
+		if ($minutes <= 0) {
+			$minutes = 60;
+		}
+
+		$row = $this->db->query(
+				'SELECT beacon_id FROM cms_analytics_pageview '.
+				'WHERE session_id = "" AND bot = 0 '.
+				'AND beacon_id != "" '.
+				'AND ip_anonymised = ? AND user_agent = ? '.
+				'AND created >= DATE_SUB(?, INTERVAL ? MINUTE) '.
+				'AND created <= DATE_ADD(?, INTERVAL ? MINUTE) '.
+				'ORDER BY created ASC, beacon_id ASC LIMIT 1',
+				array($ip_anonymised, $user_agent, $around_time, $minutes, $around_time, $minutes)
+		)->row_array();
+
+		if (empty($row['beacon_id']) || !analytics_is_valid_session_id($row['beacon_id'])) {
+			return '';
+		}
+
+		return $row['beacon_id'];
+
+	}
+
+	private function _assign_unassigned_ip_ua_cluster($canonical_session_id, $pv, $session_minutes) {
+
+		$ip = trim((string)($pv['ip_anonymised'] ?? ''));
+		$ua = trim((string)($pv['user_agent'] ?? ''));
+		$around = trim((string)($pv['created'] ?? ''));
+
+		if (!analytics_is_valid_session_id($canonical_session_id)) {
+			return;
+		}
+
+		// No IP+UA cluster: still assign this visitor by beacon (caller set canonical = beacon_id)
+		if ($ip === '' || $ua === '' || $around === '') {
+			return;
+		}
+
+		$minutes = (int)$session_minutes;
+
+		if ($minutes <= 0) {
+			$minutes = 60;
+		}
+
+		$this->db->query(
+				'UPDATE cms_analytics_pageview SET session_id = ? '.
+				'WHERE session_id = "" AND bot = 0 '.
+				'AND beacon_id != "" '.
+				'AND ip_anonymised = ? AND user_agent = ? '.
+				'AND created >= DATE_SUB(?, INTERVAL ? MINUTE) '.
+				'AND created <= DATE_ADD(?, INTERVAL ? MINUTE)',
+				array($canonical_session_id, $ip, $ua, $around, $minutes, $around, $minutes)
+		);
 
 	}
 
@@ -758,7 +952,21 @@ class analytics_model extends Model {
 			return false;
 		}
 
-		$this->db->query('INSERT INTO cms_analytics_session (session_id, started, last_activity, pageviews, total_seconds, language, first_page, last_page, ip_anonymised, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE started = VALUES(started), last_activity = VALUES(last_activity), pageviews = VALUES(pageviews), total_seconds = VALUES(total_seconds), language = VALUES(language), first_page = VALUES(first_page), last_page = VALUES(last_page), ip_anonymised = IF(ip_anonymised = "" OR ip_anonymised IS NULL, VALUES(ip_anonymised), ip_anonymised), user_agent = IF(user_agent = "" OR user_agent IS NULL, VALUES(user_agent), user_agent)',
+		$source = $aggregate['source'] ?? 'beacon';
+		if (!in_array($source, array('beacon', 'php', 'ip_ua'), true)) {
+			$source = 'beacon';
+		}
+
+		$identity = $this->_session_user_identity($visitor_id);
+
+		$this->db->query(
+				'INSERT INTO cms_analytics_session (session_id, started, last_activity, pageviews, total_seconds, language, first_page, last_page, ip_anonymised, user_agent, source, user_id, username, meta) '.
+				'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) '.
+				'ON DUPLICATE KEY UPDATE started = VALUES(started), last_activity = VALUES(last_activity), pageviews = VALUES(pageviews), '.
+				'total_seconds = VALUES(total_seconds), language = VALUES(language), first_page = VALUES(first_page), last_page = VALUES(last_page), '.
+				'ip_anonymised = IF(ip_anonymised = "" OR ip_anonymised IS NULL, VALUES(ip_anonymised), ip_anonymised), '.
+				'user_agent = IF(user_agent = "" OR user_agent IS NULL, VALUES(user_agent), user_agent), '.
+				'source = VALUES(source), user_id = VALUES(user_id), username = VALUES(username), meta = VALUES(meta)',
 				array(
 					$visitor_id,
 					$aggregate['started'],
@@ -770,6 +978,10 @@ class analytics_model extends Model {
 					$aggregate['last_page'] ?? '',
 					$aggregate['ip_anonymised'] ?? '',
 					$aggregate['user_agent'] ?? '',
+					$source,
+					(int)$identity['user_id'],
+					$identity['username'],
+					$identity['meta'],
 				));
 
 		if ($assign_pageviews) {
@@ -778,6 +990,106 @@ class analytics_model extends Model {
 		}
 
 		return true;
+
+	}
+
+	/**
+	 * Sticky session user: latest non-zero pageview user_id wins; empty hits do not clear.
+	 * On user_id change, append "Other user id: <previous>" to meta (once per stored transition).
+	 */
+	private function _session_user_identity($visitor_id) {
+
+		$existing = $this->db->query(
+				'SELECT user_id, username, meta FROM cms_analytics_session WHERE session_id = ? LIMIT 1',
+				array($visitor_id)
+		)->row_array();
+
+		$existing_user_id = (int)($existing['user_id'] ?? 0);
+		$existing_username = trim((string)($existing['username'] ?? ''));
+		$existing_meta = (string)($existing['meta'] ?? '');
+
+		$latest = $this->db->query(
+				'SELECT user_id FROM cms_analytics_pageview WHERE (beacon_id = ? OR session_id = ?) AND bot = 0 AND user_id > 0 '.
+				'ORDER BY updated DESC LIMIT 1',
+				array($visitor_id, $visitor_id)
+		)->row_array();
+
+		$candidate_user_id = (int)($latest['user_id'] ?? 0);
+		$effective_user_id = $candidate_user_id > 0 ? $candidate_user_id : $existing_user_id;
+
+		$meta = $existing_meta;
+		if ($existing_user_id > 0 && $effective_user_id > 0 && $existing_user_id !== $effective_user_id) {
+			$line = 'Other user id: '.$existing_user_id;
+			$meta = $this->_append_session_meta_line($meta, $line);
+		}
+
+		$username = '';
+		if ($effective_user_id > 0) {
+			$username = $this->_resolve_analytics_username($effective_user_id);
+			if ($username === '' && $effective_user_id === $existing_user_id) {
+				$username = $existing_username;
+			}
+		}
+
+		return array(
+			'user_id' => $effective_user_id,
+			'username' => $username,
+			'meta' => $meta,
+		);
+
+	}
+
+	private function _append_session_meta_line($meta, $line) {
+
+		$meta = trim((string)$meta);
+		$line = trim((string)$line);
+
+		if ($line === '') {
+			return $meta;
+		}
+
+		// Stability: only called when stored session user_id differs from effective, so cron re-sync does not re-append
+		if ($meta === '') {
+			return $line;
+		}
+
+		return $meta."\n".$line;
+
+	}
+
+	/**
+	 * Display name for analytics session: email if login-by-email, else username.
+	 * Empty string if user module missing or user not found.
+	 */
+	private function _resolve_analytics_username($user_id) {
+
+		$user_id = (int)$user_id;
+		if ($user_id < 1) {
+			return '';
+		}
+
+		if (empty($GLOBALS['config']['modules']) || !is_array($GLOBALS['config']['modules'])
+				|| !in_array('user', $GLOBALS['config']['modules'], true)) {
+			return '';
+		}
+
+		$this->load->model('user/user_model');
+		$user = $this->user_model->get_user($user_id);
+		if (empty($user['cms_page_panel_id']) && empty($user['user_id'])) {
+			return '';
+		}
+
+		if (!empty($user['loginname'])) {
+			return substr(trim((string)$user['loginname']), 0, 255);
+		}
+
+		$this->load->model('cms/cms_page_panel_model');
+		$config = $this->cms_page_panel_model->get_cms_page_panel_settings('user/user_settings');
+		if (empty($config['show_username'])) {
+			return substr(trim((string)($user['email'] ?? '')), 0, 255);
+		}
+
+		return substr(trim((string)($user['username'] ?? '')), 0, 255);
 
 	}
 

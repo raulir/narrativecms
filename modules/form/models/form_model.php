@@ -41,7 +41,7 @@ class form_model extends CI_Model {
 	
 	function delete_form_data($form_data_id){
 		
-		$sql = "delete from form_data where form_data_id = ? limit 1 ";
+		$sql = "delete from form_data where webform_data_id = ? limit 1 ";
 		$this->db->query($sql, [$form_data_id]);
 	
 		return true;
@@ -61,12 +61,12 @@ class form_model extends CI_Model {
 		if($this->db->_error_number() == 1146){
     	
     		$sql = "CREATE TABLE `form_data` (
-    					`form_data_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    					`webform_data_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     					`cms_page_panel_id` int(10) UNSIGNED NOT NULL,
     					`email` varchar(100) NOT NULL, 
     					`code` varchar(100) NOT NULL, 
     					`data` text NOT NULL,
-    					PRIMARY KEY (`form_data_id`)
+    					PRIMARY KEY (`webform_data_id`)
     				) ENGINE=InnoDB DEFAULT CHARSET=utf8";
     		$this->db->query($sql);
     	
@@ -131,9 +131,10 @@ class form_model extends CI_Model {
     		
     		if ($return_data != 1){
 	    		$row_unpacked['time'] = date('Y-m-d H:i', !empty($row_unpacked['time']) ? $row_unpacked['time'] : 0);
-	    		$row_unpacked['form_data_id'] = $row['form_data_id'] ?? '';
-	    		$row_unpacked['item_id'] = $row['form_data_id'] ?? 0;
-	    		$row_unpacked['id'] = $row['form_data_id'] ?? 0;
+	    		$row_id = $row['webform_data_id'] ?? $row['form_data_id'] ?? 0;
+	    		$row_unpacked['form_data_id'] = $row_id;
+	    		$row_unpacked['item_id'] = $row_id;
+	    		$row_unpacked['id'] = $row_id;
 	    		$table[] = $row_unpacked;
     		}
     		
@@ -333,7 +334,7 @@ class form_model extends CI_Model {
     	}
     	
     	// check if exists
-    	$sql = "select form_data_id, code from form_data where code = ? ";
+    	$sql = "select webform_data_id, code from form_data where code = ? ";
     	$query = $this->db->query($sql, [$code]);
     	
     	$data = $query->result_array();
@@ -342,10 +343,11 @@ class form_model extends CI_Model {
     	
     		if ($row['code']){
     			$return = 1;
-    			$sql = "update form_data set code = '' where form_data_id = ? ";
-    			$this->db->query($sql, [$row['form_data_id']]);
+    			$row_id = $row['webform_data_id'] ?? $row['form_data_id'] ?? 0;
+    			$sql = "update form_data set code = '' where webform_data_id = ? ";
+    			$this->db->query($sql, [$row_id]);
     			
-    			$this->send_confirmation_success($row['form_data_id']);
+    			$this->send_confirmation_success($row_id);
     			
     		}
 
@@ -407,7 +409,7 @@ class form_model extends CI_Model {
     	
     	$this->load->model('cms/cms_page_panel_model');
     	
-    	$sql = "select * from form_data where form_data_id = ? ";
+    	$sql = "select * from form_data where webform_data_id = ? ";
     	$query = $this->db->query($sql, [$form_data_id]);
     	$data = $query->result_array();
 
