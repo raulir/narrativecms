@@ -12,7 +12,7 @@ class form extends CI_Controller {
 			exit();
 		}
         
-		$this->js[] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
+		$this->js[] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', 'no_pack' => 1, );
         
         $this->js[] = 'modules/cms/js/cms.js';
   

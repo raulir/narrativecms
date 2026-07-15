@@ -314,6 +314,222 @@ class cms_update_model extends CI_Model {
 		return json_decode($master_data, true);
 		
 	}
+
+	/**
+	 * Whether this install may update/install the given area (host config update.allow).
+	 */
+	function client_may_use_area($area){
+
+		$allow = $GLOBALS['config']['update']['allow'] ?? [];
+		if (empty($allow) || !is_array($allow)){
+			return false;
+		}
+
+		if (in_array('*', $allow, true)){
+			return true;
+		}
+
+		// Core package uses empty area string
+		return in_array($area, $allow, true) || in_array((string)$area, $allow, true);
+
+	}
+
+	function normalise_area_name($area){
+
+		$area = (string)$area;
+		if ($area === ''){
+			return '';
+		}
+
+		if (!preg_match('/^[a-zA-Z0-9_]+$/', $area)){
+			return false;
+		}
+
+		return $area;
+
+	}
+
+	/**
+	 * Master host: modules listed in update.master (excluding core '').
+	 */
+	function get_publishable_modules(){
+
+		$master = $GLOBALS['config']['update']['master'] ?? [];
+		if (!is_array($master)){
+			$master = [];
+		}
+
+		if (!empty($GLOBALS['config']['update']['is_master']) && !in_array('', $master, true)){
+			$master[] = '';
+		}
+
+		$out = [];
+
+		foreach ($master as $name){
+
+			if ($name === '' || $name === 'cms'){
+				continue;
+			}
+
+			if (!preg_match('/^[a-zA-Z0-9_]+$/', (string)$name)){
+				continue;
+			}
+
+			$dir = $GLOBALS['config']['base_path'].'modules/'.$name.'/';
+			if (!is_dir($dir)){
+				continue;
+			}
+
+			$v = $this->get_version($name);
+			$out[] = [
+					'name' => $name,
+					'version' => $v['version'] ?? '',
+					'version_hash' => $v['current_hash'] ?? $v['version_hash'] ?? '',
+					'version_time' => !empty($v['version_time']) ? (int)$v['version_time'] : 0,
+			];
+
+		}
+
+		return $out;
+
+	}
+
+	/**
+	 * Client: packages on master not present locally, filtered by update.allow.
+	 */
+	function get_installable_modules(){
+
+		if (empty($GLOBALS['config']['cms_update_url']) || empty($GLOBALS['config']['update']['allow'])){
+			return [];
+		}
+
+		$master_list = $this->get_master_modules();
+		if (empty($master_list) || !is_array($master_list)){
+			return [];
+		}
+
+		$local = [];
+		foreach (glob($GLOBALS['config']['base_path'].'modules/*', GLOB_ONLYDIR) as $dir){
+			$local[basename($dir)] = true;
+		}
+
+		$available = [];
+		foreach ($master_list as $row){
+
+			$name = $row['name'] ?? '';
+			if ($name === '' || $name === 'cms'){
+				continue;
+			}
+			if (!empty($local[$name])){
+				continue;
+			}
+			if (!$this->client_may_use_area($name)){
+				continue;
+			}
+
+			$available[] = $row;
+
+		}
+
+		return $available;
+
+	}
+
+	function get_master_modules(){
+
+		if (empty($GLOBALS['config']['cms_update_url'])){
+			return [];
+		}
+
+		$header = [
+				'Content-type: application/x-www-form-urlencoded',
+		];
+
+		$postdata = http_build_query([
+				'do' => 'modules',
+		]);
+
+		if (stristr($GLOBALS['config']['cms_update_url'], 'localhost')){
+			$host = parse_url($GLOBALS['config']['cms_update_url'], PHP_URL_HOST);
+			$url = str_replace($host, 'localhost', $GLOBALS['config']['cms_update_url']);
+			$header[] = 'Host: '.$host;
+		} else {
+			$url = $GLOBALS['config']['cms_update_url'];
+		}
+
+		$context = stream_context_create(['http' => [
+				'method' => 'POST',
+				'header' => $header,
+				'content' => $postdata,
+				'ignore_errors' => true,
+		]]);
+
+		$master_data = file_get_contents($url, false, $context);
+		if ($master_data === false || stristr($master_data, 'was not found')){
+			return [];
+		}
+
+		$decoded = json_decode($master_data, true);
+		if (empty($decoded['modules']) || !is_array($decoded['modules'])){
+			return [];
+		}
+
+		return $decoded['modules'];
+
+	}
+
+	/**
+	 * Enable module in cms/cms_settings modules list as penultimate (before last site module).
+	 */
+	function enable_module_penultimate($name){
+
+		$name = $this->normalise_area_name($name);
+		if ($name === false || $name === '' || $name === 'cms'){
+			return ['error' => 'invalid_module'];
+		}
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$panels = $this->cms_page_panel_model->get_cms_page_panels_by([
+				'panel_name' => 'cms/cms_settings',
+				'cms_page_id' => 0,
+				'parent_id' => 0,
+				'sort' => 0,
+		]);
+
+		if (empty($panels[0]['cms_page_panel_id'])){
+			return ['error' => 'settings_missing'];
+		}
+
+		$settings_id = (int)$panels[0]['cms_page_panel_id'];
+		$settings = $this->cms_page_panel_model->get_cms_page_panel($settings_id);
+		$modules = $settings['modules'] ?? [];
+		if (!is_array($modules)){
+			$modules = [];
+		}
+
+		// Drop cms (always prepended on boot) and any existing name
+		$modules = array_values(array_filter($modules, function($m) use ($name){
+			return $m !== 'cms' && $m !== $name;
+		}));
+
+		if (count($modules) === 0){
+			$modules = [$name];
+		} else if (count($modules) === 1){
+			$modules[] = $name;
+		} else {
+			$last = array_pop($modules);
+			$modules[] = $name;
+			$modules[] = $last;
+		}
+
+		$this->cms_page_panel_model->update_cms_page_panel($settings_id, [
+				'modules' => $modules,
+		]);
+
+		return ['modules' => $modules];
+
+	}
 	
 	function get_files($area){
 		
@@ -326,17 +542,23 @@ class cms_update_model extends CI_Model {
 		// load current version data, if exists
 		if (file_exists($filename)){
 			$old_data = json_decode(file_get_contents($filename), true);
-			$return = array(
-				'files' => $old_data['files'],
-			);
-		} else {
-			$return = array(
-				'files' => '',
-				'error' => 'No version information, rebuild master first',
-			);
+			$files = !empty($old_data['files']) && is_array($old_data['files']) ? $old_data['files'] : [];
+			return [
+					'files' => $files,
+			];
 		}
-		
-		return $return;
+
+		// New install: module not on disk yet
+		if (!empty($area) && !is_dir($GLOBALS['config']['base_path'].'modules/'.$area.'/')){
+			return [
+					'files' => [],
+			];
+		}
+
+		return [
+				'files' => [],
+				'error' => 'No version information, rebuild master first',
+		];
 
 	}
 	
@@ -464,12 +686,28 @@ class cms_update_model extends CI_Model {
 	}
 	
 	function get_needed_files($area){
+
+		$area_norm = $this->normalise_area_name($area);
+		if ($area_norm === false){
+			return [];
+		}
+		$area = $area_norm;
+
+		if (!$this->client_may_use_area($area)){
+			return [];
+		}
 		
 		// get master list
 		$master_files = $this->get_master_files($area);
+		if (empty($master_files['files']) || !is_array($master_files['files'])){
+			return [];
+		}
 
 		// get local list
 		$local_files = $this->get_files($area);
+		if (empty($local_files['files']) || !is_array($local_files['files'])){
+			$local_files['files'] = [];
+		}
 		
 		$return = array();
 

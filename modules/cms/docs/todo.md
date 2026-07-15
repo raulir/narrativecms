@@ -118,6 +118,11 @@ Implemented core: admin split-view (`cms/cms_preview`), D|M toggle, saved-data i
 
 ---
 
+## Updater
+
+- [x] **Empty dirs after update** — `update_cleanup` deepest-first; drop legacy `application/` / root `js/` roots
+- [x] **Install new modules** (#753) — list master `update.master` packages not on disk; Install → files + enable penultimate in settings `modules` (client gated by `update.allow`)
+
 ## Module extends (legacy cleanup)
 
 - [x] **config.json extends + JS** — `get_panel_filenames()` appends extension JS; detail: [`cms_module_extends.md`](cms_module_extends.md)

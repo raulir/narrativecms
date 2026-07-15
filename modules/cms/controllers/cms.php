@@ -18,6 +18,12 @@ class cms extends CI_Controller {
    			print(json_encode($version_data));
    			exit();
         	
+        } else if ($do == 'modules'){
+
+        	// Packages this host publishes (update.master); used by clients to install missing modules
+        	print(json_encode(['modules' => $this->cms_update_model->get_publishable_modules()]));
+        	exit();
+
         } else if ($do == 'files'){
         	
         	$module = $this->input->post('module');

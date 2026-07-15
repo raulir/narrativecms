@@ -37,3 +37,18 @@
 .cms_update_error {
 	color: $colour_red;
 }
+
+.cms_update_section_label {
+	margin: 2.0rem 1.0rem 0.5rem 1.0rem;
+	padding-top: 1.0rem;
+	border-top: 0.1rem solid $cms_border;
+	font-weight: bold;
+}
+
+.cms_update_table_available {
+	margin-top: 0.5rem;
+}
+
+.cms_update_result {
+	padding: 2.0rem 1.0rem 1.0rem 1.0rem;
+}

@@ -84,6 +84,8 @@ $config['js'] = array(
 		),
 		array(
 				'script' => 'modules/cms/js/jquery/jquery-ui.min.js',
+				// already minified (ES6); re-pack/minify breaks syntax (missing ) after argument list)
+				'no_pack' => 1,
 				'sync' => 'defer',
 		),
 		array(

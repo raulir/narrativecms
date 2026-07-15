@@ -15,7 +15,7 @@ class admin extends CI_Controller {
 		// Admin UI must never use visitor (frontend) language cookie
 		$GLOBALS['cms_admin_request'] = true;
 
-		$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', );
+		$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', 'no_pack' => 1, );
 
 		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_preloader.js';
 		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms.js';

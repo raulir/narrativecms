@@ -28,8 +28,20 @@ class cms_update extends CI_Controller {
 		if (empty($area) && $area !== ''){
 			$area = $this->input->post('module');
 		}
+
+		$area_norm = $this->cms_update_model->normalise_area_name($area === null ? '' : $area);
+		if ($area_norm === false){
+			$params['result'] = ['error' => 'invalid_area'];
+			return $params;
+		}
+		$area = $area_norm;
 		
 		if ($do == 'cms_update_list'){
+
+			if (!$this->cms_update_model->client_may_use_area($area)){
+				$params['result'] = [];
+				return $params;
+			}
 
 			$params['result'] = $this->cms_update_model->get_needed_files($area);
 			 
@@ -46,6 +58,11 @@ class cms_update extends CI_Controller {
 			$params['master_version'] = !empty($version_data['version']) ? $version_data['version'] : '';
 
 		} else if ($do == 'cms_update_file'){ // updates file
+
+			if (!$this->cms_update_model->client_may_use_area($area)){
+				$params['result'] = ['error' => 'not_allowed'];
+				return $params;
+			}
 			 
 			$filename = $this->input->post('filename');
 				
@@ -57,6 +74,11 @@ class cms_update extends CI_Controller {
 			 
 		} else if ($do == 'cms_update_copy'){
 
+			if (!$this->cms_update_model->client_may_use_area($area)){
+				$params['result'] = ['error' => 'not_allowed'];
+				return $params;
+			}
+
 			$this->cms_update_model->update_copy($area);
 			
 			// check and update version information
@@ -65,11 +87,15 @@ class cms_update extends CI_Controller {
 			$local_data = $this->cms_update_model->get_version($area);
 			
 			$master_hash = !empty($master_data['version_hash']) ? $master_data['version_hash'] : 'error';
+			// Prefer current_hash from master when version_hash missing
+			if ($master_hash === 'error' && !empty($master_data['current_hash'])){
+				$master_hash = $master_data['current_hash'];
+			}
 			if ($local_data['current_hash'] == $master_hash){
 				// update local json
 				$this->cms_update_model->update_version_cache($area, [
 						'version' => !empty($master_data['version']) ? $master_data['version'] : '',
-						'version_hash' => !empty($master_data['version_hash']) ? $master_data['version_hash'] : '',
+						'version_hash' => !empty($master_data['version_hash']) ? $master_data['version_hash'] : (!empty($master_data['current_hash']) ? $master_data['current_hash'] : ''),
 						'version_time' => !empty($master_data['version_time']) ? $master_data['version_time'] : '',
 						'update_time' => time(),
 				]);
@@ -77,8 +103,22 @@ class cms_update extends CI_Controller {
 
 		} else if ($do == 'cms_update_cleanup'){
 
+			if (!$this->cms_update_model->client_may_use_area($area)){
+				$params['result'] = ['error' => 'not_allowed'];
+				return $params;
+			}
+
 			$this->cms_update_model->update_cleanup($area);
 			
+		} else if ($do == 'cms_update_enable'){
+
+			if (!$this->cms_update_model->client_may_use_area($area) || $area === ''){
+				$params['result'] = ['error' => 'not_allowed'];
+				return $params;
+			}
+
+			$params['result'] = $this->cms_update_model->enable_module_penultimate($area);
+
 		}
 		
 		return $params;
@@ -94,6 +134,7 @@ class cms_update extends CI_Controller {
 		$this->load->model('cms/cms_update_model');
 
 		$params['can_update'] = false;
+		$params['available'] = [];
 
 		// update local hashes
 		$params['data'] = $this->cms_update_model->rebuild();
@@ -117,15 +158,13 @@ class cms_update extends CI_Controller {
 					$params['data'][$key]['error'] = $version_data['error'];
 				}
 				
-// print('<pre>');
-// print_r($version_data);
-// print('</pre>');
 				$params['data'][$key]['master_version'] = !empty($version_data['version']) ? $version_data['version'] : '';
 				$params['data'][$key]['master_hash'] = !empty($version_data['current_hash']) ? $version_data['current_hash'] : '';
 				$params['data'][$key]['master_time'] = !empty($version_data['version_time']) ? $version_data['version_time'] : 0;
 				if ($params['data'][$key]['master_hash'] != $area['local_current_hash']){
 					$params['data'][$key]['can_update'] = true;
 				}
+				$params['data'][$key]['may_use'] = $this->cms_update_model->client_may_use_area($area['area']);
 				
 			} else {
 				
@@ -136,8 +175,6 @@ class cms_update extends CI_Controller {
 
 						$this->cms_update_model->increment_master_version($area['area']);
 						$local_data = $this->cms_update_model->get_version($area['area']);
-						
-//						print_r($local_data);
 						
 						$params['data'][$key]['local_version'] = $local_data['version'];
 						$params['data'][$key]['local_version_hash'] = $local_data['version_hash'];
@@ -153,6 +190,10 @@ class cms_update extends CI_Controller {
 
 			}
 
+		}
+
+		if (!empty($GLOBALS['config']['update']['allow']) && !empty($GLOBALS['config']['cms_update_url'])){
+			$params['available'] = $this->cms_update_model->get_installable_modules();
 		}
 
 		return $params;

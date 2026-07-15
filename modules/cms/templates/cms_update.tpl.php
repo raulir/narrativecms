@@ -51,15 +51,17 @@
 							<?php if(!in_array($row['area'], $GLOBALS['config']['update']['master'])): ?>
 								<?= $row['master_version'] ?> <?= !empty($row['master_time']) ? date('(Y-m-d H:i)', $row['master_time']) : '' ?>
 								#<?= substr($row['master_hash'], 0, 16) ?>
+							<?php elseif(!empty($row['status'])): ?>
+								<?= $row['status'] ?>
 							<?php endif ?>
 						</div>
 						<div class="cms_update_cell cms_update_cell_right">
 							<?php if((!empty($GLOBALS['config']['update']['allow'])
-									&& (in_array($row['area'], $GLOBALS['config']['update']['allow']) || ($GLOBALS['config']['update']['allow'][0] == '*') ))
+									&& !empty($row['may_use'])
 									&& !empty($row['master_hash'])
-									&& $row['local_current_hash'] !== $row['master_hash']): ?>
+									&& $row['local_current_hash'] !== $row['master_hash'])): ?>
 									
-								<div class="cms_update_button cms_tool_button" data-area="<?= $row['area'] ?>">Update</div>
+								<div class="cms_update_button cms_tool_button" data-area="<?= htmlspecialchars($row['area'], ENT_QUOTES, 'UTF-8') ?>">Update</div>
 							
 							<?php endif ?>
 						</div>
@@ -67,6 +69,42 @@
 				</div>
 			<?php endforeach ?>
 
+		</div>
+
+		<?php if(!empty($available)): ?>
+
+			<div class="cms_update_section_label">Available to install</div>
+
+			<div class="cms_update_table cms_update_table_available">
+				<div class="cms_update_row">
+					<div class="cms_update_head">Module</div>
+					<div class="cms_update_head">Local</div>
+					<div class="cms_update_head">Master</div>
+					<div class="cms_update_head cms_update_cell_right"></div>
+				</div>
+
+				<?php foreach($available as $row): ?>
+					<div class="cms_update_row">
+						<div class="cms_update_cell"><?= htmlspecialchars($row['name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+						<div class="cms_update_cell">not installed</div>
+						<div class="cms_update_cell">
+							<?= htmlspecialchars($row['version'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+							<?= !empty($row['version_time']) ? date('(Y-m-d H:i)', (int)$row['version_time']) : '' ?>
+							<?php if(!empty($row['version_hash'])): ?>
+								#<?= substr($row['version_hash'], 0, 16) ?>
+							<?php endif ?>
+						</div>
+						<div class="cms_update_cell cms_update_cell_right">
+							<div class="cms_update_install_button cms_tool_button"
+									data-area="<?= htmlspecialchars($row['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">Install</div>
+						</div>
+					</div>
+				<?php endforeach ?>
+
+			</div>
+
+		<?php endif ?>
+	
 	</div>
 	
 	<div class="cms_update_result"></div>
