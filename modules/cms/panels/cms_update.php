@@ -77,7 +77,7 @@ class cms_update extends CI_Controller {
 
 		} else if ($do == 'cms_update_cleanup'){
 
-			while ($this->cms_update_model->update_cleanup($area));
+			$this->cms_update_model->update_cleanup($area);
 			
 		}
 		

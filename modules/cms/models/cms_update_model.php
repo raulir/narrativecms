@@ -2,18 +2,35 @@
 
 class cms_update_model extends CI_Model {
 
+	/**
+	 * Live tree roots for core CMS update area (empty $area).
+	 * Legacy CI application/ and root js/ are not used.
+	 */
+	function _update_core_folders(){
+
+		return [
+				'system/',
+				'modules/cms/',
+		];
+
+	}
+
+	function _update_area_folders($area){
+
+		if ($area === '' || $area === null){
+			return $this->_update_core_folders();
+		}
+
+		return ['modules/'.$area.'/'];
+
+	}
+
 	// rebuilds area hash caches
 	function rebuild_area($area, $folders = []){
 		
 		if (empty($area)){
 
-			// system and cms
-			$folders = [
-					'application/',
-					'js/',
-					'system/',
-					'modules/cms/',
-			];
+			$folders = $this->_update_core_folders();
 
 		}
 
@@ -573,8 +590,12 @@ class cms_update_model extends CI_Model {
 						
 					$to_filename = $GLOBALS['config']['base_path'] . str_replace($folder, '', str_replace("\\", '/', $filename));
 
-					print($from_filename.' '.$to_filename."\n");
-					
+					// ensure target parent exists
+					$to_dir = pathinfo($to_filename, PATHINFO_DIRNAME);
+					if (!file_exists($to_dir)){
+						mkdir($to_dir, 0777, true);
+					}
+
 					// check whats inside
 					$contents = file_get_contents($from_filename);
 
@@ -592,24 +613,31 @@ class cms_update_model extends CI_Model {
 	
 			}
 
-			// delete directory in cache
-			function rrmdir($dir) {
-				if (is_dir($dir)) {
-					$objects = scandir($dir);
-					foreach ($objects as $object) {
-						if ($object != "." && $object != "..") {
-							if (is_dir($dir."/".$object))
-								rrmdir($dir."/".$object);
-								else
-									unlink($dir."/".$object);
-						}
-					}
-					rmdir($dir);
-				}
-			}
-			rrmdir($folder);
+			$this->_rrmdir($folder);
 
 		}
+
+	}
+
+	function _rrmdir($dir){
+
+		if (!is_dir($dir)){
+			return;
+		}
+
+		$objects = scandir($dir);
+		foreach ($objects as $object){
+			if ($object === '.' || $object === '..'){
+				continue;
+			}
+			$path = $dir.DIRECTORY_SEPARATOR.$object;
+			if (is_dir($path)){
+				$this->_rrmdir($path);
+			} else {
+				unlink($path);
+			}
+		}
+		rmdir($dir);
 
 	}
 	
@@ -675,42 +703,66 @@ class cms_update_model extends CI_Model {
 		
 	}
 	
-	function update_cleanup(){
-		
-		$return = 0;
-		
-		$folders = [
-				'application/',
-				'js/',
-				'system/',
-				'modules/cms/',
-		];
+	/**
+	 * Remove empty directories left after file deletes (updater step).
+	 * Deepest-first until stable. $area: '' = core (system + modules/cms), else modules/<area>/.
+	 */
+	function update_cleanup($area = ''){
 
-		// go over all folders
-		foreach($folders as $folder){
-				
-			// go over all files recursively
-			$full_folder = str_replace("\\", '/', $GLOBALS['config']['base_path'].$folder);
-				
-			if (file_exists($full_folder)){
-					
-				$it = new RecursiveDirectoryIterator($full_folder);
-				foreach (new RecursiveIteratorIterator($it) as $filename => $file) {
-						
-					if (is_dir($filename) && substr($filename, -3, 3) !== '/..'){
-						
-						$fi = new FilesystemIterator($filename, FilesystemIterator::SKIP_DOTS);
-						if (!iterator_count($fi)) {
-							rmdir($filename);
-						}
-						
-					}
-						
+		$folders = $this->_update_area_folders($area);
+		$base = str_replace('\\', '/', $GLOBALS['config']['base_path']);
+
+		do {
+			$removed = 0;
+
+			foreach ($folders as $folder){
+
+				$full_folder = $base.$folder;
+				if (!is_dir($full_folder)){
+					continue;
 				}
-		
+
+				$dirs = [];
+				$it = new RecursiveDirectoryIterator($full_folder, FilesystemIterator::SKIP_DOTS);
+				foreach (new RecursiveIteratorIterator($it, RecursiveIteratorIterator::SELF_FIRST) as $path => $fileinfo){
+					if ($fileinfo->isDir()){
+						$dirs[] = str_replace('\\', '/', $path);
+					}
+				}
+
+				// deepest paths first
+				usort($dirs, function($a, $b){
+					return strlen($b) - strlen($a);
+				});
+
+				foreach ($dirs as $dir){
+
+					// never remove the area root itself
+					$norm = rtrim($dir, '/').'/';
+					$root_norm = rtrim($full_folder, '/').'/';
+					if ($norm === $root_norm){
+						continue;
+					}
+
+					if (!is_dir($dir)){
+						continue;
+					}
+
+					$fi = new FilesystemIterator($dir, FilesystemIterator::SKIP_DOTS);
+					if (!iterator_count($fi)){
+						if (@rmdir($dir)){
+							$removed++;
+						}
+					}
+
+				}
+
 			}
-				
-		}
+
+		} while ($removed > 0);
+
+		return true;
+
 	}
 
 }
