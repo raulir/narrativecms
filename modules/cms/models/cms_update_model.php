@@ -982,17 +982,12 @@ class cms_update_model extends Model {
 				&& !empty($row['local_version_hash'])
 				&& $row['local_current_hash'] !== $row['local_version_hash'];
 
+		// Packages listed in update.master (core '' and named modules) are published here
 		if ($is_local_master){
 
-			if ($is_core){
-				$row['local_label'] = $this->format_local_version_label($row);
-				$row['master_label'] = 'This is master';
-				$row['status'] = 'This is master';
-			} else {
-				$row['local_only'] = true;
-				$row['local_label'] = 'Local only';
-				$row['master_label'] = '';
-			}
+			$row['local_label'] = $this->format_local_version_label($row);
+			$row['master_label'] = 'This is master';
+			$row['status'] = 'This is master';
 
 			return $row;
 

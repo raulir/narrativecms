@@ -1,0 +1,1 @@
+Sent emails: <?= $n ?>

@@ -64,8 +64,10 @@
 	position: relative;
 	text-align: left;
 	overflow: hidden;
-	display: flex;
+	// inline-flex so cms_popup_cell text-align:center still centers the box
+	display: inline-flex;
 	flex-direction: column;
+	vertical-align: middle;
 }
 
 .cms_update_popup_toolbar {

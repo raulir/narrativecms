@@ -24,15 +24,22 @@
 	"cms_menu":[
 		{
 			"id":"emailer",
-			"name":"Emailer"
+			"name":"Emailer",
+			"parent":"cms_tools"
 		},
 		{
 			"id":"emailers",
 			"name":"Emailers",
 			"parent":"emailer",
 			"url":"admin/cms_list/emailer__basic/"
+		},
+		{
+			"id":"emailsend",
+			"name":"Emailer sender",
+			"parent":"emailer",
+			"url":"admin/panel_settings/emailer__sender/"
 		}
-    ],
+	],
 	"layouts":[
 		{
 			"id":"emailer",

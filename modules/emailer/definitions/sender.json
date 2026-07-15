@@ -1,0 +1,55 @@
+{
+	"version":"2",
+    "image":"",
+    "label":"Emailer sender",
+    "description":"Emailer sender",
+	"item":[
+	
+	],
+	"settings":[
+		{
+			"type":"text",
+			"name":"from",
+			"label":"From address"
+		},
+		{
+			"type":"text",
+			"name":"from_name",
+			"label":"From name"
+		},
+		{
+			"type":"text",
+			"name":"subject",
+			"label":"Subject"
+		},
+		{
+			"type":"textarea",
+			"name":"body",
+			"label":"Body",
+			"lines":"20",
+			"width":"wide"
+		},
+		{
+			"type":"text",
+			"name":"test_to_addresses",
+			"label":"Test recipient emails",
+			"help":"Comma separated list of emails"
+		},
+		{
+			"type":"emailer/test",
+			"name":"test",
+			"label":"Test"
+		},
+		{
+			"type":"subtitle",
+			"label":"Sending"
+		},
+		{
+			"type":"textarea",
+			"name":"to_addresses",
+			"label":"To addresses",
+			"lines":"20",
+			"help":"Comma separated list of emails"
+		}
+	]
+}
