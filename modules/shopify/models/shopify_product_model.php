@@ -66,7 +66,12 @@ class shopify_product_model extends Model {
 				
 				$request_data = $response->getDecodedBody();
 
-				if (stristr($endpoint, '/') && count($request_data) == 1){
+				if (!empty($request_data['errors'])){
+					
+					$data = $request_data;
+					$more = false;
+					
+				} else if (stristr($endpoint, '/') && count($request_data) == 1){
 					
 					$data = reset($request_data);
 					$more = false;
@@ -109,6 +114,10 @@ class shopify_product_model extends Model {
 		} else {
 				
 			$data = json_decode(file_get_contents($filename), true);
+			
+			if (!is_array($data)){
+				$data = [];
+			}
 				
 		}
 
@@ -139,7 +148,7 @@ class shopify_product_model extends Model {
 		
 		$product = $this->call('products/'.$product_shopify_id, ['force' => $force, ]);
 // _print_r($product);		
-		if (!empty($product['errors']) && $product['errors'] == 'Not Found'){
+		if (!is_array($product) || !empty($product['errors'])){
 			return [];
 		}
 		
@@ -230,7 +239,7 @@ class shopify_product_model extends Model {
 		
 		$shopify_product = $this->get_product($cms_product['shopify_id'], $force);
 
-		if (empty($shopify_product)){
+		if (!is_array($shopify_product) || empty($shopify_product['id'])){
 			$this->cms_page_panel_model->update_cms_page_panel($cms_product_id, ['show' => 0, ]);
 			return [];
 		}
