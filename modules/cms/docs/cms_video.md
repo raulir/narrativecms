@@ -1,6 +1,6 @@
 # CMS video encoding
 
-**See also:** [`Agents.md`](../../../Agents.md) (architecture rules), [`cms_input_image.md`](cms_input_image.md) (selector/preview), [`cms_image.md`](cms_image.md) (video-as-image editor).
+**See also:** [`agents.md`](agents.md) (CMS architecture rules), [`cms_input_image.md`](cms_input_image.md) (selector/preview), [`cms_image.md`](cms_image.md) (video-as-image editor).
 
 ## Overview
 

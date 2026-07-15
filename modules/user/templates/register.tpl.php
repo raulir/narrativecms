@@ -1,6 +1,7 @@
 <?php if(empty($loggedin)): ?>
 
-	<div class="register_container" data-cms_page_panel_id="<?= $cms_page_panel_id ?>" data-success="<?= $success_url ?>">
+	<div class="register_container" data-cms_page_panel_id="<?= $cms_page_panel_id ?>" data-success="<?= $success_url ?>"
+			data-progress_message="<?= htmlspecialchars($progress_message ?? 'One moment...', ENT_QUOTES, 'UTF-8') ?>">
 		<div class="register_content">
 		
 				<div class="register_heading"><?= $heading ?></div>

@@ -191,7 +191,14 @@ class Controller {
 	function panel($name, $params = []){
 
 		$this->load->model('cms/cms_access_model');
-		$this->cms_access_model->enforce_panel_access($name, $params);
+		if (!$this->cms_access_model->enforce_panel_access($name, $params)){
+			return [
+					'_html' => $this->cms_access_model->get_panel_access_skipped_html($name),
+					'js' => [],
+					'css' => [],
+					'scss' => [],
+			];
+		}
 
 		if (!empty($params['_extends'])){
 			$files = $this->get_panel_filenames($name, $params, $params['_extends']);
@@ -679,7 +686,19 @@ class Controller {
 		$params = array_merge($this->cms_page_panel_model->get_cms_page_panel_settings($name, $this->cms_page_panel_model->get_content_language()), $params);
 
 		$this->load->model('cms/cms_access_model');
-		$this->cms_access_model->enforce_panel_access($name, $params);
+		if (!$this->cms_access_model->enforce_panel_access($name, $params)){
+			if (!empty($params['no_html'])){
+				return [];
+			}
+			return [
+					'_html' => $this->cms_access_model->get_panel_access_skipped_html($name),
+					'js' => [],
+					'css' => [],
+					'scss' => [],
+			];
+		}
+
+		$params['_access_ok'] = 1;
 
 		// do panel action
 		$action_result = $this->run_action($name, $params);
@@ -852,10 +871,20 @@ class Controller {
 			if (empty($panel_config['params'])){
 				$panel_config['params'] = array();
 			}
-			$this->cms_access_model->enforce_panel_access($panel_config['panel'], $panel_config['params']);
+
+			if (empty($panel_config['panel'])){
+				continue;
+			}
+
+			if (!$this->cms_access_model->enforce_panel_access($panel_config['panel'], $panel_config['params'])){
+				$page_config[$key]['_access_skipped'] = 1;
+				continue;
+			}
+
 			$action_result = $this->run_action($panel_config['panel'], (!empty($panel_config['params']) ? $panel_config['params'] : array()));
 			$page_config[$key]['params'] =
 					(!empty($action_result) && is_array($action_result) ? array_merge($panel_config['params'], $action_result) : $panel_config['params']);
+			$page_config[$key]['params']['_access_ok'] = 1;
 		}
 
 		$page_config = $this->_swap_page_config_header($page_config);
@@ -873,6 +902,14 @@ class Controller {
 						$this->cms_access_model->get_access_denied_inline_html();
 				continue;
 				
+			}
+
+			if (!empty($panel_config['_access_skipped'])){
+
+				$return[$panel_config['position'].'_'.$key.'_'.(!empty($params['cms_page_id']) ? $params['cms_page_id'] : '0')] =
+						$this->cms_access_model->get_panel_access_skipped_html($panel_config['panel']);
+				continue;
+
 			}
 
 			if (!empty($page_cache_deferred[$key])) {

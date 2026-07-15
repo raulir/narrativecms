@@ -202,6 +202,8 @@ class register extends Controller {
 		
 		$params['loggedin'] = $this->user_model->is_logged_in();
 		$params['success_url'] = $this->user_model->get_user_redirect_url();
+		$params['progress_message'] = $this->user_model->get_progress_message();
+		$this->user_model->enqueue_progress_overlay();
 		
 		return $params;
 	

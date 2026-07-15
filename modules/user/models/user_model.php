@@ -472,6 +472,29 @@ class user_model extends Model {
 		return $this->cms_page_panel_model->get_cms_page_panel_settings('user/user_settings');
 		
 	}
+
+	function get_progress_message(){
+
+		$settings = $this->get_user_settings();
+		$msg = trim((string)($settings['progress_message'] ?? ''));
+
+		return $msg !== '' ? $msg : 'One moment...';
+
+	}
+
+	/**
+	 * Full-page lighten overlay for slow auth (register / Google). JS API: user_progress_show / user_progress_hide
+	 */
+	function enqueue_progress_overlay($with_google_callback = false){
+
+		add_css('modules/user/css/user_progress.scss');
+		add_js('modules/user/js/user_progress.js');
+
+		if ($with_google_callback){
+			add_js('modules/user/js/user_google_button.js');
+		}
+
+	}
 	
 	function email_confirmation_required(){
 		

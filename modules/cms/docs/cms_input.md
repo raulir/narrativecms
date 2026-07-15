@@ -252,4 +252,4 @@ Table grid tied to panel model `ds_*` data-source methods. Can be embedded in a 
 ## See also
 
 - [`cms_input_image.md`](cms_input_image.md) — image/video input and selector stack
-- [`Agents.md`](../../../Agents.md) — panel and definition conventions
+- [`agents.md`](agents.md) — panel and definition conventions

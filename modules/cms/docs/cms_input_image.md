@@ -98,4 +98,4 @@ Sets `data-w` / `data-h` on `.cms_input_image` for downstream tools. Mp4 preview
 
 - [`cms_image.md`](cms_image.md) — crop editor UI and export model
 - [`cms_video.md`](cms_video.md) — mp4 encode queue and playback
-- [`Agents.md`](../../../Agents.md) — compact image/video architecture rules
+- [`agents.md`](agents.md) — compact image/video architecture rules

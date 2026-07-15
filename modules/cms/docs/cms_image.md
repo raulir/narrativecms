@@ -4,7 +4,7 @@
 
 The `cms_image` panel is the crop/adjust editor overlay. It opens on top of the image selector grid (`cms_images`).
 
-Full stack (input field → popup → grid → this editor): [`cms_input_image.md`](cms_input_image.md). Architecture rules: [`Agents.md`](../../../Agents.md).
+Full stack (input field → popup → grid → this editor): [`cms_input_image.md`](cms_input_image.md). Architecture rules: [`agents.md`](agents.md).
 
 ## Crop editor
 

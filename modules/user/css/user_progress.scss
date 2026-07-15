@@ -1,0 +1,60 @@
+// Full-page progress overlay (units-card style: veil immediately, message after ~1s)
+
+.user_progress_overlay {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 10000;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+	box-sizing: border-box;
+}
+
+.user_progress_overlay.user_progress_active {
+	display: flex;
+	pointer-events: all;
+}
+
+.user_progress_veil {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background-color: #fff;
+	opacity: 0;
+}
+
+.user_progress_overlay.user_progress_active .user_progress_veil {
+	animation: user_progress_veil_fade 1s forwards;
+}
+
+@keyframes user_progress_veil_fade {
+	from {
+		opacity: 0.2;
+	}
+	to {
+		opacity: 0.8;
+	}
+}
+
+.user_progress_message {
+	position: relative;
+	z-index: 1;
+	padding: 1rem 1.5rem;
+	font-size: 1.2rem;
+	line-height: 1.5rem;
+	text-align: center;
+	color: #333;
+	opacity: 0;
+	pointer-events: none;
+	box-sizing: border-box;
+}
+
+.user_progress_overlay.user_progress_message_visible .user_progress_message {
+	opacity: 1;
+}

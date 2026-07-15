@@ -11,6 +11,8 @@ Short map of login, register, reminder, email confirm, and how music themes them
 | **Links** | `login_link` (guest), `user_link` (after login/register/Google), `logout_link`. |
 | **Default access** | Keys on new register (e.g. `music_student`); modules also grant `login_access` on login. |
 
+Access keys, panel `"access"` / `"access_blocked"`, page gates: [`access.md`](../../cms/docs/access.md).
+
 Mail needs CMS **From email** / SMTP ([`cms_email.md`](../../cms/docs/cms_email.md)).
 
 ## Panels and pages

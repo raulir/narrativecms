@@ -190,7 +190,6 @@ if (file_exists($_settings_def_file)) {
 }
 
 // TODO: remove legacy position_wrappers / position_links → single_page_mode translation once all envs migrated
-// (also listed in project todo.md). Legacy translation only happens here — not in _single_page_mode() / call sites.
 if (!$_single_page_mode_from_db) {
 	if (!empty($GLOBALS['config']['position_wrappers']) && !empty($GLOBALS['config']['position_links'])) {
 		$GLOBALS['config']['single_page_mode'] = '1';

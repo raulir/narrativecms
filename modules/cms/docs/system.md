@@ -10,6 +10,9 @@ Related CMS docs:
 | `panel_params` frontend vs admin | [`cms_panel_params.md`](cms_panel_params.md) |
 | Module `config.json` extends | [`cms_module_extends.md`](cms_module_extends.md) |
 | Languages / targets boot | [`language.md`](language.md), [`targets.md`](targets.md) |
+| Access keys, page/panel gates, `access_blocked` | [`access.md`](access.md) |
+| CMS coding / agent conventions | [`agents.md`](agents.md) |
+| CMS / system backlog | [`todo.md`](todo.md) |
 
 ---
 
@@ -177,7 +180,7 @@ Public API modules: URI `module/api_id` may short-circuit in `cms.php` before fu
 
 - Do not add **serve-time** workarounds for outdated on-disk cache formats  
 - When format changes: purge/rebuild on save; on hit, serve as-is  
-- Full-page cache HIT may skip CI boot and thus skip `panel_action` (known limitation — see project `todo.md`)
+- Full-page cache HIT may skip CI boot and thus skip `panel_action` (known limitation — see [`todo.md`](todo.md) § Page cache)
 
 ---
 

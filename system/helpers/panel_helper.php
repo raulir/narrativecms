@@ -99,7 +99,20 @@ if ( !function_exists('get_position')) {
     	
     	$ci =& get_instance();
 
-    	// check if json defined js
+    	// Access first — do not register definition JS if panel is skipped
+    	$ci->load->model('cms/cms_access_model');
+    	if (!$ci->cms_access_model->enforce_panel_access($name, $params)){
+    		$html = $ci->cms_access_model->get_panel_access_skipped_html($name);
+    		if (!$params['_return']){
+    			print($html);
+    			return;
+    		}
+    		return $html;
+    	}
+
+    	$params['_access_ok'] = 1;
+
+    	// json defined js (only after access allowed)
     	$ci->load->model('cms/cms_panel_model');
     	$panel_config = $ci->cms_panel_model->get_cms_panel_config($name);
     	if (!empty($panel_config['js'])){
@@ -138,9 +151,9 @@ if ( !function_exists('get_position')) {
     	}
 
     	if (!$params['_return']){
-			print('<!-- embed start -->'.$data['_html'].'<!-- embed end -->');
+			print('<!-- embed start -->'.($data['_html'] ?? '').'<!-- embed end -->');
     	} else {
-    		return $data['_html'];
+    		return $data['_html'] ?? '';
     	}
     }
     

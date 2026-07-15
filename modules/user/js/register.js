@@ -63,6 +63,10 @@ function register_init(){
 		
 		register_submitting = true
 		$('.register_submit').addClass('register_submit_disabled')
+
+		if (typeof user_progress_show === 'function'){
+			user_progress_show(user_progress_message_from($('.register_container')))
+		}
 		
 		data.success = function(result){
 
@@ -74,6 +78,10 @@ function register_init(){
 				register_show_success(result.result.redirect_url)
 				
 			} else if (result.result.errors){
+
+				if (typeof user_progress_hide === 'function'){
+					user_progress_hide()
+				}
 				
 				result.result.errors.forEach(error => register_show_error(error))
 
@@ -87,6 +95,9 @@ function register_init(){
 		get_ajax('user/register', data).catch(function(){
 			register_submitting = false
 			$('.register_submit').removeClass('register_submit_disabled')
+			if (typeof user_progress_hide === 'function'){
+				user_progress_hide()
+			}
 		});
 
 	})

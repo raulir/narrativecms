@@ -70,7 +70,7 @@ function cms_input_image_destroy($root){
 }
 ```
 
-Call destroy when DOM is removed (repeater row delete, popup close) so handlers and state do not leak. Repeater wiring for `$root` / destroy is not automatic yet — see project `todo.md`.
+Call destroy when DOM is removed (repeater row delete, popup close) so handlers and state do not leak. Repeater wiring for `$root` / destroy is not automatic yet — see [`todo.md`](todo.md) § Panel JavaScript.
 
 Panels with destroy in CMS module: `cms_input_image`, `cms_image`, `cms_video`, `cms_images` popup.
 

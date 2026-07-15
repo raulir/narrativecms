@@ -23,7 +23,7 @@ Related email auth (login, reminder): [`auth_email.md`](auth_email.md)
 
 ## Access keys
 
-Frontend panel access is enforced by [`cms_access_model.php`](../../cms/models/cms_access_model.php) (panel definition `"access"`, user repeater **Access** on `user/user`).
+Frontend panel access is enforced by [`cms_access_model.php`](../../cms/models/cms_access_model.php) (panel definition `"access"` / `"access_blocked"`, user repeater **Access** on `user/user`). Full guide: [`access.md`](../../cms/docs/access.md).
 
 - **Default access** — `user/user_settings` → **Default access** repeater (applied on register via `create_user`)
 - **Login grant** — each module `config.json` → `login_access` array (e.g. `music_student` from [`music/config.json`](../../music/config.json)); merged on login via `refresh_user_session()`

@@ -166,7 +166,7 @@ if (typeof beacon_pageview === 'function') {
 - Lookup only in **analytics_process**, not on beacon. Resolved country/region/city stored on **`cms_analytics_session`** only (legacy geo columns on pageviews are unused).
 - Cache: `cache/analytics_geo_cache.json` (30-day TTL per IP entry).
 - **GeoIP diagnostics** on the dashboard (bottom block) is off by default; enable in Analytics settings when debugging.
-- `_resolve_geo()` is abstracted so a future third-party or **cross-installation CMS RPC** GeoIP endpoint can replace local MaxMind behind the same cache (see [`cms_todo.md`](../../cms/docs/cms_todo.md)).
+- `_resolve_geo()` is abstracted so a future third-party or **cross-installation CMS RPC** GeoIP endpoint can replace local MaxMind behind the same cache (see [`todo.md`](../../cms/docs/todo.md) § Cross-installation RPC).
 
 City-level accuracy is approximate (metro area), not street-level. Anonymised IP (/24) is sufficient for aggregate reporting.
 

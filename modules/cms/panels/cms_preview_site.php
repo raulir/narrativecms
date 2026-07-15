@@ -4,7 +4,7 @@ class cms_preview_site extends CI_Controller {
 
 	function panel_params($params){
 
-		// Stub: marker + cookie wired in controller; highlight JS/CSS deferred (todo.md)
+		// Stub: marker + cookie wired in controller; highlight JS/CSS deferred (modules/cms/docs/todo.md)
 
 		return $params;
 

@@ -1,20 +1,62 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 class cms_access_model extends Model {
-	
-	function get_panel_required_access($panel_name){
-		
+
+	// Request-scoped caches (cleared when session access changes)
+	var $_session_access_keys_cached = null;
+	var $_panel_access_meta = [];
+
+	/**
+	 * Panel definition access meta. Request-cached per panel name.
+	 * required: access key pattern (empty = public)
+	 * blocked: login | skip (default login)
+	 */
+	function get_panel_access_meta($panel_name){
+
+		$panel_name = (string)$panel_name;
+
+		if (isset($this->_panel_access_meta[$panel_name])){
+			return $this->_panel_access_meta[$panel_name];
+		}
+
 		$this->load->model('cms/cms_panel_model');
 		$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
-		
-		if (empty($config['access']) || $config['access'] === '*'){
-			return '';
+
+		$required = '';
+		if (!empty($config['access']) && $config['access'] !== '*'){
+			$required = trim((string)$config['access']);
 		}
-		
-		return $config['access'];
-		
+
+		$blocked = 'login';
+		if (!empty($config['access_blocked']) && $config['access_blocked'] === 'skip'){
+			$blocked = 'skip';
+		}
+
+		$meta = [
+				'required' => $required,
+				'blocked' => $blocked,
+		];
+
+		$this->_panel_access_meta[$panel_name] = $meta;
+
+		return $meta;
+
 	}
-	
+
+	function get_panel_required_access($panel_name){
+
+		$meta = $this->get_panel_access_meta($panel_name);
+
+		return $meta['required'];
+
+	}
+
+	function get_panel_access_skipped_html($panel_name){
+
+		return "\n".'<!-- panel "'.$panel_name.'" access skipped -->'."\n";
+
+	}
+
 	function parse_access_keys($subject){
 		
 		if (empty($subject) || !is_array($subject)){
@@ -46,8 +88,18 @@ class cms_access_model extends Model {
 		return [];
 		
 	}
+
+	function _clear_session_access_keys_cache(){
+
+		$this->_session_access_keys_cached = null;
+
+	}
 	
 	function get_session_access_keys(){
+
+		if ($this->_session_access_keys_cached !== null){
+			return $this->_session_access_keys_cached;
+		}
 		
 		if (in_array('user', $GLOBALS['config']['modules'])){
 			
@@ -55,26 +107,32 @@ class cms_access_model extends Model {
 			$user = $this->user_model->get_current();
 			
 			if (empty($user)){
-				return [];
+				$this->_session_access_keys_cached = [];
+				return $this->_session_access_keys_cached;
 			}
 			
 			if (!empty($_SESSION['access_keys']) && is_array($_SESSION['access_keys'])){
-				return array_values(array_filter(array_map('trim', $_SESSION['access_keys'])));
+				$this->_session_access_keys_cached = array_values(array_filter(array_map('trim', $_SESSION['access_keys'])));
+				return $this->_session_access_keys_cached;
 			}
 			
-			return $this->parse_access_keys($user);
+			$this->_session_access_keys_cached = $this->parse_access_keys($user);
+			return $this->_session_access_keys_cached;
 			
 		}
 		
 		if (!empty($_SESSION['access_keys']) && is_array($_SESSION['access_keys'])){
-			return array_values(array_filter(array_map('trim', $_SESSION['access_keys'])));
+			$this->_session_access_keys_cached = array_values(array_filter(array_map('trim', $_SESSION['access_keys'])));
+			return $this->_session_access_keys_cached;
 		}
 		
 		if (!empty($_SESSION['user'])){
-			return $this->parse_access_keys($_SESSION['user']);
+			$this->_session_access_keys_cached = $this->parse_access_keys($_SESSION['user']);
+			return $this->_session_access_keys_cached;
 		}
 		
-		return [];
+		$this->_session_access_keys_cached = [];
+		return $this->_session_access_keys_cached;
 		
 	}
 	
@@ -265,6 +323,7 @@ class cms_access_model extends Model {
 		
 		unset($_SESSION['user']);
 		unset($_SESSION['access_keys']);
+		$this->_clear_session_access_keys_cache();
 		
 	}
 	
@@ -292,6 +351,7 @@ class cms_access_model extends Model {
 		
 		$user['access_keys'] = $this->parse_access_keys($user);
 		$_SESSION['user'] = $user;
+		$this->_clear_session_access_keys_cache();
 		
 	}
 	
@@ -474,24 +534,68 @@ class cms_access_model extends Model {
 			return;
 		}
 		
+		// Without user module there is no login page — soft-redirect only when user module present
+		if (!in_array('user', $GLOBALS['config']['modules'] ?? [])){
+			return;
+		}
+		
 		$this->_reject_access($params);
 		
 	}
-	
-	function enforce_panel_access($panel_name, $params = []){
-		
-		$required = $this->get_panel_required_access($panel_name);
-		
+
+	/**
+	 * Panel access decision: allow | login | skip
+	 * - No required key → allow
+	 * - Has key → allow
+	 * - Denied without user module → always skip
+	 * - Denied with user module → login (default) or skip per access_blocked
+	 */
+	function check_panel_access($panel_name, $user_keys = null){
+
+		$meta = $this->get_panel_access_meta($panel_name);
+		$required = $meta['required'];
+
 		if ($required === ''){
-			return;
+			return 'allow';
 		}
-		
-		if ($this->user_has_access($required)){
-			return;
+
+		if ($this->user_has_access($required, $user_keys)){
+			return 'allow';
 		}
-		
+
+		if (!in_array('user', $GLOBALS['config']['modules'] ?? [])){
+			return 'skip';
+		}
+
+		return ($meta['blocked'] === 'skip') ? 'skip' : 'login';
+
+	}
+	
+	/**
+	 * Gate for all panel render paths.
+	 * @return bool true = allow continue; false = skip (caller emits comment / no action)
+	 * On login mode: soft-redirects / JSON and does not return
+	 */
+	function enforce_panel_access($panel_name, $params = []){
+
+		if (!empty($params['_access_ok'])){
+			return true;
+		}
+
+		$status = $this->check_panel_access($panel_name);
+
+		if ($status === 'allow'){
+			return true;
+		}
+
+		if ($status === 'skip'){
+			return false;
+		}
+
 		$this->_reject_access($params);
-		
+
+		return false;
+
 	}
 	
 }

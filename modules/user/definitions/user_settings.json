@@ -47,6 +47,13 @@
 			"help":"Plain text. Use {{name}} for the user's name (first name, else username, else email)."
 		},
 		{
+			"type":"text",
+			"name":"progress_message",
+			"label":"Progress message",
+			"default":"One moment...",
+			"help":"Shown on full-page overlay during slow sign-in/register (after ~1 second). Leave empty for default."
+		},
+		{
 			"type":"subtitle",
 			"label":"Links"
 		},
