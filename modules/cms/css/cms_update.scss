@@ -49,6 +49,73 @@
 	margin-top: 0.5rem;
 }
 
-.cms_update_result {
-	padding: 2.0rem 1.0rem 1.0rem 1.0rem;
+// Update progress popup (sized like image selector)
+.cms_update_popup_container {
+	z-index: 19900;
+}
+
+.cms_update_popup_content.cms_popup_content {
+	box-sizing: border-box;
+	width: 98.0rem;
+	max-width: calc(100vw - 2.0rem);
+	max-height: calc(100vh - 4.0rem);
+	height: auto;
+	padding: 1.4rem;
+	position: relative;
+	text-align: left;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+.cms_update_popup_toolbar {
+	margin-bottom: 1.0rem;
+	flex-shrink: 0;
+}
+
+.cms_update_popup_files {
+	box-sizing: border-box;
+	flex: 1 1 auto;
+	min-height: 20.0rem;
+	max-height: calc(100vh - 14.0rem);
+	overflow-y: auto;
+	padding: 0.5rem 0.2rem 0.5rem 0;
+	font-size: 1.4rem;
+	line-height: 2.2rem;
+}
+
+.cms_update_result_file {
+	padding: 0.1rem 0;
+}
+
+.cms_update_popup_overlay {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 50;
+	background-color: white;
+	opacity: 0;
+	transition: opacity 0.3s;
+	pointer-events: none;
+}
+
+.cms_update_popup_overlay_visible {
+	opacity: 0.85;
+	pointer-events: all;
+}
+
+.cms_update_popup_overlay_label {
+	display: none;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 1.8rem;
+	color: #000000;
+}
+
+.cms_update_popup_overlay_show_label .cms_update_popup_overlay_label {
+	display: block;
 }

@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class cms_update extends CI_Controller {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_update extends \Controller {
 
 	function __construct(){
 
@@ -119,6 +123,25 @@ class cms_update extends CI_Controller {
 
 			$params['result'] = $this->cms_update_model->enable_module_penultimate($area);
 
+		} else if ($do == 'cms_update_confirm'){
+
+			if (!$this->cms_update_model->client_may_use_area($area)){
+				$params['result'] = ['error' => 'not_allowed'];
+				return $params;
+			}
+
+			$row = $this->cms_update_model->confirm_area($area);
+
+			ob_start();
+			include $GLOBALS['config']['base_path'].'modules/cms/templates/cms_update_row.tpl.php';
+			$row_html = ob_get_clean();
+
+			$params['result'] = [
+					'area' => $area,
+					'row' => $row,
+					'row_html' => $row_html,
+			];
+
 		}
 		
 		return $params;
@@ -133,61 +156,36 @@ class cms_update extends CI_Controller {
 
 		$this->load->model('cms/cms_update_model');
 
-		$params['can_update'] = false;
 		$params['available'] = [];
+		$params['rows_local_only'] = [];
+		$params['row_core'] = null;
+		$params['rows_modules'] = [];
 
-		// update local hashes
-		$params['data'] = $this->cms_update_model->rebuild();
-		
 		if (empty($GLOBALS['config']['update']['master'])){
 			$GLOBALS['config']['update']['master'] = [];
 		}
-		
+
 		if (!empty($GLOBALS['config']['update']['is_master'])){
 			$GLOBALS['config']['update']['master'][] = '';
 		}
 
-		// get master version
-		foreach($params['data'] as $key => $area){
-			
-			if (!in_array($area['area'], $GLOBALS['config']['update']['master'])){
-				
-				$version_data = $this->cms_update_model->get_master_version($area['area']);
+		// Rebuild local hashes, then group for display (local only → core → modules)
+		$data = $this->cms_update_model->rebuild();
 
-				if (!empty($version_data['error'])){
-					$params['data'][$key]['error'] = $version_data['error'];
-				}
-				
-				$params['data'][$key]['master_version'] = !empty($version_data['version']) ? $version_data['version'] : '';
-				$params['data'][$key]['master_hash'] = !empty($version_data['current_hash']) ? $version_data['current_hash'] : '';
-				$params['data'][$key]['master_time'] = !empty($version_data['version_time']) ? $version_data['version_time'] : 0;
-				if ($params['data'][$key]['master_hash'] != $area['local_current_hash']){
-					$params['data'][$key]['can_update'] = true;
-				}
-				$params['data'][$key]['may_use'] = $this->cms_update_model->client_may_use_area($area['area']);
-				
+		foreach ($data as $area){
+
+			$row = $this->cms_update_model->build_area_display_row($area);
+			$is_core = ($row['area'] === '');
+
+			if (!empty($row['local_only'])){
+				$params['rows_local_only'][] = $row;
+				continue;
+			}
+
+			if ($is_core){
+				$params['row_core'] = $row;
 			} else {
-				
-				// check if to increment master version
-				if (!empty($GLOBALS['config']['update']['master']) && in_array($area['area'], $GLOBALS['config']['update']['master'])){
-
-					if ($area['local_current_hash'] !== $area['local_version_hash']){
-
-						$this->cms_update_model->increment_master_version($area['area']);
-						$local_data = $this->cms_update_model->get_version($area['area']);
-						
-						$params['data'][$key]['local_version'] = $local_data['version'];
-						$params['data'][$key]['local_version_hash'] = $local_data['version_hash'];
-						$params['data'][$key]['local_current_hash'] = $local_data['current_hash'];
-						$params['data'][$key]['local_updated'] = $local_data['version_time'];
-						$params['data'][$key]['local_version_time'] = $local_data['version_time'];
-						
-					}
-					
-					$params['data'][$key]['status'] = 'This is master';
-				
-				}
-
+				$params['rows_modules'][] = $row;
 			}
 
 		}

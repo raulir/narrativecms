@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class cms_update_model extends CI_Model {
+class cms_update_model extends Model {
 
 	/**
 	 * Live tree roots for core CMS update area (empty $area).
@@ -898,6 +898,166 @@ class cms_update_model extends CI_Model {
 		
 		// write cache file
 		file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
+
+	}
+
+	function format_local_version_label($row){
+
+		$version = $row['local_version'] ?? '';
+		if ($version === '' || $version === '0.0.0'){
+			$version = 'unknown';
+		}
+
+		if (!empty($row['local_changes'])){
+			return $version.' (local changes)';
+		}
+
+		return $version;
+
+	}
+
+	function format_master_version_label($version, $time){
+
+		if ($version === '' || $version === null){
+			return '';
+		}
+
+		$label = $version;
+		if (!empty($time)){
+			$label .= ' '.date('(Y-m-d H:i)', (int)$time);
+		}
+
+		return $label;
+
+	}
+
+	/**
+	 * Build one updater table row (labels only — no hash fragments in UI fields).
+	 * $area_data is a rebuild_area() result.
+	 */
+	function build_area_display_row($area_data){
+
+		if (empty($GLOBALS['config']['update']['master'])){
+			$GLOBALS['config']['update']['master'] = [];
+		}
+
+		$area_id = $area_data['area'] ?? '';
+		$is_core = ($area_id === '');
+		$is_local_master = in_array($area_id, $GLOBALS['config']['update']['master'], true);
+
+		// Master host: bump package version when local tree differs from recorded version
+		if ($is_local_master
+				&& ($area_data['local_current_hash'] ?? '') !== ($area_data['local_version_hash'] ?? '')){
+			$this->increment_master_version($area_id);
+			$local_data = $this->get_version($area_id);
+			$area_data['local_version'] = $local_data['version'] ?? $area_data['local_version'];
+			$area_data['local_version_hash'] = $local_data['version_hash'] ?? $area_data['local_version_hash'];
+			$area_data['local_current_hash'] = $local_data['current_hash'] ?? $area_data['local_current_hash'];
+			$area_data['local_updated'] = $local_data['version_time'] ?? ($area_data['local_updated'] ?? 0);
+			$area_data['local_version_time'] = $local_data['version_time'] ?? ($area_data['local_version_time'] ?? 0);
+		}
+
+		$row = [
+				'area' => $area_id,
+				'label' => $is_core ? 'Narrative CMS' : $area_id,
+				'local_version' => $area_data['local_version'] ?? '0.0.0',
+				'local_version_hash' => $area_data['local_version_hash'] ?? '',
+				'local_current_hash' => $area_data['local_current_hash'] ?? '',
+				'local_version_time' => !empty($area_data['local_version_time']) ? (int)$area_data['local_version_time'] : 0,
+				'local_updated' => !empty($area_data['local_updated']) ? (int)$area_data['local_updated'] : 0,
+				'local_changes' => false,
+				'local_label' => '',
+				'master_version' => '',
+				'master_hash' => '',
+				'master_time' => 0,
+				'master_label' => '',
+				'can_update' => false,
+				'may_use' => $this->client_may_use_area($area_id),
+				'error' => '',
+				'local_only' => false,
+				'status' => '',
+		];
+
+		$row['local_changes'] = !empty($row['local_current_hash'])
+				&& !empty($row['local_version_hash'])
+				&& $row['local_current_hash'] !== $row['local_version_hash'];
+
+		if ($is_local_master){
+
+			if ($is_core){
+				$row['local_label'] = $this->format_local_version_label($row);
+				$row['master_label'] = 'This is master';
+				$row['status'] = 'This is master';
+			} else {
+				$row['local_only'] = true;
+				$row['local_label'] = 'Local only';
+				$row['master_label'] = '';
+			}
+
+			return $row;
+
+		}
+
+		$version_data = $this->get_master_version($area_id);
+
+		if (!empty($version_data['error'])){
+
+			if ($is_core){
+				$row['error'] = $version_data['error'];
+				$row['local_label'] = $this->format_local_version_label($row);
+			} else {
+				$row['local_only'] = true;
+				$row['local_label'] = 'Local only';
+			}
+
+			return $row;
+
+		}
+
+		$master_hash = !empty($version_data['current_hash'])
+				? $version_data['current_hash']
+				: (!empty($version_data['version_hash']) ? $version_data['version_hash'] : '');
+		$master_version = !empty($version_data['version']) ? $version_data['version'] : '';
+		$master_time = !empty($version_data['version_time']) ? (int)$version_data['version_time'] : 0;
+
+		if ($master_hash === '' && $master_version === '' && !$is_core){
+			$row['local_only'] = true;
+			$row['local_label'] = 'Local only';
+			return $row;
+		}
+
+		$row['master_version'] = $master_version;
+		$row['master_hash'] = $master_hash;
+		$row['master_time'] = $master_time;
+
+		$in_sync = ($master_hash !== '' && $row['local_current_hash'] === $master_hash);
+
+		if ($in_sync){
+			$row['local_changes'] = false;
+			$row['local_label'] = $master_version !== ''
+					? $master_version
+					: $this->format_local_version_label($row);
+			$row['master_label'] = $this->format_master_version_label($master_version, $master_time);
+			$row['can_update'] = false;
+		} else {
+			$row['local_label'] = $this->format_local_version_label($row);
+			$row['master_label'] = $this->format_master_version_label($master_version, $master_time);
+			$row['can_update'] = $row['may_use'] && $master_hash !== '';
+		}
+
+		return $row;
+
+	}
+
+	/**
+	 * Rebuild hashes for one area and return display row for the updater table.
+	 */
+	function confirm_area($area){
+
+		$folders = $this->_update_area_folders($area);
+		$local = $this->rebuild_area($area, $folders);
+
+		return $this->build_area_display_row($local);
 
 	}
 
