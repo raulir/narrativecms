@@ -99,24 +99,23 @@ Local working hashes remain under `cache/version.json` / `cache/version_{module}
 
 ## Client update popup + schema
 
-After file transfer (Update or Install), the progress popup:
+After file transfer (Update or Install):
 
-1. Confirms the area (refreshes the updater table row)
-2. Checks **schema for that module only** (`area` empty → module `cms`)
-3. Shows a **Schema** section: OK message, or the same fix/sync UI as the full schema page for that one module
+1. Confirm area (refresh updater table row)
+2. Check **schema for that package only** (`area` empty → `cms`)
+3. Append result in the **same scroll stream** as file ticks (scroll down after transfer)
 
-Height matches a **4-row** image selector (`4 × 15.8rem` + chrome). File ticks and the **Schema** block share **one scrollable body** — after transfer, the view can scroll down to schema.
+No extra “Schema” heading in the popup — the fragment is the schema content only.
 
-When the module DB matches definitions: **“No schema updates available for this module”**. Otherwise the usual per-module fix/sync UI.
+- No DB drift: **“No schema updates available for this module”**
+- Drift: same fix/sync controls as the full schema page for that one module
 
-Schema fragment: [`cms_schema`](cms_schema.md) with `module` + `fragment=1` → [`templates/cms_schema/fragment.tpl.php`](../templates/cms_schema/fragment.tpl.php).
+Fragment request uses `schema_module` + `fragment=1` (not `module` — panel loader overwrites `module` with the panel package name `cms`).
 
-Install enables the module then shows schema; **page reload waits until Close** so the user can fix tables first.
-
-**Release** on master does not run schema checks (no DB apply).
+Install: enable module → schema → **reload on Close**.
 
 ## Related code
 
 - Model: [`cms_update_model.php`](../models/cms_update_model.php)
-- Admin UI: [`cms_update.js`](../js/cms_update.js), [`cms_update_row.tpl.php`](../templates/cms_update_row.tpl.php), [`cms_update_popup.tpl.php`](../templates/cms_update_popup.tpl.php)
-- Schema: [`cms_schema_model`](../models/cms_schema_model.php), [`cms_schema.js`](../js/cms_schema.js)
+- Admin UI: [`cms_update.js`](../js/cms_update.js), [`cms_update_popup.tpl.php`](../templates/cms_update_popup.tpl.php)
+- Schema fragment: [`cms_schema/fragment.tpl.php`](../templates/cms_schema/fragment.tpl.php)

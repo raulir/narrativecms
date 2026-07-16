@@ -43,9 +43,113 @@ function cms_input_repeater_run_init_hooks($container){
 
 }
 
+/**
+ * Sortable for repeater blocks — sized helper/placeholder so absolute field layout keeps shape.
+ * Drag handle: upper toolbar only (four-way arrow cursor via CSS).
+ */
+function cms_input_repeater_sortable_init($root){
+
+	var $areas = $root && $root.length
+		? ($root.hasClass('cms_repeater_area') ? $root : $root.find('.cms_repeater_area'))
+		: $('.cms_repeater_area')
+
+	$areas.each(function(){
+
+		var $area = $(this)
+
+		if ($area.closest('.cms_repeater_container_readonly').length){
+			return
+		}
+
+		if ($area.hasClass('ui-sortable')){
+			try {
+				$area.sortable('destroy')
+			} catch (e) {
+				// ignore if already destroyed
+			}
+		}
+
+		$area.sortable({
+			items: '> .cms_repeater_block',
+			handle: '.cms_repeater_block_toolbar',
+			cancel: 'input, textarea, select, button, a, .cms_repeater_block_delete',
+			tolerance: 'pointer',
+			opacity: 0.92,
+			forcePlaceholderSize: true,
+			forceHelperSize: true,
+			placeholder: 'cms_repeater_block cms_repeater_block_placeholder',
+			helper: function(e, $item){
+
+				var $h = $item.clone()
+				// Match .cms_repeater_block width (49rem) — do not use full-row outerWidth quirks
+				var content_h = $item.children('.cms_repeater_block_content').outerHeight()
+				var block_h = $item.outerHeight()
+
+				$h.css({
+					'width': '49.0rem',
+					'max-width': '49.0rem',
+					'height': block_h,
+					'box-sizing': 'border-box',
+					'z-index': 10000,
+					'display': 'inline-block',
+					'vertical-align': 'top'
+				})
+				$h.children('.cms_repeater_block_content').css({
+					'height': content_h,
+					'box-sizing': 'border-box'
+				})
+
+				return $h
+
+			},
+			start: function(e, ui){
+
+				var content_h = ui.item.children('.cms_repeater_block_content').outerHeight()
+				var block_h = ui.item.outerHeight()
+
+				// Same footprint as a real block so two still fit on a row
+				ui.placeholder.css({
+					'visibility': 'visible',
+					'display': 'inline-block',
+					'vertical-align': 'top',
+					'box-sizing': 'border-box',
+					'width': '49.0rem',
+					'max-width': '49.0rem',
+					'height': block_h,
+					'margin': 0
+				})
+				if (!ui.placeholder.children('.cms_repeater_block_content').length){
+					ui.placeholder.html(
+						'<div class="cms_repeater_block_content cms_repeater_block_placeholder_inner"></div>'
+					)
+				}
+				ui.placeholder.children('.cms_repeater_block_content').css({
+					'height': content_h,
+					'min-height': content_h,
+					'box-sizing': 'border-box',
+					'width': '100%'
+				})
+
+			},
+			stop: function(){
+
+				if (typeof cms_page_panel_fields_init === 'function'){
+					cms_page_panel_fields_init()
+				}
+
+			}
+		})
+
+	})
+
+}
+
 function init_cms_input_repeater(){
 
-	$('.cms_repeater_button').on('click.r', function(){
+	// Initial sortable (page panel may also call after its own init)
+	cms_input_repeater_sortable_init()
+
+	$('.cms_repeater_button').off('click.r').on('click.r', function(){
 		
 		var $this = $(this);
 
@@ -76,11 +180,19 @@ function init_cms_input_repeater(){
 			
 			$area.append($span.html())
 
+			// Bind delete on new block
+			if (typeof init_cms_repeater_block_delete === 'function'){
+				init_cms_repeater_block_delete()
+			}
+
 			cms_input_repeater_append_scripts(scripts, function(){
 
 				if (typeof cms_page_panel_fields_init === 'function') {
 					cms_page_panel_fields_init()
 				}
+
+				// Refresh sortable so freshly added item keeps shape when dragged
+				cms_input_repeater_sortable_init($area)
 
 				cms_input_repeater_run_init_hooks($repeater)
 

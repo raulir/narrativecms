@@ -35,7 +35,7 @@ function cms_update_popup_finish($popup, state){
 }
 
 /**
- * Update area → schema module id (core package is empty area → cms).
+ * Update area → schema package id (core package is empty area → cms).
  */
 function cms_update_area_to_schema_module(area){
 
@@ -48,7 +48,8 @@ function cms_update_area_to_schema_module(area){
 }
 
 /**
- * Load single-module schema fragment into the popup Schema section.
+ * Load single-module schema fragment into the popup (same scroll stream as file ticks).
+ * Uses schema_module — not "module" (panel loader overwrites module with package name "cms").
  */
 function cms_update_load_schema(area, $popup, state, options){
 
@@ -61,7 +62,8 @@ function cms_update_load_schema(area, $popup, state, options){
 	$body.html('<div class="cms_update_popup_schema_pending">Checking schema for ' + module + '…</div>')
 
 	get_ajax_panel('cms/cms_schema', {
-		'module': module,
+		'schema_module': module,
+		'filter_module': module,
 		'fragment': '1'
 	}, function(result){
 
@@ -80,7 +82,7 @@ function cms_update_load_schema(area, $popup, state, options){
 			)
 		}
 
-		// Scroll shared body so Schema is visible after ticks
+		// Scroll shared body so schema is visible after ticks
 		var $scroll = $popup.find('.cms_update_popup_body')
 		var $schema = $popup.find('.cms_update_popup_schema')
 		if ($scroll.length && $schema.length){
@@ -98,7 +100,6 @@ function cms_update_load_schema(area, $popup, state, options){
 			state.reload_on_close = true
 		}
 
-		// Immediate reload only if explicitly requested (avoid by default after install)
 		if (options.reload){
 			window.location.reload()
 		}
@@ -133,14 +134,12 @@ function cms_update_apply_row_html(area, row_html){
 	})
 
 	if ($existing.length){
-		// One row only — avoid cloning into header / duplicates if filter ever over-matches
 		$existing.first().replaceWith(row_html)
 		$existing.slice(1).remove()
 	} else {
 		$table.append(row_html)
 	}
 
-	// Remove from available-to-install table if present
 	var $available = $('.cms_update_table_available')
 	if ($available.length){
 		$available.find('.cms_update_row[data-area]').filter(function(){
@@ -182,7 +181,6 @@ function cms_update_confirm_area(area, $popup, state, options){
 				options.after_confirm(result)
 			}
 
-			// Schema check for the updated module (partial UI, fix buttons)
 			cms_update_load_schema(area, $popup, state, {
 				'reload_on_close': !!options.reload_on_close,
 				'reload': !!options.reload
@@ -246,7 +244,6 @@ function cms_update_run_pipeline(area, options){
 					return
 				}
 
-				// print out list of files
 				$files.html('')
 				$.each(files, function(index, value){
 					$files.append(
@@ -258,7 +255,6 @@ function cms_update_run_pipeline(area, options){
 					files[index].updated = 0
 				})
 
-				// Batch transfer: up to batch_size files per ajax, max_batches in flight
 				var batch_size = 20
 				var max_batches = 2
 				var batches_active = 0
@@ -361,7 +357,6 @@ function cms_update_run_pipeline(area, options){
 										}
 									})
 								} else {
-									// Unexpected empty — still green the batch we sent
 									$.each(batch, function(_, value){
 										cms_update_mark_file(value.fn_hash, value.letter, 'green')
 									})
@@ -397,7 +392,6 @@ function cms_update_run_pipeline(area, options){
 
 function cms_update_init($root){
 
-	// Bind once on document for installed + available tables
 	if ($('body').hasClass('cms_update_js_ok')){
 		return
 	}
@@ -405,7 +399,6 @@ function cms_update_init($root){
 
 	$(document).on('click.cms', '.cms_update_button', function(){
 
-		// attr keeps core area as '' (jQuery .data() can drop empty data-area)
 		var area = $(this).attr('data-area')
 		if (area === undefined || area === null){
 			area = ''
@@ -437,7 +430,6 @@ function cms_update_init($root){
 						}
 
 						cms_notification('Module installed', 5)
-						// Confirm + schema first; reload when user closes the popup
 						cms_update_confirm_area(area, $popup, state, {
 							'reload_on_close': true
 						})

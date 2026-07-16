@@ -1,5 +1,5 @@
 <?php
-// One module block for full schema page and updater popup fragment.
+// One module block — full schema page + updater embed.
 // Expects: $module, $items, $panel_table_modules_pending (array)
 $module = $module ?? '';
 $items = $items ?? [];

@@ -144,7 +144,7 @@ class cms_schema_model extends \Model {
 	}
 	
 	/**
-	 * @param string|null $filter_module If set, only that module’s errors are returned
+	 * @param string|null $filter_module If set, only that schema package’s errors
 	 */
 	function get_schema_errors_with_status($filter_module = null) {
 	    $errors = $this->check_schema();

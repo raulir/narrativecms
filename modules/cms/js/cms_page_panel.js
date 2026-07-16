@@ -248,15 +248,10 @@ function cms_page_panel_init($root){
 			$title.data('new_block', true);
 		}
 
-		$('.cms_repeater_area', $container).each(function(){
-
-			if ($(this).parent().hasClass('cms_repeater_container_readonly')){
-
-			} else {
-				$(this).sortable().disableSelection()
-			}
-
-		})
+		// Repeater drag: shared init (toolbar handle, sized helper/placeholder)
+		if (typeof cms_input_repeater_sortable_init === 'function'){
+			cms_input_repeater_sortable_init($container)
+		}
 
 		cms_page_panel_title_preview_init($container)
 

@@ -58,14 +58,12 @@
 	box-sizing: border-box;
 	width: 98.0rem;
 	max-width: calc(100vw - 2.0rem);
-	// 4 image rows + toolbar + padding
 	height: calc(4 * 15.8rem + 6.0rem);
 	max-height: calc(100vh - 4.0rem);
 	padding: 1.4rem;
 	position: relative;
 	text-align: left;
 	overflow: hidden;
-	// inline-flex so cms_popup_cell text-align:center still centers the box
 	display: inline-flex;
 	flex-direction: column;
 	vertical-align: middle;
@@ -76,7 +74,7 @@
 	flex-shrink: 0;
 }
 
-// One scroll document: file ticks + Schema section below
+// Single scroll: file ticks + schema fragment
 .cms_update_popup_body {
 	box-sizing: border-box;
 	flex: 1 1 auto;
@@ -105,13 +103,6 @@
 	padding-bottom: 0.5rem;
 }
 
-.cms_update_popup_schema_title {
-	font-weight: bold;
-	font-size: 1.5rem;
-	line-height: 2.0rem;
-	margin-bottom: 0.6rem;
-}
-
 .cms_update_popup_schema_body {
 	box-sizing: border-box;
 	text-align: left;
@@ -131,7 +122,6 @@
 	padding: 0.4rem 0.2rem 1.0rem;
 }
 
-// Compact schema chrome inside popup
 .cms_update_popup_schema_body {
 	.cms_schema_status_ok,
 	.cms_schema_status_none {
@@ -164,6 +154,11 @@
 
 	.cms_schema_panel_tables {
 		padding: 0.6rem 0 0;
+	}
+
+	// Fragment has no page toolbar
+	.cms_toolbar {
+		display: none;
 	}
 }
 

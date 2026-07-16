@@ -31,10 +31,6 @@ Diagnostic panel standard for this project:
 ## Template specifics
 
 - Full-width flex rows (no fixed container width)
-- Main template: [`cms_schema.tpl.php`](../templates/cms_schema.tpl.php)
-- Partials under [`templates/cms_schema/`](../templates/cms_schema/) (panel-named subfolder pattern — see [agents.md](agents.md) “Panel template partials”):
-  - `module_section.tpl.php` — one module’s errors + fix/sync buttons (full page + embeds)
-  - `fragment.tpl.php` — single-module body for updater popup / ajax embed (`fragment=1`)
 
 ## Controller notes
 

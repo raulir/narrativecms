@@ -39,6 +39,13 @@
 	height: 2.2rem;
 	border-bottom: 0.1rem solid #a0a0a0;
 	margin: 0 -0.6rem 0.2rem -0.6rem;
+	// Drag handle — cursor only (no hover background)
+	.cms_repeater_container:not(.cms_repeater_container_readonly) & {
+		cursor: default;
+		&:hover {
+			cursor: move; // four-way arrow in most browsers
+		}
+	}
 }
 
 .cms_repeater_block_delete {
@@ -54,4 +61,42 @@
 	clear: both;
 	cursor: pointer;
 	text-align: center;
+	position: relative;
+	z-index: 2;
+}
+
+// Placeholder while dragging — same width as a real block (49rem) so two still fit per row
+.cms_repeater_block.cms_repeater_block_placeholder,
+.cms_repeater_block_placeholder {
+	visibility: visible !important;
+	opacity: 1 !important;
+	display: inline-block !important;
+	vertical-align: top !important;
+	box-sizing: border-box !important;
+	width: 49.0rem !important;
+	max-width: 49.0rem !important;
+	padding: 1.0rem !important;
+	// jQuery UI often forces 100% width — override
+	margin: 0 !important;
+
+	.cms_repeater_block_content,
+	.cms_repeater_block_placeholder_inner {
+		border-style: dashed !important;
+		border-color: #a0a0a0 !important;
+		background-color: #f5f5f5 !important;
+		background-image: none !important;
+		min-height: 4.0rem;
+		width: 100% !important;
+		box-sizing: border-box !important;
+	}
+}
+
+// Drag helper (cloned card) — keep block width
+.ui-sortable-helper.cms_repeater_block {
+	z-index: 10000;
+	opacity: 0.95;
+	box-shadow: 0.2rem 0.3rem 0.8rem rgba(0, 0, 0, 0.15);
+	width: 49.0rem !important;
+	max-width: 49.0rem !important;
+	box-sizing: border-box !important;
 }

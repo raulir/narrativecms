@@ -19,20 +19,71 @@ class cms_schema extends \Controller {
 		add_css('modules/cms/css/cms_schema.scss');
 	
 	}
-	
-	function panel_action($params) {
-		$this->load->model('cms/cms_schema_model');
 
-		// Preserve embed/filter flags across action → params → template
-		$fragment = !empty($params['fragment']) || !empty($this->input->post('fragment'));
-		$filter_module = $params['module'] ?? $this->input->post('module');
-		if ($filter_module === null || $filter_module === false){
-			$filter_module = '';
+	/**
+	 * Schema filter for embeds — must NOT use key "module" (panel loader sets that to the panel’s CMS module).
+	 */
+	function _schema_filter_from_params($params){
+
+		// Prefer dedicated keys; fall back to POST
+		$filter = $params['schema_module'] ?? $params['filter_module'] ?? null;
+		if ($filter === null || $filter === '' || $filter === false){
+			$filter = $this->input->post('schema_module');
+		}
+		if ($filter === null || $filter === '' || $filter === false){
+			$filter = $this->input->post('filter_module');
+		}
+		// Legacy: only trust POST "module" (request), not $params['module'] (overwritten by panel())
+		if (($filter === null || $filter === '' || $filter === false) && $this->input->post('module') !== false && $this->input->post('module') !== null){
+			$post_module = $this->input->post('module');
+			// Ignore if it is only the panel package name with no intent — still allow cms/music/etc from client
+			if ($post_module !== '' && $post_module !== false){
+				$filter = $post_module;
+			}
 		}
 
+		if ($filter === null || $filter === false){
+			return '';
+		}
+
+		return trim((string)$filter);
+
+	}
+
+	function _wants_fragment($params){
+
+		if (!empty($params['fragment'])){
+			return true;
+		}
+		$post = $this->input->post('fragment');
+		return !empty($post);
+
+	}
+	
+	function panel_action($params) {
+
+		$this->load->model('cms/cms_schema_model');
+
+		$fragment = $this->_wants_fragment($params);
+		$filter_module = $this->_schema_filter_from_params($params);
+
 		if (!empty($params['do']) && $params['do'] === 'sync_panel_tables') {
-			$module = trim($params['module'] ?? '');
-			$stats = $this->cms_schema_model->synchronise_panel_table_data($module);
+			// Button data-module is the schema package to sync
+			$module = trim($params['schema_module'] ?? $this->input->post('schema_module') ?? $this->input->post('module') ?? '');
+			// Prefer explicit sync target from POST when panel() overwrote params['module']
+			if ($module === '' || $module === 'cms' && $this->input->post('module') && $this->input->post('module') !== 'cms'){
+				// keep post module for sync target if set
+			}
+			$sync_module = $this->input->post('schema_module');
+			if ($sync_module === null || $sync_module === false || $sync_module === ''){
+				$sync_module = $this->input->post('module');
+			}
+			if ($sync_module === null || $sync_module === false || $sync_module === ''){
+				$sync_module = $module;
+			}
+			$sync_module = trim((string)$sync_module);
+
+			$stats = $this->cms_schema_model->synchronise_panel_table_data($sync_module);
 
 			$success = empty($stats['errors']);
 
@@ -50,8 +101,8 @@ class cms_schema extends \Controller {
 				$latest = [];
 				foreach ($stats['errors'] as $err) {
 					$latest[] = [
-						'module' => $module,
-						'key' => $module.':sync_panel_tables',
+						'module' => $sync_module,
+						'key' => $sync_module.':sync_panel_tables',
 						'message' => $err,
 						'sql' => '',
 					];
@@ -68,28 +119,30 @@ class cms_schema extends \Controller {
 				'message' => $message,
 				'stats' => $stats,
 				'fragment' => $fragment ? 1 : 0,
-				'module' => $filter_module !== '' ? $filter_module : $module,
+				'schema_module' => $filter_module !== '' ? $filter_module : $sync_module,
+				'filter_module' => $filter_module !== '' ? $filter_module : $sync_module,
 			]);
 		}
 
 		if (empty($params['do']) || $params['do'] !== 'fix_schema') {
-			// Still pass through fragment request (check-only embed)
 			if ($fragment || $filter_module !== '') {
 				return array_merge($params, [
 					'fragment' => $fragment ? 1 : 0,
-					'module' => $filter_module,
+					'schema_module' => $filter_module,
+					'filter_module' => $filter_module,
 				]);
 			}
 			return [];
 		}
 		
-		$key = trim($params['key'] ?? '');
+		$key = trim($params['key'] ?? $this->input->post('key') ?? '');
 		if (!$key) {
 			return [
 				'success' => false,
 				'message' => 'No key provided',
 				'fragment' => $fragment ? 1 : 0,
-				'module' => $filter_module,
+				'schema_module' => $filter_module,
+				'filter_module' => $filter_module,
 			];
 		}
 		
@@ -110,7 +163,6 @@ class cms_schema extends \Controller {
 			]];
 		}
 
-		// Prefer module from key when filtering fragment re-render
 		if ($filter_module === '' && !empty($key)){
 			$parts = explode(':', $key);
 			$filter_module = $parts[0] ?? '';
@@ -120,7 +172,8 @@ class cms_schema extends \Controller {
 			return [
 				'success' => true,
 				'fragment' => $fragment ? 1 : 0,
-				'module' => $filter_module,
+				'schema_module' => $filter_module,
+				'filter_module' => $filter_module,
 			];
 		}
 
@@ -133,7 +186,8 @@ class cms_schema extends \Controller {
 			'success' => false,
 			'message' => $message,
 			'fragment' => $fragment ? 1 : 0,
-			'module' => $filter_module,
+			'schema_module' => $filter_module,
+			'filter_module' => $filter_module,
 		];
 	}
 	
@@ -145,14 +199,16 @@ class cms_schema extends \Controller {
 		$action_message = $params['message'] ?? null;
 		$action_stats = $params['stats'] ?? null;
 
-		$filter_module = $params['module'] ?? $this->input->post('module');
-		if ($filter_module === null || $filter_module === false){
-			$filter_module = '';
-		} else {
-			$filter_module = trim((string)$filter_module);
+		// Re-read after panel() may have set params['module'] = 'cms' (panel package)
+		$filter_module = $this->_schema_filter_from_params($params);
+		if ($filter_module === '' && !empty($params['filter_module'])){
+			$filter_module = trim((string)$params['filter_module']);
+		}
+		if ($filter_module === '' && !empty($params['schema_module'])){
+			$filter_module = trim((string)$params['schema_module']);
 		}
 
-		$fragment = !empty($params['fragment']) || !empty($this->input->post('fragment'));
+		$fragment = $this->_wants_fragment($params) || !empty($params['fragment']);
 	
 	    $data = $this->cms_schema_model->get_schema_errors_with_status(
 	    		$filter_module !== '' ? $filter_module : null);
@@ -178,6 +234,7 @@ class cms_schema extends \Controller {
 
 	    $params['fragment'] = $fragment ? 1 : 0;
 	    $params['filter_module'] = $filter_module;
+	    $params['schema_module'] = $filter_module;
 
 		if ($action_success !== null) {
 			$params['success'] = $action_success;
