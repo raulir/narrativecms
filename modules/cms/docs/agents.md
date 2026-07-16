@@ -153,6 +153,25 @@ All panels must have `<panel name>_container` and `<panel name>_content` element
 
 HTML `data-*` attributes with multi-word names use underscores after the prefix: `data-unit_id`, `data-label_correct`. Do not use hyphens between words (`data-unit-id`, `data-label-correct`).
 
+### Panel template partials
+
+When a panel needs reusable markup chunks (shared rows, embed fragments, popup bodies), prefer a **subfolder named after the panel**:
+
+```text
+modules/<module>/templates/<panel_name>.tpl.php          ← main panel template (unchanged path)
+modules/<module>/templates/<panel_name>/                 ← partials for that panel
+  module_section.tpl.php
+  fragment.tpl.php
+  …
+```
+
+Example: [`cms_schema.tpl.php`](../templates/cms_schema.tpl.php) includes [`cms_schema/module_section.tpl.php`](../templates/cms_schema/module_section.tpl.php) and [`cms_schema/fragment.tpl.php`](../templates/cms_schema/fragment.tpl.php).
+
+- Subfolder name = **panel name** (not a generic `partials/`), so ownership stays obvious.
+- Partials are **mainly for that panel**, but may be included from elsewhere when useful (e.g. updater popup embedding schema fragment).
+- Include with an explicit path, e.g. `include __DIR__.'/cms_schema/module_section.tpl.php';` — no auto-discovery.
+- Related precedent: music score pieces under `modules/music/templates/score/`.
+
 ## Models
 
 - Class name – fully lowercase (including first letter), exactly matches filename: `cms_schema_model`

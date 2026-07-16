@@ -49,7 +49,7 @@
 	margin-top: 0.5rem;
 }
 
-// Update progress popup (sized like image selector)
+// Update progress popup — height matches 4-row image selector (15.8rem per row)
 .cms_update_popup_container {
 	z-index: 19900;
 }
@@ -58,8 +58,9 @@
 	box-sizing: border-box;
 	width: 98.0rem;
 	max-width: calc(100vw - 2.0rem);
+	// 4 image rows + toolbar + padding
+	height: calc(4 * 15.8rem + 6.0rem);
 	max-height: calc(100vh - 4.0rem);
-	height: auto;
 	padding: 1.4rem;
 	position: relative;
 	text-align: left;
@@ -75,19 +76,95 @@
 	flex-shrink: 0;
 }
 
-.cms_update_popup_files {
+// One scroll document: file ticks + Schema section below
+.cms_update_popup_body {
 	box-sizing: border-box;
 	flex: 1 1 auto;
-	min-height: 20.0rem;
-	max-height: calc(100vh - 14.0rem);
+	min-height: 0;
+	overflow-x: hidden;
 	overflow-y: auto;
-	padding: 0.5rem 0.2rem 0.5rem 0;
+	padding: 0.2rem 0.2rem 0.5rem 0;
+	text-align: left;
+}
+
+.cms_update_popup_files {
+	box-sizing: border-box;
 	font-size: 1.4rem;
 	line-height: 2.2rem;
 }
 
 .cms_update_result_file {
 	padding: 0.1rem 0;
+}
+
+.cms_update_popup_schema {
+	box-sizing: border-box;
+	border-top: 0.1rem solid $cms_border;
+	margin-top: 1.2rem;
+	padding-top: 1.0rem;
+	padding-bottom: 0.5rem;
+}
+
+.cms_update_popup_schema_title {
+	font-weight: bold;
+	font-size: 1.5rem;
+	line-height: 2.0rem;
+	margin-bottom: 0.6rem;
+}
+
+.cms_update_popup_schema_body {
+	box-sizing: border-box;
+	text-align: left;
+}
+
+.cms_update_popup_schema_pending {
+	font-size: 1.4rem;
+	line-height: 2.0rem;
+	color: #666;
+	padding: 0.4rem 0.2rem 1.0rem;
+}
+
+.cms_update_popup_schema_none {
+	font-size: 1.4rem;
+	line-height: 2.0rem;
+	color: #555;
+	padding: 0.4rem 0.2rem 1.0rem;
+}
+
+// Compact schema chrome inside popup
+.cms_update_popup_schema_body {
+	.cms_schema_status_ok,
+	.cms_schema_status_none {
+		margin: 0;
+		padding: 0.4rem 0.2rem 1.0rem;
+		font-size: 1.4rem;
+		line-height: 2.0rem;
+		background: none;
+		border: none;
+		border-radius: 0;
+		text-align: left;
+		color: #555;
+	}
+
+	.cms_schema_module {
+		padding: 0;
+	}
+
+	.cms_schema_module_header {
+		padding-top: 0.4rem;
+	}
+
+	.cms_schema_items {
+		padding-bottom: 0.8rem;
+	}
+
+	.cms_schema_item_row {
+		padding: 0.8rem 0;
+	}
+
+	.cms_schema_panel_tables {
+		padding: 0.6rem 0 0;
+	}
 }
 
 .cms_update_popup_overlay {

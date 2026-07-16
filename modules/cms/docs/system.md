@@ -157,6 +157,7 @@ Admin edit of a **page block** must **not** run that page panel’s `panel_param
 |-------|------|
 | Controller | `modules/<m>/panels/<name>.php` |
 | Template | `modules/<m>/templates/<name>.tpl.php` |
+| Partials | `modules/<m>/templates/<name>/…` (optional; panel-named subfolder — see [agents.md](agents.md) “Panel template partials”) |
 | Definition | `modules/<m>/definitions/<name>.json` |
 | JS / SCSS | `modules/<m>/js|css/<name>.*` |
 

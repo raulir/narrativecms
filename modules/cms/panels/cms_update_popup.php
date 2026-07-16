@@ -21,6 +21,9 @@ class cms_update_popup extends \Controller {
 
 		add_css('modules/cms/css/cms_popup.scss');
 		add_css('modules/cms/css/cms_update.scss');
+		// Schema section after transfer (fix/sync buttons)
+		add_css('modules/cms/css/cms_schema.scss');
+		add_js('modules/cms/js/cms_schema.js');
 
 		return $params;
 

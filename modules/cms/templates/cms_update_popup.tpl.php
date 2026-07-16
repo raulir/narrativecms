@@ -9,7 +9,19 @@
 				</div>
 			</div>
 
-			<div class="cms_update_popup_files">Getting list of files ...</div>
+			<?php // Single scroll stream: file ticks then Schema (scroll down after transfer) ?>
+			<div class="cms_update_popup_body">
+
+				<div class="cms_update_popup_files">Getting list of files ...</div>
+
+				<div class="cms_update_popup_schema">
+					<div class="cms_update_popup_schema_title">Schema</div>
+					<div class="cms_update_popup_schema_body">
+						<div class="cms_update_popup_schema_pending">Waiting for file transfer…</div>
+					</div>
+				</div>
+
+			</div>
 
 			<div class="cms_update_popup_overlay">
 				<div class="cms_update_popup_overlay_label">Confirming module...</div>

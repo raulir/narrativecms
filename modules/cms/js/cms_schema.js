@@ -1,6 +1,41 @@
+function cms_schema_replace_container($from, html){
+
+	var $wrap = $(html)
+	// Prefer a cms_schema_container root from response
+	var $new = $wrap.filter('.cms_schema_container').add($wrap.find('.cms_schema_container')).first()
+	if (!$new.length){
+		$new = $wrap
+	}
+
+	var $old = $from && $from.length
+		? $from.closest('.cms_schema_container')
+		: $('.cms_schema_container').first()
+
+	if ($old.length){
+		$old.replaceWith($new)
+	}
+
+	return $new
+
+}
+
+function cms_schema_request_context($el){
+
+	var $container = $el.closest('.cms_schema_container')
+	var module = $container.attr('data-module') || $container.data('module') || ''
+	var fragment = $container.attr('data-fragment') || $container.data('fragment') ? 1 : 0
+
+	return {
+		$container: $container,
+		module: module,
+		fragment: fragment
+	}
+
+}
+
 function cms_schema_init($root) {
 
-	var $scope = $root ? $root.find('.cms_schema_container') : $('.cms_schema_container');
+	var $scope = $root ? $root.find('.cms_schema_container').addBack('.cms_schema_container') : $('.cms_schema_container');
 
 	$scope.not('.cms_schema_ok').each(function(){
 
@@ -17,6 +52,8 @@ function cms_schema_init($root) {
 		if (!key) {
 			return
 		}
+
+		var ctx = cms_schema_request_context($this)
 		
 		$this.addClass('cms_disabled').text('fixing...')
 		
@@ -24,12 +61,18 @@ function cms_schema_init($root) {
 			do: 'fix_schema',
 			key: key
 		}
+		if (ctx.fragment){
+			data.fragment = 1
+		}
+		if (ctx.module){
+			data.module = ctx.module
+		}
 		
 		get_ajax_panel('cms/cms_schema', data, function(result) {
 			var res = result && result.result ? result.result : {}
 			if (res._html) {
-				$('.cms_schema_container').parent().html(res._html)
-				cms_schema_init()
+				var $new = cms_schema_replace_container(ctx.$container, res._html)
+				cms_schema_init($new.parent())
 			}
 			if (res.success) {
 				cms_notification('Schema fixed successfully', 4, 'success')
@@ -51,11 +94,20 @@ function cms_schema_init($root) {
 			return
 		}
 
+		var ctx = cms_schema_request_context($this)
+
 		$this.addClass('cms_disabled').text('syncing...')
 
 		var data = {
 			do: 'sync_panel_tables',
 			module: module
+		}
+		if (ctx.fragment){
+			data.fragment = 1
+		}
+		// Keep fragment filtered to the popup module when set
+		if (ctx.module){
+			data.module = ctx.module
 		}
 
 		get_ajax_panel('cms/cms_schema', data, function(result) {
@@ -64,8 +116,8 @@ function cms_schema_init($root) {
 			var ok = res.success == 1 || res.success === true || (Array.isArray(stats.errors) && stats.errors.length === 0 && (stats.synced > 0 || stats.skipped > 0))
 
 			if (res._html) {
-				$('.cms_schema_container').parent().html(res._html)
-				cms_schema_init()
+				var $new = cms_schema_replace_container(ctx.$container, res._html)
+				cms_schema_init($new.parent())
 			}
 			if (ok) {
 				cms_notification(res.message || 'Panel tables synchronised', 5, 'success')

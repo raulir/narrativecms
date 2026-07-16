@@ -143,17 +143,26 @@ class cms_schema_model extends \Model {
 		return false;
 	}
 	
-	function get_schema_errors_with_status() {
+	/**
+	 * @param string|null $filter_module If set, only that module’s errors are returned
+	 */
+	function get_schema_errors_with_status($filter_module = null) {
 	    $errors = $this->check_schema();
 	    $grouped = [];
 	
 	    list($merged, $owner) = $this->_build_merged_schemas();
+
+	    $filter_module = ($filter_module === null || $filter_module === '') ? null : (string)$filter_module;
 	
 	    foreach ($errors as $key => $message) {
 	        $parts = explode(':', $key);
 	        $module  = $parts[0] ?? '(unknown)';
 	        $table   = $parts[1] ?? '';
 	        $section = $parts[2] ?? '';
+
+	        if ($filter_module !== null && $module !== $filter_module) {
+	        	continue;
+	        }
 	
 	        if (!isset($grouped[$module])) {
 	            $grouped[$module] = [];
@@ -189,7 +198,7 @@ class cms_schema_model extends \Model {
 	
 	    return [
 	        'grouped'    => $grouped,
-	        'has_errors' => !empty($errors),
+	        'has_errors' => !empty($grouped),
 	    ];
 	}
 	

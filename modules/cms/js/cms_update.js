@@ -4,9 +4,12 @@ function cms_update_popup_files($popup){
 
 }
 
-function cms_update_popup_overlay_show($popup){
+function cms_update_popup_overlay_show($popup, label){
 
 	var $overlay = $popup.find('.cms_update_popup_overlay')
+	if (label){
+		$popup.find('.cms_update_popup_overlay_label').text(label)
+	}
 	$overlay.addClass('cms_update_popup_overlay_visible')
 	setTimeout(function(){
 		if ($overlay.hasClass('cms_update_popup_overlay_visible')){
@@ -28,6 +31,79 @@ function cms_update_popup_finish($popup, state){
 	cms_update_popup_overlay_hide($popup)
 	state.allow_dismiss = true
 	$popup.find('.cms_update_popup_close').show()
+
+}
+
+/**
+ * Update area → schema module id (core package is empty area → cms).
+ */
+function cms_update_area_to_schema_module(area){
+
+	if (area === undefined || area === null || area === ''){
+		return 'cms'
+	}
+
+	return String(area)
+
+}
+
+/**
+ * Load single-module schema fragment into the popup Schema section.
+ */
+function cms_update_load_schema(area, $popup, state, options){
+
+	options = options || {}
+
+	var module = cms_update_area_to_schema_module(area)
+	var $body = $popup.find('.cms_update_popup_schema_body')
+
+	cms_update_popup_overlay_show($popup, 'Checking schema...')
+	$body.html('<div class="cms_update_popup_schema_pending">Checking schema for ' + module + '…</div>')
+
+	get_ajax_panel('cms/cms_schema', {
+		'module': module,
+		'fragment': '1'
+	}, function(result){
+
+		var res = result && result.result ? result.result : {}
+
+		if (res._html){
+			$body.html(res._html)
+			if (typeof cms_schema_init === 'function'){
+				cms_schema_init($body)
+			}
+		} else {
+			$body.html(
+				'<div class="cms_update_popup_schema_none">' +
+					'No schema updates available for this module' +
+				'</div>'
+			)
+		}
+
+		// Scroll shared body so Schema is visible after ticks
+		var $scroll = $popup.find('.cms_update_popup_body')
+		var $schema = $popup.find('.cms_update_popup_schema')
+		if ($scroll.length && $schema.length){
+			var delta = $schema.offset().top - $scroll.offset().top
+			$scroll.animate({ scrollTop: $scroll.scrollTop() + delta - 8 }, 200)
+		}
+
+		if (options.after_schema){
+			options.after_schema(res)
+		}
+
+		cms_update_popup_finish($popup, state)
+
+		if (options.reload_on_close){
+			state.reload_on_close = true
+		}
+
+		// Immediate reload only if explicitly requested (avoid by default after install)
+		if (options.reload){
+			window.location.reload()
+		}
+
+	})
 
 }
 
@@ -83,7 +159,7 @@ function cms_update_confirm_area(area, $popup, state, options){
 
 	options = options || {}
 
-	cms_update_popup_overlay_show($popup)
+	cms_update_popup_overlay_show($popup, 'Confirming module...')
 
 	get_ajax('cms/cms_update', {
 		'do': 'cms_update_confirm',
@@ -106,11 +182,11 @@ function cms_update_confirm_area(area, $popup, state, options){
 				options.after_confirm(result)
 			}
 
-			cms_update_popup_finish($popup, state)
-
-			if (options.reload){
-				window.location.reload()
-			}
+			// Schema check for the updated module (partial UI, fix buttons)
+			cms_update_load_schema(area, $popup, state, {
+				'reload_on_close': !!options.reload_on_close,
+				'reload': !!options.reload
+			})
 
 		}
 	})
@@ -123,9 +199,11 @@ function cms_update_run_pipeline(area, options){
 	var after_cleanup = options.after_cleanup || null
 	var done_message = options.done_message || 'CMS updated'
 	var reload_after = !!options.reload_after
+	var reload_on_close = !!options.reload_on_close
 
 	var state = {
-		allow_dismiss: false
+		allow_dismiss: false,
+		reload_on_close: false
 	}
 
 	get_ajax_panel('cms/cms_update_popup', {
@@ -136,6 +214,9 @@ function cms_update_run_pipeline(area, options){
 			'cancel': function(after){
 				if (state.allow_dismiss){
 					after()
+					if (state.reload_on_close){
+						window.location.reload()
+					}
 				}
 			}
 		})
@@ -158,7 +239,8 @@ function cms_update_run_pipeline(area, options){
 					} else {
 						cms_notification(done_message, 5)
 						cms_update_confirm_area(area, $popup, state, {
-							'reload': reload_after
+							'reload': reload_after,
+							'reload_on_close': reload_on_close
 						})
 					}
 					return
@@ -229,7 +311,8 @@ function cms_update_run_pipeline(area, options){
 									} else {
 										cms_notification(done_message, 5)
 										cms_update_confirm_area(area, $popup, state, {
-											'reload': reload_after
+											'reload': reload_after,
+											'reload_on_close': reload_on_close
 										})
 									}
 
@@ -353,9 +436,10 @@ function cms_update_init($root){
 							return
 						}
 
-						cms_notification('Module installed. Reload if schema tables are needed.', 6)
+						cms_notification('Module installed', 5)
+						// Confirm + schema first; reload when user closes the popup
 						cms_update_confirm_area(area, $popup, state, {
-							'reload': true
+							'reload_on_close': true
 						})
 
 					}

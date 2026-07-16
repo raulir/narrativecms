@@ -15,11 +15,20 @@ class cms_schema extends \Controller {
 			header('Location: '.$GLOBALS['config']['base_url'].'cms_login/', true, 302);
 			exit();
 		}
+
+		add_css('modules/cms/css/cms_schema.scss');
 	
 	}
 	
 	function panel_action($params) {
 		$this->load->model('cms/cms_schema_model');
+
+		// Preserve embed/filter flags across action → params → template
+		$fragment = !empty($params['fragment']) || !empty($this->input->post('fragment'));
+		$filter_module = $params['module'] ?? $this->input->post('module');
+		if ($filter_module === null || $filter_module === false){
+			$filter_module = '';
+		}
 
 		if (!empty($params['do']) && $params['do'] === 'sync_panel_tables') {
 			$module = trim($params['module'] ?? '');
@@ -52,16 +61,25 @@ class cms_schema extends \Controller {
 				unset($_SESSION['cms_schema_latest_errors']);
 			}
 
-			unset($params['do'], $params['module']);
+			unset($params['do']);
 
 			return array_merge($params, [
 				'success' => $success ? 1 : 0,
 				'message' => $message,
 				'stats' => $stats,
+				'fragment' => $fragment ? 1 : 0,
+				'module' => $filter_module !== '' ? $filter_module : $module,
 			]);
 		}
 
 		if (empty($params['do']) || $params['do'] !== 'fix_schema') {
+			// Still pass through fragment request (check-only embed)
+			if ($fragment || $filter_module !== '') {
+				return array_merge($params, [
+					'fragment' => $fragment ? 1 : 0,
+					'module' => $filter_module,
+				]);
+			}
 			return [];
 		}
 		
@@ -69,7 +87,9 @@ class cms_schema extends \Controller {
 		if (!$key) {
 			return [
 				'success' => false,
-				'message' => 'No key provided'
+				'message' => 'No key provided',
+				'fragment' => $fragment ? 1 : 0,
+				'module' => $filter_module,
 			];
 		}
 		
@@ -90,8 +110,18 @@ class cms_schema extends \Controller {
 			]];
 		}
 
+		// Prefer module from key when filtering fragment re-render
+		if ($filter_module === '' && !empty($key)){
+			$parts = explode(':', $key);
+			$filter_module = $parts[0] ?? '';
+		}
+
 		if ($success) {
-			return ['success' => true];
+			return [
+				'success' => true,
+				'fragment' => $fragment ? 1 : 0,
+				'module' => $filter_module,
+			];
 		}
 
 		$message = 'Fix failed or no changes were needed';
@@ -102,6 +132,8 @@ class cms_schema extends \Controller {
 		return [
 			'success' => false,
 			'message' => $message,
+			'fragment' => $fragment ? 1 : 0,
+			'module' => $filter_module,
 		];
 	}
 	
@@ -112,13 +144,40 @@ class cms_schema extends \Controller {
 		$action_success = $params['success'] ?? null;
 		$action_message = $params['message'] ?? null;
 		$action_stats = $params['stats'] ?? null;
+
+		$filter_module = $params['module'] ?? $this->input->post('module');
+		if ($filter_module === null || $filter_module === false){
+			$filter_module = '';
+		} else {
+			$filter_module = trim((string)$filter_module);
+		}
+
+		$fragment = !empty($params['fragment']) || !empty($this->input->post('fragment'));
 	
-	    $data = $this->cms_schema_model->get_schema_errors_with_status();
+	    $data = $this->cms_schema_model->get_schema_errors_with_status(
+	    		$filter_module !== '' ? $filter_module : null);
 	
 	    $params['grouped_errors'] = $data['grouped'];
 	    $params['has_errors']     = $data['has_errors'];
-	    $params['panel_table_modules_pending'] = $this->cms_schema_model->get_panel_table_modules_pending();
-	    $params['latest_fix_errors'] = $_SESSION['cms_schema_latest_errors'] ?? [];
+
+	    $pending = $this->cms_schema_model->get_panel_table_modules_pending();
+	    if ($filter_module !== ''){
+	    	$pending = array_values(array_filter($pending, function($m) use ($filter_module){
+	    		return $m === $filter_module;
+	    	}));
+	    }
+	    $params['panel_table_modules_pending'] = $pending;
+
+	    $latest = $_SESSION['cms_schema_latest_errors'] ?? [];
+	    if ($filter_module !== '' && is_array($latest)){
+	    	$latest = array_values(array_filter($latest, function($row) use ($filter_module){
+	    		return ($row['module'] ?? '') === $filter_module;
+	    	}));
+	    }
+	    $params['latest_fix_errors'] = $latest;
+
+	    $params['fragment'] = $fragment ? 1 : 0;
+	    $params['filter_module'] = $filter_module;
 
 		if ($action_success !== null) {
 			$params['success'] = $action_success;

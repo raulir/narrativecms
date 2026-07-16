@@ -1,3 +1,9 @@
+<?php if (!empty($fragment)): ?>
+
+	<?php include __DIR__.'/cms_schema/fragment.tpl.php'; ?>
+
+<?php else: ?>
+
 <div class="cms_schema_container">
 	<div class="cms_schema_content">
 		
@@ -34,52 +40,7 @@
 		<?php else: ?>
 			
 			<?php foreach ($grouped_errors as $module => $items): ?>
-			
-				<div class="cms_schema_module">
-				
-					<div class="cms_schema_module_header">
-						<div class="cms_schema_module_title">
-							<?= $module ?>
-						</div>
-						<div class="cms_schema_module_actions">
-							<?php if (in_array($module, $panel_table_modules_pending ?? [])): ?>
-								<div class="cms_schema_sync cms_small_button"
-								     data-module="<?= $module ?>">
-									sync panel tables
-								</div>
-							<?php endif ?>
-							<div class="cms_schema_fix cms_small_button"
-							     data-key="<?= $module ?>">
-								fix module
-							</div>
-						</div>
-					</div>
-					
-					<div class="cms_schema_items">
-						
-						<?php foreach ($items as $item): ?>
-							<div class="cms_schema_item_row">
-								<div class="cms_schema_location">
-									<?= $item['location'] ?>
-								</div>
-								<div class="cms_schema_description">
-									<?= $item['description'] ?>
-								</div>
-								<div class="cms_schema_action">
-									<?php if ($item['enabled']): ?>
-										<div class="cms_schema_fix cms_small_button"
-										     data-key="<?= $item['key'] ?>">
-											fix
-										</div>
-									<?php endif ?>
-								</div>
-							</div>
-						<?php endforeach ?>
-						
-					</div>
-				
-				</div>
-						
+				<?php include __DIR__.'/cms_schema/module_section.tpl.php'; ?>
 			<?php endforeach ?>
 			
 		<?php endif ?>
@@ -112,3 +73,5 @@
 		
 	</div>
 </div>
+
+<?php endif ?>
