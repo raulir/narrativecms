@@ -17,13 +17,7 @@
 			"show":"-- show",
 			"subcategory_id":"-- category"
 		},
-		"link_target":"1",
-		"extra_buttons":[
-			{
-				"name":"shopify/shopify_refresh",
-				"position":"none"
-			}
-		]
+		"link_target":"1"
 	},
 	"js": [
 		
@@ -73,6 +67,13 @@
         	"name": "last_update",
         	"label": "Last update",
 			"readonly":"1"
+    	},
+    	{
+       		"type": "text",
+        	"name": "shopify_updated_at",
+        	"label": "Shopify updated",
+			"readonly":"1",
+			"help": "Unix time of product.updated_at from Shopify; used by Sync to skip unchanged products"
     	},
     	{
        		"type": "textarea",

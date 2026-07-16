@@ -1,0 +1,5 @@
+{
+	"version": "2",
+	"label": "Purge products",
+	"description": "Admin control to purge missing Shopify products"
+}

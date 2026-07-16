@@ -1,0 +1,21 @@
+{
+	"version": "2",
+	"label": "Shopify settings",
+	"description": "Shopify module settings",
+	"item": [
+	],
+	"settings": [
+		{
+			"type": "shopify/shopify_cms_sync",
+			"name": "sync",
+			"label": "Sync products",
+			"help": "Loads the Shopify frontpage collection, creates missing CMS products, and fully refreshes products that changed on Shopify. Stops after about 50 seconds — click Sync again to continue."
+		},
+		{
+			"type": "shopify/shopify_cms_purge",
+			"name": "purge",
+			"label": "Purge products",
+			"help": "Deletes local products whose Shopify ID no longer exists on Shopify (and related images). Oldest products first. Stops after about 50 seconds — click Purge again to continue."
+		}
+	]
+}

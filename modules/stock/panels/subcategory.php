@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class subcategory extends CI_Controller{
+namespace stock;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class subcategory extends \Controller{
 	
 	function panel_heading($params){
 		

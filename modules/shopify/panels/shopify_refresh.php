@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class shopify_refresh extends CI_Controller {
+namespace shopify;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class shopify_refresh extends \Controller {
 
 	function __construct(){
 

@@ -4,7 +4,7 @@ namespace shopify;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class product extends \CI_Controller{
+class product extends \Controller{
 	
 	function panel_heading($params){
 		

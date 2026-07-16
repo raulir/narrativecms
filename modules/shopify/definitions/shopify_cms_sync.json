@@ -1,0 +1,5 @@
+{
+	"version": "2",
+	"label": "Sync products",
+	"description": "Admin control to sync frontpage Shopify products into CMS"
+}

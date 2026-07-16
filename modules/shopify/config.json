@@ -1,6 +1,25 @@
 {
 	"panels":[
-
+		{
+			"id":"shopify",
+			"name":"Shopify settings"
+		},
+		{
+			"id":"shopify_cms_sync",
+			"name":"Shopify product sync",
+			"flags":[
+				"hidden",
+				"cron"
+			]
+		},
+		{
+			"id":"product",
+			"name":"Product"
+		},
+		{
+			"id":"cart",
+			"name":"Cart"
+		}
 	],
 	"cms_menu":[
 		{
@@ -8,10 +27,16 @@
 			"name":"Shopify"
 		},
 		{
-			"id":"products",
+			"id":"shopify_products",
 			"name":"Products",
 			"parent":"shopify",
 			"url":"admin/cms_list/shopify__product/"
+		},
+		{
+			"id":"shopify_settings",
+			"name":"Settings",
+			"parent":"shopify",
+			"url":"admin/panel_settings/shopify__shopify/"
 		}
-    ]
+	]
 }

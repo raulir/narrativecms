@@ -1,0 +1,39 @@
+// Height-2 row (like link input): label left, taller wrapping status, button top-right
+.shopify_cms_sync {
+
+	.shopify_cms_sync_status {
+		box-sizing: border-box;
+		position: absolute;
+		left: 13.0rem;
+		right: 10.0rem;
+		top: 0.5rem;
+		bottom: 0.5rem;
+		min-height: 5.0rem;
+		line-height: 1.8rem;
+		font-size: 1.4rem;
+		color: #404040;
+		text-align: right;
+		overflow: hidden;
+		white-space: normal;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+		padding: 0.2rem 0.5rem 0 0.5rem;
+	}
+
+	.shopify_cms_sync_button {
+		position: absolute;
+		right: 1.0rem;
+		top: 0.5rem;
+		height: 2.6rem;
+		line-height: 2.4rem;
+		font-size: 1.6rem;
+		padding: 0 1.0rem;
+		z-index: 10;
+	}
+
+	.shopify_cms_sync_button.shopify_cms_sync_busy {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+
+}
