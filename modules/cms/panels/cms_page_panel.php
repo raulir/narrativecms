@@ -28,6 +28,9 @@ class cms_page_panel extends CI_Controller {
 		// set up new page panel
 		$params['target_type'] = $this->input->post('target_type');
 		$params['panel_name'] = $this->input->post('panel_name');
+		if (is_string($params['panel_name'])){
+			$params['panel_name'] = str_replace('__', '/', trim($params['panel_name']));
+		}
 
 		// if page
 		if (empty($params['cms_page_panel_id']) && empty($params['cms_page_id']) && $params['target_type'] == 'page'){
@@ -35,7 +38,9 @@ class cms_page_panel extends CI_Controller {
 			$params['cms_page_id'] = $this->input->post('target_id');
 			$params['cms_page_panel_id'] = 0;
 
-			list($params['module'], $params['module_panel_name']) = explode('/', $params['panel_name']);
+			if (!empty($params['panel_name']) && stristr($params['panel_name'], '/')){
+				list($params['module'], $params['module_panel_name']) = explode('/', $params['panel_name'], 2);
+			}
 			
 		} else if (empty($params['cms_page_panel_id']) && empty($params['cms_page_id']) && $params['target_type'] == 'panel'){
 
@@ -49,13 +54,21 @@ class cms_page_panel extends CI_Controller {
 
 		}
 
-		// if preset panel name (panel type) for new panel
-		if (!is_numeric($params['cms_page_panel_id'])){
+		// URL segment can be a panel type with __ (e.g. admin/cms_page_panel/timmy__menu/)
+		// Never treat a pure numeric id as a panel type name
+		if (!empty($params['cms_page_panel_id']) && !is_numeric($params['cms_page_panel_id'])){
 			$params['panel_name'] = str_replace('__', '/', trim($params['cms_page_panel_id']));
 			$params['cms_page_panel_id'] = 0;
 			$params['cms_page_id'] = 0;
-		} else if (!empty($params['cms_page_panel_id'])){
+		} else if (!empty($params['cms_page_panel_id']) && is_numeric($params['cms_page_panel_id'])){
 			$return['block'] = $this->cms_page_panel_model->get_cms_page_panel($params['cms_page_panel_id'], $this->cms_language_model->get_cms_language());
+		}
+
+		// New panel from selector must have module/panel type
+		if (empty($return['block']['cms_page_panel_id']) && !empty($params['target_type'])
+				&& (empty($params['panel_name']) || !stristr($params['panel_name'], '/'))){
+			_html_error('Panel name has to include module (got: '.var_export($params['panel_name'], true).')', 0, ['backtrace' => 1]);
+			return $return;
 		}
 
 		if (!empty($params['base_url'])){
@@ -71,7 +84,7 @@ class cms_page_panel extends CI_Controller {
 		}
 
 		// if no filtered block returned but has panel name
-		if (empty($return['block']['cms_page_panel_id']) && isset($params['panel_name'])){
+		if (empty($return['block']['cms_page_panel_id']) && !empty($params['panel_name']) && stristr($params['panel_name'], '/')){
 			
 			$return['block'] = $this->cms_page_panel_model->new_cms_page_panel();
 			

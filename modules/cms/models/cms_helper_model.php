@@ -13,6 +13,12 @@ class cms_helper_model extends CI_Model {
 		}
 		
 		touch($cron_data_filename);
+
+		// Visit-triggered cron: release session so the long-running request does not
+		// block the visitor's other PHP requests (admin, ajax, next page load).
+		if (session_status() === PHP_SESSION_ACTIVE){
+			session_write_close();
+		}
 		
 		// get data about cron progress
 		if (file_exists($cron_data_filename)){

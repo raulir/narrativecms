@@ -225,7 +225,7 @@ if ( !function_exists('_i')) {
 			
 			$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_media_view.js';
 			$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_video.js';
-			$GLOBALS['_panel_js'][] = 'modules/cms/js/dash/dash.min.js';
+			$GLOBALS['_panel_js'][] = ['script' => 'modules/cms/js/dash/dash.min.js', 'no_pack' => 1, 'sync' => 'defer', ];
 			
 			return ['image' => $image, 'height' => 0, 'width' => 0, ];
 			

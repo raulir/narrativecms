@@ -192,7 +192,7 @@
 	<div class="cms_page_info">
 		<div class="cms_page_info_column">
 			<div class="cms_page_info_label">page:</div>
-			<div class="cms_page_info_value"><?= (int)$page['cms_page_id'] ?></div>
+			<div class="cms_page_info_value"><?= !empty($page['title']) ? $page['title'] : (int)$page['cms_page_id'] ?></div>
 		</div>
 		<div class="cms_page_info_column">
 			<div class="cms_page_info_label">created:</div>

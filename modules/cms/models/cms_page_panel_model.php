@@ -64,6 +64,12 @@ class cms_page_panel_model extends Model {
 			return $this->_panel_table_cache[$panel_name];
 		}
 
+		// Shortcuts store target cms_page_panel_id as panel_name (no module/panel definition or table)
+		if (empty($panel_name) || !stristr($panel_name, '/')) {
+			$this->_panel_table_cache[$panel_name] = [];
+			return [];
+		}
+
 		$this->load->model('cms/cms_panel_model');
 		$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
 		$fields = [];

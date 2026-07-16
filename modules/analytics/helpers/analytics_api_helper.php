@@ -53,7 +53,7 @@ function analytics_is_bot_user_agent($user_agent) {
 			'telegram','mediapartners','ahrefs','semrush','mj12bot','dotbot','petalbot','crawler','scanner','headless',
 			'go-http-client','httpclient','python-requests','curl','wget','okhttp','apache-httpclient','l9scan','leakix','sppb','rce-poc',
 			'palo alto','paloaltonetworks','xpanse','cortex-xpanse','visionheight','rootevidence','scandash','pr-cy','cms-checker',
-			'forestengine');
+			'forestengine','google-read-aloud','censysinspect','censys');
 
 	foreach ($bot_keywords as $bot) {
 		if (strpos($ua, $bot) !== false) {

@@ -33,10 +33,10 @@ function cms_cache_init($root) {
 
 	if (!window.cms_cache_position_hook_ok) {
 		window.cms_cache_position_hook_ok = true
-		if (typeof cms_position_link_after === 'undefined') {
-			cms_position_link_after = []
+		if (!window.cms_position_link_after) {
+			window.cms_position_link_after = []
 		}
-		cms_position_link_after.push(function() {
+		window.cms_position_link_after.push(function() {
 			cms_cache_init()
 			cms_cache_resize()
 			cms_cache_scroll()

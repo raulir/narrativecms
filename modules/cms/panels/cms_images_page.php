@@ -27,7 +27,7 @@ class cms_images_page extends CI_Controller {
 		$params['cms_images_current'] = $params['page'];
 
 		add_css('modules/cms/css/cms_video_view.scss');
-		$GLOBALS['_panel_js'][] = 'modules/cms/js/dash/dash.min.js';
+		$GLOBALS['_panel_js'][] = ['script' => 'modules/cms/js/dash/dash.min.js', 'no_pack' => 1, 'sync' => 'defer', ];
 		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_media_view.js';
 		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_video.js';
 

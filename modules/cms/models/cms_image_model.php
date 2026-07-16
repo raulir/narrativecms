@@ -339,14 +339,17 @@ class cms_image_model extends CI_Model {
 				$hash = sha1($image_content);
 
 				$existing = $this->get_cms_image_by_hash($hash);
-				if (!empty($existing) && !file_exists($GLOBALS['config']['upload_path'].$existing['filename'])){
-					file_put_contents($GLOBALS['config']['upload_path'].$existing['filename'], $image_content);
+				if (!empty($existing['filename'])) {
+					// Same content already stored (e.g. product main image scraped before gallery) — reuse path
+					if (!file_exists($GLOBALS['config']['upload_path'].$existing['filename'])) {
+						file_put_contents($GLOBALS['config']['upload_path'].$existing['filename'], $image_content);
+					}
 					$return = $existing['filename'];
-				} else if (empty($existing)) {
+				} else {
 					// create_cms_image returns array ['filename' => …] (upload callers expect that)
 					$create = $this->create_cms_image(date('Y').'/'.date('m').'/', $prefix.'_'.$filename, $category);
 					$new_filename = is_array($create) ? ($create['filename'] ?? '') : (string)$create;
-					if ($new_filename !== ''){
+					if ($new_filename !== '') {
 						file_put_contents($GLOBALS['config']['upload_path'].$new_filename, $image_content);
 						$this->update_cms_image($new_filename, ['hash' => $hash, ]);
 						$return = $new_filename;

@@ -108,8 +108,8 @@ function cms_position_apply_result(result, opts) {
 
 			cms_position_link_init()
 
-			if (typeof cms_position_link_after != 'undefined') {
-				cms_position_link_after.forEach(function(element) {
+			if (window.cms_position_link_after && window.cms_position_link_after.length) {
+				window.cms_position_link_after.forEach(function(element) {
 					element()
 				})
 			}

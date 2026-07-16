@@ -187,12 +187,12 @@ function analytics_beacon_init() {
 
 	$(window).off('scroll.analytics_beacon').on('scroll.analytics_beacon', analytics_beacon_on_scroll)
 
-	if (typeof cms_position_link_after === 'undefined') {
-		cms_position_link_after = []
+	if (!window.cms_position_link_after) {
+		window.cms_position_link_after = []
 	}
 	if (!window.analytics_beacon_position_hook_ok) {
 		window.analytics_beacon_position_hook_ok = true
-		cms_position_link_after.push(() => {
+		window.cms_position_link_after.push(() => {
 			analytics_beacon_on_position_nav(window.location.pathname + window.location.hash, document.title)
 		})
 	}

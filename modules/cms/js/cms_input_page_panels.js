@@ -117,7 +117,12 @@ function cms_input_page_panel_selector(target_type, target_id, target_name, filt
 	}, function(data){
 
 		panels_display_popup(data.result._html, {
-			'select': function(data){
+			'select': function(after){
+
+				// Select stays opacity-disabled until a choice is made; ignore accidental clicks
+				if ($('.cms_panel_selector_select').hasClass('cms_panel_selector_select_disabled')){
+					return
+				}
 				
 				// if shortcut
 				if (target_type == 'page' && $('.cms_panel_selector_shortcut_select').val() !== ''){
@@ -134,10 +139,19 @@ function cms_input_page_panel_selector(target_type, target_id, target_name, filt
 						}
 					})
 					
-					$('.cms_popup_container').remove()
+					if (typeof after === 'function'){
+						after()
+					}
 					
 					return
 					
+				}
+
+				// Use attr(), not .data() — jQuery data() can miss data-panel_name / mis-parse values
+				var panel_name = $('.cms_panel_selector_item_selected').attr('data-panel_name') || ''
+				if (!panel_name || panel_name.indexOf('/') === -1){
+					cms_notification('Select a panel type first', 3)
+					return
 				}
 				
 				// if on page
@@ -145,9 +159,9 @@ function cms_input_page_panel_selector(target_type, target_id, target_name, filt
 				
 					$('body').append('<form class="cms_params_form" action="' + _cms_base + 'admin/cms_page_panel/0/" method="post"></form>')
 					
-					$('.cms_params_form').append('<input name="target_type" value="' + target_type + '">')
-					$('.cms_params_form').append('<input name="target_id" value="' + target_id + '">')
-					$('.cms_params_form').append('<input name="panel_name" value="' + $('.cms_panel_selector_item_selected').data('panel_name') + '">')
+					$('.cms_params_form').append('<input type="hidden" name="target_type" value="' + target_type + '">')
+					$('.cms_params_form').append('<input type="hidden" name="target_id" value="' + target_id + '">')
+					$('.cms_params_form').append('<input type="hidden" name="panel_name" value="' + panel_name + '">')
 					
 					// open cms page panel editor with this panel
 					$('.cms_params_form').submit()
@@ -160,10 +174,10 @@ function cms_input_page_panel_selector(target_type, target_id, target_name, filt
 				
 				$('body').append('<form class="cms_params_form" action="' + _cms_base + 'admin/cms_page_panel/0/" method="post"></form>')
 				
-				$('.cms_params_form').append('<input name="target_type" value="' + target_type + '">')
-				$('.cms_params_form').append('<input name="target_id" value="' + target_id + '">')
-				$('.cms_params_form').append('<input name="target_input_name" value="' + target_name + '">')
-				$('.cms_params_form').append('<input name="panel_name" value="' + $('.cms_panel_selector_item_selected').data('panel_name') + '">')
+				$('.cms_params_form').append('<input type="hidden" name="target_type" value="' + target_type + '">')
+				$('.cms_params_form').append('<input type="hidden" name="target_id" value="' + target_id + '">')
+				$('.cms_params_form').append('<input type="hidden" name="target_input_name" value="' + target_name + '">')
+				$('.cms_params_form').append('<input type="hidden" name="panel_name" value="' + panel_name + '">')
 				
 				// open cms page panel editor with this panel
 				$('.cms_params_form').submit()

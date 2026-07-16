@@ -356,9 +356,13 @@ if ( !function_exists('pack_css')) {
 	
 			$_js['script'] = str_replace('\\', '/', $_js['script']);
 	
-			if ($_js['sync'] == 'defer' && $GLOBALS['config']['cache']['pack_js'] && empty($_js['no_pack']) && substr($_js['script'], 0, 4) !== 'http'){
+			// Already-minified vendor files break when re-minified (dash, storefront client, etc.)
+			$is_min_js = (bool)preg_match('/\.min\.js(\?|$)/i', $_js['script']);
+
+			if ($_js['sync'] == 'defer' && $GLOBALS['config']['cache']['pack_js'] && empty($_js['no_pack'])
+					&& !$is_min_js && substr($_js['script'], 0, 4) !== 'http'){
 				$js_to_cache[] = $_js['script'];
-			} else if (substr($_js['script'], 0, 4) !== 'http'){ // local script
+			} else if (substr($_js['script'], 0, 4) !== 'http'){ // local script (or no_pack / .min.js)
 				$js_strs[] = '<script type="text/javascript" src="'.($GLOBALS['config']['base_site']??'').$GLOBALS['config']['base_url'].$_js['script'].
 				(!empty($GLOBALS['config']['cache']['force_download']) ? '?v='.time() : '').'" '.$_js['sync'].'></script>';
 			} else { // outside script
