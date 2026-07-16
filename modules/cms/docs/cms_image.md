@@ -225,7 +225,7 @@ Playback, background fit, poster, and warden behaviour: [`cms_video.md`](cms_vid
 | Controller | `modules/cms/panels/cms_image.php` |
 | Template | `modules/cms/templates/cms_image.tpl.php` |
 | Model | `modules/cms/models/cms_image_model.php` |
-| Save ops | `modules/cms/panels/cms_images_operations.php` |
+| Save / delete / check | `modules/cms/panels/cms_images.php` (`panel_action`) |
 | JS | `modules/cms/js/cms_image.js`, `modules/cms/js/cms_images.js`, `modules/cms/js/cms_media_view.js`, `modules/cms/js/cms_video.js` |
 | SCSS | `modules/cms/css/cms_image.scss`, `modules/cms/css/cms_video_view.scss` |
 | `_ib` | `system/helpers/image_helper.php` |

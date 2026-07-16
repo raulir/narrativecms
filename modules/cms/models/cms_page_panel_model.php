@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-if (!function_exists('array_merge_recursive_ex')){
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+if (!function_exists(__NAMESPACE__.'\\array_merge_recursive_ex')){
 
 	function array_merge_recursive_ex(array $array1, array $array2){
 			
@@ -24,7 +28,7 @@ if (!function_exists('array_merge_recursive_ex')){
 
 }
 
-class cms_page_panel_model extends Model {
+class cms_page_panel_model extends \Model {
 	
 	var $default_language;
 	var $_panel_table_cache = [];
@@ -995,7 +999,7 @@ class cms_page_panel_model extends Model {
 		}
 		if (count($keys)){
 			$data['update_cms_user_id'] = !empty($_SESSION['cms_user']['cms_user_id']) ? $_SESSION['cms_user']['cms_user_id'] : 0;
-			$date = new DateTime();
+			$date = new \DateTime();
 			$data['update_time'] = $date->getTimestamp();
 		}
 		
@@ -1240,7 +1244,7 @@ class cms_page_panel_model extends Model {
 		
 		// creation data
 		$panel_params['create_cms_user_id'] = !empty($_SESSION['cms_user']['cms_user_id']) ? $_SESSION['cms_user']['cms_user_id'] : 0;
-		$date = new DateTime();
+		$date = new \DateTime();
 		$panel_params['create_time'] = $date->getTimestamp();
 		$panel_params['update_cms_user_id'] = $panel_params['create_cms_user_id'];
 		$panel_params['update_time'] = $panel_params['create_time'];
@@ -1921,6 +1925,371 @@ class cms_page_panel_model extends Model {
 	
 		return $return;
 	
+	}
+
+	/**
+	 * Unlink upload files present in $old_data but not in $new_data (or all of $old_data when $new_data is null).
+	 */
+	function delete_orphan_upload_files($structure, $old_data, $new_data = null){
+
+		$old_filenames = $this->get_page_panel_data_filenames($structure, $old_data);
+		if ($new_data === null){
+			$filenames_diff = $old_filenames;
+		} else {
+			$new_filenames = $this->get_page_panel_data_filenames($structure, $new_data);
+			$filenames_diff = array_diff($old_filenames, $new_filenames);
+		}
+
+		foreach($filenames_diff as $filename){
+			if (file_exists($GLOBALS['config']['upload_path'].$filename)){
+				unlink($GLOBALS['config']['upload_path'].$filename);
+			}
+		}
+
+	}
+
+	/**
+	 * Build admin form payload for save / title preview.
+	 * $input is a plain array (panel maps POST); not request-bound.
+	 *
+	 * @return array{data: array, data_merged: array, panel_config: array, panel_structure: array}
+	 */
+	function build_panel_data_for_save($input, $language){
+
+		$this->load->model('cms/cms_panel_model');
+
+		$block_id = !empty($input['cms_page_panel_id']) ? $input['cms_page_panel_id'] : 0;
+
+		$data = [];
+		$data['cms_page_id'] = $input['cms_page_id'] ?? null;
+		$data['parent_id'] = $input['parent_id'] ?? null;
+		$data['sort'] = $input['sort'] ?? null;
+		$data['title'] = $input['title'] ?? null;
+		$data['submenu_anchor'] = $input['submenu_anchor'] ?? null;
+		$data['panel_name'] = $input['panel_name'] ?? null;
+		$data['panel_params'] = $input['panel_params'] ?? [];
+
+		if (!is_array($data['panel_params'])){
+			$data['panel_params'] = [];
+		}
+
+		$panel_config = $this->cms_panel_model->get_cms_panel_config($data['panel_name']);
+
+		if (!empty($panel_config['extends'])){
+			$data['panel_params']['_extends'] = $panel_config['extends'];
+		}
+
+		if (!empty($panel_config['list']['templates'])){
+			$data['panel_params']['_template_page_id'] = $input['_template_page_id'] ?? null;
+		}
+
+		if (!empty($panel_config['list']['search_time_extra']) && is_array($panel_config['list']['search_time_extra'])
+				&& !empty($data['panel_params']['date'])){
+			$data['panel_params']['_search_time_extra'] = serialize($panel_config['list']['search_time_extra']);
+			$data['panel_params']['_search_time_timestamp_day'] = strtotime($data['panel_params']['date'])/86400;
+		}
+
+		if (!empty($panel_config['js']) && is_array($panel_config['js'])){
+			foreach($panel_config['js'] as $_js){
+				list($_js_module, $_js_panel) = explode('/', $_js);
+				$data['panel_params']['_js'][] = 'modules/'.$_js_module.'/js/'.$_js_panel.'.js';
+			}
+		}
+		if (!empty($panel_config['css']) && is_array($panel_config['css'])){
+			foreach($panel_config['css'] as $_css){
+				list($_css_module, $_css_panel) = explode('/', $_css);
+				$data['panel_params']['_css'][] = 'modules/'.$_css_module.'/css/'.$_css_panel.'.scss';
+			}
+		}
+
+		$data['search_params'] = [];
+		$data['translate_params'] = [];
+
+		$panel_structure = $this->cms_panel_model->get_cms_panel_edit_structure(
+				$panel_config, $data['cms_page_id'], $data['parent_id'], $data['sort']);
+
+		foreach($panel_structure as $struct){
+			if (!empty($struct['search'])){
+				$data['search_params'][$struct['name']] = $struct['search'];
+			}
+			if (!empty($struct['translate'])){
+				$data['translate_params'][$struct['name']] = $language;
+			}
+			if ($struct['type'] == 'repeater'){
+				foreach ($struct['fields'] as $r_struct){
+					if (!empty($r_struct['search'])){
+						$data['search_params'][$struct['name']][$r_struct['name']] = $r_struct['search'];
+					}
+					if (!empty($r_struct['translate'])){
+						$data['translate_params'][$struct['name']][$r_struct['name']] = $language;
+					}
+				}
+			}
+		}
+
+		foreach($panel_structure as $struct){
+
+			if ($struct['type'] == 'image'){
+				if (!empty($struct['meta']) && $struct['meta'] == 'image' && !empty($data['panel_params'][$struct['name']])){
+					$data['panel_params']['_images'][] = $data['panel_params'][$struct['name']];
+				}
+			}
+
+			if ($struct['type'] == 'repeater'){
+				foreach ($struct['fields'] as $r_struct){
+					if ($r_struct['type'] == 'image'){
+						if (!empty($r_struct['meta']) && $r_struct['meta'] == 'image' && !empty($data['panel_params'][$struct['name']])){
+							if (empty($data['panel_params']['_images'])){
+								$data['panel_params']['_images'] = [];
+							}
+							array_merge($data['panel_params']['_images'], $data['panel_params'][$struct['name']]);
+						}
+					}
+				}
+			}
+
+		}
+
+		foreach ($data['panel_params'] as $key => $value){
+
+			if (is_array($value) && is_array(reset($value))){
+				$temp_result = [];
+				foreach($value as $skey => $kvalues){
+					foreach ($kvalues as $nkey => $nvalue){
+						if (!is_array($nvalue)){
+							if (empty($temp_result[$nkey])){
+								$temp_result[$nkey] = [];
+							}
+							$temp_result[$nkey][$skey] = $nvalue;
+						} else {
+							foreach($nvalue as $nnkey => $nnvalue){
+								if (empty($temp_result[$nnkey][$skey])){
+									$temp_result[$nnkey][$skey] = [];
+								}
+								$temp_result[$nnkey][$skey][$nkey] = $nnvalue;
+							}
+						}
+					}
+				}
+				$data['panel_params'][$key] = $temp_result;
+			}
+
+		}
+
+		foreach($panel_structure as $struct){
+
+			if ($struct['type'] == 'cms_page_panels' && empty($data['panel_params'][$struct['name']])){
+				$data['panel_params'][$struct['name']] = [];
+			}
+
+			if ($struct['type'] == 'repeater' && empty($data['panel_params'][$struct['name']])){
+				$data['panel_params'][$struct['name']] = [];
+			}
+
+			if ($struct['type'] == 'grid' && !empty($struct['ds']) && empty($data['panel_params'][$struct['name']]) && $block_id){
+				$existing = $this->get_cms_page_panel($block_id, $language, false);
+				if (!empty($existing[$struct['name']]) && is_array($existing[$struct['name']])){
+					$data['panel_params'][$struct['name']] = $existing[$struct['name']];
+				}
+			}
+
+		}
+
+		$data_merged = $data;
+		unset($data_merged['panel_params']);
+		$data_merged = array_merge($data['panel_params'], $data_merged);
+		$data_merged['cms_page_panel_id'] = $block_id;
+
+		return [
+			'data' => $data,
+			'data_merged' => $data_merged,
+			'panel_config' => $panel_config,
+			'panel_structure' => $panel_structure,
+		];
+
+	}
+
+	/**
+	 * List-item title from definition + row (false when not a list item).
+	 */
+	function compile_list_item_title($data_merged, $panel_config, $block_id, $language){
+
+		if (empty($panel_config['list']) || $data_merged['cms_page_id'] != 0 || empty($data_merged['sort'])){
+			return false;
+		}
+
+		$title_row = $this->get_list_item_title_row($block_id, $data_merged, $language);
+
+		if (!is_array($title_row)){
+			return false;
+		}
+
+		return $this->get_list_item_title($title_row);
+
+	}
+
+	/**
+	 * Create or update from admin form data; list slug + parent children list.
+	 *
+	 * @param array $options panel_config, parent_name (optional), old_data (optional, for slug hide state)
+	 * @return array{cms_page_panel_id: int}
+	 */
+	function save_cms_page_panel_admin($block_id, $data_merged, $options = []){
+
+		$panel_config = $options['panel_config'] ?? [];
+		$parent_name = $options['parent_name'] ?? '';
+		$old_data = $options['old_data'] ?? [];
+
+		if ($block_id){
+
+			$this->update_cms_page_panel($block_id, $data_merged, true);
+
+		} else {
+
+			$block_id = $this->create_cms_page_panel($data_merged);
+
+			if (!empty($panel_config['list']['new_first'])){
+				$this->move_first($block_id);
+			}
+
+		}
+
+		if (!empty($panel_config['list']['link_target'])){
+
+			$this->load->model('cms/cms_slug_model');
+
+			$title_row = $this->get_list_item_title_row($block_id);
+			$list_title = is_array($title_row) ? $this->get_list_item_title($title_row) : '';
+
+			if (!empty($list_title)){
+				$slug_string = $list_title;
+			} else if (!empty($data_merged['title'])){
+				$slug_string = $data_merged['title'];
+			} else if (!empty($data_merged['heading'])){
+				$slug_string = $data_merged['heading'];
+			} else {
+				$slug_string = $data_merged['panel_name'].' '.$block_id;
+			}
+
+			$slug = $this->cms_slug_model->generate_list_item_slug($data_merged['panel_name'].'='.$block_id, $slug_string);
+
+			$this->cms_slug_model->set_page_slug(
+					$data_merged['panel_name'].'='.$block_id,
+					$slug,
+					empty($old_data['show']) ? '1' : '0');
+
+		}
+
+		if (!empty($data_merged['parent_id']) && !empty($parent_name)){
+
+			$parent = $this->get_cms_page_panel($data_merged['parent_id']);
+
+			if (empty($parent[$parent_name])){
+				$field_data = [];
+			} else {
+				if (!is_array($parent[$parent_name])){
+					$field_data = explode(',', $parent[$parent_name]);
+				} else {
+					$field_data = $parent[$parent_name];
+				}
+			}
+
+			if (!in_array($block_id, $field_data)){
+				$field_data[] = $block_id;
+				$field_data = array_values($field_data);
+				$this->update_cms_page_panel($data_merged['parent_id'], [$parent_name => $field_data, ]);
+			}
+
+		}
+
+		return ['cms_page_panel_id' => $block_id];
+
+	}
+
+	/**
+	 * Set show flag and update page visibility or list-item slug status.
+	 *
+	 * @return array{show: int, block: array}
+	 */
+	function set_cms_page_panel_show($cms_page_panel_id, $show){
+
+		$show = !empty($show) ? 1 : 0;
+
+		$block = $this->get_cms_page_panel($cms_page_panel_id);
+
+		$this->update_cms_page_panel($cms_page_panel_id, ['show' => $show, ]);
+
+		if (!empty($block['cms_page_id'])){
+			$this->load->model('cms/cms_page_model');
+			$this->cms_page_model->update_page_visibility($block['cms_page_id']);
+		} else {
+			$this->load->model('cms/cms_slug_model');
+			$this->cms_slug_model->update_slug_status($block['panel_name'].'='.$cms_page_panel_id, empty($show) ? 1 : 0);
+		}
+
+		return ['show' => $show, 'block' => $block];
+
+	}
+
+	/**
+	 * Deep-copy a panel including nested cms_page_panels children.
+	 *
+	 * @return int new cms_page_panel_id
+	 */
+	function copy_cms_page_panel($cms_page_panel_id){
+
+		$this->load->model('cms/cms_panel_model');
+
+		$data = $this->get_cms_page_panel($cms_page_panel_id);
+		$panel_structure = $this->cms_panel_model->get_cms_panel_definition($data['panel_name']);
+
+		$data['show'] = 0;
+		$data['title'] = 'Copy of '.$data['title'];
+		if (!empty($data['heading'])){
+			$data['heading'] = 'Copy of '.$data['heading'];
+		}
+
+		$all_children = [];
+		foreach($panel_structure as $struct){
+			if ($struct['type'] == 'cms_page_panels' && !empty($data[$struct['name']])){
+
+				if (!is_array($data[$struct['name']])){
+					$children = explode(',', $data[$struct['name']]);
+				} else {
+					$children = $data[$struct['name']];
+				}
+				$new_children = [];
+
+				foreach($children as $child_id){
+					$child_data = $this->get_cms_page_panel($child_id);
+					unset($child_data['block_id']);
+					unset($child_data['cms_page_panel_id']);
+					$new_children[] = $this->create_cms_page_panel($child_data);
+				}
+
+				$data[$struct['name']] = $new_children;
+
+				$all_children = $all_children + $new_children;
+
+			}
+		}
+
+		if ($data['cms_page_id'] == 999999 || $data['cms_page_id'] == 0){
+			$data['sort'] = $data['sort'] + 1;
+			$this->shift_sort($data['panel_name'], $data['sort'], 1);
+		}
+
+		unset($data['block_id']);
+		unset($data['cms_page_panel_id']);
+
+		$new_block_id = $this->create_cms_page_panel($data);
+
+		foreach($all_children as $new_child_id){
+			$this->update_cms_page_panel($new_child_id, ['parent_id' => $new_block_id, ]);
+		}
+
+		return $new_block_id;
+
 	}
 	
 	function get_fk_data($panel_name, $filter = [], $label_field = 'title'){

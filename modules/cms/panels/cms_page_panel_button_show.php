@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class cms_page_panel_button_show extends CI_Controller {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_page_panel_button_show extends \Controller {
 
 	function __construct(){
 

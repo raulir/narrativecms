@@ -13,7 +13,7 @@ It is **not** the place to prepare **CMS admin edit forms**.
 
 ### Admin panel edit must not call page-panel `panel_params`
 
-The admin UI (`admin/cms_page_panel/…`, [`cms_page_panel_fields`](../panels/cms_page_panel_fields.php)) edits **definition-driven fields** plus **stored block JSON**. It must **not** invoke the page panel’s `panel_params`.
+The admin UI (`admin/cms_page_panel/…`, [`cms_page_panel`](../panels/cms_page_panel.php) + `print_fields()`) edits **definition-driven fields** plus **stored block JSON**. It must **not** invoke the page panel’s `panel_params`.
 
 Reasons:
 

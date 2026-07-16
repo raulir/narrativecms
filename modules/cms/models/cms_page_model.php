@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class cms_page_model extends CI_Model {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_page_model extends \Model {
 	
 	function get_cms_pages(){
 
@@ -181,7 +185,7 @@ class cms_page_model extends CI_Model {
 	function _stamp_page_audit_meta(&$meta, $is_create = false) {
 
 		$cms_user_id = !empty($_SESSION['cms_user']['cms_user_id']) ? (int)$_SESSION['cms_user']['cms_user_id'] : 0;
-		$now = (new DateTime())->getTimestamp();
+		$now = (new \DateTime())->getTimestamp();
 
 		if ($is_create) {
 			$meta['create_cms_user_id'] = $cms_user_id;

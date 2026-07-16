@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class cms_video_model extends CI_Model {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_video_model extends \Model {
 
 	function video_add_queue($video_id){
 
@@ -25,7 +29,7 @@ class cms_video_model extends CI_Model {
 
 		try {
 			$metadata = $this->get_video_metadata($videofile);
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->_log_encode('video_add_queue metadata failed for '.$videofile.': '.$e->getMessage());
 			return;
 		}
@@ -85,7 +89,7 @@ class cms_video_model extends CI_Model {
 			}
 		}
 		if (!$video_stream) {
-			throw new Exception('No video stream found.');
+			throw new \Exception('No video stream found.');
 		}
 
 		$width = $video_stream['width'];
@@ -137,7 +141,7 @@ class cms_video_model extends CI_Model {
 			$metadata = $this->get_video_metadata($mp4_path);
 			$result['width'] = $metadata['width'];
 			$result['height'] = $metadata['height'];
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 		}
 
 		return $result;
@@ -189,7 +193,7 @@ class cms_video_model extends CI_Model {
 
 			return ['message' => 'encoded: '.$todo['videofile']];
 
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 
 			array_shift($queue);
 			$queue[] = $todo;
@@ -600,32 +604,32 @@ class cms_video_model extends CI_Model {
 
 		exec($jpg_cmd . ' 2>&1', $output, $ret);
 		if ($ret !== 0) {
-			throw new Exception("jpg extract failed: " . implode("\n", $output));
+			throw new \Exception("jpg extract failed: " . implode("\n", $output));
 		}
 
 		exec($cmd . ' 2>&1', $output, $ret);
 		if ($ret !== 0) {
-			throw new Exception("DASH encoding failed: " . implode("\n", $output));
+			throw new \Exception("DASH encoding failed: " . implode("\n", $output));
 		}
 
 		exec($fallback_cmd.' 2>&1', $out_fb, $ret_fb);
 		if ($ret_fb !== 0) {
-			throw new Exception("Fallback encoding failed: " . implode("\n", $out_fb));
+			throw new \Exception("Fallback encoding failed: " . implode("\n", $out_fb));
 		}
 
 		exec($fallback_hd_cmd.' 2>&1', $out_fb, $ret_fb);
 		if ($ret_fb !== 0) {
-			throw new Exception("Fallback encoding failed: " . implode("\n", $out_fb));
+			throw new \Exception("Fallback encoding failed: " . implode("\n", $out_fb));
 		}
 
 		exec($gif_cmd.' 2>&1', $out_gif, $ret_gif);
 		if ($ret_gif !== 0) {
-			throw new Exception("GIF encoding failed: " . implode("\n", $out_gif));
+			throw new \Exception("GIF encoding failed: " . implode("\n", $out_gif));
 		}
 
 		exec($avc_cmd . ' 2>&1', $avc_output, $avc_ret);
 		if ($avc_ret !== 0) {
-			throw new Exception("AVC encoding failed: " . implode("\n", $avc_output));
+			throw new \Exception("AVC encoding failed: " . implode("\n", $avc_output));
 		}
 
 		$mpd_file = "{$todo['target_folder']}/manifest.mpd";

@@ -99,11 +99,12 @@ class Router {
 		
 		global $landing_route;
 
-		// load the routes.php file.
+		// load the routes.php file (rebuild after Controller boot if missing)
 		if (file_exists($GLOBALS['config']['base_path'] . 'cache/routes.php')){
 			include_once $GLOBALS['config']['base_path'] . 'cache/routes.php';
 		} else {
-			$route['(:any)'] = 'cms_operations/update_routes/';
+			// No controller fallback — main Controller ensures routes via cms_slug_model
+			$GLOBALS['cms_routes_missing'] = 1;
 		}
 
 		$route['default_controller'] = 'index'.$landing_route;

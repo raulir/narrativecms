@@ -206,7 +206,21 @@ class Loader {
 
 			require_once($path);
 
-			$this->_ci_model_instances[$name] = new $model();
+			// Prefer namespaced class module\model when present (same idea as panels / route controllers)
+			$class = $model;
+			if (class_exists($module.'\\'.$model, false)){
+				$class = $module.'\\'.$model;
+			} else if (!class_exists($model, false)){
+				_html_error(
+					'Unable to find model class "'.$model.'" (or "'.$module.'\\'.$model.
+					'") in '.$module.'/models/'.$model.'.php',
+					500,
+					['backtrace' => 1]
+				);
+				return;
+			}
+
+			$this->_ci_model_instances[$name] = new $class();
 			if (!in_array($name, $this->_ci_models, true)) {
 				$this->_ci_models[] = $name;
 			}

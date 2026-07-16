@@ -129,7 +129,7 @@ function cms_input_page_panel_selector(target_type, target_id, target_name, filt
 					
 					var shortcut_target_id = $('.cms_panel_selector_shortcut_select').val()
 					
-					get_ajax('cms/cms_page_panel_operations', {
+					get_ajax('cms/cms_page_panel', {
 						'do': 'cms_page_panel_shortcut',
 						'cms_page_id': target_id,
 						'cms_page_panel_id': shortcut_target_id,

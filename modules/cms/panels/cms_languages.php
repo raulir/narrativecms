@@ -1,6 +1,10 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
 
-class cms_languages extends CI_Controller {
+namespace cms;
+
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class cms_languages extends \Controller {
 
 	function _ensure_models(){
 

@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class cms_dump extends CI_Controller {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_dump extends \Controller {
 
 	function __construct(){
 
@@ -65,7 +69,7 @@ class cms_dump extends CI_Controller {
 		
 		if (is_dir($imagesdir)){
 		
-			$iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($imagesdir));
+			$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($imagesdir));
 			$files = array_keys(iterator_to_array($iterator, true));
 				
 			foreach ($files as $file) {
@@ -84,7 +88,7 @@ class cms_dump extends CI_Controller {
 	function _get_dump_tables() {
 		$this->load->model('cms/cms_schema_model');
 
-		$tables = ['cms_file', 'cms_image', 'cms_keyword', 'cms_page', 'cms_page_panel'];
+		$tables = ['cms_file', 'cms_image', 'cms_page', 'cms_page_panel'];
 		$tables = array_merge($tables, $this->cms_schema_model->get_panel_table_names());
 		$tables = array_merge($tables, ['cms_page_panel_param', 'cms_search_cache', 'cms_slug', 'cms_text', 'cms_user']);
 
@@ -123,13 +127,13 @@ class cms_dump extends CI_Controller {
 						unlink($outfile);
 					}
 					
-					$zip = new ZipArchive();
+					$zip = new \ZipArchive();
 						
 					if ($zip->open($outfile, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) !== TRUE) {
 						print('An error occurred');
 					}
 					
-					$iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($imagesdir));
+					$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($imagesdir));
 					$files = array_keys(iterator_to_array($iterator, true));
 					
 					foreach ($files as $file) {
@@ -167,7 +171,7 @@ class cms_dump extends CI_Controller {
 						unlink($outfile);
 					}
 					
-					$zip = new ZipArchive();
+					$zip = new \ZipArchive();
 						
 					if ($zip->open($outfile, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) !== TRUE) {
 						print('An error occurred');
@@ -203,7 +207,7 @@ class cms_dump extends CI_Controller {
 						unlink($outfile);
 					}
 					
-					$zip = new ZipArchive();
+					$zip = new \ZipArchive();
 						
 					if ($zip->open($outfile, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) !== TRUE) {
 						print('An error occurred');
@@ -255,7 +259,7 @@ class cms_dump extends CI_Controller {
 		
 				$filename = $GLOBALS['config']['base_path'].'cache/dump/'.$upload_data['file_name'];
 		
-				$zip = new ZipArchive();
+				$zip = new \ZipArchive();
 					
 				$zip->open($filename);
 				$zip->extractTo($GLOBALS['config']['upload_path']);

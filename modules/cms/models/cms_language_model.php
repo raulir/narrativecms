@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-if (!function_exists('array_key_first')) {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+if (!function_exists('array_key_first') && !function_exists(__NAMESPACE__.'\\array_key_first')) {
 	function array_key_first(array $arr) {
 		foreach($arr as $key => $unused) {
 			return $key;
@@ -9,7 +13,7 @@ if (!function_exists('array_key_first')) {
 	}
 }
 
-class cms_language_model extends Model {
+class cms_language_model extends \Model {
 
 	function normalise_language_id($language_id){
 

@@ -1,8 +1,12 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
+
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 include_once('system/helpers/json_helper.php');
 
-if (!function_exists('array_merge_recursive_ex')){
+if (!function_exists(__NAMESPACE__.'\\array_merge_recursive_ex')){
 
 	function array_merge_recursive_ex(array $array1, array $array2){
 			
@@ -26,7 +30,7 @@ if (!function_exists('array_merge_recursive_ex')){
 
 }
 
-class cms_panel_model extends Model {
+class cms_panel_model extends \Model {
 	
 	/**
 	 *  load block type structure from json file

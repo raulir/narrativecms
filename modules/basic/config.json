@@ -1,4 +1,6 @@
 {
+	"name":"Basic",
+	"version":"1.1",
 	"panels":[
 		{
 			"id":"gtm",

@@ -24,6 +24,6 @@
 
 <div class="cms_user_login_copyright">
 	<a class="cms_user_login_cms" <?php _lh('https://github.com/raulir/bccms/') ?> <?php _ib('cms/cms_icon.png', 15) ?>>
-		Narrative CMS &nbsp; - &nbsp; &copy; 2012-2025
+		Narrative CMS &nbsp; - &nbsp; &copy; 2012-2026
 	</a>
 </div>

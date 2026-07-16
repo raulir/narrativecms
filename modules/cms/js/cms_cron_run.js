@@ -11,7 +11,7 @@ function cms_cron_run_init($root){
 	setTimeout(function(){
 		$.ajax({
 			type: 'POST',
-		  	url: _cms_base + 'cms_operations/cron/',
+		  	url: _cms_base + 'cms/cron/',
 		});
 	}, 1000);
 

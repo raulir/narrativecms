@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class cms_page_panel extends CI_Controller {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_page_panel extends \Controller {
 
 	function __construct(){
 
@@ -11,6 +15,195 @@ class cms_page_panel extends CI_Controller {
 			header('Location: '.$GLOBALS['config']['base_url'].'cms_login/', true, 302);
 			exit();
 		}
+
+		// print_fields() in cms_page_panel.tpl.php — definition fields + stored block only.
+		// Do not call the page panel's panel_params here — that is frontend-only
+		// (redirects, score HTML, etc.). Custom field types prepare themselves via
+		// their own panel_params when print_fields() renders them with _panel().
+		// See modules/cms/docs/cms_panel_params.md
+		$this->load->helper('cms/cms_fields_helper');
+
+	}
+
+	/**
+	 * Admin ajax actions (save, delete, show, copy, caching, shortcut, title preview).
+	 * Domain work lives on cms_page_panel_model; hooks stay here.
+	 */
+	function panel_action($params){
+
+		$do = $this->input->post('do');
+		if (empty($do)){
+			return $params;
+		}
+
+		// Action-only: skip editor panel_params + template (get_ajax_panel callers)
+		$params['no_html'] = 1;
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_panel_model');
+
+		if ($do == 'cms_page_panel_shortcut'){
+
+			$this->cms_page_panel_model->create_cms_page_panel([
+					'sort' => 'last',
+					'cms_page_id' => $this->input->post('cms_page_id'),
+					'title' => '',
+					'panel_name' => $this->input->post('cms_page_panel_id'),
+			]);
+
+		} elseif ($do == 'cms_page_panel_caching'){
+
+			$target_id = $this->input->post('target_id');
+			$lists = $this->input->post('lists');
+			$caching = $this->input->post('caching');
+
+			$params['_caching'] = 0;
+
+			if (!empty($lists) && is_array($lists)){
+				$this->cms_page_panel_model->update_cms_page_panel($target_id, ['_cache_lists' => implode(',', $lists), ]);
+				$params['_caching'] = 1;
+			} else {
+				$this->cms_page_panel_model->update_cms_page_panel($target_id, ['_cache_lists' => '', ]);
+			}
+
+			$this->cms_page_panel_model->update_cms_page_panel($target_id, ['_cache_time' => $caching, ]);
+			if (!empty($caching)){
+				$params['_caching'] = 1;
+			}
+
+		} elseif ($do == 'cms_page_panel_show'){
+
+			$cms_page_panel_id = $this->input->post('cms_page_panel_id');
+			$block = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
+
+			if (!empty($block['show'])){
+				$result = $this->cms_page_panel_model->set_cms_page_panel_show($cms_page_panel_id, 0);
+			} else {
+				$params['notification'] = $this->run_panel_method($block['panel_name'], 'on_show', $block);
+				$result = $this->cms_page_panel_model->set_cms_page_panel_show($cms_page_panel_id, 1);
+			}
+
+			$params['show'] = $result['show'];
+
+		} elseif ($do == 'cms_page_panel_copy'){
+
+			$this->cms_page_panel_model->copy_cms_page_panel($this->input->post('cms_page_panel_id'));
+
+		} elseif ($do == 'cms_page_panel_preview_title'){
+
+			$block_id = $this->input->post('cms_page_panel_id');
+			$language = $this->_resolve_cms_language($this->input->post('language'));
+
+			if (!$this->cms_page_panel_model->_is_default_language($language)){
+				if (!empty($block_id)){
+					$saved_panel = $this->cms_page_panel_model->get_cms_page_panel(
+							$block_id, $this->cms_page_panel_model->default_language);
+					if (is_array($saved_panel)){
+						$params['_title'] = $this->cms_page_panel_model->get_panel_admin_title($saved_panel);
+					}
+				}
+			} else {
+				$built = $this->cms_page_panel_model->build_panel_data_for_save(
+						$this->_post_panel_form_input($block_id), $language);
+				$compiled_title = $this->cms_page_panel_model->compile_list_item_title(
+						$built['data_merged'], $built['panel_config'], $block_id, $language);
+
+				if ($compiled_title !== false){
+					$params['_title'] = $this->cms_page_panel_model->_compute_cached_title(
+							$compiled_title, $built['data_merged']['_targets'] ?? []);
+				}
+			}
+
+		} elseif ($do == 'cms_page_panel_save'){
+
+			$block_id = $this->input->post('cms_page_panel_id');
+			$language = $this->_resolve_cms_language($this->input->post('language'));
+
+			$old_data = $this->cms_page_panel_model->get_cms_page_panel($block_id, $language);
+
+			$built = $this->cms_page_panel_model->build_panel_data_for_save(
+					$this->_post_panel_form_input($block_id), $language);
+			$data_merged = $built['data_merged'];
+			$panel_config = $built['panel_config'];
+			$panel_structure = $built['panel_structure'];
+
+			if (!empty($old_data['_cache_lists'])){
+				$data_merged['_cache_lists'] = $old_data['_cache_lists'];
+			}
+			if (!empty($old_data['_cache_time'])){
+				$data_merged['_cache_time'] = $old_data['_cache_time'];
+			}
+
+			$compiled_title = $this->cms_page_panel_model->compile_list_item_title(
+					$data_merged, $panel_config, $block_id, $language);
+
+			if ($compiled_title !== false && $this->cms_page_panel_model->_is_default_language($language)){
+				$data_merged['title'] = $compiled_title;
+			}
+
+			$data_merged = $this->run_panel_method($data_merged['panel_name'], 'on_update', $data_merged);
+
+			$saved = $this->cms_page_panel_model->save_cms_page_panel_admin($block_id, $data_merged, [
+					'panel_config' => $panel_config,
+					'parent_name' => $this->input->post('parent_name'),
+					'old_data' => is_array($old_data) ? $old_data : [],
+			]);
+			$block_id = $saved['cms_page_panel_id'];
+
+			$this->cms_page_panel_model->delete_orphan_upload_files(
+					$panel_structure, is_array($old_data) ? $old_data : [], $data_merged);
+
+			$params['cms_page_panel_id'] = $block_id;
+
+			$saved_panel = $this->cms_page_panel_model->get_cms_page_panel($block_id, $language);
+			if (is_array($saved_panel)){
+				$params['_title'] = $this->cms_page_panel_model->get_panel_admin_title($saved_panel);
+			}
+
+		} elseif ($do == 'cms_page_panel_delete'){
+
+			$block_id = $this->input->post('cms_page_panel_id');
+
+			$data = $this->cms_page_panel_model->get_cms_page_panel($block_id);
+			$panel_config = $this->cms_panel_model->get_cms_panel_config($data['panel_name']);
+			$panel_structure = $this->cms_panel_model->get_cms_panel_edit_structure(
+					$panel_config, $data['cms_page_id'], $data['parent_id'], $data['sort']);
+
+			$this->cms_page_panel_model->delete_cms_page_panel($block_id);
+			$this->cms_page_panel_model->delete_orphan_upload_files($panel_structure, $data);
+
+		}
+
+		if (empty($params['cms_page_panel_id'])){
+			$params['cms_page_panel_id'] = !empty($params['block_id']) ? $params['block_id'] : 0;
+		}
+
+		return $params;
+
+	}
+
+	function _resolve_cms_language($language){
+
+		$this->load->model('cms/cms_language_model');
+		$resolved_language = $this->cms_language_model->resolve_language_id(
+				$language, $GLOBALS['language']['languages'] ?? []);
+		return $resolved_language !== false ? $resolved_language : $language;
+
+	}
+
+	function _post_panel_form_input($block_id){
+
+		return [
+			'cms_page_panel_id' => $block_id,
+			'cms_page_id' => $this->input->post('cms_page_id'),
+			'parent_id' => $this->input->post('parent_id'),
+			'sort' => $this->input->post('sort'),
+			'title' => $this->input->post('title'),
+			'submenu_anchor' => $this->input->post('submenu_anchor'),
+			'panel_name' => $this->input->post('panel_name'),
+			'panel_params' => $this->input->post('panel_params'),
+			'_template_page_id' => $this->input->post('_template_page_id'),
+		];
 
 	}
 

@@ -79,7 +79,7 @@ This drives the **frontend** only. It does not write or read `$_SESSION['cms_lan
 
 ## Admin editing language
 
-Toolbar language selector sets `$_SESSION['cms_language']` (via `cms/cms_language_operations`). Reload applies that language to all admin content loads via `get_cms_language()` / `get_content_language()`.
+Toolbar language selector sets `$_SESSION['cms_language']` (via `cms/cms_language_select` `do=cms_language_set`). Reload applies that language to all admin content loads via `get_cms_language()` / `get_content_language()`.
 
 Panel definition fields with `"translate":"1"` store values per language:
 

@@ -56,7 +56,7 @@ Rough order:
 | `Files` | `system/core/controller_files.php` | File serving paths |
 | Module admin | e.g. `modules/cms/controllers/admin.php` | CMS admin UI |
 
-Prefer **`extends Controller`**. Legacy name **`CI_Controller`** is a `class_alias` only — do not introduce new `CI_*` type names. Same idea for models: **`extends Model`**, not `CI_Model`.
+Prefer **`extends \Controller`** (inside `namespace module;`) or bare **`extends Controller`** only in non-namespaced legacy files. The CMS module and `system/` use **`Controller` only** — not `CI_Controller`. Legacy name **`CI_Controller`** remains a `class_alias` for other modules still migrating. Same idea for models: **`extends Model`**, not `CI_Model`.
 
 ---
 
@@ -97,10 +97,14 @@ File: [`system/core/Loader.php`](../../../system/core/Loader.php)
 ```php
 $this->load->model('cms/cms_access_model');
 // → $this->cms_access_model (on main; panels via __get)
+// class may be cms\cms_access_model (namespaced) or global cms_access_model (legacy)
 ```
 
-- Path form: **`module/model_filename`** (required slash)
-- Class name matches filename (lowercase): `cms_access_model`
+- Path form: **`module/model_filename`** (required slash) — unchanged call sites
+- File: `modules/<module>/models/<model>.php`
+- **Class resolution** (after `require_once`): prefer **`module\model`** if that class exists, else bare **`model`** (legacy other modules)
+- Property name is always the short filename: `$this->cms_access_model`
+- Prefer `namespace module;` + `class model extends \Model` (CMS module fully migrated)
 - Instances stored in Loader `_ci_model_instances`; created **once**
 - Always attached to current `parent` (and to main if different)
 - Never treat as “already loaded” without ensuring the host can access the instance
@@ -207,6 +211,8 @@ Full page loads construct many panel libraries. Keeping a **single** Loader init
 
 ## Follow-ups (not all done)
 
-- Repo-wide replace of remaining `extends CI_Controller` with `Controller`  
+- [x] CMS module: all controllers/panels namespaced `cms\` + `extends \Controller`  
+- [x] CMS module: all models namespaced `cms\` + `extends \Model`; Loader prefers `module\model`  
+- Repo-wide replace of remaining `extends CI_Controller` in other modules with `Controller`
 - Remove legacy definition `"extends"` handling from `system/` when projects migrated  
 - Optional rename of Loader internal `_ci_*` property names  

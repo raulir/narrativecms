@@ -27,7 +27,7 @@ sequenceDiagram
     participant Popup as cms_images popup
     participant Grid as cms_images_page
     participant Editor as cms_image overlay
-    participant Ops as cms_images_operations
+    participant Ops as cms_images
 
     Field->>Popup: Select → cms/cms_images
     Popup->>Grid: cms_images_load_images
@@ -50,9 +50,9 @@ Popup reopen — if grid still shows "Loading ...", `cms_input_image_load_images
 
 ## Apply selection
 
-`cms_images_operations` `cms_images_check_by_filename` returns:
+`cms/cms_images` `cms_images_check_by_filename` (`get_ajax` / `no_html`) returns:
 
-- `_html` — preview markup (`cms_images_operations.tpl.php` → `_ib` at 300px)
+- `_html` — preview markup (from `cms_images_operations.tpl.php` → `_ib` at 300px, built in `panel_action`)
 - `filename`, `original_width`, `original_height`
 - meta fields (`author`, `copyright`, …) for linked `.cms_meta` inputs (xy/mask pickers)
 
@@ -79,10 +79,9 @@ Sets `data-w` / `data-h` on `.cms_input_image` for downstream tools. Mp4 preview
 
 | Panel | Role |
 |-------|------|
-| `cms/cms_images` | Popup shell + toolbar |
+| `cms/cms_images` | Popup shell + toolbar; save / delete / check (`get_ajax`) |
 | `cms/cms_images_page` | Grid cells (ajax) |
 | `cms/cms_image` | Crop / adjust editor overlay |
-| `cms/cms_images_operations` | check, save, delete |
 | `cms/cms_images_upload` | Upload; mp4 → encode queue |
 
 ## Files

@@ -1,6 +1,10 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
 
-class cms_popup_yes_no extends CI_Controller {
+namespace cms;
+
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class cms_popup_yes_no extends \Controller {
 
 	function panel_params($params){
 

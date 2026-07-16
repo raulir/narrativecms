@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class cms_image extends CI_Controller {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_image extends \Controller {
 
 	function __construct(){
 
@@ -17,7 +21,6 @@ class cms_image extends CI_Controller {
 	function panel_params($params){
 
 		$this->load->model('cms/cms_image_model');
-		$this->load->model('cms/cms_keyword_model');
 
 		if (empty($params['filename'])) {
 			$params['filename'] = '';

@@ -94,7 +94,7 @@ Panel files call `<panel>_init()` from `$(document).ready()` (or `$(() => ...)`)
 
 ## Exceptions
 
-- **`cms_page_panel_fields_init($root)`** — layout-only positioning; intentionally has no `*_ok` guard so it can re-run on resize.
+- **`cms_page_panel_fields_init($root)`** (in `cms_page_panel.js`) — field-grid layout only; intentionally has no `*_ok` guard so repeaters/grid can re-run it after DOM changes.
 - **`cms_cron_run_init($root)`** — no panel DOM; guard `cms_cron_run_ok` on `body`.
 - **Feature state on `.data()`** — e.g. `cms_edit_slug_ok` validation result is not an init guard.
 - **Sub-state classes** — e.g. `cms_tinymce_formatted`, `cms_video_ready`, `cms_input_date_hidden` (pre-flatpickr setup).

@@ -1,6 +1,10 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
 
-class cms_schema extends Controller {
+namespace cms;
+
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class cms_schema extends \Controller {
 	
 	function __construct(){
 	

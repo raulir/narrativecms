@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class cms_slug_model extends Model {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_slug_model extends \Model {
 	
 	function generate_page_slug($page_id, $slug_string){
 		
@@ -148,6 +152,23 @@ class cms_slug_model extends Model {
     	 
 	}
 	
+	/**
+	 * Ensure cache/routes.php exists (rebuild from cms_slug if missing).
+	 * Safe to call from any place that discovers a missing routes file.
+	 */
+	function ensure_routes_cache(){
+
+		$path = $GLOBALS['config']['base_path'].'cache/routes.php';
+		if (is_file($path)){
+			return true;
+		}
+
+		$this->_regenerate_cache();
+
+		return is_file($path);
+
+	}
+
 	/**
 	 * creates new routes.php
 	 */

@@ -130,7 +130,7 @@ function cms_page_init($root){
 		get_ajax_panel('cms/cms_popup_yes_no', {'text':'Delete block shortcut?'}, function(data){
 			panels_display_popup(data.result._html, {
 				'yes': function(){
-					get_ajax_panel('cms/cms_page_panel_operations', {
+					get_ajax_panel('cms/cms_page_panel', {
 						'cms_page_panel_id': cms_page_panel_id,
 						'do': 'cms_page_panel_delete' 
 					}, function(){

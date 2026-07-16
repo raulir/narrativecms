@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class cms_list extends CI_Controller {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_list extends \Controller {
 
 	function __construct(){
 
@@ -16,6 +20,160 @@ class cms_list extends CI_Controller {
 		$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/cms_cookie.js', );
 		$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/cms_page_panel_button_show.js', );
 		
+	}
+
+	function panel_action($params){
+
+		$do = $this->input->post('do');
+
+		if ($do === 'cms_list_set'){
+
+			$cms_page_panel_id = $this->input->post('id');
+			$field = $this->input->post('field');
+			$value = $this->input->post('value');
+
+			$this->load->model('cms/cms_page_panel_model');
+			$this->cms_page_panel_model->update_cms_page_panel($cms_page_panel_id, [
+					$field => $value,
+			]);
+
+		} else if ($do === 'cms_list_save_order'){
+
+			$list_order = $this->input->post('list_order');
+
+			$this->load->model('cms/cms_page_panel_model');
+
+			$previous_sort = [];
+			foreach ($list_order as $list_sort => $cms_page_panel_id){
+				$panel = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
+				$previous_sort[] = $panel['sort'];
+			}
+
+			sort($previous_sort);
+
+			foreach ($list_order as $list_sort => $cms_page_panel_id){
+				$this->cms_page_panel_model->update_cms_page_panel($cms_page_panel_id, [
+						'sort' => $previous_sort[$list_sort],
+				]);
+			}
+
+		} else if ($do === 'cms_list_move'){
+
+			$block_id = $this->input->post('block_id');
+			$target = $this->input->post('target');
+			$start = $this->input->post('start');
+			$limit = $this->input->post('limit');
+
+			$this->load->model('cms/cms_page_panel_model');
+
+			$block = $this->cms_page_panel_model->get_cms_page_panel($block_id);
+
+			if ($target == 'first'){
+
+				$this->cms_page_panel_model->move_first($block_id);
+
+			} else if ($target == 'previous'){
+
+				if ($start >= $limit){
+
+					$filters = $this->input->post('filters');
+					$list_order = $this->input->post('list_order');
+
+					$filter = [
+							'panel_name' => $block['panel_name'],
+							'cms_page_id' => 0,
+							'sort!' => '0',
+					];
+					if (is_array($filters)){
+						$filter = array_merge($filter, $filters);
+					}
+
+					$old_block_a = $this->cms_page_panel_model->get_cms_page_panels_list_by(
+							array_merge($filter, ['_start' => $start - 1, '_limit' => 1, ])
+					);
+
+					$previous_sort = [];
+					$new_list_sort = [$old_block_a[0]['cms_page_panel_id']];
+					foreach ($list_order as $list_sort => $cms_page_panel_id){
+						$panel = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
+						$previous_sort[] = $panel['sort'];
+						if ($cms_page_panel_id != $block_id){
+							$new_list_sort[] = $cms_page_panel_id;
+						}
+					}
+
+					$this->cms_page_panel_model->update_cms_page_panel($block_id, [
+							'sort' => $old_block_a[0]['sort'],
+					]);
+
+					sort($previous_sort);
+
+					foreach ($new_list_sort as $index => $block_id){
+						$this->cms_page_panel_model->update_cms_page_panel($block_id, [
+								'sort' => $previous_sort[$index],
+						]);
+					}
+
+				}
+
+			} else if ($target == 'next'){
+
+				$filters = $this->input->post('filters');
+				$list_order = $this->input->post('list_order');
+
+				$filter = [
+						'panel_name' => $block['panel_name'],
+						'cms_page_id' => 0,
+						'sort!' => '0',
+				];
+				if (is_array($filters)){
+					$filter = array_merge($filter, $filters);
+				}
+
+				$old_block_a = $this->cms_page_panel_model->get_cms_page_panels_list_by(
+						array_merge($filter, ['_start' => $start + $limit, '_limit' => 1, ])
+				);
+
+				if (!empty($old_block_a[0])){
+
+					$previous_sort = [];
+					$new_list_sort = [];
+					foreach ($list_order as $list_sort => $cms_page_panel_id){
+						$panel = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
+						$previous_sort[] = $panel['sort'];
+						if ($cms_page_panel_id != $block_id){
+							$new_list_sort[] = $cms_page_panel_id;
+						}
+					}
+					$new_list_sort[] = $old_block_a[0]['cms_page_panel_id'];
+
+					$this->cms_page_panel_model->update_cms_page_panel($block_id, [
+							'sort' => $old_block_a[0]['sort'],
+					]);
+
+					sort($previous_sort);
+
+					foreach ($new_list_sort as $index => $block_id){
+						$this->cms_page_panel_model->update_cms_page_panel($block_id, [
+								'sort' => $previous_sort[$index],
+						]);
+					}
+
+				}
+
+			} else if ($target == 'last'){
+
+				$sort_stats = $this->cms_page_panel_model->get_sort_stats($block['panel_name']);
+				$this->cms_page_panel_model->update_cms_page_panel($block_id, [
+						'sort' => $sort_stats['max_sort'] + 1,
+				]);
+
+			}
+
+		}
+
+		return $params;
+
 	}
 
 	function panel_params($params){

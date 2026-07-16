@@ -83,7 +83,7 @@
 				"visits":"Visits"
 			},
 			"default":"visits",
-			"help":"[visits] - need to run regularly repeating tasks is checked when users visit||[cron] - when server crontab calls /cms_operations/cron/ (preferred, but not always available)"
+			"help":"[visits] - need to run regularly repeating tasks is checked when users visit||[cron] - when server crontab calls /cms/cron/ (preferred, but not always available)"
 		},
 		{
 			"type":"text",

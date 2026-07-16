@@ -11,7 +11,9 @@
 	<?php else: ?>
 		<div class="cms_update_cell"><?= htmlspecialchars($row['master_label'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
 		<div class="cms_update_cell cms_update_cell_right">
-			<?php if(!empty($row['can_update'])): ?>
+			<?php if(!empty($row['can_release'])): ?>
+				<div class="cms_update_release_button cms_tool_button" data-area="<?= $area_attr ?>">Release</div>
+			<?php elseif(!empty($row['can_update'])): ?>
 				<div class="cms_update_button cms_tool_button" data-area="<?= $area_attr ?>">Update</div>
 			<?php endif ?>
 		</div>

@@ -20,10 +20,6 @@ class cms_update extends \Controller {
 
 	function panel_action($params){
 
-		if (empty($GLOBALS['config']['update']['allow'])){
-			return $params;
-		}
-		
 		$this->load->model('cms/cms_update_model');
 
 		$do = $this->input->post('do');
@@ -39,6 +35,42 @@ class cms_update extends \Controller {
 			return $params;
 		}
 		$area = $area_norm;
+
+		// Master Release does not require update.allow (that flag is for client pulls)
+		if ($do == 'cms_update_release'){
+
+			if (!$this->cms_update_model->is_area_master($area)){
+				$params['result'] = ['error' => 'not_master'];
+				return $params;
+			}
+
+			$released = $this->cms_update_model->release_area($area);
+			if (!empty($released['error'])){
+				$params['result'] = $released;
+				return $params;
+			}
+
+			$row = $this->cms_update_model->confirm_area($area);
+
+			ob_start();
+			include $GLOBALS['config']['base_path'].'modules/cms/templates/cms_update_row.tpl.php';
+			$row_html = ob_get_clean();
+
+			$params['result'] = [
+					'area' => $area,
+					'version' => $released['version'] ?? '',
+					'row' => $row,
+					'row_html' => $row_html,
+					'message' => 'Released '.($released['version'] ?? ''),
+			];
+
+			return $params;
+
+		}
+
+		if (empty($GLOBALS['config']['update']['allow'])){
+			return $params;
+		}
 		
 		if ($do == 'cms_update_list'){
 
@@ -61,21 +93,44 @@ class cms_update extends \Controller {
 			
 			$params['master_version'] = !empty($version_data['version']) ? $version_data['version'] : '';
 
-		} else if ($do == 'cms_update_file'){ // updates file
+		} else if ($do == 'cms_update_file'){ // stage file(s) from master into cache/update/
 
 			if (!$this->cms_update_model->client_may_use_area($area)){
 				$params['result'] = ['error' => 'not_allowed'];
 				return $params;
 			}
-			 
-			$filename = $this->input->post('filename');
-				
-			$this->cms_update_model->update_file($filename, $area);
-			 
-			$params['result']['filename'] = $filename;
-			$params['result']['fn_hash'] = md5($filename);
-			$params['result']['letter'] = $this->input->post('letter');
-			 
+
+			$filenames = $this->input->post('filenames');
+			if (is_string($filenames) && $filenames !== ''){
+				$decoded = json_decode($filenames, true);
+				if (is_array($decoded)){
+					$filenames = $decoded;
+				}
+			}
+
+			if (is_array($filenames) && count($filenames)){
+
+				$staged = $this->cms_update_model->update_files($filenames, $area);
+				$params['result'] = [
+						'done' => $staged['done'] ?? [],
+						'letters' => $this->input->post('letters'),
+				];
+
+			} else {
+
+				// Legacy single-file
+				$filename = $this->input->post('filename');
+				$this->cms_update_model->update_file($filename, $area);
+				$params['result']['filename'] = $filename;
+				$params['result']['fn_hash'] = md5($filename);
+				$params['result']['letter'] = $this->input->post('letter');
+				$params['result']['done'] = [[
+						'filename' => $filename,
+						'fn_hash' => md5($filename),
+				]];
+
+			}
+
 		} else if ($do == 'cms_update_copy'){
 
 			if (!$this->cms_update_model->client_may_use_area($area)){

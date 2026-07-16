@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class cms_page_panel_export extends CI_Controller {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_page_panel_export extends \Controller {
 
 	function __construct(){
 
@@ -821,12 +825,12 @@ class cms_page_panel_export extends CI_Controller {
 				unlink($this->folder.'.zip');
 			}
 
-			$zip = new ZipArchive();
+			$zip = new \ZipArchive();
 			if ($zip->open($this->folder.'.zip', ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true){
 				die('An error occurred creating zip');
 			}
 
-			$iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->folder));
+			$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->folder));
 			foreach ($iterator as $fileinfo){
 				if ($fileinfo->isFile()){
 					$path = $fileinfo->getPathname();

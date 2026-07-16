@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class cms_language_select extends Controller {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_language_select extends \Controller {
 
 	function __construct(){
 
@@ -15,6 +19,26 @@ class cms_language_select extends Controller {
 		add_css('modules/cms/css/cms_input.scss');
 		add_css('modules/cms/css/cms_page_panel_toolbar.scss');
 		
+	}
+
+	function panel_action($params){
+
+		$do = $this->input->post('do');
+
+		if ($do === 'cms_language_set'){
+
+			$cms_language = $this->input->post('language');
+			$this->load->model('cms/cms_language_model');
+			$resolved_language = $this->cms_language_model->resolve_language_id(
+					$cms_language,
+					$GLOBALS['language']['languages'] ?? []
+			);
+			$_SESSION['cms_language'] = $resolved_language !== false ? $resolved_language : $cms_language;
+
+		}
+
+		return $params;
+
 	}
 	
 	function panel_params($params){

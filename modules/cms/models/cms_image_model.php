@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class cms_image_model extends CI_Model {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_image_model extends \Model {
 
 	function get_cms_image_by_filename($filename){
 
@@ -106,7 +110,8 @@ class cms_image_model extends CI_Model {
 		}
 
 		if ($search !== ''){
-			$where .= " and ( filename like '%".$search."%' or keyword like '%".$search."%' ) ";
+			// filename only; free-text tags can live in meta description if a project needs them
+			$where .= " and filename like '%".$search."%' ";
 		}
 
 		$sql = "select a.*, count(b.cms_page_panel_param_id) as number from cms_image a left join cms_page_panel_param b on a.filename = b.value " .
@@ -205,7 +210,7 @@ class cms_image_model extends CI_Model {
 			$type = 'video';
 		}
 
-		$sql = "insert into cms_image set type = ? , name = ? , filename = ? , category = ? , hash = '', meta = '', keyword = '' ";
+		$sql = "insert into cms_image set type = ? , name = ? , filename = ? , category = ? , hash = '', meta = '' ";
 		$this->db->query($sql, [$type, $name_data, $filename, $category, ]);
 		$insert_id = $this->db->insert_id();
 		
@@ -653,7 +658,7 @@ class cms_image_model extends CI_Model {
 							'height' => (int)$metadata['height'],
 						];
 					}
-				} catch (Exception $e){
+				} catch (\Exception $e){
 				}
 			}
 		}

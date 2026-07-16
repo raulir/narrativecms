@@ -69,9 +69,25 @@ class login_google extends \Controller {
 
 Namespaced class definition notes:
 
-- File: `modules/<module>/panels/<panel>.php` → `namespace <module>;` and `class <panel>`
-- Extend `\Controller` (panels) or `\Model` (models), not bare `Controller` / `Model` when inside a namespace
-- Legacy un-namespaced panels still work (`class register extends Controller` with a one-line BASEPATH header); prefer namespaces for new class files
+- File: `modules/<module>/panels/<panel>.php` → `namespace <module>;` and `class <panel> extends \Controller`
+- File: `modules/<module>/models/<model>.php` → `namespace <module>;` and `class <model> extends \Model`
+- Load models with the same path as before: `$this->load->model('cms/cms_access_model')` → `$this->cms_access_model` (Loader prefers `cms\cms_access_model` when present)
+- Extend `\Controller` / `\Model` inside a namespace (leading backslash), not bare `Controller` / `Model` / `CI_*`
+- Legacy un-namespaced panels/models still work; prefer namespaces for new class files. CMS module controllers, panels, and models are namespaced.
+
+### Avoid stub panel controllers
+
+**Do not** add `panels/<name>.php` when it only:
+
+- extends `\Controller` with an empty body, or  
+- has `__construct` that only calls `parent::__construct()` / admin session redirect, or  
+- has `panel_params` / `panel_action` that only `return $params`
+
+The runtime already supports **template-only / definition-only panels**: if `modules/<m>/panels/<name>.php` is missing, `get_panel_filenames()` leaves `controller` empty and skips loading a class (`Controller::panel()` / `run_panel_method()`). Templates, SCSS, JS, and definition `"js"` still load as usual.
+
+**Do** add a panel controller when it has real work: prepare data in `panel_params`, handle `do=` in `panel_action`, `panel_heading` for admin lists, `add_css` / `add_js` that must run server-side, model/DB logic, redirects, etc.
+
+If the only need is CSS/JS, prefer definition `"js"` / panel SCSS (or `add_*` from a parent that already runs) over an empty PHP class.
 
 Config access – use `$GLOBALS['config']`:
 
@@ -165,7 +181,7 @@ Example: `cms_language_select.php`
 
 `panel_params` returns the modified `$params` array.
 
-If no `$params` modification is needed (e.g. they come directly from db or ajax), no `panel_params` function is needed.
+If no `$params` modification is needed (e.g. they come directly from db or ajax), no `panel_params` function is needed — and if the controller would only pass params through, **omit the panel PHP file entirely** (see “Avoid stub panel controllers” above).
 
 If the panel needs to update system state, use `panel_action($params)`, which works similarly to `panel_params()`, but all `panel_action` calls run before any `panel_params()` on the page.
 
@@ -209,7 +225,7 @@ Three UI layers (detail in module docs):
 2. **Selector grid** — `cms_images` popup + `cms_images_page` ajax grid
 3. **Crop editor** — `cms_image` overlay on grid → [`cms_image.md`](cms_image.md)
 
-Coding — logic in [`cms_image_model`](../models/cms_image_model.php); panels thin (`panel_params` / `panel_action`). Save via [`cms_images_operations.php`](../panels/cms_images_operations.php) `cms_images_save`. JS chain: `cms_input_image.js` → `cms_images.js` → `cms_image.js`; frontend transforms in `cms_media_view.js`. Video child without physical file: [`cms_input_image.php`](../panels/cms_input_image.php) uses `get_video_view_meta()` so missing-file error is skipped when parent mp4/fallback exists.
+Coding — logic in [`cms_image_model`](../models/cms_image_model.php); panel thin (`cms/cms_images` `panel_params` + `panel_action` for save/delete/check). JS chain: `cms_input_image.js` → `cms_images.js` → `cms_image.js`; frontend transforms in `cms_media_view.js`. Video child without physical file: [`cms_input_image.php`](../panels/cms_input_image.php) uses `get_video_view_meta()` so missing-file error is skipped when parent mp4/fallback exists.
 
 UI — crop `%` in unrotated source space; zoom/pan are editor-only (not applied on frontend). Save overlay: **Exporting ...** (images) / **Saving ...** (video). Grid thumbnails `_ib(..., 150)`; input preview `_ib(..., 300)`.
 

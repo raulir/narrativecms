@@ -40,6 +40,13 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 ---
 
+## Updater — [`cms_update.md`](cms_update.md)
+
+- [x] **Config major.minor + Release snapshot** (#430) — `config.json` `"version"`, manual [Release], serve clients from `cache/master/{id}/`
+- [ ] **Admin UI to edit package major.minor** — today operators set `"version": "x.y"` in module `config.json`; ticket for CMS UI instead of hand-editing JSON
+
+---
+
 ## Schema panel — [`cms_schema.md`](cms_schema.md)
 
 - Show errors inside the panel
@@ -75,7 +82,7 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 ## Panel editor — field position calculations
 
-- [ ] Investigate `cms_page_panel_fields.js` absolute positioning (e.g. site `landing` “CTAs” subtitle section overlapping fields above) — not a subtitle container height fix
+- [ ] Investigate `cms_page_panel_fields_init` absolute positioning (e.g. site `landing` “CTAs” subtitle section overlapping fields above) — not a subtitle container height fix
 
 ---
 

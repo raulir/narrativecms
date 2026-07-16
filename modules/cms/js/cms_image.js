@@ -976,7 +976,7 @@ function cms_image_init($root){
 			$('.cms_image_save').addClass('cms_image_save_disabled')
 		}
 
-		get_ajax_panel('cms/cms_images_operations', {
+		get_ajax('cms/cms_images', {
 			'filename': $(this).data('filename'),
 			'do': 'cms_images_save',
 			'source_cms_image_id': $('.cms_image_container').data('source_cms_image_id'),
@@ -997,49 +997,50 @@ function cms_image_init($root){
 			'overlay_opacity': $('.cms_image_opacity_input').val(),
 			'rotation': $('.cms_image_rotation_input').val(),
 			'rotation_fixed': cms_image_rotation_fixed ? '1' : '0',
-		}, function(data){
+			'success': function(data){
 
-			var $container = $('.cms_image_container')
-			var is_child = $container.data('is_child') == 1
+				var $container = $('.cms_image_container')
+				var is_child = $container.data('is_child') == 1
 
-			if ($('.cms_images_category').val() != $('.cms_image_category').val()){
-				$('.cms_images_category').val($('.cms_image_category').val())
-				var page = 0
-			} else {
-				var page = $('.cms_images_area').data('page')
-				if ($('.cms_images_image').length == 1 && page > 0){
-					page = page - 1
+				if ($('.cms_images_category').val() != $('.cms_image_category').val()){
+					$('.cms_images_category').val($('.cms_image_category').val())
+					var page = 0
+				} else {
+					var page = $('.cms_images_area').data('page')
+					if ($('.cms_images_image').length == 1 && page > 0){
+						page = page - 1
+					}
 				}
-			}
 
-			var reopen_filename = data.result && data.result.child_filename ? data.result.child_filename : ''
-			var parent_filename = $('.cms_image_save').data('filename')
-			var reload_filename = cms_images_get_selected_filename()
+				var reopen_filename = data.result && data.result.child_filename ? data.result.child_filename : ''
+				var parent_filename = $('.cms_image_save').data('filename')
+				var reload_filename = cms_images_get_selected_filename()
 
-			if (is_child){
-				$('.cms_images_area').data('edited_filename', parent_filename)
-			} else if (reopen_filename){
-				$('.cms_images_area').data('edited_filename', reopen_filename)
-				$('.cms_images_area').data('edited_from_filename', parent_filename)
-				reload_filename = reopen_filename
-				if (typeof cms_images_set_popup_selection === 'function'){
-					cms_images_set_popup_selection(reopen_filename)
+				if (is_child){
+					$('.cms_images_area').data('edited_filename', parent_filename)
+				} else if (reopen_filename){
+					$('.cms_images_area').data('edited_filename', reopen_filename)
+					$('.cms_images_area').data('edited_from_filename', parent_filename)
+					reload_filename = reopen_filename
+					if (typeof cms_images_set_popup_selection === 'function'){
+						cms_images_set_popup_selection(reopen_filename)
+					}
 				}
+
+				cms_image_video_cleanup()
+				$('.cms_image_overlay,.cms_image_container').remove()
+
+				cms_images_load_images(
+					page,
+					$('.cms_images_area').data('limit'),
+					reload_filename
+				)
+
+				if (!is_child && reopen_filename && typeof cms_image_open === 'function'){
+					cms_image_open(reopen_filename)
+				}
+
 			}
-
-			cms_image_video_cleanup()
-			$('.cms_image_overlay,.cms_image_container').remove()
-
-			cms_images_load_images(
-				page,
-				$('.cms_images_area').data('limit'),
-				reload_filename
-			)
-
-			if (!is_child && reopen_filename && typeof cms_image_open === 'function'){
-				cms_image_open(reopen_filename)
-			}
-
 		})
 
 	})

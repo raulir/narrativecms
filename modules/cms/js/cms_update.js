@@ -160,81 +160,134 @@ function cms_update_run_pipeline(area, options){
 					files[index].updated = 0
 				})
 
-				var number_updating = 0
+				// Batch transfer: up to batch_size files per ajax, max_batches in flight
+				var batch_size = 20
+				var max_batches = 2
+				var batches_active = 0
+				var transfer_done = false
 
-				// update
-				var interval = setInterval(function(){
+				function cms_update_mark_file(fn_hash, letter, colour){
+					$files.find('.cms_update_result_file_' + fn_hash).children('.cms_update_tick')
+							.html('(<span style="color: ' + colour + '; font-weight: bold; ">' + letter + '</span>)')
+				}
 
+				function cms_update_take_batch(){
+					var batch = []
 					$.each(files, function(key, value){
-
-						if (value.updated == 0 && number_updating < 7){
+						if (value.updated == 0 && batch.length < batch_size){
 							files[key].updated = 1
-							number_updating = number_updating + 1
-							$files.find('.cms_update_result_file_' + value.fn_hash).children('.cms_update_tick')
-									.html('(<span style="color: orange; font-weight: bold; ">' + value.letter + '</span>)')
-
-							get_ajax('cms/cms_update', {
-								'do': 'cms_update_file',
-								'area': area,
-								'filename': value.filename,
-								'letter': value.letter,
-								'success': function(data){
-									var fn_hash = data.result && data.result.result
-											? data.result.result.fn_hash
-											: value.fn_hash
-									var letter = data.result && data.result.result
-											? data.result.result.letter
-											: value.letter
-									$files.find('.cms_update_result_file_' + fn_hash).children('.cms_update_tick')
-											.html('(<span style="color: green; font-weight: bold; ">' + letter + '</span>)')
-									number_updating = number_updating - 1
-								}
-							})
+							batch.push(value)
 						}
-
 					})
+					return batch
+				}
 
-					// still pending transfers?
+				function cms_update_pending_left(){
 					var pending = false
 					$.each(files, function(key, value){
 						if (value.updated == 0){
 							pending = true
 						}
 					})
+					return pending
+				}
 
-					if (number_updating == 0 && !pending){
+				function cms_update_finish_transfer(){
+					if (transfer_done){
+						return
+					}
+					transfer_done = true
 
-						clearInterval(interval)
+					get_ajax('cms/cms_update', {
+						'do': 'cms_update_copy',
+						'area': area,
+						'success': function(){
 
-						// copy over
+							get_ajax('cms/cms_update', {
+								'do': 'cms_update_cleanup',
+								'area': area,
+								'success': function(){
+
+									if (after_cleanup){
+										after_cleanup($popup, state)
+									} else {
+										cms_notification(done_message, 5)
+										cms_update_confirm_area(area, $popup, state, {
+											'reload': reload_after
+										})
+									}
+
+								}
+							})
+
+						}
+					})
+				}
+
+				function cms_update_pump_batches(){
+
+					while (batches_active < max_batches){
+
+						var batch = cms_update_take_batch()
+						if (!batch.length){
+							break
+						}
+
+						batches_active = batches_active + 1
+
+						var filenames = []
+						var letter_by_hash = {}
+						$.each(batch, function(_, value){
+							filenames.push(value.filename)
+							letter_by_hash[value.fn_hash] = value.letter
+							cms_update_mark_file(value.fn_hash, value.letter, 'orange')
+						})
+
 						get_ajax('cms/cms_update', {
-							'do': 'cms_update_copy',
+							'do': 'cms_update_file',
 							'area': area,
+							'filenames': filenames,
 							'success': function(data){
 
-								get_ajax('cms/cms_update', {
-									'do': 'cms_update_cleanup',
-									'area': area,
-									'success': function(data){
+								var done = data.result && data.result.result && data.result.result.done
+										? data.result.result.done
+										: []
 
-										if (after_cleanup){
-											after_cleanup($popup, state)
-										} else {
-											cms_notification(done_message, 5)
-											cms_update_confirm_area(area, $popup, state, {
-												'reload': reload_after
-											})
+								if (done.length){
+									$.each(done, function(_, row){
+										var h = row.fn_hash
+										var letter = letter_by_hash[h] || 'U'
+										if (h){
+											cms_update_mark_file(h, letter, 'green')
 										}
+									})
+								} else {
+									// Unexpected empty — still green the batch we sent
+									$.each(batch, function(_, value){
+										cms_update_mark_file(value.fn_hash, value.letter, 'green')
+									})
+								}
 
-									}
-								})
+								batches_active = batches_active - 1
+
+								if (batches_active == 0 && !cms_update_pending_left()){
+									cms_update_finish_transfer()
+								} else {
+									cms_update_pump_batches()
+								}
 
 							}
 						})
 
 					}
 
-				}, 300)
+					if (batches_active == 0 && !cms_update_pending_left()){
+						cms_update_finish_transfer()
+					}
+
+				}
+
+				cms_update_pump_batches()
 
 			}
 		})
@@ -296,6 +349,48 @@ function cms_update_init($root){
 
 	})
 
+	$(document).on('click.cms', '.cms_update_release_button', function(){
+
+		var area = $(this).data('area')
+		if (area === undefined){
+			area = ''
+		}
+
+		var label = $(this).closest('.cms_update_row').find('.cms_update_cell').first().text() || 'module'
+
+		get_ajax_panel('cms/cms_popup_yes_no', {
+			'text': 'Release ' + label + ' from the live tree into cache/master?<br>Clients will receive this snapshot only.',
+		}, function(data){
+			panels_display_popup(data.result._html, {
+				'yes': function(){
+
+					get_ajax('cms/cms_update', {
+						'do': 'cms_update_release',
+						'area': area,
+						'success': function(resp){
+
+							var result = (resp.result && resp.result.result) ? resp.result.result : (resp.result || {})
+
+							if (result.error){
+								cms_notification('Release failed: ' + result.error, 8)
+								return
+							}
+
+							if (result.row_html){
+								cms_update_apply_row_html(area, result.row_html)
+							}
+
+							cms_notification(result.message || ('Released ' + (result.version || '')), 5)
+
+						}
+					})
+
+				}
+			})
+		})
+
+	})
+
 }
 
 function cms_update_resize(){
@@ -306,6 +401,7 @@ function cms_update_destroy($root){
 
 	$(document).off('click.cms', '.cms_update_button')
 	$(document).off('click.cms', '.cms_update_install_button')
+	$(document).off('click.cms', '.cms_update_release_button')
 	$('body').removeClass('cms_update_js_ok')
 
 }

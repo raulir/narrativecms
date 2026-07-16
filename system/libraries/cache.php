@@ -365,7 +365,7 @@ class cache {
 			return false;
 		}
 
-		$prefixes = ['admin/', 'cms_login/', 'cms_operations/'];
+		$prefixes = ['admin/', 'cms_login/'];
 		foreach ($prefixes as $prefix) {
 			if (strpos($request_uri, $prefix) === 0) {
 				return false;

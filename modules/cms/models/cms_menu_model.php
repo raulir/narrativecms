@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class cms_menu_model extends CI_Model {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_menu_model extends \Model {
 	
 	function get_menu_items($menu_id){
 		$sql = "select * from menu_item where menu_id = ? order by sort asc";

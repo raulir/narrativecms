@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class cms_cssjs_settings extends CI_Controller {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_cssjs_settings extends \Controller {
 	
 	function __construct(){
 		
@@ -15,7 +19,41 @@ class cms_cssjs_settings extends CI_Controller {
 	}
 		
 	function panel_action($params){
-				
+
+		$do = $this->input->post('do');
+
+		if ($do === 'cms_cssjs_save'){
+
+			$this->load->model('cms/cms_page_panel_model');
+
+			$panels = $this->input->post('panels');
+
+			$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by([
+					'panel_name' => 'cms/cms_cssjs_settings',
+					'cms_page_id' => 0,
+			]);
+
+			if (!count($settings_a)){
+				$cms_page_panel_id = $this->cms_page_panel_model->create_cms_page_panel([
+						'panel_name' => 'cms/cms_cssjs_settings',
+				]);
+			} else {
+				$cms_page_panel_id = $settings_a[0]['cms_page_panel_id'];
+			}
+
+			$this->cms_page_panel_model->update_cms_page_panel($cms_page_panel_id, [
+					'css' => $panels,
+			]);
+
+			$cache_file = $GLOBALS['config']['base_path'].'cache/cms_cssjs_settings.json';
+			if (file_exists($cache_file)){
+				unlink($cache_file);
+			}
+
+		}
+
+		return $params;
+
 	}
 	
 	function panel_params($params){

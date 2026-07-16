@@ -1,4 +1,6 @@
 {
+	"name":"Form",
+	"version":"2.0",
 	"cms_menu":[
 		{
 			"id":"forms",

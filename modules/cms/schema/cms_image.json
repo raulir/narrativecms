@@ -12,8 +12,7 @@
     "title": { "type": "VARCHAR", "constraint": 500, "null": false, "default": "" },
     "description": { "type": "VARCHAR", "constraint": 500, "null": false, "default": "" },
     "category": { "type": "VARCHAR", "constraint": 30, "null": false },
-    "meta": { "type": "MEDIUMTEXT", "null": false },
-    "keyword": { "type": "VARCHAR", "constraint": 200, "null": false }
+    "meta": { "type": "MEDIUMTEXT", "null": false }
   },
   "indexes": {
     "PRIMARY": { "columns": ["cms_image_id"], "type": "primary" },

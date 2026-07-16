@@ -1,6 +1,10 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
 
-class cms_schema_model extends Model {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_schema_model extends \Model {
 
 	private $_fix_sql_errors = [];
 	private $_fix_key = '';

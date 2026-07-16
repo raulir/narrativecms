@@ -68,7 +68,7 @@ function cms_page_panel_save_submit(params){
 		
 	}
 	
-	get_ajax('cms/cms_page_panel_operations', data_to_submit);
+	get_ajax('cms/cms_page_panel', data_to_submit);
 	
 }
 

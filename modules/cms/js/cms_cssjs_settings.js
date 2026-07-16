@@ -45,13 +45,14 @@ function cms_cssjs_settings_init($root){
 		});
 		
 		// send to server
-		get_ajax_panel('cms/cms_cssjs_operations', {
+		get_ajax('cms/cms_cssjs_settings', {
 			'do': 'cms_cssjs_save',
-			'panels': panels
-		}, function(data){
-			cms_notification('Css settings saved!', 3);
-			location.reload();
-		});
+			'panels': panels,
+			'success': function(){
+				cms_notification('Css settings saved!', 3);
+				location.reload()
+			}
+		})
 
 		});
 

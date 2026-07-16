@@ -1,6 +1,10 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
 
-class cms_access_model extends Model {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_access_model extends \Model {
 
 	// Request-scoped caches (cleared when session access changes)
 	var $_session_access_keys_cached = null;

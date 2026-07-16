@@ -1,6 +1,10 @@
 <?php
 
-	// optimise images in non-session way
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+// optimise images in non-session way
 	
 	$_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
 
@@ -12,7 +16,7 @@
 
 			include_once($GLOBALS['config']['base_path'].'system/core/Common.php');
 			include($GLOBALS['config']['base_path'].'system/core/controller.php');
-			$ci = new CI_Controller();
+			$ci = new \Controller();
 			$ci->load->model('cms/cms_image_model');
 			$name = $ci->cms_image_model->normalise_gif_original($name);
 

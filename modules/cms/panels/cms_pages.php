@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class cms_pages extends CI_Controller {
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class cms_pages extends \Controller {
 
 	function __construct(){
 
@@ -11,6 +15,25 @@ class cms_pages extends CI_Controller {
 			header('Location: '.$GLOBALS['config']['base_url'].'cms_login/', true, 302);
 			exit();
 		}
+
+	}
+
+	function panel_action($params){
+
+		$do = $this->input->post('do');
+
+		if ($do === 'cms_save_page_order'){
+
+			$this->load->model('cms/cms_page_model');
+			$page_orders = $this->input->post('page_orders');
+			$this->cms_page_model->save_orders($page_orders);
+
+			// Ajax reorder only — no HTML
+			return $params;
+
+		}
+
+		return $params;
 
 	}
 

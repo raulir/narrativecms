@@ -66,6 +66,21 @@ class Controller {
 			if (empty($GLOBALS['_panel_js'])){
 				$GLOBALS['_panel_js'] = [];
 			}
+
+			// Restore routes.php when missing (was cms_operations/update_routes)
+			$routes_path = $GLOBALS['config']['base_path'].'cache/routes.php';
+			if (!empty($GLOBALS['cms_routes_missing']) || !is_file($routes_path)){
+				$this->load->model('cms/cms_slug_model');
+				$this->cms_slug_model->ensure_routes_cache();
+				$was_missing = !empty($GLOBALS['cms_routes_missing']);
+				unset($GLOBALS['cms_routes_missing']);
+				// Routing ran without slug map — reload once so pretty URLs resolve
+				if ($was_missing && is_object($this->uri) && $this->uri->uri_string !== ''){
+					$uri = $_SERVER['REQUEST_URI'] ?? '/';
+					header('Location: '.$uri, true, 302);
+					exit();
+				}
+			}
 		} else {
 			// Panel library: share main services by object handle (not =& — avoids overloaded property notices).
 			// Models stay on main via Loader; undeclared model props resolve through __get.

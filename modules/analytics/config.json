@@ -1,5 +1,6 @@
 {
 	"name":"Analytics",
+	"version":"0.9",
 	"panels":[
 		{
 			"id":"beacon",

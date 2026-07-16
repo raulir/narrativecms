@@ -79,6 +79,9 @@
 	// Note: The Router class automatically validates the controller path using the router->_validate_request().
 	// If this include fails it means that the default controller in the Routes.php file is not resolving to something valid.
 	$class = $RTR->fetch_class();
+	// Instantiable class name (may become module\class after namespaced controller load)
+	$controller_class = $class;
+
 	if (!file_exists($GLOBALS['config']['base_path'].'system/core/controller_'.$RTR->fetch_directory().$class.'.php')) {
 		
 		$not_found = true;
@@ -89,8 +92,13 @@
 				$not_found = false;
 				
 				include($GLOBALS['config']['base_path'].'modules/'.$module.'/controllers/'.$class.'.php');
+
+				// Prefer namespaced class module\controller when present
+				if (class_exists($module.'\\'.$class, false)){
+					$controller_class = $module.'\\'.$class;
+				}
 				
-				continue;
+				break;
 			
 			}
 		}
@@ -116,7 +124,7 @@
  */
 	$method = $RTR->fetch_method();
 
-	if ( ! class_exists($class)
+	if ( ! class_exists($controller_class)
 		OR strncmp($method, '_', 1) == 0
 		OR in_array(strtolower($method), array_map('strtolower', get_class_methods('Controller')))
 		)
@@ -125,8 +133,9 @@
 		{
 			$x = explode('/', $RTR->routes['404_override']);
 			$class = $x[0];
+			$controller_class = $class;
 			$method = (isset($x[1]) ? $x[1] : 'index');
-			if ( ! class_exists($class))
+			if ( ! class_exists($controller_class))
 			{
 				if ( ! file_exists($GLOBALS['config']['base_path'].'system/core/controller_'.$class.'.php'))
 				{
@@ -142,7 +151,7 @@
 		}
 	}
 
-	$CI = new $class();
+	$CI = new $controller_class();
 
 	if (defined('CMS_CLI_BOOTSTRAP')){
 		return;

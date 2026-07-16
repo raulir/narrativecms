@@ -70,7 +70,9 @@
 			
 		<?php endif ?>
 		
-		<?php _panel('cms/cms_page_panel_fields', ['panel_params_structure' => $panel_params_structure, 'block' => $block]) ?>
+		<div class="cms_page_panel_fields cms_page_panel_fields_hidden">
+			<?= print_fields($panel_params_structure, $block) ?>
+		</div>
 
 	</form>
 	

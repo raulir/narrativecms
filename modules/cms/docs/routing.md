@@ -16,6 +16,16 @@ Schema: [`modules/cms/schema/cms_slug.json`](../schema/cms_slug.json)
 
 Model: [`modules/cms/models/cms_slug_model.php`](../models/cms_slug_model.php)
 
+### Route cache file
+
+Generated file: `cache/routes.php` (slug → `index/index/{target}/`).
+
+- Written by `cms_slug_model::_regenerate_cache()` after slug changes.
+- If the file is **missing** at request start, Router sets a flag; the main `Controller` constructor calls **`ensure_routes_cache()`** and, when the URI was non-empty, redirects once so routing reloads with the new map.
+- Prefer calling `ensure_routes_cache()` anywhere that discovers a missing routes file (do not invent a dedicated HTTP controller for this).
+
+Cron (repeating tasks) is a separate public API: **`/cms/cron/`** — see [`cms_video.md`](cms_video.md) / site settings **cron_trigger**.
+
 ## Target formats
 
 | Kind | Target example | Created by |
@@ -23,9 +33,9 @@ Model: [`modules/cms/models/cms_slug_model.php`](../models/cms_slug_model.php)
 | CMS page | `4` (numeric `cms_page_id`) | Page save / visibility |
 | List item | `music/material=42` (`{panel_name}={cms_page_panel_id}`) | List item save when `list.link_target` is set in panel definition |
 
-List items must have `"link_target": "1"` (or any truthy value) under `"list"` in the panel definition JSON. On save, [`cms_page_panel_operations.php`](../panels/cms_page_panel_operations.php) generates a slug from the list item title and stores it via `cms_slug_model::set_page_slug()`.
+List items must have `"link_target": "1"` (or any truthy value) under `"list"` in the panel definition JSON. On save, [`cms_page_panel_model::save_cms_page_panel_admin()`](../models/cms_page_panel_model.php) (via [`cms_page_panel`](../panels/cms_page_panel.php) `panel_action`) generates a slug from the list item title and stores it via `cms_slug_model::set_page_slug()`.
 
-Show/hide on a list item updates slug visibility through `cms_slug_model::update_slug_status()` (same file, show action).
+Show/hide on a list item updates slug visibility through `cms_page_panel_model::set_cms_page_panel_show()` → `cms_slug_model::update_slug_status()`.
 
 ## Slug generation
 

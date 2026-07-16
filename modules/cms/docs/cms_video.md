@@ -31,7 +31,7 @@ Skips when:
 
 1. **Settings → CMS repeating tasks** — add `CMS video encode` (`cms/cms_video_encode`) on desired interval
 2. Cron runner: [`cms_helper_model::run_cron()`](../models/cms_helper_model.php) → `cms_video_encode::panel_action()` → `cms_video_model::process_encode_queue()`
-3. Also triggered on site visits when `cron_trigger: visits` (via `cms_cron_run.js` hitting `/cms_operations/cron/`)
+3. Also triggered on site visits when `cron_trigger: visits` (via `cms_cron_run.js` hitting `/cms/cron/`)
 
 Each cron tick processes **one** queue item (if allowed).
 

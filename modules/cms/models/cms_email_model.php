@@ -1,4 +1,8 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
+
+namespace cms;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -11,7 +15,7 @@ require_once('system/vendor/phpmailer/Exception.php');
 require_once('system/vendor/phpmailer/PHPMailer.php');
 require_once('system/vendor/phpmailer/SMTP.php');
 
-class cms_email_model extends Model {
+class cms_email_model extends \Model {
 
 	function send_mail($to, $subject, $body, $params = []){
 
