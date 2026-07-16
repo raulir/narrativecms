@@ -71,6 +71,13 @@ When config maj.min **changes**, the next Release starts patch at **0** again. S
 
 Unreleased live edits are invisible to clients until Release.
 
+### Installed table order (upper list)
+
+1. **Narrative CMS** (core, empty area)  
+2. **Masters** — packages in this host’s `update.master` / `is_master`  
+3. **Local only** — present on disk, not on remote master  
+4. **Installed** — other client packages tracked against remote master  
+
 ### Master host table labels
 
 | Column | Unreleased | Released (in sync) | Released + live edits |
@@ -112,7 +119,20 @@ No extra “Schema” heading in the popup — the fragment is the schema conten
 
 Fragment request uses `schema_module` + `fragment=1` (not `module` — panel loader overwrites `module` with the panel package name `cms`).
 
-Install: enable module → schema → **reload on Close**.
+Install / Update: enable (if install) → confirm row HTML → schema in popup → **Close without page reload** (table rows update only).
+
+### Remove (client installed modules)
+
+**Remove** appears before Update on non-core rows. Not shown for:
+
+- Core (Narrative CMS / empty area)
+- Packages this host **masters** (`update.master` / `is_master`) — take the package out of master config first
+
+**Does:** unregister from `cms/cms_settings` modules, delete `modules/{name}/`, delete local `cache/version_{name}.json`.
+
+**Does not:** drop database tables / panel table data.
+
+If master still has a **released** package for that name (and `update.allow` includes it), the row is added under **Available to install** without a full updater rescan.
 
 ## Related code
 

@@ -28,7 +28,7 @@ class cms_slug_model extends \Model {
 	function generate_list_item_slug($target, $slug_string){
 
 		if (substr($target, 0, 2) == '_/'){
-			str_replace('_/', end($GLOBALS['config']['modules']).'/', $target);
+			$target = str_replace('_/', end($GLOBALS['config']['modules']).'/', $target);
 		}
 
 		$this->delete_slug($target);
@@ -105,7 +105,7 @@ class cms_slug_model extends \Model {
 	function set_page_slug($target, $slug, $status){
 		
 		if (substr($target, 0, 2) == '_/'){
-			str_replace('_/', end($GLOBALS['config']['modules']).'/', $target);
+			$target = str_replace('_/', end($GLOBALS['config']['modules']).'/', $target);
 		}
 		
 		// check if table doesnt have status field - deprecated

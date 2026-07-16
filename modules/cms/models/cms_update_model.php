@@ -792,6 +792,110 @@ class cms_update_model extends \Model {
 		return ['modules' => $modules];
 
 	}
+
+	/**
+	 * Drop module from cms/cms_settings modules list (keep other modules).
+	 */
+	function disable_module_from_settings($name){
+
+		$name = $this->normalise_area_name($name);
+		if ($name === false || $name === '' || $name === 'cms'){
+			return ['error' => 'invalid_module'];
+		}
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$panels = $this->cms_page_panel_model->get_cms_page_panels_by([
+				'panel_name' => 'cms/cms_settings',
+				'cms_page_id' => 0,
+				'parent_id' => 0,
+				'sort' => 0,
+		]);
+
+		if (empty($panels[0]['cms_page_panel_id'])){
+			return ['error' => 'settings_missing'];
+		}
+
+		$settings_id = (int)$panels[0]['cms_page_panel_id'];
+		$settings = $this->cms_page_panel_model->get_cms_page_panel($settings_id);
+		$modules = $settings['modules'] ?? [];
+		if (!is_array($modules)){
+			$modules = [];
+		}
+
+		$modules = array_values(array_filter($modules, function($m) use ($name){
+			return $m !== $name;
+		}));
+
+		$this->cms_page_panel_model->update_cms_page_panel($settings_id, [
+				'modules' => $modules,
+		]);
+
+		return ['modules' => $modules];
+
+	}
+
+	/**
+	 * Unregister module, delete modules/{name}/ files, keep DB tables.
+	 * Master packages must be taken out of update.master first (is_area_master).
+	 * Returns available=true only if master still has a real release to re-install.
+	 */
+	function remove_module_area($area){
+
+		$name = $this->normalise_area_name($area);
+		if ($name === false || $name === '' || $name === 'cms'){
+			return ['error' => 'invalid_module'];
+		}
+
+		if ($this->is_area_master($name)){
+			return [
+					'error' => 'Master packages cannot be removed here — remove from update.master / is_master in config first',
+			];
+		}
+
+		$disabled = $this->disable_module_from_settings($name);
+		if (!empty($disabled['error'])){
+			return $disabled;
+		}
+
+		$dir = $GLOBALS['config']['base_path'].'modules/'.$name.'/';
+		if (is_dir($dir)){
+			$this->_rrmdir($dir);
+		}
+
+		$version_file = $this->_local_version_path($name);
+		if (is_file($version_file)){
+			@unlink($version_file);
+		}
+
+		// Offer re-install only when master still has a released package
+		$available = false;
+		$available_row = null;
+		if ($this->client_may_use_area($name) && !empty($GLOBALS['config']['cms_update_url'])){
+			$version_data = $this->get_master_version($name);
+			if (is_array($version_data) && empty($version_data['error'])){
+				$master_hash = !empty($version_data['current_hash'])
+						? $version_data['current_hash']
+						: (!empty($version_data['version_hash']) ? $version_data['version_hash'] : '');
+				$master_version = !empty($version_data['version']) ? $version_data['version'] : '';
+				if ($master_hash !== '' || $master_version !== ''){
+					$available = true;
+					$available_row = [
+							'name' => $name,
+							'version' => $master_version,
+							'version_time' => !empty($version_data['version_time']) ? (int)$version_data['version_time'] : 0,
+					];
+				}
+			}
+		}
+
+		return [
+				'area' => $name,
+				'available' => $available ? 1 : 0,
+				'available_row' => $available_row,
+		];
+
+	}
 	
 	/**
 	 * File list for updater protocol.
@@ -1439,6 +1543,9 @@ class cms_update_model extends \Model {
 
 		$live_hash = $area_data['local_current_hash'] ?? '';
 
+		// Never remove core; master packages must leave update.master first
+		$can_remove = !$is_core && $area_id !== '' && $area_id !== 'cms' && !$is_local_master;
+
 		$row = [
 				'area' => $area_id,
 				'label' => $is_core ? 'Narrative CMS' : $area_id,
@@ -1455,6 +1562,7 @@ class cms_update_model extends \Model {
 				'master_label' => '',
 				'can_update' => false,
 				'can_release' => false,
+				'can_remove' => $can_remove,
 				'may_use' => $this->client_may_use_area($area_id),
 				'error' => '',
 				'local_only' => false,
@@ -1489,6 +1597,8 @@ class cms_update_model extends \Model {
 						$row['local_version'], $row['local_version_time']);
 				$row['status'] = $row['master_label'];
 			}
+
+			$row['can_remove'] = false;
 
 			return $row;
 
@@ -1546,9 +1656,14 @@ class cms_update_model extends \Model {
 
 		if ($in_sync){
 			$row['local_changes'] = false;
-			$row['local_label'] = $master_version !== ''
-					? $master_version
-					: $this->format_local_version_label($row);
+			if ($master_version !== ''){
+				$row['local_version'] = $master_version;
+			}
+			// Date on Local like Master (use master time if local cache has no version_time)
+			if (empty($row['local_version_time']) && $master_time){
+				$row['local_version_time'] = $master_time;
+			}
+			$row['local_label'] = $this->format_local_version_label($row);
 			$row['master_label'] = $this->format_master_version_label($master_version, $master_time);
 			$row['can_update'] = false;
 		} else {

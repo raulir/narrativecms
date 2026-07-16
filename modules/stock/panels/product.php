@@ -39,11 +39,30 @@ class product extends \Controller{
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_slug_model');
 		
-		$product = $this->cms_page_panel_model->get_cms_page_panel($params['cms_page_panel_id']);
+		$id = (int)($params['cms_page_panel_id'] ?? 0);
+		$product = $this->cms_page_panel_model->get_cms_page_panel($id);
+		if (empty($product['cms_page_panel_id'])){
+			return '';
+		}
 
-		$return = $this->cms_slug_model->get_cms_slug_by_target($product['panel_name'].'='.$params['cms_page_panel_id']);
-		
-		return $return;
+		// Prefer real panel_name target; fall back to legacy sync (_/product=) and stock/
+		$candidates = [
+				($product['panel_name'] ?? '').'='.$id,
+				'_/product='.$id,
+				'stock/product='.$id,
+		];
+
+		foreach ($candidates as $target){
+			if ($target === '='.$id || $target === '_/product=0'){
+				continue;
+			}
+			$slug = $this->cms_slug_model->get_cms_slug_by_target($target);
+			if (!empty($slug)){
+				return $slug;
+			}
+		}
+
+		return '';
 		
 	}
 	

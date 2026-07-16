@@ -24,6 +24,13 @@
 
 .cms_update_cell_right {
 	text-align: right;
+	white-space: nowrap;
+
+	.cms_tool_button {
+		display: inline-block;
+		margin-left: 0.6rem;
+		vertical-align: middle;
+	}
 }
 
 .cms_udate_result {

@@ -94,15 +94,8 @@ function cms_update_load_schema(area, $popup, state, options){
 			options.after_schema(res)
 		}
 
+		// No full page reload — installed/available tables already updated via row_html
 		cms_update_popup_finish($popup, state)
-
-		if (options.reload_on_close){
-			state.reload_on_close = true
-		}
-
-		if (options.reload){
-			window.location.reload()
-		}
 
 	})
 
@@ -140,17 +133,71 @@ function cms_update_apply_row_html(area, row_html){
 		$table.append(row_html)
 	}
 
-	var $available = $('.cms_update_table_available')
-	if ($available.length){
-		$available.find('.cms_update_row[data-area]').filter(function(){
-			return cms_update_row_area_matches($(this), area)
-		}).remove()
+	cms_update_remove_available_row(area)
 
-		if ($available.find('.cms_update_row[data-area]').length === 0){
-			$available.prev('.cms_update_section_label').remove()
-			$available.remove()
-		}
+}
+
+function cms_update_remove_available_row(area){
+
+	var $available = $('.cms_update_table_available')
+	if (!$available.length){
+		return
 	}
+
+	$available.find('.cms_update_row[data-area]').filter(function(){
+		return cms_update_row_area_matches($(this), area)
+	}).remove()
+
+	if ($available.find('.cms_update_row[data-area]').length === 0){
+		$available.prev('.cms_update_section_label').remove()
+		$available.remove()
+	}
+
+}
+
+/**
+ * Ensure “Available to install” table exists; append server-rendered install row.
+ */
+function cms_update_append_available_html(html){
+
+	if (!html){
+		return
+	}
+
+	var $available = $('.cms_update_table_available')
+	if (!$available.length){
+		var $wrap = $('.cms_update_table_installed').parent()
+		if (!$wrap.length){
+			$wrap = $('.cms_update_table').first().parent()
+		}
+		$wrap.append(
+			'<div class="cms_update_section_label">Available to install</div>' +
+			'<div class="cms_update_table cms_update_table_available">' +
+				'<div class="cms_update_row">' +
+					'<div class="cms_update_head">Module</div>' +
+					'<div class="cms_update_head">Local</div>' +
+					'<div class="cms_update_head">Master</div>' +
+					'<div class="cms_update_head cms_update_cell_right"></div>' +
+				'</div>' +
+			'</div>'
+		)
+		$available = $('.cms_update_table_available')
+	}
+
+	$available.append(html)
+
+}
+
+function cms_update_remove_installed_row(area){
+
+	var $table = $('.cms_update_table_installed')
+	if (!$table.length){
+		return
+	}
+
+	$table.find('.cms_update_row[data-area]').filter(function(){
+		return cms_update_row_area_matches($(this), area)
+	}).remove()
 
 }
 
@@ -181,10 +228,7 @@ function cms_update_confirm_area(area, $popup, state, options){
 				options.after_confirm(result)
 			}
 
-			cms_update_load_schema(area, $popup, state, {
-				'reload_on_close': !!options.reload_on_close,
-				'reload': !!options.reload
-			})
+			cms_update_load_schema(area, $popup, state, options)
 
 		}
 	})
@@ -196,12 +240,9 @@ function cms_update_run_pipeline(area, options){
 	options = options || {}
 	var after_cleanup = options.after_cleanup || null
 	var done_message = options.done_message || 'CMS updated'
-	var reload_after = !!options.reload_after
-	var reload_on_close = !!options.reload_on_close
 
 	var state = {
-		allow_dismiss: false,
-		reload_on_close: false
+		allow_dismiss: false
 	}
 
 	get_ajax_panel('cms/cms_update_popup', {
@@ -212,9 +253,6 @@ function cms_update_run_pipeline(area, options){
 			'cancel': function(after){
 				if (state.allow_dismiss){
 					after()
-					if (state.reload_on_close){
-						window.location.reload()
-					}
 				}
 			}
 		})
@@ -236,10 +274,7 @@ function cms_update_run_pipeline(area, options){
 						after_cleanup($popup, state)
 					} else {
 						cms_notification(done_message, 5)
-						cms_update_confirm_area(area, $popup, state, {
-							'reload': reload_after,
-							'reload_on_close': reload_on_close
-						})
+						cms_update_confirm_area(area, $popup, state, {})
 					}
 					return
 				}
@@ -306,10 +341,7 @@ function cms_update_run_pipeline(area, options){
 										after_cleanup($popup, state)
 									} else {
 										cms_notification(done_message, 5)
-										cms_update_confirm_area(area, $popup, state, {
-											'reload': reload_after,
-											'reload_on_close': reload_on_close
-										})
+										cms_update_confirm_area(area, $popup, state, {})
 									}
 
 								}
@@ -430,14 +462,60 @@ function cms_update_init($root){
 						}
 
 						cms_notification('Module installed', 5)
-						cms_update_confirm_area(area, $popup, state, {
-							'reload_on_close': true
-						})
+						// Row moves via confirm row_html; no full page reload
+						cms_update_confirm_area(area, $popup, state, {})
 
 					}
 				})
 
 			}
+		})
+
+	})
+
+	$(document).on('click.cms', '.cms_update_remove_button', function(){
+
+		var area = $(this).attr('data-area')
+		if (!area){
+			return
+		}
+
+		var label = $(this).closest('.cms_update_row').find('.cms_update_cell').first().text() || area
+
+		get_ajax_panel('cms/cms_popup_yes_no', {
+			'text': 'Remove module <b>' + label + '</b>?<br><br>' +
+				'Deletes the module files and unregisters it from site settings.<br>' +
+				'<b>Database tables are kept</b> (data is not dropped).'
+		}, function(data){
+			panels_display_popup(data.result._html, {
+				'yes': function(){
+
+					get_ajax('cms/cms_update', {
+						'do': 'cms_update_remove',
+						'area': area,
+						'success': function(resp){
+
+							var result = (resp.result && resp.result.result) ? resp.result.result : (resp.result || {})
+
+							if (result.error){
+								cms_notification('Remove failed: ' + result.error, 8)
+								return
+							}
+
+							cms_update_remove_installed_row(area)
+
+							// Only if master still has a release for this package
+							if (result.available && result.available_html){
+								cms_update_append_available_html(result.available_html)
+							}
+
+							cms_notification('Module removed', 5)
+
+						}
+					})
+
+				}
+			})
 		})
 
 	})
@@ -494,6 +572,7 @@ function cms_update_destroy($root){
 
 	$(document).off('click.cms', '.cms_update_button')
 	$(document).off('click.cms', '.cms_update_install_button')
+	$(document).off('click.cms', '.cms_update_remove_button')
 	$(document).off('click.cms', '.cms_update_release_button')
 	$('body').removeClass('cms_update_js_ok')
 

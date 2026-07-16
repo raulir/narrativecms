@@ -27,18 +27,24 @@
 			</div>
 
 			<?php
-				$rows_local_only = $rows_local_only ?? [];
+				// Order: Narrative CMS → masters → local-only → installed from remote master
 				$row_core = $row_core ?? null;
+				$rows_masters = $rows_masters ?? [];
+				$rows_local_only = $rows_local_only ?? [];
 				$rows_modules = $rows_modules ?? [];
 			?>
-
-			<?php foreach($rows_local_only as $row): ?>
-				<?php include __DIR__.'/cms_update_row.tpl.php'; ?>
-			<?php endforeach ?>
 
 			<?php if(!empty($row_core)): ?>
 				<?php $row = $row_core; include __DIR__.'/cms_update_row.tpl.php'; ?>
 			<?php endif ?>
+
+			<?php foreach($rows_masters as $row): ?>
+				<?php include __DIR__.'/cms_update_row.tpl.php'; ?>
+			<?php endforeach ?>
+
+			<?php foreach($rows_local_only as $row): ?>
+				<?php include __DIR__.'/cms_update_row.tpl.php'; ?>
+			<?php endforeach ?>
 
 			<?php foreach($rows_modules as $row): ?>
 				<?php include __DIR__.'/cms_update_row.tpl.php'; ?>
@@ -59,18 +65,7 @@
 				</div>
 
 				<?php foreach($available as $row): ?>
-					<div class="cms_update_row" data-area="<?= htmlspecialchars($row['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-						<div class="cms_update_cell"><?= htmlspecialchars($row['name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
-						<div class="cms_update_cell">not installed</div>
-						<div class="cms_update_cell">
-							<?= htmlspecialchars($row['version'] ?? '', ENT_QUOTES, 'UTF-8') ?>
-							<?= !empty($row['version_time']) ? ' - '.date('j M Y', (int)$row['version_time']) : '' ?>
-						</div>
-						<div class="cms_update_cell cms_update_cell_right">
-							<div class="cms_update_install_button cms_tool_button"
-									data-area="<?= htmlspecialchars($row['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">Install</div>
-						</div>
-					</div>
+					<?php include __DIR__.'/cms_update_available_row.tpl.php'; ?>
 				<?php endforeach ?>
 
 			</div>

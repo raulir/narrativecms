@@ -200,11 +200,12 @@ class shopify_product_model extends Model {
 					
 				$shopify_products[$product_key]['cms_page_panel_id'] = $this->cms_page_panel_model->create_cms_page_panel($new_cms_product);
 
-				// update slug
-				$slug = $this->cms_slug_model->generate_list_item_slug('_/product='.$shopify_products[$product_key]['cms_page_panel_id'], $product['title']);
-		
-				$this->cms_slug_model->set_page_slug('_/product='.$shopify_products[$product_key]['cms_page_panel_id'], $slug, '0');
-				
+				// Target must be shopify/product={id} so stock/product panel_slug + thumbs resolve
+				$this->_ensure_product_slug(
+						(int)$shopify_products[$product_key]['cms_page_panel_id'],
+						$product['title'] ?? '',
+						1
+				);
 				$slugs_updated = true;
 		
 			}
@@ -419,6 +420,13 @@ class shopify_product_model extends Model {
 			$needs_update = true;
 		}
 
+		// Ensure list slug target shopify/product={id} (migrate legacy _/product=; create if missing)
+		$this->_ensure_product_slug(
+				(int)$cms_page_panel_id,
+				$cms_product['heading'] ?? ($shopify_product['title'] ?? ''),
+				$cms_product['show'] ?? 1
+		);
+
 		// Clear force-refresh flag after a full pass
 		if (!empty($cms_product['sync_needed'])){
 			$cms_product['sync_needed'] = 0;
@@ -604,11 +612,11 @@ class shopify_product_model extends Model {
 
 				$cms_page_panel_id = $this->cms_page_panel_model->create_cms_page_panel($new_cms_product);
 
-				$slug = $this->cms_slug_model->generate_list_item_slug(
-						'_/product='.$cms_page_panel_id,
-						$product['title'] ?? ('product-'.$product['id'])
+				$this->_ensure_product_slug(
+						(int)$cms_page_panel_id,
+						$product['title'] ?? ('product-'.$product['id']),
+						1
 				);
-				$this->cms_slug_model->set_page_slug('_/product='.$cms_page_panel_id, $slug, '0');
 				$slugs_updated = true;
 
 				$refreshed = $this->refresh_product($cms_page_panel_id, 1);
@@ -1010,6 +1018,48 @@ class shopify_product_model extends Model {
 		}
 
 		return null;
+
+	}
+
+	/**
+	 * Ensure list-item slug for shopify/product={id}.
+	 * Migrates legacy _/product={id} so stock/product panel_slug and thumbs resolve.
+	 */
+	function _ensure_product_slug($cms_page_panel_id, $slug_string, $show = 1){
+
+		$cms_page_panel_id = (int)$cms_page_panel_id;
+		if (!$cms_page_panel_id){
+			return;
+		}
+
+		$slug_string = trim((string)$slug_string);
+		if ($slug_string === ''){
+			$slug_string = 'shopify-product-'.$cms_page_panel_id;
+		}
+
+		$this->load->model('cms/cms_slug_model');
+
+		$target = 'shopify/product='.$cms_page_panel_id;
+		$legacy = '_/product='.$cms_page_panel_id;
+
+		$existing = $this->cms_slug_model->get_slug_row_by_target($target);
+		if (is_array($existing) && !empty($existing['cms_slug_id'])){
+			return;
+		}
+
+		// Move legacy sync target without changing public slug string
+		$legacy_row = $this->cms_slug_model->get_slug_row_by_target($legacy);
+		if (is_array($legacy_row) && !empty($legacy_row['cms_slug_id'])){
+			$sql = 'update cms_slug set target = ? where target = ? ';
+			$this->db->query($sql, [$target, $legacy]);
+			$this->cms_slug_model->_regenerate_cache();
+			$this->cms_slug_model->_regenerate_sitemap();
+			return;
+		}
+
+		$status = empty($show) ? '1' : '0';
+		$slug = $this->cms_slug_model->generate_list_item_slug($target, $slug_string);
+		$this->cms_slug_model->set_page_slug($target, $slug, $status);
 
 	}
 

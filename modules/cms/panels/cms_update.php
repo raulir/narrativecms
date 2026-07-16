@@ -197,6 +197,39 @@ class cms_update extends \Controller {
 					'row_html' => $row_html,
 			];
 
+		} else if ($do == 'cms_update_remove'){
+
+			// Named modules only; master packages blocked in model
+			if ($area === '' || $area === 'cms'){
+				$params['result'] = ['error' => 'invalid_module'];
+				return $params;
+			}
+
+			if (!$this->cms_update_model->client_may_use_area($area)){
+				$params['result'] = ['error' => 'not_allowed'];
+				return $params;
+			}
+
+			$removed = $this->cms_update_model->remove_module_area($area);
+			if (!empty($removed['error'])){
+				$params['result'] = $removed;
+				return $params;
+			}
+
+			$available_html = '';
+			if (!empty($removed['available']) && !empty($removed['available_row'])){
+				$row = $removed['available_row'];
+				ob_start();
+				include $GLOBALS['config']['base_path'].'modules/cms/templates/cms_update_available_row.tpl.php';
+				$available_html = ob_get_clean();
+			}
+
+			$params['result'] = [
+					'area' => $removed['area'] ?? $area,
+					'available' => !empty($removed['available']) ? 1 : 0,
+					'available_html' => $available_html,
+			];
+
 		}
 		
 		return $params;
@@ -212,8 +245,9 @@ class cms_update extends \Controller {
 		$this->load->model('cms/cms_update_model');
 
 		$params['available'] = [];
-		$params['rows_local_only'] = [];
 		$params['row_core'] = null;
+		$params['rows_masters'] = [];
+		$params['rows_local_only'] = [];
 		$params['rows_modules'] = [];
 
 		if (empty($GLOBALS['config']['update']['master'])){
@@ -224,24 +258,33 @@ class cms_update extends \Controller {
 			$GLOBALS['config']['update']['master'][] = '';
 		}
 
-		// Rebuild local hashes, then group for display (local only → core → modules)
+		// Rebuild local hashes, then group for display:
+		// Narrative CMS → masters → local-only → installed (from remote master)
 		$data = $this->cms_update_model->rebuild();
 
 		foreach ($data as $area){
 
 			$row = $this->cms_update_model->build_area_display_row($area);
-			$is_core = ($row['area'] === '');
+			$area_id = $row['area'] ?? '';
+			$is_core = ($area_id === '');
+
+			if ($is_core){
+				$params['row_core'] = $row;
+				continue;
+			}
+
+			// Packages this host publishes (update.master) — not core
+			if ($this->cms_update_model->is_area_master($area_id)){
+				$params['rows_masters'][] = $row;
+				continue;
+			}
 
 			if (!empty($row['local_only'])){
 				$params['rows_local_only'][] = $row;
 				continue;
 			}
 
-			if ($is_core){
-				$params['row_core'] = $row;
-			} else {
-				$params['rows_modules'][] = $row;
-			}
+			$params['rows_modules'][] = $row;
 
 		}
 
