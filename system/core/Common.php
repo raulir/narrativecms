@@ -86,6 +86,19 @@ if ( ! function_exists('is_loaded'))
 	}
 }
 
+/**
+ * Main controller reference (Loader, Model, helpers).
+ * Defined here so module APIs (cms/cron, cms/updater) work without CodeIgniter.php.
+ * Controller class must be loaded before the first call.
+ */
+if ( ! function_exists('get_instance'))
+{
+	function &get_instance()
+	{
+		return Controller::get_instance();
+	}
+}
+
 // ------------------------------------------------------------------------
 
 /**

@@ -31,6 +31,20 @@ function cms_update_popup_finish($popup, state){
 
 }
 
+/**
+ * Core package uses area '' — match only rows that have data-area (never the header row).
+ * Use attr(), not .data(): empty data-area="" must stay '' and not look like a missing attr.
+ */
+function cms_update_row_area_matches($row, area){
+
+	if (!$row.is('[data-area]')){
+		return false
+	}
+
+	return String($row.attr('data-area') || '') === String(area || '')
+
+}
+
 function cms_update_apply_row_html(area, row_html){
 
 	var $table = $('.cms_update_table_installed')
@@ -38,12 +52,14 @@ function cms_update_apply_row_html(area, row_html){
 		$table = $('.cms_update_table').not('.cms_update_table_available').first()
 	}
 
-	var $existing = $table.find('.cms_update_row').filter(function(){
-		return String($(this).data('area') || '') === String(area || '')
+	var $existing = $table.find('.cms_update_row[data-area]').filter(function(){
+		return cms_update_row_area_matches($(this), area)
 	})
 
 	if ($existing.length){
-		$existing.replaceWith(row_html)
+		// One row only — avoid cloning into header / duplicates if filter ever over-matches
+		$existing.first().replaceWith(row_html)
+		$existing.slice(1).remove()
 	} else {
 		$table.append(row_html)
 	}
@@ -51,8 +67,8 @@ function cms_update_apply_row_html(area, row_html){
 	// Remove from available-to-install table if present
 	var $available = $('.cms_update_table_available')
 	if ($available.length){
-		$available.find('.cms_update_row').filter(function(){
-			return String($(this).data('area') || '') === String(area || '')
+		$available.find('.cms_update_row[data-area]').filter(function(){
+			return cms_update_row_area_matches($(this), area)
 		}).remove()
 
 		if ($available.find('.cms_update_row[data-area]').length === 0){
@@ -306,8 +322,9 @@ function cms_update_init($root){
 
 	$(document).on('click.cms', '.cms_update_button', function(){
 
-		var area = $(this).data('area')
-		if (area === undefined){
+		// attr keeps core area as '' (jQuery .data() can drop empty data-area)
+		var area = $(this).attr('data-area')
+		if (area === undefined || area === null){
 			area = ''
 		}
 		cms_update_run_pipeline(area)
@@ -316,7 +333,7 @@ function cms_update_init($root){
 
 	$(document).on('click.cms', '.cms_update_install_button', function(){
 
-		var area = $(this).data('area')
+		var area = $(this).attr('data-area')
 		if (!area){
 			return
 		}
@@ -351,8 +368,8 @@ function cms_update_init($root){
 
 	$(document).on('click.cms', '.cms_update_release_button', function(){
 
-		var area = $(this).data('area')
-		if (area === undefined){
+		var area = $(this).attr('data-area')
+		if (area === undefined || area === null){
 			area = ''
 		}
 

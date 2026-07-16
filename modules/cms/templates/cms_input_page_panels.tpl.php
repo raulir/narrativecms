@@ -1,6 +1,8 @@
 <div class="cms_input_container">
 	<div class="cms_input cms_input_page_panels" data-cms_input_height="<?= (!empty($size) ? $size : 4) + 2 ?>"
-			data-panels="<?= !empty($panels) ? $panels : '' ?>">
+			data-panels="<?= !empty($panels) ? $panels : '' ?>"
+			data-sortable_class="<?= !empty($sortable_class) ? htmlspecialchars($sortable_class, ENT_QUOTES, 'UTF-8') : 'cms_list_sortable' ?>"
+			<?php if (!empty($name)): ?>data-input_name="<?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>"<?php endif ?>>
 	
 		<?php if (!empty($label)): ?>
 			<div class="admin_block_label">

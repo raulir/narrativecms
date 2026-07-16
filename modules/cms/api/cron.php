@@ -10,12 +10,16 @@ if (!defined('BASEPATH')) {
 	exit('No direct script access allowed');
 }
 
-if (!function_exists('load_class')) {
-	require BASEPATH.'core/Common.php';
-}
+// Bootstrap without CodeIgniter.php (cms.php early API die)
+require_once BASEPATH.'core/Common.php';
+require_once BASEPATH.'core/controller.php';
 
-if (!class_exists('Controller', false)) {
-	require BASEPATH.'core/controller.php';
+// Not really needed — get_instance() lives in Common.php / controller.php.
+// Only for bracing partial deploys / stale OPcache; deprecated, remove later.
+if (!function_exists('get_instance')) {
+	function &get_instance() {
+		return Controller::get_instance();
+	}
 }
 
 // Main request controller so models / run_panel_method work (no session — cms.php dies after API)

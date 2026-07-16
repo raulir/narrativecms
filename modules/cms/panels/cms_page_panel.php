@@ -44,12 +44,38 @@ class cms_page_panel extends \Controller {
 
 		if ($do == 'cms_page_panel_shortcut'){
 
-			$this->cms_page_panel_model->create_cms_page_panel([
+			$cms_page_id = $this->input->post('cms_page_id');
+			$target_panel_id = $this->input->post('cms_page_panel_id');
+
+			$new_id = $this->cms_page_panel_model->create_cms_page_panel([
 					'sort' => 'last',
-					'cms_page_id' => $this->input->post('cms_page_id'),
+					'cms_page_id' => $cms_page_id,
 					'title' => '',
-					'panel_name' => $this->input->post('cms_page_panel_id'),
+					'panel_name' => $target_panel_id,
 			]);
+
+			// Display title matches cms_input_page_panels shortcut labelling
+			$this->load->model('cms/cms_page_model');
+			$block = $this->cms_page_panel_model->get_cms_page_panel($new_id, '', false);
+			$target = $this->cms_page_panel_model->get_cms_page_panel($target_panel_id, '', false);
+			if (!is_array($block)){
+				$block = [];
+			}
+			if (!is_array($target)){
+				$target = [];
+			}
+			$target_page = !empty($target['cms_page_id'])
+					? $this->cms_page_model->get_page($target['cms_page_id']) : [];
+			$shortcut_title = '> '.( !empty($target_page['title']) ? $target_page['title'] : '[ no title ]')
+					.' > '.$this->cms_page_panel_model->get_panel_admin_title($target);
+
+			$params['cms_page_panel_id'] = $new_id;
+			$params['shortcut'] = [
+					'cms_page_panel_id' => $new_id,
+					'title' => $this->cms_page_panel_model->get_panel_admin_title($block).$shortcut_title,
+					'show' => !empty($block['show']) ? 1 : 0,
+					'goto_id' => (int)$target_panel_id,
+			];
 
 		} elseif ($do == 'cms_page_panel_caching'){
 

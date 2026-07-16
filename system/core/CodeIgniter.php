@@ -70,11 +70,7 @@
 	
 	// Load the base controller class
 	require BASEPATH.'core/controller.php';
-
-	function &get_instance(){
-		return Controller::get_instance();
-	}
-
+	
 	// Load the local application controller
 	// Note: The Router class automatically validates the controller path using the router->_validate_request().
 	// If this include fails it means that the default controller in the Routes.php file is not resolving to something valid.

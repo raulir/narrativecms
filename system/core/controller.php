@@ -1330,5 +1330,15 @@ class Controller {
 
 }
 
+/**
+ * Global get_instance() — must exist for Loader/Model (session-free APIs load
+ * Controller without CodeIgniter.php, so do not rely on that file alone).
+ */
+if ( ! function_exists('get_instance')){
+	function &get_instance(){
+		return Controller::get_instance();
+	}
+}
+
 // Legacy name — prefer extends Controller; CI_Controller kept for older panels
 class_alias('Controller', 'CI_Controller');

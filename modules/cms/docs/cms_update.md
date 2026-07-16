@@ -71,6 +71,15 @@ When config maj.min **changes**, the next Release starts patch at **0** again. S
 
 Unreleased live edits are invisible to clients until Release.
 
+### Master host table labels
+
+| Column | Unreleased | Released (in sync) | Released + live edits |
+|--------|------------|--------------------|------------------------|
+| **Local** | Config maj.min (e.g. `0.0`) | Full version + date (`0.0.0 - 16 Jul 2026`) | Same + ` (local changes)` |
+| **Master** | `Master` | `Master (0.0.0 - 16 Jul 2026)` — version clients get | Same published version |
+
+Release button presence already means “can publish”; no “(not released)” suffix. Version `0.0.0` is shown as-is (never rewritten to “unknown”).
+
 ## Layout on master
 
 ```

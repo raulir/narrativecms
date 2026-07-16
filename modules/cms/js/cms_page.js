@@ -124,22 +124,7 @@ function cms_page_init($root){
 		cms_page_toolbar_title();
 		$('.cms_page_title', $container).on('keyup.cms', cms_page_toolbar_title);
 
-		$('.cms_page_panel_delete', $container).on('click.cms', function(){
-		var $this = $(this);
-		var cms_page_panel_id = $this.data('cms_page_panel_id');
-		get_ajax_panel('cms/cms_popup_yes_no', {'text':'Delete block shortcut?'}, function(data){
-			panels_display_popup(data.result._html, {
-				'yes': function(){
-					get_ajax_panel('cms/cms_page_panel', {
-						'cms_page_panel_id': cms_page_panel_id,
-						'do': 'cms_page_panel_delete' 
-					}, function(){
-						$this.closest('li').remove();
-					})
-				}
-			}); 
-		});
-		});
+		// Shortcut remove is bound in cms_input_page_panels.js (page + nested lists)
 
 		// cms page saves block order automatically
 		$('.cms_page_sortable', $container).sortable({

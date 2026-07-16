@@ -1346,21 +1346,47 @@ class cms_update_model extends \Model {
 
 	}
 
-	function format_local_version_label($row){
+	/**
+	 * Short calendar date for version labels (e.g. 16 Jul 2026).
+	 */
+	function format_version_date($time){
 
-		$version = $row['local_version'] ?? '';
-		if ($version === '' || $version === '0.0.0'){
-			$version = 'unknown';
+		if (empty($time)){
+			return '';
 		}
 
-		if (!empty($row['local_changes'])){
-			return $version.' (local changes)';
-		}
-
-		return $version;
+		return date('j M Y', (int)$time);
 
 	}
 
+	/**
+	 * Local column: version + optional last-updated date + optional (local changes).
+	 * Keeps 0.0.0 as a real version (never "unknown").
+	 */
+	function format_local_version_label($row){
+
+		$version = $row['local_version'] ?? '';
+		if ($version === '' || $version === null){
+			$version = '0.0.0';
+		}
+
+		$label = $version;
+		$date = $this->format_version_date($row['local_version_time'] ?? 0);
+		if ($date !== ''){
+			$label .= ' - '.$date;
+		}
+
+		if (!empty($row['local_changes'])){
+			$label .= ' (local changes)';
+		}
+
+		return $label;
+
+	}
+
+	/**
+	 * Client install: remote master package version (+ date).
+	 */
 	function format_master_version_label($version, $time){
 
 		if ($version === '' || $version === null){
@@ -1368,11 +1394,32 @@ class cms_update_model extends \Model {
 		}
 
 		$label = $version;
-		if (!empty($time)){
-			$label .= ' '.date('(Y-m-d H:i)', (int)$time);
+		$date = $this->format_version_date($time);
+		if ($date !== ''){
+			$label .= ' - '.$date;
 		}
 
 		return $label;
+
+	}
+
+	/**
+	 * This host is master: what version is currently shared with clients.
+	 * Unreleased → "Master"; released → "Master (1.1.0 - 16 Jul 2026)".
+	 */
+	function format_this_master_label($version, $time){
+
+		if ($version === '' || $version === null){
+			return 'Master';
+		}
+
+		$inner = $version;
+		$date = $this->format_version_date($time);
+		if ($date !== ''){
+			$inner .= ' - '.$date;
+		}
+
+		return 'Master ('.$inner.')';
 
 	}
 
@@ -1418,14 +1465,16 @@ class cms_update_model extends \Model {
 		if ($is_local_master){
 
 			$release = $this->get_release_meta($area_id);
-			$row['master_label'] = 'This is master';
-			$row['status'] = 'This is master';
 
 			if ($release === null){
+				// Config maj.min only; Release button already means not published yet
 				$row['local_version'] = $this->get_config_version_string($area_id);
-				$row['local_label'] = $row['local_version'].' (not released)';
+				$row['local_version_time'] = 0;
+				$row['local_label'] = $row['local_version'];
 				$row['local_changes'] = true;
 				$row['can_release'] = true;
+				$row['master_label'] = 'Master';
+				$row['status'] = 'Master';
 			} else {
 				$released_hash = $release['current_hash'] ?? ($release['version_hash'] ?? '');
 				$row['local_version'] = $release['version'] ?? '0.0.0';
@@ -1435,6 +1484,10 @@ class cms_update_model extends \Model {
 						|| ($released_hash === '');
 				$row['local_label'] = $this->format_local_version_label($row);
 				$row['can_release'] = !empty($row['local_changes']);
+				// What clients receive from the last Release
+				$row['master_label'] = $this->format_this_master_label(
+						$row['local_version'], $row['local_version_time']);
+				$row['status'] = $row['master_label'];
 			}
 
 			return $row;

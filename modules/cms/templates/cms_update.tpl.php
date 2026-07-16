@@ -64,7 +64,7 @@
 						<div class="cms_update_cell">not installed</div>
 						<div class="cms_update_cell">
 							<?= htmlspecialchars($row['version'] ?? '', ENT_QUOTES, 'UTF-8') ?>
-							<?= !empty($row['version_time']) ? date('(Y-m-d H:i)', (int)$row['version_time']) : '' ?>
+							<?= !empty($row['version_time']) ? ' - '.date('j M Y', (int)$row['version_time']) : '' ?>
 						</div>
 						<div class="cms_update_cell cms_update_cell_right">
 							<div class="cms_update_install_button cms_tool_button"
