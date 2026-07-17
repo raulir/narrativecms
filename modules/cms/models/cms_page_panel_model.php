@@ -882,6 +882,117 @@ class cms_page_panel_model extends \Model {
 
 	}
 
+	/**
+	 * Keys that do not affect admin list title (skip auto _title refresh when update is only these).
+	 */
+	function _title_meta_keys(){
+
+		return [
+				'show',
+				'sort',
+				'cms_page_panel_id',
+				'cms_page_id',
+				'parent_id',
+				'panel_name',
+				'submenu_anchor',
+				'submenu_title',
+				'sync_needed',
+				'shopify_checked_at',
+				'shopify_updated_at',
+				'last_update',
+				'update_time',
+				'update_cms_user_id',
+				'create_time',
+				'create_cms_user_id',
+				'image_update',
+				'image_name_hash',
+		];
+
+	}
+
+	/**
+	 * Parse control flag _update_title from data array (not stored).
+	 * Returns [cleaned $data, null|true|false] — null = auto.
+	 */
+	function _extract_update_title_flag($data){
+
+		if (!is_array($data) || !array_key_exists('_update_title', $data)){
+			return [$data, null];
+		}
+
+		$raw = $data['_update_title'];
+		unset($data['_update_title']);
+
+		// Explicit skip
+		if ($raw === false || $raw === 0 || $raw === '0' || $raw === ''){
+			return [$data, false];
+		}
+
+		// Explicit force
+		return [$data, true];
+
+	}
+
+	/**
+	 * Whether to recompute _title after update_cms_page_panel.
+	 *
+	 * @param bool $purge full panel replace
+	 * @param bool|null $flag true force, false skip, null auto
+	 * @param array $row_keys cms_page_panel columns written
+	 * @param array $param_keys param/table fields written
+	 */
+	function _should_refresh_panel_title($purge, $flag, $row_keys, $param_keys){
+
+		if ($flag === false){
+			return false;
+		}
+
+		if ($flag === true){
+			return true;
+		}
+
+		// Auto
+		if (!empty($purge)){
+			return true;
+		}
+
+		$row_keys = is_array($row_keys) ? $row_keys : [];
+		$param_keys = is_array($param_keys) ? $param_keys : [];
+
+		if (in_array('title', $row_keys, true)){
+			return true;
+		}
+
+		if (in_array('heading', $param_keys, true)){
+			return true;
+		}
+
+		// Target badges affect cached title prefix
+		if (in_array('_targets', $param_keys, true)){
+			return true;
+		}
+
+		$meta = array_flip($this->_title_meta_keys());
+
+		foreach (array_merge($row_keys, $param_keys) as $key){
+			if ($key === '' || $key === '_title'){
+				continue;
+			}
+			// Other underscore system keys (except _targets above): ignore for auto
+			if (is_string($key) && $key !== '' && $key[0] === '_'){
+				continue;
+			}
+			if (isset($meta[$key])){
+				continue;
+			}
+			// Non-meta content field present
+			return true;
+		}
+
+		return false;
+
+	}
+
 	function get_panel_admin_title($row, $lazy_refresh = true){
 
 		if (!empty($row['_title'])){
@@ -1050,6 +1161,11 @@ class cms_page_panel_model extends \Model {
 
 	function update_cms_page_panel($cms_page_panel_id, $data, $purge = false){
 
+		// Control flag: not stored — true force title, false skip, null auto (see _should_refresh_panel_title)
+		list($data, $update_title_flag) = $this->_extract_update_title_flag($data);
+		// Requested purge (before settings-panel demotion) counts as full save for title auto
+		$requested_purge = !empty($purge);
+
 		if (isset($data['search_params'])){
 			$search_params = $data['search_params'];
 			unset($data['search_params']);
@@ -1110,6 +1226,11 @@ class cms_page_panel_model extends \Model {
 			$table_data = $this->_split_panel_table_fields($panel_name, $params);
 		}
 
+		// Keys written this call (for auto title refresh) — before purge may strip others
+		$row_keys_written = array_keys($data);
+		$param_keys_written = array_merge(array_keys($params), array_keys($table_data));
+		$title_for_refresh = array_key_exists('title', $data) ? $data['title'] : null;
+
 		// params data
 		if (!empty($params)){
 			
@@ -1165,8 +1286,11 @@ class cms_page_panel_model extends \Model {
 			$sql = "update cms_page_panel set `".implode('` = ? , `', array_keys($data))."` = ? where cms_page_panel_id = '".(int)$cms_page_panel_id."' ";
 			$this->db->query($sql, $data);
 		}
-		
-		$this->_refresh_cached_title($cms_page_panel_id, $data['title'] ?? null);
+
+		// Full title process (panel_heading / heading / badges) — gated to avoid every meta stamp
+		if ($this->_should_refresh_panel_title($requested_purge, $update_title_flag, $row_keys_written, $param_keys_written)){
+			$this->_refresh_cached_title($cms_page_panel_id, $title_for_refresh);
+		}
 
 		$this->invalidate_html_cache($cms_page_panel_id);
 		$this->_invalidate_page_cache($cms_page_panel_id);
@@ -1231,6 +1355,9 @@ class cms_page_panel_model extends \Model {
 	 * insert new page panel into db
 	 */
 	function create_cms_page_panel($data){
+
+		// Optional skip: _update_title => 0 after create (rare bulk load that sets title later)
+		list($data, $update_title_flag) = $this->_extract_update_title_flag($data);
 		
 		if (!empty($data['panel_params']) && is_array($data['panel_params'])){
 			$data = array_merge($data['panel_params'], $data);
@@ -1319,7 +1446,10 @@ class cms_page_panel_model extends \Model {
 			$this->_update_cached_params($insert_id);
 		}
 
-		$this->_refresh_cached_title($insert_id, $data['title'] ?? null);
+		// Always full title process after create (params exist) unless explicitly skipped
+		if ($update_title_flag !== false){
+			$this->_refresh_cached_title($insert_id, $data['title'] ?? null);
+		}
 		
 		$this->invalidate_html_cache($insert_id);
 		$this->_invalidate_page_cache($insert_id);
@@ -2352,12 +2482,33 @@ class cms_page_panel_model extends \Model {
 	
 	function get_fk_data($panel_name, $filter = [], $label_field = 'title'){
 
+		// Prefer list title_field from panel definition when caller uses default "title"
+		if ($label_field === 'title' && stristr((string)$panel_name, '/')){
+			$this->load->model('cms/cms_panel_model');
+			$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+			if (!empty($config['list']['title_field'])){
+				$label_field = $config['list']['title_field'];
+			}
+		}
+
 		$panels = $this->get_cms_page_panels_by(['panel_name' => $panel_name, 'cms_page_id' => 0] + $filter);
     	
     	$return = array();
     	
     	foreach($panels as $row){
-    		$return[(int)$row['cms_page_panel_id']] = str_replace('"', '&quot;', $row[$label_field]);
+			$label = '';
+			if ($label_field !== '' && isset($row[$label_field]) && (string)$row[$label_field] !== ''){
+				$label = (string)$row[$label_field];
+			} else if (!empty($row['heading'])){
+				$label = (string)$row['heading'];
+			} else if (!empty($row['_title'])){
+				$label = (string)$row['_title'];
+			} else if (!empty($row['title'])){
+				$label = (string)$row['title'];
+			} else {
+				$label = '#'.(int)$row['cms_page_panel_id'];
+			}
+    		$return[(int)$row['cms_page_panel_id']] = str_replace('"', '&quot;', $label);
     	}
     	
     	return $return;

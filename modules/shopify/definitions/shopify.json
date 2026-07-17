@@ -16,6 +16,34 @@
 			"name": "purge",
 			"label": "Purge products",
 			"help": "Deletes local products whose Shopify ID no longer exists on Shopify (and related images). Oldest products first. Stops after about 50 seconds — click Purge again to continue."
+		},
+		{
+			"type": "text",
+			"name": "thumb_html_ttl",
+			"label": "Thumb HTML cache (seconds)",
+			"default": "900",
+			"help": "How long product thumbnail HTML/payload may be reused without rebuild (default 900 = 15 minutes)"
+		},
+		{
+			"type": "text",
+			"name": "shopify_data_ttl",
+			"label": "Shopify data recheck (seconds)",
+			"default": "3600",
+			"help": "How long CMS product data is treated as fresh without a full Shopify Admin recheck (default 3600 = 1 hour)"
+		},
+		{
+			"type": "text",
+			"name": "product_page_recheck_ttl",
+			"label": "Product page recheck (seconds)",
+			"default": "300",
+			"help": "How often a product page may recheck Shopify for price/availability (default 300 = 5 minutes)"
+		},
+		{
+			"type": "text",
+			"name": "max_refresh_time",
+			"label": "Max refresh time per request (seconds)",
+			"default": "30",
+			"help": "Budget for Shopify Admin API product refreshes in one page request (default 30). When exhausted, serve CMS data without more live API calls"
 		}
 	]
 }

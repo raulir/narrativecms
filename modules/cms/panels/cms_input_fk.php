@@ -34,8 +34,27 @@ class cms_input_fk extends \Controller {
 			
 			$list = $this->cms_page_panel_model->get_list($params['list'], ['show' => [0,1]]);
 
+			// Prefer explicit label_field, then list title_field, then heading/_title/title
+			$label_field = $params['label_field'] ?? '';
+			if ($label_field === ''){
+				$config = $this->cms_panel_model->get_cms_panel_config($params['list']);
+				$label_field = $config['list']['title_field'] ?? 'heading';
+			}
+
 			foreach($list as $item_id => $item){
-				$params['values'][$item_id] = $item['title'];
+				$label = '';
+				if ($label_field !== '' && isset($item[$label_field]) && (string)$item[$label_field] !== ''){
+					$label = (string)$item[$label_field];
+				} else if (!empty($item['heading'])){
+					$label = (string)$item['heading'];
+				} else if (!empty($item['_title'])){
+					$label = (string)$item['_title'];
+				} else if (!empty($item['title'])){
+					$label = (string)$item['title'];
+				} else {
+					$label = '#'.(int)$item_id;
+				}
+				$params['values'][$item_id] = $label;
 			}
 			
 			if ($add_empty){

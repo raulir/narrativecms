@@ -4,7 +4,15 @@
 	"item": [
 	
 	],
-	"settings":[ 
+	"settings":[
+		{
+			"type":"shop/cms_input_provides",
+			"name":"shop_checkout",
+			"label":"Checkout provider",
+			"service":"shop_checkout",
+			"default":"",
+			"help":"Panel that handles checkout handoff (from modules that provide shop_checkout).||Leave empty until configured — cart will show an error on the checkout button."
+		},
 		{
 			"type":"text",
 			"name":"dimension_prefix",

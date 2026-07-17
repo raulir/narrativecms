@@ -13,30 +13,51 @@
 			]
 		},
 		{
-			"id":"product",
-			"name":"Product"
+			"id":"shop_product",
+			"name":"Shopify product fields"
 		},
 		{
 			"id":"cart",
 			"name":"Cart"
+		},
+		{
+			"id":"checkout",
+			"name":"Shopify checkout handoff",
+			"flags":[
+				"hidden"
+			]
+		}
+	],
+	"extends":[
+		{
+			"target":"shop/product",
+			"source":"//shop_product"
+		},
+		{
+			"target":"shop/order",
+			"source":"//shop_order"
+		}
+	],
+	"provides":[
+		{
+			"service":"shop_checkout",
+			"panel":"//checkout",
+			"label":"Shopify checkout"
 		}
 	],
 	"cms_menu":[
 		{
-			"id":"shopify",
-			"name":"Shopify"
-		},
-		{
-			"id":"shopify_products",
-			"name":"Products",
-			"parent":"shopify",
-			"url":"admin/cms_list/shopify__product/"
+			"id":"shop_shopify",
+			"name":"Shopify",
+			"parent":"shop",
+			"order":800
 		},
 		{
 			"id":"shopify_settings",
-			"name":"Settings",
-			"parent":"shopify",
-			"url":"admin/panel_settings/shopify__shopify/"
+			"name":"Shopify settings",
+			"parent":"shop_shopify",
+			"url":"admin/panel_settings/shopify__shopify/",
+			"order":810
 		}
 	]
 }

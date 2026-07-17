@@ -13,6 +13,7 @@ if ( !function_exists('cms_cookie_create')) {
 		if ($days) {
 			
 			$date = time() + $days * 24 * 60 * 60;
+			// Negative days = expire in the past (clear cookie)
 			$expires = '; expires='.date(DATE_RFC1123, $date);
 		
 		}

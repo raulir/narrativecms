@@ -1,6 +1,6 @@
 <?php
 
-namespace stock;
+namespace shop;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 

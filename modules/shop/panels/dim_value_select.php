@@ -1,6 +1,6 @@
 <?php
 
-namespace stock;
+namespace shop;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
@@ -34,8 +34,8 @@ class dim_value_select extends \Controller{
 			
 			$new_dims = [];
 			$updated = false;
-			foreach($item['dimensions'] as $dim_k => $dim_v){
-				if (!is_string($dim_v['value'])){
+			foreach(($item['dimensions'] ?? []) as $dim_k => $dim_v){
+				if (!is_string($dim_v['value'] ?? null)){
 					$dim_v['value'] = '=';
 				}
 				list($dim_str, $dim_value_str) = explode('=', $dim_v['value']);
@@ -65,10 +65,10 @@ class dim_value_select extends \Controller{
 		$this->load->model('cms/cms_page_panel_model');
 		
 		$item = $this->cms_page_panel_model->get_cms_page_panel($params['item_id']);
-//_print_r($item['dimensions']);		
+		
 		$params['current'] = '';
-		foreach($item['dimensions'] as $dim){
-			if (is_string($dim['value']) && stristr($dim['value'], $params['dimension'].'=')){
+		foreach(($item['dimensions'] ?? []) as $dim){
+			if (is_string($dim['value'] ?? null) && stristr($dim['value'], $params['dimension'].'=')){
 				$params['current'] = $dim['value'];
 			}
 		}
@@ -77,10 +77,12 @@ class dim_value_select extends \Controller{
 		
 		$params['available'] = [];
 		
-		$dimension_a = $this->cms_page_panel_model->get_list('stock/product_dimension', ['id' => $params['dimension']]);
+		$dimension_a = $this->cms_page_panel_model->get_list('shop/product_dimension', ['id' => $params['dimension']]);
 		$dimension = array_pop($dimension_a);
-		foreach($dimension['values'] as $value){
-			$params['available'][$value['id']] = $value['label'];
+		if (!empty($dimension['values']) && is_array($dimension['values'])){
+			foreach($dimension['values'] as $value){
+				$params['available'][$value['id']] = $value['label'];
+			}
 		}
 		
 		return $params;

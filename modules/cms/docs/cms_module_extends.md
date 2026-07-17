@@ -4,6 +4,8 @@ Created: 2026-07-08
 
 Site/final module extends base panels from other modules. Declare in **`modules/<module>/config.json`** — not in panel definition JSON.
 
+Related: modules may also declare **`provides`** (capability → panel), e.g. Shopify `shop_checkout` → `shopify/checkout`. Aggregated in [`config.php`](../../../system/core/config.php) as `$GLOBALS['config']['provides']`. See [shop.md cart section](../../shop/docs/shop.md).
+
 ## Panel names and `//` (current module)
 
 Panel ids are normally **`module/panel`** (e.g. `user/login`, `music/units`).

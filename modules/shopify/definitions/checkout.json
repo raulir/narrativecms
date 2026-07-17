@@ -1,0 +1,7 @@
+{
+	"version": "2",
+	"label": "Shopify checkout handoff",
+	"description": "Materialises local shop cart into a Shopify Storefront cart and returns checkoutUrl",
+	"item": [],
+	"settings": []
+}

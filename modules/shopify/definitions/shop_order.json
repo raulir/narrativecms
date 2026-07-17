@@ -1,0 +1,25 @@
+{
+	"version": "2",
+	"label": "Shopify order fields",
+	"description": "Extends shop/order with Storefront cart handoff state",
+	"item": [
+		{
+			"type": "text",
+			"name": "shopify_cart_id",
+			"label": "Shopify cart id",
+			"help": "Storefront cart GID — reused across checkout returns"
+		},
+		{
+			"type": "text",
+			"name": "shopify_lines_fingerprint",
+			"label": "Shopify lines fingerprint",
+			"help": "Hash of last lines pushed site → Shopify"
+		},
+		{
+			"type": "text",
+			"name": "shopify_checkout_url",
+			"label": "Shopify checkout URL",
+			"help": "Last checkoutUrl after materialise"
+		}
+	]
+}

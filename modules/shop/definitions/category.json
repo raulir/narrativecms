@@ -1,0 +1,30 @@
+{
+	"version": "2",
+	"list": {
+		"list_title": "Product categories",
+		"item_title": "Product category",
+		"title_field": "heading",
+		"filter_fields": {
+			"show": "-- show --"
+		},
+		"link_target": "1"
+	},
+	"item": [
+		{
+			"type": "text",
+			"name": "heading",
+			"label": "Heading"
+		},
+		{
+			"type": "textarea",
+			"name": "text",
+			"label": "Text",
+			"lines": "3"
+		},
+		{
+			"type": "colour",
+			"name": "colour",
+			"label": "Colour"
+		}
+	]
+}

@@ -56,7 +56,7 @@ class basket extends CI_Controller{
 		$params['items'] = [];
 		foreach($lines as $line){
 
-			if ($refs[$line['ref_id']]['panel_name'] == 'stock/product_item'){
+			if ($refs[$line['ref_id']]['panel_name'] == 'shop/product_item'){
 			
 				$dimensions = [];
 				$dims = $refs[$line['ref_id']]['dimensions'];

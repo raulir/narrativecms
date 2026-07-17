@@ -1,5 +1,34 @@
 # Panel controllers: `panel_params` and separation of concerns
 
+## Admin list titles (`_title`)
+
+CMS list rows use a cached admin title stored as panel param **`_title`**.
+
+| When | Behaviour |
+|------|-----------|
+| **`create_cms_page_panel`** | Always runs full title process after params are written (`panel_heading` / `heading` / badges). Pass `_update_title => 0` only for rare bulk creates that set the title later. |
+| **`update_cms_page_panel`** | Runs full title process only when needed (see below). |
+| **List UI** | If `_title` empty, may lazy-refresh once via `get_panel_admin_title`. |
+
+### Update flag `_update_title` (not stored)
+
+| Value | Meaning |
+|-------|---------|
+| `1` / true | Force recompute `_title` after this update |
+| `0` / false | Skip title refresh |
+| omitted | **Auto** |
+
+**Auto refresh when:**
+
+- `purge` is true (typical admin full save / full product replace), or  
+- `title` column is written, or  
+- `heading` (or other non-meta content fields) are written, or  
+- `_targets` changes (badge prefix)
+
+**Auto skip when** the update only touches meta keys such as `show`, `sort`, `sync_needed`, `shopify_checked_at`, `last_update`, `update_time`, `update_cms_user_id`, image hash stamps, etc.
+
+List-item titles prefer `panel_heading()` when defined, else definition `heading`, else a fallback. Do not put HTML badges into the `cms_page_panel.title` column — badges live in `_title`.
+
 ## `panel_params` is frontend-only
 
 `panel_params($params)` on a **site / page panel** (e.g. `music/engine`, `user/userforward`) runs when that panel is **rendered on the public site** (or via ajax panel / position load that builds frontend HTML).

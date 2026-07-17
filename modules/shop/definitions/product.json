@@ -1,0 +1,131 @@
+{
+	"version": "2",
+	"image": "",
+	"label": "Product",
+	"description": "Shop product (catalogue)",
+	"list": {
+		"list_title": "Products",
+		"item_title": "Product",
+		"title_field": "heading",
+		"filter_fields": {
+			"show": "-- show",
+			"subcategory_id": "-- subcategory"
+		},
+		"link_target": "1"
+	},
+	"js": [],
+	"item": [
+		{
+			"type": "text",
+			"name": "heading",
+			"label": "Heading",
+			"search": "3"
+		},
+		{
+			"type": "image",
+			"name": "image",
+			"label": "Image",
+			"category": "product"
+		},
+		{
+			"type": "text",
+			"name": "type",
+			"label": "Type",
+			"search": "1"
+		},
+		{
+			"type": "textarea",
+			"name": "text",
+			"label": "Text",
+			"lines": "8",
+			"search": "1"
+		},
+		{
+			"type": "text",
+			"name": "min_price",
+			"label": "Min price"
+		},
+		{
+			"type": "text",
+			"name": "max_price",
+			"label": "Max price"
+		},
+		{
+			"type": "text",
+			"name": "available",
+			"label": "Total available"
+		},
+		{
+			"type": "colour",
+			"name": "colour",
+			"label": "Accent colour",
+			"default": "black"
+		},
+		{
+			"type": "repeater",
+			"name": "images",
+			"label": "Images",
+			"fields": [
+				{
+					"type": "image",
+					"name": "image",
+					"label": "Image",
+					"category": "product"
+				},
+				{
+					"type": "text",
+					"name": "image_update",
+					"label": "Image last update"
+				},
+				{
+					"type": "text",
+					"name": "shopify_id",
+					"label": "External image id"
+				}
+			]
+		},
+		{
+			"type": "subtitle",
+			"label": "Organisation"
+		},
+		{
+			"type": "fk",
+			"name": "subcategory_id",
+			"label": "Subcategory",
+			"add_empty": "1",
+			"list": "shop/subcategory",
+			"table": "1",
+			"table_type": "int",
+			"table_index": "1"
+		},
+		{
+			"type": "repeater",
+			"name": "texts",
+			"label": "Product texts",
+			"fields": [
+				{
+					"type": "fk",
+					"name": "text_id",
+					"label": "Text",
+					"list": "shop/producttext"
+				}
+			]
+		},
+		{
+			"type": "repeater",
+			"name": "related",
+			"label": "Related products",
+			"fields": [
+				{
+					"type": "fk",
+					"name": "product_id",
+					"label": "Product",
+					"list": "shop/product",
+					"label_field": "heading",
+					"add_empty": "1"
+				}
+			]
+		}
+	],
+	"settings": []
+}

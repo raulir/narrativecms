@@ -1,0 +1,45 @@
+/* Basic cart structure — site modules extend for visual design */
+
+.cart_container {
+
+}
+
+.cart_content {
+
+}
+
+.cart_area {
+
+}
+
+.cart_label {
+	.cart_number_loading,.cart_number_loaded {
+		display: inline-block;
+		min-width: 1.5rem;
+		text-align: center;
+	}
+}
+
+.cart_popup {
+	display: none;
+	.cart_visible & {
+		display: block;
+	}
+}
+
+.cart_popup_item_image {
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.cart_popup_checkout_row {
+	position: relative;
+}
+
+.cart_checkout_error {
+	color: #c00;
+	font-weight: bold;
+	margin-top: 0.6rem;
+	text-align: center;
+}

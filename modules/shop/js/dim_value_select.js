@@ -11,11 +11,13 @@ function dim_value_select_init(){
 				'value': $this.val()
 		}
 
-		get_ajax_panel('stock/dim_value_select', data, function(result){
+		get_ajax_panel('shop/dim_value_select', data, function(result){
 
 			$this.closest('.cms_grid_field_inner').html(result.result.html)
 			
 			cms_notification('Dimension ' + $this.data('dimension') + ' updated', 2)
+
+			dim_value_select_init()
 
 		})
 

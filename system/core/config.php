@@ -222,6 +222,7 @@ array_unshift($GLOBALS['config']['modules'], 'cms');
 $GLOBALS['config']['modules'] = array_values(array_unique($GLOBALS['config']['modules']));
 
 $GLOBALS['config']['extends'] = [];
+$GLOBALS['config']['provides'] = [];
 
 foreach($GLOBALS['config']['modules'] as $module_name){
 	
@@ -246,6 +247,33 @@ foreach($GLOBALS['config']['modules'] as $module_name){
 				$item['source'] = str_replace('//', $module_name.'/', $item['source']);
 			}
 			$GLOBALS['config']['extends'][] = $item;
+		}
+	}
+
+	// Capability registry: module offers a named service implemented by a panel
+	// e.g. { "service": "shop_checkout", "panel": "//checkout" } → shopify/checkout
+	// Stored as provides[service][panel] so shop settings can list all options
+	if (!empty($GLOBALS['config']['module'][$module_name]['provides']) && is_array($GLOBALS['config']['module'][$module_name]['provides'])){
+		foreach($GLOBALS['config']['module'][$module_name]['provides'] as $item){
+			if (empty($item['service']) || empty($item['panel'])){
+				continue;
+			}
+			$panel = $item['panel'];
+			if (strpos($panel, '//') === 0){
+				$panel = $module_name.'/'.substr($panel, 2);
+			} else if (strpos($panel, '/') === false){
+				$panel = $module_name.'/'.$panel;
+			}
+			$service = $item['service'];
+			if (!isset($GLOBALS['config']['provides'][$service]) || !is_array($GLOBALS['config']['provides'][$service])){
+				$GLOBALS['config']['provides'][$service] = [];
+			}
+			$GLOBALS['config']['provides'][$service][$panel] = [
+					'panel' => $panel,
+					'module' => $module_name,
+					'service' => $service,
+					'label' => !empty($item['label']) ? $item['label'] : $panel,
+			];
 		}
 	}
 	

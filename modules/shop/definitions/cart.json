@@ -1,0 +1,56 @@
+{
+	"version": "2",
+	"label": "Cart",
+	"description": "Basic shop cart (badge + popup). Site modules extend for design.",
+	"item": [],
+	"settings": [
+		{
+			"type": "text",
+			"name": "number_template",
+			"label": "Number template",
+			"default": "{{number}}"
+		},
+		{
+			"type": "text",
+			"name": "popup_heading",
+			"label": "Popup heading",
+			"default": "Cart"
+		},
+		{
+			"type": "text",
+			"name": "total_label",
+			"label": "Total",
+			"default": "Total"
+		},
+		{
+			"type": "text",
+			"name": "checkout_label",
+			"label": "Checkout label",
+			"default": "Checkout"
+		},
+		{
+			"type": "text",
+			"name": "empty_label",
+			"label": "Empty cart",
+			"default": "Please add items to cart"
+		},
+		{
+			"type": "text",
+			"name": "delete_label",
+			"label": "Remove",
+			"default": "Remove"
+		},
+		{
+			"type": "text",
+			"name": "customisation_label",
+			"label": "Customisation",
+			"default": "Customisation"
+		},
+		{
+			"type": "text",
+			"name": "currency_prefix",
+			"label": "Currency prefix",
+			"default": ""
+		}
+	]
+}

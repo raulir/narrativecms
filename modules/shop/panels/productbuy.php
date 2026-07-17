@@ -42,8 +42,8 @@ class productbuy extends CI_Controller{
 					
 					if (empty($params['errors'])){
 
-						$product_items = $this->cms_page_panel_model->get_list('cg/product_item', ['product_id' => $params['product_id'], 'order_id' => [0, '']]);
-						$exclude_lines = $this->cms_page_panel_model->get_list('cg/order_line', ['order_id' => $order['cms_page_panel_id']]);
+						$product_items = $this->cms_page_panel_model->get_list('shop/product_item', ['product_id' => $params['product_id'], 'order_id' => [0, '']]);
+						$exclude_lines = $this->cms_page_panel_model->get_list('shop/order_line', ['order_id' => $order['cms_page_panel_id']]);
 						
 						$exclude_items = [];
 						foreach($exclude_lines as $line){
@@ -161,7 +161,7 @@ class productbuy extends CI_Controller{
 					} else {
 						
 						// if no dimensions
-						$items = $this->cms_page_panel_model->get_list('stock/product_item', ['product_id' => $params['product_id']]);
+						$items = $this->cms_page_panel_model->get_list('shop/product_item', ['product_id' => $params['product_id']]);
 
 						$item = reset($items);
 

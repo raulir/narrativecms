@@ -29,15 +29,135 @@ class shopify_product_model extends Model {
 
 	}
 	
+	/**
+	 * Shopify module settings (panel settings shopify/shopify).
+	 */
+	function get_shopify_settings(){
+
+		if (!empty($GLOBALS['shopify_settings_cache']) && is_array($GLOBALS['shopify_settings_cache'])){
+			return $GLOBALS['shopify_settings_cache'];
+		}
+
+		$this->load->model('cms/cms_page_panel_model');
+		$settings = $this->cms_page_panel_model->get_cms_page_panel_settings('shopify/shopify');
+		if (!is_array($settings)){
+			$settings = [];
+		}
+
+		// Defaults when settings not yet saved in admin
+		$defaults = [
+				'thumb_html_ttl' => 900,
+				'shopify_data_ttl' => 3600,
+				'product_page_recheck_ttl' => 300,
+				'max_refresh_time' => 30,
+		];
+		foreach ($defaults as $key => $value){
+			if (!isset($settings[$key]) || $settings[$key] === '' || $settings[$key] === null){
+				$settings[$key] = $value;
+			} else {
+				$settings[$key] = (int)$settings[$key];
+			}
+		}
+
+		$GLOBALS['shopify_settings_cache'] = $settings;
+
+		return $settings;
+
+	}
+
+	/**
+	 * Per-request Admin API refresh budget (max_refresh_time seconds).
+	 * Force=1 admin/sync paths should pass $respect_budget = false.
+	 */
+	function _refresh_budget_ok($respect_budget = true){
+
+		if (!$respect_budget){
+			return true;
+		}
+
+		if (empty($GLOBALS['shopify_refresh']) || !is_array($GLOBALS['shopify_refresh'])){
+			$settings = $this->get_shopify_settings();
+			$GLOBALS['shopify_refresh'] = [
+					'started' => microtime(true),
+					'max' => max(1, (float)($settings['max_refresh_time'] ?? 30)),
+					'exhausted' => false,
+			];
+		}
+
+		if (!empty($GLOBALS['shopify_refresh']['exhausted'])){
+			return false;
+		}
+
+		$elapsed = microtime(true) - $GLOBALS['shopify_refresh']['started'];
+		if ($elapsed >= $GLOBALS['shopify_refresh']['max']){
+			$GLOBALS['shopify_refresh']['exhausted'] = true;
+			return false;
+		}
+
+		return true;
+
+	}
+
+	/**
+	 * Load last good disk cache for an endpoint, or empty array.
+	 */
+	function _call_read_cache($filename){
+
+		if (!file_exists($filename)){
+			return [];
+		}
+
+		$data = cms_json_decode(file_get_contents($filename), $filename);
+		if (!is_array($data)){
+			return [];
+		}
+
+		return $data;
+
+	}
+
+	/**
+	 * True when Shopify response is a confirmed missing resource (hide product).
+	 */
+	function _is_shopify_not_found($data, $status_code = 0){
+
+		if ((int)$status_code === 404){
+			return true;
+		}
+
+		if (!is_array($data) || empty($data['errors'])){
+			return false;
+		}
+
+		$errors = $data['errors'];
+		if (is_string($errors)){
+			$lower = strtolower($errors);
+			return (strpos($lower, 'not found') !== false || strpos($lower, '404') !== false);
+		}
+
+		if (is_array($errors)){
+			$flat = strtolower(json_encode($errors));
+			return (strpos($flat, 'not found') !== false);
+		}
+
+		return false;
+
+	}
+
 	function call($endpoint, $params = []){
 		
 		$caching = $params['force'] ?? 0;
 		// -1 - never update if cache available
 		// 0 - 300s caching
 		// 1 - always update cache
+		// Meta: prefer disk cache when budget exhausted (page traffic only)
+		$respect_budget = !empty($params['_respect_budget']);
 		
 		if (isset($params['force'])){
 			unset($params['force']);
+		}
+		if (isset($params['_respect_budget'])){
+			unset($params['_respect_budget']);
 		}
 		
 		$filename = $GLOBALS['config']['base_path'].'cache/shopify_'.substr(md5($endpoint.json_encode($params)), 0, 16).'.json';
@@ -51,73 +171,134 @@ class shopify_product_model extends Model {
 			$needs_update = 1;
 		}
 
-		if (!file_exists($filename) || ((time() - filemtime($filename)) > 300 && $caching != -1) || $caching == 1){
+		// force -1: disk only — never open Admin API
+		if ($caching == -1){
+			if (file_exists($filename)){
+				return $this->_call_read_cache($filename);
+			}
+			return ['_soft_fail' => 1, '_reason' => 'no_disk_cache', ];
+		}
+
+		// Budget exhausted: never open new Admin API for page traffic; serve disk/CMS
+		if ($needs_update && $respect_budget && !$this->_refresh_budget_ok(true)){
+			$cached = $this->_call_read_cache($filename);
+			if (!empty($cached) && empty($cached['errors']) && empty($cached['_soft_fail']) && empty($cached['_not_found'])){
+				return $cached;
+			}
+			return ['_soft_fail' => 1, '_reason' => 'budget', ];
+		}
+
+		if ($needs_update){
 			
 			$more = true;
 			$data = [];
+			$api_ok = false;
+			$status_code = 0;
 			
-			while ($more){
-		
-				if (empty($params)){
-					$response = $this->client->get(path: $endpoint);
-				} else {
-					$response = $this->client->get(path: $endpoint, query: $params);
-				}
-				
-				$request_data = $response->getDecodedBody();
+			try {
 
-				if (!empty($request_data['errors'])){
-					
-					$data = $request_data;
-					$more = false;
-					
-				} else if (stristr($endpoint, '/') && count($request_data) == 1){
-					
-					$data = reset($request_data);
-					$more = false;
-
-				} else {
-	
-	
-	
-					$request_data = $request_data[array_key_first($request_data)];
-				
-					foreach($request_data as $record){
-						$data[] = $record;
+				while ($more){
+			
+					if (empty($params)){
+						$response = $this->client->get(path: $endpoint);
+					} else {
+						$response = $this->client->get(path: $endpoint, query: $params);
 					}
 
-					$headers = $response->getHeaders();
+					if (is_object($response) && method_exists($response, 'getStatusCode')){
+						$status_code = (int)$response->getStatusCode();
+					}
+					
+					$request_data = $response->getDecodedBody();
 
-					if (empty($headers['link'])){
+					if (!is_array($request_data)){
+						$data = ['_soft_fail' => 1, '_reason' => 'decode', ];
 						$more = false;
-					} 
+						$api_ok = false;
+					} else if (!empty($request_data['errors'])){
 
-					if ($more){
-						
-						$last_record = $request_data[array_key_last($request_data)];
-						$params['since_id'] = $last_record['id'];
-
-						if (empty($last_record['id'])){
-							$more = false;
+						if ($this->_is_shopify_not_found($request_data, $status_code)){
+							$data = ['_not_found' => 1, 'errors' => $request_data['errors'], ];
+						} else if ($status_code >= 500 || $status_code === 0){
+							$data = ['_soft_fail' => 1, '_reason' => 'http_'.$status_code, 'errors' => $request_data['errors'], ];
+						} else if ($status_code === 404 || $this->_is_shopify_not_found($request_data, $status_code)){
+							$data = ['_not_found' => 1, 'errors' => $request_data['errors'], ];
 						} else {
-							usleep(1000000);
+							// Other client errors: treat as soft fail (do not hide products)
+							$data = ['_soft_fail' => 1, '_reason' => 'errors', 'errors' => $request_data['errors'], ];
 						}
+						$more = false;
+						$api_ok = false;
 						
+					} else if (stristr($endpoint, '/') && count($request_data) == 1){
+						
+						$data = reset($request_data);
+						$more = false;
+						$api_ok = true;
+
+					} else {
+		
+						$request_data = $request_data[array_key_first($request_data)];
+					
+						foreach($request_data as $record){
+							$data[] = $record;
+						}
+
+						$headers = $response->getHeaders();
+
+						if (empty($headers['link'])){
+							$more = false;
+						} 
+
+						if ($more){
+							
+							$last_record = $request_data[array_key_last($request_data)];
+							$params['since_id'] = $last_record['id'];
+
+							if (empty($last_record['id'])){
+								$more = false;
+							} else {
+								usleep(1000000);
+							}
+							
+						}
+
+						$api_ok = true;
+					
 					}
-				
+
 				}
+
+			} catch (Exception $e){
+
+				$data = ['_soft_fail' => 1, '_reason' => 'exception', '_message' => $e->getMessage(), ];
+				$api_ok = false;
+
+			} catch (Throwable $e){
+
+				$data = ['_soft_fail' => 1, '_reason' => 'exception', '_message' => $e->getMessage(), ];
+				$api_ok = false;
 
 			}
 
-			file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
+			// Only overwrite disk cache with successful product/list payloads
+			if ($api_ok && is_array($data) && empty($data['errors']) && empty($data['_soft_fail']) && empty($data['_not_found'])){
+				file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
+			} else if (!empty($data['_not_found'])){
+				// Confirmed missing: do not leave a stale good product in cache as authority
+				// Keep previous file if any; caller handles hide. Soft-fail on network uses previous file.
+			} else if (!empty($data['_soft_fail'])){
+				// Prefer previous good cache over soft-fail empty
+				$cached = $this->_call_read_cache($filename);
+				if (!empty($cached) && empty($cached['errors']) && empty($cached['_soft_fail']) && empty($cached['_not_found'])){
+					$cached['_from_stale_cache'] = 1;
+					return $cached;
+				}
+			}
 				
 		} else {
 				
-			$data = json_decode(file_get_contents($filename), true);
-			
-			if (!is_array($data)){
-				$data = [];
-			}
+			$data = $this->_call_read_cache($filename);
 				
 		}
 
@@ -144,24 +325,284 @@ class shopify_product_model extends Model {
 	
 	}
 
-	function get_product($product_shopify_id, $force = 0){
+	/**
+	 * Fetch one product from Shopify Admin (with disk cache).
+	 * Returns product array, or meta flags: _not_found, _soft_fail.
+	 *
+	 * @param int|string $product_shopify_id
+	 * @param int $force -1 disk only if present; 0 ~300s; 1 always API
+	 * @param bool $respect_budget apply per-request max_refresh_time
+	 */
+	function get_product($product_shopify_id, $force = 0, $respect_budget = false){
 		
-		$product = $this->call('products/'.$product_shopify_id, ['force' => $force, ]);
-// _print_r($product);		
-		if (!is_array($product) || !empty($product['errors'])){
-			return [];
+		$product = $this->call('products/'.$product_shopify_id, [
+				'force' => $force,
+				'_respect_budget' => $respect_budget ? 1 : 0,
+		]);
+
+		if (!is_array($product)){
+			return ['_soft_fail' => 1, '_reason' => 'empty', ];
+		}
+
+		if (!empty($product['_not_found'])){
+			return $product;
+		}
+
+		if (!empty($product['_soft_fail'])){
+			return $product;
+		}
+
+		if (!empty($product['errors'])){
+			if ($this->_is_shopify_not_found($product)){
+				return ['_not_found' => 1, 'errors' => $product['errors'], ];
+			}
+			return ['_soft_fail' => 1, '_reason' => 'errors', 'errors' => $product['errors'], ];
+		}
+
+		if (empty($product['id'])){
+			// Empty body without id — soft fail (do not hide)
+			return ['_soft_fail' => 1, '_reason' => 'no_id', ];
 		}
 		
 		return $product;
 		
 	}
-	
-	function get_product_by_id($product_id){
-		
-		$product = $this->refresh_product($product_id);
 
-		return $product;
-		
+	/**
+	 * Product page / display: refresh Shopify only when shopify_checked_at is older than TTL.
+	 * $mode: 'page' uses product_page_recheck_ttl; 'thumb' uses shopify_data_ttl.
+	 */
+	function get_product_by_id($product_id, $mode = 'page'){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$settings = $this->get_shopify_settings();
+		$cms_product = $this->cms_page_panel_model->get_cms_page_panel($product_id);
+
+		if (empty($cms_product['cms_page_panel_id'])){
+			return [];
+		}
+
+		$checked_at = (int)($cms_product['shopify_checked_at'] ?? 0);
+		$age = $checked_at > 0 ? (time() - $checked_at) : PHP_INT_MAX;
+
+		$data_ttl = (int)$settings['shopify_data_ttl'];
+		$page_ttl = (int)$settings['product_page_recheck_ttl'];
+		$recheck_ttl = ($mode === 'thumb') ? $data_ttl : $page_ttl;
+
+		// Fresh enough: CMS + last Shopify disk payload (no Admin API)
+		if ($age <= $recheck_ttl){
+			return $this->_product_from_cms($cms_product, -1, false);
+		}
+
+		// Stale for page recheck but within full data TTL: soft recheck (300s file / force 0)
+		// Older than full data TTL: force live Admin when budget allows
+		$force = ($age > $data_ttl) ? 1 : 0;
+
+		return $this->refresh_product($product_id, $force, true);
+
+	}
+
+	/**
+	 * Attach options/variants/images from last good Shopify disk cache onto CMS product row.
+	 */
+	function _product_from_cms($cms_product, $force = -1, $respect_budget = false){
+
+		if (empty($cms_product['shopify_id'])){
+			return $cms_product;
+		}
+
+		$shopify_product = $this->get_product($cms_product['shopify_id'], $force, $respect_budget);
+
+		if (!empty($shopify_product['id'])){
+			$cms_product['options'] = $shopify_product['options'] ?? [];
+			$cms_product['variants'] = $shopify_product['variants'] ?? [];
+			$cms_product['shopify_images'] = $shopify_product['images'] ?? [];
+		} else {
+			$cms_product['options'] = $cms_product['options'] ?? [];
+			$cms_product['variants'] = $cms_product['variants'] ?? [];
+			$cms_product['shopify_images'] = $cms_product['shopify_images'] ?? [];
+		}
+
+		return $cms_product;
+
+	}
+
+	/**
+	 * Productthumb display payload path (shopify-owned; not CMS panel HTML cache).
+	 */
+	function _productthumb_cache_path($cms_page_panel_id){
+
+		return $GLOBALS['config']['base_path'].'cache/productthumb_'.(int)$cms_page_panel_id.'.json';
+
+	}
+
+	/**
+	 * Drop productthumb payload so next list/related render rebuilds display fields.
+	 */
+	function invalidate_product_display_cache($cms_page_panel_id){
+
+		$cms_page_panel_id = (int)$cms_page_panel_id;
+		if ($cms_page_panel_id <= 0){
+			return;
+		}
+
+		$path = $this->_productthumb_cache_path($cms_page_panel_id);
+		if (file_exists($path)){
+			@unlink($path);
+		}
+
+	}
+
+	/**
+	 * Read productthumb payload if within thumb_html_ttl and not older than product update_time.
+	 * Returns ['product' => ..., 'sold_out_label' => ...] or null.
+	 */
+	function get_productthumb_payload_cache($cms_page_panel_id, $update_time = 0){
+
+		$cms_page_panel_id = (int)$cms_page_panel_id;
+		if ($cms_page_panel_id <= 0){
+			return null;
+		}
+
+		$settings = $this->get_shopify_settings();
+		$thumb_ttl = max(1, (int)($settings['thumb_html_ttl'] ?? 900));
+
+		$filename = $this->_productthumb_cache_path($cms_page_panel_id);
+		clearstatcache(true, $filename);
+		if (!file_exists($filename)){
+			return null;
+		}
+
+		$filemtime = filemtime($filename);
+		$update_time = (int)$update_time;
+		if ((time() - $filemtime) > $thumb_ttl){
+			return null;
+		}
+		if ($update_time > 0 && $update_time > $filemtime){
+			return null;
+		}
+
+		$payload = cms_json_decode(file_get_contents($filename), $filename);
+		if (!is_array($payload) || empty($payload['product'])){
+			return null;
+		}
+
+		return $payload;
+
+	}
+
+	/**
+	 * Write productthumb display payload (price HTML, subcategory label, thumbnail, …).
+	 */
+	function set_productthumb_payload_cache($cms_page_panel_id, $payload){
+
+		$cms_page_panel_id = (int)$cms_page_panel_id;
+		if ($cms_page_panel_id <= 0 || !is_array($payload)){
+			return;
+		}
+
+		file_put_contents(
+				$this->_productthumb_cache_path($cms_page_panel_id),
+				json_encode($payload, JSON_PRETTY_PRINT)
+		);
+
+	}
+
+	/**
+	 * Full productthumb panel_params assembly: cache → CMS/Shopify product → display fields.
+	 * Parents only pass cms_page_panel_id (+ productthumb settings labels merged by CMS).
+	 */
+	function get_productthumb_params($params){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('timmy/imagemaker_model');
+
+		$cms_page_panel_id = (int)($params['cms_page_panel_id'] ?? 0);
+		if ($cms_page_panel_id <= 0){
+			$params['product'] = [
+					'heading' => 'Missing product cms id',
+					'error' => 1,
+			];
+			return $params;
+		}
+
+		$update_time = (int)($params['update_time'] ?? 0);
+		$cached = $this->get_productthumb_payload_cache($cms_page_panel_id, $update_time);
+		if ($cached !== null){
+			$params['product'] = $cached['product'];
+			if (array_key_exists('sold_out_label', $cached) && $cached['sold_out_label'] !== null){
+				$params['sold_out_label'] = $cached['sold_out_label'];
+			}
+			return $params;
+		}
+
+		// Rebuild: CMS-first, Shopify recheck only when data TTL expired + budget
+		$product = $this->get_product_by_id($cms_page_panel_id, 'thumb');
+
+		if (empty($product) || empty($product['cms_page_panel_id'])){
+			$params['product'] = [
+					'heading' => 'Missing product cms id: '.$cms_page_panel_id,
+					'error' => 1,
+			];
+			return $params;
+		}
+
+		$min_price = round($product['min_price'] ?? 0);
+
+		if (round((float)($product['min_price'] ?? 0), 2) != $min_price){
+			$pounds = floor((float)$product['min_price']);
+			$min_price = $pounds.'<span class="productthumb_pence">.'.
+					round(((float)$product['min_price'] - $pounds) * 100).'</span>';
+		}
+
+		if (($product['min_price'] ?? 0) == ($product['max_price'] ?? 0)){
+			$product['price'] = ($params['currency_label'] ?? '£').$min_price;
+		} else {
+			$product['price'] = '<span class="productthumb_from">'.($params['from_label'] ?? 'from').'</span> '.
+					($params['currency_label'] ?? '£').$min_price;
+		}
+
+		// Subcategory label when Shopify type is empty
+		$product['subcategory_heading'] = '';
+		if (!empty($product['subcategory_id'])){
+			$subcategory = $this->cms_page_panel_model->get_cms_page_panel($product['subcategory_id']);
+			$product['subcategory_heading'] = trim((string)($subcategory['heading'] ?? ''));
+		}
+
+		if (empty($product['thumbnail_image'])){
+			if (!empty($product['image'])){
+				$product['thumbnail_image'] = $product['image'];
+			} else if (!empty($product['images'][0]['image'])){
+				$product['thumbnail_image'] = $product['images'][0]['image'];
+			} else {
+				$product['thumbnail_image'] = $product['image'] ?? '';
+			}
+		}
+
+		if (!empty($product['imagemaker_style'])){
+			$style = $this->cms_page_panel_model->get_cms_page_panel($product['imagemaker_style']);
+			$product['generated_1'] = $this->imagemaker_model->add_colour(
+					$product['colour'] ?? '',
+					$style['print_background'] ?? '',
+					$style['colour_mask'] ?? ''
+			);
+			$product['thumbnail_image'] = $product['generated_1'];
+		}
+
+		if (($product['shopify_status'] ?? '') != 'active'){
+			$params['sold_out_label'] = $params['unavailable_label'] ?? 'unavailable';
+		}
+
+		$params['product'] = $product;
+
+		$this->set_productthumb_payload_cache($cms_page_panel_id, [
+				'product' => $product,
+				'sold_out_label' => $params['sold_out_label'] ?? null,
+		]);
+
+		return $params;
+
 	}
 	
 	function refresh_products(){
@@ -182,14 +623,14 @@ class shopify_product_model extends Model {
 				
 // print(' '.$n++.' '.(round(microtime(true) * 1000) - $GLOBALS['timer']['start']));
 			
-			$cms_product = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'shopify/product', 'shopify_id' => $product['id']]);
+			$cms_product = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'shop/product', 'shopify_id' => $product['id']]);
 				
 // _print_r($cms_product);
 				
 			if (empty($cms_product)){
 
 				$new_cms_product = [
-						'panel_name' => 'shopify/product',
+						'panel_name' => 'shop/product',
 						'show' => 1,
 						'sort' => 'first',
 						'shopify_id' => $product['id'],
@@ -200,7 +641,7 @@ class shopify_product_model extends Model {
 					
 				$shopify_products[$product_key]['cms_page_panel_id'] = $this->cms_page_panel_model->create_cms_page_panel($new_cms_product);
 
-				// Target must be shopify/product={id} so stock/product panel_slug + thumbs resolve
+				// Target must be shop/product={id} so list slugs + thumbs resolve
 				$this->_ensure_product_slug(
 						(int)$shopify_products[$product_key]['cms_page_panel_id'],
 						$product['title'] ?? '',
@@ -221,7 +662,14 @@ class shopify_product_model extends Model {
 		
 	}
 	
-	function refresh_product($cms_product_id, $force = 0){
+	/**
+	 * Full merge of Shopify Admin product into CMS product row.
+	 *
+	 * @param int $cms_product_id
+	 * @param int $force call() force (-1/0/1)
+	 * @param bool $respect_budget page traffic budget (sync/admin pass false)
+	 */
+	function refresh_product($cms_product_id, $force = 0, $respect_budget = false){
 		
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_slug_model');
@@ -234,15 +682,23 @@ class shopify_product_model extends Model {
 		}
 		
 		if (empty($cms_product['shopify_id'])){
+			// Local product without Shopify id — hide (config error, not network)
 			$this->cms_page_panel_model->update_cms_page_panel($cms_product_id, ['show' => 0, ]);
 			return [];
 		}
 		
-		$shopify_product = $this->get_product($cms_product['shopify_id'], $force);
+		$shopify_product = $this->get_product($cms_product['shopify_id'], $force, $respect_budget);
 
-		if (!is_array($shopify_product) || empty($shopify_product['id'])){
+		// Confirmed missing on Shopify → hide
+		if (!empty($shopify_product['_not_found'])){
 			$this->cms_page_panel_model->update_cms_page_panel($cms_product_id, ['show' => 0, ]);
+			$this->invalidate_product_display_cache($cms_product_id);
 			return [];
+		}
+
+		// Network / budget / 5xx / decode — keep CMS product visible, no hide
+		if (!empty($shopify_product['_soft_fail']) || !is_array($shopify_product) || empty($shopify_product['id'])){
+			return $this->_product_from_cms($cms_product, -1, false);
 		}
 
 		$needs_update = false;
@@ -420,9 +876,9 @@ class shopify_product_model extends Model {
 			$needs_update = true;
 		}
 
-		// Ensure list slug target shopify/product={id} (migrate legacy _/product=; create if missing)
+		// Ensure list slug target shop/product={id} (migrate legacy _/product=; create if missing)
 		$this->_ensure_product_slug(
-				(int)$cms_page_panel_id,
+				(int)$cms_product_id,
 				$cms_product['heading'] ?? ($shopify_product['title'] ?? ''),
 				$cms_product['show'] ?? 1
 		);
@@ -433,10 +889,21 @@ class shopify_product_model extends Model {
 			$needs_update = true;
 		}
 
+		// Stamp successful Admin fetch (drives TTL rechecks). Do not bump update_time
+		// for checked_at alone — that would thrash productthumb payload invalidation.
+		$checked_at = time();
+		$cms_product['shopify_checked_at'] = $checked_at;
+
 		if ($needs_update){
 			$cms_product['update_time'] = time();
 			$cms_product['last_update'] = time();
 			$this->cms_page_panel_model->update_cms_page_panel($cms_product_id, $cms_product, true);
+			// Price/image/status changed — rebuild productthumb display next request
+			$this->invalidate_product_display_cache($cms_product_id);
+		} else {
+			$this->cms_page_panel_model->update_cms_page_panel($cms_product_id, [
+					'shopify_checked_at' => $checked_at,
+			], true);
 		}
 		
 		// save some data for other funtionality
@@ -454,7 +921,7 @@ class shopify_product_model extends Model {
 		$this->load->model('cms/cms_page_panel_model');
 
 		$panels = $this->cms_page_panel_model->get_cms_page_panels_by([
-				'panel_name' => 'shopify/product',
+				'panel_name' => 'shop/product',
 		]);
 
 		$map = [];
@@ -601,7 +1068,7 @@ class shopify_product_model extends Model {
 			foreach ($new_list as $product){
 
 				$new_cms_product = [
-						'panel_name' => 'shopify/product',
+						'panel_name' => 'shop/product',
 						'show' => 1,
 						'sort' => 'first',
 						'shopify_id' => $product['id'],
@@ -836,7 +1303,7 @@ class shopify_product_model extends Model {
 		$this->load->model('cms/cms_page_panel_model');
 
 		$panels = $this->cms_page_panel_model->get_cms_page_panels_by([
-				'panel_name' => 'shopify/product',
+				'panel_name' => 'shop/product',
 		]);
 
 		foreach ($panels as $panel){
@@ -961,12 +1428,12 @@ class shopify_product_model extends Model {
 		$this->load->model('cms/cms_page_panel_model');
 
 		$rows = $this->cms_page_panel_model->get_cms_page_panels_by([
-				'panel_name' => 'stock/category',
+				'panel_name' => 'shop/category',
 				'heading' => 'Cards',
 		]);
 
 		if (empty($rows[0]['cms_page_panel_id'])){
-			_html_error('Shopify sync: stock/category "Cards" not found — cannot create subcategories');
+			_html_error('Shopify sync: shop/category "Cards" not found — cannot create subcategories');
 			$this->_cards_category_id = 0;
 			return 0;
 		}
@@ -989,7 +1456,7 @@ class shopify_product_model extends Model {
 		$this->load->model('cms/cms_page_panel_model');
 
 		$subs = $this->cms_page_panel_model->get_cms_page_panels_by([
-				'panel_name' => 'stock/subcategory',
+				'panel_name' => 'shop/subcategory',
 		]);
 
 		$heading_match = null;
@@ -1022,8 +1489,8 @@ class shopify_product_model extends Model {
 	}
 
 	/**
-	 * Ensure list-item slug for shopify/product={id}.
-	 * Migrates legacy _/product={id} so stock/product panel_slug and thumbs resolve.
+	 * Ensure list-item slug for shop/product={id}.
+	 * Migrates legacy _/product={id} so shop/product slugs and thumbs resolve.
 	 */
 	function _ensure_product_slug($cms_page_panel_id, $slug_string, $show = 1){
 
@@ -1039,7 +1506,7 @@ class shopify_product_model extends Model {
 
 		$this->load->model('cms/cms_slug_model');
 
-		$target = 'shopify/product='.$cms_page_panel_id;
+		$target = 'shop/product='.$cms_page_panel_id;
 		$legacy = '_/product='.$cms_page_panel_id;
 
 		$existing = $this->cms_slug_model->get_slug_row_by_target($target);
@@ -1064,7 +1531,7 @@ class shopify_product_model extends Model {
 	}
 
 	/**
-	 * Ensure list-item slug for stock/subcategory={id} (link_target panels need this for frontend URLs).
+	 * Ensure list-item slug for shop/subcategory={id} (link_target panels need this for frontend URLs).
 	 */
 	function _ensure_subcategory_slug($cms_page_panel_id, $slug_string, $show = 1){
 
@@ -1080,7 +1547,7 @@ class shopify_product_model extends Model {
 
 		$this->load->model('cms/cms_slug_model');
 
-		$target = 'stock/subcategory='.$cms_page_panel_id;
+		$target = 'shop/subcategory='.$cms_page_panel_id;
 		$existing = $this->cms_slug_model->get_slug_row_by_target($target);
 		if (is_array($existing) && !empty($existing['cms_slug_id'])){
 			return;
@@ -1119,7 +1586,7 @@ class shopify_product_model extends Model {
 		$this->load->model('cms/cms_page_panel_model');
 
 		$new_id = $this->cms_page_panel_model->create_cms_page_panel([
-				'panel_name' => 'stock/subcategory',
+				'panel_name' => 'shop/subcategory',
 				'show' => 1,
 				'sort' => 'first',
 				'title' => $collection_title,
@@ -1189,7 +1656,7 @@ class shopify_product_model extends Model {
 	}
 
 	/**
-	 * Delete local shopify/product panels that no longer exist on Shopify.
+	 * Delete local shop/product panels that no longer exist on Shopify.
 	 * Oldest first (cms_page_panel_id ASC). Soft stop after 50s once current item finishes.
 	 */
 	function purge_missing_products($max_seconds = 50){
@@ -1221,7 +1688,7 @@ class shopify_product_model extends Model {
 			$this->load->model('cms/cms_slug_model');
 
 			$products = $this->cms_page_panel_model->get_cms_page_panels_by([
-					'panel_name' => 'shopify/product',
+					'panel_name' => 'shop/product',
 			]);
 
 			usort($products, function($a, $b){
@@ -1302,4 +1769,425 @@ class shopify_product_model extends Model {
 
 	}
 
+	/**
+	 * Storefront GraphQL (public token) — used for cartCreate at checkout handoff only.
+	 */
+	function storefront_graphql($query, $variables = []){
+
+		$domain = $GLOBALS['config']['shopify_store_domain'] ?? 'tim-sanders.myshopify.com';
+		$token = $GLOBALS['config']['shopify_storefront_token'] ?? '';
+		$version = $GLOBALS['config']['shopify_storefront_api_version'] ?? '2026-10';
+
+		if ($token === ''){
+			return ['errors' => [['message' => 'Missing shopify_storefront_token in site config']]];
+		}
+
+		$url = 'https://'.$domain.'/api/'.$version.'/graphql.json';
+		$body = json_encode([
+				'query' => $query,
+				'variables' => $variables,
+		]);
+
+		$ch = curl_init($url);
+		curl_setopt_array($ch, [
+				CURLOPT_POST => true,
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_HTTPHEADER => [
+						'Content-Type: application/json',
+						'X-Shopify-Storefront-Access-Token: '.$token,
+				],
+				CURLOPT_POSTFIELDS => $body,
+				CURLOPT_TIMEOUT => 30,
+		]);
+		$raw = curl_exec($ch);
+		$errno = curl_errno($ch);
+		$error = curl_error($ch);
+		curl_close($ch);
+
+		if ($errno){
+			return ['errors' => [['message' => 'Storefront request failed: '.$error]]];
+		}
+
+		$decoded = json_decode($raw, true);
+		if (!is_array($decoded)){
+			return ['errors' => [['message' => 'Invalid Storefront response']]];
+		}
+
+		return $decoded;
+
+	}
+
+	/**
+	 * Build Storefront CartLineInput[] from local order lines (site → Shopify only).
+	 * Never reads remote lines into CMS.
+	 */
+	function _local_lines_to_cart_inputs($lines){
+
+		$cart_lines = [];
+		foreach($lines as $line){
+
+			$merchandise = $line['merchandise_id'] ?? '';
+			$variant = $line['shopify_variant_id'] ?? '';
+			if ($merchandise === '' && $variant === ''){
+				continue;
+			}
+			if ($merchandise === ''){
+				$merchandise = (strpos((string)$variant, 'gid://') === 0)
+						? $variant
+						: 'gid://shopify/ProductVariant/'.$variant;
+			}
+
+			$qty = max(1, (int)($line['qty'] ?? $line['quantity'] ?? 1));
+			$entry = [
+					'merchandiseId' => $merchandise,
+					'quantity' => $qty,
+			];
+
+			$attrs = [];
+			if (!empty($line['attributes']) && is_array($line['attributes'])){
+				foreach($line['attributes'] as $k => $v){
+					if (is_array($v) && isset($v['key'])){
+						$attrs[] = [
+								'key' => (string)$v['key'],
+								'value' => (string)($v['value'] ?? ''),
+						];
+					} else if (!is_array($v)){
+						$attrs[] = [
+								'key' => (string)$k,
+								'value' => (string)$v,
+						];
+					}
+				}
+			}
+			if ($attrs){
+				$entry['attributes'] = $attrs;
+			}
+
+			$cart_lines[] = $entry;
+
+		}
+
+		return $cart_lines;
+
+	}
+
+	function _storefront_cart_query($cart_id, $with_lines = false){
+
+		if ($cart_id === '' || $cart_id === null){
+			return null;
+		}
+
+		if ($with_lines){
+			$query = '
+				query GetCart($id: ID!) {
+					cart(id: $id) {
+						id
+						checkoutUrl
+						totalQuantity
+						lines(first: 100) {
+							edges {
+								node { id }
+							}
+						}
+					}
+				}
+			';
+		} else {
+			$query = '
+				query GetCart($id: ID!) {
+					cart(id: $id) {
+						id
+						checkoutUrl
+						totalQuantity
+					}
+				}
+			';
+		}
+
+		$response = $this->storefront_graphql($query, ['id' => $cart_id]);
+		if (!empty($response['errors'])){
+			// Treat API errors as dead cart for status purposes when id is invalid
+			return null;
+		}
+
+		return $response['data']['cart'] ?? null;
+
+	}
+
+	function _save_shopify_cart_on_order($order_id, $cart_id, $fingerprint, $checkout_url){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->cms_page_panel_model->update_cms_page_panel($order_id, [
+				'shopify_cart_id' => $cart_id,
+				'shopify_lines_fingerprint' => $fingerprint,
+				'shopify_checkout_url' => $checkout_url,
+		]);
+		$_SESSION['shopify']['shopify_cart_id'] = $cart_id;
+		$_SESSION['shopify']['checkout_url'] = $checkout_url;
+
+	}
+
+	function _cart_create_with_lines($cart_lines){
+
+		$mutation = '
+			mutation CartCreate($lines: [CartLineInput!]!) {
+				cartCreate(input: { lines: $lines }) {
+					cart {
+						id
+						checkoutUrl
+						totalQuantity
+					}
+					userErrors {
+						field
+						message
+					}
+				}
+			}
+		';
+
+		$response = $this->storefront_graphql($mutation, ['lines' => $cart_lines]);
+		if (!empty($response['errors'])){
+			return ['ok' => 0, 'error' => $response['errors'][0]['message'] ?? 'Storefront error'];
+		}
+		$payload = $response['data']['cartCreate'] ?? null;
+		if (empty($payload)){
+			return ['ok' => 0, 'error' => 'Cart create failed'];
+		}
+		if (!empty($payload['userErrors'])){
+			return ['ok' => 0, 'error' => $payload['userErrors'][0]['message'] ?? 'Cart create rejected'];
+		}
+		$cart = $payload['cart'] ?? [];
+		if (empty($cart['id']) || empty($cart['checkoutUrl'])){
+			return ['ok' => 0, 'error' => 'No checkout URL returned'];
+		}
+		return [
+				'ok' => 1,
+				'cart' => $cart,
+		];
+
+	}
+
+	/**
+	 * Replace all merchandise lines on an existing Storefront cart from local inputs only.
+	 */
+	function _cart_replace_lines($cart_id, $cart_lines){
+
+		$remote = $this->_storefront_cart_query($cart_id, true);
+		if (empty($remote['id'])){
+			return ['ok' => 0, 'error' => 'Remote cart gone', 'dead' => 1];
+		}
+
+		$line_ids = [];
+		foreach(($remote['lines']['edges'] ?? []) as $edge){
+			if (!empty($edge['node']['id'])){
+				$line_ids[] = $edge['node']['id'];
+			}
+		}
+
+		if ($line_ids){
+			$remove_mut = '
+				mutation CartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
+					cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
+						cart { id checkoutUrl totalQuantity }
+						userErrors { field message }
+					}
+				}
+			';
+			$remove_res = $this->storefront_graphql($remove_mut, [
+					'cartId' => $cart_id,
+					'lineIds' => $line_ids,
+			]);
+			if (!empty($remove_res['errors'])){
+				return ['ok' => 0, 'error' => $remove_res['errors'][0]['message'] ?? 'cartLinesRemove failed'];
+			}
+			if (!empty($remove_res['data']['cartLinesRemove']['userErrors'])){
+				$ue = $remove_res['data']['cartLinesRemove']['userErrors'][0]['message'] ?? 'cartLinesRemove rejected';
+				return ['ok' => 0, 'error' => $ue];
+			}
+		}
+
+		if ($cart_lines){
+			$add_mut = '
+				mutation CartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
+					cartLinesAdd(cartId: $cartId, lines: $lines) {
+						cart { id checkoutUrl totalQuantity }
+						userErrors { field message }
+					}
+				}
+			';
+			$add_res = $this->storefront_graphql($add_mut, [
+					'cartId' => $cart_id,
+					'lines' => $cart_lines,
+			]);
+			if (!empty($add_res['errors'])){
+				return ['ok' => 0, 'error' => $add_res['errors'][0]['message'] ?? 'cartLinesAdd failed'];
+			}
+			$payload = $add_res['data']['cartLinesAdd'] ?? null;
+			if (!empty($payload['userErrors'])){
+				return ['ok' => 0, 'error' => $payload['userErrors'][0]['message'] ?? 'cartLinesAdd rejected'];
+			}
+			$cart = $payload['cart'] ?? null;
+		} else {
+			$cart = $this->_storefront_cart_query($cart_id, false);
+		}
+
+		if (empty($cart['id']) || empty($cart['checkoutUrl'])){
+			return ['ok' => 0, 'error' => 'No checkout URL after line replace'];
+		}
+
+		return ['ok' => 1, 'cart' => $cart];
+
+	}
+
+	/**
+	 * Push local order lines to Shopify (site → remote only). Reuse cart id when open
+	 * so addresses/vouchers survive; replace lines when local fingerprint changed.
+	 */
+	function materialise_checkout_from_order($order_id){
+
+		$this->load->model('shop/shop_model');
+		$this->load->model('cms/cms_page_panel_model');
+
+		$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
+		if (empty($order['cms_page_panel_id'])){
+			return ['ok' => 0, 'error' => 'Order not found'];
+		}
+
+		$lines = $this->shop_model->get_order_lines($order_id);
+		if (empty($lines)){
+			return ['ok' => 0, 'error' => 'Cart is empty'];
+		}
+
+		$cart_lines = $this->_local_lines_to_cart_inputs($lines);
+		if (empty($cart_lines)){
+			return ['ok' => 0, 'error' => 'No Shopify products in cart'];
+		}
+
+		$fingerprint = $this->shop_model->calculate_order_lines_fingerprint($lines);
+		$existing_id = $order['shopify_cart_id'] ?? '';
+
+		// Reuse open remote cart
+		if ($existing_id !== ''){
+			$remote = $this->_storefront_cart_query($existing_id, false);
+
+			if (empty($remote['id'])){
+				// Dead / completed checkout — end site cart (do not create a new remote cart with same lines)
+				$this->shop_model->close_cart_order($order_id, 'paid');
+				return [
+						'ok' => 0,
+						'error' => 'Previous checkout completed. Your cart was cleared — add items again.',
+						'changed' => 1,
+						'quantity' => 0,
+						'closed' => 1,
+				];
+			} else if (($order['shopify_lines_fingerprint'] ?? '') === $fingerprint){
+				// Lines already pushed — keep buyer state on Shopify
+				$checkout_url = $remote['checkoutUrl'] ?? ($order['shopify_checkout_url'] ?? '');
+				if ($checkout_url === ''){
+					return ['ok' => 0, 'error' => 'No checkout URL on remote cart'];
+				}
+				$this->_save_shopify_cart_on_order($order_id, $existing_id, $fingerprint, $checkout_url);
+				return [
+						'ok' => 1,
+						'redirect' => $checkout_url,
+						'shopify_cart_id' => $existing_id,
+						'quantity' => (int)($remote['totalQuantity'] ?? 0),
+						'reused' => 1,
+				];
+			} else {
+				// Local cart changed — overwrite remote lines from site only
+				$replaced = $this->_cart_replace_lines($existing_id, $cart_lines);
+				if (!empty($replaced['dead'])){
+					$this->shop_model->close_cart_order($order_id, 'paid');
+					return [
+							'ok' => 0,
+							'error' => 'Previous checkout completed. Your cart was cleared — add items again.',
+							'changed' => 1,
+							'quantity' => 0,
+							'closed' => 1,
+					];
+				}
+				if (empty($replaced['ok'])){
+					return $replaced;
+				}
+				$cart = $replaced['cart'];
+				$this->_save_shopify_cart_on_order(
+						$order_id,
+						$cart['id'],
+						$fingerprint,
+						$cart['checkoutUrl']
+				);
+				return [
+						'ok' => 1,
+						'redirect' => $cart['checkoutUrl'],
+						'shopify_cart_id' => $cart['id'],
+						'quantity' => (int)($cart['totalQuantity'] ?? 0),
+						'replaced' => 1,
+				];
+			}
+		}
+
+		// New Storefront cart
+		$created = $this->_cart_create_with_lines($cart_lines);
+		if (empty($created['ok'])){
+			return $created;
+		}
+		$cart = $created['cart'];
+		$this->_save_shopify_cart_on_order($order_id, $cart['id'], $fingerprint, $cart['checkoutUrl']);
+
+		return [
+				'ok' => 1,
+				'redirect' => $cart['checkoutUrl'],
+				'shopify_cart_id' => $cart['id'],
+				'quantity' => (int)($cart['totalQuantity'] ?? 0),
+				'created' => 1,
+		];
+
+	}
+
+	/**
+	 * Status-only check: if Storefront cart is gone (typically after successful checkout),
+	 * close the CMS order and clear the site cart cookie. Never syncs lines Shopify → site.
+	 */
+	function reconcile_checkout_status($order){
+
+		$this->load->model('shop/shop_model');
+
+		if (empty($order['cms_page_panel_id'])){
+			return ['ok' => 1, 'changed' => 0];
+		}
+
+		$cart_id = $order['shopify_cart_id'] ?? '';
+		if ($cart_id === ''){
+			return ['ok' => 1, 'changed' => 0];
+		}
+
+		// Throttle: once per 45s per order
+		$throttle_key = 'shopify_reconcile_'.$order['cms_page_panel_id'];
+		$now = time();
+		if (!empty($_SESSION[$throttle_key]) && ($now - (int)$_SESSION[$throttle_key]) < 45){
+			return ['ok' => 1, 'changed' => 0, 'throttled' => 1];
+		}
+		$_SESSION[$throttle_key] = $now;
+
+		$remote = $this->_storefront_cart_query($cart_id, false);
+
+		if (!empty($remote['id'])){
+			// Still open (user may have edited lines on Shopify — site cart unchanged)
+			return ['ok' => 1, 'changed' => 0, 'open' => 1];
+		}
+
+		// Dead cart → treat as completed checkout; empty site cart session
+		$this->shop_model->close_cart_order($order['cms_page_panel_id'], 'paid');
+
+		return [
+				'ok' => 1,
+				'changed' => 1,
+				'quantity' => 0,
+				'closed' => 1,
+		];
+
+	}
+
 }
+

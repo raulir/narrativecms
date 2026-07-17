@@ -176,7 +176,8 @@ class cms_panel_model extends \Model {
 			$copied = 0;
 			foreach($structure_into['item'] as $key => $into){
 				if (!empty($item['name']) && !empty($into['name']) && $into['name'] == $item['name']){
-					$structure_into['item'][$key] = $item;
+					// Overlay extension props onto base field (e.g. readonly) — keep type/list/etc.
+					$structure_into['item'][$key] = $this->_merge_field_definition($into, $item);
 					$copied = 1;
 				}
 			}
@@ -193,7 +194,7 @@ class cms_panel_model extends \Model {
 			$copied = 0;
 			foreach($structure_into['settings'] as $key => $into){
 				if (!empty($item['name']) && !empty($into['name']) && $into['name'] == $item['name']){
-					$structure_into['settings'][$key] = $item;
+					$structure_into['settings'][$key] = $this->_merge_field_definition($into, $item);
 					$copied = 1;
 				}
 			}
@@ -202,9 +203,66 @@ class cms_panel_model extends \Model {
 			}
 				
 		}
+
+		// Extension panels may add CMS toolbar buttons (e.g. shopify product refresh)
+		if (!empty($structure_from['extra_buttons']) && is_array($structure_from['extra_buttons'])){
+			if (empty($structure_into['extra_buttons']) || !is_array($structure_into['extra_buttons'])){
+				$structure_into['extra_buttons'] = [];
+			}
+			foreach ($structure_from['extra_buttons'] as $btn){
+				$structure_into['extra_buttons'][] = $btn;
+			}
+		}
 		
 		return $structure_into;
 		
+	}
+
+	/**
+	 * Merge one field definition: base first, extension overwrites keys.
+	 * Nested "fields" (repeaters) merge by field name the same way.
+	 */
+	function _merge_field_definition($base, $overlay){
+
+		if (!is_array($base)){
+			$base = [];
+		}
+		if (!is_array($overlay)){
+			return $base;
+		}
+
+		$base_fields = [];
+		if (!empty($base['fields']) && is_array($base['fields'])){
+			$base_fields = $base['fields'];
+		}
+		$overlay_fields = [];
+		if (!empty($overlay['fields']) && is_array($overlay['fields'])){
+			$overlay_fields = $overlay['fields'];
+		}
+
+		$merged = array_merge($base, $overlay);
+
+		if (!empty($base_fields) || !empty($overlay_fields)){
+			$merged['fields'] = $base_fields;
+			foreach ($overlay_fields as $ofield){
+				$copied = 0;
+				if (!empty($ofield['name'])){
+					foreach ($merged['fields'] as $fkey => $ffield){
+						if (!empty($ffield['name']) && $ffield['name'] === $ofield['name']){
+							$merged['fields'][$fkey] = $this->_merge_field_definition($ffield, $ofield);
+							$copied = 1;
+							break;
+						}
+					}
+				}
+				if (!$copied){
+					$merged['fields'][] = $ofield;
+				}
+			}
+		}
+
+		return $merged;
+
 	}
 	
 	function get_cms_panel_fk_data($block_structure){

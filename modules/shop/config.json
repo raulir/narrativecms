@@ -11,63 +11,157 @@
 		{
 			"id":"basket",
 			"name":"Basket"
+		},
+		{
+			"id":"cart",
+			"name":"Cart"
+		},
+		{
+			"id":"product",
+			"name":"Product"
+		},
+		{
+			"id":"category",
+			"name":"Category"
+		},
+		{
+			"id":"subcategory",
+			"name":"Subcategory"
+		},
+		{
+			"id":"producttext",
+			"name":"Product text"
+		},
+		{
+			"id":"product_item",
+			"name":"Product item"
+		},
+		{
+			"id":"product_dimension",
+			"name":"Product dimension"
+		},
+		{
+			"id":"stock_group",
+			"name":"Stock group"
+		},
+		{
+			"id":"dim_value_select",
+			"name":"Dimension value select"
 		}
 	],
 	"cms_menu":[
 		{
 			"id":"shop",
-			"name":"Shop"
+			"name":"Shop",
+			"order":200
+		},
+		{
+			"id":"shop_products",
+			"name":"Products",
+			"parent":"shop",
+			"url":"admin/cms_list/shop__product/",
+			"order":100
+		},
+		{
+			"id":"shop_categories",
+			"name":"Product categories",
+			"parent":"shop",
+			"url":"admin/cms_list/shop__category/",
+			"order":110
+		},
+		{
+			"id":"shop_subcategories",
+			"name":"Product subcategories",
+			"parent":"shop",
+			"url":"admin/cms_list/shop__subcategory/",
+			"order":120
+		},
+		{
+			"id":"shop_producttexts",
+			"name":"Product texts",
+			"parent":"shop",
+			"url":"admin/cms_list/shop__producttext/",
+			"order":130
+		},
+		{
+			"id":"shop_product_items",
+			"name":"Product items",
+			"parent":"shop",
+			"url":"admin/cms_list/shop__product_item/",
+			"order":140
+		},
+		{
+			"id":"shop_product_dimensions",
+			"name":"Product dimensions",
+			"parent":"shop",
+			"url":"admin/cms_list/shop__product_dimension/",
+			"order":150
+		},
+		{
+			"id":"shop_stock_groups",
+			"name":"Stock groups",
+			"parent":"shop",
+			"url":"admin/cms_list/shop__stock_group/",
+			"order":160
 		},
 		{
 			"id":"shop_orders",
 			"name":"Orders",
 			"parent":"shop",
 			"access":"shop_orders",
-			"url":"admin/cms_list/shop__order/"
+			"url":"admin/cms_list/shop__order/",
+			"order":200
 		},
 		{
 			"id":"shop_order_lines",
 			"name":"Order lines",
 			"parent":"shop",
 			"access":"shop_order_lines",
-			"url":"admin/cms_list/shop__order_line/"
+			"url":"admin/cms_list/shop__order_line/",
+			"order":210
 		},
 		{
 			"id":"shop_settings",
-			"name":"Settings",
-			"parent":"_shop",
+			"name":"Shop settings",
+			"parent":"shop",
 			"access":"shop_settings",
-			"url":"admin/panel_settings/shop__shop/"
+			"url":"admin/panel_settings/shop__shop/",
+			"order":700
 		},
 		{
 			"id":"productbuy_settings",
 			"name":"Product buy settings",
 			"parent":"shop",
-			"url":"admin/panel_settings/shop__productbuy/"
+			"url":"admin/panel_settings/shop__productbuy/",
+			"order":710
 		},
 		{
 			"id":"productdimensions_settings",
 			"name":"Product dimensions settings",
 			"parent":"shop",
-			"url":"admin/panel_settings/shop__productdimensions/"
+			"url":"admin/panel_settings/shop__productdimensions/",
+			"order":720
 		},
 		{
 			"id":"checkout_settings",
 			"name":"Checkout settings",
 			"parent":"shop",
-			"url":"admin/panel_settings/shop__checkout/"
+			"url":"admin/panel_settings/shop__checkout/",
+			"order":730
 		},
 		{
-			"id":"delivery",
+			"id":"shop_delivery",
 			"name":"Delivery methods",
 			"parent":"shop",
-			"url":"admin/cms_list/shop__delivery/"
+			"url":"admin/cms_list/shop__delivery/",
+			"order":740
 		},
 		{
-			"id":"delivery",
+			"id":"shop_delivery_set",
 			"name":"Delivery sets",
 			"parent":"shop",
-			"url":"admin/cms_list/shop__delivery_set/"
+			"url":"admin/cms_list/shop__delivery_set/",
+			"order":750
 		}
 	]
 }

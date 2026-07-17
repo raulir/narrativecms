@@ -1,0 +1,39 @@
+{
+	"version": "2",
+	"list": {
+		"list_title": "Product subcategories",
+		"item_title": "Product subcategory",
+		"title_field": "heading",
+		"filter_fields": {
+			"show": "-- show --"
+		},
+		"link_target": "1"
+	},
+	"item": [
+		{
+			"type": "text",
+			"name": "heading",
+			"label": "Heading"
+		},
+		{
+			"type": "textarea",
+			"name": "text",
+			"label": "Text",
+			"lines": "4"
+		},
+		{
+			"type": "fk",
+			"name": "category_id",
+			"label": "Category",
+			"list": "shop/category",
+			"help": "Parent category"
+		},
+		{
+			"type": "text",
+			"name": "shopify_collection",
+			"label": "Shopify collection",
+			"readonly": "1",
+			"help": "Set by Shopify sync from the product range collection; used to match products to this subcategory"
+		}
+	]
+}
