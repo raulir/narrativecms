@@ -2,16 +2,12 @@
 
 if ( !function_exists('_iw')) {
 	
-	// if used from api, ci object may not exist
+	// if used from api, ci object may not exist — Common.php defines get_instance()
 	if ( !function_exists('get_instance')){
-		
 		include_once($GLOBALS['config']['base_path'] . 'system/core/Common.php');
-		include($GLOBALS['config']['base_path'] . 'system/core/controller.php');
-		
-		function &get_instance(){
-			return Controller::get_instance();
-		}
-
+	}
+	if ( !class_exists('Controller', false)){
+		include_once($GLOBALS['config']['base_path'] . 'system/core/controller.php');
 	}
 	
 	function _get_iw_size($image, $params = []){

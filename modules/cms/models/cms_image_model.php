@@ -210,7 +210,8 @@ class cms_image_model extends \Model {
 			$type = 'video';
 		}
 
-		$sql = "insert into cms_image set type = ? , name = ? , filename = ? , category = ? , hash = '', meta = '' ";
+		$sql = "insert into cms_image set type = ? , name = ? , filename = ? , category = ? , ".
+				"title = '' , description = '' , hash = '' , meta = '' ";
 		$this->db->query($sql, [$type, $name_data, $filename, $category, ]);
 		$insert_id = $this->db->insert_id();
 		

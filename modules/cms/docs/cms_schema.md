@@ -47,6 +47,37 @@ Diagnostic panel standard for this project:
   level
 - Always re-checks issue still exists before any SQL
 
+## Panel tables (definition-driven)
+
+List panel fields may opt into a real SQL table `{module}_{panel}` (e.g. `shopify_product`) for fast filters.
+
+| Definition key | Meaning |
+|----------------|---------|
+| `"table": "1"` | Store field on the panel table; `get_list` / `get_cms_page_panels_by` filters this field in **SQL** (not a PHP loop over all rows) |
+| `"table_type"` | Column type: `int` / `int:N` (unsigned INT default 0), `int_signed` / `int_signed:N`, `varchar:N`, or omit for TEXT |
+| `"table_index"` | Non-empty → secondary index; `"unique"` → unique index |
+
+Workflow:
+
+1. **Schema fix** (create/alter panel table) — builds structure **and** copies existing
+   field values from `cms_page_panel_param` (named row or JSON blob) into the new/updated
+   table, then removes legacy named param rows for those fields. Same work as “sync panel
+   tables”, done automatically after a successful structure fix for a definition panel table.
+2. **Sync panel tables** (optional) — re-run data migrate only (recovery if something was
+   skipped, or when structure is already OK but named params remain).
+
+Integer fields with no param value sync as `0` so every list item gets a row (INNER JOIN safe).
+
+### Demote / remove (reverse)
+
+| Change in definition | Schema fix does |
+|----------------------|-----------------|
+| Remove `"table": "1"` but keep the field in `item` | Copy column → panel params, then `DROP COLUMN` |
+| Remove field from definition entirely | `DROP COLUMN` only (no param restore — no official place for the data) |
+| No `"table": "1"` fields left on the panel | Orphan error: restore remaining **item** fields from table → params, then `DROP TABLE` |
+
+Orphan detection is **definition-driven** only: list+item panel JSON → table name `{module}_{panel}`. No scanning of arbitrary `{module}_*` database tables (avoids false positives). All managed tables come from `schema/*.json` and/or panel `table` fields.
+
 ## TODO
 
 - Show errors inside the panel

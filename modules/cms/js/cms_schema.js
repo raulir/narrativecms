@@ -84,6 +84,40 @@ function cms_schema_init($root) {
 			})
 		})
 
+		$('.cms_schema_dump_structure', $container).on('click.cms', function(e) {
+			e.preventDefault()
+
+			var $this = $(this)
+			var ctx = cms_schema_request_context($this)
+			var label = $this.text()
+
+			$this.addClass('cms_disabled').text('…')
+
+			var data = {
+				do: 'dump_cms_structure'
+			}
+			if (ctx.fragment){
+				data.fragment = 1
+			}
+			if (ctx.module){
+				data.schema_module = ctx.module
+				data.filter_module = ctx.module
+			}
+
+			get_ajax_panel('cms/cms_schema', data, function(result) {
+				var res = result && result.result ? result.result : {}
+				if (res._html) {
+					var $new = cms_schema_replace_container(ctx.$container, res._html)
+					cms_schema_init($new.parent())
+				}
+				if (res.success == 1 || res.success === true) {
+					cms_notification(res.message || 'Structure dump ready', 4, 'success')
+				} else {
+					$this.removeClass('cms_disabled').text(label)
+				}
+			})
+		})
+
 		$('.cms_schema_sync', $container).on('click.cms', function(e) {
 			e.preventDefault()
 

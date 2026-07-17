@@ -295,7 +295,7 @@ function cms_input_textarea_init($root){
 	setTimeout(() => {
 		$('.cms_input_textarea textarea').each(function(){
 
-			$this = $(this);
+			var $this = $(this);
 			if (!$this.closest('.cms_page_panel_fields').length){
 				$this.css({'height':parseInt($this.css('line-height')) * parseInt($this.data('lines')) + 7 + 'px'});
 			}

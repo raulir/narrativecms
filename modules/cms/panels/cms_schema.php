@@ -67,6 +67,23 @@ class cms_schema extends \Controller {
 		$fragment = $this->_wants_fragment($params);
 		$filter_module = $this->_schema_filter_from_params($params);
 
+		if (!empty($params['do']) && $params['do'] === 'dump_cms_structure'){
+
+			$dump = $this->cms_schema_model->dump_cms_table_structures();
+
+			unset($params['do']);
+
+			return array_merge($params, [
+					'structure_dump' => $dump,
+					'success' => 1,
+					'message' => 'Dumped '.count($dump).' module table(s)',
+					'fragment' => $fragment ? 1 : 0,
+					'schema_module' => $filter_module,
+					'filter_module' => $filter_module,
+			]);
+
+		}
+
 		if (!empty($params['do']) && $params['do'] === 'sync_panel_tables') {
 			// Button data-module is the schema package to sync
 			$module = trim($params['schema_module'] ?? $this->input->post('schema_module') ?? $this->input->post('module') ?? '');
@@ -198,6 +215,7 @@ class cms_schema extends \Controller {
 		$action_success = $params['success'] ?? null;
 		$action_message = $params['message'] ?? null;
 		$action_stats = $params['stats'] ?? null;
+		$structure_dump = $params['structure_dump'] ?? null;
 
 		// Re-read after panel() may have set params['module'] = 'cms' (panel package)
 		$filter_module = $this->_schema_filter_from_params($params);
@@ -240,6 +258,10 @@ class cms_schema extends \Controller {
 			$params['success'] = $action_success;
 			$params['message'] = $action_message;
 			$params['stats'] = $action_stats;
+		}
+
+		if ($structure_dump !== null) {
+			$params['structure_dump'] = $structure_dump;
 		}
 
 	    return $params;

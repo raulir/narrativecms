@@ -9,9 +9,7 @@
 		
 		<div class="cms_toolbar">
 			<div class="cms_tool_text">Database schema</div>
-			<div class="cms_toolbar_buttons">
-				<!-- intentionally empty – no global fix button -->
-			</div>
+			<div class="cms_schema_dump_structure cms_tool_button cms_right">Structure</div>
 		</div>
 
 		<?php if (!empty($panel_table_modules_pending)): ?>
@@ -67,6 +65,22 @@
 						</div>
 					<?php endforeach ?>
 				</div>
+			</div>
+
+		<?php endif ?>
+
+		<?php if (!empty($structure_dump) && is_array($structure_dump)): ?>
+
+			<div class="cms_schema_structure_dump">
+				<div class="cms_schema_structure_dump_title">
+					Live module table structure (<?= count($structure_dump) ?> table<?= count($structure_dump) === 1 ? '' : 's' ?> — {module}_* for installed modules)
+				</div>
+				<?php foreach ($structure_dump as $row): ?>
+					<div class="cms_schema_structure_dump_table">
+						<div class="cms_schema_structure_dump_name"><?= htmlspecialchars($row['name'] ?? '') ?></div>
+						<pre class="cms_schema_structure_dump_create"><?= htmlspecialchars($row['create'] ?? '') ?></pre>
+					</div>
+				<?php endforeach ?>
 			</div>
 
 		<?php endif ?>

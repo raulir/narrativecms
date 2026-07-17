@@ -66,6 +66,19 @@ class cms_schema_model extends \Model {
 					}
 					$this->_compare_column($errors, $col_key, $spec, $db_cols[$col_name]);
 				}
+
+				// Extra DB columns not listed in schema (definition is the source of truth)
+				foreach ($db_cols as $col_name => $_col) {
+					if (isset($def['columns'][$col_name])) {
+						continue;
+					}
+					// migrate_from sources are handled by rename/drop migration, not orphan drops
+					if (isset($migrate_cols[$col_name])) {
+						continue;
+					}
+					$errors[$base_key . ':columns:' . $col_name . ':extra'] =
+							'Extra field "'.$col_name.'" exists in database but not in schema';
+				}
 			}
 
 			$db_idx = $this->_get_db_indexes($table);
@@ -84,6 +97,15 @@ class cms_schema_model extends \Model {
 				}
 			}
 		}
+
+		// Orphan panel tables: list+item definition has zero "table":1 fields but DB table still exists.
+		// Only definition-driven names (module_panel) — never scan arbitrary module_* tables.
+		foreach ($this->_list_orphan_panel_tables() as $orphan) {
+			$base_key = $orphan['module'].':'.$orphan['table'].':orphan';
+			$errors[$base_key] = 'Orphan panel table "'.$orphan['table'].
+					'" — definition has no table fields; reverse-migrate remaining item fields to params and drop table';
+		}
+
 		return $errors;
 	}
 
@@ -108,7 +130,7 @@ class cms_schema_model extends \Model {
 
 		list($merged, $owner) = $this->_build_merged_schemas();
 
-		// 1. Module level (all tables owned by this module)
+		// 1. Module level (all tables owned by this module + orphan panel tables)
 		if (count($parts) === 1) {
 			$count = 0;
 			foreach ($owner as $table => $mod) {
@@ -118,10 +140,23 @@ class cms_schema_model extends \Model {
 					}
 				}
 			}
+			foreach ($this->_list_orphan_panel_tables($module) as $orphan) {
+				if ($this->_fix_orphan_panel_table($orphan['module'], $orphan['table'], $orphan['panel_name'])) {
+					$count++;
+				}
+			}
 			return $count > 0 && empty($this->_fix_sql_errors);
 		}
 
 		$table = $parts[1] ?? '';
+		$section = $parts[2] ?? '';
+
+		// Orphan panel table: module:table:orphan (table no longer in virtual schema)
+		if ($section === 'orphan' || (!isset($merged[$table]) && $this->_is_orphan_panel_table($module, $table))) {
+			$panel_name = $module.'/'.preg_replace('/^'.preg_quote($module, '/').'_/', '', $table);
+			return $this->_fix_orphan_panel_table($module, $table, $panel_name) && empty($this->_fix_sql_errors);
+		}
+
 		if (!isset($merged[$table]) || ($owner[$table] ?? '') !== $module) {
 			return false;
 		}
@@ -132,8 +167,6 @@ class cms_schema_model extends \Model {
 		if (count($parts) === 2) {
 			return $this->_fix_table($table, $def) && empty($this->_fix_sql_errors);
 		}
-
-		$section = $parts[2] ?? '';
 
 		// 3–4. Column / index level — run full phased table fix (auto_increment needs index phase)
 		if ($section === 'columns' || $section === 'indexes') {
@@ -201,6 +234,67 @@ class cms_schema_model extends \Model {
 	        'has_errors' => !empty($grouped),
 	    ];
 	}
+
+	/**
+	 * Structure-only dump (SHOW CREATE TABLE) for tables matching {module}_*
+	 * for every installed module in $GLOBALS['config']['modules'].
+	 */
+	function dump_cms_table_structures() {
+
+		$modules = $GLOBALS['config']['modules'] ?? [];
+		if (!is_array($modules) || empty($modules)){
+			return [];
+		}
+
+		$tables = [];
+
+		foreach ($modules as $module){
+			$module = trim((string)$module);
+			if ($module === ''){
+				continue;
+			}
+			// module\_% — escape module name for LIKE, then literal underscore prefix
+			$like = $this->db->escape_like_str($module).'\\_%';
+			$query = $this->db->query("SHOW TABLES LIKE '".$like."'");
+			if (!$query){
+				continue;
+			}
+			foreach ($query->result_array() as $row){
+				$name = reset($row);
+				if ($name === false || $name === ''){
+					continue;
+				}
+				// Exact prefix module_ (SHOW LIKE already scoped; keep unique)
+				if (strpos($name, $module.'_') !== 0){
+					continue;
+				}
+				$tables[$name] = $name;
+			}
+		}
+
+		$tables = array_values($tables);
+		sort($tables);
+
+		$dump = [];
+		foreach ($tables as $table){
+			$create = '';
+			$q = $this->db->query('SHOW CREATE TABLE `'.$table.'`');
+			if ($q && $q->num_rows()){
+				$r = $q->row_array();
+				$create = $r['Create Table'] ?? ($r['Create View'] ?? '');
+				if ($create === '' && !empty($r)){
+					$create = (string)end($r);
+				}
+			}
+			$dump[] = [
+					'name' => $table,
+					'create' => $create,
+			];
+		}
+
+		return $dump;
+
+	}
 	
 	// ====================== PANEL TABLE SCHEMAS ======================
 
@@ -266,7 +360,13 @@ class cms_schema_model extends \Model {
 		return false;
 	}
 
-	function synchronise_panel_table_data($module = '') {
+	/**
+	 * Copy panel-table field values from cms_page_panel_param into panel tables.
+	 *
+	 * @param string $module module name filter (empty = all)
+	 * @param string $table_only if set, only this panel table name (e.g. shopify_product)
+	 */
+	function synchronise_panel_table_data($module = '', $table_only = '') {
 		$this->load->model('cms/cms_page_panel_model');
 
 		list($schemas, $owner) = $this->_build_panel_table_schemas();
@@ -275,6 +375,9 @@ class cms_schema_model extends \Model {
 		foreach ($schemas as $table => $def) {
 			$table_module = $owner[$table] ?? '';
 			if ($module && $table_module !== $module) {
+				continue;
+			}
+			if ($table_only !== '' && $table_only !== $table) {
 				continue;
 			}
 			if (!$this->db->table_exists($table)) {
@@ -295,7 +398,6 @@ class cms_schema_model extends \Model {
 			foreach ($rows as $row) {
 				$cms_page_panel_id = (int)$row['cms_page_panel_id'];
 				$row_data = ['cms_page_panel_id' => $cms_page_panel_id];
-				$has_source = false;
 				$has_legacy_params = false;
 
 				foreach ($table_fields as $field_name => $field_spec) {
@@ -306,14 +408,24 @@ class cms_schema_model extends \Model {
 					}
 
 					$value = $this->_get_panel_param_value($cms_page_panel_id, $field_name);
+					// Missing/empty int fields → 0 so every panel gets a table row (INNER JOIN safe)
 					if ($value === null) {
-						continue;
+						$table_type = $field_spec['table_type'] ?? '';
+						if ($this->is_panel_table_int_type($table_type)) {
+							$value = 0;
+						} else {
+							// non-int with no source: leave column out (use DB default if any)
+							continue;
+						}
 					}
-					$row_data[$field_name] = $value;
-					$has_source = true;
+					$row_data[$field_name] = $this->cms_page_panel_model->_normalise_panel_table_value(
+							$value,
+							$field_spec
+					);
 				}
 
-				if (!$has_source) {
+				// Need at least one table field besides PK
+				if (count($row_data) <= 1) {
 					$stats['skipped']++;
 					continue;
 				}
@@ -484,7 +596,19 @@ class cms_schema_model extends \Model {
 		];
 	}
 
+	/**
+	 * Map definition table_type string to column spec for panel tables.
+	 *
+	 * Supported:
+	 *   varchar:N     → VARCHAR(N) NOT NULL DEFAULT ''
+	 *   int / int:N   → INT(N) UNSIGNED NOT NULL DEFAULT 0  (FKs, counts)
+	 *   int_signed / int_signed:N → signed INT NOT NULL DEFAULT 0
+	 *   text / empty  → TEXT NOT NULL
+	 */
 	private function _parse_panel_table_type($table_type) {
+
+		$table_type = trim((string)$table_type);
+
 		if (preg_match('/^varchar:(\d+)$/i', $table_type, $m)) {
 			return [
 				'type' => 'VARCHAR',
@@ -494,10 +618,44 @@ class cms_schema_model extends \Model {
 			];
 		}
 
+		// Signed int first so "int_signed" is not swallowed by "int"
+		if (preg_match('/^int_signed(?::(\d+))?$/i', $table_type, $m)) {
+			$width = !empty($m[1]) ? (int)$m[1] : 10;
+			return [
+					'type' => 'INT',
+					'constraint' => $width,
+					'unsigned' => false,
+					'null' => false,
+					'default' => 0,
+			];
+		}
+
+		if (preg_match('/^int(?::(\d+))?$/i', $table_type, $m)) {
+			$width = !empty($m[1]) ? (int)$m[1] : 10;
+			return [
+					'type' => 'INT',
+					'constraint' => $width,
+					'unsigned' => true,
+					'null' => false,
+					'default' => 0,
+			];
+		}
+
+		// explicit text or anything unknown
 		return [
 			'type' => 'TEXT',
 			'null' => false,
 		];
+	}
+
+	/**
+	 * Whether a panel-table field definition is an integer column type.
+	 */
+	function is_panel_table_int_type($table_type){
+
+		$table_type = trim((string)$table_type);
+		return (bool)preg_match('/^int(_signed)?(:\d+)?$/i', $table_type);
+
 	}
 
 	// ====================== REUSABLE HELPERS ======================
@@ -544,16 +702,251 @@ class cms_schema_model extends \Model {
 
 	// ====================== FIX CORE ======================
 
-	private function _fix_table($table, $def) {
-		if (!$this->db->table_exists($table)) {
-			if ($this->_migrate_table_from($table, $def)) {
-				// table migrated — continue with column/index fixes below
-			} else {
-				return $this->_create_table($table, $def);
+	/**
+	 * True if $table was invented from panel definition "table": "1" fields
+	 * (not only a hand-written schema/*.json file).
+	 */
+	private function _is_definition_panel_table($table) {
+
+		list($schemas, ) = $this->_build_panel_table_schemas();
+		return isset($schemas[$table]);
+
+	}
+
+	/**
+	 * List+item panel definitions → possible panel table names.
+	 * Only from definition files (schemas + panel table fields) — no loose module_* DB scan.
+	 *
+	 * @return array [table => ['module'=>, 'panel'=>, 'panel_name'=>, 'has_table_fields'=>bool]]
+	 */
+	private function _list_definition_panel_table_candidates() {
+
+		$out = [];
+		$modules = $GLOBALS['config']['modules'] ?? [];
+		$this->load->model('cms/cms_page_panel_model');
+
+		foreach ($modules as $module) {
+			$def_dir = $GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/';
+			if (!is_dir($def_dir)) {
+				continue;
+			}
+			foreach (glob($def_dir.'*.json') as $file) {
+				$panel = basename($file, '.json');
+				$json = file_get_contents($file);
+				$def = cms_json_decode($json, basename($file));
+				if (!is_array($def) || empty($def['list']) || empty($def['item'])) {
+					continue;
+				}
+				$panel_name = $module.'/'.$panel;
+				$table = $module.'_'.$panel;
+				$table_fields = $this->cms_page_panel_model->get_panel_table_fields($panel_name);
+				$out[$table] = [
+						'module' => $module,
+						'panel' => $panel,
+						'panel_name' => $panel_name,
+						'has_table_fields' => !empty($table_fields),
+				];
 			}
 		}
 
-		return $this->_fix_table_phased($table, $def);
+		return $out;
+
+	}
+
+	/**
+	 * Panel tables that exist in DB but definition has no "table":1 fields left.
+	 */
+	private function _list_orphan_panel_tables($module = '') {
+
+		$orphans = [];
+		foreach ($this->_list_definition_panel_table_candidates() as $table => $info) {
+			if ($module !== '' && $info['module'] !== $module) {
+				continue;
+			}
+			if ($info['has_table_fields']) {
+				continue;
+			}
+			if (!$this->db->table_exists($table)) {
+				continue;
+			}
+			$orphans[] = [
+					'module' => $info['module'],
+					'table' => $table,
+					'panel_name' => $info['panel_name'],
+			];
+		}
+		return $orphans;
+
+	}
+
+	private function _is_orphan_panel_table($module, $table) {
+
+		foreach ($this->_list_orphan_panel_tables($module) as $orphan) {
+			if ($orphan['table'] === $table) {
+				return true;
+			}
+		}
+		return false;
+
+	}
+
+	/**
+	 * Copy selected columns from panel table rows into cms_page_panel_param, then caller drops columns/table.
+	 * Only for fields that still exist as definition item fields (demote). Columns with no field are dropped without restore.
+	 *
+	 * @param string[] $columns column names (not cms_page_panel_id)
+	 */
+	function reverse_migrate_panel_table_columns($table, $panel_name, $columns) {
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		if (!$this->db->table_exists($table) || empty($columns) || !is_array($columns)) {
+			return ['restored' => 0, 'errors' => []];
+		}
+
+		$item_fields = $this->cms_page_panel_model->get_panel_item_field_names($panel_name);
+		$item_set = array_flip($item_fields);
+		$restore_cols = [];
+		foreach ($columns as $col) {
+			if ($col === 'cms_page_panel_id') {
+				continue;
+			}
+			if (isset($item_set[$col])) {
+				$restore_cols[] = $col;
+			}
+		}
+
+		$stats = ['restored' => 0, 'errors' => []];
+		if (empty($restore_cols)) {
+			return $stats;
+		}
+
+		$cols_sql = '`cms_page_panel_id`';
+		foreach ($restore_cols as $col) {
+			$cols_sql .= ', `'.$col.'`';
+		}
+		$query = $this->db->query('select '.$cols_sql.' from `'.$table.'`');
+		if (!$query) {
+			$stats['errors'][] = $table.': select failed';
+			return $stats;
+		}
+
+		foreach ($query->result_array() as $row) {
+			$id = (int)($row['cms_page_panel_id'] ?? 0);
+			if ($id <= 0) {
+				continue;
+			}
+			$data = [];
+			foreach ($restore_cols as $col) {
+				if (array_key_exists($col, $row)) {
+					$data[$col] = $row[$col];
+				}
+			}
+			if (empty($data)) {
+				continue;
+			}
+			if ($this->cms_page_panel_model->write_panel_param_fields($id, $data)) {
+				$stats['restored']++;
+			} else {
+				$stats['errors'][] = $table.':'.$id.': write params failed';
+			}
+		}
+
+		return $stats;
+
+	}
+
+	/**
+	 * Orphan panel table: restore demoted item fields to params, drop table.
+	 */
+	private function _fix_orphan_panel_table($module, $table, $panel_name) {
+
+		if (!$this->db->table_exists($table)) {
+			return true;
+		}
+
+		$db_cols = $this->_get_db_columns($table);
+		$columns = [];
+		foreach (array_keys($db_cols) as $col) {
+			if ($col !== 'cms_page_panel_id') {
+				$columns[] = $col;
+			}
+		}
+
+		$stats = $this->reverse_migrate_panel_table_columns($table, $panel_name, $columns);
+		if (!empty($stats['errors'])) {
+			foreach ($stats['errors'] as $err) {
+				$this->record_fix_error($module.':'.$table.':orphan', $err, '');
+			}
+			return false;
+		}
+
+		if (!$this->_execute('DROP TABLE `'.$table.'`')) {
+			return false;
+		}
+
+		return empty($this->_fix_sql_errors);
+
+	}
+
+	/**
+	 * After panel table structure is OK, copy param values into it (same as sync button).
+	 */
+	private function _auto_sync_panel_table_data($table) {
+
+		if (!$this->_is_definition_panel_table($table)) {
+			return true;
+		}
+
+		list(, $owner) = $this->_build_panel_table_schemas();
+		$module = $owner[$table] ?? '';
+		if ($module === '') {
+			return true;
+		}
+
+		$stats = $this->synchronise_panel_table_data($module, $table);
+		if (!empty($stats['errors'])) {
+			foreach ($stats['errors'] as $err) {
+				$this->record_fix_error(
+						$this->_fix_key !== '' ? $this->_fix_key : ($module.':'.$table),
+						'Panel table data: '.$err,
+						''
+				);
+			}
+			return false;
+		}
+
+		return true;
+
+	}
+
+	private function _fix_table($table, $def) {
+
+		$ok = true;
+
+		if (!$this->db->table_exists($table)) {
+			if ($this->_migrate_table_from($table, $def)) {
+				// renamed legacy table — still run column/index phases below
+				$ok = $this->_fix_table_phased($table, $def);
+			} else {
+				// Brand-new table: CREATE includes columns + indexes from virtual schema
+				$ok = $this->_create_table($table, $def);
+			}
+		} else {
+			$ok = $this->_fix_table_phased($table, $def);
+		}
+
+		if (!$ok || !empty($this->_fix_sql_errors)) {
+			return false;
+		}
+
+		// Panel tables: migrate cms_page_panel_param → table in the same fix step
+		if (!$this->_auto_sync_panel_table_data($table)) {
+			return false;
+		}
+
+		return true;
+
 	}
 
 	private function _fix_table_phased($table, $def) {
@@ -580,6 +973,11 @@ class cms_schema_model extends \Model {
 			return false;
 		}
 
+		// Drop DB columns that are not in the schema definition
+		if (!$this->_drop_extra_columns($table, $def)) {
+			return false;
+		}
+
 		if (!$this->_prepare_auto_increment_for_indexes($table, $def)) {
 			return false;
 		}
@@ -603,6 +1001,63 @@ class cms_schema_model extends \Model {
 		}
 
 		return $ok && empty($this->_fix_sql_errors);
+	}
+
+	/**
+	 * Remove live columns that are not defined in schema JSON
+	 * (schema is authoritative; prevents leftover NOT NULL columns like cms_image.keyword).
+	 *
+	 * Panel tables: if the column still exists as a normal definition item field (demote),
+	 * copy values into panel params first; if the field was removed from definition, drop only.
+	 */
+	private function _drop_extra_columns($table, $def) {
+
+		if (empty($def['columns']) || !is_array($def['columns'])) {
+			return true;
+		}
+
+		$migrate_cols = $def['migrate_from']['columns'] ?? [];
+		$db_cols = $this->_get_db_columns($table);
+
+		$panel_name = '';
+		$is_panel = $this->_is_definition_panel_table($table);
+		if ($is_panel) {
+			list(, $owner) = $this->_build_panel_table_schemas();
+			$module = $owner[$table] ?? '';
+			if ($module !== '') {
+				$panel_name = $module.'/'.preg_replace('/^'.preg_quote($module, '/').'_/', '', $table);
+			}
+		}
+
+		foreach ($db_cols as $col_name => $_col) {
+			if (isset($def['columns'][$col_name])) {
+				continue;
+			}
+			if (isset($migrate_cols[$col_name])) {
+				continue;
+			}
+			if ($col_name === 'cms_page_panel_id') {
+				continue;
+			}
+
+			// Demote: field still in definition item → restore to params before DROP
+			if ($is_panel && $panel_name !== '') {
+				$stats = $this->reverse_migrate_panel_table_columns($table, $panel_name, [$col_name]);
+				if (!empty($stats['errors'])) {
+					foreach ($stats['errors'] as $err) {
+						$this->record_fix_error($this->_fix_key, $err, '');
+					}
+					return false;
+				}
+			}
+
+			if (!$this->_execute('ALTER TABLE `'.$table.'` DROP COLUMN `'.$col_name.'`')) {
+				return false;
+			}
+		}
+
+		return empty($this->_fix_sql_errors);
+
 	}
 
 	private function _fix_column_phase1($table, $column, $spec, $def, &$deferred_auto) {
@@ -1046,6 +1501,10 @@ class cms_schema_model extends \Model {
 				$this->db->query($sql, $bind);
 			} else {
 				$this->db->query($sql);
+			}
+			// CREATE/DROP/RENAME invalidate list_tables() cache used by table_exists()
+			if (preg_match('/^\s*(CREATE|DROP|RENAME)\s+TABLE\b/i', $sql)) {
+				unset($this->db->data_cache['table_names']);
 			}
 			return true;
 		} catch (\mysqli_sql_exception $e) {

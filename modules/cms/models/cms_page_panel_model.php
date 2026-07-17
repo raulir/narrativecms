@@ -28,6 +28,32 @@ if (!function_exists(__NAMESPACE__.'\\array_merge_recursive_ex')){
 
 }
 
+if (!function_exists(__NAMESPACE__.'\\recursive_keys')){
+
+	function recursive_keys($array, $prefix = ''){
+
+		$return = [];
+
+		foreach ($array as $k => $v){
+
+			if (is_numeric($k)){
+				$k = str_pad($k, 6, '0', STR_PAD_LEFT);
+			}
+
+			if (!is_array($v)){
+				$return[] = $prefix.$k;
+			} else {
+				$return = array_merge($return, recursive_keys($v, $prefix.$k.'.'));
+			}
+
+		}
+
+		return $return;
+
+	}
+
+}
+
 class cms_page_panel_model extends \Model {
 	
 	var $default_language;
@@ -116,6 +142,25 @@ class cms_page_panel_model extends \Model {
 		return $row;
 	}
 
+	/**
+	 * Normalise a value for a panel-table column (empty fk → 0 for int types).
+	 */
+	function _normalise_panel_table_value($value, $field_spec = []){
+
+		$table_type = $field_spec['table_type'] ?? '';
+		$is_int = (bool)preg_match('/^int(_signed)?(:\d+)?$/i', trim((string)$table_type));
+
+		if ($is_int){
+			if ($value === null || $value === '' || $value === false){
+				return 0;
+			}
+			return (int)$value;
+		}
+
+		return $value;
+
+	}
+
 	function _write_panel_table_row($cms_page_panel_id, $panel_name, $data) {
 		$fields = $this->get_panel_table_fields($panel_name);
 		if (empty($fields) || !$this->panel_table_exists($panel_name)) {
@@ -125,7 +170,7 @@ class cms_page_panel_model extends \Model {
 		$row = [];
 		foreach ($fields as $name => $spec) {
 			if (array_key_exists($name, $data)) {
-				$row[$name] = $data[$name];
+				$row[$name] = $this->_normalise_panel_table_value($data[$name], $spec);
 			}
 		}
 		if (empty($row)) {
@@ -185,6 +230,46 @@ class cms_page_panel_model extends \Model {
 			}
 		}
 		return $table_data;
+	}
+
+	/**
+	 * Write field values into the general panel param store (named params + JSON cache).
+	 * Used when reverse-migrating panel-table columns back to normal fields.
+	 * Does not write panel-table columns (split still applies if field is still table:1).
+	 */
+	function write_panel_param_fields($cms_page_panel_id, $fields) {
+
+		$cms_page_panel_id = (int)$cms_page_panel_id;
+		if ($cms_page_panel_id <= 0 || !is_array($fields) || empty($fields)) {
+			return false;
+		}
+
+		$this->update_cms_page_panel($cms_page_panel_id, $fields, false);
+		return true;
+
+	}
+
+	/**
+	 * Item field names from panel definition (settings excluded) — for demote checks.
+	 */
+	function get_panel_item_field_names($panel_name) {
+
+		if (empty($panel_name) || !stristr($panel_name, '/')) {
+			return [];
+		}
+
+		$this->load->model('cms/cms_panel_model');
+		$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+		$names = [];
+		if (!empty($config['item']) && is_array($config['item'])) {
+			foreach ($config['item'] as $item) {
+				if (!empty($item['name'])) {
+					$names[$item['name']] = $item['name'];
+				}
+			}
+		}
+		return array_values($names);
+
 	}
 	
 	/**
@@ -1054,34 +1139,7 @@ class cms_page_panel_model extends \Model {
 					}
 				}
 
-				if (!function_exists('recursive_keys')){
-				
-					// remove keys not existing in new value array
-					function recursive_keys($array, $prefix = ''){
-						
-						$return = [];
-						
-						foreach($array as $k => $v){
-							
-							if (is_numeric($k)){
-								$k = str_pad($k, 6, '0', STR_PAD_LEFT);
-							}
-							
-							if (!is_array($v)){
-								$return[] = $prefix.$k;
-							} else {
-								$return = array_merge($return, recursive_keys($v, $prefix.$k.'.'));
-							}
-							
-						}
-						
-						return $return;
-						
-					}
-				
-				}
-				
-				// build keys
+				// build keys (cms\recursive_keys — file-scope helper)
 				$recursive_keys = recursive_keys($params);
 				$recursive_keys = array_unique(array_merge($recursive_keys, ['', 'create_cms_user_id', 'create_time', 'update_cms_user_id', 'update_time']));
 
