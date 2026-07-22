@@ -1,0 +1,5 @@
+{
+	"version": "2",
+	"label": "Shopify product sync (cron)",
+	"description": "Cron task: sync Shopify frontpage collection products into CMS"
+}

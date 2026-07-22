@@ -4,7 +4,7 @@ namespace shopify;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class shopify_cms_purge extends \Controller {
+class shopify_cms_images_purge extends \Controller {
 
 	function __construct(){
 
@@ -33,11 +33,11 @@ class shopify_cms_purge extends \Controller {
 
 		$this->load->model('shopify/shopify_product_model');
 
-		if ($do == 'purge_status'){
+		if ($do == 'images_purge_status'){
 
-			$params['result'] = $this->shopify_product_model->purge_status_read();
+			$params['result'] = $this->shopify_product_model->images_purge_status_read();
 
-		} else if ($do == 'purge_start'){
+		} else if ($do == 'images_purge_start'){
 
 			set_time_limit(0);
 			if (function_exists('ignore_user_abort')){
@@ -49,7 +49,7 @@ class shopify_cms_purge extends \Controller {
 				session_write_close();
 			}
 
-			$params['result'] = $this->shopify_product_model->purge_missing_products(50);
+			$params['result'] = $this->shopify_product_model->purge_orphan_shopify_images(100);
 
 		}
 
@@ -59,7 +59,7 @@ class shopify_cms_purge extends \Controller {
 
 	function panel_params($params){
 
-		add_css('modules/shopify/css/shopify_cms_purge.scss');
+		add_css('modules/shopify/css/shopify_cms_images_purge.scss');
 
 		return $params;
 

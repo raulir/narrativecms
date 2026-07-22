@@ -1,0 +1,14 @@
+{
+	"version": "2",
+	"label": "Shopify subcategory fields",
+	"description": "Extends shop/subcategory with Shopify collection match key",
+	"item": [
+		{
+			"type": "text",
+			"name": "shopify_collection",
+			"label": "Shopify collection",
+			"readonly": "1",
+			"help": "Set by Shopify sync from the range collection title; used to match products to this subcategory"
+		}
+	]
+}

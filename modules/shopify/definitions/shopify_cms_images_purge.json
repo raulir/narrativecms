@@ -1,0 +1,5 @@
+{
+	"version": "2",
+	"label": "Purge images",
+	"description": "Admin control to move orphan Shopify images to cache/tmp/img/"
+}

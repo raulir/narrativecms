@@ -1,0 +1,32 @@
+{
+	"version": "2",
+	"list": {
+		"list_title": "Product collections",
+		"item_title": "Product collection",
+		"title_field": "heading",
+		"filter_fields": {
+			"show": "-- show --"
+		},
+		"link_target": "0"
+	},
+	"item": [
+		{
+			"type": "text",
+			"name": "heading",
+			"label": "Heading"
+		},
+		{
+			"type": "text",
+			"name": "type",
+			"label": "Type",
+			"help": "Shopify collection suffix that created this row (e.g. range, category). Set by sync; identifies collection kind."
+		},
+		{
+			"type": "text",
+			"name": "hash",
+			"label": "Hash",
+			"readonly": "1",
+			"help": "URL fragment for category pages (#hash). Generated from heading on save."
+		}
+	]
+}

@@ -1,0 +1,14 @@
+{
+	"version": "2",
+	"label": "Shopify collection fields",
+	"description": "Extends shop/collection with Shopify collection match key",
+	"item": [
+		{
+			"type": "text",
+			"name": "shopify_collection",
+			"label": "Shopify collection",
+			"readonly": "1",
+			"help": "Set by Shopify sync from the matched collection title"
+		}
+	]
+}

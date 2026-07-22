@@ -13,9 +13,10 @@
 }
 
 .cart_label {
-	.cart_number_loading,.cart_number_loaded {
+	// Live item count inside cart_label (e.g. CART [{{number}}])
+	.cart_quantity {
 		display: inline-block;
-		min-width: 1.5rem;
+		min-width: 1.8rem;
 		text-align: center;
 	}
 }

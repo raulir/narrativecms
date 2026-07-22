@@ -27,13 +27,6 @@
 			"label": "Category",
 			"list": "shop/category",
 			"help": "Parent category"
-		},
-		{
-			"type": "text",
-			"name": "shopify_collection",
-			"label": "Shopify collection",
-			"readonly": "1",
-			"help": "Set by Shopify sync from the product range collection; used to match products to this subcategory"
 		}
 	]
 }

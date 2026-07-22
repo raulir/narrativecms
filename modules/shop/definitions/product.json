@@ -100,6 +100,20 @@
 		},
 		{
 			"type": "repeater",
+			"name": "collections",
+			"label": "Collections",
+			"fields": [
+				{
+					"type": "fk",
+					"name": "collection_id",
+					"label": "Collection",
+					"list": "shop/collection",
+					"add_empty": "1"
+				}
+			]
+		},
+		{
+			"type": "repeater",
 			"name": "texts",
 			"label": "Product texts",
 			"fields": [

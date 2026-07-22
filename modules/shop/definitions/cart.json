@@ -6,9 +6,10 @@
 	"settings": [
 		{
 			"type": "text",
-			"name": "number_template",
-			"label": "Number template",
-			"default": "{{number}}"
+			"name": "cart_label",
+			"label": "Cart",
+			"default": "CART [{{number}}]",
+			"help": "Menu badge text. Use {{number}} for the live item count."
 		},
 		{
 			"type": "text",

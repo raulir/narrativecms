@@ -4,7 +4,7 @@ namespace shopify;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class shopify_cms_purge extends \Controller {
+class shopify_cms_reload extends \Controller {
 
 	function __construct(){
 
@@ -33,23 +33,14 @@ class shopify_cms_purge extends \Controller {
 
 		$this->load->model('shopify/shopify_product_model');
 
-		if ($do == 'purge_status'){
+		if ($do == 'reload_clear'){
 
-			$params['result'] = $this->shopify_product_model->purge_status_read();
+			$params['result'] = $this->shopify_product_model->mark_all_products_sync_needed();
 
-		} else if ($do == 'purge_start'){
+		} else if ($do == 'reload_recover'){
 
-			set_time_limit(0);
-			if (function_exists('ignore_user_abort')){
-				ignore_user_abort(true);
-			}
-
-			// Release session lock so status polls can run while purge works
-			if (session_status() === PHP_SESSION_ACTIVE){
-				session_write_close();
-			}
-
-			$params['result'] = $this->shopify_product_model->purge_missing_products(50);
+			// Restore shopify_id on products wiped by accidental purge=true updates
+			$params['result'] = $this->shopify_product_model->recover_missing_shopify_ids();
 
 		}
 
@@ -59,7 +50,7 @@ class shopify_cms_purge extends \Controller {
 
 	function panel_params($params){
 
-		add_css('modules/shopify/css/shopify_cms_purge.scss');
+		add_css('modules/shopify/css/shopify_cms_reload.scss');
 
 		return $params;
 

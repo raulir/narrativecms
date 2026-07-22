@@ -44,19 +44,28 @@ class shopify_product_model extends Model {
 			$settings = [];
 		}
 
-		// Defaults when settings not yet saved in admin
-		$defaults = [
+		// Integer TTL/budget defaults
+		$int_defaults = [
 				'thumb_html_ttl' => 900,
 				'shopify_data_ttl' => 3600,
 				'product_page_recheck_ttl' => 300,
 				'max_refresh_time' => 30,
 		];
-		foreach ($defaults as $key => $value){
+		foreach ($int_defaults as $key => $value){
 			if (!isset($settings[$key]) || $settings[$key] === '' || $settings[$key] === null){
 				$settings[$key] = $value;
 			} else {
 				$settings[$key] = (int)$settings[$key];
 			}
+		}
+
+		// Collection mapping suffixes (Shopify naming → CMS type). shop/category is manual.
+		if (!isset($settings['collection_subcategory_suffix']) || $settings['collection_subcategory_suffix'] === null
+				|| $settings['collection_subcategory_suffix'] === ''){
+			$settings['collection_subcategory_suffix'] = 'range';
+		}
+		if (empty($settings['collection_collection_suffixes']) || !is_array($settings['collection_collection_suffixes'])){
+			$settings['collection_collection_suffixes'] = [];
 		}
 
 		$GLOBALS['shopify_settings_cache'] = $settings;
@@ -429,16 +438,22 @@ class shopify_product_model extends Model {
 	}
 
 	/**
-	 * Productthumb display payload path (shopify-owned; not CMS panel HTML cache).
+	 * Productthumb HTML cache: rendered markup under cache/productthumbs/.
 	 */
+	function _productthumb_cache_dir(){
+
+		return $GLOBALS['config']['base_path'].'cache/productthumbs/';
+
+	}
+
 	function _productthumb_cache_path($cms_page_panel_id){
 
-		return $GLOBALS['config']['base_path'].'cache/productthumb_'.(int)$cms_page_panel_id.'.json';
+		return $this->_productthumb_cache_dir().'productthumb_'.(int)$cms_page_panel_id.'.html';
 
 	}
 
 	/**
-	 * Drop productthumb payload so next list/related render rebuilds display fields.
+	 * Drop productthumb HTML so next list/related render rebuilds markup.
 	 */
 	function invalidate_product_display_cache($cms_page_panel_id){
 
@@ -455,10 +470,10 @@ class shopify_product_model extends Model {
 	}
 
 	/**
-	 * Read productthumb payload if within thumb_html_ttl and not older than product update_time.
-	 * Returns ['product' => ..., 'sold_out_label' => ...] or null.
+	 * Read cached productthumb HTML if within thumb_html_ttl and not older than product update_time.
+	 * Returns HTML string or null.
 	 */
-	function get_productthumb_payload_cache($cms_page_panel_id, $update_time = 0){
+	function get_productthumb_html_cache($cms_page_panel_id, $update_time = 0){
 
 		$cms_page_panel_id = (int)$cms_page_panel_id;
 		if ($cms_page_panel_id <= 0){
@@ -483,35 +498,55 @@ class shopify_product_model extends Model {
 			return null;
 		}
 
-		$payload = cms_json_decode(file_get_contents($filename), $filename);
-		if (!is_array($payload) || empty($payload['product'])){
+		$html = file_get_contents($filename);
+		if ($html === false || $html === ''){
 			return null;
 		}
 
-		return $payload;
+		return $html;
 
 	}
 
 	/**
-	 * Write productthumb display payload (price HTML, subcategory label, thumbnail, …).
+	 * Write rendered productthumb HTML.
 	 */
-	function set_productthumb_payload_cache($cms_page_panel_id, $payload){
+	function set_productthumb_html_cache($cms_page_panel_id, $html){
 
 		$cms_page_panel_id = (int)$cms_page_panel_id;
-		if ($cms_page_panel_id <= 0 || !is_array($payload)){
+		if ($cms_page_panel_id <= 0 || !is_string($html) || $html === ''){
 			return;
 		}
 
-		file_put_contents(
-				$this->_productthumb_cache_path($cms_page_panel_id),
-				json_encode($payload, JSON_PRETTY_PRINT)
-		);
+		$dir = $this->_productthumb_cache_dir();
+		if (!is_dir($dir)){
+			@mkdir($dir, 0755, true);
+		}
+
+		file_put_contents($this->_productthumb_cache_path($cms_page_panel_id), $html);
 
 	}
 
 	/**
-	 * Full productthumb panel_params assembly: cache → CMS/Shopify product → display fields.
+	 * Render productthumb template to HTML (no productthumb_html short-circuit).
+	 */
+	function _render_productthumb_html($params){
+
+		$render = $params;
+		unset($render['productthumb_html']);
+
+		$template = $GLOBALS['config']['base_path'].'modules/timmy/templates/productthumb.tpl.php';
+		if (!file_exists($template)){
+			return '';
+		}
+
+		return $this->load->view($template, $render, true);
+
+	}
+
+	/**
+	 * Full productthumb panel_params: HTML cache → rebuild product → render + store HTML.
 	 * Parents only pass cms_page_panel_id (+ productthumb settings labels merged by CMS).
+	 * Template echoes $productthumb_html when set.
 	 */
 	function get_productthumb_params($params){
 
@@ -524,16 +559,14 @@ class shopify_product_model extends Model {
 					'heading' => 'Missing product cms id',
 					'error' => 1,
 			];
+			$params['productthumb_html'] = $this->_render_productthumb_html($params);
 			return $params;
 		}
 
 		$update_time = (int)($params['update_time'] ?? 0);
-		$cached = $this->get_productthumb_payload_cache($cms_page_panel_id, $update_time);
-		if ($cached !== null){
-			$params['product'] = $cached['product'];
-			if (array_key_exists('sold_out_label', $cached) && $cached['sold_out_label'] !== null){
-				$params['sold_out_label'] = $cached['sold_out_label'];
-			}
+		$cached_html = $this->get_productthumb_html_cache($cms_page_panel_id, $update_time);
+		if ($cached_html !== null){
+			$params['productthumb_html'] = $cached_html;
 			return $params;
 		}
 
@@ -545,6 +578,7 @@ class shopify_product_model extends Model {
 					'heading' => 'Missing product cms id: '.$cms_page_panel_id,
 					'error' => 1,
 			];
+			$params['productthumb_html'] = $this->_render_productthumb_html($params);
 			return $params;
 		}
 
@@ -563,11 +597,22 @@ class shopify_product_model extends Model {
 					($params['currency_label'] ?? '£').$min_price;
 		}
 
-		// Subcategory label when Shopify type is empty
+		// Category label (via product → subcategory → category)
+		$product['category_heading'] = '';
 		$product['subcategory_heading'] = '';
 		if (!empty($product['subcategory_id'])){
 			$subcategory = $this->cms_page_panel_model->get_cms_page_panel($product['subcategory_id']);
 			$product['subcategory_heading'] = trim((string)($subcategory['heading'] ?? ''));
+			if ($product['subcategory_heading'] === '' && !empty($subcategory['title'])){
+				$product['subcategory_heading'] = trim((string)$subcategory['title']);
+			}
+			if (!empty($subcategory['category_id'])){
+				$category = $this->cms_page_panel_model->get_cms_page_panel($subcategory['category_id']);
+				$product['category_heading'] = trim((string)($category['heading'] ?? ''));
+				if ($product['category_heading'] === '' && !empty($category['title'])){
+					$product['category_heading'] = trim((string)$category['title']);
+				}
+			}
 		}
 
 		if (empty($product['thumbnail_image'])){
@@ -596,10 +641,9 @@ class shopify_product_model extends Model {
 
 		$params['product'] = $product;
 
-		$this->set_productthumb_payload_cache($cms_page_panel_id, [
-				'product' => $product,
-				'sold_out_label' => $params['sold_out_label'] ?? null,
-		]);
+		$html = $this->_render_productthumb_html($params);
+		$this->set_productthumb_html_cache($cms_page_panel_id, $html);
+		$params['productthumb_html'] = $html;
 
 		return $params;
 
@@ -872,7 +916,7 @@ class shopify_product_model extends Model {
 		}
 
 		// Assign subcategory from Shopify range collection when empty (admin override wins)
-		if ($this->_assign_subcategory_if_empty($cms_product)){
+		if ($this->_assign_organisation_from_shopify($cms_product)){
 			$needs_update = true;
 		}
 
@@ -890,7 +934,7 @@ class shopify_product_model extends Model {
 		}
 
 		// Stamp successful Admin fetch (drives TTL rechecks). Do not bump update_time
-		// for checked_at alone — that would thrash productthumb payload invalidation.
+		// for checked_at alone — that would thrash productthumb HTML invalidation.
 		$checked_at = time();
 		$cms_product['shopify_checked_at'] = $checked_at;
 
@@ -933,12 +977,46 @@ class shopify_product_model extends Model {
 			$map[(string)$shopify_id] = [
 					'cms_page_panel_id' => (int)($panel['cms_page_panel_id'] ?? 0),
 					'shopify_updated_at' => (int)($panel['shopify_updated_at'] ?? 0),
+					'shopify_checked_at' => (int)($panel['shopify_checked_at'] ?? 0),
 					// force refresh when images/subcategory/flag need work (even if Shopify updated_at matches)
 					'sync_needed' => $this->_product_needs_sync($panel),
 			];
 		}
 
 		return $map;
+
+	}
+
+	/**
+	 * Local product with oldest successful Admin check (shopify_checked_at).
+	 * Missing/0 counts as oldest. Tie-break: lowest cms_page_panel_id.
+	 * $local: map from get_local_products_by_shopify_id().
+	 * Returns cms_page_panel_id or 0.
+	 */
+	function _oldest_checked_product_id($local){
+
+		if (!is_array($local) || empty($local)){
+			return 0;
+		}
+
+		$best_id = 0;
+		$best_checked = null;
+
+		foreach ($local as $row){
+			$id = (int)($row['cms_page_panel_id'] ?? 0);
+			if ($id <= 0){
+				continue;
+			}
+			$checked = (int)($row['shopify_checked_at'] ?? 0);
+			if ($best_checked === null
+					|| $checked < $best_checked
+					|| ($checked === $best_checked && $id < $best_id)){
+				$best_checked = $checked;
+				$best_id = $id;
+			}
+		}
+
+		return $best_id;
 
 	}
 
@@ -973,8 +1051,28 @@ class shopify_product_model extends Model {
 	}
 
 	/**
+	 * Process setup for a sync batch (settings button or cron), then sync_products().
+	 */
+	function run_sync_batch($max_seconds = 50){
+
+		set_time_limit(0);
+		if (function_exists('ignore_user_abort')){
+			ignore_user_abort(true);
+		}
+
+		// Do not hold session during long sync (visit-triggered cron must not block other requests)
+		if (session_status() === PHP_SESSION_ACTIVE){
+			session_write_close();
+		}
+
+		return $this->sync_products($max_seconds);
+
+	}
+
+	/**
 	 * Sync frontpage collection products into CMS.
 	 * New: create + full refresh. Stale: full refresh when Shopify updated_at is newer.
+	 * Idle (new=0, stale=0): full-refresh one product with oldest shopify_checked_at.
 	 * Soft stop after $max_seconds once current product finishes.
 	 */
 	function sync_products($max_seconds = 50){
@@ -1124,6 +1222,21 @@ class shopify_product_model extends Model {
 				}
 			}
 
+			// Idle: nothing new or stale — fully refresh one oldest-checked product
+			if (!$stopped && $new_total === 0 && $stale_total === 0){
+				$idle_id = $this->_oldest_checked_product_id($local);
+				if ($idle_id > 0){
+					$refreshed = $this->refresh_product($idle_id, 1);
+					if (!empty($refreshed)){
+						$updated++;
+					}
+					$this->_sync_status_write(
+							$this->_sync_format_status($found, $new_total, $stale_total, $updated),
+							false
+					);
+				}
+			}
+
 			if ($slugs_updated){
 				$this->cms_slug_model->_regenerate_cache();
 				$this->cms_slug_model->_regenerate_sitemap();
@@ -1214,9 +1327,14 @@ class shopify_product_model extends Model {
 
 	}
 
-	function _purge_format_status($total, $purged, $kept){
+	function _purge_format_status($total, $purged, $kept, $purged_missing = null, $purged_duplicates = null){
 
-		return 'Total '.$total.', purged '.$purged.', kept '.$kept;
+		$text = 'Found '.$total.', purged '.$purged.', kept '.$kept;
+		if ($purged_missing !== null && $purged_duplicates !== null){
+			$text .= ' (missing '.$purged_missing.', duplicates '.$purged_duplicates.')';
+		}
+
+		return $text;
 
 	}
 
@@ -1264,6 +1382,9 @@ class shopify_product_model extends Model {
 
 	/**
 	 * Product should be fully refreshed even when Shopify updated_at is unchanged.
+	 *
+	 * subcategory_id empty or 0 is normal (no range) — never forces sync.
+	 * Subcategory is assigned only when Shopify has a matching range collection.
 	 */
 	function _product_needs_sync($panel){
 
@@ -1275,8 +1396,9 @@ class shopify_product_model extends Model {
 			return true;
 		}
 
-		$subcategory_id = $panel['subcategory_id'] ?? '';
-		if ($subcategory_id === '' || $subcategory_id === null || $subcategory_id === '0' || $subcategory_id === 0){
+		// Never fully stamped from Shopify yet — force one full refresh
+		$shopify_updated_at = (int)($panel['shopify_updated_at'] ?? 0);
+		if ($shopify_updated_at < 1){
 			return true;
 		}
 
@@ -1291,6 +1413,202 @@ class shopify_product_model extends Model {
 	}
 
 	/**
+	 * Mark every local shop/product for full Shopify refresh (sync_needed only).
+	 * Must NOT purge params — only merge the flag onto existing product data.
+	 * Does not call Admin API — Sync refreshes existing rows by shopify_id.
+	 * Returns ['marked' => n, 'already' => n, 'total' => n, 'text' => '...'].
+	 */
+	function mark_all_products_sync_needed(){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$panels = $this->cms_page_panel_model->get_cms_page_panels_by([
+				'panel_name' => 'shop/product',
+		]);
+		if (!is_array($panels)){
+			$panels = [];
+		}
+
+		$marked = 0;
+		$already = 0;
+		$total = 0;
+
+		foreach ($panels as $panel){
+			$id = (int)($panel['cms_page_panel_id'] ?? 0);
+			if (!$id){
+				continue;
+			}
+			$total++;
+			if (!empty($panel['sync_needed']) && $panel['sync_needed'] !== '0' && $panel['sync_needed'] !== 0){
+				$already++;
+				continue;
+			}
+			// purge=false: merge flag only — never wipe product params
+			$this->cms_page_panel_model->update_cms_page_panel($id, ['sync_needed' => 1], false);
+			$marked++;
+		}
+
+		$text = 'Marked '.$marked.' product'.($marked === 1 ? '' : 's').' for reload';
+		if ($already > 0){
+			$text .= ' ('.$already.' already queued)';
+		}
+		$text .= ' — run Sync to refresh';
+
+		return [
+				'marked' => $marked,
+				'already' => $already,
+				'total' => $total,
+				'text' => $text,
+		];
+
+	}
+
+	/**
+	 * After accidental purge: restore shopify_id (+ heading) on products that lost them.
+	 * Matches productthumb HTML headings / slug titles to Shopify list titles.
+	 * Does not create new panels — only patches existing cms_page_panel rows (purge=false).
+	 */
+	function recover_missing_shopify_ids(){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_slug_model');
+
+		$shopify_products = $this->get_products();
+		if (!is_array($shopify_products) || !empty($shopify_products['errors'])){
+			return [
+					'error' => 'list_failed',
+					'text' => 'Shopify list failed — cannot recover',
+					'recovered' => 0,
+			];
+		}
+
+		// title (normalised) => shopify product
+		$by_title = [];
+		foreach ($shopify_products as $row){
+			if (!is_array($row) || empty($row['id']) || empty($row['title'])){
+				continue;
+			}
+			$key = mb_strtolower(trim((string)$row['title']));
+			if ($key === ''){
+				continue;
+			}
+			$by_title[$key] = $row;
+		}
+
+		// slug basename hints (handle-like) => shopify product
+		$by_handle = [];
+		foreach ($shopify_products as $row){
+			if (!is_array($row) || empty($row['id'])){
+				continue;
+			}
+			$handle = mb_strtolower(trim((string)($row['handle'] ?? '')));
+			if ($handle !== ''){
+				$by_handle[$handle] = $row;
+			}
+		}
+
+		$panels = $this->cms_page_panel_model->get_cms_page_panels_by([
+				'panel_name' => 'shop/product',
+		]);
+		if (!is_array($panels)){
+			$panels = [];
+		}
+
+		$recovered = 0;
+		$skipped = 0;
+		$failed = 0;
+
+		foreach ($panels as $panel){
+			$id = (int)($panel['cms_page_panel_id'] ?? 0);
+			if ($id < 1){
+				continue;
+			}
+
+			$existing_sid = trim((string)($panel['shopify_id'] ?? ''));
+			if ($existing_sid !== '' && $existing_sid !== '0'){
+				$skipped++;
+				continue;
+			}
+
+			$heading = trim((string)($panel['heading'] ?? ''));
+			if ($heading === ''){
+				// productthumb HTML cache
+				$thumb = $GLOBALS['config']['base_path'].'cache/productthumbs/productthumb_'.$id.'.html';
+				if (file_exists($thumb)){
+					$html = file_get_contents($thumb);
+					if (preg_match('/class="productthumb_heading"[^>]*>([^<]+)</', $html, $m)){
+						$heading = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
+					}
+				}
+			}
+
+			$match = null;
+			if ($heading !== ''){
+				$key = mb_strtolower($heading);
+				if (!empty($by_title[$key])){
+					$match = $by_title[$key];
+				}
+			}
+
+			// Fallback: cms_slug → Shopify handle (list slugs often end with -1, -2, …)
+			if (empty($match)){
+				$sql = "select cms_slug_id from cms_slug where target = ? limit 1 ";
+				$query = $this->db->query($sql, ['shop/product='.$id]);
+				if ($query && $query->num_rows()){
+					$slug = (string)$query->row_array()['cms_slug_id'];
+					$handle = mb_strtolower($slug);
+					// strip trailing -digits used by duplicate slug disambiguation
+					$handle_base = preg_replace('/-\d+$/', '', $handle);
+					if (!empty($by_handle[$handle])){
+						$match = $by_handle[$handle];
+					} else if (!empty($by_handle[$handle_base])){
+						$match = $by_handle[$handle_base];
+					}
+				}
+			}
+
+			if (empty($match)){
+				$failed++;
+				continue;
+			}
+
+			$patch = [
+					'shopify_id' => (string)$match['id'],
+					'sync_needed' => 1,
+			];
+			if ($heading !== ''){
+				$patch['heading'] = $heading;
+			} else if (!empty($match['title'])){
+				$patch['heading'] = $match['title'];
+			}
+			if (!empty($match['updated_at'])){
+				$patch['shopify_updated_at'] = (int)strtotime($match['updated_at']);
+			}
+
+			// Critical: purge=false so we only add/merge keys
+			$this->cms_page_panel_model->update_cms_page_panel($id, $patch, false);
+			$recovered++;
+		}
+
+		$text = 'Recovered shopify_id on '.$recovered.' product'.($recovered === 1 ? '' : 's');
+		if ($skipped > 0){
+			$text .= ', '.$skipped.' already had id';
+		}
+		if ($failed > 0){
+			$text .= ', '.$failed.' unmatched';
+		}
+		$text .= ' — run Sync to refill fields';
+
+		return [
+				'recovered' => $recovered,
+				'skipped' => $skipped,
+				'failed' => $failed,
+				'text' => $text,
+		];
+
+	}
+
+	/**
 	 * One-shot after deploy: mark every local product sync_needed so stale list includes them.
 	 */
 	function _mark_all_products_sync_needed_once(){
@@ -1300,22 +1618,7 @@ class shopify_product_model extends Model {
 			return;
 		}
 
-		$this->load->model('cms/cms_page_panel_model');
-
-		$panels = $this->cms_page_panel_model->get_cms_page_panels_by([
-				'panel_name' => 'shop/product',
-		]);
-
-		foreach ($panels as $panel){
-			$id = (int)($panel['cms_page_panel_id'] ?? 0);
-			if (!$id){
-				continue;
-			}
-			if (!empty($panel['sync_needed']) && $panel['sync_needed'] !== '0' && $panel['sync_needed'] !== 0){
-				continue;
-			}
-			$this->cms_page_panel_model->update_cms_page_panel($id, ['sync_needed' => 1], true);
-		}
+		$this->mark_all_products_sync_needed();
 
 		file_put_contents($path, (string)time());
 
@@ -1341,9 +1644,10 @@ class shopify_product_model extends Model {
 			if (!is_array($col) || empty($col['id'])){
 				continue;
 			}
+			$raw = trim((string)($col['title'] ?? ''));
 			$map[(string)$col['id']] = [
 					'id' => $col['id'],
-					'title' => $col['title'] ?? '',
+					'title' => $this->_strip_shopify_collection_parentheses($raw),
 					'handle' => $col['handle'] ?? '',
 			];
 		}
@@ -1385,44 +1689,166 @@ class shopify_product_model extends Model {
 	}
 
 	/**
-	 * Prefer a range collection; ignore Shopify frontpage/Main.
-	 * If several remain, pick title A–Z for stability.
+	 * Lowercase + collapse whitespace for collection title/suffix matching.
 	 */
-	function _pick_range_collection($collections){
+	function _normalise_collection_key($value){
 
-		if (empty($collections) || !is_array($collections)){
-			return null;
-		}
+		$value = strtolower(trim((string)$value));
+		$value = preg_replace('/\s+/u', ' ', $value);
 
-		$candidates = [];
-		foreach ($collections as $col){
-			$handle = strtolower(trim((string)($col['handle'] ?? '')));
-			$title = trim((string)($col['title'] ?? ''));
-			if ($handle === 'frontpage' || strtolower($title) === 'main'){
-				continue;
-			}
-			if ($title === ''){
-				continue;
-			}
-			$candidates[] = $col;
-		}
-
-		if (empty($candidates)){
-			return null;
-		}
-
-		usort($candidates, function($a, $b){
-			return strcasecmp((string)($a['title'] ?? ''), (string)($b['title'] ?? ''));
-		});
-
-		return $candidates[0];
+		return $value === null ? '' : $value;
 
 	}
 
-	function _get_cards_category_id(){
+	/**
+	 * True when title ends with suffix as a trailing token (case-insensitive).
+	 */
+	function _collection_title_ends_with_suffix($title, $suffix){
 
-		if (isset($this->_cards_category_id)){
-			return $this->_cards_category_id;
+		$t = $this->_normalise_collection_key($title);
+		$s = $this->_normalise_collection_key($suffix);
+		if ($t === '' || $s === ''){
+			return false;
+		}
+		if ($t === $s){
+			return true;
+		}
+		$tail = ' '.$s;
+		$len = strlen($tail);
+		if (strlen($t) < $len){
+			return false;
+		}
+
+		return substr($t, -$len) === $tail;
+
+	}
+
+	/**
+	 * Remove trailing parentheticals from Shopify collection titles before mapping.
+	 * e.g. "Sugar & Sass Range (Cards)" → "Sugar & Sass Range"
+	 * (Client titles in Admin usually omit this; API/legacy can still include it.)
+	 */
+	function _strip_shopify_collection_parentheses($title){
+
+		$title = trim((string)$title);
+		if ($title === ''){
+			return '';
+		}
+
+		// Strip one or more trailing "(…)" segments
+		while (preg_match('/^(.*)\s*\([^)]*\)\s*$/u', $title, $m)){
+			$title = trim($m[1]);
+		}
+
+		return $title;
+
+	}
+
+	/**
+	 * Strip trailing suffix from title (case-insensitive), trim.
+	 */
+	function _strip_collection_suffix($title, $suffix){
+
+		$title = trim((string)$title);
+		$suffix = trim((string)$suffix);
+		if ($title === '' || $suffix === ''){
+			return $title;
+		}
+
+		$pattern = '/^(.*)\s+'.preg_quote($suffix, '/').'\s*$/iu';
+		if (preg_match($pattern, $title, $m)){
+			return trim($m[1]);
+		}
+
+		return $title;
+
+	}
+
+	/**
+	 * Classify product custom collections by shopify suffix settings.
+	 * Order: subcategory suffix → collection suffixes.
+	 * shop/category is not auto-created (manual depts). Parent for new subcategories uses fallback.
+	 * Always strip trailing "(…)" from titles first, then match suffixes.
+	 * @return array{subcategory:?array,collections:array}
+	 */
+	function _classify_product_collections($collections){
+
+		$out = [
+				'subcategory' => null,
+				'collections' => [],
+		];
+
+		if (empty($collections) || !is_array($collections)){
+			return $out;
+		}
+
+		$settings = $this->get_shopify_settings();
+		// shop/subcategory
+		$sub_suf = trim((string)($settings['collection_subcategory_suffix'] ?? 'range'));
+		// shop/collection — multi-membership
+		$col_sufs = [];
+		if (!empty($settings['collection_collection_suffixes']) && is_array($settings['collection_collection_suffixes'])){
+			foreach ($settings['collection_collection_suffixes'] as $row){
+				$s = trim((string)($row['suffix'] ?? ''));
+				if ($s !== ''){
+					$col_sufs[] = $s;
+				}
+			}
+		}
+
+		foreach ($collections as $col){
+
+			if (!is_array($col)){
+				continue;
+			}
+
+			$handle = strtolower(trim((string)($col['handle'] ?? '')));
+			$raw_title = trim((string)($col['title'] ?? ''));
+			if ($handle === 'frontpage' || strtolower($raw_title) === 'main' || $raw_title === ''){
+				continue;
+			}
+
+			// Always drop trailing "(Cards)" / similar before suffix matching
+			$title = $this->_strip_shopify_collection_parentheses($raw_title);
+			if ($title === ''){
+				continue;
+			}
+
+			// 1) Subcategory suffix → shop/subcategory
+			if ($sub_suf !== '' && $this->_collection_title_ends_with_suffix($title, $sub_suf)){
+				$out['subcategory'] = [
+						'title' => $title,
+						'heading' => $this->_strip_collection_suffix($title, $sub_suf),
+				];
+				continue;
+			}
+
+			// 2) Collection suffixes → shop/collection
+			foreach ($col_sufs as $cs){
+				if ($this->_collection_title_ends_with_suffix($title, $cs)){
+					$out['collections'][] = [
+							'title' => $title,
+							'heading' => $this->_strip_collection_suffix($title, $cs),
+							// Original matched word stored on shop/collection.type
+							'type' => $cs,
+					];
+					break;
+				}
+			}
+
+		}
+
+		return $out;
+
+	}
+
+	/**
+	 * Fallback parent category id (prefer heading Cards, else first shop/category).
+	 */
+	function _get_fallback_category_id(){
+
+		if (isset($this->_fallback_category_id)){
+			return $this->_fallback_category_id;
 		}
 
 		$this->load->model('cms/cms_page_panel_model');
@@ -1432,59 +1858,234 @@ class shopify_product_model extends Model {
 				'heading' => 'Cards',
 		]);
 
-		if (empty($rows[0]['cms_page_panel_id'])){
-			_html_error('Shopify sync: shop/category "Cards" not found — cannot create subcategories');
-			$this->_cards_category_id = 0;
-			return 0;
+		if (!empty($rows[0]['cms_page_panel_id'])){
+			$this->_fallback_category_id = (int)$rows[0]['cms_page_panel_id'];
+			return $this->_fallback_category_id;
 		}
 
-		$this->_cards_category_id = (int)$rows[0]['cms_page_panel_id'];
-		return $this->_cards_category_id;
+		$all = $this->cms_page_panel_model->get_list('shop/category');
+		if (!empty($all) && is_array($all)){
+			$first = reset($all);
+			if (!empty($first['cms_page_panel_id'])){
+				$this->_fallback_category_id = (int)$first['cms_page_panel_id'];
+				return $this->_fallback_category_id;
+			}
+		}
+
+		$this->_fallback_category_id = 0;
+		return 0;
 
 	}
 
 	/**
-	 * Find subcategory by shopify_collection; fall back to heading match and backfill the field.
+	 * @deprecated use _get_fallback_category_id
 	 */
-	function _find_subcategory_by_shopify_collection($collection_title){
+	function _get_cards_category_id(){
 
-		$collection_title = trim((string)$collection_title);
-		if ($collection_title === ''){
+		return $this->_get_fallback_category_id();
+
+	}
+
+	/**
+	 * Find panel by shopify_collection full title, else by heading (case-insensitive).
+	 */
+	function _find_panel_by_shopify_collection($panel_name, $full_title, $heading = ''){
+
+		$full_title = trim((string)$full_title);
+		$heading = trim((string)$heading);
+		if ($full_title === '' && $heading === ''){
 			return null;
 		}
 
 		$this->load->model('cms/cms_page_panel_model');
 
-		$subs = $this->cms_page_panel_model->get_cms_page_panels_by([
-				'panel_name' => 'shop/subcategory',
+		$rows = $this->cms_page_panel_model->get_cms_page_panels_by([
+				'panel_name' => $panel_name,
 		]);
 
 		$heading_match = null;
+		$heading_key = $this->_normalise_collection_key($heading !== '' ? $heading : $full_title);
 
-		foreach ($subs as $sub){
-			$sc = trim((string)($sub['shopify_collection'] ?? ''));
-			if ($sc !== '' && $sc === $collection_title){
-				return $sub;
+		foreach ($rows as $row){
+			$sc = trim((string)($row['shopify_collection'] ?? ''));
+			if ($full_title !== '' && $sc !== '' && $sc === $full_title){
+				return $row;
 			}
-			if ($heading_match === null && trim((string)($sub['heading'] ?? '')) === $collection_title){
-				$heading_match = $sub;
+			if ($heading_match === null){
+				$row_heading = $this->_normalise_collection_key($row['heading'] ?? '');
+				if ($heading_key !== '' && $row_heading === $heading_key){
+					$heading_match = $row;
+				}
 			}
 		}
 
-		// Harden: reuse existing row with same heading and set shopify_collection
 		if ($heading_match !== null){
-			if (trim((string)($heading_match['shopify_collection'] ?? '')) === ''){
+			if ($full_title !== '' && trim((string)($heading_match['shopify_collection'] ?? '')) === ''){
 				$this->cms_page_panel_model->update_cms_page_panel(
 						(int)$heading_match['cms_page_panel_id'],
-						['shopify_collection' => $collection_title],
+						['shopify_collection' => $full_title],
 						true
 				);
-				$heading_match['shopify_collection'] = $collection_title;
+				$heading_match['shopify_collection'] = $full_title;
 			}
 			return $heading_match;
 		}
 
 		return null;
+
+	}
+
+	function _find_subcategory_by_shopify_collection($collection_title){
+
+		return $this->_find_panel_by_shopify_collection('shop/subcategory', $collection_title, $collection_title);
+
+	}
+
+	function _ensure_list_item_slug($panel_name, $cms_page_panel_id, $slug_string, $show = 1){
+
+		$cms_page_panel_id = (int)$cms_page_panel_id;
+		if (!$cms_page_panel_id || $panel_name === ''){
+			return;
+		}
+
+		$slug_string = trim((string)$slug_string);
+		if ($slug_string === ''){
+			$slug_string = str_replace('/', '-', $panel_name).'-'.$cms_page_panel_id;
+		}
+
+		$this->load->model('cms/cms_slug_model');
+
+		$target = $panel_name.'='.$cms_page_panel_id;
+		$existing = $this->cms_slug_model->get_slug_row_by_target($target);
+		if (is_array($existing) && !empty($existing['cms_slug_id'])){
+			return;
+		}
+
+		$status = empty($show) ? '1' : '0';
+		$slug = $this->cms_slug_model->generate_list_item_slug($target, $slug_string);
+		$this->cms_slug_model->set_page_slug($target, $slug, $status);
+
+	}
+
+	/**
+	 * @param string $full_title Full Shopify collection title (after parenthesis strip)
+	 * @param string $heading Display heading (suffix stripped)
+	 * @param string $type Matched collection suffix word (e.g. "category") — stored as type
+	 */
+	function _ensure_collection_for_collection($full_title, $heading = '', $type = ''){
+
+		$full_title = trim((string)$full_title);
+		$heading = trim((string)$heading);
+		$type = trim((string)$type);
+		if ($heading === ''){
+			$heading = $full_title;
+		}
+		if ($full_title === '' && $heading === ''){
+			return null;
+		}
+
+		$existing = $this->_find_panel_by_shopify_collection('shop/collection', $full_title, $heading);
+		if (!empty($existing['cms_page_panel_id'])){
+			$this->load->model('cms/cms_page_panel_model');
+			// Backfill type when empty and we know the matched suffix
+			$existing_type = trim((string)($existing['type'] ?? ''));
+			if ($existing_type === '' && $type !== ''){
+				$this->cms_page_panel_model->update_cms_page_panel(
+						(int)$existing['cms_page_panel_id'],
+						['type' => $type],
+						false
+				);
+				$existing['type'] = $type;
+			}
+			// Category page #hash (not a public cms_slug)
+			$this->_ensure_collection_hash((int)$existing['cms_page_panel_id'], $heading);
+			return $this->cms_page_panel_model->get_cms_page_panel((int)$existing['cms_page_panel_id']);
+		}
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$new_row = [
+				'panel_name' => 'shop/collection',
+				'show' => 1,
+				'sort' => 'first',
+				'title' => $heading,
+				'heading' => $heading,
+				'shopify_collection' => $full_title,
+		];
+		if ($type !== ''){
+			$new_row['type'] = $type;
+		}
+
+		$new_id = $this->cms_page_panel_model->create_cms_page_panel($new_row);
+
+		if (empty($new_id)){
+			return null;
+		}
+
+		$this->_ensure_collection_hash((int)$new_id, $heading);
+
+		return $this->cms_page_panel_model->get_cms_page_panel($new_id);
+
+	}
+
+	/**
+	 * Fill shop/collection.hash for category page fragments (no cms_slug).
+	 */
+	function _ensure_collection_hash($cms_page_panel_id, $heading = ''){
+
+		$cms_page_panel_id = (int)$cms_page_panel_id;
+		if ($cms_page_panel_id < 1){
+			return;
+		}
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_slug_model');
+
+		$row = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
+		if (empty($row['cms_page_panel_id'])){
+			return;
+		}
+		if (trim((string)($row['hash'] ?? '')) !== ''){
+			return;
+		}
+
+		$heading = trim((string)$heading);
+		if ($heading === ''){
+			$heading = trim((string)($row['heading'] ?? $row['title'] ?? ''));
+		}
+
+		$base = $this->cms_slug_model->_slugify_candidate($heading);
+		if ($base === ''){
+			$base = 'collection';
+		}
+
+		$panels = $this->cms_page_panel_model->get_cms_page_panels_by([
+				'panel_name' => 'shop/collection',
+		]);
+		$used = [];
+		if (is_array($panels)){
+			foreach ($panels as $p){
+				$pid = (int)($p['cms_page_panel_id'] ?? 0);
+				if ($pid < 1 || $pid === $cms_page_panel_id){
+					continue;
+				}
+				$h = trim((string)($p['hash'] ?? ''));
+				if ($h !== ''){
+					$used[$h] = true;
+				}
+			}
+		}
+
+		$candidate = $base;
+		$i = 1;
+		while (isset($used[$candidate])){
+			$candidate = $base.'-'.$i;
+			$i++;
+		}
+
+		$this->cms_page_panel_model->update_cms_page_panel($cms_page_panel_id, [
+				'hash' => $candidate,
+		], false);
 
 	}
 
@@ -1560,26 +2161,50 @@ class shopify_product_model extends Model {
 
 	}
 
-	function _ensure_subcategory_for_collection($collection_title){
+	/**
+	 * @param string $full_title Full Shopify collection title
+	 * @param string $heading Stripped display heading
+	 * @param int $category_id Parent shop/category id
+	 */
+	function _ensure_subcategory_for_collection($full_title, $heading = '', $category_id = 0){
 
-		$collection_title = trim((string)$collection_title);
-		if ($collection_title === ''){
+		$full_title = trim((string)$full_title);
+		$heading = trim((string)$heading);
+		if ($heading === ''){
+			$heading = $full_title;
+		}
+		if ($full_title === '' && $heading === ''){
 			return null;
 		}
 
-		$existing = $this->_find_subcategory_by_shopify_collection($collection_title);
+		$existing = $this->_find_panel_by_shopify_collection('shop/subcategory', $full_title, $heading);
 		if (!empty($existing['cms_page_panel_id'])){
-			// Backfill slug for subcategories created before slug support
 			$this->_ensure_subcategory_slug(
 					(int)$existing['cms_page_panel_id'],
-					$collection_title,
+					$heading,
 					$existing['show'] ?? 1
 			);
+			// Keep parent shop/category in sync when Shopify mapping provides one
+			$category_id = (int)$category_id;
+			$old_cat = (int)($existing['category_id'] ?? 0);
+			if ($category_id > 0 && $old_cat !== $category_id){
+				$this->load->model('cms/cms_page_panel_model');
+				$this->cms_page_panel_model->update_cms_page_panel(
+						(int)$existing['cms_page_panel_id'],
+						['category_id' => $category_id],
+						false
+				);
+				$existing['category_id'] = $category_id;
+			}
 			return $existing;
 		}
 
-		$cards_id = $this->_get_cards_category_id();
-		if (empty($cards_id)){
+		$category_id = (int)$category_id;
+		if ($category_id < 1){
+			$category_id = $this->_get_fallback_category_id();
+		}
+		if ($category_id < 1){
+			_html_error('Shopify sync: no shop/category available for subcategory "'.$heading.'"');
 			return null;
 		}
 
@@ -1589,32 +2214,29 @@ class shopify_product_model extends Model {
 				'panel_name' => 'shop/subcategory',
 				'show' => 1,
 				'sort' => 'first',
-				'title' => $collection_title,
-				'heading' => $collection_title,
-				'shopify_collection' => $collection_title,
-				'category_id' => $cards_id,
+				'title' => $heading,
+				'heading' => $heading,
+				'shopify_collection' => $full_title,
+				'category_id' => $category_id,
 		]);
 
 		if (empty($new_id)){
 			return null;
 		}
 
-		$this->_ensure_subcategory_slug((int)$new_id, $collection_title, 1);
+		$this->_ensure_subcategory_slug((int)$new_id, $heading, 1);
 
 		return $this->cms_page_panel_model->get_cms_page_panel($new_id);
 
 	}
 
 	/**
-	 * When product has no subcategory, assign from Shopify range collection.
+	 * Map Shopify collections → category / subcategory / collections on product.
+	 * Overwrites product subcategory from Shopify when a range/category-suffix match exists
+	 * (or clears it when Shopify no longer has one). Replaces collections list from Shopify.
 	 * @return bool true if $cms_product was modified
 	 */
-	function _assign_subcategory_if_empty(&$cms_product){
-
-		$subcategory_id = $cms_product['subcategory_id'] ?? '';
-		if ($subcategory_id !== '' && $subcategory_id !== null && $subcategory_id !== '0' && $subcategory_id !== 0){
-			return false;
-		}
+	function _assign_organisation_from_shopify(&$cms_product){
 
 		$shopify_id = $cms_product['shopify_id'] ?? '';
 		if ($shopify_id === '' || $shopify_id === null){
@@ -1622,18 +2244,85 @@ class shopify_product_model extends Model {
 		}
 
 		$collections = $this->_get_product_collections($shopify_id);
-		$range = $this->_pick_range_collection($collections);
-		if (empty($range['title'])){
-			return false;
+		$class = $this->_classify_product_collections($collections);
+		$changed = false;
+
+		// shop/category is manual — new subcategories hang under fallback (e.g. Cards)
+		if (!empty($class['subcategory']['title'])){
+			$category_id = $this->_get_fallback_category_id();
+			$sub = $this->_ensure_subcategory_for_collection(
+					$class['subcategory']['title'],
+					$class['subcategory']['heading'] ?? '',
+					$category_id
+			);
+			// Always overwrite product subcategory from Shopify classification
+			$new_sub_id = !empty($sub['cms_page_panel_id']) ? (int)$sub['cms_page_panel_id'] : 0;
+			$old_sub_id = (int)($cms_product['subcategory_id'] ?? 0);
+			if ($new_sub_id > 0 && $old_sub_id !== $new_sub_id){
+				$cms_product['subcategory_id'] = $new_sub_id;
+				$changed = true;
+			}
+		} else {
+			// Shopify has no subcategory-suffix collection — clear CMS subcategory
+			$old_sub_id = (int)($cms_product['subcategory_id'] ?? 0);
+			if ($old_sub_id > 0){
+				$cms_product['subcategory_id'] = 0;
+				$changed = true;
+			}
 		}
 
-		$sub = $this->_ensure_subcategory_for_collection($range['title']);
-		if (empty($sub['cms_page_panel_id'])){
-			return false;
+		// Replace product.collections from classified Shopify collections
+		$new_collections = [];
+		$seen = [];
+		if (!empty($class['collections']) && is_array($class['collections'])){
+			foreach ($class['collections'] as $c){
+				if (empty($c['title'])){
+					continue;
+				}
+				$row = $this->_ensure_collection_for_collection(
+						$c['title'],
+						$c['heading'] ?? '',
+						$c['type'] ?? ''
+				);
+				if (empty($row['cms_page_panel_id'])){
+					continue;
+				}
+				$cid = (int)$row['cms_page_panel_id'];
+				if (isset($seen[$cid])){
+					continue;
+				}
+				$seen[$cid] = true;
+				$new_collections[] = ['collection_id' => $cid];
+			}
 		}
 
-		$cms_product['subcategory_id'] = (int)$sub['cms_page_panel_id'];
-		return true;
+		$old = [];
+		if (!empty($cms_product['collections']) && is_array($cms_product['collections'])){
+			foreach ($cms_product['collections'] as $row){
+				$cid = (int)($row['collection_id'] ?? 0);
+				if ($cid > 0){
+					$old[] = $cid;
+				}
+			}
+		}
+		sort($old);
+		$new_ids = array_keys($seen);
+		sort($new_ids);
+		if ($old !== $new_ids){
+			$cms_product['collections'] = $new_collections;
+			$changed = true;
+		}
+
+		return $changed;
+
+	}
+
+	/**
+	 * @deprecated use _assign_organisation_from_shopify
+	 */
+	function _assign_subcategory_if_empty(&$cms_product){
+
+		return $this->_assign_organisation_from_shopify($cms_product);
 
 	}
 
@@ -1656,8 +2345,10 @@ class shopify_product_model extends Model {
 	}
 
 	/**
-	 * Delete local shop/product panels that no longer exist on Shopify.
-	 * Oldest first (cms_page_panel_id ASC). Soft stop after 50s once current item finishes.
+	 * Delete local shop/product panels that:
+	 * - have no Shopify id / no longer exist on Shopify, or
+	 * - are older duplicates of the same shopify_id (keep highest cms_page_panel_id).
+	 * Oldest first. Soft stop after 50s once current item finishes.
 	 */
 	function purge_missing_products($max_seconds = 50){
 
@@ -1695,38 +2386,90 @@ class shopify_product_model extends Model {
 				return ((int)($a['cms_page_panel_id'] ?? 0)) <=> ((int)($b['cms_page_panel_id'] ?? 0));
 			});
 
+			// Per shopify_id: keep newest panel (max cms_page_panel_id); older copies are duplicates
+			$by_sid = [];
+			foreach ($products as $cms_product){
+				$sid = trim((string)($cms_product['shopify_id'] ?? ''));
+				if ($sid === ''){
+					continue;
+				}
+				$id = (int)($cms_product['cms_page_panel_id'] ?? 0);
+				if ($id < 1){
+					continue;
+				}
+				if (!isset($by_sid[$sid])){
+					$by_sid[$sid] = [];
+				}
+				$by_sid[$sid][] = $id;
+			}
+
+			$duplicate_ids = [];
+			foreach ($by_sid as $sid => $ids){
+				if (count($ids) < 2){
+					continue;
+				}
+				sort($ids, SORT_NUMERIC);
+				$keep_id = (int)array_pop($ids); // highest id kept
+				foreach ($ids as $old_id){
+					$duplicate_ids[(int)$old_id] = true;
+				}
+				unset($keep_id);
+			}
+
 			$total = count($products);
 			$purged = 0;
+			$purged_missing = 0;
+			$purged_duplicates = 0;
 			$kept = 0;
 
-			$this->_purge_status_write($this->_purge_format_status($total, $purged, $kept), false);
+			$this->_purge_status_write(
+					$this->_purge_format_status($total, $purged, $kept, $purged_missing, $purged_duplicates),
+					false
+			);
+
+			// Cache remote existence per shopify_id (one Admin call per unique id this run)
+			$remote_ok = [];
 
 			foreach ($products as $cms_product){
 
 				$cms_page_panel_id = (int)($cms_product['cms_page_panel_id'] ?? 0);
-				$shopify_id = $cms_product['shopify_id'] ?? '';
+				$shopify_id = trim((string)($cms_product['shopify_id'] ?? ''));
 
+				$is_duplicate = !empty($duplicate_ids[$cms_page_panel_id]);
 				$missing = false;
-				if ($shopify_id === '' || $shopify_id === null){
+
+				if ($is_duplicate){
+					// Older clone of a valid shopify_id — drop without rechecking Shopify
+				} else if ($shopify_id === ''){
 					$missing = true;
 				} else {
-					$remote = $this->get_product($shopify_id, 1);
-					if (!is_array($remote) || empty($remote['id'])){
-						$missing = true;
+					if (!array_key_exists($shopify_id, $remote_ok)){
+						$remote = $this->get_product($shopify_id, 1);
+						$remote_ok[$shopify_id] = (is_array($remote) && !empty($remote['id'])
+								&& empty($remote['_not_found']));
 					}
+					$missing = empty($remote_ok[$shopify_id]);
 				}
 
-				if ($missing){
+				if ($is_duplicate || $missing){
 					$this->_purge_delete_product_images($cms_product);
 					if ($cms_page_panel_id){
 						$this->cms_page_panel_model->delete_cms_page_panel($cms_page_panel_id);
 					}
 					$purged++;
+					if ($is_duplicate){
+						$purged_duplicates++;
+					} else {
+						$purged_missing++;
+					}
 				} else {
 					$kept++;
 				}
 
-				$this->_purge_status_write($this->_purge_format_status($total, $purged, $kept), false);
+				$this->_purge_status_write(
+						$this->_purge_format_status($total, $purged, $kept, $purged_missing, $purged_duplicates),
+						false
+				);
 
 				if ((time() - $started) >= $max_seconds){
 					$stopped = true;
@@ -1740,7 +2483,7 @@ class shopify_product_model extends Model {
 				$this->cms_slug_model->_regenerate_sitemap();
 			}
 
-			$text = $this->_purge_format_status($total, $purged, $kept);
+			$text = $this->_purge_format_status($total, $purged, $kept, $purged_missing, $purged_duplicates);
 			if ($stopped){
 				$text .= ' - stopped (50s limit)';
 			} else {
@@ -1753,7 +2496,326 @@ class shopify_product_model extends Model {
 					'text' => $text,
 					'total' => $total,
 					'purged' => $purged,
+					'purged_missing' => $purged_missing,
+					'purged_duplicates' => $purged_duplicates,
 					'kept' => $kept,
+					'stopped' => $stopped,
+					'done' => true,
+					'running' => false,
+			];
+
+		} finally {
+
+			if (file_exists($lock)){
+				unlink($lock);
+			}
+
+		}
+
+	}
+
+	function _images_purge_status_path(){
+
+		return $GLOBALS['config']['base_path'].'cache/shopify_images_purge_status.txt';
+
+	}
+
+	function _images_purge_lock_path(){
+
+		return $GLOBALS['config']['base_path'].'cache/shopify_images_purge.lock';
+
+	}
+
+	function images_purge_status_read(){
+
+		$path = $this->_images_purge_status_path();
+		clearstatcache(true, $path);
+		clearstatcache(true, $this->_images_purge_lock_path());
+
+		$raw = '';
+		if (file_exists($path)){
+			$raw = (string)@file_get_contents($path);
+		}
+
+		$lines = preg_split("/\r\n|\n|\r/", trim($raw));
+		$display = $lines[0] ?? '';
+		$running = file_exists($this->_images_purge_lock_path());
+		$has_done_marker = false;
+		foreach ($lines as $line){
+			if (trim($line) === 'done'){
+				$has_done_marker = true;
+				break;
+			}
+		}
+
+		return [
+				'text' => $display,
+				'done' => !$running && $has_done_marker,
+				'running' => $running,
+		];
+
+	}
+
+	function _images_purge_status_write($text, $done = false){
+
+		$content = $text;
+		if ($done){
+			$content .= "\ndone";
+		}
+
+		file_put_contents($this->_images_purge_status_path(), $content, LOCK_EX);
+		clearstatcache(true, $this->_images_purge_status_path());
+
+	}
+
+	function _images_purge_format_status($found, $needed, $orphans, $moved){
+
+		return 'Found '.$found.', needed '.$needed.', orphans '.$orphans.', moved '.$moved;
+
+	}
+
+	/**
+	 * Load cms_image rows that look like Shopify scrapes (category and/or path prefix).
+	 */
+	function _list_shopify_cms_images(){
+
+		$sql = "select cms_image_id, filename, category, meta from cms_image ".
+				"where category = 'shopify' or filename regexp '(^|/)shopify_' ".
+				"order by cms_image_id asc ";
+		$query = $this->db->query($sql);
+
+		return $query->result_array();
+
+	}
+
+	/**
+	 * True if $filename is used as a panel param value (product image fields, page settings, etc.).
+	 * Page covers live in params too — there is no cms_page.image column.
+	 */
+	function _filename_is_referenced($filename){
+
+		if (empty($filename) || !is_string($filename)){
+			return false;
+		}
+
+		$sql = 'select cms_page_panel_param_id from cms_page_panel_param where value = ? limit 1 ';
+		$query = $this->db->query($sql, [$filename]);
+
+		return $query->num_rows() > 0;
+
+	}
+
+	function _shopify_filename_referenced_cached($filename, &$ref_cache){
+
+		if (array_key_exists($filename, $ref_cache)){
+			return $ref_cache[$filename];
+		}
+
+		$ref_cache[$filename] = $this->_filename_is_referenced($filename);
+
+		return $ref_cache[$filename];
+
+	}
+
+	/**
+	 * Crop-child filenames for a parent cms_image row (path pattern + meta.child_ids).
+	 */
+	function _shopify_image_child_filenames($parent_row){
+
+		$out = [];
+		$parent_fn = $parent_row['filename'] ?? '';
+		if ($parent_fn === ''){
+			return $out;
+		}
+
+		$name_a = pathinfo($parent_fn);
+		$dir = isset($name_a['dirname']) ? str_replace('\\', '/', $name_a['dirname']) : '';
+		$base = $name_a['filename'] ?? '';
+		$ext = $name_a['extension'] ?? '';
+		if ($base !== '' && $ext !== ''){
+			$like = ($dir === '.' || $dir === '' ? '' : $dir.'/').$base.'_v%.'.$ext;
+			$sql = 'select filename from cms_image where filename like ? ';
+			$query = $this->db->query($sql, [$like]);
+			foreach ($query->result_array() as $row){
+				if (!empty($row['filename'])){
+					$out[$row['filename']] = true;
+				}
+			}
+		}
+
+		$meta = [];
+		if (!empty($parent_row['meta']) && is_string($parent_row['meta'])){
+			$meta = json_decode($parent_row['meta'], true) ?: [];
+		}
+		if (!empty($meta['child_ids']) && is_array($meta['child_ids'])){
+			$ids = array_values(array_filter(array_map('intval', $meta['child_ids'])));
+			if (!empty($ids)){
+				$placeholders = implode(',', array_fill(0, count($ids), '?'));
+				$sql = 'select filename from cms_image where cms_image_id in ('.$placeholders.') ';
+				$query = $this->db->query($sql, $ids);
+				foreach ($query->result_array() as $row){
+					if (!empty($row['filename'])){
+						$out[$row['filename']] = true;
+					}
+				}
+			}
+		}
+
+		return array_keys($out);
+
+	}
+
+	/**
+	 * Keep this Shopify image if it (or its parent/child family) is still referenced.
+	 */
+	function _shopify_image_is_needed($row, &$ref_cache){
+
+		$filename = $row['filename'] ?? '';
+		if ($filename === ''){
+			return false;
+		}
+
+		if ($this->_shopify_filename_referenced_cached($filename, $ref_cache)){
+			return true;
+		}
+
+		$meta = [];
+		if (!empty($row['meta']) && is_string($row['meta'])){
+			$meta = json_decode($row['meta'], true) ?: [];
+		}
+
+		// Child: keep if parent or any sibling is still used
+		$parent_fn = $meta['parent_filename'] ?? '';
+		if ($parent_fn !== '' && is_string($parent_fn)){
+
+			if ($this->_shopify_filename_referenced_cached($parent_fn, $ref_cache)){
+				return true;
+			}
+
+			$parent_row = [
+					'filename' => $parent_fn,
+					'cms_image_id' => (int)($meta['parent_cms_image_id'] ?? 0),
+					'meta' => '',
+			];
+			if (!empty($meta['parent_cms_image_id'])){
+				$sql = 'select cms_image_id, filename, meta from cms_image where cms_image_id = ? limit 1 ';
+				$query = $this->db->query($sql, [(int)$meta['parent_cms_image_id']]);
+				if ($query->num_rows()){
+					$parent_row = $query->row_array();
+				}
+			}
+
+			foreach ($this->_shopify_image_child_filenames($parent_row) as $sibling_fn){
+				if ($sibling_fn === $filename){
+					continue;
+				}
+				if ($this->_shopify_filename_referenced_cached($sibling_fn, $ref_cache)){
+					return true;
+				}
+			}
+
+			return false;
+
+		}
+
+		// Parent: keep if any crop child is still used
+		foreach ($this->_shopify_image_child_filenames($row) as $child_fn){
+			if ($this->_shopify_filename_referenced_cached($child_fn, $ref_cache)){
+				return true;
+			}
+		}
+
+		return false;
+
+	}
+
+	/**
+	 * Move orphan Shopify cms_image files (and resized copies) to cache/tmp/img/.
+	 * One-by-one: check reference, then move if orphan (no bulk pre-scan).
+	 * Soft-stops after $max_seconds. Click again to continue.
+	 */
+	function purge_orphan_shopify_images($max_seconds = 100){
+
+		$lock = $this->_images_purge_lock_path();
+		if (file_exists($lock)){
+			return [
+					'error' => 'busy',
+					'text' => 'Wait, image purge is running',
+					'running' => true,
+					'done' => false,
+			];
+		}
+
+		file_put_contents($lock, (string)time());
+		$this->_images_purge_status_write('Loading images...', false);
+
+		$max_seconds = (int)$max_seconds;
+		if ($max_seconds < 1){
+			$max_seconds = 100;
+		}
+
+		$started = time();
+		$stopped = false;
+
+		try {
+
+			$this->load->model('cms/cms_image_model');
+
+			$rows = $this->_list_shopify_cms_images();
+			$found = count($rows);
+			$needed = 0;
+			$orphans = 0;
+			$moved = 0;
+			$ref_cache = [];
+
+			$this->_images_purge_status_write(
+					$this->_images_purge_format_status($found, $needed, $orphans, $moved),
+					false
+			);
+
+			foreach ($rows as $row){
+
+				$filename = $row['filename'] ?? '';
+				if ($filename === ''){
+					continue;
+				}
+
+				if ($this->_shopify_image_is_needed($row, $ref_cache)){
+					$needed++;
+				} else {
+					$orphans++;
+					if ($this->cms_image_model->move_cms_image_to_tmp($filename)){
+						$moved++;
+					}
+				}
+
+				$this->_images_purge_status_write(
+						$this->_images_purge_format_status($found, $needed, $orphans, $moved),
+						false
+				);
+
+				if ((time() - $started) >= $max_seconds){
+					$stopped = true;
+					break;
+				}
+
+			}
+
+			$text = $this->_images_purge_format_status($found, $needed, $orphans, $moved);
+			if ($stopped){
+				$text .= ' - stopped (100s limit)';
+			} else {
+				$text .= ' - done';
+			}
+
+			$this->_images_purge_status_write($text, true);
+
+			return [
+					'text' => $text,
+					'found' => $found,
+					'needed' => $needed,
+					'orphans' => $orphans,
+					'moved' => $moved,
 					'stopped' => $stopped,
 					'done' => true,
 					'running' => false,

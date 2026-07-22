@@ -9,13 +9,25 @@
 			"type": "shopify/shopify_cms_sync",
 			"name": "sync",
 			"label": "Sync products",
-			"help": "Loads the Shopify frontpage collection, creates missing CMS products, and fully refreshes products that changed on Shopify. Stops after about 50 seconds — click Sync again to continue."
+			"help": "Loads the Shopify frontpage collection, creates missing CMS products, and fully refreshes products that changed on Shopify. When nothing is new or stale, fully refreshes one product with the oldest Shopify check (shopify_checked_at). Stops after about 50 seconds — click Sync again to continue."
 		},
 		{
 			"type": "shopify/shopify_cms_purge",
 			"name": "purge",
 			"label": "Purge products",
-			"help": "Deletes local products whose Shopify ID no longer exists on Shopify (and related images). Oldest products first. Stops after about 50 seconds — click Purge again to continue."
+			"help": "Deletes local products missing on Shopify, and older local duplicates of the same Shopify ID (keeps the newest panel). Related images removed. Oldest first. Stops after about 50 seconds — click Purge again to continue."
+		},
+		{
+			"type": "shopify/shopify_cms_images_purge",
+			"name": "purge_images",
+			"label": "Purge images",
+			"help": "Moves unused Shopify-scraped images (and their resized copies) to cache/tmp/img/, preserving paths. Stops after about 100 seconds — click again to continue."
+		},
+		{
+			"type": "shopify/shopify_cms_reload",
+			"name": "reload_data",
+			"label": "Reload Shopify data",
+			"help": "Marks every local product for a full Shopify refresh (sync_needed). Does not call Shopify immediately — run Sync to process the queue. Products not yet refreshed keep serving cached CMS / thumbnail HTML."
 		},
 		{
 			"type": "text",
@@ -44,6 +56,31 @@
 			"label": "Max refresh time per request (seconds)",
 			"default": "30",
 			"help": "Budget for Shopify Admin API product refreshes in one page request (default 30). When exhausted, serve CMS data without more live API calls"
+		},
+		{
+			"type": "subtitle",
+			"label": "Collection mapping"
+		},
+		{
+			"type": "text",
+			"name": "collection_subcategory_suffix",
+			"label": "Subcategory suffix",
+			"default": "range",
+			"help": "Shopify titles ending with this become shop/subcategory (Shop by range). Parent shop/category is set manually (or fallback). Example: suffix \"range\" → \"Sugar & Sass Range\" → subcategory Sugar & Sass. Matching is case-insensitive; suffix is stripped from the heading."
+		},
+		{
+			"type": "repeater",
+			"name": "collection_collection_suffixes",
+			"label": "Collection suffixes",
+			"help": "Shopify titles ending with any of these become shop/collection (multi-membership on the product). Example: suffix \"category\" → \"Birthday Category\" → collection Birthday. Add one row per client naming pattern.",
+			"fields": [
+				{
+					"type": "text",
+					"name": "suffix",
+					"label": "Suffix",
+					"mandatory": "1"
+				}
+			]
 		}
 	]
 }

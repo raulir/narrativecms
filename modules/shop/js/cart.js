@@ -23,9 +23,9 @@ function cart_set_badge(quantity){
 		$container.addClass('cart_empty')
 	}
 
-	var $num = $container.find('.cart_number_loaded, .cart_number_loading').first()
+	var $num = $container.find('.cart_quantity').first()
 	if ($num.length){
-		$num.removeClass('cart_number_loading').addClass('cart_number_loaded').html(quantity)
+		$num.html(quantity)
 	}
 
 }

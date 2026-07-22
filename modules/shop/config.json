@@ -29,6 +29,10 @@
 			"name":"Subcategory"
 		},
 		{
+			"id":"collection",
+			"name":"Collection"
+		},
+		{
 			"id":"producttext",
 			"name":"Product text"
 		},
@@ -77,6 +81,13 @@
 			"order":120
 		},
 		{
+			"id":"shop_collections",
+			"name":"Product collections",
+			"parent":"shop",
+			"url":"admin/cms_list/shop__collection/",
+			"order":125
+		},
+		{
 			"id":"shop_producttexts",
 			"name":"Product texts",
 			"parent":"shop",
@@ -121,35 +132,6 @@
 			"order":210
 		},
 		{
-			"id":"shop_settings",
-			"name":"Shop settings",
-			"parent":"shop",
-			"access":"shop_settings",
-			"url":"admin/panel_settings/shop__shop/",
-			"order":700
-		},
-		{
-			"id":"productbuy_settings",
-			"name":"Product buy settings",
-			"parent":"shop",
-			"url":"admin/panel_settings/shop__productbuy/",
-			"order":710
-		},
-		{
-			"id":"productdimensions_settings",
-			"name":"Product dimensions settings",
-			"parent":"shop",
-			"url":"admin/panel_settings/shop__productdimensions/",
-			"order":720
-		},
-		{
-			"id":"checkout_settings",
-			"name":"Checkout settings",
-			"parent":"shop",
-			"url":"admin/panel_settings/shop__checkout/",
-			"order":730
-		},
-		{
 			"id":"shop_delivery",
 			"name":"Delivery methods",
 			"parent":"shop",
@@ -162,6 +144,55 @@
 			"parent":"shop",
 			"url":"admin/cms_list/shop__delivery_set/",
 			"order":750
+		},
+		{
+			"id":"shop_panel_settings",
+			"name":"Shop settings",
+			"parent":"shop",
+			"order":760
+		},
+		{
+			"id":"shop_settings",
+			"name":"General",
+			"parent":"shop_panel_settings",
+			"access":"shop_settings",
+			"url":"admin/panel_settings/shop__shop/",
+			"order":10
+		},
+		{
+			"id":"productbuy_settings",
+			"name":"Product buy",
+			"parent":"shop_panel_settings",
+			"url":"admin/panel_settings/shop__productbuy/",
+			"order":20
+		},
+		{
+			"id":"productdimensions_settings",
+			"name":"Product dimensions",
+			"parent":"shop_panel_settings",
+			"url":"admin/panel_settings/shop__productdimensions/",
+			"order":30
+		},
+		{
+			"id":"checkout_settings",
+			"name":"Checkout",
+			"parent":"shop_panel_settings",
+			"url":"admin/panel_settings/shop__checkout/",
+			"order":40
+		},
+		{
+			"id":"cart_settings",
+			"name":"Cart",
+			"parent":"shop_panel_settings",
+			"url":"admin/panel_settings/shop__cart/",
+			"order":50
+		},
+		{
+			"id":"category_settings",
+			"name":"Product category",
+			"parent":"shop_panel_settings",
+			"url":"admin/panel_settings/shop__category/",
+			"order":60
 		}
 	]
 }

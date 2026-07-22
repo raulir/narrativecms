@@ -13,13 +13,15 @@
 		{
 			"type": "text",
 			"name": "heading",
-			"label": "Heading"
+			"label": "Heading",
+			"search": "2"
 		},
 		{
 			"type": "textarea",
 			"name": "text",
 			"label": "Text",
-			"lines": "3"
+			"lines": "3",
+			"search": "1"
 		},
 		{
 			"type": "colour",

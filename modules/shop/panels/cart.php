@@ -151,8 +151,8 @@ class cart extends \Controller{
 
 		$params['cart']['number_text'] = str_replace(
 				'{{number}}',
-				'<div class="cart_number_loaded">'.$quantity.'</div>',
-				$params['number_template'] ?? '{{number}}'
+				'<div class="cart_quantity">'.$quantity.'</div>',
+				$params['cart_label']
 		);
 
 		$params['cart_visible'] = !empty($_SESSION['shop']['cart_visible']);
