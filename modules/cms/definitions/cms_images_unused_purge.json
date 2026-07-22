@@ -1,0 +1,5 @@
+{
+	"version": "2",
+	"label": "Purge unused images",
+	"description": "Admin control on Data dumps to soft-move unused dated library images to cache/tmp/img/"
+}

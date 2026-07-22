@@ -134,6 +134,16 @@ Nested page panels editor.
 
 Select panel type from installed modules.
 
+### list
+
+| Property | Description |
+|----------|-------------|
+| `add_empty` | `"1"` — prepend `-- not specified --` option (value `''`) |
+| `mandatory` | `"1"` — requires a selection; implies `add_empty`. Empty values `''` and `0` fail validation |
+| `link_target` | `"1"` — only lists with definition `list.link_target` set (linkable / public slug lists). `"0"` or omit — all lists |
+
+Select one **list panel type** (definitions with a `"list"` block), e.g. `shop/product`. Labels are formatted `Shop/Product` (each path segment capitalised). Stored value is the raw id `module/panel`.
+
 ### fk
 
 | Property | Description |

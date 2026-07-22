@@ -116,12 +116,30 @@ Do **not** paper over missing or old CMS param values at request time:
 - No controller checks like `if (empty($params['heading'])) { $params['heading'] = '…'; }` for labels/copy that live in the panel definition defaults
 - No template guards solely for “maybe the field was not re-saved after a definition change” (`if (!empty($heading))` around every label)
 - No regex stripping / normalising of legacy stored strings on every page view (e.g. turning `"--- or ---"` into `"or"`)
+- **No dual-key / rename fallbacks** in production code, e.g. `$params['cart_label'] ?? $params['number_template'] ?? '…'`. After a field rename, the code uses **only** the new name.
 
-**Why:** empty or stale values only appear when a developer changed definition/template mid-project, or data was never re-saved. That is rare and fixed by the admin re-saving the panel (definition defaults apply on save), or by a one-off script outside the CMS for a whole env. Running fallbacks on every page generation costs every visitor for almost no real cases.
+**Why:** empty or stale values only appear when a developer changed definition/template mid-project, or data was never re-saved. That is rare and fixed by updating the DB (or re-saving admin) **at change time**, not by carrying forever-fallbacks into live for shapes that never existed on live. Running fallbacks on every page generation costs every visitor for almost no real cases, and the codebase accumulates thousands of dead branches.
 
-**Do:** put good `"default"` values in definition JSON; after field renames/additions during development, re-save the block or run an explicit migration script if the env is large. Same spirit as the cache rule — no dual serve-time paths for “old shape”.
+**Do at rename / reshape time (dev):**
+
+1. Change definition JSON (`"name"`, `"default"`)
+2. Update PHP/templates/JS to the **new** key only
+3. **Migrate stored data now** — e.g. `UPDATE cms_page_panel_param SET name = 'cart_label', value = '…' WHERE name = 'number_template'` and fix the cached `name = ''` JSON blob if present
+4. Or re-save the settings panel in admin so defaults and new keys stick
+
+Do **not** leave “read old or new” in the runtime path. One-off SQL/scripts outside request handling are fine; dual serve-time paths are not.
 
 **Select value `0` / “No”:** never use PHP `empty()` when reading CMS field values for admin print or templates — `empty('0')` is true and wipes legitimate No/0 choices. Prefer `isset` / `array_key_exists`, or `(int)$value > 0` when the scale is 0/1/2 show flags.
+
+### Frontend copy (labels, headings, button text)
+
+**All visitor-facing text must come from CMS panel fields** (definition `"item"` / `"settings"` with `"default"` where needed) — not hard-coded strings in templates, PHP, or JS for UI labels.
+
+This includes column headings, empty states, button labels, menu column titles, cart badge templates, etc. Hard-coded copy cannot be edited in admin, translated, or A/B-tested without a deploy.
+
+**Do:** put strings in the relevant panel definition; print `$label_…` / `$params['…']` in the template (or pass into JS via `data-*` if the client needs them).
+
+**Do not:** write English (or any language) UI sentences directly in `.tpl.php` / panel PHP / front-end JS except for truly technical non-UI cases (console debug, API error keys for developers).
 
 ### Cache
 
@@ -152,6 +170,21 @@ All styles on the template have to start with `<panel name>_` prefix.
 All panels must have `<panel name>_container` and `<panel name>_content` elements around the rest of the content.
 
 HTML `data-*` attributes with multi-word names use underscores after the prefix: `data-unit_id`, `data-label_correct`. Do not use hyphens between words (`data-unit-id`, `data-label-correct`).
+
+### CMS field output (trust admin content)
+
+Values that come from CMS panel fields / settings are **admin-controlled**. Print them simply:
+
+```php
+<?= $search_placeholder ?>
+<?= $heading ?>
+```
+
+**Do not** wrap ordinary CMS text in `htmlspecialchars(..., ENT_QUOTES, 'UTF-8')` (or equivalent) on every output. That adds serve-time work for no benefit under this project’s trust model, and fights the preferred low-ceremony template style.
+
+**Do not** invent dual defaults on print either (`<?= $x ?? 'fallback' ?>` for CMS labels) when the field has a definition `"default"` — re-save settings / migrate data instead (see “CMS field values” above).
+
+**Exceptions** (rare): building a raw JavaScript string literal by hand, or other non-HTML embedding where the context is not normal template text. Prefer `data-*` attributes or `json_encode` for structured handoff rather than ad-hoc escaping of CMS copy.
 
 ### Panel template partials
 

@@ -134,6 +134,8 @@ class cms_images extends \Controller {
 		$GLOBALS['_panel_js'][] = ['script' => 'modules/cms/js/dash/dash.min.js', 'no_pack' => 1, 'sync' => 'defer', ];
 		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_media_view.js';
 		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_video.js';
+		// Grid thumbs use data-cms_images_lazy; page ajax uses _no_js so must load with popup shell
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_images_lazy.js';
 
 		return $params;
 

@@ -68,6 +68,30 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 ## Images — [`cms_image.md`](cms_image.md)
 
 - Future image transforms (section placeholder — no items yet)
+- [x] **Unused image purge on Data dumps** — months + category filter, Test size estimate, soft-move to `cache/tmp/img/` ([`cms_image.md`](cms_image.md) § Purge unused images)
+
+---
+
+## Data dumps / backups — [`cms_dump.php`](../panels/cms_dump.php)
+
+Nicer dump management page + multi-backup workflow (today: ad-hoc generate/download/upload of `_dump*.zip` only).
+
+### Page / UX
+
+- [ ] **Redesign dump management page** — modern CMS admin UI for `admin/dump/` (clear layout, status, actions; not raw table + bare forms)
+- [ ] **Multiple backups management** — keep and list several named/timestamped backups on this page (not a single overwrite of `_dump.zip` / `_dump_2.zip` / `_dump_db.zip`)
+- [ ] **Restore without downloading** — apply a backup that already sits on the server (from the list) without download/re-upload round-trip
+
+### Dump generation
+
+- [ ] **Resources as separate files by month** — split resource/image packs by `YYYY/MM` (easier partial transfer and restore) instead of one monolithic files zip
+- [ ] **Option: import resources without optimised images** — restore/upload originals only; skip derivative `_name.WIDTH.ext` (and similar) so target rebuilds optimised sizes lazily
+
+### Upload / restore safety
+
+- [ ] **Preflight PHP limits** — before upload/restore, check `upload_max_filesize`, `post_max_size`, and `memory_limit`; warn clearly when limits will fail the transfer
+- [ ] **Validate upload contents** — after resources are uploaded, verify structure/permissions/paths are allowed (no path traversal, expected layout, writable targets)
+- [ ] **Resources checksum registry** — store checksums of resource files; show when an update/restore is needed (local vs registered / package mismatch)
 
 ---
 

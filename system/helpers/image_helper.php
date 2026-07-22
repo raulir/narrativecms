@@ -2,6 +2,92 @@
 
 require_once 'image_optimiser_helper.php';
 
+if ( !function_exists('_image_cache_version')) {
+
+	/**
+	 * Cache-bust token for image URLs when cache.force_image_download is on.
+	 * Prefer cms_image.hash (short), else filemtime of $filepath / upload file.
+	 * Cached per request in $GLOBALS['cache']['image_url_v'].
+	 */
+	function _image_cache_version($filename, $filepath = ''){
+
+		if (empty($GLOBALS['config']['cache']['force_image_download'])){
+			return '';
+		}
+
+		if (!is_string($filename)){
+			$filename = '';
+		}
+		if (!is_string($filepath)){
+			$filepath = '';
+		}
+
+		$cache_key = $filename;
+		if ($filepath !== ''){
+			$cache_key .= '|'.$filepath;
+		}
+		if ($cache_key === ''){
+			return '';
+		}
+
+		if (!isset($GLOBALS['cache']['image_url_v']) || !is_array($GLOBALS['cache']['image_url_v'])){
+			$GLOBALS['cache']['image_url_v'] = [];
+		}
+		if (array_key_exists($cache_key, $GLOBALS['cache']['image_url_v'])){
+			return $GLOBALS['cache']['image_url_v'][$cache_key];
+		}
+
+		$v = '';
+
+		if ($filename !== ''){
+			if (!empty($GLOBALS['cache']['images_by_filename'][$filename]['hash'])){
+				$v = substr((string)$GLOBALS['cache']['images_by_filename'][$filename]['hash'], 0, 12);
+			} else if (function_exists('get_instance')){
+				$ci =& get_instance();
+				if (is_object($ci) && isset($ci->load)){
+					$ci->load->model('cms/cms_image_model');
+					$row = $ci->cms_image_model->get_cms_image_by_filename($filename);
+					if (!empty($row['hash'])){
+						$v = substr((string)$row['hash'], 0, 12);
+					}
+				}
+			}
+		}
+
+		if ($v === ''){
+			$path = $filepath;
+			if ($path === '' && $filename !== ''){
+				$path = $GLOBALS['config']['upload_path'].$filename;
+			}
+			if ($path !== '' && file_exists($path) && !is_dir($path)){
+				$v = (string)@filemtime($path);
+			}
+		}
+
+		$GLOBALS['cache']['image_url_v'][$cache_key] = $v;
+
+		return $v;
+
+	}
+
+	/**
+	 * Append ?v=… (or &v=…) when force_image_download is on.
+	 */
+	function _image_url_with_version($url, $filename, $filepath = ''){
+
+		$v = _image_cache_version($filename, $filepath);
+		if ($v === '' || $v === null){
+			return $url;
+		}
+
+		$sep = (strpos($url, '?') === false) ? '?' : '&';
+
+		return $url.$sep.'v='.rawurlencode($v);
+
+	}
+
+}
+
 if ( !function_exists('_i')) {
 
 	/**
@@ -34,7 +120,9 @@ if ( !function_exists('_i')) {
 
 			if (empty($params['silent'])){
 				if (substr($image_data['image'], 0, 4) != 'http'){
-					print(($GLOBALS['config']['base_site'] ?? '').$GLOBALS['config']['upload_url'].$image_data['image']);
+					$url = ($GLOBALS['config']['base_site'] ?? '').$GLOBALS['config']['upload_url'].$image_data['image'];
+					$filepath = $GLOBALS['config']['upload_path'].$image_data['image'];
+					print(_image_url_with_version($url, $image, $filepath));
 				} else {
 					print($image_data['image']);
 				}
@@ -134,9 +222,10 @@ if ( !function_exists('_i')) {
 		// if gif or svg
 		if (($extension == 'gif' || $extension == 'svg') && file_exists($GLOBALS['config']['upload_path'].$image) && 
 				!is_dir($GLOBALS['config']['upload_path'].$image)){
-			
-			print('style="background-image:  url('.($GLOBALS['config']['base_site']??'').$GLOBALS['config']['upload_url'].
-					trim($image, '/').'); '.$params['css'].'"');
+
+			$gif_url = ($GLOBALS['config']['base_site']??'').$GLOBALS['config']['upload_url'].trim($image, '/');
+			$gif_url = _image_url_with_version($gif_url, $image, $GLOBALS['config']['upload_path'].$image);
+			print('style="background-image:  url('.$gif_url.'); '.$params['css'].'"');
 			return ['image' => $image, 'height' => 0, 'width' => 0, ];
 			
 		}
@@ -159,6 +248,7 @@ if ( !function_exists('_i')) {
 			if (!$has_source && !$has_fallback){
 
 				$fileurl = ($GLOBALS['config']['base_site'] ?? '').$GLOBALS['config']['base_url'].'modules/cms/img/cms_no_image.png';
+				$fileurl = _image_url_with_version($fileurl, 'cms/cms_no_image.png', $GLOBALS['config']['base_path'].'modules/cms/img/cms_no_image.png');
 				print('style="background-image:  url('.$fileurl.'); '.$params['css'].'"');
 				return ['image' => $image, 'height' => 0, 'width' => 0, ];
 
@@ -197,11 +287,21 @@ if ( !function_exists('_i')) {
 				}
 			}
 
-			$cover = $GLOBALS['config']['upload_path'].$cover_base.'.data/cover.jpg';
-			if (!file_exists($cover)){
-				$cover = $GLOBALS['config']['base_url'].'modules/cms/img/cms_video_loading.png';
-			} else {
+			$cover_path = $GLOBALS['config']['upload_path'].$cover_base.'.data/cover.jpg';
+			$loading_poster = ($GLOBALS['config']['base_site'] ?? '').$GLOBALS['config']['base_url'].'modules/cms/img/cms_video_loading.png';
+			$loading_poster = _image_url_with_version(
+					$loading_poster,
+					'cms/cms_video_loading.png',
+					$GLOBALS['config']['base_path'].'modules/cms/img/cms_video_loading.png'
+			);
+
+			// Real cover when available; otherwise transparent until ready (loading image only after 3s via JS)
+			$has_cover = file_exists($cover_path);
+			if ($has_cover){
 				$cover = $GLOBALS['config']['upload_url'].$cover_base.'.data/cover.jpg';
+				$cover = _image_url_with_version($cover, $cover_base, $cover_path);
+			} else {
+				$cover = '';
 			}
 
 			add_css('modules/cms/css/cms_video_view.scss');
@@ -220,8 +320,21 @@ if ( !function_exists('_i')) {
 				$params['video'] .= ' data-source_w="'.(int)$view_meta['source_width'].'"';
 				$params['video'] .= ' data-source_h="'.(int)$view_meta['source_height'].'"';
 			}
-			
-			print($params['video'].' data-cms_video_poster="'.$cover.'" style="background-image:  url('.$cover.'); '.$params['css'].'" ');
+
+			$video_attrs = $params['video'];
+			if ($has_cover){
+				$video_attrs .= ' data-cms_video_poster="'.htmlspecialchars($cover, ENT_QUOTES, 'UTF-8').'"';
+				$video_style = 'background-image: url('.htmlspecialchars($cover, ENT_QUOTES, 'UTF-8').'); ';
+			} else {
+				// Delayed generic spinner (cms_video_mark_pending → 3s)
+				$video_attrs .= ' data-cms_video_loading_poster="'.htmlspecialchars($loading_poster, ENT_QUOTES, 'UTF-8').'"';
+				$video_style = 'background-color: rgba(255,255,255,0); background-image: none; ';
+			}
+			if (!empty($params['css'])){
+				$video_style .= $params['css'];
+			}
+
+			print($video_attrs.' style="'.$video_style.'" ');
 			
 			$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_media_view.js';
 			$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_video.js';
@@ -278,6 +391,7 @@ if ( !function_exists('_i')) {
 				|| empty($image_db_data['original_width'])){
 			
 			$fileurl = ($GLOBALS['config']['base_site'] ?? '').$GLOBALS['config']['base_url'].'modules/cms/img/cms_no_image.png';
+			$fileurl = _image_url_with_version($fileurl, 'cms/cms_no_image.png', $GLOBALS['config']['base_path'].'modules/cms/img/cms_no_image.png');
 			$image_data['width'] = 2800;
 			$image_data['height'] = 2800;
 			
@@ -290,7 +404,8 @@ if ( !function_exists('_i')) {
 			// if no resizing
 			if((empty($params['width']) && empty($params['height'])) || empty($image_db_data['name'])){
 				
-				$fileurl = $GLOBALS['config']['upload_url'].$image;
+				$fileurl = ($GLOBALS['config']['base_site'] ?? '').$GLOBALS['config']['upload_url'].$image;
+				$fileurl = _image_url_with_version($fileurl, $image, $GLOBALS['config']['upload_path'].$image);
 				$image_data['width'] = $image_db_data['original_width'];
 				$image_data['height'] = $image_db_data['original_height'];
 				
@@ -353,6 +468,10 @@ if ( !function_exists('_i')) {
 						'/_'.$image_db_data['name'].'.'.$params['width_lq'].'.'.$params['output'];
 				$fileurl_mobile = ($GLOBALS['config']['base_site'] ?? '').$GLOBALS['config']['upload_url'].$image_dir.
 						'/_'.$image_db_data['name'].'.'.$params['width_mobile'].'.'.$params['output'];
+				// Version by parent cms_image (hash) so all sizes bust together when source changes
+				$fileurl_hq = _image_url_with_version($fileurl_hq, $image, $filename_hq);
+				$fileurl_lq = _image_url_with_version($fileurl_lq, $image, $filename_lq);
+				$fileurl_mobile = _image_url_with_version($fileurl_mobile, $image, $filename_mobile);
 				
 				// if mobile
 				if ($_SESSION['mobile']){
@@ -406,9 +525,16 @@ if ( !function_exists('_i')) {
 		if (!empty($needs_lazy_loading)){
 			
 			$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_images_lazy.js';
+
+			// Interim: original (B/W via .cms_images_lazy_waiting) until optimised exists
+			// force_image_download still versions this URL; resize swaps to derivative + ?v=
+			$lazy_url = trim(($GLOBALS['config']['base_site']??''),'/').$GLOBALS['config']['upload_url'].$image;
+			$lazy_url = _image_url_with_version($lazy_url, $image, $GLOBALS['config']['upload_path'].$image);
+			$lazy_v = _image_cache_version($image, $GLOBALS['config']['upload_path'].$image);
 			
-			print(' style="background-image: url('.trim(($GLOBALS['config']['base_site']??''),'/').$GLOBALS['config']['upload_url'].$image.'); '.
+			print(' style="background-image: url('.$lazy_url.'); '.
 					$params['css'].'" data-cms_images_lazy="'.$image.'" data-output="'.$params['output'].'" '.
+					($lazy_v !== '' ? ' data-v="'.htmlspecialchars($lazy_v, ENT_QUOTES, 'UTF-8').'" ' : '').
 					' data-w1="'.$params['width_1'].'" '.(!empty($params['width_2']) ? ' data-w2="'.$params['width_2'].'" ' : '').$dataprops);
 		
 		} elseif ($_SESSION['mobile']){

@@ -188,6 +188,28 @@ Examples: `1 (2)`, `0 (0)`, `0 (1)`, `(0)`, `(15)`.
 
 Delete confirmation uses total usage (self + children for parents, self only for children): e.g. `1 (3)` warns **in use at 4 places**.
 
+## Purge unused images (admin/dump)
+
+On **Data dumps** (`admin/dump/`), a control **Images older than months** can soft-move unused library images to `cache/tmp/img/` (same recoverability pattern as Shopify image purge).
+
+| Control | Meaning |
+|---------|---------|
+| Months (default 3) | Path month `YYYY/MM` must be older than this many months |
+| Category | Optional filter (same list as the image selector); empty = all |
+| **Test** | Dry-run: candidate count + total size (original + derivatives + `.data/`) |
+| **Purge** | Move eligible rows; soft-stops after ~100s — click again to continue |
+
+**Eligible when all of:**
+
+1. Filename not referenced in `cms_page_panel_param` (usage count 0)
+2. Not a parent that still has children (`child_ids` / `_vN`)
+3. Child rows skipped while their parent is still referenced
+4. Dated path only (`YYYY/MM/…`) — module copies (`cms/…`, `timmy/…`, …) are never candidates
+5. Older than the months threshold
+6. Optional category match
+
+Uses [`move_cms_image_to_tmp()`](../models/cms_image_model.php). Distinct from **Shopify → Purge images** (shopify-scraped orphans only).
+
 Export uses GD:
 - Crop area can extend beyond the source image
 - Areas outside the source are transparent (PNG) or white (JPEG)
@@ -226,8 +248,9 @@ Playback, background fit, poster, and warden behaviour: [`cms_video.md`](cms_vid
 | Template | `modules/cms/templates/cms_image.tpl.php` |
 | Model | `modules/cms/models/cms_image_model.php` |
 | Save / delete / check | `modules/cms/panels/cms_images.php` (`panel_action`) |
-| JS | `modules/cms/js/cms_image.js`, `modules/cms/js/cms_images.js`, `modules/cms/js/cms_media_view.js`, `modules/cms/js/cms_video.js` |
-| SCSS | `modules/cms/css/cms_image.scss`, `modules/cms/css/cms_video_view.scss` |
+| Unused purge (dump page) | `modules/cms/panels/cms_images_unused_purge.php` |
+| JS | `modules/cms/js/cms_image.js`, `modules/cms/js/cms_images.js`, `modules/cms/js/cms_media_view.js`, `modules/cms/js/cms_video.js`, `modules/cms/js/cms_images_unused_purge.js` |
+| SCSS | `modules/cms/css/cms_image.scss`, `modules/cms/css/cms_video_view.scss`, `modules/cms/css/cms_images_unused_purge.scss` |
 | `_ib` | `system/helpers/image_helper.php` |
 
 ## TODO (future image transforms)

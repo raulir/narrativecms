@@ -637,7 +637,53 @@ var cms_video_reveal_min_ms = 200
 
 function cms_video_clear_poster($host){
 
-	$host.css({'background-image': ''})
+	$host.css({'background-image': '', 'background-color': ''})
+	$host.removeClass('cms_video_show_loading')
+
+}
+
+function cms_video_clear_loading_timer($host){
+
+	var loading_timer = $host.data('cms_video_loading_timer')
+	if (loading_timer){
+		clearTimeout(loading_timer)
+		$host.removeData('cms_video_loading_timer')
+	}
+
+}
+
+// Generic spinner only after cms_video_reveal_max_ms when no real cover was set
+function cms_video_schedule_loading_poster($host){
+
+	var loading_url = $host.attr('data-cms_video_loading_poster') || $host.data('cms_video_loading_poster') || ''
+	if (!loading_url){
+		return
+	}
+
+	if ($host.data('cms_video_loading_timer')){
+		return
+	}
+
+	var loading_timer = setTimeout(function(){
+
+		$host.removeData('cms_video_loading_timer')
+
+		if (!$host.length || $host.hasClass('cms_video_ready') || !$host.hasClass('cms_video_pending')){
+			return
+		}
+
+		$host.addClass('cms_video_show_loading')
+		$host.css({
+			'background-image': 'url(' + loading_url + ')',
+			'background-color': '',
+			'background-size': 'contain',
+			'background-repeat': 'no-repeat',
+			'background-position': 'center',
+		})
+
+	}, cms_video_reveal_max_ms)
+
+	$host.data('cms_video_loading_timer', loading_timer)
 
 }
 
@@ -647,8 +693,10 @@ function cms_video_mark_pending($host){
 		return
 	}
 
-	$host.addClass('cms_video_pending').removeClass('cms_video_ready')
+	$host.addClass('cms_video_pending').removeClass('cms_video_ready cms_video_show_loading')
 	$host.data('cms_video_pending_since', Date.now())
+
+	cms_video_schedule_loading_poster($host)
 
 	if ($host.data('cms_video_reveal_timer')){
 		return
@@ -680,8 +728,10 @@ function cms_video_reveal($host){
 		$host.removeData('cms_video_reveal_min_timer')
 	}
 
+	cms_video_clear_loading_timer($host)
+
 	$host.removeData('cms_video_pending_since')
-	$host.removeClass('cms_video_pending').addClass('cms_video_ready')
+	$host.removeClass('cms_video_pending cms_video_show_loading').addClass('cms_video_ready')
 	cms_video_clear_poster($host)
 
 	$host.find('.cms_video_view_clip, .cms_video').css({
@@ -821,10 +871,14 @@ function cms_video_wrapper($container, $style_host, options){
 		}
 	}
 
-	var poster = $style_host.data('cms_video_poster') || $container.data('cms_video_poster') || ''
+	var poster = $style_host.attr('data-cms_video_poster') || $style_host.data('cms_video_poster')
+		|| $container.attr('data-cms_video_poster') || $container.data('cms_video_poster') || ''
 
-	var $video = $('<video class="cms_video_player" autoplay="autoplay" muted="muted" loop="loop" playsinline="playsinline" poster="'
-		+ poster + '">')
+	// Empty poster when no real cover — avoid generic spinner flash on <video poster>
+	var poster_attr = poster ? ' poster="' + poster + '"' : ''
+
+	var $video = $('<video class="cms_video_player" autoplay="autoplay" muted="muted" loop="loop" playsinline="playsinline"'
+		+ poster_attr + '>')
 		.css(video_styles)
 
 	$video_wrapper.append($video)

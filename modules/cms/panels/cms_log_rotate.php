@@ -6,6 +6,37 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class cms_log_rotate extends \Controller {
 
+	/**
+	 * Min seconds between emails when the log has no real errors (23h 45m).
+	 * 15 minutes headroom so daily cron jitter does not skip a day.
+	 */
+	function _empty_email_min_interval(){
+		return (23 * 3600) + (45 * 60);
+	}
+
+	function _last_email_marker_path(){
+		return $GLOBALS['config']['base_path'].'cache/php_errors_last_email_at';
+	}
+
+	function _get_last_email_time(){
+		$path = $this->_last_email_marker_path();
+		if (!is_file($path)){
+			return 0;
+		}
+		$raw = trim((string)@file_get_contents($path));
+		if ($raw === '' || !ctype_digit($raw)){
+			return 0;
+		}
+		return (int)$raw;
+	}
+
+	function _set_last_email_time($time = null){
+		if ($time === null){
+			$time = time();
+		}
+		@file_put_contents($this->_last_email_marker_path(), (string)(int)$time);
+	}
+
 	function panel_action(){
 		
 		if (empty($GLOBALS['config']['errors_log'])){
@@ -16,8 +47,15 @@ class cms_log_rotate extends \Controller {
 		$trim_str = '[';
 				
 		$filename = $GLOBALS['config']['errors_log'];
+
+		if (!is_string($filename) || $filename === '' || !is_file($filename)){
+			return;
+		}
 		
 		$lines = file($filename);
+		if ($lines === false){
+			return;
+		}
 		
 		$errors = [];
 		$skipped = [];
@@ -50,19 +88,26 @@ class cms_log_rotate extends \Controller {
 		
 		}
 		
-		// sort errors by count
-		
-		function mysort($a, $b){
-			if ($a['count'] > $b['count']){
-				return -1;
+		// Sort by count descending
+		usort($errors, function($a, $b){
+			return ((int)$b['count']) <=> ((int)$a['count']);
+		});
+
+		$has_errors = !empty($errors);
+
+		// Empty report: email at most once per ~day (23h 45m since last real send)
+		if (!$has_errors){
+			$last_sent = $this->_get_last_email_time();
+			$elapsed = $last_sent > 0 ? (time() - $last_sent) : PHP_INT_MAX;
+			if ($elapsed < $this->_empty_email_min_interval()){
+				// Still clear the log so noise does not pile up
+				file_put_contents($filename, '');
+				return [
+						'message' => 'PHP error log empty — email skipped (last sent '.
+								($last_sent ? date('Y-m-d H:i:s', $last_sent) : 'never').')',
+				];
 			}
-			if ($a['count'] < $b['count']){
-				return 1;
-			}
-			return 0;
 		}
-		
-		usort($errors, 'mysort');
 		
 		// put together mail text
 		
@@ -72,15 +117,22 @@ class cms_log_rotate extends \Controller {
 		
 		$text .= '<b>PHP errors report:</b>'."\n\n";
 		$text .= 'Site name: '.str_replace(['#page#',' - '], '', $GLOBALS['config']['site_title'])."\n";
-		$text .= 'Server name: '.strtolower($_SERVER['SERVER_NAME'])."\n";
+		$text .= 'Server name: '.strtolower($_SERVER['SERVER_NAME'] ?? '')."\n";
 		$text .= 'Errors from: '.$email_filename."\n\n";
-		$text .= 'Count - Last seen - Error'."\n";
-		foreach($errors as $error) {
-			$text .= sprintf('%7s', $error['count']).' - '.$error['times'][(count($error['times']) - 1)].' - '.$error['message'];
+
+		if ($has_errors){
+			$text .= 'Count - Last seen - Error'."\n";
+			foreach($errors as $error) {
+				$text .= sprintf('%7s', $error['count']).' - '.$error['times'][(count($error['times']) - 1)].' - '.$error['message'];
+			}
+		} else {
+			$text .= "(No new PHP errors since last report.)\n";
 		}
 		
-		$text .= "\n\nSkipped:\n\n";
-		$text .= implode("\n", $skipped);
+		if ($skipped){
+			$text .= "\n\nSkipped:\n\n";
+			$text .= implode("\n", $skipped);
+		}
 
 		// add stats to archive too
 		file_put_contents($GLOBALS['config']['base_path'].'cache/php_errors_'.date('Y-m-d_H-i-s').'.log', $text);
@@ -94,8 +146,15 @@ class cms_log_rotate extends \Controller {
 
 			$html_text = str_replace(["\n", "\r\n"], '<br>', $text);
 
-			$subject = 'PHP errors '.(!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].']' : '').' '.
-					str_replace(['#page#',' - '], '', $GLOBALS['config']['site_title']).' ('.strtolower($_SERVER['SERVER_NAME']).')';
+			$env = !empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].']' : '';
+			$site = str_replace(['#page#',' - '], '', $GLOBALS['config']['site_title']);
+			$host = strtolower($_SERVER['SERVER_NAME'] ?? '');
+
+			if ($has_errors){
+				$subject = 'PHP errors '.$env.' '.$site.' ('.$host.')';
+			} else {
+				$subject = 'PHP errors OK '.$env.' '.$site.' ('.$host.')';
+			}
 
 			$this->cms_email_model->send_mail(
 					$GLOBALS['config']['admin_email'],
@@ -108,7 +167,15 @@ class cms_log_rotate extends \Controller {
 					]
 			);
 
+			$this->_set_last_email_time();
+
 		}
+
+		return [
+				'message' => $has_errors
+						? 'PHP errors report emailed ('.count($errors).' unique)'
+						: 'Empty PHP errors report emailed (daily OK)',
+		];
 	
 	}
 

@@ -45,7 +45,7 @@ Returns `bool`. Failures are logged with prefix `cms_email_model send_mail:`.
 | `user_model` | `send_email_verification()` |
 | `user/reminder` | Password reminder + update confirmation |
 | `form_model` | Autoreply, confirmation, admin notification emails |
-| `cms_log_rotate` | PHP error log summary to `admin_email` |
+| `cms_log_rotate` | PHP error log summary to `admin_email`. Real errors: every run. Empty log: email only if last send was ≥ 23h 45m ago (`cache/php_errors_last_email_at`) |
 
 Domain-specific content (tokens, templates, form field substitution) stays in the calling model or panel.
 

@@ -1,0 +1,85 @@
+// Search module pack has no Timmy vars — local breakpoint (same as basic/timmy)
+$mobile_width: 900px;
+
+.button_container {
+	display: block;
+	height: 100%;
+	font-size: inherit;
+	line-height: inherit;
+}
+
+.button_content {
+	display: block;
+	height: 100%;
+	position: relative;
+	font-size: inherit;
+	line-height: inherit;
+}
+
+// Label left, icon right — same weight as menu cart text
+.button_trigger {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.6rem;
+	height: 100%;
+	width: 100%;
+	box-sizing: border-box;
+	font-size: inherit;
+	line-height: inherit;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.button_label {
+	display: inline-block;
+	font-size: inherit;
+	line-height: inherit;
+	vertical-align: middle;
+}
+
+.button_icon {
+	flex: 0 0 2.3rem;
+	width: 2.3rem;
+	height: 2.3rem;
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+// Full page-width modal under main menu / category filter bar
+// Nudge 0.01rem up to close subpixel gap under sticky stack
+.button_modal {
+	display: none;
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: calc(var(--search_modal_top, 5.0rem) - 0.01rem);
+	width: 100%;
+	min-height: 0;
+	height: auto;
+	background-color: transparent;
+	z-index: 95;
+	box-sizing: border-box;
+	.button_open & {
+		display: block;
+	}
+}
+
+.button_modal_body {
+	display: block;
+	width: 100%;
+	min-height: 0;
+	box-sizing: border-box;
+}
+
+@media only screen and (max-width: $mobile_width) {
+
+	.button_icon {
+		flex-basis: 2.8rem;
+		width: 2.8rem;
+		height: 2.8rem;
+	}
+
+}

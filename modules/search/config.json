@@ -15,7 +15,26 @@
 		}
 	],
 	"panels":[
-
+		{
+			"id":"button",
+			"name":"Search button",
+			"flags":[
+				"hidden"
+			]
+		},
+		{
+			"id":"search",
+			"name":"Search",
+			"flags":[
+				"hidden"
+			]
+		},
+		{
+			"id":"searchajax",
+			"name":"Search results",
+			"flags":[
+				"hidden"
+			]
+		}
 	]
 }
-			

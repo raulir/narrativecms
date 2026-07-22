@@ -49,3 +49,13 @@ UPLOAD DUMP:<br>
 		<input type="submit" value="upload"> 
 	</form>
 </div>
+
+<br>
+<br>
+
+<?php _panel('cms/cms_images_unused_purge', [
+		'label' => 'Images older than months',
+		'min_months' => 3,
+		'category' => '',
+		'help' => '[Purge unused images]||Moves unused dated library images (YYYY/MM/…) older than the given months to cache/tmp/img/. Skips module paths (cms/, timmy/, …), parents with children, and any file still referenced in panel params. Use Test to estimate count and disk size first.',
+]); ?>

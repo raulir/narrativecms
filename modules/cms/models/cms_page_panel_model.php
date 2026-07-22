@@ -163,6 +163,7 @@ class cms_page_panel_model extends \Model {
 
 	function _write_panel_table_row($cms_page_panel_id, $panel_name, $data) {
 		$fields = $this->get_panel_table_fields($panel_name);
+		// No table → caller must keep values in params (_split leaves them when table missing)
 		if (empty($fields) || !$this->panel_table_exists($panel_name)) {
 			return;
 		}
@@ -223,6 +224,11 @@ class cms_page_panel_model extends \Model {
 	function _split_panel_table_fields($panel_name, &$data) {
 		$table_data = [];
 		$fields = $this->get_panel_table_fields($panel_name);
+		// If panel table is not created yet (schema not applied), leave fields in params
+		// so values still save — otherwise subcategory_id etc. are stripped and lost.
+		if (empty($fields) || !$this->panel_table_exists($panel_name)) {
+			return [];
+		}
 		foreach ($fields as $name => $spec) {
 			if (array_key_exists($name, $data)) {
 				$table_data[$name] = $data[$name];
@@ -448,6 +454,86 @@ class cms_page_panel_model extends \Model {
 	
 		return $return;
 	
+	}
+
+	/**
+	 * Search weights from panel definition item/settings fields ("search": "1"–"3").
+	 * Used when update_cms_page_panel does not receive search_params (API/sync saves).
+	 */
+	function get_search_params_for_panel_name($panel_name){
+
+		$panel_name = trim((string)$panel_name);
+		if ($panel_name === '' || !stristr($panel_name, '/')){
+			return [];
+		}
+
+		$this->load->model('cms/cms_panel_model');
+		$panel_config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+		if (!is_array($panel_config)){
+			return [];
+		}
+
+		// List item structure (sort > 0) merges item fields + extends
+		$panel_structure = $this->cms_panel_model->get_cms_panel_edit_structure($panel_config, 0, 0, 1);
+		if (!is_array($panel_structure) || empty($panel_structure)){
+			$panel_structure = $this->cms_panel_model->get_cms_panel_edit_structure($panel_config, 0, 0, 0);
+		}
+		if (!is_array($panel_structure)){
+			return [];
+		}
+
+		$search_params = [];
+		foreach ($panel_structure as $struct){
+			if (empty($struct['name'])){
+				continue;
+			}
+			if (!empty($struct['search'])){
+				$search_params[$struct['name']] = $struct['search'];
+			}
+			if (($struct['type'] ?? '') === 'repeater' && !empty($struct['fields']) && is_array($struct['fields'])){
+				foreach ($struct['fields'] as $r_struct){
+					if (!empty($r_struct['name']) && !empty($r_struct['search'])){
+						$search_params[$struct['name']][$r_struct['name']] = $r_struct['search'];
+					}
+				}
+			}
+		}
+
+		return $search_params;
+
+	}
+
+	/**
+	 * Re-apply definition search weights on all params for panels of $panel_name.
+	 * Returns number of param rows updated.
+	 */
+	function reindex_search_weights_for_panel_name($panel_name){
+
+		$search_params = $this->get_search_params_for_panel_name($panel_name);
+		if (empty($search_params) || !is_array($search_params)){
+			return 0;
+		}
+
+		$updated = 0;
+		foreach ($search_params as $field => $weight){
+			if (is_array($weight)){
+				// repeater fields: name like images.000000.image — skip bulk SQL for nested
+				continue;
+			}
+			$weight = (int)$weight;
+			if ($weight < 1){
+				continue;
+			}
+			$sql = "update cms_page_panel_param p ".
+					"inner join cms_page_panel b on b.cms_page_panel_id = p.cms_page_panel_id ".
+					"set p.search = ? ".
+					"where b.panel_name = ? and p.name = ? and p.language = '' ";
+			$this->db->query($sql, [$weight, $panel_name, $field]);
+			$updated += (int)$this->db->affected_rows();
+		}
+
+		return $updated;
+
 	}
 	
 	/**
@@ -1166,7 +1252,8 @@ class cms_page_panel_model extends \Model {
 		// Requested purge (before settings-panel demotion) counts as full save for title auto
 		$requested_purge = !empty($purge);
 
-		if (isset($data['search_params'])){
+		$search_params_explicit = array_key_exists('search_params', $data);
+		if ($search_params_explicit){
 			$search_params = $data['search_params'];
 			unset($data['search_params']);
 		} else {
@@ -1219,6 +1306,12 @@ class cms_page_panel_model extends \Model {
 			if ($pquery->num_rows()) {
 				$panel_name = $pquery->row_array()['panel_name'];
 			}
+		}
+
+		// Apply definition search weights when caller did not pass search_params
+		// (e.g. Shopify sync) — otherwise every update zeros cms_page_panel_param.search
+		if (!$search_params_explicit && !empty($params) && $panel_name !== ''){
+			$search_params = $this->get_search_params_for_panel_name($panel_name);
 		}
 
 		$table_data = [];
@@ -1886,7 +1979,10 @@ class cms_page_panel_model extends \Model {
 		$where_parts = array_filter([$sql_filter_str, $sql_arrays_str, $table_filter_str, $table_arrays_str]);
 		$where_str = implode(' and ', $where_parts);
 
-		$table_join = $use_panel_table ? " join `{$panel_table}` t on t.cms_page_panel_id = a.cms_page_panel_id " : '';
+		// LEFT JOIN: panel table rows are optional until a table field is first saved.
+		// INNER JOIN hid panels with no table row (e.g. shop/product without subcategory_id)
+		// so Shopify sync kept treating them as "new" and recreating duplicates.
+		$table_join = $use_panel_table ? " left join `{$panel_table}` t on t.cms_page_panel_id = a.cms_page_panel_id " : '';
 
 		if ($fields_only){
 

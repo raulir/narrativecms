@@ -63,7 +63,28 @@ if ( !function_exists('_iw')) {
 	
 	}
 	
+	function _gd_image_valid($img){
+
+		if ($img instanceof \GdImage){
+			return true;
+		}
+
+		// PHP 7.x GD resources
+		return is_resource($img) && @get_resource_type($img) === 'gd';
+
+	}
+
+	function _gd_image_destroy($img){
+
+		if (_gd_image_valid($img)){
+			imagedestroy($img);
+		}
+
+	}
+
 	function _load_gd_image($image){
+
+		$src = false;
 		
 		list($width, $height, $original_width, $original_height) = _get_iw_size($image);
 		
@@ -105,11 +126,6 @@ if ( !function_exists('_iw')) {
 				ob_start();
 				$src = imagecreatefrompng($GLOBALS['config']['upload_path'].$image);
 				ob_end_clean();
-				
-//				imagepng($src, 'c://xampp/htdocs/timmy/img/2025/05/testprint_1c.png');
-				
-//_print_r($image);					
-		
 					
 			}
 		}
@@ -170,7 +186,7 @@ if ( !function_exists('_iw')) {
 		}
 		
 		// really needs resizing:
-		
+		$source_image = $image;
 		
 		$src = _load_gd_image($image);
 		
@@ -205,12 +221,12 @@ if ( !function_exists('_iw')) {
 
 			if ($extension == 'jpg' || $extension == 'jpeg'){
 
-				imagejpeg($tmp, $GLOBALS['config']['upload_path'].$new_image, !empty($GLOBALS['config']['images_quality']) ? $GLOBALS['config']['images_quality'] : 85);
+				@imagejpeg($tmp, $GLOBALS['config']['upload_path'].$new_image, !empty($GLOBALS['config']['images_quality']) ? $GLOBALS['config']['images_quality'] : 85);
 
 			} else if ($extension == 'png'){
 					
 				imagesavealpha($tmp, true);
-				imagepng($tmp, $GLOBALS['config']['upload_path'].$new_image);
+				@imagepng($tmp, $GLOBALS['config']['upload_path'].$new_image);
 				
 				/*
 				// optimise on linux
@@ -261,85 +277,19 @@ if ( !function_exists('_iw')) {
 				}
 			
 			} else if ($extension == 'webp'){
-				
-				// detect if source is png or jpg
-				if ($name_a['extension'] == 'png'){
-				
-					$png_image = str_replace('.png', '.tmp.png', _get_iw_new($image, $width, 'png'));
-					
-					if (!file_exists($GLOBALS['config']['upload_path'].$png_image)){
-						
+
+				// Write webp from the in-memory resize ($tmp). Do not reassign $src —
+				// a failed intermediate load used to leave $src as false and crash imagedestroy().
+				if ($GLOBALS['config']['images_webp'] == 'gd' || $GLOBALS['config']['images_webp'] == 'cwebp'){
+
+					if ($name_a['extension'] == 'png'){
 						imagesavealpha($tmp, true);
-						imagepng($tmp, $GLOBALS['config']['upload_path'].$png_image);
-						/*
-						// optimise on linux
-						if(!empty($GLOBALS['config']['images_pngquant'])){
-							
-							$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($png_image).'.png';
-							
-							rename($GLOBALS['config']['upload_path'].$png_image, $temp_name);
-							
-							$cmd = (empty($GLOBALS['config']['images_pngquant_executable']) ? $GLOBALS['config']['base_path'].'system/vendor/pngquant/bin/pngquant.bin' : $GLOBALS['config']['images_pngquant_executable'])
-									.' '.$temp_name.' --strip --speed 1 --quality=0-'.(!empty($GLOBALS['config']['images_quality']) ? $GLOBALS['config']['images_quality'] : 90).' -o '.$GLOBALS['config']['upload_path'].$new_image;
-		
-							shell_exec($cmd);
-							
-//							unlink($temp_name);
-							
-						}
-						*/
 					}
-					
-					// convert png to webp
-					if ($GLOBALS['config']['images_webp'] == 'gd' || $GLOBALS['config']['images_webp'] == 'cwebp'){
-						
-						$src = imagecreatefrompng($GLOBALS['config']['upload_path'].$png_image);
-						
-						imagewebp($tmp, $GLOBALS['config']['upload_path'].$new_image);
-						
-					} /* else if ($GLOBALS['config']['images_webp'] == 'cwebp'){
-						
-						$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($png_image).'.png';
-						rename($GLOBALS['config']['upload_path'].$png_image, $temp_name);
-						
-						$cmd = 'cwebp -z 9 '.$temp_name.' -o '.$GLOBALS['config']['upload_path'].$new_image;
 
-						shell_exec($cmd);
-						
-						unlink($temp_name);
-						
-					} */
-					
-					if (file_exists($GLOBALS['config']['upload_path'].$png_image)){
-						unlink($GLOBALS['config']['upload_path'].$png_image);
-					}
-				
-				} else { // if jpg
-					
-					// convert jpg to webp
-					if ($GLOBALS['config']['images_webp'] == 'gd' || $GLOBALS['config']['images_webp'] == 'cwebp'){
-					
-						imagewebp($tmp, $GLOBALS['config']['upload_path'].$new_image);
-					
-					} /* else if ($GLOBALS['config']['images_webp'] == 'cwebp'){
-					
-						$jpg_image = _get_iw_new($image, $width, 'jpg');
-						$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($jpg_image).'.jpg';
-						
-						imagesavealpha($tmp, false);
-						imagejpeg($tmp, $temp_name, 100);
-
-						$cmd = 'cwebp -m 6 -q '.(!empty($GLOBALS['config']['images_quality']) ? ($GLOBALS['config']['images_quality']) : 85).
-								' '.$temp_name.' -o '.$GLOBALS['config']['upload_path'].$new_image;
-					
-						shell_exec($cmd);
-						
-						unlink($temp_name);
-
-					} */
+					@imagewebp($tmp, $GLOBALS['config']['upload_path'].$new_image);
 
 				}
-			
+
 			} else if ($extension == 'ico'){
 					
 				// bmp data part
@@ -412,16 +362,33 @@ if ( !function_exists('_iw')) {
 						$data .= $pixel_data;
 						unset( $pixel_data );
 
-						file_put_contents($GLOBALS['config']['upload_path'].$new_image, $data);
+						@file_put_contents($GLOBALS['config']['upload_path'].$new_image, $data);
 
 			}
 
-			imagedestroy($tmp);
-			imagedestroy($src);
+			_gd_image_destroy($tmp);
+			_gd_image_destroy($src);
 
-			$image = $new_image;
+			// Permission / write failures: do not pretend the derivative exists
+			$new_path = $GLOBALS['config']['upload_path'].$new_image;
+			if (!file_exists($new_path) || is_dir($new_path)){
+				trigger_error('Image resize write failed (check permissions on upload path): '.$new_image, E_USER_NOTICE);
+				return [
+						'image' => $source_image,
+						'width' => $width,
+						'height' => $height,
+						'original_width' => $original_width,
+						'original_height' => $original_height,
+				];
+			}
 
-		return ['image' => $image, 'width' => $width, 'height' => $height, 'original_width' => $original_width, 'original_height' => $original_height, ];
+		return [
+				'image' => $new_image,
+				'width' => $width,
+				'height' => $height,
+				'original_width' => $original_width,
+				'original_height' => $original_height,
+		];
 		 
 	}
 

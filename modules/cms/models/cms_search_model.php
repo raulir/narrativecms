@@ -17,8 +17,11 @@ class cms_search_model extends \Model {
 		$this->load->model('cms/cms_slug_model');
 		$this->load->model('cms/cms_module_model');
 		
+		// all = admin-style (every field, looser page filters). all_fields = frontend: every field but still show=1.
 		if (!empty($params['all'])){
 			$sql = "select * from cms_page_panel_param where value like ? ";
+		} else if (!empty($params['all_fields'])){
+			$sql = "select a.*, b.show from cms_page_panel_param a join cms_page_panel b on a.cms_page_panel_id = b.cms_page_panel_id where b.show = 1 and a.value like ? ";
 		} else {
 			$sql = "select a.*, b.show from cms_page_panel_param a join cms_page_panel b on a.cms_page_panel_id = b.cms_page_panel_id where b.show = 1 and a.search > 0 and a.value like ? ";
 		}
@@ -29,6 +32,7 @@ class cms_search_model extends \Model {
 		// summarise block scores
 		$block_scores = array();
 		$cms_page_panels = array();
+		$unweighted = !empty($params['all']) || !empty($params['all_fields']);
 		
 		foreach($result as $row){
 			
@@ -36,7 +40,7 @@ class cms_search_model extends \Model {
 				$block_scores[$row['cms_page_panel_id']] = 0;
 			}
 			
-			$block_scores[$row['cms_page_panel_id']] += !empty($params['all']) ? 1 : $row['search'];
+			$block_scores[$row['cms_page_panel_id']] += $unweighted ? 1 : (int)($row['search'] ?? 0);
 			$cms_page_panels[$row['cms_page_panel_id']] = $row['cms_page_panel_id'];
 			
 		}

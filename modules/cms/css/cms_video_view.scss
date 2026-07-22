@@ -1,5 +1,14 @@
-[data-cms_video].cms_video_pending:not(.cms_image_image_source) {
+// No real cover: stay transparent; generic spinner only with .cms_video_show_loading (after 3s)
+[data-cms_video].cms_video_pending:not(.cms_video_show_loading):not(.cms_image_image_source) {
 	background-image: none !important;
+	background-color: rgba(255, 255, 255, 0);
+}
+
+[data-cms_video].cms_video_pending.cms_video_show_loading:not(.cms_image_image_source) {
+	// background-image set inline by cms_video_schedule_loading_poster
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
 }
 
 [data-cms_video].cms_video_pending .cms_video_view_clip,

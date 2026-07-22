@@ -1,0 +1,80 @@
+// Standalone on admin/dump/ and height-2 settings-style control
+.cms_images_unused_purge {
+
+	position: relative;
+	box-sizing: border-box;
+	min-height: 6.0rem;
+
+	// Dump page is not a cms_input grid — make it a clear block
+	&.cms_input {
+		margin: 1.5rem 0 0 0;
+		padding: 0.8rem 1.0rem 1.0rem 1.0rem;
+		border: 0.1rem solid #d0d0d0;
+		background: #fafafa;
+		max-width: 72.0rem;
+	}
+
+	> label {
+		display: block;
+		font-size: 1.4rem;
+		line-height: 2.0rem;
+		margin: 0 0 0.6rem 0;
+		color: #202020;
+	}
+
+	.cms_images_unused_purge_controls {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.6rem;
+	}
+
+	.cms_images_unused_purge_months {
+		box-sizing: border-box;
+		width: 5.5rem;
+		height: 2.6rem;
+		line-height: 2.4rem;
+		font-size: 1.5rem;
+		padding: 0 0.4rem;
+		border: 0.1rem solid #c0c0c0;
+		background: #fff;
+	}
+
+	.cms_images_unused_purge_category {
+		box-sizing: border-box;
+		min-width: 12.0rem;
+		height: 2.6rem;
+		line-height: 2.4rem;
+		font-size: 1.4rem;
+		padding: 0 0.4rem;
+		border: 0.1rem solid #c0c0c0;
+		background: #fff;
+	}
+
+	.cms_images_unused_purge_test_button,
+	.cms_images_unused_purge_button {
+		height: 2.6rem;
+		line-height: 2.4rem;
+		font-size: 1.5rem;
+		padding: 0 1.0rem;
+		flex-shrink: 0;
+	}
+
+	.cms_images_unused_purge_test_button.cms_images_unused_purge_busy,
+	.cms_images_unused_purge_button.cms_images_unused_purge_busy {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+
+	.cms_images_unused_purge_status {
+		box-sizing: border-box;
+		margin-top: 0.6rem;
+		min-height: 1.8rem;
+		line-height: 1.8rem;
+		font-size: 1.4rem;
+		color: #404040;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+	}
+
+}

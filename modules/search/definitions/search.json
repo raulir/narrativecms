@@ -1,18 +1,22 @@
 {
 	"version":"2",
 	"label": "Search",
-    "js": [
-
-    ],
-    "item":[
-    
-    ],
+	"js": [],
+	"item":[],
 	"settings":[
 		{
 			"type":"text",
 			"name":"search",
 			"label":"Search label",
-			"default": "Search"
+			"default": "Search",
+			"help": "Label for the search control (e.g. accessibility / UI text)"
+		},
+		{
+			"type":"text",
+			"name":"search_placeholder",
+			"label":"Search placeholder",
+			"default": "enter search",
+			"help": "Placeholder text inside the search input"
 		},
 		{
 			"type":"image",
@@ -20,6 +24,72 @@
 			"label":"Search icon",
 			"category":"icon",
 			"default":"//search_icon.png"
+		},
+		{
+			"type":"subtitle",
+			"label":"Behaviour"
+		},
+		{
+			"type":"text",
+			"name":"debounce_s",
+			"label":"Debounce (s)",
+			"default":"0.5",
+			"help": "Seconds to wait after typing before searching"
+		},
+		{
+			"type":"text",
+			"name":"min_chars",
+			"label":"Min characters",
+			"default":"3",
+			"help": "Minimum characters before a search runs"
+		},
+		{
+			"type":"text",
+			"name":"cache_hours",
+			"label":"Cache time (h)",
+			"default":"6",
+			"help": "HTML result cache lifetime under cache/search/"
+		},
+		{
+			"type":"subtitle",
+			"label":"What to search"
+		},
+		{
+			"type":"select",
+			"name":"include_pages",
+			"label":"Include pages",
+			"values":{
+				"1":"Yes",
+				"0":"No"
+			},
+			"default":"1",
+			"help": "Include normal CMS pages in frontend results"
+		},
+		{
+			"type":"select",
+			"name":"include_all_fields",
+			"label":"All fields",
+			"values":{
+				"0":"No",
+				"1":"Yes"
+			},
+			"default":"0",
+			"help": "Yes = match any panel field value (like admin search). No = only fields with search weight 1–3 in definitions"
+		},
+		{
+			"type":"repeater",
+			"name":"include_lists",
+			"label":"Include lists",
+			"help": "List types to include in frontend search. Empty = no list items. Add one row per list.",
+			"fields":[
+				{
+					"type":"list",
+					"name":"list",
+					"label":"List",
+					"mandatory":"1",
+					"link_target":"1"
+				}
+			]
 		}
 	]
 }

@@ -46,6 +46,12 @@
 	z-index: 10;
 	filter: grayscale(0%);
 	transition: filter 0.5s;
+
+	// Original as interim placeholder until optimised derivative is ready
+	&.cms_images_lazy_waiting,
+	&.cms_images_lazy_loading {
+		filter: grayscale(100%);
+	}
 }
 
 .cms_images_selected {

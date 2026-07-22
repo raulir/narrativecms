@@ -1718,4 +1718,630 @@ class cms_image_model extends \Model {
 
 	}
 
+	/**
+	 * Move original + resized derivatives + optional .data/ to dest_root, preserving relative path.
+	 * Removes cms_image row. Default dest: cache/tmp/img/
+	 * Returns true when the image was handled (moved, already at dest, or file already gone with DB cleared).
+	 */
+	function move_cms_image_to_tmp($filename, $dest_root = ''){
+
+		if (empty($filename) || !is_string($filename)){
+			return false;
+		}
+
+		$filename = str_replace('\\', '/', $filename);
+		if (strpos($filename, '..') !== false || $filename[0] === '/' || preg_match('#^[a-zA-Z]:#', $filename)){
+			return false;
+		}
+
+		if ($dest_root === '' || $dest_root === null){
+			$dest_root = $GLOBALS['config']['base_path'].'cache/tmp/img/';
+		}
+		$dest_root = rtrim(str_replace('\\', '/', $dest_root), '/').'/';
+
+		$upload = $GLOBALS['config']['upload_path'];
+
+		// Direct query — avoid get_cms_image_by_filename side effects (hash/size refresh)
+		$sql = 'select * from cms_image where filename = ? limit 1 ';
+		$query = $this->db->query($sql, [$filename]);
+		$image = $query->num_rows() ? $query->row_array() : [];
+
+		if (!empty($image['cms_image_id'])){
+			$this->_remove_child_id_from_parent($image);
+		}
+
+		$name_a = pathinfo($filename);
+		$rel_dir = isset($name_a['dirname']) ? str_replace('\\', '/', $name_a['dirname']) : '';
+		if ($rel_dir === '.' || $rel_dir === ''){
+			$rel_dir = '';
+			$src_dir = $upload;
+			$dst_dir = $dest_root;
+		} else {
+			$src_dir = $upload.$rel_dir.'/';
+			$dst_dir = $dest_root.$rel_dir.'/';
+		}
+
+		if (!is_dir($dst_dir)){
+			mkdir($dst_dir, 0755, true);
+		}
+
+		$src_file = $upload.$filename;
+		$dst_file = $dest_root.$filename;
+		$this->_move_filesystem_path($src_file, $dst_file);
+
+		$glob_pat = $src_dir.'_'.$name_a['filename'].'.*.*';
+		$derivatives = glob($glob_pat);
+		if (!empty($derivatives)){
+			foreach ($derivatives as $src_der){
+				$base = basename($src_der);
+				$this->_move_filesystem_path($src_der, $dst_dir.$base);
+			}
+		}
+
+		$src_data = $upload.$filename.'.data';
+		if (is_dir($src_data)){
+			$this->_move_filesystem_path($src_data, $dest_root.$filename.'.data');
+		}
+
+		if (!empty($image['cms_image_id'])){
+			$sql = 'delete from cms_image where filename = ? ';
+			$this->db->query($sql, [$filename]);
+			$this->_clear_image_cache($filename);
+		}
+
+		return true;
+
+	}
+
+	/**
+	 * Rename/move file or directory. If destination already exists, remove source to free img/.
+	 */
+	function _move_filesystem_path($src, $dst){
+
+		$src = str_replace('\\', '/', $src);
+		$dst = str_replace('\\', '/', $dst);
+
+		if ((!file_exists($src) && !is_dir($src))){
+			return true;
+		}
+
+		$dst_parent = dirname($dst);
+		if (!is_dir($dst_parent)){
+			mkdir($dst_parent, 0755, true);
+		}
+
+		if (file_exists($dst) || is_dir($dst)){
+			if (is_file($src) && !is_dir($src)){
+				@unlink($src);
+			} else if (is_dir($src)){
+				_delete_directory($src);
+			}
+			return true;
+		}
+
+		if (@rename($src, $dst)){
+			return true;
+		}
+
+		// Cross-device fallback for files
+		if (is_file($src) && !is_dir($src)){
+			if (@copy($src, $dst)){
+				@unlink($src);
+				return true;
+			}
+		}
+
+		return false;
+
+	}
+
+	/**
+	 * Module / non-dated library paths (cms/…, timmy/…, shop/…).
+	 * Dated uploads use YYYY/MM/… and are the only purge candidates.
+	 */
+	function is_module_cms_image_path($filename){
+
+		if (empty($filename) || !is_string($filename)){
+			return true;
+		}
+
+		$filename = str_replace('\\', '/', $filename);
+
+		return !preg_match('#^\d{4}/\d{2}/#', $filename);
+
+	}
+
+	/**
+	 * True when path month YYYY/MM is strictly older than (now − $min_months).
+	 * min_months 0 = no age floor (all dated paths pass).
+	 */
+	function cms_image_age_months_ok($filename, $min_months){
+
+		$min_months = (int)$min_months;
+		if ($min_months < 0){
+			$min_months = 0;
+		}
+
+		$filename = str_replace('\\', '/', (string)$filename);
+		if (!preg_match('#^(\d{4})/(\d{2})/#', $filename, $m)){
+			return false;
+		}
+
+		if ($min_months === 0){
+			return true;
+		}
+
+		$year = (int)$m[1];
+		$month = (int)$m[2];
+		if ($year < 1970 || $month < 1 || $month > 12){
+			return false;
+		}
+
+		// First day of the image path month
+		$path_ts = mktime(0, 0, 0, $month, 1, $year);
+
+		// First day of the month that is still “too new”
+		$cutoff = new \DateTime('first day of this month');
+		$cutoff->modify('-'.$min_months.' months');
+
+		return $path_ts < $cutoff->getTimestamp();
+
+	}
+
+	function cms_image_filename_is_referenced($filename){
+
+		if (empty($filename) || !is_string($filename)){
+			return false;
+		}
+
+		$sql = 'select cms_page_panel_param_id from cms_page_panel_param where value = ? limit 1 ';
+		$query = $this->db->query($sql, [$filename]);
+
+		return $query->num_rows() > 0;
+
+	}
+
+	function cms_image_is_parent_with_children($row){
+
+		$meta = [];
+		if (!empty($row['meta']) && is_string($row['meta'])){
+			$meta = json_decode($row['meta'], true) ?: [];
+		} else if (!empty($row['meta']) && is_array($row['meta'])){
+			$meta = $row['meta'];
+		}
+
+		if (!empty($meta['child_ids']) && is_array($meta['child_ids'])){
+			$ids = array_values(array_filter(array_map('intval', $meta['child_ids'])));
+			if (!empty($ids)){
+				$placeholders = implode(',', array_fill(0, count($ids), '?'));
+				$sql = 'select cms_image_id from cms_image where cms_image_id in ('.$placeholders.') limit 1 ';
+				$query = $this->db->query($sql, $ids);
+				if ($query->num_rows()){
+					return true;
+				}
+			}
+		}
+
+		$filename = $row['filename'] ?? '';
+		if ($filename === ''){
+			return false;
+		}
+
+		$name_a = pathinfo($filename);
+		$dir = isset($name_a['dirname']) ? str_replace('\\', '/', $name_a['dirname']) : '';
+		$base = $name_a['filename'] ?? '';
+		$ext = $name_a['extension'] ?? '';
+		if ($base === '' || $ext === ''){
+			return false;
+		}
+
+		$like = ($dir === '.' || $dir === '' ? '' : $dir.'/').$base.'_v%.'.$ext;
+		$sql = 'select cms_image_id from cms_image where filename like ? limit 1 ';
+		$query = $this->db->query($sql, [$like]);
+
+		return $query->num_rows() > 0;
+
+	}
+
+	/**
+	 * Bytes for original + resized derivatives + optional .data/ tree.
+	 */
+	function get_cms_image_disk_bytes($filename){
+
+		if (empty($filename) || !is_string($filename)){
+			return 0;
+		}
+
+		$filename = str_replace('\\', '/', $filename);
+		$upload = $GLOBALS['config']['upload_path'];
+		$bytes = 0;
+
+		$src = $upload.$filename;
+		if (is_file($src)){
+			$bytes += (int)filesize($src);
+		}
+
+		$name_a = pathinfo($filename);
+		$rel_dir = isset($name_a['dirname']) ? str_replace('\\', '/', $name_a['dirname']) : '';
+		if ($rel_dir === '.' || $rel_dir === ''){
+			$src_dir = $upload;
+		} else {
+			$src_dir = $upload.$rel_dir.'/';
+		}
+
+		$glob_pat = $src_dir.'_'.$name_a['filename'].'.*.*';
+		$derivatives = glob($glob_pat);
+		if (!empty($derivatives)){
+			foreach ($derivatives as $der){
+				if (is_file($der)){
+					$bytes += (int)filesize($der);
+				}
+			}
+		}
+
+		$data_dir = $upload.$filename.'.data';
+		if (is_dir($data_dir)){
+			$bytes += $this->_directory_size_bytes($data_dir);
+		}
+
+		return $bytes;
+
+	}
+
+	function _directory_size_bytes($dir){
+
+		$bytes = 0;
+		if (!is_dir($dir)){
+			return 0;
+		}
+
+		$iterator = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS)
+		);
+		foreach ($iterator as $file){
+			if ($file->isFile()){
+				$bytes += (int)$file->getSize();
+			}
+		}
+
+		return $bytes;
+
+	}
+
+	function format_cms_image_bytes($size){
+
+		$size = (float)$size;
+		if ($size < 512){
+			return (int)$size.' B';
+		}
+
+		$size = $size / 1024;
+		if ($size < 100){
+			return round($size, 1).' kB';
+		}
+		if ($size < 512){
+			return round($size).' kB';
+		}
+
+		$size = $size / 1024;
+		if ($size < 100){
+			return round($size, 1).' MB';
+		}
+		if ($size < 512){
+			return round($size).' MB';
+		}
+
+		$size = $size / 1024;
+
+		return round($size, 1).' GB';
+
+	}
+
+	/**
+	 * Classify row for unused purge: candidate | needed | parent | module | young | family
+	 */
+	function classify_unused_cms_image_purge_row($row, $min_months, &$ref_cache = null){
+
+		if (!is_array($ref_cache)){
+			$ref_cache = [];
+		}
+
+		$filename = $row['filename'] ?? '';
+		if ($filename === ''){
+			return 'needed';
+		}
+
+		if ($this->is_module_cms_image_path($filename)){
+			return 'module';
+		}
+
+		if (!$this->cms_image_age_months_ok($filename, $min_months)){
+			return 'young';
+		}
+
+		if ($this->cms_image_is_parent_with_children($row)){
+			return 'parent';
+		}
+
+		if (!array_key_exists($filename, $ref_cache)){
+			$ref_cache[$filename] = $this->cms_image_filename_is_referenced($filename);
+		}
+		if ($ref_cache[$filename]){
+			return 'needed';
+		}
+
+		// Child: keep while parent is still referenced
+		$meta = [];
+		if (!empty($row['meta']) && is_string($row['meta'])){
+			$meta = json_decode($row['meta'], true) ?: [];
+		}
+		$parent_fn = $meta['parent_filename'] ?? '';
+		if ($parent_fn !== '' && is_string($parent_fn)){
+			$parent_fn = str_replace('\\', '/', $parent_fn);
+			if (!array_key_exists($parent_fn, $ref_cache)){
+				$ref_cache[$parent_fn] = $this->cms_image_filename_is_referenced($parent_fn);
+			}
+			if ($ref_cache[$parent_fn]){
+				return 'family';
+			}
+		}
+
+		return 'candidate';
+
+	}
+
+	/**
+	 * @param string|null $category null = all categories; '' = empty category only; else exact match
+	 */
+	function _list_cms_images_for_unused_purge($category = null){
+
+		$params = [];
+		$sql = 'select cms_image_id, filename, category, meta from cms_image where 1=1 ';
+
+		if ($category !== null){
+			$sql .= ' and category = ? ';
+			$params[] = (string)$category;
+		}
+
+		$sql .= ' order by cms_image_id asc ';
+		$query = $this->db->query($sql, $params);
+
+		return $query->result_array();
+
+	}
+
+	/**
+	 * Dry-run: how many candidates and total disk bytes (original + derivatives + .data).
+	 *
+	 * @param string|null $category null = all; '' = empty category only
+	 */
+	function estimate_unused_cms_images_purge($min_months = 3, $category = null){
+
+		$min_months = (int)$min_months;
+		if ($min_months < 0){
+			$min_months = 0;
+		}
+
+		$rows = $this->_list_cms_images_for_unused_purge($category);
+		$ref_cache = [];
+		$count = 0;
+		$bytes = 0;
+		$skipped_parent = 0;
+		$skipped_module = 0;
+		$needed = 0;
+		$young = 0;
+		$family = 0;
+
+		foreach ($rows as $row){
+			$class = $this->classify_unused_cms_image_purge_row($row, $min_months, $ref_cache);
+			if ($class === 'candidate'){
+				$count++;
+				$bytes += $this->get_cms_image_disk_bytes($row['filename'] ?? '');
+			} else if ($class === 'parent'){
+				$skipped_parent++;
+			} else if ($class === 'module'){
+				$skipped_module++;
+			} else if ($class === 'needed'){
+				$needed++;
+			} else if ($class === 'young'){
+				$young++;
+			} else if ($class === 'family'){
+				$family++;
+			}
+		}
+
+		$size_label = $this->format_cms_image_bytes($bytes);
+		$text = 'Would purge '.$count.' image'.($count === 1 ? '' : 's').' (~'.$size_label.')';
+
+		return [
+				'count' => $count,
+				'bytes' => $bytes,
+				'size' => $size_label,
+				'text' => $text,
+				'needed' => $needed,
+				'skipped_parent' => $skipped_parent,
+				'skipped_module' => $skipped_module,
+				'young' => $young,
+				'family' => $family,
+				'found' => count($rows),
+		];
+
+	}
+
+	function _unused_purge_status_path(){
+		return $GLOBALS['config']['base_path'].'cache/cms_images_unused_purge_status.txt';
+	}
+
+	function _unused_purge_lock_path(){
+		return $GLOBALS['config']['base_path'].'cache/cms_images_unused_purge.lock';
+	}
+
+	function unused_purge_status_read(){
+
+		$path = $this->_unused_purge_status_path();
+		clearstatcache(true, $this->_unused_purge_lock_path());
+		$running = file_exists($this->_unused_purge_lock_path());
+		$text = '';
+		$done = false;
+
+		if (file_exists($path)){
+			$raw = (string)file_get_contents($path);
+			$lines = preg_split('/\r\n|\n|\r/', $raw);
+			$text = isset($lines[0]) ? trim($lines[0]) : '';
+			foreach ($lines as $line){
+				if (trim((string)$line) === 'done'){
+					$done = true;
+					break;
+				}
+			}
+			if (!$done && (strpos($text, ' - done') !== false || strpos($text, ' - stopped') !== false)){
+				$done = true;
+			}
+		}
+
+		return [
+				'text' => $text,
+				'running' => $running,
+				'done' => $done && !$running,
+		];
+
+	}
+
+	function _unused_purge_status_write($text, $done = false){
+
+		$content = $text;
+		if ($done){
+			$content .= "\ndone";
+		}
+		file_put_contents($this->_unused_purge_status_path(), $content, LOCK_EX);
+		clearstatcache(true, $this->_unused_purge_status_path());
+
+	}
+
+	function _unused_purge_format_status($found, $needed, $skipped_parent, $skipped_module, $moved){
+
+		return 'Found '.$found.', needed '.$needed.', skipped parent '.$skipped_parent.
+				', skipped module '.$skipped_module.', moved '.$moved;
+
+	}
+
+	/**
+	 * Soft-move eligible unused images to cache/tmp/img/. Soft-stops after $max_seconds.
+	 *
+	 * @param string|null $category null = all; '' = empty category only
+	 */
+	function purge_unused_cms_images($max_seconds = 100, $min_months = 3, $category = null){
+
+		$lock = $this->_unused_purge_lock_path();
+		if (file_exists($lock)){
+			return [
+					'error' => 'busy',
+					'text' => 'Wait, image purge is running',
+					'running' => true,
+					'done' => false,
+			];
+		}
+
+		file_put_contents($lock, (string)time());
+		$this->_unused_purge_status_write('Loading images...', false);
+
+		$max_seconds = (int)$max_seconds;
+		if ($max_seconds < 1){
+			$max_seconds = 100;
+		}
+		$min_months = (int)$min_months;
+		if ($min_months < 0){
+			$min_months = 0;
+		}
+
+		$started = time();
+		$stopped = false;
+
+		try {
+
+			$rows = $this->_list_cms_images_for_unused_purge($category);
+			$found = count($rows);
+			$needed = 0;
+			$skipped_parent = 0;
+			$skipped_module = 0;
+			$young = 0;
+			$family = 0;
+			$moved = 0;
+			$ref_cache = [];
+
+			$this->_unused_purge_status_write(
+					$this->_unused_purge_format_status($found, $needed, $skipped_parent, $skipped_module, $moved),
+					false
+			);
+
+			foreach ($rows as $row){
+
+				$filename = $row['filename'] ?? '';
+				if ($filename === ''){
+					continue;
+				}
+
+				$class = $this->classify_unused_cms_image_purge_row($row, $min_months, $ref_cache);
+
+				if ($class === 'candidate'){
+					if ($this->move_cms_image_to_tmp($filename)){
+						$moved++;
+					}
+				} else if ($class === 'needed'){
+					$needed++;
+				} else if ($class === 'parent'){
+					$skipped_parent++;
+				} else if ($class === 'module'){
+					$skipped_module++;
+				} else if ($class === 'young'){
+					$young++;
+				} else if ($class === 'family'){
+					$family++;
+				}
+
+				$this->_unused_purge_status_write(
+						$this->_unused_purge_format_status($found, $needed, $skipped_parent, $skipped_module, $moved),
+						false
+				);
+
+				if ((time() - $started) >= $max_seconds){
+					$stopped = true;
+					break;
+				}
+
+			}
+
+			$text = $this->_unused_purge_format_status($found, $needed, $skipped_parent, $skipped_module, $moved);
+			if ($stopped){
+				$text .= ' - stopped (100s limit)';
+			} else {
+				$text .= ' - done';
+			}
+
+			$this->_unused_purge_status_write($text, true);
+
+			return [
+					'text' => $text,
+					'found' => $found,
+					'needed' => $needed,
+					'skipped_parent' => $skipped_parent,
+					'skipped_module' => $skipped_module,
+					'young' => $young,
+					'family' => $family,
+					'moved' => $moved,
+					'stopped' => $stopped,
+					'done' => true,
+					'running' => false,
+			];
+
+		} finally {
+
+			if (file_exists($lock)){
+				unlink($lock);
+			}
+
+		}
+
+	}
+
 }

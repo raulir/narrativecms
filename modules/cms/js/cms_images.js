@@ -205,6 +205,54 @@ function cms_images_transfer(data, success){
 	
 }
 
+/**
+ * Start optimise queue for grid thumbs.
+ * cms_images_page is loaded with _no_js (since ~Jul 2026) so _ib cannot inject
+ * cms_images_lazy.js on that request — load it with the popup shell and re-init here.
+ * Classic behaviour: B/W original → image_resize → colour optimised (10+ years).
+ */
+function cms_images_run_lazy_optimise($root){
+
+	$root = $root && $root.length ? $root : $('.cms_images_area')
+
+	function run(){
+		if (typeof cms_images_lazy_init === 'function'){
+			cms_images_lazy_init($root)
+		}
+	}
+
+	if (typeof cms_images_lazy_init === 'function'){
+		run()
+		return
+	}
+
+	if (window._cms_images_lazy_loading_script){
+		var waits = 0
+		var t = setInterval(function(){
+			waits++
+			if (typeof cms_images_lazy_init === 'function' || waits > 50){
+				clearInterval(t)
+				run()
+			}
+		}, 100)
+		return
+	}
+
+	window._cms_images_lazy_loading_script = 1
+	var base = (typeof _cms_get_base === 'function') ? _cms_get_base() : (typeof _cms_base !== 'undefined' ? _cms_base : '/')
+	var s = document.createElement('script')
+	s.src = base + 'modules/cms/js/cms_images_lazy.js'
+	s.onload = function(){
+		window._cms_images_lazy_loading_script = 0
+		run()
+	}
+	s.onerror = function(){
+		window._cms_images_lazy_loading_script = 0
+	}
+	document.head.appendChild(s)
+
+}
+
 function cms_images_load_images(page, limit, filename){
 	
 	cms_images_load_parameters = {
@@ -265,6 +313,9 @@ function cms_images_load_images(page, limit, filename){
 		
 		// activate functionality
 		cms_images_activate();
+
+		// Optimise thumbs after ajax grid HTML (lazy js may still be loading first open)
+		cms_images_run_lazy_optimise($('.cms_images_area'))
 
 		if (typeof cms_video_init_when_ready === 'function'){
 			cms_video_init_when_ready($('.cms_images_area'))

@@ -366,9 +366,11 @@ function cms_load_css(filenames, force_download, class_to_remove) {
 
 function get_api(name, params) {
 
-	var ext_params = $.extend({'success': function() {} }, params)
+	var ext_params = $.extend({'success': function() {}, 'error': function() {} }, params)
 	var action_on_success = ext_params.success
+	var action_on_error = ext_params.error
 	delete ext_params.success
+	delete ext_params.error
 
 	$.ajax({
 		type: 'POST',
@@ -377,6 +379,9 @@ function get_api(name, params) {
 		dataType: 'json',
 		success: function(returned_data) {
 			action_on_success(returned_data)
+		},
+		error: function(xhr, status, err) {
+			action_on_error(xhr, status, err)
 		}
 	})
 

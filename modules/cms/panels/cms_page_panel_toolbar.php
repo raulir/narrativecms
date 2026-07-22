@@ -46,6 +46,11 @@ class cms_page_panel_toolbar extends \Controller {
 		// breadcrumb
 		$params['breadcrumb'] = [];
 
+		// Global / list panel settings: cms_page_id 0, parent_id 0, sort 0
+		$is_panel_settings = empty($cms_page_panel['cms_page_id'])
+				&& empty($cms_page_panel['parent_id'])
+				&& empty($cms_page_panel['sort']);
+
 		$toolbar_title_item = function($title) use ($cms_page_panel){
 			if (empty($cms_page_panel['cms_page_panel_id'])){
 				return [
@@ -132,8 +137,24 @@ class cms_page_panel_toolbar extends \Controller {
 
 		} else {
 
-			// if this is list item
-			if (!empty($panel_config['list'])){
+			// list panel settings (sort 0): single title, e.g. "Product category settings"
+			if (!empty($panel_config['list']) && $is_panel_settings){
+
+				if (!empty($panel_config['list']['item_title'])){
+					$settings_heading = $panel_config['list']['item_title'].' settings';
+				} else {
+					$settings_heading = (!empty($panel_config['label']) ? $panel_config['label'] : $cms_page_panel['panel_name']).' settings';
+				}
+
+				$params['breadcrumb'] = [
+						[
+								'text' => $settings_heading,
+								'url' => '',
+						],
+				];
+
+			// list item (sort > 0)
+			} else if (!empty($panel_config['list'])){
 
 				if (empty($panel_config['parent'])){
 					
@@ -155,23 +176,11 @@ class cms_page_panel_toolbar extends \Controller {
 					
 				}
 
-				if ($cms_page_panel['sort']){
-					$heading = $this->cms_page_panel_model->get_panel_admin_title($cms_page_panel);
-					if ($heading === ''){
-						$heading = $cms_page_panel['title'];
-					}
-				} else {
-					$heading = (!empty($panel_config['label']) ? $panel_config['label'] : $cms_page_panel['panel_name']) . ' settings';
+				$heading = $this->cms_page_panel_model->get_panel_admin_title($cms_page_panel);
+				if ($heading === ''){
+					$heading = $cms_page_panel['title'];
 				}
-
-				if ($cms_page_panel['sort']){
-					$params['breadcrumb'][] = $toolbar_title_item($heading);
-				} else {
-					$params['breadcrumb'][] = [
-							'text' => $heading,
-							'url' => '',
-					];
-				}
+				$params['breadcrumb'][] = $toolbar_title_item($heading);
 
 			} else { // must be global settings panel
 
@@ -199,8 +208,11 @@ class cms_page_panel_toolbar extends \Controller {
 				'position' => 'visible', 
 		];
 
-		// delete,caching,hide = except not on page && list item == settings
-		if (!empty($cms_page_panel['cms_page_id']) || !empty($cms_page_panel['parent_id']) || !empty($panel_config['list'])){
+		// delete, caching, hide — page panels, children, list items; never global/list settings
+		if (!$is_panel_settings && (
+				!empty($cms_page_panel['cms_page_id'])
+				|| !empty($cms_page_panel['parent_id'])
+				|| !empty($panel_config['list']))){
 			
 			$params['buttons'][] = [
 					'name' => 'cms/cms_page_panel_button_delete', 

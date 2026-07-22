@@ -1,0 +1,32 @@
+{
+	"name": "Booking",
+	"panels": [
+		{
+			"id": "treatment",
+			"name": "Treatment"
+		},
+		{
+			"id": "treatment_category",
+			"name": "Treatment category"
+		}
+	],
+	"cms_menu": [
+		{
+			"id": "booking",
+			"name": "Booking",
+			"order": 250
+		},
+		{
+			"id": "booking_treatments",
+			"name": "Treatments",
+			"parent": "booking",
+			"url": "admin/cms_list/booking__treatment/"
+		},
+		{
+			"id": "booking_treatment_categories",
+			"name": "Treatment categories",
+			"parent": "booking",
+			"url": "admin/cms_list/booking__treatment_category/"
+		}
+	]
+}

@@ -34,6 +34,7 @@ class cms_images_page extends \Controller {
 		$GLOBALS['_panel_js'][] = ['script' => 'modules/cms/js/dash/dash.min.js', 'no_pack' => 1, 'sync' => 'defer', ];
 		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_media_view.js';
 		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_video.js';
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_images_lazy.js';
 
 		return $params;
 

@@ -1,43 +1,106 @@
+var search_request_gen = 0
+var search_debounce_timer = null
+
+function search_debounce_ms($root){
+
+	var s = parseFloat($root.data('debounce_s'), 10)
+	if (isNaN(s) || s < 0){
+		s = 0.5
+	}
+	return Math.round(s * 1000)
+
+}
+
+function search_clear_results($root){
+
+	var $results = $root.find('.search_results')
+	$results.removeClass('search_results_active').html('')
+	$root.data('lastterm', '')
+
+}
+
+function search_run($root, term){
+
+	term = String(term || '').trim()
+	var min_chars = parseInt($root.data('min_chars'), 10)
+	if (isNaN(min_chars) || min_chars < 1){
+		min_chars = 3
+	}
+
+	if (term === ''){
+		search_clear_results($root)
+		return
+	}
+
+	if (term === $root.data('lastterm')){
+		return
+	}
+
+	var gen = ++search_request_gen
+
+	get_ajax_panel('search/searchajax', {
+		'term': term
+	}, function(data){
+
+		if (gen !== search_request_gen){
+			return
+		}
+
+		var html = ''
+		if (data && data.result){
+			html = data.result._html || data.result.html || ''
+		}
+
+		$root.data('lastterm', term)
+		var $results = $root.find('.search_results')
+		if (html){
+			$results.html(html).addClass('search_results_active')
+		} else {
+			$results.removeClass('search_results_active').html('')
+		}
+
+		if (typeof cursor_init === 'function'){
+			cursor_init()
+		}
+
+	})
+
+}
+
+function search_schedule($input){
+
+	var $root = $input.closest('.search_container')
+	if (!$root.length){
+		return
+	}
+
+	if (search_debounce_timer){
+		clearTimeout(search_debounce_timer)
+		search_debounce_timer = null
+	}
+
+	var term = String($input.val() || '')
+	if (String(term).trim() === ''){
+		search_clear_results($root)
+		return
+	}
+
+	var ms = search_debounce_ms($root)
+	search_debounce_timer = setTimeout(function(){
+		search_debounce_timer = null
+		search_run($root, $input.val())
+	}, ms)
+
+}
+
 function search_init(){
 
-	$('.search_input').on('keyup.cms', function(){
-		
-		var term = $('.search_input').val()
-		
-		if (term !== $('.search_container').data('lastterm')){
-		
-			if (!$('.search_container').data('blocked')){
-				
-				$('.search_container').data('blocked', true)
-				
-				get_ajax_panel('search/searchajax', {
-					
-					'term' : $('.search_input').val()
-					
-				}, function(data){
-					
-					$('.search_container').data('lastterm', term)
-					$('.search_container').data('blocked', false)
-					$('.search_results').html(data.result.html)
-// console.log(data.result.html)					
-					$('.search_results').addClass('search_results_active')
-				
-				})
+	// Delegated: search/search is often injected via ajax into the modal
+	$(document).off('input.cms_search keyup.cms_search change.cms_search', '.search_input')
+	$(document).on('input.cms_search keyup.cms_search change.cms_search', '.search_input', function(){
+		search_schedule($(this))
+	})
 
-			} else {
-				
-				setTimeout(() => $('.search_input').keyup(), 100)
-				
-			}
-
-		}
-		
-		if (term == ''){
-			$('.search_results').removeClass('search_results_active').html('')
-		}
-		
-	});
-	
 }
 
 function search_resize(){
