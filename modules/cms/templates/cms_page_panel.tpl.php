@@ -1,10 +1,11 @@
 <?php
 
 	_panel('cms/cms_page_panel_toolbar', [
-			'target_id' => $block['cms_page_panel_id'],
-			'target_page_id' => $block['cms_page_id'],
-			'target_parent_id' => $block['parent_id'],
-			'extra_buttons' => $extra_buttons,
+			'target_id' => $block['cms_page_panel_id'] ?? 0,
+			'target_page_id' => $block['cms_page_id'] ?? 0,
+			'target_parent_id' => $block['parent_id'] ?? 0,
+			'panel_name' => $block['panel_name'] ?? '',
+			'extra_buttons' => $extra_buttons ?? [],
 	]);
 
 ?>

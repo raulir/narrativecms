@@ -58,10 +58,15 @@ modules/music/
 | Asset | Supported | Handler |
 |-------|-----------|---------|
 | Definition `item` / `settings` | Yes | [`cms_panel_model::merge_structures()`](../../models/cms_panel_model.php) when loading `target` |
+| Settings **values** | Yes | [`get_cms_page_panel_settings()`](../../models/cms_page_panel_model.php) merges saved settings from each extend **source** into the target |
 | SCSS | Yes | [`controller::get_panel_filenames()`](../../../system/core/controller.php) |
 | JS | Yes | Same — appended after target panel JS; [`pack_js()`](../../../system/helpers/packer_helper.php) concatenates in order |
 | Template | Yes | Same — if `modules/<ext>/templates/<source_panel>.tpl.php` exists, it **replaces** the target template entirely (no merge). Last extending module in `modules` order wins. |
-| PHP controller | **Todo** | Not wired (next) |
+| PHP controller | Yes | `modules/<ext>/panels/<source>.php` if present. **`panel_params` / `panel_action`:** target first, then each extend in order (chain). **`panel_heading`:** reverse-walk extenders — only the **last** implementer runs (else target). |
+
+### Naming convention
+
+Extension panel id = `{target_module}_{target_panel}` in the extending module, e.g. `shop/product` ← `//shop_product` → `timmy/shop_product` or `shopify/shop_product`.
 
 ## Template replace
 

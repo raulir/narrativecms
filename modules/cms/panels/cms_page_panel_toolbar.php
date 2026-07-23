@@ -26,11 +26,21 @@ class cms_page_panel_toolbar extends \Controller {
 		$this->load->model('cms/cms_slug_model');
 
 		$cms_page_panel = $this->cms_page_panel_model->get_cms_page_panel($params['target_id'], $this->cms_page_panel_model->get_cms_language());
-		if (empty($cms_page_panel)){
+		if (empty($cms_page_panel) || !is_array($cms_page_panel)){
 			$cms_page_panel = [];
 		}
 
-		$params['cms_page_panel_id'] = !empty($cms_page_panel['cms_page_panel_id']) ? $cms_page_panel['cms_page_panel_id'] : (int)($params['target_id'] ?? 0);
+		// New panel (target_id 0): caller may pass panel_name / page ids
+		if (empty($cms_page_panel['panel_name']) && !empty($params['panel_name'])){
+			$cms_page_panel['panel_name'] = $params['panel_name'];
+		}
+		if (empty($cms_page_panel['cms_page_id']) && isset($params['target_page_id'])){
+			$cms_page_panel['cms_page_id'] = $params['target_page_id'];
+		}
+
+		$params['cms_page_panel_id'] = !empty($cms_page_panel['cms_page_panel_id'])
+				? $cms_page_panel['cms_page_panel_id']
+				: (int)($params['target_id'] ?? 0);
 
 		if (!empty($params['target_parent_id'])) {
 			$cms_page_panel['target_parent_id'] = $params['target_parent_id'];
@@ -214,25 +224,28 @@ class cms_page_panel_toolbar extends \Controller {
 				|| !empty($cms_page_panel['parent_id'])
 				|| !empty($panel_config['list']))){
 			
+			$btn_id = $cms_page_panel['cms_page_panel_id'] ?? $params['cms_page_panel_id'] ?? 0;
+			$btn_panel = $cms_page_panel['panel_name'] ?? ($params['panel_name'] ?? '');
+
 			$params['buttons'][] = [
 					'name' => 'cms/cms_page_panel_button_delete', 
 					'position' => 'hidden', 
-					'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
-					'panel_name' => $cms_page_panel['panel_name'],
+					'cms_page_panel_id' => $btn_id,
+					'panel_name' => $btn_panel,
 			];
 			
 			$params['buttons'][] = [
 					'name' => 'cms/cms_page_panel_button_caching', 
 					'position' => 'hidden', 
-					'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
-					'panel_name' => $cms_page_panel['panel_name'],
+					'cms_page_panel_id' => $btn_id,
+					'panel_name' => $btn_panel,
 			];
 			
 			$params['buttons'][] = [
 					'name' => 'cms/cms_page_panel_button_show', 
 					'position' => 'visible', 
-					'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
-					'panel_name' => $cms_page_panel['panel_name'],
+					'cms_page_panel_id' => $btn_id,
+					'panel_name' => $btn_panel,
 			];
 			
 			$params['hidden_section'] = 1;
@@ -276,7 +289,7 @@ class cms_page_panel_toolbar extends \Controller {
 			$params['buttons'][] = [
 					'name' => 'cms/cms_page_panel_button_settings', 
 					'position' => 'hidden', 
-					'panel_name' => $cms_page_panel['panel_name'],
+					'panel_name' => $cms_page_panel['panel_name'] ?? ($params['panel_name'] ?? ''),
 			];
 			$params['hidden_section'] = 1;
 		
@@ -289,8 +302,8 @@ class cms_page_panel_toolbar extends \Controller {
 			$params['buttons'][] = [
 					'name' => 'cms/cms_page_panel_button_targets', 
 					'position' => 'hidden', 
-					'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
-					'panel_name' => $cms_page_panel['panel_name'],
+					'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'] ?? $params['cms_page_panel_id'] ?? 0,
+					'panel_name' => $cms_page_panel['panel_name'] ?? ($params['panel_name'] ?? ''),
 			];
 			$params['hidden_section'] = 1;
 		
@@ -298,10 +311,10 @@ class cms_page_panel_toolbar extends \Controller {
 		
 		if (!empty($params['extra_buttons'])){
 			foreach($params['extra_buttons'] as $bkey => $button){
-				
-				$params['extra_buttons'][$bkey]['cms_page_panel_id'] = $cms_page_panel['cms_page_panel_id'];
-				$params['extra_buttons'][$bkey]['panel_name']	= $cms_page_panel['panel_name'];
-	
+				$params['extra_buttons'][$bkey]['cms_page_panel_id'] =
+						$cms_page_panel['cms_page_panel_id'] ?? $params['cms_page_panel_id'] ?? 0;
+				$params['extra_buttons'][$bkey]['panel_name'] =
+						$cms_page_panel['panel_name'] ?? ($params['panel_name'] ?? '');
 			}
 		}
 

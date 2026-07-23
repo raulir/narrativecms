@@ -338,6 +338,17 @@ class cms_page_panel_model extends \Model {
 
 	function _has_panel_heading($panel_name, $row = []){
 
+		if ($panel_name === '' || $panel_name === null){
+			return false;
+		}
+
+		if (!isset($GLOBALS['_panel_has_heading'])){
+			$GLOBALS['_panel_has_heading'] = [];
+		}
+		if (array_key_exists($panel_name, $GLOBALS['_panel_has_heading'])){
+			return $GLOBALS['_panel_has_heading'][$panel_name];
+		}
+
 		$ci = &get_instance();
 
 		if (!empty($row['_extends'])){
@@ -346,35 +357,25 @@ class cms_page_panel_model extends \Model {
 			$files = $ci->get_panel_filenames($panel_name, $row);
 		}
 
-		if (!empty($files['extends_controller'])){
+		$has = false;
 
-			$extends_panel_name = $files['extends_module'].'_'.$files['extends_name'].'_panel';
-			$ci->load->library(
-					$files['extends_controller'],
-					['module' => $files['extends_module'], 'name' => $files['extends_name'], ],
-					$extends_panel_name
-					);
+		if (!empty($files['controller'])
+				&& $ci->_controller_has_method($files['controller'], $files['module'], $files['name'], 'panel_heading')){
+			$has = true;
+		}
 
-			if (method_exists($ci->{$extends_panel_name}, 'panel_heading')){
-				return true;
+		if (!$has && !empty($files['extend_controllers'])){
+			foreach ($files['extend_controllers'] as $ext){
+				if ($ci->_controller_has_method($ext['controller'], $ext['module'], $ext['name'], 'panel_heading')){
+					$has = true;
+					break;
+				}
 			}
-
 		}
 
-		if (!empty($files['controller'])){
+		$GLOBALS['_panel_has_heading'][$panel_name] = $has;
 
-			$panel_lib_name = $files['module'].'_'.$files['name'].'_panel';
-			$ci->load->library(
-					$files['controller'],
-					['module' => $files['module'], 'name' => $files['name'], ],
-					$panel_lib_name
-					);
-
-			return method_exists($ci->{$panel_lib_name}, 'panel_heading');
-
-		}
-
-		return false;
+		return $has;
 
 	}
 
@@ -2150,11 +2151,58 @@ class cms_page_panel_model extends \Model {
 			}
 		}
 
+		// Legacy definition JSON extends
 		if (!empty($config['extends'])){
 			
 			$extends_settings = $this->get_cms_page_panel_settings($config['extends']['panel'], $language);
 			$return = array_merge_recursive_ex($extends_settings, $return);
 			
+		}
+
+		// Config.json extends: merge saved settings from each source panel (e.g. timmy/shop_product)
+		if (!empty($GLOBALS['config']['extends']) && is_array($GLOBALS['config']['extends'])){
+			foreach ($GLOBALS['config']['extends'] as $item){
+				if (($item['target'] ?? '') !== $cms_panel_name || empty($item['source'])){
+					continue;
+				}
+				$source = $item['source'];
+				if ($source === $cms_panel_name || !stristr($source, '/')){
+					continue;
+				}
+				// Prefer current source name; fall back to legacy short name (timmy/product → timmy/shop_product)
+				$source_candidates = [$source];
+				if (preg_match('#^([^/]+)/shop_(.+)$#', $source, $m)){
+					$source_candidates[] = $m[1].'/'.$m[2];
+				}
+				$source_params = [];
+				foreach ($source_candidates as $candidate){
+					$source_settings_a = $this->get_cms_page_panels_by([
+							'panel_name' => $candidate,
+							'cms_page_id' => 0,
+							'parent_id' => 0,
+							'sort' => 0,
+					]);
+					if (empty($source_settings_a[0]['cms_page_panel_id'])){
+						continue;
+					}
+					$p = $this->get_cms_page_panel_params($source_settings_a[0]['cms_page_panel_id'], $language);
+					if (is_array($p) && $p){
+						$source_params = $p;
+						// Auto-migrate legacy settings panel_name once
+						if ($candidate !== $source){
+							$this->db->query(
+									'update cms_page_panel set panel_name = ? where cms_page_panel_id = ? ',
+									[$source, (int)$source_settings_a[0]['cms_page_panel_id']]
+									);
+						}
+						break;
+					}
+				}
+				if ($source_params){
+					// Source first, target wins on key clash (target already in $return)
+					$return = array_merge_recursive_ex($source_params, $return);
+				}
+			}
 		}
 		
 		return $return;

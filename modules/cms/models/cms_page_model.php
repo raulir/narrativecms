@@ -546,20 +546,24 @@ class cms_page_model extends \Model {
 	function get_system_page_defs(){
 
 		// Non-numeric slugs only (numeric strings collide with cms_page_id routing)
+		// 504 = conventional gateway/timeout-ish status; slug stays "timeout"
 		return [
 			['slug' => 'not-found', 'title' => '404 - Not found', 'error' => '404', ],
 			['slug' => 'internal-error', 'title' => '500 - Internal error', 'error' => '500', ],
-			['slug' => 'timeout', 'title' => 'Timeout', 'error' => 'timeout', ],
+			['slug' => 'timeout', 'title' => '504 - Timeout', 'error' => '504', ],
 		];
 
 	}
 
 	/**
-	 * System page def for error key: 404 | 500 | timeout
+	 * System page def for error key: 404 | 500 | 504 | timeout (slug)
 	 */
 	function get_system_page_def_for_error($error_key){
 
 		$error_key = (string)$error_key;
+		if ($error_key === 'timeout'){
+			$error_key = '504';
+		}
 		foreach ($this->get_system_page_defs() as $def){
 			if (($def['error'] ?? '') === $error_key || ($def['slug'] ?? '') === $error_key){
 				return $def;
@@ -654,7 +658,9 @@ class cms_page_model extends \Model {
 				if (($existing['page_class'] ?? '') !== 'system'){
 					$need['page_class'] = 'system';
 				}
-				if (empty($existing['title']) || $existing['title'] === $existing['slug']){
+				$old_title = (string)($existing['title'] ?? '');
+				// Rename default titles (e.g. Timeout → 504 - Timeout)
+				if ($old_title === '' || $old_title === $existing['slug'] || $old_title === 'Timeout'){
 					$need['title'] = $def['title'];
 				}
 				if ($need){

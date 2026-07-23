@@ -196,6 +196,28 @@ if ( !function_exists('get_position')) {
     }
 
     /**
+     * Ensure CMS path ends with / (before ?query). Skip empty, /, files with extension.
+     */
+    function _l_path_trailing_slash($path){
+
+    	if ($path === '' || $path === '/'){
+    		return $path;
+    	}
+
+    	// Static files (img, css, js, …) — do not force trailing slash
+    	if (preg_match('#\.[a-zA-Z0-9]{2,5}$#', $path)){
+    		return $path;
+    	}
+
+    	if (substr($path, -1) !== '/'){
+    		$path .= '/';
+    	}
+
+    	return $path;
+
+    }
+
+    /**
      * prints out url with full site path where needed
      */
     function _l($url, $print = true, $params = []){
@@ -207,9 +229,17 @@ if ( !function_exists('get_position')) {
     			$url = '';
     		}
     	}
+
+    	$hash = '';
+    	$query = '';
     	 
     	if (stristr($url, '#') && substr($url, 0, 1) != '#'){
-    		list($url, $hash) = explode('#', $url);
+    		list($url, $hash) = explode('#', $url, 2);
+    	}
+
+    	if (strpos($url, '?') !== false){
+    		list($url, $query) = explode('?', $url, 2);
+    		$query = '?'.$query;
     	}
 
 		if (substr($url, 0, 2) == '//'){
@@ -222,13 +252,13 @@ if ( !function_exists('get_position')) {
     		$url = $url;
     	} else if (substr($url, 0, 4) != 'http'){
     		
-    		if (((int)$url == $url && $url != '') || (!stristr($url, '?') && stristr($url, '='))){
-    			// get slug
+    		if (((int)$url == $url && $url != '') || stristr($url, '=')){
+    			// get slug from page id or panel=id target
     			$ci =& get_instance();
     			$ci->load->model('cms/cms_slug_model');
     			$slug = $ci->cms_slug_model->get_cms_slug_by_target($url);
     			if ($slug){
-    				$url = $slug.'/';
+    				$url = $slug;
     			} else if(stristr($url, '=') && stristr($url, '/')){
 
     				list($panel_name, $id) = explode('=', $url);
@@ -255,7 +285,7 @@ if ( !function_exists('get_position')) {
     						$ci->{$panel_name}->init_panel(['name' => $panel, 'controller' => $filename, ]);
     					
     						// get params through panel controller
-    						$url = $ci->{$panel_name}->panel_slug(['module' => $module, 'name' => $panel, 'cms_page_panel_id' => $id, ]).'/';
+    						$url = $ci->{$panel_name}->panel_slug(['module' => $module, 'name' => $panel, 'cms_page_panel_id' => $id, ]);
     							
     					}
     						
@@ -265,15 +295,22 @@ if ( !function_exists('get_position')) {
     		}
     		
     		// if homepage
-    		if (ltrim($url, '/') == $GLOBALS['config']['landing_page']['url']){
+    		if (ltrim($url, '/') == ($GLOBALS['config']['landing_page']['url'] ?? '')){
     			$url = '/';
     		}
+
+    		// CMS paths always end with / (before query)
+    		$url = _l_path_trailing_slash($url);
 
     		$url = ($params['base_url'] ?? $GLOBALS['config']['base_url']).ltrim($url, '/');
     		
     	}
+
+    	if ($query !== ''){
+    		$url = $url.$query;
+    	}
     	    	
-    	if (!empty($hash)){
+    	if ($hash !== ''){
     		$url = $url.'#'.$hash;
     	}
     	

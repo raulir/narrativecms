@@ -160,7 +160,9 @@ Implemented core: admin split-view (`cms/cms_preview`), D|M toggle, saved-data i
 - [x] **config extends: template replace** (#715) — extension `templates/<source>.tpl.php` replaces target template; last module wins; see [`cms_module_extends.md`](cms_module_extends.md)
 - [x] **Pages admin: Lists + System sections** — left column Pages / Lists / System; list shells `module_panel` slugs; system `not-found` / `internal-error` / `timeout`; 404 redirects to system page
 - [ ] **System/list auto content** — helper panels on empty system + list template pages
-- [ ] **config extends: PHP controller** — wire extension `panels/` for target (next after template)
+- [x] **config extends: PHP controller** — extension `panels/<source>.php` chained after target; `panel_heading` last extender wins (reverse walk)
+- [x] **config extends PHP optimise** — shared chain helper, method map (`_panel_controller_methods`), no double-load for heading probe
+- [ ] **config extends: `extends_by_target` at boot** — index `$GLOBALS['config']['extends']` by target (+ optional precomputed controller/template/scss flags) so `get_panel_filenames` does O(extends for target) not O(all extends); see session plan notes
 - [ ] **Remove legacy extend code from core** — definition JSON `"extends"` / `join_js` / `join_css` in `controller.php` + `cms_panel_model.php`; DB `_extends.*` param handling
 
 ---

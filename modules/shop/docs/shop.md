@@ -37,19 +37,19 @@ Site modules **may** still add behaviour that checks whether `shopify` is instal
 
 | Piece | Name |
 |-------|------|
-| Admin list | `shop/product` only |
+| Admin list / PDP id | **`shop/product` only** |
 | Base definition | `modules/shop/definitions/product.json` |
-| Shopify fields | `shopify` extends → `target: shop/product`, `source: //shop_product` → `shopify/shop_product` |
-| Site fields (Timmy) | `timmy` extends → `target: shop/product`, `source: //shopify_product` (or site `shop_product`) |
+| Shopify fields | `shopify` extends → `//shop_product` → `shopify/shop_product` |
+| Site (Timmy) | `timmy` extends → `//shop_product` → `timmy/shop_product` (item fields, settings, template/CSS/JS, `panel_params`) |
 
-Stored rows use **`panel_name = shop/product`**. Extends only merge definition/JS/CSS into the target; they do not create a second list.
+Stored rows use **`panel_name = shop/product`**. Config extends merge definition, assets, settings values, and PHP controllers into the target — they do not create a second catalogue list.
 
 ### Categories
 
 | List | Panel |
 |------|--------|
-| Product categories | `shop/category` |
-| Product subcategories | `shop/subcategory` |
+| Product categories | `shop/category` (Timmy UI via `//shop_category`) |
+| Product subcategories | `shop/subcategory` (Timmy UI via `//shop_subcategory`; Shopify fields via shopify `//shop_subcategory`) |
 | Product texts | `shop/producttext` |
 
 ### Local stock / variants (in shop)
@@ -143,24 +143,23 @@ Enough for a working small shop without a site theme module:
 
 | Panel | Role |
 |-------|------|
-| `shop/product` | Product page (base; site may extend) |
+| `shop/product` | Product page (base; site/connector extend via `//shop_product`) |
 | `shop/productthumb` / `shop/products` | Grid (to be consolidated over time) |
-| `shop/category` (+ subcategory) | Category landings |
+| `shop/category` (+ subcategory) | Category landings; site extends with `//shop_category` |
 | `shop/cart` | Cart badge + popup (sites extend design) |
 | `shop/basket`, `shop/basketmini` | Full basket (legacy local) |
 | `shop/checkout` | Local checkout |
 | `shop/productbuy`, `shop/productdimensions` | Add-to-cart / variants (local) |
 
-Timmy may keep themed copies (`timmy/product`, `timmy/productthumb`, …) that **use** shop data and cart, or gradually extend shop panels.
+Timmy storefront PDP is **`//shop_product` extends** of `shop/product` (not a second placeable product panel). Grids may still use `timmy/productthumb` / `timmy/products` until similarly extended.
 
 ---
 
 ## Timmy-specific notes
 
-- Customisation, overlay images, imagemaker → **timmy** product extends.  
-- Frontend templates/SCSS → **timmy**.  
-- Optional: `if (shopify module loaded)` for Shopify-only UX.  
-- Product links / lists should resolve **`shop/product`**.  
+- Customisation, overlay images, imagemaker, PDP labels → **`timmy/shop_product`** extend.  
+- Frontend template/SCSS/JS for product page → same extend (full template replace).  
+- Product links / lists / list-item targets: **`shop/product` only**.  
 - Category URLs: **`shop/category`**, **`shop/subcategory`**.
 
 ---

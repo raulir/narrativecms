@@ -2,6 +2,8 @@
 
 Public URLs are resolved from the `cms_slug` table. Each row maps a unique **slug** (`cms_slug_id`) to a **target** string that the front controller understands.
 
+**Trailing slash:** site paths built with `_l()` / `_lh()` always end with `/` on the path (before `?` or `#`). External `http(s)://`, `mailto:`, `tel:`, and static file paths (with an extension) are left unchanged.
+
 **System bootstrap / Router / main controllers:** see [`system.md`](system.md). This file is about **slug storage, generation, admin edit, and route cache content**.
 
 ## Storage
@@ -57,9 +59,11 @@ Reserved main pages (`meta.page_class` = `system`), **non-numeric** slugs (numer
 |-------|------|
 | 404 - Not found | `not-found` |
 | 500 - Internal error | `internal-error` |
-| Timeout | `timeout` |
+| 504 - Timeout | `timeout` |
 
 `show_404()` redirects to `/not-found/` when that slug is in the route cache (one clean page request — no nested page build).
+
+**PHP max execution time:** after API branching, front requests register a shutdown handler ([`system/helpers/error_helper.php`](../../../system/helpers/error_helper.php)). On `Maximum execution time…` fatal: HTTP 504 + soft redirect (`meta refresh`) to `/timeout/` when not already there, and minimal HTML “Script timeout. Click here” linking to site root. Module **API** scripts do not register this handler (normal fatals).
 
 ## Slug generation
 

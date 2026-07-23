@@ -88,6 +88,10 @@ if (stristr($request_uri, '/')){
 	
 }
 
+// Front/router requests only — module API includes exit above with normal fatals
+require_once $GLOBALS['config']['base_path'].'system/helpers/error_helper.php';
+cms_register_timeout_shutdown();
+
 // router - check if landing page and landing page set
 if (empty($GLOBALS['config']['landing_page']['_value'])){
 	$GLOBALS['config']['landing_page']['_value'] = '1';

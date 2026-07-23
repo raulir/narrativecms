@@ -128,76 +128,171 @@ class Controller {
 	}
 	
 	/**
-	 * run controller panel_action part for a panel
+	 * Whether a panel controller file implements $method.
+	 * Uses require_once + method_exists (no CI library / init_panel).
+	 * Cached in $GLOBALS['_panel_controller_methods'][$path].
+	 */
+	function _controller_has_method($controller_path, $module, $name, $method){
+
+		if (empty($controller_path) || !is_file($controller_path)){
+			return false;
+		}
+
+		if (!isset($GLOBALS['_panel_controller_methods'])){
+			$GLOBALS['_panel_controller_methods'] = [];
+		}
+
+		$path_key = $controller_path;
+		if (!isset($GLOBALS['_panel_controller_methods'][$path_key])){
+			require_once $controller_path;
+			$class = $module.'\\'.$name;
+			if (!class_exists($class, false) && class_exists($name, false)){
+				$class = $name;
+			}
+			$map = [
+					'panel_heading' => false,
+					'panel_params' => false,
+					'panel_action' => false,
+			];
+			if (class_exists($class, false)){
+				foreach (array_keys($map) as $m){
+					$map[$m] = method_exists($class, $m);
+				}
+			}
+			$GLOBALS['_panel_controller_methods'][$path_key] = $map;
+		}
+
+		return !empty($GLOBALS['_panel_controller_methods'][$path_key][$method]);
+
+	}
+
+	/**
+	 * Invoke a panel controller file method if it exists.
+	 * @return array{ok:bool,result:mixed}
+	 */
+	function _invoke_panel_controller($controller_path, $module, $name, $method, $params){
+
+		if (!$this->_controller_has_method($controller_path, $module, $name, $method)){
+			return ['ok' => false, 'result' => $params];
+		}
+
+		$ci =& get_instance();
+		$lib = $module.'_'.$name.'_panel';
+
+		$ci->load->library(
+				$controller_path,
+				['module' => $module, 'name' => $name, ],
+				$lib
+				);
+
+		$ci->{$lib}->init_panel(['name' => $name, 'controller' => $controller_path, ]);
+		$out = $ci->{$lib}->{$method}($params);
+
+		return ['ok' => true, 'result' => $out];
+
+	}
+
+	/**
+	 * Run target + extend_controllers for a panel method.
+	 *
+	 * panel_params / panel_action / other: target first, then extends in order (chain).
+	 * panel_heading: reverse-walk extends (last implementer only); else target.
+	 */
+	function _run_panel_controller_chain($files, $method, $params){
+
+		$extend_list = !empty($files['extend_controllers']) ? $files['extend_controllers'] : [];
+
+		// --- panel_heading: last extender that implements it, else target ---
+		if ($method === 'panel_heading'){
+
+			for ($i = count($extend_list) - 1; $i >= 0; $i--){
+				$ext = $extend_list[$i];
+				$inv = $this->_invoke_panel_controller(
+						$ext['controller'],
+						$ext['module'],
+						$ext['name'],
+						'panel_heading',
+						$params
+						);
+				if ($inv['ok']){
+					return $inv['result'];
+				}
+			}
+
+			if (!empty($files['controller'])){
+				$inv = $this->_invoke_panel_controller(
+						$files['controller'],
+						$files['module'],
+						$files['name'],
+						'panel_heading',
+						$params
+						);
+				if ($inv['ok']){
+					return $inv['result'];
+				}
+			}
+
+			return $params;
+		}
+
+		// --- panel_params / panel_action / other: chain target → extends ---
+		$result = $params;
+
+		if (!empty($files['controller'])){
+			$inv = $this->_invoke_panel_controller(
+					$files['controller'],
+					$files['module'],
+					$files['name'],
+					$method,
+					$result
+					);
+			if ($inv['ok']){
+				$result = $inv['result'];
+				if (is_array($result)){
+					$result['_no_cache'] = 1;
+				}
+			}
+		} else if ($method != 'panel_action' && method_exists($this, $method)){
+			$result = $this->{$method}($result);
+			if (is_array($result)){
+				$result['_no_cache'] = 1;
+			}
+		}
+
+		foreach ($extend_list as $ext){
+			$inv = $this->_invoke_panel_controller(
+					$ext['controller'],
+					$ext['module'],
+					$ext['name'],
+					$method,
+					is_array($result) ? $result : $params
+					);
+			if (!$inv['ok']){
+				continue;
+			}
+			$result = $inv['result'];
+			if (is_array($result)){
+				$result['_no_cache'] = 1;
+			}
+		}
+
+		return $result;
+
+	}
+
+	/**
+	 * Run a panel controller method (target + config/legacy extend chain).
 	 */
 	function run_panel_method($panel_name_param, $panel_method, $params = []){
-	
+
 		if (!empty($params['_extends'])){
 			$files = $this->get_panel_filenames($panel_name_param, $params, $params['_extends']);
 		} else {
 			$files = $this->get_panel_filenames($panel_name_param, $params);
 		}
 
-		// if extended, run extended controller first
-		if (!empty($files['extends_controller'])){
+		return $this->_run_panel_controller_chain($files, $panel_method, $params);
 
-			$ci =& get_instance();
-
-			$extends_panel_name = $files['extends_module'].'_'.$files['extends_name'].'_panel';
-			$res = $ci->load->library(
-					$files['extends_controller'],
-					['module' => $files['extends_module'], 'name' => $files['extends_name'], ],
-					$extends_panel_name
-					);
-	
-			if (method_exists($ci->{$extends_panel_name}, $panel_method)){
-				$ci->{$extends_panel_name}->init_panel(array('name' => $files['extends_name'], 'controller' => $files['extends_controller'], ));
-				$params = $ci->{$extends_panel_name}->{$panel_method}($params);
-				if (is_array($params)){
-					$params['_no_cache'] = 1;
-				}
-			}
-
-		}
-	
-		// if there is a normal controller, do this
-		if (!empty($files['controller']) && is_array($params)){
-
-			$ci =& get_instance();
-			
-			// load panel stuff into this sandbox - it will be the same as sandbox is singleton for itself
-			$panel_name = $files['module'].'_'.$files['name'].'_panel';
-
-			$res = $ci->load->library(
-					$files['controller'],
-					['module' => $files['module'], 'name' => $files['name'], ],
-					$panel_name
-					);
-
-			if (method_exists($ci->{$panel_name}, $panel_method)){
-	
-				// define this controller as panel
-				$ci->{$panel_name}->init_panel(array('name' => $files['name'], 'controller' => $files['controller'], ));
-	
-				// get params through panel controller
-				$params = $ci->{$panel_name}->{$panel_method}($params);
-				if (is_array($params)){
-					$params['_no_cache'] = 1;
-				}
-		   
-			}
-
-		} else if ($panel_method != 'panel_action' && method_exists($this, $panel_method)){
-	
-			$params = $this->{$panel_method}($params);
-			if (is_array($params)){
-				$params['_no_cache'] = 1;
-			}
-	
-		}
-	
-		return $params;
-	
 	}
 
 	/*
@@ -225,58 +320,18 @@ class Controller {
 		$panel_css = $files['css'];
 		$panel_scss = $files['scss'];
 
-		// if controller found, rework params
-		if(!empty($files['controller']) || !empty($files['extends_controller'])){
-	
+		if (!empty($files['controller']) || !empty($files['extend_controllers'])){
+
 			$controller_timer_start = round(microtime(true) * 1000);
-	
+
 			$params['module'] = $files['module'];
-	
-			// if extended, run extended controller first
-			if (!empty($files['extends_controller'])){
-				 
-				// Panel controllers are libraries on the main controller (same get_instance())
-				$this->panel_ci = get_instance();
-				 
-				$extends_panel_name = $files['extends_module'].'_'.$files['extends_name'].'_panel';
-				$this->panel_ci->load->library(
-						$files['extends_controller'],
-						['module' => $files['extends_module'], 'name' => $files['extends_name'], ],
-						$extends_panel_name
-						);
-				$this->panel_ci->{$extends_panel_name}->init_panel(array('name' => $files['extends_name'], 'controller' => $files['extends_controller'], ));
-				$params = $this->panel_ci->{$extends_panel_name}->panel_params($params);
-	
-				$this->panel_ci = null;
-				 
+			$chained = $this->_run_panel_controller_chain($files, 'panel_params', $params);
+			if (is_array($chained)){
+				$params = $chained;
 			}
-	
-			// if there is a normal controller, do this
-			if (!empty($files['controller'])){
-	
-				$this->panel_ci = get_instance();
-				 
-				// load panel controller as library on main instance
-				$panel_name = $files['module'].'_'.$files['name'].'_panel';
-	
-				$this->panel_ci->load->library(
-						$files['controller'],
-						['module' => $files['module'], 'name' => $files['name'], ],
-						$panel_name
-						);
-		   
-				// define this controller as panel
-				$this->panel_ci->{$panel_name}->init_panel(array('name' => $files['name'], 'controller' => $files['controller'], ));
-		   
-				// get params through panel controller
-				$params = $this->panel_ci->{$panel_name}->panel_params($params);
-	
-				$this->panel_ci = null;
-	
-			}
-	
+
 			$controller_timer_end = round(microtime(true) * 1000);
-	
+
 		}
 
 		// render view when needed only
@@ -1194,13 +1249,17 @@ class Controller {
 		}
 		 
 		$return = [];
+		$return['extend_controllers'] = [];
+		$extends_files = null;
+		$def_extends_module = null;
+		$def_extends_name = null;
 	
 		if (!empty($extends['panel'])){
 			if (!stristr($extends['panel'], '/') && !empty($GLOBALS['config']['errors_visible'])){
 				_html_error('Bad panel extension panel name '.$extends['panel'].' (definition has to be "module/panel", save page panel in CMS after fixing)');
 			} else {
 				$extends_files = $this->get_panel_filenames($extends['panel']);
-				list($return['extends_module'], $return['extends_name']) = explode('/', $extends['panel']);
+				list($def_extends_module, $def_extends_name) = explode('/', $extends['panel']);
 			}
 		}
 
@@ -1231,8 +1290,13 @@ class Controller {
 			$return['controller'] = '';
 		}
 	
-		if (!empty($extends_files['controller'])){
-			$return['extends_controller'] = $extends_files['controller'];
+		// Legacy definition "extends"."panel" → first entry in extend_controllers[]
+		if (!empty($extends_files['controller']) && !empty($def_extends_module)){
+			$return['extend_controllers'][] = [
+					'module' => $def_extends_module,
+					'name' => $def_extends_name,
+					'controller' => $extends_files['controller'],
+			];
 		}
 
 		if (!empty($template_filename) && file_exists($template_filename)){
@@ -1361,6 +1425,16 @@ class Controller {
 				if (file_exists($ext_template)){
 					$return['template'] = $ext_template;
 					$return['template_from_extend'] = $item['source'];
+				}
+
+				// Config extends PHP: panels/<source>.php — chain after target (order = modules/extends order)
+				$ext_controller = $GLOBALS['config']['base_path'].'modules/'.$ext_module.'/panels/'.$ext_panel.'.php';
+				if (file_exists($ext_controller)){
+					$return['extend_controllers'][] = [
+							'module' => $ext_module,
+							'name' => $ext_panel,
+							'controller' => $ext_controller,
+					];
 				}
 			}
 		}
