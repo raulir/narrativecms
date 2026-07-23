@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class delivery_model extends Model {
+namespace shop;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class delivery_model extends \Model {
 
 	function get_deliveries($products){
 		

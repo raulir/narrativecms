@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class button extends Controller{
+namespace emailer;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class button extends \Controller{
 	
 	function panel_params($params){
 		

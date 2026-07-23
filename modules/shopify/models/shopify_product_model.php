@@ -1,4 +1,7 @@
 <?php
+
+namespace shopify;
+
 require_once 'vendor/autoload.php';
 
 use Shopify\Auth\FileSessionStorage;
@@ -8,7 +11,7 @@ use Shopify\Utils;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class shopify_product_model extends Model {
+class shopify_product_model extends \Model {
 	
 	function __construct(){
 		
@@ -16,7 +19,7 @@ class shopify_product_model extends Model {
 		$api_secret = $GLOBALS['config']['shopify_api_secret'];
 		$tmp_dir = $GLOBALS['config']['base_path'].'cache/';
 		
-		Shopify\Context::initialize(
+		\Shopify\Context::initialize(
 				apiKey: $api_key,
 				apiSecretKey: $api_secret,
 				scopes: ['read_products', 'read_product_listings', 'read_orders', 'read_product_feeds'],
@@ -278,12 +281,12 @@ class shopify_product_model extends Model {
 
 				}
 
-			} catch (Exception $e){
+			} catch (\Exception $e){
 
 				$data = ['_soft_fail' => 1, '_reason' => 'exception', '_message' => $e->getMessage(), ];
 				$api_ok = false;
 
-			} catch (Throwable $e){
+			} catch (\Throwable $e){
 
 				$data = ['_soft_fail' => 1, '_reason' => 'exception', '_message' => $e->getMessage(), ];
 				$api_ok = false;

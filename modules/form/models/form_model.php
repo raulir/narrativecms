@@ -1,6 +1,10 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
 
-class form_model extends CI_Model {
+namespace form;
+
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class form_model extends \Model {
 	
 	function create_form_data($cms_page_panel_id, $email, $data){
 

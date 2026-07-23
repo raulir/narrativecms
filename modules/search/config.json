@@ -35,6 +35,13 @@
 			"flags":[
 				"hidden"
 			]
+		},
+		{
+			"id":"search_cms_purge",
+			"name":"Search purge",
+			"flags":[
+				"hidden"
+			]
 		}
 	]
 }

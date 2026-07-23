@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class form_upload extends CI_Controller {
+namespace form;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class form_upload extends \Controller {
 
 	// common functionality of file uploading
 	function file_upload($input_name){

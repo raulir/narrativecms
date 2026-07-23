@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class form extends CI_Controller {
+namespace form;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class form extends \Controller {
 		
     public function __construct() {
     	

@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class console_log extends CI_Controller {
+namespace basic;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class console_log extends \Controller {
 	
 	function panel_action($params){
 

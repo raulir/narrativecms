@@ -52,6 +52,7 @@ modules/music/
   definitions/user_login.json   # extra CMS fields merged into target definition
   css/user_login.scss           # theme (loaded after target SCSS)
   js/user_login.js              # behaviour (concatenated after target JS)
+  templates/user_login.tpl.php  # optional full template replace of target (see below)
 ```
 
 | Asset | Supported | Handler |
@@ -59,8 +60,18 @@ modules/music/
 | Definition `item` / `settings` | Yes | [`cms_panel_model::merge_structures()`](../../models/cms_panel_model.php) when loading `target` |
 | SCSS | Yes | [`controller::get_panel_filenames()`](../../../system/core/controller.php) |
 | JS | Yes | Same — appended after target panel JS; [`pack_js()`](../../../system/helpers/packer_helper.php) concatenates in order |
-| PHP controller | **Todo** | Not wired |
-| Template | **Todo** | Not wired |
+| Template | Yes | Same — if `modules/<ext>/templates/<source_panel>.tpl.php` exists, it **replaces** the target template entirely (no merge). Last extending module in `modules` order wins. |
+| PHP controller | **Todo** | Not wired (next) |
+
+## Template replace
+
+Unlike SCSS/JS (append / cascade), an extension **template** is a full replace of the target’s `.tpl.php`.
+
+1. Place `templates/<source_panel>.tpl.php` next to the extension panel (e.g. `music/templates/user_login.tpl.php` for `source: "//user_login"`).
+2. When the **target** is rendered (`user/login`), that file is used instead of `user/templates/login.tpl.php`.
+3. If several modules extend the same target and each provides a template, the **last** module in the site `modules` list (and thus in `$GLOBALS['config']['extends']`) wins.
+4. Extension with only definition/CSS/JS and **no** template file → base template unchanged.
+5. HTML comments note the source when replaced: `template from config extend "music/user_login"`.
 
 ## JavaScript
 

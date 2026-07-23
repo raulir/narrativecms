@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class basket extends CI_Controller{
+namespace shop;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class basket extends \Controller{
 
 	function panel_action($params){
 				

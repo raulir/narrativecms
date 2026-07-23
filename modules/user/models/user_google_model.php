@@ -1,6 +1,10 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
 
-class user_google_model extends Model {
+namespace user;
+
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class user_google_model extends \Model {
 
 	/**
 	 * Website GSI journey: set before showing login_google / register_google.

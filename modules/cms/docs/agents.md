@@ -73,7 +73,7 @@ Namespaced class definition notes:
 - File: `modules/<module>/models/<model>.php` → `namespace <module>;` and `class <model> extends \Model`
 - Load models with the same path as before: `$this->load->model('cms/cms_access_model')` → `$this->cms_access_model` (Loader prefers `cms\cms_access_model` when present)
 - Extend `\Controller` / `\Model` inside a namespace (leading backslash), not bare `Controller` / `Model` / `CI_*`
-- Legacy un-namespaced panels/models still work; prefer namespaces for new class files. CMS module controllers, panels, and models are namespaced.
+- All module panels, models, and route controllers use namespaces; new class files must follow this. Core keeps `CI_Controller` / `CI_Model` as `class_alias` only for external/legacy code.
 
 ### Avoid stub panel controllers
 

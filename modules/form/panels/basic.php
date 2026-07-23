@@ -4,7 +4,7 @@ namespace form;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class basic extends \CI_Controller{
+class basic extends \Controller{
 	
 	function ds_subscribers($params){
 

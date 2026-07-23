@@ -142,7 +142,7 @@ class cms_email_model extends \Model {
 
 			return $sent;
 
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			error_log('cms_email_model send_mail: SMTP send failed to '.$to.' — '.$subject.' — '.$e->getMessage());
 			return false;
 		}

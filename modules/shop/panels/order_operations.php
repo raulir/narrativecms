@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class order_operations extends MY_Controller{
+namespace shop;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class order_operations extends \Controller{
 	
 	function panel_action($params){
 

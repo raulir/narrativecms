@@ -4,7 +4,7 @@ namespace basic;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class spacer extends \CI_Controller{
+class spacer extends \Controller{
 	
 	function panel_heading($params){
 

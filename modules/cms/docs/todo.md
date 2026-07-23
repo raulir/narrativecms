@@ -157,8 +157,9 @@ Implemented core: admin split-view (`cms/cms_preview`), D|M toggle, saved-data i
 ## Module extends (legacy cleanup)
 
 - [x] **config.json extends + JS** — `get_panel_filenames()` appends extension JS; detail: [`cms_module_extends.md`](cms_module_extends.md)
+- [x] **config extends: template replace** (#715) — extension `templates/<source>.tpl.php` replaces target template; last module wins; see [`cms_module_extends.md`](cms_module_extends.md)
+- [ ] **config extends: PHP controller** — wire extension `panels/` for target (next after template)
 - [ ] **Remove legacy extend code from core** — definition JSON `"extends"` / `join_js` / `join_css` in `controller.php` + `cms_panel_model.php`; DB `_extends.*` param handling
-- [ ] **config extends: PHP + template override** — wire extension `panels/` and `templates/` for target panels
 
 ---
 

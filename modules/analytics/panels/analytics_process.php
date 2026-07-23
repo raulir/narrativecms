@@ -1,6 +1,10 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
 
-class analytics_process extends CI_Controller {
+namespace analytics;
+
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class analytics_process extends \Controller {
 
 	function panel_action($params) {
 

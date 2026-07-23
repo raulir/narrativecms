@@ -1,0 +1,37 @@
+// Height-1 settings row: label left, status, Purge button right
+.search_cms_purge {
+
+	.search_cms_purge_status {
+		box-sizing: border-box;
+		position: absolute;
+		left: 13.0rem;
+		right: 10.0rem;
+		top: 0.5rem;
+		bottom: 0.5rem;
+		line-height: 2.5rem;
+		font-size: 1.4rem;
+		color: #404040;
+		text-align: right;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		padding: 0 0.5rem 0 0.5rem;
+	}
+
+	.search_cms_purge_button {
+		position: absolute;
+		right: 1.0rem;
+		top: 0.5rem;
+		height: 2.6rem;
+		line-height: 2.4rem;
+		font-size: 1.6rem;
+		padding: 0 1.0rem;
+		z-index: 10;
+	}
+
+	.search_cms_purge_button.search_cms_purge_busy {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+
+}

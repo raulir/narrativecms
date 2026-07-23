@@ -1,12 +1,9 @@
 {
 	"version":"2",
-	"label": "Search",
-    "js": [
-
-    ],
-    "item":[
-    
-    ],
+	"label": "Search results",
+	"cache": "3600",
+	"js": [],
+	"item":[],
 	"settings":[
 		{
 			"type":"text",
@@ -19,6 +16,13 @@
 			"name":"no_characters",
 			"label":"No characters",
 			"default": "Enter {{x}} characters"
+		},
+		{
+			"type":"text",
+			"name":"label_page",
+			"label":"Page label",
+			"default": "Page",
+			"help": "Prefix for CMS page hits, e.g. Page - Story"
 		}
 	]
 }

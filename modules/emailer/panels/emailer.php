@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class emailer extends CI_Controller{
+namespace emailer;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class emailer extends \Controller{
 	
 	function panel_params($params){
 		

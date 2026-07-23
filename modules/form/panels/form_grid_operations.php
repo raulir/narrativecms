@@ -4,7 +4,7 @@ namespace form;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class form_grid_operations extends \CI_Controller {
+class form_grid_operations extends \Controller {
 	
 	function panel_action($params){
 

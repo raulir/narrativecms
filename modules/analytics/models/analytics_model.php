@@ -1,6 +1,10 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
 
-class analytics_model extends Model {
+namespace analytics;
+
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class analytics_model extends \Model {
 
 	private $_geo_cache = null;
 	private $_geo_cache_dirty = false;
@@ -372,7 +376,7 @@ class analytics_model extends Model {
 				$lines[] = 'buildEpoch: '.(!empty($meta->buildEpoch) ? date('Y-m-d H:i:s', (int)$meta->buildEpoch) : '');
 				$lines[] = 'binaryFormatMajorVersion: '.($meta->binaryFormatMajorVersion ?? '');
 				$lines[] = 'binaryFormatMinorVersion: '.($meta->binaryFormatMinorVersion ?? '');
-			} catch (Exception $e) {
+			} catch (\Exception $e) {
 				$lines[] = 'ERROR opening Reader: '.get_class($e).': '.$e->getMessage();
 				$reader = null;
 			}
@@ -1261,7 +1265,7 @@ class analytics_model extends Model {
 
 			return $ip.' => ERROR AddressNotFoundException: '.$e->getMessage();
 
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 
 			return $ip.' => ERROR '.get_class($e).': '.$e->getMessage();
 
@@ -1292,7 +1296,7 @@ class analytics_model extends Model {
 			);
 		} catch (\GeoIp2\Exception\AddressNotFoundException $e) {
 			return $unknown;
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			return $unknown;
 		}
 

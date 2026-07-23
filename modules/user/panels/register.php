@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class register extends Controller {
+namespace user;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class register extends \Controller {
 	
 	function panel_action($params){
 		

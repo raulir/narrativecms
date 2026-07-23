@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-if (!function_exists('get_user_ip')){
+namespace form;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+if (!function_exists(__NAMESPACE__ . '\\get_user_ip')){
 
 	function get_user_ip(){
 
@@ -29,7 +33,7 @@ if (!function_exists('get_user_ip')){
 
 }
 
-class do_send extends CI_Controller {
+class do_send extends \Controller {
 	
 	function panel_action($params){
 

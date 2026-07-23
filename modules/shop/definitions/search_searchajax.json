@@ -1,0 +1,33 @@
+{
+	"version": "2",
+	"label": "Search results (Shop)",
+	"description": "Shop list labels for search results — only when shop module is loaded",
+	"item": [],
+	"settings": [
+		{
+			"type": "subtitle",
+			"label": "Shop result labels"
+		},
+		{
+			"type": "text",
+			"name": "label_category",
+			"label": "Category label",
+			"default": "Category",
+			"help": "Prefix for shop/category hits"
+		},
+		{
+			"type": "text",
+			"name": "label_subcategory",
+			"label": "Subcategory label",
+			"default": "Subcategory",
+			"help": "Prefix for shop/subcategory hits"
+		},
+		{
+			"type": "text",
+			"name": "label_collection",
+			"label": "Collection label",
+			"default": "Collection",
+			"help": "Fallback prefix for shop/collection when type is empty; otherwise collection type is used"
+		}
+	]
+}

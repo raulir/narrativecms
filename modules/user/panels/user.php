@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class user extends Controller{
+namespace user;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class user extends \Controller{
 	
 	function panel_heading($params){
 		

@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class usergroup extends Controller{
+namespace user;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class usergroup extends \Controller{
 	
 	function panel_heading($params){
 

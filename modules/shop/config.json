@@ -194,5 +194,11 @@
 			"url":"admin/panel_settings/shop__category/",
 			"order":60
 		}
+	],
+	"extends":[
+		{
+			"target":"search/searchajax",
+			"source":"//search_searchajax"
+		}
 	]
 }

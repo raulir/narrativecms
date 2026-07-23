@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class lander extends CI_Controller{
+namespace basic;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class lander extends \Controller{
 	
 	function panel_params($params){
 

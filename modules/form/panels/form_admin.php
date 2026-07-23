@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class form_admin extends CI_Controller {
+namespace form;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class form_admin extends \Controller {
 	
 	function panel_action($params){
 	

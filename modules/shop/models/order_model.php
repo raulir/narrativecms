@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class order_model extends CI_Model {
+namespace shop;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class order_model extends \Model {
 	
 	function delete_order_line($order_line_id){
 		

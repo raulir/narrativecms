@@ -56,7 +56,7 @@ Rough order:
 | `Files` | `system/core/controller_files.php` | File serving paths |
 | Module admin | e.g. `modules/cms/controllers/admin.php` | CMS admin UI |
 
-Prefer **`extends \Controller`** (inside `namespace module;`) or bare **`extends Controller`** only in non-namespaced legacy files. The CMS module and `system/` use **`Controller` only** — not `CI_Controller`. Legacy name **`CI_Controller`** remains a `class_alias` for other modules still migrating. Same idea for models: **`extends Model`**, not `CI_Model`.
+Prefer **`extends \Controller`** inside `namespace <module>;`. Module panels/models/controllers are namespaced. Core class name is **`Controller`** (not `CI_Controller`); **`CI_Controller`** remains a `class_alias` for external/legacy code. Same for models: **`extends \Model`**, with `CI_Model` as alias only.
 
 ---
 
@@ -193,7 +193,7 @@ Public API modules: URI `module/api_id` may short-circuit in `cms.php` before fu
 | Rule | Detail |
 |------|--------|
 | Class / file | Fully lowercase, match filename: `cms_schema_model` |
-| Extends | `Model` (not `CI_Model`) |
+| Extends | `\Model` inside `namespace <module>;` (`CI_Model` is alias only) |
 | Constructor | Omit unless needed (no obligatory `parent::__construct()`) |
 | DB | `$this->db` available; no `$db->error()` on this older library |
 | Visibility | No `public` keyword by convention; private/protected rare |
@@ -213,6 +213,6 @@ Full page loads construct many panel libraries. Keeping a **single** Loader init
 
 - [x] CMS module: all controllers/panels namespaced `cms\` + `extends \Controller`  
 - [x] CMS module: all models namespaced `cms\` + `extends \Model`; Loader prefers `module\model`  
-- Repo-wide replace of remaining `extends CI_Controller` in other modules with `Controller`
+- [x] All modules: panels/models/controllers namespaced + `extends \Controller` / `\Model` (no `CI_*` extends)
 - Remove legacy definition `"extends"` handling from `system/` when projects migrated  
 - Optional rename of Loader internal `_ci_*` property names  

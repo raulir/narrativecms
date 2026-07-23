@@ -305,8 +305,14 @@ class Controller {
 		}
 
 		// add debug data
+		$template_note = '';
+		if (!empty($files['template_from_extend'])){
+			$template_note = ' template from config extend "'.$files['template_from_extend'].'" ';
+		}
 		$return = "\n".'<!-- panel "' . $files['module'] . '/' . $files['name'] . '" '.
-						(!empty($params['_extends']['panel']) ? 'extends "'.$params['_extends']['panel'].'" ' : '' ).'start -->'."\n".
+						(!empty($params['_extends']['panel']) ? 'extends "'.$params['_extends']['panel'].'" ' : '' ).
+						$template_note.
+						'start -->'."\n".
 				(!empty($params['_extends']['panel']) && empty($params['_extends']['no_wrapper']) ? 
 						'<span class="cms_wrapper cms_wrapper_'.$files['module'].'_'.$files['name'].'">'."\n" : '').
 				$return .
@@ -715,21 +721,53 @@ class Controller {
 
 		$params['_access_ok'] = 1;
 
-		// do panel action
-		$action_result = $this->run_action($name, $params);
-		if (is_array($action_result)){
-			$params = array_merge($params, $action_result);
+		// Definition JSON "cache": seconds — HTML file cache for ajax/_panel (not cms/*)
+		$def_cache_ttl = $this->_panel_definition_cache_ttl($name, $panel_config);
+		$def_cache_path = '';
+		$def_cache_hit = false;
+
+		if ($def_cache_ttl > 0 && empty($params['no_html']) && empty($GLOBALS['config']['cache']['force_download'])){
+			$def_cache_path = $this->_panel_definition_cache_path($name, $params);
+			if ($def_cache_path !== '' && is_file($def_cache_path)
+					&& (time() - filemtime($def_cache_path)) < $def_cache_ttl){
+				$def_cache_hit = true;
+				$files = !empty($params['_extends'])
+						? $this->get_panel_filenames($name, $params, $params['_extends'])
+						: $this->get_panel_filenames($name, $params);
+				$return = [
+						'_html' => (string)file_get_contents($def_cache_path),
+						'js' => $files['js'] ?? [],
+						'css' => $files['css'] ?? [],
+						'scss' => $files['scss'] ?? [],
+				];
+			}
 		}
-		
-		// leave after action when no html needed
-		if (!empty($params['no_html']) && stristr($name, '/')){
-		
-			return $params;
-		
+
+		if (!$def_cache_hit){
+
+			// do panel action
+			$action_result = $this->run_action($name, $params);
+			if (is_array($action_result)){
+				$params = array_merge($params, $action_result);
+			}
+
+			// leave after action when no html needed
+			if (!empty($params['no_html']) && stristr($name, '/')){
+
+				return $params;
+
+			}
+
+			// get panel
+			$return = $this->panel($name, $params);
+
+			// write definition HTML cache
+			if ($def_cache_ttl > 0 && $def_cache_path !== '' && empty($params['no_html'])
+					&& !empty($return['_html']) && empty($action_result['_no_cache'])){
+				$this->_panel_definition_cache_write($def_cache_path, $return['_html']);
+			}
+
 		}
-		 
-		// get panel
-		$return = $this->panel($name, $params);
 		
 		// meta images
 		if (!empty($params['_images'])){
@@ -742,15 +780,18 @@ class Controller {
 		if (!empty($params['embed'])){
 	
 			$return['_panel_js'] = [];
-			$return['_panel_scss'] = $return['scss'];
+			$return['_panel_scss'] = $return['scss'] ?? [];
 	
 		} else if (empty($params['no_html'])){
 	
-			$js = $GLOBALS['_panel_js'];
+			$js = $GLOBALS['_panel_js'] ?? [];
+			if (!empty($return['js']) && is_array($return['js'])){
+				$js = array_merge($js, $return['js']);
+			}
 	
 			if (empty($params['_no_css'])){
 				
-				$scss = array_merge($return['scss'], $return['css']);
+				$scss = array_merge($return['scss'] ?? [], $return['css'] ?? []);
 				
 				if(!empty($GLOBALS['_panel_scss'])){
 					$scss = array_merge($scss, $GLOBALS['_panel_scss']);
@@ -783,11 +824,97 @@ class Controller {
 		}
 		 
 		if (empty($params['no_html'])){
+			if (!isset($return['_html'])){
+				$return['_html'] = '';
+			}
+			// On cache hit HTML is already complete; still append packed css/js tags for ajax consumers
 			$return['_html'] .= "\n".$css_str."\n".$js_str;
 		}
 	
 		return $return;
 		 
+	}
+
+	/**
+	 * Definition JSON "cache": seconds. 0 = off. cms/* never definition-cached.
+	 */
+	function _panel_definition_cache_ttl($panel_name, $panel_config = null){
+
+		if (!is_string($panel_name) || !stristr($panel_name, '/')){
+			return 0;
+		}
+		list($module, ) = explode('/', $panel_name, 2);
+		if ($module === 'cms'){
+			return 0;
+		}
+		if (!is_array($panel_config)){
+			$this->load->model('cms/cms_panel_model');
+			$panel_config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+		}
+		if (empty($panel_config['cache'])){
+			return 0;
+		}
+		return max(0, (int)$panel_config['cache']);
+
+	}
+
+	/**
+	 * cache/{module}/{panel}/{md5_12}.html from panel name + stable params.
+	 */
+	function _panel_definition_cache_path($panel_name, $params){
+
+		if (!is_string($panel_name) || !stristr($panel_name, '/')){
+			return '';
+		}
+		list($module, $panel) = explode('/', $panel_name, 2);
+		$hash = $this->_panel_definition_cache_hash($panel_name, $params);
+		if ($hash === ''){
+			return '';
+		}
+		return $GLOBALS['config']['base_path'].'cache/'.$module.'/'.$panel.'/'.$hash.'.html';
+
+	}
+
+	function _panel_definition_cache_hash($panel_name, $params){
+
+		if (!is_array($params)){
+			$params = [];
+		}
+		$keys = array_keys($params);
+		sort($keys);
+		$parts = [$panel_name];
+		foreach ($keys as $key){
+			if ($key === '' || !is_string($key)){
+				continue;
+			}
+			// Skip internal / volatile keys
+			if ($key[0] === '_' || in_array($key, ['module', 'embed', 'data', 'panel_name'], true)){
+				continue;
+			}
+			$val = $params[$key];
+			if (is_array($val)){
+				$val = json_encode($val);
+			} else if (is_bool($val)){
+				$val = $val ? '1' : '0';
+			} else if ($val === null){
+				$val = '';
+			} else {
+				$val = (string)$val;
+			}
+			$parts[] = $key.'='.$val;
+		}
+		return substr(md5(implode('|', $parts)), 0, 12);
+
+	}
+
+	function _panel_definition_cache_write($path, $html){
+
+		$dir = dirname($path);
+		if (!is_dir($dir)){
+			@mkdir($dir, 0755, true);
+		}
+		@file_put_contents($path, $html);
+
 	}
 	
 	// panel name is filled when this controller is panel
@@ -1196,7 +1323,8 @@ class Controller {
 			$panel_css_exists = true; // scss replaces css here
 		}
 		
-		// extensions from module config.json (definition + scss + js)
+		// extensions from module config.json (definition merge elsewhere; scss + js + full template replace)
+		// Loop order = modules load order; later extension templates overwrite earlier (last wins).
 		foreach($GLOBALS['config']['extends'] as $item){
 			if ($item['target'] == $return['module'].'/'.$return['name']){
 				
@@ -1227,6 +1355,13 @@ class Controller {
 				}
 
 				$this->_append_extend_module_js($return['js'], $ext_module, $ext_panel);
+
+				// Full template replace (no merge) — last extending module with a template file wins
+				$ext_template = $GLOBALS['config']['base_path'].'modules/'.$ext_module.'/templates/'.$ext_panel.'.tpl.php';
+				if (file_exists($ext_template)){
+					$return['template'] = $ext_template;
+					$return['template_from_extend'] = $item['source'];
+				}
 			}
 		}
 

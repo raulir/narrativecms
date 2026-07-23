@@ -1,6 +1,10 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
 
-class user_model extends Model {
+namespace user;
+
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class user_model extends \Model {
 	
 	function create_user($data){
 		

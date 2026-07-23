@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class iframe extends CI_Controller {
+namespace basic;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class iframe extends \Controller {
 	
 	function panel_params($params){
 

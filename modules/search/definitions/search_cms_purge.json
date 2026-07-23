@@ -1,0 +1,5 @@
+{
+	"version": "2",
+	"label": "Search purge",
+	"description": "Admin control to delete cached search HTML under cache/search/"
+}

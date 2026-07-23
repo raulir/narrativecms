@@ -44,11 +44,10 @@
 			"help": "Minimum characters before a search runs"
 		},
 		{
-			"type":"text",
-			"name":"cache_hours",
-			"label":"Cache time (h)",
-			"default":"6",
-			"help": "HTML result cache lifetime under cache/search/"
+			"type":"search/search_cms_purge",
+			"name":"purge",
+			"label":"Search purge",
+			"help": "Deletes all cached search HTML under cache/search/ (definition panel cache for the search module)"
 		},
 		{
 			"type":"subtitle",

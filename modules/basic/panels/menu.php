@@ -1,6 +1,10 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-class menu extends CI_Controller {
+namespace basic;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class menu extends \Controller {
 	
 	function __construct(){
 		
