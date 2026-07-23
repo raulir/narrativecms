@@ -158,6 +158,8 @@ Implemented core: admin split-view (`cms/cms_preview`), D|M toggle, saved-data i
 
 - [x] **config.json extends + JS** — `get_panel_filenames()` appends extension JS; detail: [`cms_module_extends.md`](cms_module_extends.md)
 - [x] **config extends: template replace** (#715) — extension `templates/<source>.tpl.php` replaces target template; last module wins; see [`cms_module_extends.md`](cms_module_extends.md)
+- [x] **Pages admin: Lists + System sections** — left column Pages / Lists / System; list shells `module_panel` slugs; system `not-found` / `internal-error` / `timeout`; 404 redirects to system page
+- [ ] **System/list auto content** — helper panels on empty system + list template pages
 - [ ] **config extends: PHP controller** — wire extension `panels/` for target (next after template)
 - [ ] **Remove legacy extend code from core** — definition JSON `"extends"` / `join_js` / `join_css` in `controller.php` + `cms_panel_model.php`; DB `_extends.*` param handling
 

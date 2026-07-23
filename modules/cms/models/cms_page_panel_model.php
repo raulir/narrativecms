@@ -416,6 +416,18 @@ class cms_page_panel_model extends \Model {
 			return false;
 		}
 
+		// Namespaced list template slugs: shop_product → shop/product
+		$this->load->model('cms/cms_page_model');
+		$panel_from_slug = $this->cms_page_model->list_template_panel_from_slug($slug);
+		if ($panel_from_slug !== ''){
+			foreach ($this->cms_page_model->get_linkable_list_types() as $type){
+				if ($type['panel_name'] === $panel_from_slug){
+					return true;
+				}
+			}
+		}
+
+		// Bare panel basename definitions (definitions/{slug}.json with list)
 		foreach ($GLOBALS['config']['modules'] as $module){
 
 			$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/'.$slug.'.json';

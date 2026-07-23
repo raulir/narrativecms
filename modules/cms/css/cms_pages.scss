@@ -4,12 +4,38 @@
 	letter-spacing: 0;
 }
 
-.cms_pages_page {
-	position: relative;
-}
-
 .cms_pages_list {
 	padding: 1.0rem 0 4.5rem 0;
+}
+
+// Row chrome (was cms_list_sortable_item) — no drag handle
+.cms_pages_page {
+	box-sizing: border-box;
+	display: block;
+	position: relative;
+	background-color: white;
+	height: 2.8rem;
+	line-height: 2.6rem;
+	font-size: 1.6rem;
+	border: 0.1rem solid #c0c0c0;
+	color: #101010;
+	padding: 0 0.3rem 0 0.9rem;
+	margin-bottom: 0.6rem;
+	cursor: default;
+	transition: background-color 0.2s;
+
+	&:last-of-type {
+		margin-bottom: 0;
+	}
+
+	&:hover {
+		background-color: #efefef;
+	}
+}
+
+// Landing / homepage: extra left padding for home icon
+.cms_pages_page_landing {
+	padding-left: 2.8rem;
 }
 
 .cms_pages_label {
@@ -19,9 +45,9 @@
 .cms_pages_link {
 	display: block;
 	position: absolute;
-	left: 2.6rem;
+	left: 0.9rem;
 	top: 0;
-	width: calc(100% - 8.7rem);
+	width: calc(100% - 7.0rem);
 	height: 100%;
 	z-index: 10;
 	cursor: pointer;
@@ -30,16 +56,17 @@
 .cms_pages_landing {
 	position: absolute;
 	width: 1.6rem;
-    height: 1.4rem;
-    left: 2.5rem;
-    top: 0.6rem;
+	height: 1.4rem;
+	left: 0.9rem;
+	top: 0.6rem;
 	background-size: contain;
 	background-position: center;
 	background-repeat: no-repeat;
 }
 
-.cms_pages_page_landing {
-	padding-left: 4.6rem;
+.cms_pages_page_landing .cms_pages_link {
+	left: 2.8rem;
+	width: calc(100% - 8.9rem);
 }
 
 .cms_pages_position_empty {
@@ -57,4 +84,8 @@
 	&::first-letter {
 		text-transform: uppercase;
 	}
+}
+
+.cms_pages_section {
+	margin-bottom: 1.0rem;
 }

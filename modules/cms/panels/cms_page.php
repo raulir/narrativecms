@@ -47,7 +47,11 @@ class cms_page extends \Controller {
 			$return['page']['title'] = 'New '.(!empty($params['position']) ? $params['position'] : 'page');
 		}
 
-		$return['is_list_item'] = !empty($return['page']['slug']) && $this->cms_page_panel_model->is_list_slug($return['page']['slug']) ? 1 : 0;
+		$page_class = $this->cms_page_model->get_page_class($return['page']);
+		$return['page_class'] = $page_class;
+		$return['is_list_item'] = ($page_class === 'list'
+				|| (!empty($return['page']['slug']) && $this->cms_page_panel_model->is_list_slug($return['page']['slug'])))
+			? 1 : 0;
 
 		if (!empty($return['page']['create_cms_user_id'])) {
 			$return['page']['create_user'] = $this->cms_user_model->get_cms_user($return['page']['create_cms_user_id']);

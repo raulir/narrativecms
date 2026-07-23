@@ -37,6 +37,30 @@ List items must have `"link_target": "1"` (or any truthy value) under `"list"` i
 
 Show/hide on a list item updates slug visibility through `cms_page_panel_model::set_cms_page_panel_show()` → `cms_slug_model::update_slug_status()`.
 
+### List type template pages (admin Pages → Lists)
+
+Each linkable list type gets a **main** CMS page used as the layout shell for all items of that type:
+
+| Field | Example |
+|-------|---------|
+| `meta.page_class` | `list` |
+| `meta.list_panel` | `shop/product` |
+| Page slug | `shop_product` (`{module}_{panel}` with panel `_` → `-`) |
+
+Front controller resolves the shell by that slug only (no bare `product` fallback). The shell’s own public route stays **hidden**; list **items** still use title-based public slugs.
+
+### System pages (admin Pages → System)
+
+Reserved main pages (`meta.page_class` = `system`), **non-numeric** slugs (numeric strings would clash with `cms_page_id` routing):
+
+| Title | Slug |
+|-------|------|
+| 404 - Not found | `not-found` |
+| 500 - Internal error | `internal-error` |
+| Timeout | `timeout` |
+
+`show_404()` redirects to `/not-found/` when that slug is in the route cache (one clean page request — no nested page build).
+
 ## Slug generation
 
 `cms_slug_model::slugify_slug()` normalises text then ensures uniqueness:

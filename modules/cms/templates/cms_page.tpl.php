@@ -1,6 +1,16 @@
 <div class="cms_toolbar">
 	
-	<a class="cms_tool_text" <?php _lh('admin/pages/') ?>><?= (empty($page['position']) || $page['position'] == 'main') ? 'Pages' : $page['position'] ?></a>
+	<a class="cms_tool_text" <?php _lh('admin/pages/') ?>><?php
+		if (!empty($page['position']) && $page['position'] !== 'main') {
+			echo $page['position'];
+		} else if (!empty($page_class) && $page_class === 'list') {
+			echo 'Lists';
+		} else if (!empty($page_class) && $page_class === 'system') {
+			echo 'System';
+		} else {
+			echo 'Pages';
+		}
+	?></a>
 	<div class="cms_tool_text">
 		&nbsp; &gt; &nbsp; 
 		<div class="cms_page_toolbar_title"></div>
@@ -101,16 +111,23 @@
 							'width' => 'narrow', 
 							'help' => '[Sharing and SEO]||These fields are very important for search engines, page sharing in social media etc']) ?>
 					
-					<?php _panel('cms/cms_input_text', [
+					<?php
+						$slug_readonly = !empty($page_class) && ($page_class === 'list' || $page_class === 'system');
+						_panel('cms/cms_input_text', [
 							'name' => 'slug',
 							'value' => $page['slug'],
 							'name_clean' => 'page_slug',
 							'label' => 'Slug',
-							'help' => '[Page slug]||Can be seen on browser address bar following the main address part of the site. '.
-							'Important for SEO.||Can contain only letters, numbers, hyphens and underscores (_).'.
-							'||Slug is ignored when page is set as default landing page.',
+							'readonly' => $slug_readonly ? '1' : '',
+							'help' => $slug_readonly
+								? '[Page slug]||Reserved for this list or system page and cannot be changed. '.
+									'List templates use a module_panel slug; system pages use fixed slugs (e.g. not-found).'
+								: '[Page slug]||Can be seen on browser address bar following the main address part of the site. '.
+									'Important for SEO.||Can contain only letters, numbers, hyphens and underscores (_).'.
+									'||Slug is ignored when page is set as default landing page.',
 							'meta_class' => 'cms_page_slug',
-					]) ?>
+						]);
+					?>
 					
 					<?php _panel('cms/cms_input_text', [
 							'name' => 'seo_title',

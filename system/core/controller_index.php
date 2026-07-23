@@ -163,17 +163,13 @@ class Index extends Controller {
     		}
  			
     		if (empty($list_item_data['_template_page_id'])){
- 			
-	 			// this is when there is page parameter
-	    		// check if template page exists
-	    		$page = $this->cms_page_model->get_page_by_slug(str_replace('_', '-', $panel_name));
-	    		
-	    		// try without model
-	    		if (empty($page['page_id']) && stristr($panel_name, '/')){
-	    			list($m_module, $m_panel_name) = explode('/', $panel_name);
-	    			$page = $this->cms_page_model->get_page_by_slug(str_replace('_', '-', $m_panel_name));
-	    		}
-    		
+
+	    		// List type template page: namespaced slug only (e.g. shop/product → shop_product)
+	    		$template_slug = $this->cms_page_model->list_template_slug_from_panel($panel_name);
+	    		$page = $template_slug !== ''
+	    			? $this->cms_page_model->get_page_by_slug($template_slug)
+	    			: [];
+
     		} else {
     			
     			// special template

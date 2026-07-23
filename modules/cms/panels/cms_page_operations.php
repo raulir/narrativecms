@@ -71,6 +71,29 @@ class cms_page_operations extends \Controller {
 				$old_slug = !empty($old_page['slug']) ? $old_page['slug'] : '';
 			}
 
+			// Preserve list/system classification on save (not posted from form)
+			if (!empty($page_id)) {
+				$existing = $this->cms_page_model->get_page($page_id);
+				if (!empty($existing['page_class'])) {
+					$data['page_class'] = $existing['page_class'];
+				}
+				if (!empty($existing['list_panel'])) {
+					$data['list_panel'] = $existing['list_panel'];
+				}
+				// List/system reserved slugs must not be overwritten by free-text slugify input
+				if (($existing['page_class'] ?? '') === 'list' && !empty($existing['list_panel'])) {
+					$data['slug'] = $this->cms_page_model->list_template_slug_from_panel($existing['list_panel']);
+				}
+				if (($existing['page_class'] ?? '') === 'system' && !empty($existing['slug'])) {
+					$data['slug'] = $existing['slug'];
+				}
+			} else {
+				// New pages from admin are user pages
+				if (empty($data['page_class'])) {
+					$data['page_class'] = 'user';
+				}
+			}
+
 			// save data
 			if(!empty($page_id)){
 				$this->cms_page_model->update_page($page_id, $data, $language);
