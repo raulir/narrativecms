@@ -777,8 +777,10 @@ class CI_Upload {
 			return FALSE;
 		}
 
-		$CI =& get_instance();
-		return $CI->security->xss_clean($data, TRUE);
+		if ( ! function_exists('xss_clean')){
+			require_once $GLOBALS['config']['base_path'].'system/helpers/security_helper.php';
+		}
+		return xss_clean($data, TRUE);
 	}
 
 	// --------------------------------------------------------------------

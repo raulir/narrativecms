@@ -2,9 +2,9 @@
 
 if ( !function_exists('_iw')) {
 	
-	// if used from api, ci object may not exist — Common.php defines get_instance()
+	// if used from api, ci object may not exist — cms_bootstrap defines get_instance()
 	if ( !function_exists('get_instance')){
-		include_once($GLOBALS['config']['base_path'] . 'system/core/Common.php');
+		include_once($GLOBALS['config']['base_path'] . 'system/core/cms_bootstrap.php');
 	}
 	if ( !class_exists('Controller', false)){
 		include_once($GLOBALS['config']['base_path'] . 'system/core/controller.php');

@@ -40,7 +40,7 @@ Rough order:
 4. **[`cms_config_load_full()`](../../../system/core/cms_config.php)** — mysqli, cms_settings, all modules, extends/provides
 5. **`cms_route_resolve()`** ([`cms_router.php`](../../../system/core/cms_router.php)) → `$GLOBALS['cms_route']`
 6. Timeout shutdown, landing redirects, **session**, targets, page HTML cache try-serve
-7. [`CodeIgniter.php`](../../../system/core/CodeIgniter.php) — dispatch Controller + method
+7. [`CodeIgniter.php`](../../../system/core/CodeIgniter.php) — dispatch Controller + method (loads [`cms_bootstrap.php`](../../../system/core/cms_bootstrap.php): `load_class` / `get_instance` / `show_404`; app loading stays in `Loader`)
 
 **Config access:** `$GLOBALS['config']` — host files: `config/<host>.json`. Full load: `cms_config_load_full()` / [`cms_config.php`](../../../system/core/cms_config.php).
 

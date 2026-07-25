@@ -41,9 +41,6 @@ class Input {
 	 */
 	protected $headers			= array();
 
-	var $_enable_csrf;
-	var $security;
-	
 	/**
 	 * Constructor
 	 *
@@ -56,10 +53,11 @@ class Input {
 	{
 		$this->_allow_get_array	= true;
 		$this->_enable_xss		= false;
-		$this->_enable_csrf		= false;
 
-		global $SEC;
-		$this->security =& $SEC;
+		// string_helper via cms_bootstrap; security_helper for optional xss_clean()
+		if ( ! function_exists('xss_clean')){
+			require_once $GLOBALS['config']['base_path'].'system/helpers/security_helper.php';
+		}
 
 		// Sanitize global arrays
 		$this->_sanitize_globals();
@@ -87,7 +85,7 @@ class Input {
 
 		if ($xss_clean === TRUE)
 		{
-			return $this->security->xss_clean($array[$index]);
+			return xss_clean($array[$index]);
 		}
 
 		return $array[$index];
@@ -481,7 +479,7 @@ class Input {
 		// Should we filter the input data?
 		if ($this->_enable_xss === TRUE)
 		{
-			$str = $this->security->xss_clean($str);
+			$str = xss_clean($str);
 		}
 
 		// Standardize newlines if needed
@@ -588,7 +586,7 @@ class Input {
 
 		if ($xss_clean === TRUE)
 		{
-			return $this->security->xss_clean($this->headers[$index]);
+			return xss_clean($this->headers[$index]);
 		}
 
 		return $this->headers[$index];

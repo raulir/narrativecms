@@ -20,7 +20,7 @@ require_once BASEPATH.'core/cms_config.php';
 
 		if (!empty($name) && pathinfo($name, PATHINFO_EXTENSION) === 'gif'){
 
-			include_once($GLOBALS['config']['base_path'].'system/core/Common.php');
+			include_once($GLOBALS['config']['base_path'].'system/core/cms_bootstrap.php');
 			include($GLOBALS['config']['base_path'].'system/core/controller.php');
 			$ci = new \Controller();
 			$ci->load->model('cms/cms_image_model');
