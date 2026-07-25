@@ -402,62 +402,39 @@ class cache {
 
 	}
 
-	function _load_routes() {
-
-		$routes = [];
-		$path = $GLOBALS['config']['base_path'].'cache/routes.php';
-
-		if (!file_exists($path)) {
-			return $routes;
-		}
-
-		include $path;
-
-		return !empty($route) && is_array($route) ? $route : [];
-
-	}
-
+	/**
+	 * Page-cache stem uses the same target as early cms_route_resolve() (DB).
+	 */
 	function _resolve_route_target($request_uri) {
 
-		global $landing_route;
+		// Prefer route already resolved in cms.php (before try_serve)
+		if (!empty($GLOBALS['cms_route']) && is_array($GLOBALS['cms_route'])) {
+			$kind = $GLOBALS['cms_route']['kind'] ?? '';
+			if ($kind === 'home' || $kind === 'page' || $kind === 'list_item') {
+				return (string)($GLOBALS['cms_route']['target'] ?? '');
+			}
+			if ($kind === 'not_found') {
+				return '';
+			}
+		}
 
-		$routes = $this->_load_routes();
+		$request_uri = trim((string)$request_uri, '/');
 
 		if ($request_uri === '') {
-			$default = 'index'.($landing_route ?? '');
-			$parts = explode('/', trim($default, '/'));
-			if (count($parts) >= 3 && $parts[0] === 'index' && $parts[1] === 'index') {
-				return $parts[2];
-			}
-			return '';
+			return !empty($GLOBALS['config']['landing_page']['_value'])
+				? (string)$GLOBALS['config']['landing_page']['_value']
+				: '';
 		}
 
-		if (isset($routes[$request_uri])) {
-			$parts = explode('/', trim($routes[$request_uri], '/'));
-			if (count($parts) >= 3 && $parts[0] === 'index' && $parts[1] === 'index') {
-				return $parts[2];
-			}
-		}
-
-		foreach ($routes as $key => $val) {
-			if ($key === 'default_controller' || $key === '404_override') {
-				continue;
-			}
-			$pattern = '#^'.str_replace(':any', '.+', str_replace(':num', '[0-9]+', $key)).'$#';
-			if (preg_match($pattern, $request_uri)) {
-				if (strpos($val, '$') !== false && strpos($key, '(') !== false) {
-					$val = preg_replace($pattern, $val, $request_uri);
-				}
-				$parts = explode('/', trim($val, '/'));
-				if (count($parts) >= 3 && $parts[0] === 'index' && $parts[1] === 'index') {
-					return $parts[2];
-				}
-			}
-		}
-
+		// Direct index/index/{target}
 		$parts = explode('/', $request_uri);
 		if (count($parts) >= 2 && $parts[0] === 'index' && $parts[1] === 'index' && !empty($parts[2])) {
-			return $parts[2];
+			return implode('/', array_slice($parts, 2));
+		}
+
+		if (function_exists('cms_route_lookup_slug')) {
+			$target = cms_route_lookup_slug($request_uri);
+			return $target !== null ? $target : '';
 		}
 
 		return '';

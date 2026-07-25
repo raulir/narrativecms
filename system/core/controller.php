@@ -67,20 +67,6 @@ class Controller {
 				$GLOBALS['_panel_js'] = [];
 			}
 
-			// Restore routes.php when missing (was cms_operations/update_routes)
-			$routes_path = $GLOBALS['config']['base_path'].'cache/routes.php';
-			if (!empty($GLOBALS['cms_routes_missing']) || !is_file($routes_path)){
-				$this->load->model('cms/cms_slug_model');
-				$this->cms_slug_model->ensure_routes_cache();
-				$was_missing = !empty($GLOBALS['cms_routes_missing']);
-				unset($GLOBALS['cms_routes_missing']);
-				// Routing ran without slug map — reload once so pretty URLs resolve
-				if ($was_missing && is_object($this->uri) && $this->uri->uri_string !== ''){
-					$uri = $_SERVER['REQUEST_URI'] ?? '/';
-					header('Location: '.$uri, true, 302);
-					exit();
-				}
-			}
 		} else {
 			// Panel library: share main services by object handle (not =& — avoids overloaded property notices).
 			// Models stay on main via Loader; undeclared model props resolve through __get.
@@ -131,6 +117,9 @@ class Controller {
 	 * Whether a panel controller file implements $method.
 	 * Uses require_once + method_exists (no CI library / init_panel).
 	 * Cached in $GLOBALS['_panel_controller_methods'][$path].
+	 * Prefills panel_heading / panel_params / panel_action; other methods
+	 * (ensure_exercise, ds_*, on_show, on_update, …) are resolved on demand
+	 * via method_exists and then cached for the request.
 	 */
 	function _controller_has_method($controller_path, $module, $name, $method){
 
@@ -150,19 +139,35 @@ class Controller {
 				$class = $name;
 			}
 			$map = [
+					'_class' => class_exists($class, false) ? $class : '',
 					'panel_heading' => false,
 					'panel_params' => false,
 					'panel_action' => false,
 			];
-			if (class_exists($class, false)){
-				foreach (array_keys($map) as $m){
-					$map[$m] = method_exists($class, $m);
+			if ($map['_class'] !== ''){
+				foreach (['panel_heading', 'panel_params', 'panel_action'] as $m){
+					$map[$m] = method_exists($map['_class'], $m);
 				}
 			}
 			$GLOBALS['_panel_controller_methods'][$path_key] = $map;
 		}
 
-		return !empty($GLOBALS['_panel_controller_methods'][$path_key][$method]);
+		$map = &$GLOBALS['_panel_controller_methods'][$path_key];
+
+		// Already known (lifecycle methods or prior on-demand lookups)
+		if (array_key_exists($method, $map) && $method !== '_class'){
+			return !empty($map[$method]);
+		}
+
+		// Custom methods: ensure_exercise, ds_*, on_show, on_update, markdown filters, etc.
+		if (empty($map['_class'])){
+			return false;
+		}
+
+		$has = method_exists($map['_class'], $method);
+		$map[$method] = $has;
+
+		return $has;
 
 	}
 

@@ -1,8 +1,13 @@
 <?php
 
+// Light boot left DB/modules unloaded — full config for mysqli + settings
+require_once BASEPATH.'core/cms_config.php';
+
 require_once($GLOBALS['config']['base_path'].'modules/analytics/helpers/analytics_api_helper.php');
 
 header('Content-Type: application/json');
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Pragma: no-cache');
 
 if (!analytics_beacon_enabled()) {
 	http_response_code(204);
@@ -44,7 +49,7 @@ if ($do === 'heartbeat') {
 
 	analytics_update_heartbeat($pageview_token, $seconds, $scroll_pct);
 
-	http_response_code(204);
+	print(json_encode(array('result' => array('ok' => true))));
 	die();
 
 }

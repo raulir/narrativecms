@@ -10,6 +10,9 @@ if (!defined('BASEPATH')) {
 	exit('No direct script access allowed');
 }
 
+// Light boot left DB/modules unloaded
+require_once BASEPATH.'core/cms_config.php';
+
 // Bootstrap without CodeIgniter.php (cms.php early API die)
 require_once BASEPATH.'core/Common.php';
 require_once BASEPATH.'core/controller.php';

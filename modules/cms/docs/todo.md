@@ -36,7 +36,7 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 ## Config / SPA legacy
 
-- [ ] **Remove legacy SPA config translation** — in [`system/core/config.php`](../../../system/core/config.php), delete `position_wrappers` / `position_links` → `single_page_mode` mapping once all envs only store `single_page_mode` (see comment there)
+- [ ] **Remove legacy SPA config translation** — in [`cms_config.php`](../../../system/core/cms_config.php), delete `position_wrappers` / `position_links` → `single_page_mode` mapping once all envs only store `single_page_mode` (see comment there)
 
 ---
 

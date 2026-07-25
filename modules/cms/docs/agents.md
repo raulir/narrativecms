@@ -157,7 +157,7 @@ Syntax is British: use in function names and variables `normalise`, `colour`, et
 
 `text.json` contains a structural description for data and variable properties of a `text` panel.
 
-Panel ids are normally `module/panel`. Where a module prefix is expected inside the **current** module’s JSON or `config.json`, use `//` instead of repeating the module name — e.g. `"image": "//panel_login.png"` in `music/definitions/login.json` → `music/panel_login.png`; `"source": "//user_login"` in `music/config.json` → `music/user_login`. Handlers: [`cms_panel_model.php`](../models/cms_panel_model.php) (definition strings), [`config.php`](../../../system/core/config.php) (extends). Detail: [`cms_module_extends.md`](cms_module_extends.md).
+Panel ids are normally `module/panel`. Where a module prefix is expected inside the **current** module’s JSON or `config.json`, use `//` instead of repeating the module name — e.g. `"image": "//panel_login.png"` in `music/definitions/login.json` → `music/panel_login.png`; `"source": "//user_login"` in `music/config.json` → `music/user_login`. Handlers: [`cms_panel_model.php`](../models/cms_panel_model.php) (definition strings), [`cms_config.php`](../../../system/core/cms_config.php) (extends). Detail: [`cms_module_extends.md`](cms_module_extends.md).
 
 CMS field `"label"` values — do not repeat the word “label” in the label text. The admin UI has limited room and “label” is usually cropped. Use the thing itself, e.g. `"Correct answer"` not `"Correct answer label"`.
 

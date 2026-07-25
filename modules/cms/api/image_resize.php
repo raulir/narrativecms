@@ -4,6 +4,9 @@ namespace cms;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+// Light boot left DB/settings unloaded
+require_once BASEPATH.'core/cms_config.php';
+
 // optimise images in non-session way
 // Do not use FILTER_SANITIZE_STRING (deprecated / can corrupt paths on PHP 8+)
 

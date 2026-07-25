@@ -140,18 +140,8 @@ class Exceptions {
 			}
 		}
 
-		// Only redirect if route cache knows the slug (page ensured + public)
-		$base_path = !empty($GLOBALS['config']['base_path']) ? $GLOBALS['config']['base_path'] : '';
-		$routes_file = $base_path.'cache/routes.php';
-		if (is_file($routes_file)){
-			$routes_src = @file_get_contents($routes_file);
-			if ($routes_src === false
-					|| (strpos($routes_src, "\$route['".$slug."']") === false
-						&& strpos($routes_src, '$route["'.$slug.'"]') === false)){
-				return false;
-			}
-		} else {
-			// No routes file — do not guess
+		// Only redirect if a visible public route exists for this system slug (DB)
+		if (!function_exists('cms_route_lookup_slug') || cms_route_lookup_slug($slug) === null){
 			return false;
 		}
 

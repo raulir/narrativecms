@@ -701,7 +701,6 @@ class shopify_product_model extends \Model {
 		}
 		
 		if ($slugs_updated){
-			$this->cms_slug_model->_regenerate_cache();
 			$this->cms_slug_model->_regenerate_sitemap();
 		}
 		
@@ -1241,7 +1240,6 @@ class shopify_product_model extends \Model {
 			}
 
 			if ($slugs_updated){
-				$this->cms_slug_model->_regenerate_cache();
 				$this->cms_slug_model->_regenerate_sitemap();
 			}
 
@@ -2123,7 +2121,6 @@ class shopify_product_model extends \Model {
 		if (is_array($legacy_row) && !empty($legacy_row['cms_slug_id'])){
 			$sql = 'update cms_slug set target = ? where target = ? ';
 			$this->db->query($sql, [$target, $legacy]);
-			$this->cms_slug_model->_regenerate_cache();
 			$this->cms_slug_model->_regenerate_sitemap();
 			return;
 		}
@@ -2482,7 +2479,6 @@ class shopify_product_model extends \Model {
 			}
 
 			if ($purged > 0){
-				$this->cms_slug_model->_regenerate_cache();
 				$this->cms_slug_model->_regenerate_sitemap();
 			}
 

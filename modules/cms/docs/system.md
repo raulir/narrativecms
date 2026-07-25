@@ -30,20 +30,19 @@ Site modules use system/CMS services; they must not assume admin request shape o
 
 ## Bootstrap
 
-Entry: project `index.php` → [`system/core/CodeIgniter.php`](../../../system/core/CodeIgniter.php) (after config).
+Entry: project `index.php` → [`system/cms.php`](../../../system/cms.php).
 
 Rough order:
 
-1. [`config.php`](../../../system/core/config.php) — host config, modules list, `$GLOBALS['config']`
-2. Common classes, error handler, URI, **Router**
-3. Output, Input
-4. Load base [`Controller`](../../../system/core/controller.php) (`get_instance()`)
-5. Route class file: `system/core/controller_{class}.php` (e.g. `Index`, `Ajax_api`) or `modules/{module}/controllers/{class}.php`
-6. Run requested method (usually page render or ajax)
+1. **[`cms_config_basic.php`](../../../system/core/cms_config_basic.php)** — host JSON/PHP only (`base_path`, `base_url`, …). **No DB.**
+2. **[`cms_path.php`](../../../system/core/cms_path.php)** — `cms_request_path()`
+3. **Module API branch** — if `modules/{m}/api/{id}.php` **exists** and that module’s `config.json` lists `"api":[{"id":…}]`, include and **die**. No `cms_router`, no full config. APIs that need DB call **`cms_config_load_full()`** themselves.
+4. **[`cms_config_load_full()`](../../../system/core/cms_config.php)** — mysqli, cms_settings, all modules, extends/provides
+5. **`cms_route_resolve()`** ([`cms_router.php`](../../../system/core/cms_router.php)) → `$GLOBALS['cms_route']`
+6. Timeout shutdown, landing redirects, **session**, targets, page HTML cache try-serve
+7. [`CodeIgniter.php`](../../../system/core/CodeIgniter.php) — dispatch Controller + method
 
-**API shortcuts** (no full page render): [`system/cms.php`](../../../system/cms.php) may dispatch `modules/<module>/api/<id>.php` when the URI matches a module API id (see module `config.json` `"api"`). Lightweight paths (e.g. analytics beacon) intentionally avoid full CI boot.
-
-**Config access:** `$GLOBALS['config']` — e.g. `base_path`, `base_url`, `upload_path` (`img/`), `cache/` under base path. Host files: `config/<host>.json`.
+**Config access:** `$GLOBALS['config']` — host files: `config/<host>.json`. Full load: `cms_config_load_full()` / [`cms_config.php`](../../../system/core/cms_config.php).
 
 ---
 
@@ -83,6 +82,8 @@ Rules:
 - Share main `load` / `input` / `db` (object handles)
 - Models resolved on main via Loader; panel `$this->model_name` works through **`Controller::__get`** when the property lives on the main instance
 - Prefer `namespace module;` + `class name extends \Controller`
+
+`run_panel_method()` uses a per-request method map (`$GLOBALS['_panel_controller_methods']`): `panel_heading` / `panel_params` / `panel_action` are prefilled; custom methods (`ensure_exercise`, `ds_*`, `on_show`, `on_update`, markdown filters, …) are resolved with `method_exists` on first use and then cached.
 
 Do **not** assign by reference (`=&`) into properties that go through `__get` — PHP raises *Indirect modification of overloaded property*. Use plain assignment or a declared property (e.g. `$panel_ci`).
 
@@ -164,17 +165,18 @@ Admin edit of a **page block** must **not** run that page panel’s `panel_param
 
 ## Routing (system view)
 
-1. **Router** loads generated `cache/routes.php` (visible slugs → `index/index/...` targets).  
-2. Numeric or `module/panel=id` targets select page or list-item rendering.  
-3. Slug **table** and admin UX: [`routing.md`](routing.md) (storage, slugify, edit slug UI).
+1. **DB is ready** after `config.php` (before resolve).  
+2. **`cms_route_resolve`** maps path → controller/method/args (or not_found). Public slugs: one PK query on **`cms_route`**.  
+3. **Index** builds the page from numeric or `module/panel=id` targets.  
+4. Slug storage / admin UX: [`routing.md`](routing.md).
 
-Public API modules: URI `module/api_id` may short-circuit in `cms.php` before full front controller (module `config.json` `"api"`).
+Public API modules: URI `module/api_id` short-circuits in `cms.php` before session and CI.
 
 ---
 
 ## Config and modules
 
-- Host config merged in [`config.php`](../../../system/core/config.php)
+- Host config: [`cms_config_basic.php`](../../../system/core/cms_config_basic.php); full (DB/modules): [`cms_config.php`](../../../system/core/cms_config.php)
 - Enabled modules drive which definitions, schema, menus, and extends load
 - **`config.json` `"extends"`** (target/source, `//panel` convention): merged at boot into `$GLOBALS['config']['extends']` — definition fields, SCSS, JS (not PHP/template yet). Detail: [`cms_module_extends.md`](cms_module_extends.md)
 

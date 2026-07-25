@@ -596,7 +596,7 @@ if ( !function_exists('_user_login_text')) {
 
 	/**
 	 * Single page mode: position wrappers + ajax position loads (SPA-style).
-	 * Config value only — legacy key mapping lives solely in system/core/config.php.
+	 * Config value only — site settings live in $GLOBALS['config'] (cms_config_load_full).
 	 */
 	function _single_page_mode(){
 		

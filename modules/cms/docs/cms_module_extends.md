@@ -4,7 +4,7 @@ Created: 2026-07-08
 
 Site/final module extends base panels from other modules. Declare in **`modules/<module>/config.json`** — not in panel definition JSON.
 
-Related: modules may also declare **`provides`** (capability → panel), e.g. Shopify `shop_checkout` → `shopify/checkout`. Aggregated in [`config.php`](../../../system/core/config.php) as `$GLOBALS['config']['provides']`. See [shop.md cart section](../../shop/docs/shop.md).
+Related: modules may also declare **`provides`** (capability → panel), e.g. Shopify `shop_checkout` → `shopify/checkout`. Aggregated in [`cms_config.php`](../../../system/core/cms_config.php) as `$GLOBALS['config']['provides']`. See [shop.md cart section](../../shop/docs/shop.md).
 
 ## Panel names and `//` (current module)
 
@@ -20,7 +20,7 @@ Where a value expects a module prefix, **`//`** means **the module that owns the
 
 Handlers:
 
-- [`config.php`](../../../system/core/config.php) — `extends[].source` with `//`
+- [`cms_config.php`](../../../system/core/cms_config.php) — `extends[].source` with `//`
 - [`cms_panel_model::get_cms_panel_config()`](../../models/cms_panel_model.php) — `"//` at the start of JSON string values → `"<module>/`
 
 Use `module/…` when referring to another module. Use `//…` only for assets or panel ids inside the **current** module’s files.
@@ -39,7 +39,7 @@ Use `module/…` when referring to another module. Use `//…` only for assets o
 | `target` | Base panel rendered on the page (`module/panel`) |
 | `source` | Extension panel in the declaring module — use `//<panel>` (see above): `//user_login` → `music/user_login` |
 
-Boot: [`system/core/config.php`](../../../system/core/config.php) aggregates all module `extends` into `$GLOBALS['config']['extends']`. Request lifecycle / Loader: [`system.md`](system.md).
+Boot: [`cms_config_load_full()`](../../../system/core/cms_config.php) aggregates all module `extends` into `$GLOBALS['config']['extends']`. Request lifecycle / Loader: [`system.md`](system.md).
 
 ## Extension panel naming
 

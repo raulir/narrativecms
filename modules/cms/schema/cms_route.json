@@ -1,0 +1,45 @@
+{
+	"table": "cms_route",
+	"migrate_from": {
+		"table": "cms_slug",
+		"columns": {
+			"cms_slug_id": "slug"
+		},
+		"indexes": {
+			"PRIMARY": "PRIMARY",
+			"target_idx": "target_idx"
+		}
+	},
+	"engine": "InnoDB",
+	"charset": "utf8mb4",
+	"collation": "utf8mb4_general_ci",
+	"columns": {
+		"slug": {
+			"type": "VARCHAR",
+			"constraint": 100,
+			"null": false
+		},
+		"target": {
+			"type": "VARCHAR",
+			"constraint": 100,
+			"null": false
+		},
+		"status": {
+			"type": "INT",
+			"constraint": 10,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		}
+	},
+	"indexes": {
+		"PRIMARY": {
+			"columns": ["slug"],
+			"type": "primary"
+		},
+		"target_idx": {
+			"columns": ["target"],
+			"length": 10
+		}
+	}
+}

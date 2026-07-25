@@ -39,12 +39,41 @@
  * ------------------------------------------------------
  */
 	$RTR =& load_class('Router');
-	$RTR->_set_routing();
 
-	// Set any routing overrides that may exist in the main index file
-	if (isset($routing))
+	// Early cms_route_resolve() result from cms.php (DB-backed public slugs).
+	$cms_route = !empty($GLOBALS['cms_route']) && is_array($GLOBALS['cms_route'])
+		? $GLOBALS['cms_route']
+		: null;
+	$cms_route_ready = $cms_route
+		&& !empty($cms_route['controller'])
+		&& !empty($cms_route['method']);
+
+	if ($cms_route_ready)
 	{
-		$RTR->_set_overrides($routing);
+		$RTR->set_class($cms_route['controller']);
+		$RTR->set_method($cms_route['method']);
+		// 1-based rsegments: class, method, …args
+		$rseg = array(
+			1 => $cms_route['controller'],
+			2 => $cms_route['method'],
+		);
+		$argi = 3;
+		foreach (($cms_route['args'] ?? array()) as $arg)
+		{
+			$rseg[$argi++] = $arg;
+		}
+		$URI->rsegments = $rseg;
+		$URI->uri_string = isset($GLOBALS['cms_request_uri']) ? $GLOBALS['cms_request_uri'] : '';
+	}
+	else
+	{
+		$RTR->_set_routing();
+
+		// Set any routing overrides that may exist in the main index file
+		if (isset($routing))
+		{
+			$RTR->_set_overrides($routing);
+		}
 	}
 
 /*
@@ -153,6 +182,13 @@
 		return;
 	}
 
+	// Public slug not in DB — soft 404
+	if ($cms_route_ready && ($cms_route['kind'] ?? '') === 'not_found')
+	{
+		$nf = !empty($cms_route['slug']) ? $cms_route['slug'] : ($URI->uri_string ?? '');
+		show_404($nf);
+	}
+
 /*
  * ------------------------------------------------------
  *  Call the requested method
@@ -161,7 +197,10 @@
 	// Is there a "remap" function? If so, we call it instead
 	if (method_exists($CI, '_remap'))
 	{
-		$CI->_remap($method, array_slice($URI->rsegments, 2));
+		$remap_args = ($cms_route_ready && array_key_exists('args', $cms_route))
+			? $cms_route['args']
+			: array_slice($URI->rsegments, 2);
+		$CI->_remap($method, $remap_args);
 	}
 	else
 	{
@@ -194,8 +233,16 @@
 		}
 
 		// Call the requested method.
-		// Any URI segments present (besides the class/function) will be passed to the method for convenience
-		call_user_func_array(array(&$CI, $method), array_slice($URI->rsegments, 2));
+		// Prefer early cms_route args when present (single target string for Index)
+		if ($cms_route_ready && array_key_exists('args', $cms_route))
+		{
+			call_user_func_array(array(&$CI, $method), $cms_route['args']);
+		}
+		else
+		{
+			// Any URI segments present (besides the class/function) will be passed to the method for convenience
+			call_user_func_array(array(&$CI, $method), array_slice($URI->rsegments, 2));
+		}
 	}
 
 /*

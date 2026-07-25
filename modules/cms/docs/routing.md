@@ -1,6 +1,6 @@
 # Routing and slugs
 
-Public URLs are resolved from the `cms_slug` table. Each row maps a unique **slug** (`cms_slug_id`) to a **target** string that the front controller understands.
+Public URLs are resolved from the **`cms_route`** table. Each row maps a unique **slug** to a **target** string that the front controller understands.
 
 **Trailing slash:** site paths built with `_l()` / `_lh()` always end with `/` on the path (before `?` or `#`). External `http(s)://`, `mailto:`, `tel:`, and static file paths (with an extension) are left unchanged.
 
@@ -10,21 +10,26 @@ Public URLs are resolved from the `cms_slug` table. Each row maps a unique **slu
 
 | Column | Role |
 |--------|------|
-| `cms_slug_id` | URL path segment, e.g. `my-material-item` → `https://example.com/my-material-item/` |
+| `slug` | URL path segment, e.g. `my-material-item` → `https://example.com/my-material-item/` (PRIMARY KEY) |
 | `target` | Internal route target |
 | `status` | `0` = visible (routed, in sitemap); `1` = hidden |
 
-Schema: [`modules/cms/schema/cms_slug.json`](../schema/cms_slug.json)
+Schema: [`modules/cms/schema/cms_route.json`](../schema/cms_route.json) (migrates from legacy `cms_slug` once)
 
-Model: [`modules/cms/models/cms_slug_model.php`](../models/cms_slug_model.php)
+Model: [`modules/cms/models/cms_slug_model.php`](../models/cms_slug_model.php) (loader name unchanged)
 
-### Route cache file
+### Request resolve (DB, not PHP)
 
-Generated file: `cache/routes.php` (slug → `index/index/{target}/`).
+Public paths are resolved **early** in [`system/cms.php`](../../../system/cms.php) via [`cms_route_resolve()`](../../../system/core/cms_router.php) (#105):
 
-- Written by `cms_slug_model::_regenerate_cache()` after slug changes.
-- If the file is **missing** at request start, Router sets a flag; the main `Controller` constructor calls **`ensure_routes_cache()`** and, when the URI was non-empty, redirects once so routing reloads with the new map.
-- Prefer calling `ensure_routes_cache()` anywhere that discovers a missing routes file (do not invent a dedicated HTTP controller for this).
+1. Config loads and **opens mysqli** (`config.php`).
+2. Path normalize + **module API** short-circuit (before session).
+3. **`cms_route_resolve($path)`** — reserved controllers (`ajax_api`, `admin`, …) or **one PK query** on **`cms_route`** for visible slugs (#343).
+4. Session, targets, page cache, then dispatch (`CodeIgniter.php` bridge until full `cms_dispatch`).
+
+Table: **`cms_route`** (`slug` PK, `target`, `status`). Schema migrates from old `cms_slug` once. Model: [`cms_slug_model`](../models/cms_slug_model.php) (loader name kept).
+
+Sitemap rebuilds from all visible rows on slug write (not on every request).
 
 Cron (repeating tasks) is a separate public API: **`/cms/cron/`** — see [`cms_video.md`](cms_video.md) / site settings **cron_trigger**.
 
@@ -73,24 +78,18 @@ Reserved main pages (`meta.page_class` = `system`), **non-numeric** slugs (numer
 2. Drop common words (`a`, `an`, `the`)
 3. Trim to 50 characters (cut at last `-` inside limit)
 4. If empty after normalisation, random 4-letter fallback
-5. If `cms_slug_id` already exists, append `-2`, `-3`, … until free
+5. If `slug` already exists, append `-2`, `-3`, … until free
 
 Manual edit uses `_slugify_candidate()` only — **no** auto-suffix. The operator must pick an available slug.
 
-## Route cache
+## Route writes
 
-On every slug insert, delete, or status change, the model rebuilds:
+On every slug insert, delete, or status change the model:
 
-- `cache/routes.php` — CodeIgniter `$route[...]` entries for visible slugs
-- `cache/sitemap.xml` and `robots.txt` Sitemap line
+- Updates **`cms_route`** (source of truth)
+- Rebuilds `cache/sitemap.xml` and `robots.txt` Sitemap line
 
-[`system/core/Router.php`](../../../system/core/Router.php) loads `cache/routes.php` at bootstrap.
-
-Example generated line:
-
-```php
-$route['my-slug'] = 'index/index/music/material=42/';
-```
+Example DB row: `slug = my-slug`, `target = music/material=42`, `status = 0`.
 
 ## Page HTML cache
 
@@ -117,7 +116,7 @@ Behaviour:
 - Live check on input (500 ms debounce): **Slug available** (green), **Slug taken** (red), **Disallowed characters** (red) when typed text ≠ slugified form
 - Current slug counts as available
 - **Update** re-validates server-side; on collision returns error (no `-2` suffix)
-- Successful rename invalidates slug and list-item caches; `cms_slug_model::set_page_slug()` rebuilds route cache
+- Successful rename invalidates slug and list-item caches; `cms_slug_model::set_page_slug()` updates `cms_route` and sitemap
 
 ## Link picker
 

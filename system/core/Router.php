@@ -99,18 +99,13 @@ class Router {
 		
 		global $landing_route;
 
-		// load the routes.php file (rebuild after Controller boot if missing)
-		if (file_exists($GLOBALS['config']['base_path'] . 'cache/routes.php')){
-			include_once $GLOBALS['config']['base_path'] . 'cache/routes.php';
-		} else {
-			// No controller fallback — main Controller ensures routes via cms_slug_model
-			$GLOBALS['cms_routes_missing'] = 1;
-		}
-
+		// Public slugs: cms_route_resolve() + DB. This Router path is only a fallback
+		// when $GLOBALS['cms_route'] was not set (should be rare).
+		$route = array();
 		$route['default_controller'] = 'index'.$landing_route;
 		$route['404_override'] = '';
 
-		$this->routes = ( ! isset($route) OR ! is_array($route)) ? array() : $route;
+		$this->routes = $route;
 		unset($route);
 
 		// Set the default controller so we can display it in the event
@@ -262,7 +257,7 @@ class Router {
 	 *  Parse Routes
 	 *
 	 * This function matches any routes that may exist in
-	 * the config/routes.php file against the URI to
+	 * any custom $this->routes entries against the URI to
 	 * determine if the class/method need to be remapped.
 	 *
 	 * @access	private
