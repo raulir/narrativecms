@@ -22,6 +22,13 @@ function cms_request_path() {
 		$string = substr($string, 0, $h);
 	}
 
-	return trim($string, '/');
+	$path = trim($string, '/');
+
+	// Pretty sitemap URL → cms/sitemap API (also when rewrite leaves original REQUEST_URI)
+	if ($path === 'sitemap.xml'){
+		return 'cms/sitemap';
+	}
+
+	return $path;
 
 }

@@ -124,7 +124,7 @@ class cms_slug_model extends \Model {
 		$sql = 'insert into `'.$table.'` set `'.$slug_col.'` = ? , target = ? , status = ? ';
 		$this->db->query($sql, [$slug, $target, $status, ]);
 
-		$this->_regenerate_sitemap();
+		$this->invalidate_sitemap_cache();
 
 		return $slug;
 
@@ -146,43 +146,187 @@ class cms_slug_model extends \Model {
 
 		}
 
-		$this->_regenerate_sitemap();
+		$this->invalidate_sitemap_cache();
 
 	}
 
 	/**
-	 * creates new sitemap.xml and robots.txt
+	 * Max age for file + HTTP cache of sitemap (seconds). Cheap rebuild = short TTL ok.
 	 */
-	function _regenerate_sitemap(){
+	function sitemap_cache_ttl(){
+
+		return 300;
+
+	}
+
+	function sitemap_cache_path(){
+
+		return $GLOBALS['config']['base_path'].'cache/sitemap.xml';
+
+	}
+
+	function robots_txt_path(){
+
+		return $GLOBALS['config']['base_path'].'robots.txt';
+
+	}
+
+	/**
+	 * Absolute site prefix ending with / (scheme+host+base_url).
+	 * Shared by sitemap <loc> and robots Sitemap: line.
+	 */
+	function public_site_prefix(){
+
+		$host = !empty($GLOBALS['config']['base_host'])
+			? rtrim($GLOBALS['config']['base_host'], '/')
+			: (((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (!empty($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443))
+				? 'https://' : 'http://').($_SERVER['HTTP_HOST'] ?? 'localhost');
+
+		$base = $GLOBALS['config']['base_url'] ?? '/';
+		if ($base === '/' || $base === ''){
+			return $host.'/';
+		}
+
+		return $host.'/'.trim($base, '/').'/';
+
+	}
+
+	/**
+	 * Absolute crawler URL for the pretty sitemap path.
+	 */
+	function sitemap_public_url(){
+
+		return $this->public_site_prefix().'sitemap.xml';
+
+	}
+
+	/**
+	 * Drop file cache only — does not build XML.
+	 * Rebuild runs solely from cms/sitemap API (get_sitemap_xml_cached).
+	 */
+	function invalidate_sitemap_cache(){
+
+		$path = $this->sitemap_cache_path();
+		if (is_file($path)){
+			@unlink($path);
+		}
+
+	}
+
+	/**
+	 * Build sitemap XML string from visible cms_route rows.
+	 * Call only from get_sitemap_xml_cached / cms/sitemap API.
+	 */
+	function build_sitemap_xml(){
 
 		list($table, $slug_col) = $this->_route_table();
 
-		$sql = 'select * from `'.$table.'`';
+		$sql = 'select `'.$slug_col.'` as slug from `'.$table.'` where status = 0 and `'.$slug_col.'` != \'\' order by `'.$slug_col.'`';
 		$query = $this->db->query($sql);
-		$routes = $query->result_array();
+		$routes = $query ? $query->result_array() : [];
 
-		$secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443;
-		$protocol = !$secure ? 'http' : 'https';
+		$prefix = $this->public_site_prefix();
 
-		$data = array();
-		$data[] = '<?xml version="1.0" encoding="UTF-8"?>';
-		$data[] = '<urlset xmlns="'.$protocol.'://www.sitemaps.org/schemas/sitemap/0.9">';
+		$lines = [];
+		$lines[] = '<?xml version="1.0" encoding="UTF-8"?>';
+		$lines[] = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
-		if (!empty($routes )) {
-			foreach ($routes as $route) {
-				$slug = $route['slug'] ?? '';
-				if ($slug && (int)($route['status'] ?? 0) === 0){
-					$data[] = '<url><loc>'.$protocol.'://' . $_SERVER['HTTP_HOST'] . '/' . $slug . '/</loc></url>';
+		foreach ($routes as $route){
+			$slug = trim((string)($route['slug'] ?? ''), '/');
+			if ($slug === ''){
+				continue;
+			}
+			$loc = htmlspecialchars($prefix.$slug.'/', ENT_XML1 | ENT_QUOTES, 'UTF-8');
+			$lines[] = '<url><loc>'.$loc.'</loc></url>';
+		}
+
+		$lines[] = '</urlset>';
+
+		return implode("\n", $lines)."\n";
+
+	}
+
+	/**
+	 * Default robots.txt body (Allow all + Sitemap for this host).
+	 */
+	function build_robots_txt(){
+
+		$lines = [];
+		$lines[] = '# Managed by CMS — Sitemap URL is checked/updated when the sitemap cache rebuilds';
+		$lines[] = 'User-agent: *';
+		$lines[] = 'Allow: /';
+		$lines[] = '';
+		$lines[] = 'Sitemap: '.$this->sitemap_public_url();
+
+		return implode("\n", $lines)."\n";
+
+	}
+
+	/**
+	 * Ensure project-root robots.txt exists and points Sitemap: at this site’s /sitemap.xml.
+	 * Preserves custom User-agent / Allow / Disallow rules; only fixes Sitemap line(s).
+	 * Called when the sitemap file cache is rebuilt (same host context as <loc> URLs).
+	 */
+	function ensure_robots_txt(){
+
+		$path = $this->robots_txt_path();
+		$sitemap_line = 'Sitemap: '.$this->sitemap_public_url();
+
+		if (!is_file($path) || !is_readable($path) || (int)@filesize($path) === 0){
+			@file_put_contents($path, $this->build_robots_txt());
+			return;
+		}
+
+		$content = @file_get_contents($path);
+		if ($content === false){
+			@file_put_contents($path, $this->build_robots_txt());
+			return;
+		}
+
+		// Already correct: exactly one Sitemap line matching this host
+		if (preg_match_all('/^Sitemap:\s*(\S+)\s*$/mi', $content, $matches)){
+			if (count($matches[0]) === 1 && trim($matches[0][0]) === $sitemap_line){
+				return;
+			}
+		} else {
+			// No Sitemap directive — append
+			$body = rtrim($content)."\n\n".$sitemap_line."\n";
+			@file_put_contents($path, $body);
+			return;
+		}
+
+		// Wrong or multiple Sitemap lines: strip all, append the correct one
+		$body = preg_replace('/^Sitemap:\s*\S+\s*$/mi', '', $content);
+		$body = preg_replace("/\n{3,}/", "\n\n", $body);
+		$body = rtrim($body)."\n\n".$sitemap_line."\n";
+		@file_put_contents($path, $body);
+
+	}
+
+	/**
+	 * Cached sitemap XML: file until invalidate or TTL (default 300s).
+	 * On rebuild, also ensure robots.txt Sitemap: matches this environment.
+	 */
+	function get_sitemap_xml_cached(){
+
+		$path = $this->sitemap_cache_path();
+		$ttl = $this->sitemap_cache_ttl();
+
+		if (is_file($path)){
+			$age = time() - (int)filemtime($path);
+			if ($age >= 0 && $age < $ttl){
+				$cached = @file_get_contents($path);
+				if ($cached !== false && $cached !== ''){
+					return $cached;
 				}
 			}
 		}
 
-		$data[] = '</urlset>';
+		$xml = $this->build_sitemap_xml();
+		@file_put_contents($path, $xml);
+		$this->ensure_robots_txt();
 
-		$output = implode("\n", $data);
-		file_put_contents($GLOBALS['config']['base_path'].'cache/sitemap.xml', $output);
-
-		file_put_contents($GLOBALS['config']['base_path'].'robots.txt', 'Sitemap: '.$protocol.'://'.$_SERVER['HTTP_HOST'].'/cache/sitemap.xml'."\n");
+		return $xml;
 
 	}
 
@@ -339,7 +483,7 @@ class cms_slug_model extends \Model {
 		$sql = 'update `'.$table.'` set status = ? where target = ? ';
 		$this->db->query($sql, [$status, $target, ]);
 
-		$this->_regenerate_sitemap();
+		$this->invalidate_sitemap_cache();
 
 	}
 

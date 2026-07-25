@@ -657,14 +657,11 @@ class shopify_product_model extends \Model {
 		set_time_limit(300);
 		
 		$this->load->model('cms/cms_page_panel_model');
-		$this->load->model('cms/cms_slug_model');
 		
 		$shopify_products = $this->get_products();
 // _print_r($shopify_products);
 // die();
 
-
-		$slugs_updated = false;
 		$n = 0;
 		foreach($shopify_products as $product_key => $product){
 				
@@ -689,19 +686,15 @@ class shopify_product_model extends \Model {
 				$shopify_products[$product_key]['cms_page_panel_id'] = $this->cms_page_panel_model->create_cms_page_panel($new_cms_product);
 
 				// Target must be shop/product={id} so list slugs + thumbs resolve
+				// set_page_slug → invalidate_sitemap_cache only (rebuild is cms/sitemap API)
 				$this->_ensure_product_slug(
 						(int)$shopify_products[$product_key]['cms_page_panel_id'],
 						$product['title'] ?? '',
 						1
 				);
-				$slugs_updated = true;
 		
 			}
 				
-		}
-		
-		if ($slugs_updated){
-			$this->cms_slug_model->_regenerate_sitemap();
 		}
 		
 		return $shopify_products;
@@ -1099,12 +1092,10 @@ class shopify_product_model extends \Model {
 
 		$started = time();
 		$stopped = false;
-		$slugs_updated = false;
 
 		try {
 
 			$this->load->model('cms/cms_page_panel_model');
-			$this->load->model('cms/cms_slug_model');
 
 			// One-shot: force every local product through full refresh (subcategories, images, etc.)
 			$this->_mark_all_products_sync_needed_once();
@@ -1184,7 +1175,6 @@ class shopify_product_model extends \Model {
 						$product['title'] ?? ('product-'.$product['id']),
 						1
 				);
-				$slugs_updated = true;
 
 				$refreshed = $this->refresh_product($cms_page_panel_id, 1);
 				if (!empty($refreshed)){
@@ -1237,10 +1227,6 @@ class shopify_product_model extends \Model {
 							false
 					);
 				}
-			}
-
-			if ($slugs_updated){
-				$this->cms_slug_model->_regenerate_sitemap();
 			}
 
 			$text = $this->_sync_format_status($found, $new_total, $stale_total, $updated);
@@ -2119,9 +2105,9 @@ class shopify_product_model extends \Model {
 		// Move legacy sync target without changing public slug string
 		$legacy_row = $this->cms_slug_model->get_slug_row_by_target($legacy);
 		if (is_array($legacy_row) && !empty($legacy_row['cms_slug_id'])){
-			$sql = 'update cms_slug set target = ? where target = ? ';
+			$sql = 'update cms_route set target = ? where target = ? ';
 			$this->db->query($sql, [$target, $legacy]);
-			$this->cms_slug_model->_regenerate_sitemap();
+			// Slug string unchanged — no sitemap URL change; cache drop not required
 			return;
 		}
 
@@ -2376,7 +2362,6 @@ class shopify_product_model extends \Model {
 		try {
 
 			$this->load->model('cms/cms_page_panel_model');
-			$this->load->model('cms/cms_slug_model');
 
 			$products = $this->cms_page_panel_model->get_cms_page_panels_by([
 					'panel_name' => 'shop/product',
@@ -2476,10 +2461,6 @@ class shopify_product_model extends \Model {
 					break;
 				}
 
-			}
-
-			if ($purged > 0){
-				$this->cms_slug_model->_regenerate_sitemap();
 			}
 
 			$text = $this->_purge_format_status($total, $purged, $kept, $purged_missing, $purged_duplicates);

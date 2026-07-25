@@ -29,9 +29,24 @@ Public paths are resolved **early** in [`system/cms.php`](../../../system/cms.ph
 
 Table: **`cms_route`** (`slug` PK, `target`, `status`). Schema migrates from old `cms_slug` once. Model: [`cms_slug_model`](../models/cms_slug_model.php) (loader name kept).
 
-Sitemap rebuilds from all visible rows on slug write (not on every request).
-
 Cron (repeating tasks) is a separate public API: **`/cms/cron/`** — see [`cms_video.md`](cms_video.md) / site settings **cron_trigger**.
+
+## Sitemap (#643)
+
+Dynamic XML sitemap from visible `cms_route` rows (`status = 0`). No static XML file in the repo root for crawlers — PHP builds it on demand with a short file cache.
+
+| Piece | Detail |
+|-------|--------|
+| API | [`modules/cms/api/sitemap.php`](../api/sitemap.php) — registered as `"id":"sitemap"` in [`config.json`](../config.json) |
+| Public URLs | **`/cms/sitemap`** and **`/sitemap.xml`** (same body) |
+| Pretty path | `.htaccess` rewrites `sitemap.xml` → `index.php?/cms/sitemap`; [`cms_path.php`](../../../system/core/cms_path.php) also maps path `sitemap.xml` → `cms/sitemap` when `REQUEST_URI` is unchanged |
+| Build | **Only** from the API: `get_sitemap_xml_cached()` → `build_sitemap_xml()`. Panels / shopify / admin never build XML. |
+| File cache | `cache/sitemap.xml` — **TTL 300s** (or until invalidate) |
+| HTTP cache | `Cache-Control: public, max-age=300` |
+| Invalidate (not rebuild) | Slug insert / delete / status / rename calls `invalidate_sitemap_cache()` (unlink cache file only). Next `/sitemap.xml` or `/cms/sitemap` rebuilds. |
+| robots.txt | On each **sitemap cache rebuild** (API only), `ensure_robots_txt()` checks/fixes the `Sitemap:` line. Custom crawl rules kept; missing file gets default Allow-all. |
+
+Do **not** call build/regenerate from panels or product sync. Route writes only drop the cache; crawlers trigger rebuild via the fake XML / API path.
 
 ## Target formats
 
@@ -87,7 +102,7 @@ Manual edit uses `_slugify_candidate()` only — **no** auto-suffix. The operato
 On every slug insert, delete, or status change the model:
 
 - Updates **`cms_route`** (source of truth)
-- Rebuilds `cache/sitemap.xml` and `robots.txt` Sitemap line
+- Invalidates sitemap file cache only (`invalidate_sitemap_cache` — no XML rebuild)
 
 Example DB row: `slug = my-slug`, `target = music/material=42`, `status = 0`.
 
@@ -116,7 +131,7 @@ Behaviour:
 - Live check on input (500 ms debounce): **Slug available** (green), **Slug taken** (red), **Disallowed characters** (red) when typed text ≠ slugified form
 - Current slug counts as available
 - **Update** re-validates server-side; on collision returns error (no `-2` suffix)
-- Successful rename invalidates slug and list-item caches; `cms_slug_model::set_page_slug()` updates `cms_route` and sitemap
+- Successful rename invalidates slug and list-item caches; `cms_slug_model::set_page_slug()` updates `cms_route` and drops sitemap file cache (rebuild waits for next `/sitemap.xml` hit)
 
 ## Link picker
 

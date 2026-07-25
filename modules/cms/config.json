@@ -215,6 +215,9 @@
 		},
 		{
 			"id":"updater"
+		},
+		{
+			"id":"sitemap"
 		}
 	]
 }
