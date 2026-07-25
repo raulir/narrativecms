@@ -8,6 +8,22 @@ Client behaviour follows [`cms_panel_js.md`](cms_panel_js.md): each input panel 
 
 `*` = required where noted.
 
+## Panel-level flags (definition root)
+
+| Property | Description |
+|----------|-------------|
+| `ensure_data` | Truthy (`"1"`) — before **create** and **purge** saves, fill missing top-level fields from existing DB values, then definition defaults / type fallbacks (#114). Does **not** run on partial non-purge updates (e.g. Shopify stamps). Intentionally empty posted values are kept. Meta keys (`_…`) from existing are preserved. V1 only ensures **top-level** fields (repeaters become `[]` if missing, not deep-filled). |
+
+```json
+{
+  "label": "My panel",
+  "ensure_data": "1",
+  "item": [ … ]
+}
+```
+
+Cost is intentional: only panels that need this integrity should set the flag. Cached param JSON encode failures always abort the cache write (all panels).
+
 ## Universal properties
 
 | Property | Description |

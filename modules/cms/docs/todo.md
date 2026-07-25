@@ -22,6 +22,12 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 ---
 
+## Panel data integrity
+
+- [x] **#114 ensure_data** — opt-in definition flag; create/purge fill missing fields from existing + defaults; JSON cache encode check. See [`cms_input.md`](cms_input.md) § Panel-level flags.
+
+---
+
 ## Admin page load
 
 - [ ] Lazy-load `cms_page_positions` via AJAX

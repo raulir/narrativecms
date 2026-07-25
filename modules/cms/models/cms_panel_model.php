@@ -57,32 +57,138 @@ class cms_panel_model extends \Model {
 
 	}
 
+	/**
+	 * Resolve a single field's default value (definition default tokens + type fallbacks).
+	 * Used by settings restore and ensure_data (#114).
+	 */
+	function resolve_field_default($field){
+
+		$type = $field['type'] ?? '';
+
+		if ($type === 'modules'){
+			$modules = [];
+			foreach (glob($GLOBALS['config']['base_path'].'modules/*', GLOB_ONLYDIR) as $dir) {
+				$module = basename($dir);
+				if ($module !== 'cms') {
+					$modules[] = $module;
+				}
+			}
+			sort($modules);
+			return $modules;
+		}
+
+		if (array_key_exists('default', $field)){
+			$default = $field['default'];
+			if (!is_string($default)){
+				return $default;
+			}
+			if ($default === 'today'){
+				return date('Y-m-d');
+			}
+			if (substr($default, 0, 6) === ':date:'){
+				$defparams = explode(':', $default);
+				if (empty($defparams[3])){
+					return date(substr($default, 6));
+				}
+				return date($defparams[2], time() + (int)$defparams[3]);
+			}
+			if (substr($default, 0, 5) === ':rnd:'){
+				$length = (int)substr($default, 5);
+				if ($length < 1){
+					$length = 8;
+				}
+				$chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+				$out = '';
+				while (strlen($out) < $length){
+					$out .= $chars[mt_rand(0, strlen($chars) - 1)];
+				}
+				return $out;
+			}
+			// :meta:… needs sibling panel data — leave literal only if no better source
+			return $default;
+		}
+
+		if (in_array($type, ['repeater', 'cms_page_panels', 'grid', 'file', 'files'], true)){
+			return [];
+		}
+
+		if (in_array($type, ['checkbox', 'select', 'fk', 'number'], true)){
+			return '0';
+		}
+
+		return '';
+
+	}
+
+	/**
+	 * Defaults map name => value for a list of definition fields (named fields only).
+	 */
+	function get_fields_defaults($fields){
+
+		$defaults = [];
+		if (!is_array($fields)){
+			return $defaults;
+		}
+
+		foreach ($fields as $field){
+			if (empty($field['name']) || $field['name'] === '_noname'){
+				continue;
+			}
+			// Layout-only types without storage
+			if (in_array($field['type'] ?? '', ['heading', 'subtitle', 'text_note'], true) && empty($field['name'])){
+				continue;
+			}
+			$defaults[$field['name']] = $this->resolve_field_default($field);
+		}
+
+		return $defaults;
+
+	}
+
 	function get_settings_defaults($panel_name) {
 
 		$panel_config = $this->get_cms_panel_config($panel_name);
 		$defaults = [];
 
+		// Only fields with explicit default (or modules) — restore_panel_settings_defaults contract
 		foreach ($panel_config['settings'] ?? [] as $field) {
 			if (empty($field['name'])) {
 				continue;
 			}
-
-			if (($field['type'] ?? '') === 'modules') {
-				$modules = [];
-				foreach (glob($GLOBALS['config']['base_path'].'modules/*', GLOB_ONLYDIR) as $dir) {
-					$module = basename($dir);
-					if ($module !== 'cms') {
-						$modules[] = $module;
-					}
-				}
-				sort($modules);
-				$defaults[$field['name']] = $modules;
-			} elseif (array_key_exists('default', $field)) {
-				$defaults[$field['name']] = $field['default'];
+			if (($field['type'] ?? '') === 'modules' || array_key_exists('default', $field)) {
+				$defaults[$field['name']] = $this->resolve_field_default($field);
 			}
 		}
 
 		return $defaults;
+
+	}
+
+	/**
+	 * Defaults for the structure used when editing this panel instance
+	 * (item vs settings — same rules as get_cms_panel_edit_structure).
+	 */
+	function get_structure_defaults($panel_name, $cms_page_id = 0, $parent_id = 0, $sort = 0){
+
+		$panel_config = $this->get_cms_panel_config($panel_name);
+		$structure = $this->get_cms_panel_edit_structure($panel_config, $cms_page_id, $parent_id, $sort);
+
+		return $this->get_fields_defaults($structure);
+
+	}
+
+	/**
+	 * Truthy ensure_data on panel definition (#114).
+	 */
+	function panel_has_ensure_data($panel_name){
+
+		if ($panel_name === '' || !stristr($panel_name, '/')){
+			return false;
+		}
+
+		$config = $this->get_cms_panel_config($panel_name);
+
+		return !empty($config['ensure_data']);
 
 	}
 	

@@ -29,6 +29,12 @@ CMS list rows use a cached admin title stored as panel param **`_title`**.
 
 List-item titles prefer `panel_heading()` when defined, else definition `heading`, else a fallback. Do not put HTML badges into the `cms_page_panel.title` column — badges live in `_title`.
 
+## Save integrity (`ensure_data`, #114)
+
+Optional definition flag `"ensure_data": "1"` makes `cms_page_panel_model` fill missing **top-level** fields on **create** and **purge** updates (not on partial non-purge writes). Merge order: new write → existing DB → definition default / type fallback. See [`cms_input.md`](cms_input.md) § Panel-level flags.
+
+The cached params blob (`cms_page_panel_param` name `''`) is only written if `json_encode` succeeds; encode errors are reported and the previous cache row is left alone.
+
 ## `panel_params` is frontend-only
 
 `panel_params($params)` on a **site / page panel** (e.g. `music/engine`, `user/userforward`) runs when that panel is **rendered on the public site** (or via ajax panel / position load that builds frontend HTML).

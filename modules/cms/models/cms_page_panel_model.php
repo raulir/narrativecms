@@ -782,9 +782,15 @@ class cms_page_panel_model extends \Model {
 			}
 
 			$this->_overlay_panel_table_fields($panel_params, $cms_page_panel_id, $page_panel_base['panel_name']);
-			
+
+			$json = json_encode($panel_params, JSON_PRETTY_PRINT);
+			if ($json === false || json_last_error() !== JSON_ERROR_NONE){
+				_html_error('Panel param cache JSON encode failed for id '.$cms_page_panel_id.': '.json_last_error_msg(), 0, ['backtrace' => 1]);
+				return;
+			}
+
 			$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = '' , value = ? , search = 0 ";
-			$this->db->query($sql, [$cms_page_panel_id, json_encode($panel_params, JSON_PRETTY_PRINT)]);
+			$this->db->query($sql, [$cms_page_panel_id, $json]);
 				
 		} else {
 			
@@ -1258,6 +1264,64 @@ class cms_page_panel_model extends \Model {
 
 	}
 
+	/**
+	 * Opt-in (#114): when panel definition has ensure_data, fill missing top-level fields
+	 * from existing DB values, then definition defaults / type fallbacks.
+	 * Does not overwrite keys present in $new_params (including intentional "").
+	 *
+	 * @param array $context cms_page_id, parent_id, sort for item vs settings structure
+	 */
+	function ensure_panel_data($panel_name, $new_params, $existing_params = null, $context = []){
+
+		if ($panel_name === '' || !is_array($new_params)){
+			return is_array($new_params) ? $new_params : [];
+		}
+
+		$this->load->model('cms/cms_panel_model');
+		if (!$this->cms_panel_model->panel_has_ensure_data($panel_name)){
+			return $new_params;
+		}
+
+		$existing = is_array($existing_params) ? $existing_params : [];
+		$cms_page_id = $context['cms_page_id'] ?? 0;
+		$parent_id = $context['parent_id'] ?? 0;
+		$sort = $context['sort'] ?? 0;
+
+		$panel_config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+		$structure = $this->cms_panel_model->get_cms_panel_edit_structure(
+				$panel_config, $cms_page_id, $parent_id, $sort);
+
+		$result = $new_params;
+
+		foreach ($structure as $field){
+			$name = $field['name'] ?? '';
+			if ($name === '' || $name === '_noname'){
+				continue;
+			}
+			if (array_key_exists($name, $result)){
+				continue;
+			}
+			if (array_key_exists($name, $existing)){
+				$result[$name] = $existing[$name];
+				continue;
+			}
+			$result[$name] = $this->cms_panel_model->resolve_field_default($field);
+		}
+
+		// Keep meta keys from existing when not in the write payload
+		foreach ($existing as $key => $value){
+			if ($key === '' || !is_string($key) || $key[0] !== '_'){
+				continue;
+			}
+			if (!array_key_exists($key, $result)){
+				$result[$key] = $value;
+			}
+		}
+
+		return $result;
+
+	}
+
 	function update_cms_page_panel($cms_page_panel_id, $data, $purge = false){
 
 		// Control flag: not stored — true force title, false skip, null auto (see _should_refresh_panel_title)
@@ -1358,7 +1422,36 @@ class cms_page_panel_model extends \Model {
 				}
 
 				$existing_params = $this->get_cms_page_panel_params($cms_page_panel_id);
-				if (is_array($existing_params)){
+				if (!is_array($existing_params)){
+					$existing_params = [];
+				}
+
+				// #114 ensure_data: fill missing definition fields before purge key delete
+				if ($purge && $panel_name !== '' && $this->cms_panel_model->panel_has_ensure_data($panel_name)){
+					$row_ctx = [
+						'cms_page_id' => $data['cms_page_id'] ?? null,
+						'parent_id' => $data['parent_id'] ?? null,
+						'sort' => $data['sort'] ?? null,
+					];
+					// When row columns not in this write, load from existing panel row
+					if ($row_ctx['cms_page_id'] === null || $row_ctx['parent_id'] === null || $row_ctx['sort'] === null){
+						$sql_ctx = 'select cms_page_id, parent_id, sort from cms_page_panel where cms_page_panel_id = ? limit 1 ';
+						$q_ctx = $this->db->query($sql_ctx, [(int)$cms_page_panel_id]);
+						if ($q_ctx->num_rows()){
+							$ctx_row = $q_ctx->row_array();
+							if ($row_ctx['cms_page_id'] === null){
+								$row_ctx['cms_page_id'] = $ctx_row['cms_page_id'];
+							}
+							if ($row_ctx['parent_id'] === null){
+								$row_ctx['parent_id'] = $ctx_row['parent_id'];
+							}
+							if ($row_ctx['sort'] === null){
+								$row_ctx['sort'] = $ctx_row['sort'];
+							}
+						}
+					}
+					$params = $this->ensure_panel_data($panel_name, $params, $existing_params, $row_ctx);
+				} else {
 					foreach($existing_params as $preserve_key => $preserve_value){
 						if ($preserve_key !== '' && $preserve_key[0] === '_' && !array_key_exists($preserve_key, $params)){
 							$params[$preserve_key] = $preserve_value;
@@ -1366,14 +1459,16 @@ class cms_page_panel_model extends \Model {
 					}
 				}
 
-				// build keys (cms\recursive_keys — file-scope helper)
-				$recursive_keys = recursive_keys($params);
-				$recursive_keys = array_unique(array_merge($recursive_keys, ['', 'create_cms_user_id', 'create_time', 'update_cms_user_id', 'update_time']));
+				if ($purge){
+					// build keys (cms\recursive_keys — file-scope helper)
+					$recursive_keys = recursive_keys($params);
+					$recursive_keys = array_unique(array_merge($recursive_keys, ['', 'create_cms_user_id', 'create_time', 'update_cms_user_id', 'update_time']));
 
 // 				_print _r($recursive_keys);
 
-				$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name not in ('".implode("','", $recursive_keys)."') ";
-				$this->db->query($sql, [(int)$cms_page_panel_id]);
+					$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name not in ('".implode("','", $recursive_keys)."') ";
+					$this->db->query($sql, [(int)$cms_page_panel_id]);
+				}
 
 			}
 			
@@ -1539,6 +1634,15 @@ class cms_page_panel_model extends \Model {
 		$panel_params['create_time'] = $date->getTimestamp();
 		$panel_params['update_cms_user_id'] = $panel_params['create_cms_user_id'];
 		$panel_params['update_time'] = $panel_params['create_time'];
+
+		// #114 ensure_data on create (no existing row yet)
+		if (!empty($data['panel_name'])){
+			$panel_params = $this->ensure_panel_data($data['panel_name'], $panel_params, null, [
+				'cms_page_id' => $data['cms_page_id'] ?? 0,
+				'parent_id' => $data['parent_id'] ?? 0,
+				'sort' => $data['sort'] ?? 0,
+			]);
+		}
 		
 		if (!empty($panel_params)){
 		
