@@ -9,6 +9,10 @@ Diagnostic panel showing schema differences from
 
 Supports granular fixing via `cms_schema_model->fix_schema($path)`.
 
+## Backups before destructive DB work
+
+Do **not** leave recovery copies as MySQL `*_bu` / shadow tables. Snapshot tables to **`cache/db/*.zip`** (SQL dump inside) — see [`agents.md`](agents.md) § Database backups. Example: route rebuild uses `cms_slug_model::backup_table_sql_zip('cms_route')`.
+
 ## Layout
 
 Diagnostic panel standard for this project:

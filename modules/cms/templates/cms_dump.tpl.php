@@ -53,6 +53,14 @@ UPLOAD DUMP:<br>
 <br>
 <br>
 
+<?php _panel('cms/cms_rebuild_routes', [
+		'label' => 'Public URL routes',
+		'help' => '[Rebuild routes]||Writes a zipped SQL backup of cms_route to cache/db/, truncates the table, then rebuilds from main pages and all link_target list items (title/heading → slug). Use after bad slug data (e.g. numeric product URLs).',
+]); ?>
+
+<br>
+<br>
+
 <?php _panel('cms/cms_images_unused_purge', [
 		'label' => 'Images older than months',
 		'min_months' => 3,

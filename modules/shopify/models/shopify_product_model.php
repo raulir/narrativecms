@@ -600,9 +600,10 @@ class shopify_product_model extends \Model {
 					($params['currency_label'] ?? '£').$min_price;
 		}
 
-		// Category label (via product → subcategory → category)
+		// Category label + light colour for thumb hover (via product → subcategory → category)
 		$product['category_heading'] = '';
 		$product['subcategory_heading'] = '';
+		$product['category_light_colour'] = '';
 		if (!empty($product['subcategory_id'])){
 			$subcategory = $this->cms_page_panel_model->get_cms_page_panel($product['subcategory_id']);
 			$product['subcategory_heading'] = trim((string)($subcategory['heading'] ?? ''));
@@ -614,6 +615,11 @@ class shopify_product_model extends \Model {
 				$product['category_heading'] = trim((string)($category['heading'] ?? ''));
 				if ($product['category_heading'] === '' && !empty($category['title'])){
 					$product['category_heading'] = trim((string)$category['title']);
+				}
+				// Filter-bar light colour — baked into HTML as --category_menu_bg for hover
+				$light = trim((string)($category['light_colour'] ?? ''));
+				if ($light !== ''){
+					$product['category_light_colour'] = $light;
 				}
 			}
 		}

@@ -12,7 +12,7 @@ Client behaviour follows [`cms_panel_js.md`](cms_panel_js.md): each input panel 
 
 | Property | Description |
 |----------|-------------|
-| `ensure_data` | Truthy (`"1"`) — before **create** and **purge** saves, fill missing top-level fields from existing DB values, then definition defaults / type fallbacks (#114). Does **not** run on partial non-purge updates (e.g. Shopify stamps). Intentionally empty posted values are kept. Meta keys (`_…`) from existing are preserved. V1 only ensures **top-level** fields (repeaters become `[]` if missing, not deep-filled). |
+| `ensure_data` | Truthy (`"1"`) — before **create** and **purge** saves, fill missing top-level fields from existing DB values, then definition defaults / type fallbacks (#114). Runs on the **full** field bag **before** `table:1` split, so panel-table columns are filled the same way as param fields (existing is loaded with table overlay). Does **not** run on partial non-purge updates. Non-purge already keeps unmentioned param rows and table columns. On **purge**, extra param keys not in the write (and not refilled) are still deleted; only definition fields + `_…` meta are refilled. Intentionally empty posted values are kept. V1 only ensures **top-level** fields (repeaters become `[]` if missing, not deep-filled). |
 
 ```json
 {

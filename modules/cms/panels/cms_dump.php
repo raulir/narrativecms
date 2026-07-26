@@ -90,7 +90,8 @@ class cms_dump extends \Controller {
 
 		$tables = ['cms_file', 'cms_image', 'cms_page', 'cms_page_panel'];
 		$tables = array_merge($tables, $this->cms_schema_model->get_panel_table_names());
-		$tables = array_merge($tables, ['cms_page_panel_param', 'cms_search_cache', 'cms_slug', 'cms_text', 'cms_user']);
+		// cms_route is the public slug table (legacy name was cms_slug)
+		$tables = array_merge($tables, ['cms_page_panel_param', 'cms_search_cache', 'cms_route', 'cms_text', 'cms_user']);
 
 		return $tables;
 	}

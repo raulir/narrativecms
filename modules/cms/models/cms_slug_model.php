@@ -67,6 +67,25 @@ class cms_slug_model extends \Model {
 
 		// common words
 		$slug_string = str_replace(array(' a ', ' an ', ' the ', ), '  ', $slug_string);
+
+		// Drop repeated words (first occurrence kept) — e.g. birthday … birthday → one birthday
+		$parts = preg_split('/\s+/', trim($slug_string));
+		$seen = array();
+		$unique = array();
+		if (is_array($parts)){
+			foreach ($parts as $part){
+				if ($part === ''){
+					continue;
+				}
+				if (isset($seen[$part])){
+					continue;
+				}
+				$seen[$part] = true;
+				$unique[] = $part;
+			}
+		}
+		$slug_string = implode(' ', $unique);
+
 		// add dashes
 		$slug_string = preg_replace('/[ ]+/', '-', trim($slug_string));
 		// cut shorter
@@ -505,6 +524,174 @@ class cms_slug_model extends \Model {
 		}
 
 		return 0;
+
+	}
+
+	/**
+	 * Dump one table to cache/db/{table}_YYYYMMDD_HHMMSS.zip (SQL inside).
+	 * No _bu tables — DB backups live under cache/db/ as zip (project rule).
+	 *
+	 * @return string|false relative path from base_path, or false on failure
+	 */
+	function backup_table_sql_zip($table){
+
+		$table = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$table);
+		if ($table === '' || !$this->db->table_exists($table)){
+			return false;
+		}
+
+		$dir = $GLOBALS['config']['base_path'].'cache/db/';
+		if (!is_dir($dir)){
+			if (!@mkdir($dir, 0755, true) && !is_dir($dir)){
+				return false;
+			}
+		}
+
+		$stamp = date('Ymd_His');
+		$sql_name = $table.'_'.$stamp.'.sql';
+		$sql_path = $dir.$sql_name;
+		$zip_name = $table.'_'.$stamp.'.zip';
+		$zip_path = $dir.$zip_name;
+
+		if (is_file($sql_path)){
+			@unlink($sql_path);
+		}
+		if (is_file($zip_path)){
+			@unlink($zip_path);
+		}
+
+		include_once $GLOBALS['config']['base_path'].'system/vendor/mysqldump/mysqldump.php';
+
+		$db = $GLOBALS['config']['database'];
+		Export_Database(
+			$db['hostname'],
+			$db['username'],
+			$db['password'],
+			$db['database'],
+			array($table),
+			$sql_path
+		);
+
+		if (!is_file($sql_path) || (int)@filesize($sql_path) < 1){
+			@unlink($sql_path);
+			return false;
+		}
+
+		$zip = new \ZipArchive();
+		if ($zip->open($zip_path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true){
+			@unlink($sql_path);
+			return false;
+		}
+		$zip->addFile($sql_path, $sql_name);
+		$zip->close();
+		@unlink($sql_path);
+
+		if (!is_file($zip_path)){
+			return false;
+		}
+
+		return 'cache/db/'.$zip_name;
+
+	}
+
+	/**
+	 * Full rebuild of cms_route from current pages + link_target list items.
+	 * Backs up current table to cache/db/*.zip first (no _bu tables).
+	 *
+	 * @return array{ok:int,backup?:string,pages:int,list_items:int,error?:string}
+	 */
+	function rebuild_all_routes(){
+
+		list($table, $slug_col) = $this->_route_table();
+
+		if (!$this->db->table_exists($table)){
+			return array('ok' => 0, 'error' => 'Table '.$table.' missing', 'pages' => 0, 'list_items' => 0);
+		}
+
+		$backup = $this->backup_table_sql_zip($table);
+		if ($backup === false){
+			return array('ok' => 0, 'error' => 'Failed to write backup under cache/db/', 'pages' => 0, 'list_items' => 0);
+		}
+
+		$this->db->query('TRUNCATE TABLE `'.$table.'`');
+
+		$stats = array(
+			'ok' => 1,
+			'backup' => $backup,
+			'pages' => 0,
+			'list_items' => 0,
+		);
+
+		$this->load->model('cms/cms_page_model');
+		$this->load->model('cms/cms_page_panel_model');
+
+		// Main CMS pages (user / system / list shells)
+		$pages = $this->cms_page_model->get_cms_pages();
+		foreach ($pages as $page){
+			$position = !empty($page['position']) ? $page['position'] : 'main';
+			if ($position !== 'main'){
+				continue;
+			}
+			$cms_page_id = (int)($page['cms_page_id'] ?? 0);
+			if ($cms_page_id < 1){
+				continue;
+			}
+			$result = $this->cms_page_model->update_page_visibility($cms_page_id);
+			if ($result !== false){
+				$stats['pages']++;
+			}
+		}
+
+		// List items with public slugs (link_target)
+		$types = $this->cms_page_model->get_linkable_list_types();
+		foreach ($types as $type){
+			$panel_name = $type['panel_name'] ?? '';
+			if ($panel_name === ''){
+				continue;
+			}
+
+			// All rows of this list type (including hidden)
+			$items = $this->cms_page_panel_model->get_cms_page_panels_by(array(
+				'panel_name' => $panel_name,
+			));
+			if (!is_array($items)){
+				continue;
+			}
+
+			foreach ($items as $item){
+				$id = (int)($item['cms_page_panel_id'] ?? 0);
+				if ($id < 1){
+					continue;
+				}
+
+				$target = $panel_name.'='.$id;
+
+				$title = $this->cms_page_panel_model->get_list_item_title($item);
+				if ($title === '' || $title === false || $title === null){
+					if (!empty($item['title'])){
+						$title = $item['title'];
+					} else if (!empty($item['heading'])){
+						$title = $item['heading'];
+					} else {
+						$title = $panel_name.' '.$id;
+					}
+				}
+
+				// slugify_slug after truncate — uniqueness among rebuild set
+				$slug = $this->slugify_slug($title);
+				// status 0 = visible (show), 1 = hidden — same as admin list save
+				$status = empty($item['show']) ? 1 : 0;
+
+				$sql = 'insert into `'.$table.'` set `'.$slug_col.'` = ? , target = ? , status = ? ';
+				$this->db->query($sql, array($slug, $target, $status));
+
+				$stats['list_items']++;
+			}
+		}
+
+		$this->invalidate_sitemap_cache();
+
+		return $stats;
 
 	}
 

@@ -70,6 +70,8 @@ function cms_input_link_target($container){
 
 		var $option = $page_select.children('option:selected');
 		$page_select.siblings('.cms_input_link_url,.cms_input_link_url_display').val($option.data('url'));
+		// Store option label as link title (button labels etc.)
+		$input_text.val(($option.text() || '').trim());
 
 		$input_value.val($page_select.val());
 
@@ -101,6 +103,8 @@ function cms_input_link_update_list($select){
 		$this.siblings('.cms_input_link_url').val($this.val());
 		$this.siblings('.cms_input_link_target_id').val($option.data('target_id'));
 		$this.siblings('.cms_input_link_value').val($this.val());
+		// Store option label as link title (button labels etc.)
+		$this.siblings('.cms_input_link_text').val(($option.text() || '').trim());
 	}).change();
 
 }

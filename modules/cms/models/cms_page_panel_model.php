@@ -1391,17 +1391,7 @@ class cms_page_panel_model extends \Model {
 			$search_params = $this->get_search_params_for_panel_name($panel_name);
 		}
 
-		$table_data = [];
-		if ($panel_name) {
-			$table_data = $this->_split_panel_table_fields($panel_name, $params);
-		}
-
-		// Keys written this call (for auto title refresh) — before purge may strip others
-		$row_keys_written = array_keys($data);
-		$param_keys_written = array_merge(array_keys($params), array_keys($table_data));
-		$title_for_refresh = array_key_exists('title', $data) ? $data['title'] : null;
-
-		// params data
+		// params data (ensure before split so table:1 fields stay in the bag correctly)
 		if (!empty($params)){
 			
 			if ($purge){
@@ -1421,12 +1411,13 @@ class cms_page_panel_model extends \Model {
 					}
 				}
 
+				// get_cms_page_panel_params overlays panel-table columns into the bag
 				$existing_params = $this->get_cms_page_panel_params($cms_page_panel_id);
 				if (!is_array($existing_params)){
 					$existing_params = [];
 				}
 
-				// #114 ensure_data: fill missing definition fields before purge key delete
+				// #114 ensure_data: fill missing definition fields (params + table:1) before purge
 				if ($purge && $panel_name !== '' && $this->cms_panel_model->panel_has_ensure_data($panel_name)){
 					$row_ctx = [
 						'cms_page_id' => $data['cms_page_id'] ?? null,
@@ -1459,17 +1450,36 @@ class cms_page_panel_model extends \Model {
 					}
 				}
 
-				if ($purge){
-					// build keys (cms\recursive_keys — file-scope helper)
-					$recursive_keys = recursive_keys($params);
-					$recursive_keys = array_unique(array_merge($recursive_keys, ['', 'create_cms_user_id', 'create_time', 'update_cms_user_id', 'update_time']));
+			}
+		}
+
+		// Split table:1 fields after ensure so missing table columns refill from existing/defaults
+		$table_data = [];
+		if ($panel_name) {
+			$table_data = $this->_split_panel_table_fields($panel_name, $params);
+		}
+
+		// Keys written this call (for auto title refresh) — after ensure + split
+		$row_keys_written = array_keys($data);
+		$param_keys_written = array_merge(array_keys($params), array_keys($table_data));
+		$title_for_refresh = array_key_exists('title', $data) ? $data['title'] : null;
+
+		if (!empty($params)){
+
+			if ($purge){
+				// build keys (cms\recursive_keys — file-scope helper)
+				// Include table field names so purge does not leave orphan named param rows
+				$recursive_keys = recursive_keys($params);
+				$recursive_keys = array_unique(array_merge(
+					$recursive_keys,
+					array_keys($table_data),
+					['', 'create_cms_user_id', 'create_time', 'update_cms_user_id', 'update_time']
+				));
 
 // 				_print _r($recursive_keys);
 
-					$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name not in ('".implode("','", $recursive_keys)."') ";
-					$this->db->query($sql, [(int)$cms_page_panel_id]);
-				}
-
+				$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name not in ('".implode("','", $recursive_keys)."') ";
+				$this->db->query($sql, [(int)$cms_page_panel_id]);
 			}
 			
 			$this->_insert_or_update_param($cms_page_panel_id, '', $params, $search_params, $translate_params);
@@ -1605,11 +1615,6 @@ class cms_page_panel_model extends \Model {
 				unset($data[$key]);
 			}
 		}
-
-		$table_data = [];
-		if (!empty($data['panel_name'])) {
-			$table_data = $this->_split_panel_table_fields($data['panel_name'], $panel_params);
-		}
 		
 		// check sort
 		if (!empty($data['sort']) && $data['sort'] == 'first'){
@@ -1635,13 +1640,18 @@ class cms_page_panel_model extends \Model {
 		$panel_params['update_cms_user_id'] = $panel_params['create_cms_user_id'];
 		$panel_params['update_time'] = $panel_params['create_time'];
 
-		// #114 ensure_data on create (no existing row yet)
+		// #114 ensure_data on create (full bag incl. table:1 fields), then split
 		if (!empty($data['panel_name'])){
 			$panel_params = $this->ensure_panel_data($data['panel_name'], $panel_params, null, [
 				'cms_page_id' => $data['cms_page_id'] ?? 0,
 				'parent_id' => $data['parent_id'] ?? 0,
 				'sort' => $data['sort'] ?? 0,
 			]);
+		}
+
+		$table_data = [];
+		if (!empty($data['panel_name'])) {
+			$table_data = $this->_split_panel_table_fields($data['panel_name'], $panel_params);
 		}
 		
 		if (!empty($panel_params)){

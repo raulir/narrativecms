@@ -32,3 +32,28 @@
 	vertical-align: top;
 	line-height: 2.4rem;
 }
+
+.cms_rebuild_routes {
+	margin-top: 1.0rem;
+}
+
+.cms_rebuild_routes_controls {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.cms_rebuild_routes_button {
+	display: inline-block;
+}
+
+.cms_rebuild_routes_button.cms_rebuild_routes_busy {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+.cms_rebuild_routes_status {
+	margin-top: 0.6rem;
+	font-size: 1.3rem;
+	line-height: 1.8rem;
+	color: #444;
+}

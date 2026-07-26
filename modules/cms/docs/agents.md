@@ -22,6 +22,14 @@ Bootstrap, `Controller` vs panel libraries, Loader / shared models, panel pipeli
 
 Open that file when changing or debugging core loading, request lifecycle, or routing at the framework level.
 
+## Markup and CSS style (front / panel HTML)
+
+- **Do not use `<button>` elements** — use `div` (or `a` when it is a real navigation link). Style and bind clicks with classes/JS.
+- **Avoid `display: flex` / flexbox** for new layouts. Prefer **absolute positioning**, block/inline-block, and fixed rem sizes. (Existing productthumb/grid flex is legacy; do not add new flex.)
+- **Why absolute is preferred:** content width is **fixed in rem** — standard **100rem** page content, or a fixed project width such as **120rem** when the design calls for it. With a known fixed band, absolute layout is predictable, easier to manage, and has fewer side effects than flex (wrapping, shrink/grow, nested flex, percentage height quirks).
+- Prefer simple structure: outer full-width container → inner fixed-width content (`100rem` / `120rem` / `max-width: 100%`) → positioned children inside that content box.
+- Do not set `cursor:` on public site panels when the custom cursors system is in use (it fights `elementsFromPoint`).
+
 ## General programming style
 
 All lowercase snake case in 99% cases:
@@ -95,6 +103,18 @@ Config access – use `$GLOBALS['config']`:
 - Cache: `$GLOBALS['config']['base_path'].'cache/'`
 - Images/files: `$GLOBALS['config']['base_path'].'img/'` (also `upload_path`)
 
+### Database backups (no `*_bu` tables)
+
+**Do not** create backup / shadow tables in MySQL (`cms_route_bu`, `cms_slug_bu`, `*_backup`, `CREATE TABLE … AS SELECT` for recovery, etc.).
+
+When code needs a DB snapshot before a destructive change:
+
+1. Export SQL (same approach as Data dumps: `system/vendor/mysqldump/mysqldump.php` → `Export_Database(…, $tables, $sql_path)`)
+2. Store under **`cache/db/`** as a **zipped** file, e.g. `cache/db/{table}_YYYYMMDD_HHMMSS.zip` containing `{table}_….sql`
+3. Optionally keep only the tables you will mutate (single-table zip is fine)
+
+Full environment dumps stay on the dump page (`cache/_dump*.zip`). Table-level recovery archives live in `cache/db/`.
+
 Helper methods – always start with underscore: `_deep_merge()`, `_get_db_columns()`
 
 Always use `cms_json_decode($json_data, $filename = '')` instead of `json_decode()` for JSON files/data (shows exact file + line + column on error). `$filename` is for display only; if non-file JSON, leave empty.
@@ -108,6 +128,8 @@ All HTTP redirects in this CMS must be **soft** (302 or 303). Never use permanen
 ### Controllers and models (short)
 
 Prefer `extends Controller` / `extends Model` — not new `CI_*` names. Details and Loader rules: [`system.md`](system.md).
+
+**SQL lives in models only.** Panel controllers, templates, helpers, and APIs must not run `$this->db->query` / raw SQL. Put queries on a model (e.g. `timmy/timmy_shop_model`, `cms/cms_page_panel_model`) and call the model from the panel. Controllers assemble params and call models; models own the database.
 
 ### CMS field values (no serve-time migration / empty fallbacks)
 

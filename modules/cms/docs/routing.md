@@ -31,6 +31,20 @@ Table: **`cms_route`** (`slug` PK, `target`, `status`). Schema migrates from old
 
 Cron (repeating tasks) is a separate public API: **`/cms/cron/`** — see [`cms_video.md`](cms_video.md) / site settings **cron_trigger**.
 
+## Rebuild routes (slugs)
+
+After bad data (e.g. numeric product slugs), rebuild all public routes from current content:
+
+| | |
+|--|--|
+| UI | Admin **Data dumps** page → **Rebuild routes** (`cms/cms_rebuild_routes`, ajax `panel_action`) |
+| Method | `cms_slug_model::rebuild_all_routes()` |
+| Backup | Zipped SQL under **`cache/db/cms_route_YYYYMMDD_HHMMSS.zip`** (never a `*_bu` table — see agents.md DB backup rule) |
+| Effect | Then `TRUNCATE cms_route`, reinsert from main pages + all `link_target` list items (title/heading → slugify; repeated words dropped) |
+| Status | List `show` → route `status` 0 visible / 1 hidden |
+
+Also invalidates sitemap file cache.
+
 ## Sitemap (#643)
 
 Dynamic XML sitemap from visible `cms_route` rows (`status = 0`). No static XML file in the repo root for crawlers — PHP builds it on demand with a short file cache.
@@ -89,11 +103,12 @@ Reserved main pages (`meta.page_class` = `system`), **non-numeric** slugs (numer
 
 `cms_slug_model::slugify_slug()` normalises text then ensures uniqueness:
 
-1. Lowercase, strip diacritics, replace non-alphanumeric runs with `-`
+1. Lowercase, strip diacritics, replace non-alphanumeric runs with spaces
 2. Drop common words (`a`, `an`, `the`)
-3. Trim to 50 characters (cut at last `-` inside limit)
-4. If empty after normalisation, random 4-letter fallback
-5. If `slug` already exists, append `-2`, `-3`, … until free
+3. Drop **repeated words** (keep first occurrence only — e.g. no double `birthday`)
+4. Join with `-`, trim to 50 characters (cut at last `-` inside limit)
+5. If empty after normalisation, random 4-letter fallback
+6. If `slug` already exists, append `-2`, `-3`, … until free
 
 Manual edit uses `_slugify_candidate()` only — **no** auto-suffix. The operator must pick an available slug.
 
