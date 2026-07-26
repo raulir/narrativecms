@@ -232,10 +232,9 @@ Example: [`cms_schema.tpl.php`](../templates/cms_schema.tpl.php) includes [`cms_
 - Class name – fully lowercase (including first letter), exactly matches filename: `cms_schema_model`
 - Extends – always `Model` (never `CI_Model`)
 - Constructor – do not create one when there is no need from model functionality (no `parent::__construct()` usually)
-- Database – `$this->db` is always available
+- Database – `$this->db` is always a **`cms_db`** instance (see [`system.md`](system.md) § Database); write raw SQL + `query()` / binds — no Active Record
 - Visibility – no `public` keyword anywhere; `private` and `protected` are allowed but usually not used
 - Keep a thin `_execute($sql)` wrapper in schema-related models (makes future logging / dry-run / error collection easy)
-- There is no `$db->error()` — older CodeIgniter db library
 
 Loader / shared instances: [`system.md`](system.md).
 

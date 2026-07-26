@@ -258,7 +258,7 @@
  *  Close the DB connection if one exists
  * ------------------------------------------------------
  */
-	if (class_exists('CI_DB') AND isset($CI->db))
+	if (isset($CI->db) && is_object($CI->db) && method_exists($CI->db, 'close'))
 	{
 		$CI->db->close();
 	}

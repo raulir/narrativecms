@@ -140,7 +140,7 @@ if (!empty($GLOBALS['config']['cron_trigger']) && $GLOBALS['config']['cron_trigg
 // start session
 include($GLOBALS['config']['base_path'].'system/core/session.php');
 
-// check for visitor target groups
+// Visitor targets (business: AB / language / mobile…) — after session; uses global $db from full config
 $_SESSION['config']['targets']['hash'] = '';
 if (!empty($GLOBALS['config']['targets_enabled'])){
 

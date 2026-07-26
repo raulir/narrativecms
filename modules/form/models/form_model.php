@@ -53,33 +53,25 @@ class form_model extends \Model {
 	}
 	
     function create_table_form_data(){
-    	
-    	$db_debug = $this->db->db_debug; //save setting
-    	$this->db->db_debug = false; //disable debugging for queries
-    	
-		$sql = "select cms_page_panel_id from form_data limit 1 ";
-		$query = $this->db->query($sql);
 
-		$this->db->db_debug = $db_debug; //restore setting
-		
-		if($this->db->_error_number() == 1146){
-    	
-    		$sql = "CREATE TABLE `form_data` (
-    					`webform_data_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-    					`cms_page_panel_id` int(10) UNSIGNED NOT NULL,
-    					`email` varchar(100) NOT NULL, 
-    					`code` varchar(100) NOT NULL, 
-    					`data` text NOT NULL,
-    					PRIMARY KEY (`webform_data_id`)
-    				) ENGINE=InnoDB DEFAULT CHARSET=utf8";
-    		$this->db->query($sql);
-    	
-    		$sql = "ALTER TABLE `form_data` ADD KEY `cms_page_panel_idx` (`cms_page_panel_id`)";
-    		$this->db->query($sql);
-    		$sql = "ALTER TABLE `form_data` ADD INDEX `code_idx` (`code`(3))";
-    		$this->db->query($sql);
-    	
-    	}
+		if ($this->db->table_exists('form_data')){
+			return;
+		}
+
+		$sql = "CREATE TABLE `form_data` (
+					`webform_data_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+					`cms_page_panel_id` int(10) UNSIGNED NOT NULL,
+					`email` varchar(100) NOT NULL, 
+					`code` varchar(100) NOT NULL, 
+					`data` text NOT NULL,
+					PRIMARY KEY (`webform_data_id`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+		$this->db->query($sql);
+
+		$sql = "ALTER TABLE `form_data` ADD KEY `cms_page_panel_idx` (`cms_page_panel_id`)";
+		$this->db->query($sql);
+		$sql = "ALTER TABLE `form_data` ADD INDEX `code_idx` (`code`(3))";
+		$this->db->query($sql);
 
     }
     

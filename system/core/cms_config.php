@@ -44,25 +44,22 @@ function cms_config_load_full(){
 		);
 	}
 
-	// connect to db (if mysqli)
-	if ($GLOBALS['config']['database']['dbdriver'] = 'mysqli') {
-
-		$conn_hash = md5($GLOBALS['config']['database']['hostname'].$GLOBALS['config']['database']['username'].
-				$GLOBALS['config']['database']['password'].$GLOBALS['config']['database']['database']);
-
-		try {
-			$GLOBALS['dbconnections'][$conn_hash] = @mysqli_connect($GLOBALS['config']['database']['hostname'],
-					$GLOBALS['config']['database']['username'], $GLOBALS['config']['database']['password'], $GLOBALS['config']['database']['database']);
-		} catch (Exception $e) {
-			print('Can\'t connect database');
-			die();
-		}
-
+	// One CMS DB per request. Consumers: $GLOBALS['db'] / global $db.
+	// Modules needing another DB open their own connection — do not reintroduce multi-conn here.
+	try {
+		$GLOBALS['db'] = @mysqli_connect(
+				$GLOBALS['config']['database']['hostname'],
+				$GLOBALS['config']['database']['username'],
+				$GLOBALS['config']['database']['password'],
+				$GLOBALS['config']['database']['database']
+				);
+	} catch (Exception $e) {
+		print('Can\'t connect database');
+		die();
 	}
 
-	// load config from db
-	$db = $GLOBALS['dbconnections'][md5($GLOBALS['config']['database']['hostname'].$GLOBALS['config']['database']['username'].
-			$GLOBALS['config']['database']['password'].$GLOBALS['config']['database']['database'])];
+	// Local alias for settings queries in this function; public handle is $GLOBALS['db']
+	$db = $GLOBALS['db'] ?? false;
 
 	if ($db === false){
 

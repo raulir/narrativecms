@@ -10,30 +10,7 @@
  */
 
 // cms_request_path() lives in cms_path.php (loaded before API branch)
-
-/**
- * mysqli from full config bootstrap ($GLOBALS['dbconnections']).
- */
-function cms_route_mysqli() {
-
-	if (empty($GLOBALS['config']['database'])) {
-		return false;
-	}
-
-	$conn_hash = md5(
-		$GLOBALS['config']['database']['hostname'].
-		$GLOBALS['config']['database']['username'].
-		$GLOBALS['config']['database']['password'].
-		$GLOBALS['config']['database']['database']
-	);
-
-	if (!empty($GLOBALS['dbconnections'][$conn_hash])) {
-		return $GLOBALS['dbconnections'][$conn_hash];
-	}
-
-	return false;
-
-}
+// DB: $GLOBALS['db'] from cms_config_load_full() — no separate getter
 
 /**
  * Look up visible public route target by slug (PRIMARY KEY on cms_route.slug).
@@ -47,13 +24,8 @@ function cms_route_lookup_slug($slug) {
 		return null;
 	}
 
-	$db = cms_route_mysqli();
-	if ($db === false) {
-		return null;
-	}
-
 	$sql = 'SELECT target FROM cms_route WHERE slug = ? AND status = 0 LIMIT 1';
-	$stmt = mysqli_prepare($db, $sql);
+	$stmt = mysqli_prepare($GLOBALS['db'], $sql);
 	if ($stmt === false) {
 		return null;
 	}

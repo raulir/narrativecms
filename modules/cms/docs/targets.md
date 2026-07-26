@@ -2,6 +2,8 @@
 
 Enable in CMS settings: **Visitor target groups** (`targets_enabled`).
 
+Boot: after full config (global `$db`) and session — see [`system.md`](system.md). Config is loaded from the `cms/cms_targets` panel via mysqli on each request.
+
 Configure groups in **CMS Target Groups** (`admin/panel_settings/cms__cms_targets/`). Assign per-panel visibility in the page panel editor **Targets** popup (toolbar hidden menu).
 
 Panel settings definitions use the `settings` array in the panel JSON file.

@@ -21,22 +21,7 @@ function analytics_beacon_tracking_flags($params) {
 
 }
 
-function analytics_get_mysqli() {
-
-	if (empty($GLOBALS['config']['database'])) {
-		return false;
-	}
-
-	$conn_hash = md5($GLOBALS['config']['database']['hostname'].$GLOBALS['config']['database']['username'].
-			$GLOBALS['config']['database']['password'].$GLOBALS['config']['database']['database']);
-
-	if (!empty($GLOBALS['dbconnections'][$conn_hash])) {
-		return $GLOBALS['dbconnections'][$conn_hash];
-	}
-
-	return false;
-
-}
+// DB: $GLOBALS['db'] from cms_config_load_full() (beacon API requires full config first)
 
 function analytics_is_bot_user_agent($user_agent) {
 
@@ -327,15 +312,10 @@ function analytics_get_beacon_settings() {
 		'session_minutes' => 60,
 	);
 
-	$db = analytics_get_mysqli();
-	if ($db === false) {
-		return $settings;
-	}
-
 	$sql = 'SELECT b.name, b.value FROM cms_page_panel a JOIN cms_page_panel_param b ON a.cms_page_panel_id = b.cms_page_panel_id '.
 			'WHERE a.panel_name = ? AND a.cms_page_id = 0 AND b.language = ?';
 
-	$stmt = mysqli_prepare($db, $sql);
+	$stmt = mysqli_prepare($GLOBALS['db'], $sql);
 	if ($stmt === false) {
 		return $settings;
 	}
@@ -490,11 +470,6 @@ function analytics_get_or_create_beacon_session($posted_beacon_id = '') {
 
 function analytics_insert_pageview($page, $viewport_w, $viewport_h, $posted_beacon_id = '') {
 
-	$db = analytics_get_mysqli();
-	if ($db === false) {
-		return false;
-	}
-
 	$ip = $_SERVER['REMOTE_ADDR'] ?? '';
 	$ip_anonymised = analytics_store_ip($ip);
 	$user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
@@ -510,7 +485,7 @@ function analytics_insert_pageview($page, $viewport_w, $viewport_h, $posted_beac
 
 	$sql = 'INSERT INTO cms_analytics_pageview (pageview_token, session_id, beacon_id, language, page, ip_anonymised, user_agent, viewport_w, viewport_h, bot, user_id, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
 
-	$stmt = mysqli_prepare($db, $sql);
+	$stmt = mysqli_prepare($GLOBALS['db'], $sql);
 	if ($stmt === false) {
 		return false;
 	}
@@ -530,8 +505,7 @@ function analytics_insert_pageview($page, $viewport_w, $viewport_h, $posted_beac
 
 function analytics_update_heartbeat($pageview_token, $seconds, $scroll_pct) {
 
-	$db = analytics_get_mysqli();
-	if ($db === false || empty($pageview_token)) {
+	if (empty($pageview_token)) {
 		return false;
 	}
 
@@ -541,7 +515,7 @@ function analytics_update_heartbeat($pageview_token, $seconds, $scroll_pct) {
 
 	$sql = 'UPDATE cms_analytics_pageview SET seconds = GREATEST(seconds, ?), scroll_pct = GREATEST(scroll_pct, ?), updated = NOW() WHERE pageview_token = ? LIMIT 1';
 
-	$stmt = mysqli_prepare($db, $sql);
+	$stmt = mysqli_prepare($GLOBALS['db'], $sql);
 	if ($stmt === false) {
 		return false;
 	}

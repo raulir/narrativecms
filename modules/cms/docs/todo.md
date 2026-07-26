@@ -8,6 +8,12 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 ---
 
+## System / database
+
+- [x] **#762 one mysqli + slim cms_db** — `$GLOBALS['db']` single connection; [`cms_db.php`](../../../system/core/cms_db.php) replaces `system/database/` (no AR/forge/multi-driver). See [`system.md`](system.md) § Database.
+
+---
+
 ## Email
 
 - [x] Central mail helper — [`cms_email_model`](../models/cms_email_model.php); see [`cms_email.md`](cms_email.md)

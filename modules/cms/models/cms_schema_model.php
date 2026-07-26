@@ -1502,10 +1502,7 @@ class cms_schema_model extends \Model {
 			} else {
 				$this->db->query($sql);
 			}
-			// CREATE/DROP/RENAME invalidate list_tables() cache used by table_exists()
-			if (preg_match('/^\s*(CREATE|DROP|RENAME)\s+TABLE\b/i', $sql)) {
-				unset($this->db->data_cache['table_names']);
-			}
+			// table_exists() always hits SHOW TABLES — no list cache to invalidate
 			return true;
 		} catch (\mysqli_sql_exception $e) {
 			$this->record_fix_error($this->_fix_key, $e->getMessage(), $sql);

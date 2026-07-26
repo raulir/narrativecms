@@ -37,12 +37,24 @@ Rough order:
 1. **[`cms_config_basic.php`](../../../system/core/cms_config_basic.php)** — host JSON/PHP only (`base_path`, `base_url`, …). **No DB.**
 2. **[`cms_path.php`](../../../system/core/cms_path.php)** — `cms_request_path()`
 3. **Module API branch** — if `modules/{m}/api/{id}.php` **exists** and that module’s `config.json` lists `"api":[{"id":…}]`, include and **die**. No `cms_router`, no full config. APIs that need DB call **`cms_config_load_full()`** themselves.
-4. **[`cms_config_load_full()`](../../../system/core/cms_config.php)** — mysqli, cms_settings, all modules, extends/provides
+4. **[`cms_config_load_full()`](../../../system/core/cms_config.php)** — one mysqli connect → **`$GLOBALS['db']`** (global `$db`), cms_settings, all modules, extends/provides.
 5. **`cms_route_resolve()`** ([`cms_router.php`](../../../system/core/cms_router.php)) → `$GLOBALS['cms_route']`
-6. Timeout shutdown, landing redirects, **session**, targets, page HTML cache try-serve
-7. [`CodeIgniter.php`](../../../system/core/CodeIgniter.php) — dispatch Controller + method (loads [`cms_bootstrap.php`](../../../system/core/cms_bootstrap.php): `load_class` / `get_instance` / `show_404`; app loading stays in `Loader`)
+6. Timeout shutdown, landing redirects, **session**, targets (uses global `$db`), page HTML cache try-serve
+7. [`CodeIgniter.php`](../../../system/core/CodeIgniter.php) — dispatch Controller + method (loads [`cms_bootstrap.php`](../../../system/core/cms_bootstrap.php): `load_class` / `get_instance` / `show_404`; app loading stays in `Loader`). Loader attaches **`cms_db`** as `$this->db`.
 
 **Config access:** `$GLOBALS['config']` — host files: `config/<host>.json`. Full load: `cms_config_load_full()` / [`cms_config.php`](../../../system/core/cms_config.php).
+
+### Database (#762)
+
+| Piece | Role |
+|-------|------|
+| **`$GLOBALS['db']`** | Single mysqli connection after full config. Pre-CI code (targets, router, analytics API, `api_data`) uses it directly. |
+| **[`cms_db.php`](../../../system/core/cms_db.php)** | Thin wrapper class `cms_db` + `cms_db_result`. Models use **`$this->db`** (same property name; class is not CI). |
+| **Loader** | `load->database()` constructs `cms_db` on the main controller (no multi-driver, no Active Record). |
+
+**Supported model API:** `query($sql, $binds?)`, result `result_array()` / `row_array()` / `num_rows()`, `insert_id()`, `affected_rows()`, `table_exists()`, `escape()` / `escape_str()` / `escape_like_str()`, `close()`.
+
+**Not provided:** query builder (select/from/where/…), forge, utility, multi-driver, connection pool. Schema DDL is raw SQL in models. `table_exists()` always uses `SHOW TABLES LIKE` (no list cache). A module that needs another DB opens its own connection — do not reintroduce multi-conn maps in core.
 
 ---
 

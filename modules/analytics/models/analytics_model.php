@@ -21,7 +21,8 @@ class analytics_model extends \Model {
 
 	function get_total_sessions() {
 
-		return (int)$this->db->count_all('cms_analytics_session');
+		$row = $this->db->query('SELECT COUNT(*) AS cnt FROM cms_analytics_session')->row_array();
+		return !empty($row['cnt']) ? (int)$row['cnt'] : 0;
 
 	}
 
