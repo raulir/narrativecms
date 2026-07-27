@@ -12,13 +12,16 @@
 	"cms_menu":[
 		{
 			"id":"stripe",
-			"name":"Stripe"
+			"name":"Stripe",
+			"parent":"shop",
+			"order":790
 		},
-        {
-            "id":"payment_settings",
-            "name":"Payment settings",
-            "parent":"stripe",
-            "url":"admin/panel_settings/stripe__payment/"
-        }
-    ]
+		{
+			"id":"payment_settings",
+			"name":"Payment settings",
+			"parent":"stripe",
+			"url":"admin/panel_settings/stripe__payment/",
+			"order":10
+		}
+	]
 }

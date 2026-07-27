@@ -5,16 +5,33 @@ function _cms_get_base() {
 }
 
 function get_ajax(name, params) {
-	return new Promise((resolve) => {
+	return new Promise((resolve, reject) => {
 		var ext_params = Object.assign({
 			'no_html': '1',
 			'success': data => resolve(data)
 		}, params)
 
 		var action_on_success = ext_params.success
+		var action_on_error = ext_params.error
+		var ajax_timeout = ext_params.timeout
 		delete ext_params.success
+		delete ext_params.error
+		delete ext_params.timeout
 
-		get_ajax_panel(name, ext_params, action_on_success)
+		// Preserve callbacks / timeout for get_ajax_panel (not POST body)
+		if (typeof action_on_error === 'function') {
+			ext_params._ajax_error = action_on_error
+		}
+		if (ajax_timeout !== undefined && ajax_timeout !== null) {
+			ext_params._ajax_timeout = ajax_timeout
+		}
+		if (!action_on_success) {
+			ext_params._ajax_error = function(err) {
+				reject(err)
+			}
+		}
+
+		get_ajax_panel(name, ext_params, action_on_success || (data => resolve(data)))
 	})
 }
 
@@ -55,10 +72,20 @@ function get_ajax_panel(name, args, action_on_success) {
 	var params = Object.assign({}, args)
 	delete params._ajax_cache
 
+	var action_on_error = params._ajax_error
+	var ajax_timeout = params._ajax_timeout
+	delete params._ajax_error
+	delete params._ajax_timeout
+	// Never POST callback/timeout fields
+	delete params.success
+	delete params.error
+	delete params.timeout
+	delete params.complete
+
 	params.panel_id = name
 
 	return new Promise((resolve) => {
-		$.ajax({
+		var ajax_opts = {
 			type: 'POST',
 			url: _cms_get_base() + 'ajax_api/get_panel/',
 			data: params,
@@ -97,8 +124,26 @@ function get_ajax_panel(name, args, action_on_success) {
 
 				cms_apply_panel_css(returned_data, finish)
 
+			},
+			error: function(xhr, status, err) {
+				if (typeof action_on_error === 'function') {
+					action_on_error({
+						xhr: xhr,
+						status: status,
+						error: err,
+						message: status === 'timeout'
+							? 'Request timed out'
+							: ('Request failed' + (err ? (': ' + err) : ''))
+					})
+				}
 			}
-		})
+		}
+
+		if (ajax_timeout !== undefined && ajax_timeout !== null && ajax_timeout !== '') {
+			ajax_opts.timeout = parseInt(ajax_timeout, 10) || 0
+		}
+
+		$.ajax(ajax_opts)
 	})
 }
 

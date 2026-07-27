@@ -90,6 +90,33 @@ Cached panel JSON uses `_translations.{language_id}.{field}`.
 
 Admin save posts the toolbar language (`cms_page_panel_button_save` → `language` = CMS select). Translation popup syncs field values for the current CMS language.
 
+### Panel translations page
+
+Full-panel UI for all `translate:1` fields of one block:
+
+| Piece | Detail |
+|-------|--------|
+| **URL** | `admin/translation/{cms_page_panel_id}/` |
+| **Entry** | Square translate icon on the panel edit toolbar (between language select and the hidden-menu gear), only when languages are configured and the panel has translatable fields |
+| **Toolbar** | Breadcrumb · CMS language select · Save |
+| **Grid** | Label · definition default · base language value · **selected CMS language** (editable) |
+
+Storage is the same as the per-field popup (`cms/cms_translate_string`). Save writes only the active CMS language for each field path. Nested repeater fields appear as separate rows (`Items › #2 › Heading`).
+
+**Admin translation API** (grid + field popup) lives in [`cms_translation_model`](../models/cms_translation_model.php). Panel param load/merge and full form save stay on [`cms_page_panel_model`](../models/cms_page_panel_model.php); translation writers use `set_translated_param` / `rebuild_panel_param_cache` on that model.
+
+### AI suggestions (optional)
+
+| Piece | Detail |
+|-------|--------|
+| **Provider** | Site settings → **AI** subtitle: **AI provider** (`ai_provider`, `cms/cms_input_provides`, service `ai`). Empty = AI disabled. |
+| **Ask confirmation** / **Only missing texts** | Same **Site settings → AI** block (apply to all providers). |
+| **Provider modules** | e.g. **xAI** (`modules/xai`) declares `provides: [{ service: "ai", panel: "//ai" }]`. API key + style context stay on provider settings. See [`xai.md`](../../xai/docs/xai.md). |
+| **UI** | Translations grid: **[AI]** before Save; **AI** column with suggestion + **→** to copy into edit. Click only (cost). |
+| **Context** | Batch sends field labels, base text, current target, defaults, panel name; provider **Site / style context** is included in the prompt. |
+
+Does not auto-save; user must Save after accepting suggestions.
+
 ## Frontend display
 
 - [`basic/language`](../../modules/basic/panels/language.php) panel — visitor language switcher (cookie). Option labels from Languages grid **Endonym**, fallback **Label**. Text dropdown with chevron (no flag icons).

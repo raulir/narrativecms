@@ -60,6 +60,83 @@ class cms_menu extends \Controller {
 
 	}
 
+	/**
+	 * Whether item has a keyboard ctrl shortcut assigned (top-level keyboard nav).
+	 */
+	function _menu_has_ctrl($item){
+
+		if (!is_array($item) || !array_key_exists('ctrl', $item)){
+			return false;
+		}
+		$ctrl = $item['ctrl'];
+		return $ctrl !== null && $ctrl !== false && $ctrl !== '';
+
+	}
+
+	/**
+	 * Sort menu siblings: submenu groups (items that have children) first, then
+	 * direct links; within each band sort by order ascending.
+	 *
+	 * @param array $items list of menu item arrays (with id, order)
+	 * @param array $children_map parent_id => children[]
+	 * @return array reindexed list
+	 */
+	function _menu_sort_siblings($items, $children_map){
+
+		if (!is_array($items) || $items === []){
+			return is_array($items) ? $items : [];
+		}
+
+		usort($items, function($a, $b) use ($children_map){
+			$a_id = $a['id'] ?? '';
+			$b_id = $b['id'] ?? '';
+			$a_sub = ($a_id !== '' && !empty($children_map[$a_id]));
+			$b_sub = ($b_id !== '' && !empty($children_map[$b_id]));
+			if ($a_sub !== $b_sub){
+				return $a_sub ? -1 : 1;
+			}
+			return ((int)($a['order'] ?? 9999)) <=> ((int)($b['order'] ?? 9999));
+		});
+
+		return array_values($items);
+
+	}
+
+	/**
+	 * Top-level only: items with ctrl key first (stable by order), then remaining
+	 * via submenu-first + order (Shop, Forms, … after Pages/Content/CMS/Tools/…).
+	 *
+	 * @param array $items list of top-level menu items
+	 * @param array $children_map parent_id => children[]
+	 * @return array reindexed list
+	 */
+	function _menu_sort_top_level($items, $children_map){
+
+		if (!is_array($items) || $items === []){
+			return is_array($items) ? $items : [];
+		}
+
+		$with_ctrl = [];
+		$without_ctrl = [];
+		foreach($items as $item){
+			if ($this->_menu_has_ctrl($item)){
+				$with_ctrl[] = $item;
+			} else {
+				$without_ctrl[] = $item;
+			}
+		}
+
+		// Ctrl-assigned: keep configured order only (do not reorder by submenu vs link)
+		usort($with_ctrl, function($a, $b){
+			return ((int)($a['order'] ?? 9999)) <=> ((int)($b['order'] ?? 9999));
+		});
+
+		$without_ctrl = $this->_menu_sort_siblings($without_ctrl, $children_map);
+
+		return array_values(array_merge($with_ctrl, $without_ctrl));
+
+	}
+
 	function panel_params($params){
 		
 		$this->load->model('cms/cms_module_model');
@@ -186,16 +263,23 @@ class cms_menu extends \Controller {
 			}
 		}
 
-		uasort($return['menu_items'], function($a, $b){
-			return ((int)($a['order'] ?? 9999)) <=> ((int)($b['order'] ?? 9999));
-		});
-
-		foreach($return['children'] as $parent_id => &$group){
-			usort($group, function($a, $b){
-				return ((int)($a['order'] ?? 9999)) <=> ((int)($b['order'] ?? 9999));
-			});
+		// Top level: ctrl-assigned items first (by order), then rest (submenu-first + order)
+		$return['menu_items'] = $this->_menu_sort_top_level(
+				array_values($return['menu_items']),
+				$return['children']
+		);
+		$keyed = [];
+		foreach($return['menu_items'] as $item){
+			if (!empty($item['id'])){
+				$keyed[$item['id']] = $item;
+			}
 		}
-		unset($group);
+		$return['menu_items'] = $keyed;
+
+		// Nested levels: submenu groups before direct links, then by order
+		foreach($return['children'] as $parent_id => $group){
+			$return['children'][$parent_id] = $this->_menu_sort_siblings($group, $return['children']);
+		}
 
 		return $return;
 

@@ -3,6 +3,9 @@ $colour_white: white;
 
 .cms_page_panel_toolbar_container {
 	padding-bottom: 1.0rem;
+	// Keep toolbar stack above following panel fields (subtitle/labels/translate icons)
+	position: relative;
+	z-index: 120;
 }
 
 .cms_page_panel_toolbar_content {
@@ -36,7 +39,13 @@ $colour_white: white;
 
 .cms_page_panel_toolbar_area {
 	overflow: visible;
-	z-index: 20;
+	// Above cms_input_label / subtitle (z-index 20) and cms_translate_icon (100)
+	// so gear dropdown is hoverable over form fields below
+	z-index: 120;
+
+	.cms_toolbar_buttons {
+		z-index: 1;
+	}
 }
 
 .cms_page_panel_toolbar_breadcrumb {
@@ -50,6 +59,7 @@ $colour_white: white;
     background-repeat: no-repeat;
     background-position: 23% 44%;
     position: relative;
+	z-index: 2;
     
     &:hover {
     	.cms_toolbar_buttons_hidden_container {
@@ -57,6 +67,8 @@ $colour_white: white;
     		max-height: 100.0rem;
     		max-width: 20.0rem;
     		transition: opacity 0.2s, max-height 0.2s 0s;
+			// Visible and receiving pointer events while open
+			pointer-events: auto;
     	}
     }
     
@@ -83,12 +95,14 @@ $colour_white: white;
 	position: absolute;
 	top: 3.0rem;
     right: -0.4rem;
-    z-index: 20;
+    z-index: 130;
     padding: 0.6rem 0.3rem 0.1rem 0.5rem;
 	background-color: white;
 	border-radius: 0.7rem;
 	overflow: hidden;
 	box-sizing: border-box;
+	// Closed menu must not steal clicks / block fields underneath
+	pointer-events: none;
 	
 	.cms_tool_button {
 		float: none;

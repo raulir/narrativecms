@@ -1,0 +1,38 @@
+{
+	"version": "2",
+	"label": "xAI",
+	"description": "xAI Grok API provider settings",
+	"item": [],
+	"settings": [
+		{
+			"type": "text",
+			"name": "api_key",
+			"label": "API key",
+			"default": "",
+			"help": "xAI API key from console.x.ai. Stored in CMS settings; never sent to the browser."
+		},
+		{
+			"type": "text",
+			"name": "model",
+			"label": "Model",
+			"default": "grok-4.3",
+			"help": "Chat model id. Prefer grok-4.3 for CMS translation (cost/quality); grok-4.5 for hard coding/agents. See xAI docs for current names."
+		},
+		{
+			"type": "text",
+			"name": "base_url",
+			"label": "API base URL",
+			"default": "https://api.x.ai/v1",
+			"help": "OpenAI-compatible base URL. Default https://api.x.ai/v1"
+		},
+		{
+			"type": "textarea",
+			"name": "context_style",
+			"label": "Site / style context",
+			"lines": "4",
+			"width": "wide",
+			"default": "",
+			"help": "Provider-specific profile: short description of this site and expected tone for this xAI setup (e.g. music education app, friendly student UI). Shared AI options (provider pick, confirm, only-missing) are under Site settings → AI."
+		}
+	]
+}

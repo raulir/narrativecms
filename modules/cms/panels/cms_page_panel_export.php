@@ -830,7 +830,7 @@ class cms_page_panel_export extends \Controller {
 			}
 
 			$zip = new \ZipArchive();
-			if ($zip->open($this->folder.'.zip', ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true){
+			if ($zip->open($this->folder.'.zip', \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true){
 				die('An error occurred creating zip');
 			}
 

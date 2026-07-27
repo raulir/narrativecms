@@ -130,7 +130,7 @@ class cms_dump extends \Controller {
 					
 					$zip = new \ZipArchive();
 						
-					if ($zip->open($outfile, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) !== TRUE) {
+					if ($zip->open($outfile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
 						print('An error occurred');
 					}
 					
@@ -174,7 +174,7 @@ class cms_dump extends \Controller {
 					
 					$zip = new \ZipArchive();
 						
-					if ($zip->open($outfile, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) !== TRUE) {
+					if ($zip->open($outfile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
 						print('An error occurred');
 					}
 					
@@ -210,7 +210,7 @@ class cms_dump extends \Controller {
 					
 					$zip = new \ZipArchive();
 						
-					if ($zip->open($outfile, ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) !== TRUE) {
+					if ($zip->open($outfile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
 						print('An error occurred');
 					}
 					

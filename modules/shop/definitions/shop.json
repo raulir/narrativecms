@@ -6,7 +6,7 @@
 	],
 	"settings":[
 		{
-			"type":"shop/cms_input_provides",
+			"type":"cms/cms_input_provides",
 			"name":"shop_checkout",
 			"label":"Checkout provider",
 			"service":"shop_checkout",

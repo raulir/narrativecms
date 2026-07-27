@@ -1,0 +1,24 @@
+{
+	"provides": [
+		{
+			"service": "ai",
+			"panel": "//ai",
+			"label": "xAI Grok"
+		}
+	],
+	"cms_menu": [
+		{
+			"id": "xai",
+			"name": "xAI",
+			"parent": "cms_tools",
+			"order": 50
+		},
+		{
+			"id": "xai_settings",
+			"name": "Settings",
+			"parent": "xai",
+			"url": "admin/panel_settings/xai__xai/",
+			"order": 10
+		}
+	]
+}

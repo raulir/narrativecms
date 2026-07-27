@@ -309,6 +309,26 @@ class cms_page_panel_toolbar extends \Controller {
 		
 		}
 		
+		// Translation under gear submenu (text label; only if multi-language + translatable fields)
+		if (!empty($cms_page_panel['cms_page_panel_id'])
+				&& !empty($GLOBALS['language']['languages'])
+				&& is_array($GLOBALS['language']['languages'])
+				&& count($GLOBALS['language']['languages']) > 1){
+			$this->load->model('cms/cms_translation_model');
+			$translate_fields = $this->cms_translation_model->list_translatable_fields(
+					(int)$cms_page_panel['cms_page_panel_id']
+			);
+			if (!empty($translate_fields)){
+				$params['buttons'][] = [
+						'name' => 'cms/cms_page_panel_button_translation',
+						'position' => 'hidden',
+						'cms_page_panel_id' => (int)$cms_page_panel['cms_page_panel_id'],
+						'panel_name' => $cms_page_panel['panel_name'] ?? ($params['panel_name'] ?? ''),
+				];
+				$params['hidden_section'] = 1;
+			}
+		}
+
 		if (!empty($params['extra_buttons'])){
 			foreach($params['extra_buttons'] as $bkey => $button){
 				$params['extra_buttons'][$bkey]['cms_page_panel_id'] =

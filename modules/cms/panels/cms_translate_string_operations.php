@@ -25,7 +25,7 @@ class cms_translate_string_operations extends \Controller {
 			return $params;
 		}
 
-		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_translation_model');
 
 		$cms_page_panel_id = (int)$this->input->post('cms_page_panel_id');
 		$field_name = $this->input->post('field_name');
@@ -36,7 +36,7 @@ class cms_translate_string_operations extends \Controller {
 			$values = cms_json_decode($values, 'translate_string_values');
 		}
 
-		$result = $this->cms_page_panel_model->save_translate_string($cms_page_panel_id, $field_name, $values, $cms_language);
+		$result = $this->cms_translation_model->save_translate_string($cms_page_panel_id, $field_name, $values, $cms_language);
 
 		print(json_encode(['result' => $result], JSON_PRETTY_PRINT));
 		die();

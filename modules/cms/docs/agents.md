@@ -30,6 +30,20 @@ Open that file when changing or debugging core loading, request lifecycle, or ro
 - Prefer simple structure: outer full-width container → inner fixed-width content (`100rem` / `120rem` / `max-width: 100%`) → positioned children inside that content box.
 - Do not set `cursor:` on public site panels when the custom cursors system is in use (it fights `elementsFromPoint`).
 
+## HTTP from PHP
+
+- **Do not use curl** (`curl_init`, `curl_exec`, etc.) in modules or system code.
+- Prefer PHP streams: **`stream_context_create`** + **`file_get_contents`** (same pattern as `form_model`, `basic/pageshare` Bitly, reCAPTCHA, etc.).
+- For POST JSON APIs: set `http.method`, `http.header` (Content-Type, Authorization), `http.content`, `http.timeout`, and usually `http.ignore_errors` so error bodies can be read; parse status from `$http_response_header` when needed.
+- Never log secrets (API keys) from request headers or bodies.
+
+## Admin CMS menu (`config.json` → `cms_menu`)
+
+- Items merge from all modules; nest with `parent` id; optional `order`, `url`, `access`, `ctrl` (keyboard shortcut digit/letter on top bar).
+- **Top level:** items with **`ctrl`** first, sorted by `order` only (Pages / Content / CMS / Tools / … stay in keyboard order). Remaining top items after that (Shop, Forms, …).
+- **Nested levels:** **submenu groups first** (items that have children), then **direct links**, then by `order`. Implemented in `cms/cms_menu` (`_menu_sort_top_level` / `_menu_sort_siblings`).
+- Prefer groups under **Tools** for related admin areas (e.g. Analytics → Raport/Settings, xAI → Settings).
+
 ## General programming style
 
 All lowercase snake case in 99% cases:

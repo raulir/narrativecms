@@ -39,9 +39,10 @@ class user_google_model extends \Model {
 		
 		require_once($GLOBALS['config']['base_path'].'vendor/autoload.php');
 		
-		Firebase\JWT\JWT::$leeway = 60;
+		// Leading \ — this file is namespace user; bare Firebase\… would be user\Firebase\…
+		\Firebase\JWT\JWT::$leeway = 60;
 		
-		$client = new Google\Client(['client_id' => $google_client_id]);
+		$client = new \Google\Client(['client_id' => $google_client_id]);
 		$payload = $client->verifyIdToken($credential);
 		
 		if (!($payload && !empty($payload['email_verified']))) {

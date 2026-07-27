@@ -1,0 +1,215 @@
+.cms_translation_container {
+	position: relative;
+	box-sizing: border-box;
+	padding-bottom: 2.0rem;
+}
+
+.cms_translation_toolbar {
+	margin-bottom: 1.2rem;
+	position: relative;
+	overflow: visible;
+}
+
+.cms_translation_save {
+	width: 4.5rem;
+	height: 3.0rem;
+	padding: 0;
+	font-size: 0;
+
+	.cms_tool_button_inner {
+		background-repeat: no-repeat;
+		background-position: center;
+		// Match image editor save icon scale (button stays full size)
+		background-size: 1.5rem auto;
+	}
+}
+
+.cms_translation_ai {
+	min-width: 4.5rem;
+	height: 3.0rem;
+	line-height: 2.8rem;
+	padding: 0 0.8rem;
+	font-size: 2.0rem;
+	font-weight: normal;
+	text-align: center;
+	box-sizing: border-box;
+}
+
+.cms_translation_ai_busy .cms_translation_ai {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+.cms_translation_message {
+	padding: 1.5rem 0;
+	font-size: 1.4rem;
+	line-height: 2.0rem;
+	color: #404040;
+
+	code {
+		font-size: 1.2rem;
+	}
+}
+
+.cms_translation_col_label {
+	width: 16%;
+}
+
+.cms_translation_col_default {
+	width: 12%;
+}
+
+.cms_translation_col_base {
+	width: 22%;
+}
+
+.cms_translation_col_selected {
+	width: 22%;
+}
+
+.cms_translation_col_copy {
+	width: 2.4rem;
+	flex: 0 0 2.4rem;
+	max-width: 2.4rem;
+	min-width: 2.4rem;
+}
+
+.cms_translation_col_ai {
+	width: 25%;
+}
+
+.cms_translation_grid_header,
+.cms_translation_row {
+	// No vertical column rules — space only
+	.cms_grid_field {
+		padding-left: 1.0rem;
+		padding-right: 1.0rem;
+
+		&::after {
+			display: none;
+		}
+
+		&:first-child {
+			padding-left: 0;
+		}
+
+		&:last-child {
+			padding-right: 0;
+		}
+	}
+
+	// Copy column: tight cell, no field padding around the button
+	.cms_translation_col_copy {
+		padding: 0;
+	}
+}
+
+.cms_translation_grid_header {
+	// Header border-bottom is enough — no extra line above body
+	// Same side inset as .cms_toolbar (1.0rem each side)
+	margin: 0 auto;
+	width: calc(100% - 2.0rem);
+	box-sizing: border-box;
+}
+
+.cms_translation_grid_body {
+	border-top: 0;
+	margin: 0 auto;
+	width: calc(100% - 2.0rem);
+	box-sizing: border-box;
+}
+
+.cms_translation_row {
+	align-items: flex-start;
+	border-bottom: 0.1rem solid #e8e8e8;
+	padding: 0.6rem 0;
+
+	&:last-child {
+		border-bottom: 0;
+	}
+}
+
+.cms_translation_label {
+	font-weight: 600;
+	font-size: 1.3rem;
+	line-height: 1.8rem;
+	word-break: break-word;
+}
+
+.cms_translation_readonly {
+	font-size: 1.3rem;
+	line-height: 1.8rem;
+	color: #606060;
+	white-space: pre-wrap;
+	word-break: break-word;
+	min-height: 1.8rem;
+}
+
+.cms_translation_col_selected {
+	.cms_translate_string_input,
+	.cms_translate_string_textarea,
+	.cms_translate_string_text_input,
+	.cms_translate_string_colour_input {
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.cms_translate_string_textarea {
+		min-height: 5.0rem;
+	}
+}
+
+.cms_translation_copy_cell {
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	padding: 0;
+	width: 100%;
+}
+
+.cms_translation_ai_cell {
+	display: block;
+}
+
+.cms_translation_ai_suggestion {
+	font-size: 1.3rem;
+	line-height: 1.8rem;
+	color: #2060a0;
+	white-space: pre-wrap;
+	word-break: break-word;
+	min-height: 1.8rem;
+	cursor: pointer;
+}
+
+// Square toolbar-style control (smaller than toolbar; height kept compact)
+.cms_translation_ai_use {
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.2rem;
+	height: 2.2rem;
+	padding: 0;
+	margin: 0.2rem 0 0 0;
+	border: 0.1rem solid #a0a0a0;
+	border-radius: 0.4rem;
+	background-color: white;
+	cursor: pointer;
+	font-size: 1.4rem;
+	font-weight: bold;
+	line-height: 1;
+	color: #404040;
+	text-align: center;
+	text-decoration: none;
+	user-select: none;
+
+	&:hover {
+		background-color: #f8f8f8;
+	}
+
+	&:active {
+		background-color: #e8e8e8;
+	}
+}
+
+

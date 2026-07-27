@@ -28,20 +28,26 @@
 	],
 	"cms_menu":[
 		{
-			"id":"analytics_dashboard",
+			"id":"analytics",
 			"name":"Analytics",
-			"url":"admin/analytics/",
 			"parent":"cms_tools",
-			"access":"analytics_dashboard",
 			"order":"5"
 		},
 		{
+			"id":"analytics_dashboard",
+			"name":"Raport",
+			"url":"admin/analytics/",
+			"parent":"analytics",
+			"access":"analytics_dashboard",
+			"order":"10"
+		},
+		{
 			"id":"analytics_settings",
-			"name":"Analytics settings",
+			"name":"Settings",
 			"url":"admin/panel_settings/analytics__analytics_settings/",
-			"parent":"cms_tools",
+			"parent":"analytics",
 			"access":"analytics_settings",
-			"order":"6"
+			"order":"20"
 		}
 	],
 	"access":[

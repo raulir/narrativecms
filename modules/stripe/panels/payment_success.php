@@ -1,11 +1,13 @@
-<?php use Stripe\ApiOperations\Update;
+<?php
+
+namespace stripe;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 require_once($GLOBALS['config']['base_path'] . 'vendor/stripe/init.php');
 require_once($GLOBALS['config']['base_path'] . 'vendor/autoload.php');
 
-class payment_success extends CI_Controller{
+class payment_success extends \Controller {
 	
 	function panel_params($params){
 		

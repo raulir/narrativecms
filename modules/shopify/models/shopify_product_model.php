@@ -2836,24 +2836,32 @@ class shopify_product_model extends \Model {
 				'variables' => $variables,
 		]);
 
-		$ch = curl_init($url);
-		curl_setopt_array($ch, [
-				CURLOPT_POST => true,
-				CURLOPT_RETURNTRANSFER => true,
-				CURLOPT_HTTPHEADER => [
-						'Content-Type: application/json',
-						'X-Shopify-Storefront-Access-Token: '.$token,
+		// PHP streams — no curl (see cms/docs/agents.md HTTP from PHP)
+		$context = stream_context_create([
+				'http' => [
+						'method' => 'POST',
+						'header' =>
+								"Content-Type: application/json\r\n".
+								'X-Shopify-Storefront-Access-Token: '.$token."\r\n",
+						'content' => $body,
+						'timeout' => 30,
+						'ignore_errors' => true,
 				],
-				CURLOPT_POSTFIELDS => $body,
-				CURLOPT_TIMEOUT => 30,
 		]);
-		$raw = curl_exec($ch);
-		$errno = curl_errno($ch);
-		$error = curl_error($ch);
-		curl_close($ch);
 
-		if ($errno){
-			return ['errors' => [['message' => 'Storefront request failed: '.$error]]];
+		$raw = @file_get_contents($url, false, $context);
+
+		if ($raw === false){
+			$status = 0;
+			if (!empty($http_response_header) && is_array($http_response_header)){
+				foreach ($http_response_header as $hline){
+					if (preg_match('#^HTTP/\S+\s+(\d+)#', $hline, $m)){
+						$status = (int)$m[1];
+						break;
+					}
+				}
+			}
+			return ['errors' => [['message' => 'Storefront request failed'.($status ? ' (HTTP '.$status.')' : '')]]];
 		}
 
 		$decoded = json_decode($raw, true);

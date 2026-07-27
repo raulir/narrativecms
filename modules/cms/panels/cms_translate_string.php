@@ -25,13 +25,13 @@ class cms_translate_string extends \Controller {
 
 	function panel_params($params){
 
-		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_translation_model');
 
 		$cms_page_panel_id = (int)($params['cms_page_panel_id'] ?? 0);
 		$field_name = $params['field_name'] ?? '';
 		$field_type = $params['field_type'] ?? '';
 
-		$data = $this->cms_page_panel_model->get_translate_string_data($cms_page_panel_id, $field_name, $field_type);
+		$data = $this->cms_translation_model->get_translate_string_data($cms_page_panel_id, $field_name, $field_type);
 
 		if (!empty($data['error'])){
 			$params['error'] = $data['error'];

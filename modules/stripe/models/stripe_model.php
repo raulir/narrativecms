@@ -1,8 +1,12 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
+
+namespace stripe;
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 require_once($GLOBALS['config']['base_path'] . 'vendor/stripe/init.php');
 
-class stripe_model extends CI_Model {
+class stripe_model extends \Model {
 	
 	function __construct(){
 		

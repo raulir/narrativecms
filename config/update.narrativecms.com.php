@@ -41,7 +41,8 @@ $config['update']['master'] = [
 		'stripe',
 		'user',
 		'video',
-		'weather'
+		'weather',
+		'xai'
 ];
 
 // depending of availability: none - '', PHP - 'gd', Google cwebp - 'cwebp'

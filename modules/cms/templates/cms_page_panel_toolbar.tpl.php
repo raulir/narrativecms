@@ -24,6 +24,7 @@
 		
 			<div class="cms_toolbar_buttons">
 		
+				<?php // float:right — first in DOM is rightmost: language | hidden (gear) | save … ?>
 				<?php if (!empty($GLOBALS['language']['languages'])): ?>
 					<?php _panel('cms/cms_language_select') ?>
 				<?php endif ?>

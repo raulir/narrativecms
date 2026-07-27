@@ -1,10 +1,12 @@
-<?php use Stripe\ApiOperations\Update;
+<?php
+
+namespace stripe;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 require_once($GLOBALS['config']['base_path'] . 'vendor/stripe/init.php');
 
-if (!function_exists('get_user_ip')){
+if (!function_exists(__NAMESPACE__.'\\get_user_ip')){
 
 	function get_user_ip(){
 
@@ -33,7 +35,7 @@ if (!function_exists('get_user_ip')){
 
 }
 
-class payment extends CI_Controller{
+class payment extends \Controller {
 	
 	function panel_params($params){
 
@@ -112,7 +114,7 @@ class payment extends CI_Controller{
 										'country' => 'GB',
 								]
 						]);
-					} catch (Exception $e) {
+					} catch (\Exception $e) {
 						print(json_encode(['message' => $e->getMessage()], JSON_PRETTY_PRINT));
 						die;
 					}
@@ -124,7 +126,7 @@ class payment extends CI_Controller{
 					$subscription = \Stripe\Subscription::create($subscription_params);
 				
 										
-				} catch (Exception $e) {
+				} catch (\Exception $e) {
 		
 					print(json_encode(['message' => $e->getMessage()], JSON_PRETTY_PRINT));
 					die;
@@ -153,7 +155,7 @@ class payment extends CI_Controller{
 							'payment_behavior' => 'pending_if_incomplete',
 					]);
 						
-				} catch (Exception $e) {
+				} catch (\Exception $e) {
 		
 					print(json_encode(['message' => $e->getMessage()], JSON_PRETTY_PRINT));
 					die;
@@ -257,7 +259,7 @@ class payment extends CI_Controller{
             						'https://' : 'http://').$_SERVER['HTTP_HOST'].'/'.ltrim($GLOBALS['config']['base_url'], '/').'stripe-payment-success/',
 						]);
 	
-					}  catch (Exception $e) {
+					}  catch (\Exception $e) {
 	
 						print(json_encode(['message' => $e->getMessage()], JSON_PRETTY_PRINT));
 						die;
@@ -331,7 +333,7 @@ class payment extends CI_Controller{
 		
 		try {
 			$price = \Stripe\Price::retrieve($params['stripe_price_id']);
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			_html_error('Stripe: Retrieving price failed', 500);
 			die();
 		}
@@ -339,7 +341,7 @@ class payment extends CI_Controller{
 		// check if customer has default payment method
 		try {
 			$customer = \Stripe\Customer::retrieve($user['stripe_customer_id']);
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			_html_error('Stripe: Retrieving customer failed', 500);
 			die();
 		}

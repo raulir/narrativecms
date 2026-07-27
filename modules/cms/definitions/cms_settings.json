@@ -420,6 +420,42 @@
 			},
 			"default":"0",
 			"help": "Saves SMTP debug log to cache folder"
+		},
+		{
+			"type":"subtitle",
+			"label":"AI",
+			"width":"wide",
+			"help":"Site-wide AI features (translations, etc). Provider modules (e.g. xAI) hold API keys and style profiles."
+		},
+		{
+			"type":"cms/cms_input_provides",
+			"name":"ai_provider",
+			"label":"AI provider",
+			"service":"ai",
+			"default":"",
+			"help":"[AI provider]||Module panel that provides the generic {ai} service (e.g. xAI Grok).||Leave empty to disable AI features."
+		},
+		{
+			"type":"select",
+			"name":"ai_ask_confirmation",
+			"label":"Ask confirmation",
+			"values":{
+				"1":"Yes",
+				"0":"No"
+			},
+			"default":"1",
+			"help":"When Yes, the translations page shows a confirm dialog before calling the AI (cost warning)."
+		},
+		{
+			"type":"select",
+			"name":"ai_only_missing",
+			"label":"Only missing texts",
+			"values":{
+				"0":"No — translate all fields with base text",
+				"1":"Yes — only empty / default / same as base"
+			},
+			"default":"0",
+			"help":"When Yes, AI only receives fields whose selected-language value is empty, equals the definition default, or equals the base language text."
 		}
 	]
 }

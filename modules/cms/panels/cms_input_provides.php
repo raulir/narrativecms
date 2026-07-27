@@ -1,12 +1,11 @@
 <?php
 
-namespace shop;
+namespace cms;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
- * @deprecated Prefer cms/cms_input_provides (provides is a CMS-level feature).
- * Kept for older definitions that still reference shop/cms_input_provides.
+ * Admin select of module provides for a service (e.g. ai, shop_checkout → panel names).
  */
 class cms_input_provides extends \Controller {
 
@@ -26,18 +25,20 @@ class cms_input_provides extends \Controller {
 
 	function panel_params($params){
 
-		$service = $params['service'] ?? ($params['params']['service'] ?? 'shop_checkout');
+		$service = $params['service'] ?? ($params['params']['service'] ?? '');
 
-		$values = ['' => '-- select --'];
+		$values = ['' => '-- none --'];
 
-		$providers = $GLOBALS['config']['provides'][$service] ?? [];
+		$providers = ($service !== '' && !empty($GLOBALS['config']['provides'][$service]))
+				? $GLOBALS['config']['provides'][$service]
+				: [];
+
 		if (is_array($providers)){
 			if (isset($providers['panel']) && is_string($providers['panel'])){
 				$panel = $providers['panel'];
-				$label = $providers['label'] ?? $panel;
-				$values[$panel] = $label;
+				$values[$panel] = $providers['label'] ?? $panel;
 			} else {
-				foreach($providers as $key => $provider){
+				foreach ($providers as $key => $provider){
 					if (!is_array($provider)){
 						continue;
 					}
@@ -45,8 +46,7 @@ class cms_input_provides extends \Controller {
 					if ($panel === ''){
 						continue;
 					}
-					$label = $provider['label'] ?? $panel;
-					$values[$panel] = $label;
+					$values[$panel] = $provider['label'] ?? $panel;
 				}
 			}
 		}

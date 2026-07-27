@@ -61,6 +61,10 @@ class admin extends \Controller {
 		$this->_output('cms/cms_page_panel', ['cms_page_panel_id' => $cms_page_panel_id, ]);
 	}
 
+	function translation($cms_page_panel_id){
+		$this->_output('cms/cms_translation', ['cms_page_panel_id' => (int)$cms_page_panel_id, ]);
+	}
+
 	function cms_list($list_item = ''){
 
 		if (empty($list_item)){

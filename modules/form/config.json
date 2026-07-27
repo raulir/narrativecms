@@ -4,23 +4,27 @@
 	"cms_menu":[
 		{
 			"id":"forms",
-			"name":"Forms"
+			"name":"Forms",
+			"parent":"cms_tools",
+			"order":60
 		},
 		{
 			"id":"form",
 			"name":"Forms data",
 			"parent":"forms",
 			"url":"form/admin/",
-			"access":"form_data"
+			"access":"form_data",
+			"order":10
 		},
-        {
-            "id": "form_settings",
-            "name": "Forms default settings",
-            "parent": "forms",
-            "user": "1",
-            "url": "admin/panel_settings/form__basic/",
-			"access":"form_settings"
-        }
+		{
+			"id":"form_settings",
+			"name":"Forms default settings",
+			"parent":"forms",
+			"user":"1",
+			"url":"admin/panel_settings/form__basic/",
+			"access":"form_settings",
+			"order":20
+		}
 	],
 	"panels":[
 		{
