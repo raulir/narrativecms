@@ -12,23 +12,55 @@ use Shopify\Utils;
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class shopify_product_model extends \Model {
-	
+
+	/** @var Rest|null Lazy Admin REST client — not created unless Shopify API is used */
+	public $client = null;
+
+	protected $_shopify_api_ready = false;
+
 	function __construct(){
-		
-		$api_key = $GLOBALS['config']['shopify_api_key'];
-		$api_secret = $GLOBALS['config']['shopify_api_secret'];
+
+		// Do not require Shopify credentials on construct — CMS shop/product create
+		// loads this model via toolbar/extra buttons when shopify is enabled.
+		// API client is initialised only when a sync/API method needs it.
+
+	}
+
+	/**
+	 * Lazy Shopify Admin API setup. Returns false if keys/token are missing.
+	 */
+	function _ensure_shopify_api(){
+
+		if ($this->_shopify_api_ready && $this->client){
+			return true;
+		}
+
+		$api_key = $GLOBALS['config']['shopify_api_key'] ?? '';
+		$api_secret = $GLOBALS['config']['shopify_api_secret'] ?? '';
+		$api_token = $GLOBALS['config']['shopify_api_token'] ?? '';
+		$host = $GLOBALS['config']['shopify_store_domain']
+				?? ($GLOBALS['config']['shopify_host'] ?? 'tim-sanders.myshopify.com');
+		$host = preg_replace('#^https?://#', '', rtrim((string)$host, '/'));
+
+		if ($api_key === '' || $api_secret === '' || $api_token === ''){
+			return false;
+		}
+
 		$tmp_dir = $GLOBALS['config']['base_path'].'cache/';
-		
+
 		\Shopify\Context::initialize(
 				apiKey: $api_key,
 				apiSecretKey: $api_secret,
 				scopes: ['read_products', 'read_product_listings', 'read_orders', 'read_product_feeds'],
-				hostName: 'tim-sanders.myshopify.com',
+				hostName: $host,
 				sessionStorage: new FileSessionStorage($tmp_dir),
 				apiVersion: '2026-10',
 		);
-		
-		$this->client = new Rest('tim-sanders.myshopify.com', $GLOBALS['config']['shopify_api_token']);
+
+		$this->client = new Rest($host, $api_token);
+		$this->_shopify_api_ready = true;
+
+		return true;
 
 	}
 	
@@ -201,7 +233,15 @@ class shopify_product_model extends \Model {
 		}
 
 		if ($needs_update){
-			
+
+			if (!$this->_ensure_shopify_api() || empty($this->client)){
+				$cached = $this->_call_read_cache($filename);
+				if (!empty($cached) && empty($cached['errors']) && empty($cached['_soft_fail']) && empty($cached['_not_found'])){
+					return $cached;
+				}
+				return ['_soft_fail' => 1, '_reason' => 'shopify_not_configured', ];
+			}
+
 			$more = true;
 			$data = [];
 			$api_ok = false;

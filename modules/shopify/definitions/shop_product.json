@@ -1,7 +1,7 @@
 {
 	"version": "2",
 	"label": "Shopify product fields",
-	"description": "Extends shop/product with Shopify sync fields; marks synced catalogue fields readonly",
+	"description": "Extends shop/product with Shopify sync metadata (readonly). Core catalogue fields stay editable for CMS-only products.",
 	"extra_buttons": [
 		{
 			"name": "shopify/shopify_productrefresh",
@@ -9,55 +9,6 @@
 		}
 	],
 	"item": [
-		{
-			"name": "heading",
-			"readonly": "1"
-		},
-		{
-			"name": "image",
-			"readonly": "1",
-			"category": "shopify"
-		},
-		{
-			"name": "type",
-			"readonly": "1"
-		},
-		{
-			"name": "text",
-			"readonly": "1"
-		},
-		{
-			"name": "min_price",
-			"readonly": "1"
-		},
-		{
-			"name": "max_price",
-			"readonly": "1"
-		},
-		{
-			"name": "available",
-			"readonly": "1"
-		},
-		{
-			"name": "images",
-			"readonly": "1",
-			"fields": [
-				{
-					"name": "image",
-					"readonly": "1",
-					"category": "shopify"
-				},
-				{
-					"name": "image_update",
-					"readonly": "1"
-				},
-				{
-					"name": "shopify_id",
-					"label": "Shopify image ID",
-					"readonly": "1"
-				}
-			]
-		},
 		{
 			"type": "subtitle",
 			"label": "Shopify"

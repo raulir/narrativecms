@@ -46,6 +46,14 @@ class cms_db {
 
 		$this->conn = $GLOBALS['db'];
 
+		// Keep connection on utf8mb4 if connect path skipped set_charset
+		$cs = @mysqli_character_set_name($this->conn);
+		if ($cs === false || strcasecmp((string)$cs, 'utf8mb4') !== 0){
+			if (!@mysqli_set_charset($this->conn, 'utf8mb4')){
+				@mysqli_query($this->conn, 'SET NAMES utf8mb4');
+			}
+		}
+
 	}
 
 	/**

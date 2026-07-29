@@ -75,6 +75,11 @@ function cms_config_load_full(){
 
 	}
 
+	// utf8mb4 connection — real Unicode in/out (emoji, accents); tables use utf8mb4
+	if (!@mysqli_set_charset($db, 'utf8mb4')){
+		@mysqli_query($db, "SET NAMES utf8mb4");
+	}
+
 	$sql = "select b.name, b.value from cms_page_panel a join cms_page_panel_param b on a.cms_page_panel_id = b.cms_page_panel_id ".
 			" where a.panel_name = 'cms/cms_settings' and b.name != ''";
 

@@ -15,7 +15,10 @@ if (empty($working_directory)){
 	$working_directory = str_replace('\\', '/', trim(getcwd()).'/');
 }
 
+// Early helpers (BASEPATH is set in index.php before cms.php)
 require_once($working_directory.'system/helpers/json_helper.php');
+require_once($working_directory.'system/helpers/error_helper.php');
+require_once($working_directory.'system/helpers/string_helper.php');
 
 /*
  * LOAD HOST CONFIG

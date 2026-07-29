@@ -33,14 +33,24 @@ class shopify_productrefresh extends \Controller {
 	}
 	
 	function panel_params($params){
-		
-		
+
 		if (empty($params['cms_page_panel_id'])){
-			$params['cms_page_panel_id'] = $params['product_id'];
+			$params['cms_page_panel_id'] = $params['product_id'] ?? 0;
 		}
-		
+
+		$params['show_refresh'] = 0;
+		$id = (int)($params['cms_page_panel_id'] ?? 0);
+		if ($id > 0){
+			$this->load->model('cms/cms_page_panel_model');
+			$product = $this->cms_page_panel_model->get_cms_page_panel($id);
+			if (!empty($product['shopify_id'])){
+				$params['show_refresh'] = 1;
+				$params['product_id'] = $id;
+			}
+		}
+
 		return $params;
-		
+
 	}
 
 }
