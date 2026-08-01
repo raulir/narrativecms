@@ -28,6 +28,11 @@
 	],
 	"cms_menu":[
 		{
+			"id":"cms_tools",
+			"name":"Tools",
+			"order":40
+		},
+		{
 			"id":"analytics",
 			"name":"Analytics",
 			"parent":"cms_tools",

@@ -16,7 +16,10 @@
 			"type":"modules",
 			"name":"modules",
 			"label":"Modules",
-			"help":"[modules]||Which modules and in what order to load from modules installed to the server||{cms} is always automatically loaded as the first"
+			"sticky":{
+				"cms":"cms"
+			},
+			"help":"[modules]||Which modules and in what order to load from modules installed to the server||{cms} is sticky (always first, not removable)"
 		},
 		{
 			"type":"text",
@@ -383,6 +386,20 @@
 			"label":"Technical admin email",
 			"default":"",
 			"help":"Email to send technical system messages. Eg error logs."
+		},
+		{
+			"type":"text",
+			"name":"email_queue_limit",
+			"label":"Email queue process limit",
+			"default":"50",
+			"help":"Max messages the cms/cms_email_queue cron processes per run||Default 50"
+		},
+		{
+			"type":"text",
+			"name":"email_queue_max_attempts",
+			"label":"Email queue max attempts",
+			"default":"5",
+			"help":"Give up after this many failed sends||Backoff between tries: 2×n² minutes (n = attempts so far)||Default 5"
 		},
 		{
 			"type":"subtitle",

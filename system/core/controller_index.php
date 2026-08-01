@@ -318,6 +318,23 @@ class Index extends Controller {
 			}
 
 			//  output to the template, deprecated - layout without module name
+			// Layout lives in page meta — missing/empty must not be silent
+			$layout = isset($page['layout']) ? trim((string)$page['layout']) : '';
+			if ($layout === ''){
+				$log_page_id = (int)($page['cms_page_id'] ?? $cms_page_id ?? 0);
+				$log_slug = trim((string)($page['slug'] ?? ''));
+				$log_route = is_scalar($page_id) ? (string)$page_id : '';
+				$log_uri = isset($_SERVER['REQUEST_URI']) ? (string)$_SERVER['REQUEST_URI'] : '';
+				// Structured tags for cms_log_rotate title resolution: [cms_page_id=N]
+				error_log(
+						'CMS missing page layout [cms_page_id='.$log_page_id.']'.
+						($log_slug !== '' ? ' [slug='.$log_slug.']' : '').
+						($log_route !== '' ? ' [route='.$log_route.']' : '').
+						($log_uri !== '' ? ' [uri='.$log_uri.']' : '')
+				);
+				// Keep empty so include still fails visibly (do not invent a default layout)
+				$page['layout'] = '';
+			}
 			if (!stristr($page['layout'], '/')){
 				$page['layout'] = 'cms/'.$page['layout'];
 			}

@@ -36,9 +36,9 @@ Rough order:
 
 1. **[`cms_config_basic.php`](../../../system/core/cms_config_basic.php)** — host JSON/PHP only (`base_path`, `base_url`, …). **No DB.**
 2. **[`cms_path.php`](../../../system/core/cms_path.php)** — `cms_request_path()`
-3. **Module API branch** — if `modules/{m}/api/{id}.php` **exists** and that module’s `config.json` lists `"api":[{"id":…}]`, include and **die**. No `cms_router`, no full config. APIs that need DB call **`cms_config_load_full()`** themselves.
+3. **Module API branch** — if `modules/{m}/api/{id}.php` **exists** and that module’s `config.json` lists `"api":[{"id":…}]`, include and **die**. No `cms_router`. Prefer this for public non-page endpoints (e.g. `stripe/webhook`, `cms/updater`, `analytics/beacon`). APIs that need DB load full config via requiring [`cms_config.php`](../../../system/core/cms_config.php) (calls **`cms_config_load_full()`**).
 4. **[`cms_config_load_full()`](../../../system/core/cms_config.php)** — one mysqli connect → **`$GLOBALS['db']`** (global `$db`), cms_settings, all modules, extends/provides.
-5. **`cms_route_resolve()`** ([`cms_router.php`](../../../system/core/cms_router.php)) → `$GLOBALS['cms_route']`
+5. **`cms_route_resolve()`** ([`cms_router.php`](../../../system/core/cms_router.php)) → `$GLOBALS['cms_route']` (includes legacy **module controller first-segment** discovery — to be phased out for new public endpoints; see [`todo.md`](todo.md) § System / routing)
 6. Timeout shutdown, landing redirects, **session**, targets (uses global `$db`), page HTML cache try-serve
 7. [`CodeIgniter.php`](../../../system/core/CodeIgniter.php) — dispatch Controller + method (loads [`cms_bootstrap.php`](../../../system/core/cms_bootstrap.php): `load_class` / `get_instance` / `show_404`; app loading stays in `Loader`). Loader attaches **`cms_db`** as `$this->db`.
 

@@ -64,18 +64,33 @@
 	position: absolute;
 	right: 0;
 	left: 0;
+	// No margin-top — margin is not part of the hover hit area and drops :hover
+	// when moving from the closed control into the list
 	top: 100%;
-	margin-top: 0.1rem;
-	padding: 0.2rem 0.5rem;
+	padding: 0.4rem 0.5rem 0.2rem 0.5rem;
 	background-color: $colour_white;
 	opacity: 0;
 	height: 0;
 	overflow: hidden;
 	box-sizing: border-box;
-	
+	pointer-events: none;
+
+	// Invisible bridge so the pointer stays on .language_button while moving down
+	&::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: -0.5rem;
+		height: 0.5rem;
+	}
+
 	.language_button:hover & {
 		height: auto;
 		opacity: 1;
+		// open list: overflow visible so the bridge above can receive hover
+		overflow: visible;
+		pointer-events: auto;
 	}
 
 }

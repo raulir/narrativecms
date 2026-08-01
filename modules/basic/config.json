@@ -65,6 +65,11 @@
 	],
 	"cms_menu":[
 		{
+			"id":"cms_tools",
+			"name":"Tools",
+			"order":40
+		},
+		{
 			"id":"basic_gtag",
 			"name":"Google Analytics settings",
 			"url":"admin/panel_settings/basic__gtag/",

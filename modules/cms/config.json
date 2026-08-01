@@ -58,7 +58,7 @@
 		},
 		{
 			"id":"cms_dump",
-			"name":"Data dumps",
+			"name":"Data and backup",
 			"parent":"cms_cms",
 			"access":"cms_dump",
 			"url":"admin/dump/"
@@ -200,6 +200,14 @@
 		{
 			"id":"cms_video_encode",
 			"name":"CMS video encode",
+			"flags":[
+				"hidden",
+				"cron"
+			]
+		},
+		{
+			"id":"cms_email_queue",
+			"name":"CMS email queue",
 			"flags":[
 				"hidden",
 				"cron"

@@ -3,6 +3,11 @@
 	"version":"2.0",
 	"cms_menu":[
 		{
+			"id":"cms_tools",
+			"name":"Tools",
+			"order":40
+		},
+		{
 			"id":"forms",
 			"name":"Forms",
 			"parent":"cms_tools",

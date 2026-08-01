@@ -1,0 +1,5 @@
+{
+	"version": "2",
+	"label": "CMS email queue",
+	"description": "Cron: send queued emails from cache/email_queue (async send_mail)"
+}

@@ -12,12 +12,16 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 - [x] **#762 one mysqli + slim cms_db** — `$GLOBALS['db']` single connection; [`cms_db.php`](../../../system/core/cms_db.php) replaces `system/database/` (no AR/forge/multi-driver). See [`system.md`](system.md) § Database.
 
+## System / routing
+
+- [ ] **Deprecate / remove module controller first-segment autoresolve** — public endpoints should use **module APIs** (`modules/{m}/api/{id}.php` + `config.json` `"api":[{"id":…}]`) or explicit reserved system controllers (`ajax_api`, `files`, `admin`, …). Avoid new public routes via `modules/*/controllers/{name}.php` (example: Stripe webhook moved to **`stripe/webhook`** API). Keep admin module controllers until admin routing is redesigned. See [`system.md`](system.md) § Bootstrap, [`routing.md`](routing.md).
+
 ---
 
 ## Email
 
 - [x] Central mail helper — [`cms_email_model`](../models/cms_email_model.php); see [`cms_email.md`](cms_email.md)
-- [ ] **Async email sending** — queue + background worker so `send_mail()` does not block the HTTP request (reminder / verification feel slow under SMTP). Detail: [`cms_email.md`](cms_email.md) § TODO
+- [x] **Async email sending** — default enqueue to `cache/email_queue/`; cron panel `cms/cms_email_queue`; `send_now` for password reminder / updated / verification. Settings: `email_queue_limit`, `email_queue_max_attempts`. Detail: [`cms_email.md`](cms_email.md)
 
 ---
 
@@ -31,6 +35,8 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 ## Panel data integrity
 
 - [x] **#114 ensure_data** — opt-in definition flag; create/purge fill missing fields from existing + defaults; JSON cache encode check. See [`cms_input.md`](cms_input.md) § Panel-level flags.
+- [x] **Orphaned panel data purge** — gear menu **Data purge** (before Translation); popup scans instance + settings for keys not in definition and translation languages not in CMS; purge selected. `cms_page_panel_data_purge` + model `scan_orphan_panel_data` / `purge_panel_param_keys` / `purge_panel_translation_languages`.
+- [x] **Orphan scan includes ghost translation fields** — `_translations.{lang}.*` keys not in item/settings definition (e.g. `yearly_badge` stuck on pricing instance). Panel still wins over settings on clash; clean via Data purge only.
 
 ---
 
@@ -84,12 +90,15 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 ---
 
-## Data management and backup — [`cms_dump.md`](cms_dump.md) (#26)
+## Data and backup — [`cms_dump.md`](cms_dump.md) (#26)
 
-Full checklist (rename, multi-backup, monthly resources, limits, checksums, restore-on-server, design/help, plus shipped routes rebuild + image purge): **[`cms_dump.md`](cms_dump.md)**.
+Full checklist: **[`cms_dump.md`](cms_dump.md)**.
 
-- [ ] **Rename admin page to “Data management and backup”** (menu + toolbar; URL may stay `admin/dump/`)
-- [ ] Page redesign, multi-backup, restore without download, monthly resource packs, upload preflight/validation, checksum registry — see `cms_dump.md`
+- [x] **Rename admin page to “Data and backup”** (menu + toolbar; URL `admin/dump/`)
+- [x] Phase 1: generate section (options, multi backup under `cache/backup/`, metadata JSON, resize images); layout sections
+- [x] Phase 2: **Backups and restore** (collapsible list, upload to library, Restore/Download/Delete, `dump_<project>_date`, dump.json in zip, no `*_bu` on restore)
+- [ ] **Restore: select which tables to overwrite** in confirmation dialog (from dump meta / SQL)
+- [ ] Preflight PHP limits, upload validation, checksum registry, help/warnings — see `cms_dump.md`
 - [x] Rebuild routes control on dump page
 - [x] Unused image purge on dump page
 

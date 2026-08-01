@@ -37,16 +37,38 @@ Open that file when changing or debugging core loading, request lifecycle, or ro
 - For POST JSON APIs: set `http.method`, `http.header` (Content-Type, Authorization), `http.content`, `http.timeout`, and usually `http.ignore_errors` so error bodies can be read; parse status from `$http_response_header` when needed.
 - Never log secrets (API keys) from request headers or bodies.
 
+## Third-party APIs (backend vs frontend)
+
+- **Prefer backend (PHP / panel actions / models)** for calls to third-party providers (payments, AI, email, shopify, maps keys, etc.) whenever possible.
+- Frontend JS should talk to **this CMS** (`get_ajax` / `get_ajax_panel` / form posts). The server holds secrets, enforces auth, and shapes the provider request.
+- Avoid browser-direct provider SDKs/APIs that need secret keys, privileged webhooks, or business rules that must not be spoofed. Public publishable keys or pure client widgets are fine only when the provider’s model requires them (e.g. Stripe publishable key for Elements) — still keep charge/session creation on the server.
+- Same idea as module **providers** (`provides` + domain panel orchestrating `shopify/checkout`, `stripe/subscription_checkout`, AI, …): domain FE → our panel → third party.
+
+## Encoding (UTF-8 / utf8mb4)
+
+- **Storage and APIs use real UTF-8** (MySQL **utf8mb4** connection via `mysqli_set_charset`). Do **not** store HTML entities (`&aacute;`, etc.) for normal copy — use Unicode characters.
+- `htmlspecialchars` is **not** the default for CMS field output (see “trust at render”). Use only for rare non-HTML embedding cases — not for normal template text or prepared attribute values.
+- Sanitize untrusted / external strings with **`cms_utf8_string()`** / **`cms_utf8_tree()`** (`system/helpers/string_helper.php`) — e.g. AI API responses, translation save, param cache rebuild.
+- HTTP status codes: **`set_status_header()`** in `system/helpers/error_helper.php` (not json_helper).
+- JSON: prefer `JSON_UNESCAPED_UNICODE` so multibyte stays readable Unicode in cache/API.
+
 ## Admin CMS menu (`config.json` → `cms_menu`)
 
-- Items merge from all modules; nest with `parent` id; optional `order`, `url`, `access`, `ctrl` (keyboard shortcut digit/letter on top bar).
-- **Top level:** items with **`ctrl`** first, sorted by `order` only (Pages / Content / CMS / Tools / … stay in keyboard order). Remaining top items after that (Shop, Forms, …).
-- **Nested levels:** **submenu groups first** (items that have children), then **direct links**, then by `order`. Implemented in `cms/cms_menu` (`_menu_sort_top_level` / `_menu_sort_siblings`).
+- Items merge from all modules by **`id`**. Duplicate ids are **merged** (later non-empty fields win; empty does not wipe). Implemented in `cms/cms_menu` (`_menu_merge_item`).
+- Nest with `parent` id; optional `order`, `url`, `access`, `ctrl` (keyboard shortcut digit/letter on top bar).
+- **When nesting under a top-level item** (e.g. Shop, Tools), **redefine that top-level** in the same module’s `cms_menu` (`id` + `name` + `order` as needed) so the bar entry exists even if the “owner” module is missing. Example: Stripe/Shopify redefine `shop`; form/analytics/xai redefine `cms_tools`.
+- Missing parents are auto-stubbed as a last resort (`id` as name); prefer an explicit redefine for proper labels/`ctrl`.
+- **Top level:** items with **`ctrl`** first, sorted by `order` only (Pages / Content / CMS / Tools / …). Remaining top items after that (Shop, …).
+- **Nested levels:** **submenu groups first**, then **direct links**, then by `order` (`_menu_sort_top_level` / `_menu_sort_siblings`).
 - Prefer groups under **Tools** for related admin areas (e.g. Analytics → Raport/Settings, xAI → Settings).
+
+## JavaScript / jQuery
+
+- **`$.trim` is not a function** in the jQuery build used by this CMS — do not use it. Prefer native **`String.prototype.trim`**: `String(value || '').trim()`.
+- Prefer the same for other removed/legacy jQuery helpers when native APIs exist.
 
 ## General programming style
 
-All lowercase snake case in 99% cases:
 
 ```
 $user_name
@@ -127,7 +149,7 @@ When code needs a DB snapshot before a destructive change:
 2. Store under **`cache/db/`** as a **zipped** file, e.g. `cache/db/{table}_YYYYMMDD_HHMMSS.zip` containing `{table}_….sql`
 3. Optionally keep only the tables you will mutate (single-table zip is fine)
 
-Full environment dumps stay on the dump page (`cache/_dump*.zip`). Table-level recovery archives live in `cache/db/`.
+Full environment dumps stay on the dump page under **`cache/backup/`** (`dump_<project>_YYYY_MM_DD[_N].zip` + sidecar `.json` + embedded `dump.json`). Table-level recovery archives live in `cache/db/`.
 
 Helper methods – always start with underscore: `_deep_merge()`, `_get_db_columns()`
 
@@ -207,20 +229,29 @@ All panels must have `<panel name>_container` and `<panel name>_content` element
 
 HTML `data-*` attributes with multi-word names use underscores after the prefix: `data-unit_id`, `data-label_correct`. Do not use hyphens between words (`data-unit-id`, `data-label-correct`).
 
-### CMS field output (trust admin content)
+### CMS field output (trust at render)
 
-Values that come from CMS panel fields / settings are **admin-controlled**. Print them simply:
+**Validate and sanitize on the way in** — CMS admin forms, API/webhook handlers, user input, third-party payloads. Once data lives in the CMS (admin fields, catalogue, settings, params **after model prep**), templates **trust** it.
+
+Print prepared values simply:
 
 ```php
 <?= $search_placeholder ?>
 <?= $heading ?>
+<?= $card['cta_text'] ?>
 ```
 
-**Do not** wrap ordinary CMS text in `htmlspecialchars(..., ENT_QUOTES, 'UTF-8')` (or equivalent) on every output. That adds serve-time work for no benefit under this project’s trust model, and fights the preferred low-ceremony template style.
+**Do not** re-check at template time:
+
+- No `htmlspecialchars(..., ENT_QUOTES, 'UTF-8')` on ordinary CMS / model-prepared text (including normal `data-*` attribute values when the model already typed ints/enums/admin strings)
+- No defensive `?? ''`, `!empty(...)`, or `is_array(...)` for keys the model always sets
+- Templates are **not** a second validation layer
 
 **Do not** invent dual defaults on print either (`<?= $x ?? 'fallback' ?>` for CMS labels) when the field has a definition `"default"` — re-save settings / migrate data instead (see “CMS field values” above).
 
-**Exceptions** (rare): building a raw JavaScript string literal by hand, or other non-HTML embedding where the context is not normal template text. Prefer `data-*` attributes or `json_encode` for structured handoff rather than ad-hoc escaping of CMS copy.
+**Exceptions** (rare): embedding into a raw JS string literal by hand; content that was stored without sanitization and is truly untrusted (prefer fix at write). Prefer `data-*` + JS or `json_encode` for structured handoff.
+
+Related: Encoding section — `htmlspecialchars` is for edge cases, not the default for every CMS field echo.
 
 ### Panel template partials
 
@@ -237,9 +268,11 @@ modules/<module>/templates/<panel_name>/                 ← partials for that p
 Example: [`cms_schema.tpl.php`](../templates/cms_schema.tpl.php) includes [`cms_schema/module_section.tpl.php`](../templates/cms_schema/module_section.tpl.php) and [`cms_schema/fragment.tpl.php`](../templates/cms_schema/fragment.tpl.php).
 
 - Subfolder name = **panel name** (not a generic `partials/`), so ownership stays obvious.
-- Partials are **mainly for that panel**, but may be included from elsewhere when useful (e.g. updater popup embedding schema fragment).
+- Prefer **one item per partial**; the **parent template owns `foreach`** (how many / which items is the parent’s business logic). Filtering, visibility flags, active labels → model or parent prep, not the item partial.
+- Partials are **mainly for that panel**, but may be included from elsewhere when useful (e.g. manage reusing `pricing/card.tpl.php`).
 - Include with an explicit path, e.g. `include __DIR__.'/cms_schema/module_section.tpl.php';` — no auto-discovery.
 - Related precedent: music score pieces under `modules/music/templates/score/`.
+- **Reusable domain controls** (e.g. currency dropdown) belong as their **own panel** (`_panel('shop/currency_selector', …)`), not as ad-hoc host-page partials.
 
 ## Models
 
@@ -255,8 +288,12 @@ Loader / shared instances: [`system.md`](system.md).
 ## Database schema (only when needed — mostly “cms” module)
 
 - Schema files – always `.json`, one per table, inside `modules/<module>/schema/`
+- **Table names are singular** and **prefixed with the module name** (snake_case): `{module}_{entity}`  
+  Examples: `subscription_subscription`, `music_user_unit`, `music_user_set`.  
+  Primary key: `{table}_id` (auto-increment INT unsigned).
 - Schema layering – later-loaded modules override earlier ones (deep merge on same table name)
 - Error keys – format `module:table:columns:column:property` (or `:indexes:indexname`)
+- Table renames: use schema `"migrate_from": { "table": "old_name", "columns": { "old_col": "new_col" } }` then CMS schema fix
 
 ## Panel controllers
 
