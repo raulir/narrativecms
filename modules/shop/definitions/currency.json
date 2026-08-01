@@ -1,0 +1,36 @@
+{
+	"version": "2",
+	"list": {
+		"list_title": "Currencies",
+		"item_title": "Currency",
+		"title_field": "heading",
+		"filter_fields": {
+			"show": "-- show --"
+		},
+		"link_target": "0"
+	},
+	"item": [
+		{
+			"type": "text",
+			"name": "heading",
+			"label": "Heading",
+			"default": "GBP",
+			"help": "Currency code or name (e.g. GBP, EUR, USD)",
+			"mandatory": "1"
+		},
+		{
+			"type": "text",
+			"name": "sign",
+			"label": "Sign",
+			"default": "",
+			"help": "Optional prefix before amounts (£, €, $). Leave empty if none."
+		},
+		{
+			"type": "text",
+			"name": "rate",
+			"label": "Rate",
+			"default": "1",
+			"help": "Rate relative to shop default currency (default currency should be 1)"
+		}
+	]
+}

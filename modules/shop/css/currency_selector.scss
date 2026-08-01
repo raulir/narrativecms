@@ -1,0 +1,105 @@
+// Embeddable currency dropdown — value on .currency_selector_container[data-value]
+// and #currency_selector_value / .currency_selector_value
+
+.currency_selector_container {
+	position: relative;
+	z-index: 10;
+	box-sizing: border-box;
+	display: block;
+}
+
+.currency_selector_button {
+	position: relative;
+	display: block;
+	box-sizing: border-box;
+	width: 8.0rem;
+	height: 2.6rem;
+	border: 0.15rem solid #404040;
+	border-radius: 0.5rem;
+	background-color: #ffffff;
+	color: #1c1a1f;
+	cursor: pointer;
+	user-select: none;
+	// Keep overflow visible so the list stays hoverable when the pointer moves down
+	overflow: visible;
+	text-align: left;
+}
+
+.currency_selector_button_label {
+	display: block;
+	box-sizing: border-box;
+	height: 2.3rem;
+	line-height: 2.3rem;
+	padding: 0 2.0rem 0 0.8rem;
+	font-size: 1.2rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	// Chevron
+	&::after,
+	&::before {
+		content: '';
+		display: block;
+		width: 0.5rem;
+		height: 0.14rem;
+		background-color: #1c1a1f;
+		position: absolute;
+		right: 0.7rem;
+		top: 50%;
+		transform: translate(0, -50%) rotate(-45deg);
+	}
+
+	&::before {
+		transform: translate(0, -50%) rotate(45deg);
+		right: 1.0rem;
+	}
+}
+
+.currency_selector_list {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 100%;
+	// No margin-top — margin is not hoverable and drops :hover when moving into the list
+	box-sizing: border-box;
+	background-color: #ffffff;
+	border: 0.15rem solid #404040;
+	border-radius: 0.5rem;
+	padding: 0.5rem 0 0.3rem 0;
+	opacity: 0;
+	height: 0;
+	overflow: hidden;
+	pointer-events: none;
+	z-index: 200;
+
+	// Bridge into the closed control so the pointer never leaves :hover
+	&::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: -0.4rem;
+		height: 0.4rem;
+	}
+}
+
+.currency_selector_button:hover .currency_selector_list {
+	height: auto;
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.currency_selector_option {
+	display: block;
+	box-sizing: border-box;
+	padding: 0.2rem 0.8rem;
+	font-size: 1.2rem;
+	line-height: 1.8rem;
+	color: #000000;
+	cursor: pointer;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	text-align: left;
+}

@@ -1,0 +1,8 @@
+{
+	"version": "2",
+	"label": "Currency selector",
+	"description": "Embeddable currency dropdown. Writes selection to container data-value and #currency_selector_value.",
+	"js": [
+		"shop/currency_selector"
+	]
+}

@@ -771,5 +771,224 @@ class shop_model extends \Model {
 		return $return;
 	
 	}
-	
+
+	/**
+	 * Shop default currency panel (shop settings default_currency_id).
+	 */
+	function get_default_currency(){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$settings = $this->cms_page_panel_model->get_cms_page_panel_settings('shop/shop');
+		$id = (int)($settings['default_currency_id'] ?? 0);
+		if ($id < 1){
+			return null;
+		}
+
+		return $this->get_currency($id);
+
+	}
+
+	/**
+	 * Currency list item by cms_page_panel_id.
+	 */
+	function get_currency($currency_id){
+
+		$currency_id = (int)$currency_id;
+		if ($currency_id < 1){
+			return null;
+		}
+
+		$this->load->model('cms/cms_page_panel_model');
+		$c = $this->cms_page_panel_model->get_cms_page_panel($currency_id);
+		if (empty($c) || !is_array($c)){
+			return null;
+		}
+		if (($c['panel_name'] ?? '') !== 'shop/currency' && strpos((string)($c['panel_name'] ?? ''), 'currency') === false){
+			// Still allow if id points at a currency list item
+		}
+
+		$rate = (float)str_replace(',', '.', (string)($c['rate'] ?? '1'));
+		if ($rate <= 0){
+			$rate = 1.0;
+		}
+
+		return [
+				'cms_page_panel_id' => (int)($c['cms_page_panel_id'] ?? $currency_id),
+				'heading' => (string)($c['heading'] ?? ''),
+				'sign' => (string)($c['sign'] ?? ''),
+				'rate' => $rate,
+		];
+
+	}
+
+	/**
+	 * Currencies for selectors / pricing.
+	 * $ids null or empty → all shown shop/currency list items (list order).
+	 * Otherwise resolve each id via get_currency (skip missing).
+	 *
+	 * @param int[]|null $ids
+	 * @return array[] list of get_currency() rows
+	 */
+	function get_currencies($ids = null){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		if ($ids === null || $ids === [] || $ids === ''){
+			$rows = $this->cms_page_panel_model->get_list('shop/currency');
+			$out = [];
+			foreach ($rows as $row){
+				$id = (int)($row['cms_page_panel_id'] ?? 0);
+				if ($id < 1){
+					continue;
+				}
+				$c = $this->get_currency($id);
+				if (!empty($c)){
+					$out[] = $c;
+				}
+			}
+			return $out;
+		}
+
+		if (!is_array($ids)){
+			$ids = [(int)$ids];
+		}
+
+		$out = [];
+		foreach ($ids as $id){
+			$id = (int)$id;
+			if ($id < 1){
+				continue;
+			}
+			$c = $this->get_currency($id);
+			if (!empty($c)){
+				$out[] = $c;
+			}
+		}
+		return $out;
+
+	}
+
+	/**
+	 * Convert amount in main (default) currency to target currency via rate.
+	 */
+	function convert_from_main($amount_main, $currency){
+
+		$amount_main = (float)$amount_main;
+		if (!is_array($currency)){
+			$currency = $this->get_currency((int)$currency);
+		}
+		if (empty($currency)){
+			return round($amount_main, 2);
+		}
+		$rate = (float)($currency['rate'] ?? 1);
+		if ($rate <= 0){
+			$rate = 1.0;
+		}
+
+		return round($amount_main * $rate, 2);
+
+	}
+
+	/**
+	 * Format amount with optional currency sign prefix.
+	 */
+	function format_amount($amount, $currency = null){
+
+		$amount = (float)$amount;
+		$sign = '';
+		if (is_array($currency)){
+			$sign = (string)($currency['sign'] ?? '');
+		} else if ($currency){
+			$c = $this->get_currency((int)$currency);
+			$sign = $c ? (string)$c['sign'] : '';
+		}
+
+		if (abs($amount - round($amount)) < 0.001){
+			$num = (string)(int)round($amount);
+		} else {
+			$num = number_format($amount, 2, '.', '');
+		}
+
+		return $sign.$num;
+
+	}
+
+	/**
+	 * Resolve product price in a currency.
+	 * Uses prices[] override for currency_id if set; else main price × rate.
+	 *
+	 * @return array{price:float,formatted:string,currency:array|null,stripe_price_id:string,source:string}
+	 */
+	function get_product_price_in_currency($product, $currency_id){
+
+		if (!is_array($product)){
+			$this->load->model('cms/cms_page_panel_model');
+			$product = $this->cms_page_panel_model->get_cms_page_panel((int)$product);
+		}
+		if (!is_array($product)){
+			return [
+					'price' => 0.0,
+					'formatted' => $this->format_amount(0),
+					'currency' => null,
+					'stripe_price_id' => '',
+					'source' => 'none',
+			];
+		}
+
+		$currency_id = (int)$currency_id;
+		$currency = $currency_id > 0 ? $this->get_currency($currency_id) : $this->get_default_currency();
+		if (empty($currency) && $currency_id > 0){
+			$currency = $this->get_default_currency();
+		}
+
+		// Product base price (default currency). min_price is a legacy fallback only.
+		$main = 0.0;
+		if (isset($product['price']) && $product['price'] !== '' && $product['price'] !== null){
+			$main = (float)str_replace(',', '.', (string)$product['price']);
+		} else if (isset($product['min_price']) && $product['min_price'] !== '' && $product['min_price'] !== null){
+			$main = (float)str_replace(',', '.', (string)$product['min_price']);
+		}
+
+		$stripe = '';
+		$source = 'rate';
+		$price = $main;
+
+		if (!empty($currency) && !empty($product['prices']) && is_array($product['prices'])){
+			$cid = (int)$currency['cms_page_panel_id'];
+			foreach ($product['prices'] as $row){
+				if (!is_array($row)){
+					continue;
+				}
+				if ((int)($row['currency_id'] ?? 0) === $cid){
+					if (isset($row['price']) && $row['price'] !== '' && $row['price'] !== null){
+						$price = (float)str_replace(',', '.', (string)$row['price']);
+						$source = 'override';
+					}
+					$stripe = trim((string)($row['stripe_price_id'] ?? ''));
+					break;
+				}
+			}
+		}
+
+		if ($source === 'rate' && !empty($currency)){
+			$price = $this->convert_from_main($main, $currency);
+		}
+
+		// Product-level stripe id fallback (legacy subscription field)
+		if ($stripe === '' && !empty($product['stripe_price_id'])){
+			$stripe = trim((string)$product['stripe_price_id']);
+		}
+
+		$price = round($price, 2);
+
+		return [
+				'price' => $price,
+				'formatted' => $this->format_amount($price, $currency),
+				'currency' => $currency,
+				'stripe_price_id' => $stripe,
+				'source' => $source,
+		];
+
+	}
+
 }

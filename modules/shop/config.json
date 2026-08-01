@@ -74,6 +74,13 @@
 			"order":110
 		},
 		{
+			"id":"shop_currencies",
+			"name":"Currencies",
+			"parent":"shop",
+			"url":"admin/cms_list/shop__currency/",
+			"order":115
+		},
+		{
 			"id":"shop_subcategories",
 			"name":"Product subcategories",
 			"parent":"shop",
