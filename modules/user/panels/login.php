@@ -88,6 +88,7 @@ class login extends \Controller{
 
 		// Web: alternatives from CMS (link to /login-google/ GSI).
 		// Inapp: same repeater shown as .login_app_google in login.tpl.php — do not clear either path.
+		// Post-login resume for checkout: subscription extends this panel (user_login).
 
 		return $params;
 	

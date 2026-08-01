@@ -1,0 +1,19 @@
+{
+	"version": "2",
+	"label": "User subscription fields",
+	"description": "Manual elevated plan (no payment) on site users",
+	"item": [
+		{
+			"type": "subtitle",
+			"label": "Subscription (manual)"
+		},
+		{
+			"type": "fk",
+			"name": "elevated_plan",
+			"label": "Elevated plan",
+			"list": "shop/product",
+			"add_empty": "1",
+			"help": "Grant a plan without payment (testing / comps). Leave empty for none. Stripe-paid subscriptions take precedence when active."
+		}
+	]
+}

@@ -1,0 +1,181 @@
+{
+	"version": "2",
+	"label": "Subscription settings",
+	"description": "Shared subscription / pricing copy and defaults",
+	"item": [],
+	"settings": [
+		{
+			"type": "text",
+			"name": "monthly_label",
+			"label": "Monthly toggle",
+			"default": "Monthly",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "yearly_label",
+			"label": "Yearly toggle",
+			"default": "Yearly",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "yearly_badge",
+			"label": "Yearly badge",
+			"default": "−18%",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "per_none_label",
+			"label": "Per none",
+			"default": "/always",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "per_month_label",
+			"label": "Per month",
+			"default": "/month",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "per_year_label",
+			"label": "Per year",
+			"default": "/year",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "save_prefix",
+			"label": "Save prefix",
+			"default": "Save",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "free_label",
+			"label": "Free label",
+			"default": "Free",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "cta_label",
+			"label": "CTA label",
+			"default": "Purchase now",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "cta_free_label",
+			"label": "Free CTA label",
+			"default": "Get started",
+			"translate": "1"
+		},
+		{
+			"type": "link",
+			"name": "cta_free_link",
+			"label": "Free CTA link",
+			"help": "Get started target (usually login / register page)"
+		},
+		{
+			"type": "text",
+			"name": "checkout_missing_message",
+			"label": "Missing provider message",
+			"default": "Select subscription checkout provider!",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "checkout_error_message",
+			"label": "Checkout error message",
+			"default": "Checkout could not start. Try again.",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_login_message",
+			"label": "Manage: login required",
+			"default": "Please log in to manage your subscription.",
+			"translate": "1"
+		},
+		{
+			"type": "link",
+			"name": "manage_page_link",
+			"label": "My subscription page",
+			"help": "Checkout success returns here. Also used as cancel fallback when set."
+		},
+		{
+			"type": "text",
+			"name": "manage_basic_label",
+			"label": "Basic plan name",
+			"default": "Basic",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_renews_prefix",
+			"label": "Renews prefix",
+			"default": "renews",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_ends_prefix",
+			"label": "Ends prefix",
+			"default": "ends",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_change_cta",
+			"label": "Change plan CTA",
+			"default": "Change plan",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_auto_extension_label",
+			"label": "Automatic extension label",
+			"default": "Automatic extension",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_on_label",
+			"label": "Auto extension On",
+			"default": "On",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_off_label",
+			"label": "Auto extension Off",
+			"default": "Off",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_updating_label",
+			"label": "Updating label",
+			"default": "Updating …",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_payment_heading",
+			"label": "Update payment method heading",
+			"default": "Update payment method",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_payment_cta",
+			"label": "Update payment method CTA",
+			"default": "Click here",
+			"translate": "1"
+		}
+	]
+}

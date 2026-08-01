@@ -1,0 +1,93 @@
+{
+	"name": "Subscription",
+	"version": "0.1",
+	"cms_menu": [
+		{
+			"id": "shop",
+			"name": "Shop",
+			"order": "50"
+		},
+		{
+			"id": "subscription_settings",
+			"name": "Subscription settings",
+			"parent": "shop",
+			"url": "admin/panel_settings/subscription__subscription/",
+			"access": "shop"
+		}
+	],
+	"panels": [
+		{
+			"id": "subscription",
+			"name": "Subscription settings",
+			"flags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "pricing",
+			"name": "Pricing"
+		},
+		{
+			"id": "manage",
+			"name": "My subscription"
+		},
+		{
+			"id": "checkout_start",
+			"name": "Subscription checkout start",
+			"flags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "user_login",
+			"name": "Login extend",
+			"flags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "user_register",
+			"name": "Register extend",
+			"flags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "user_auth_google",
+			"name": "Google auth extend",
+			"flags": [
+				"hidden"
+			]
+		}
+	],
+	"extends": [
+		{
+			"target": "shop/category",
+			"source": "//shop_category"
+		},
+		{
+			"target": "shop/product",
+			"source": "//shop_product"
+		},
+		{
+			"target": "shop/shop",
+			"source": "//shop_shop"
+		},
+		{
+			"target": "user/login",
+			"source": "//user_login"
+		},
+		{
+			"target": "user/register",
+			"source": "//user_register"
+		},
+		{
+			"target": "user/auth_google",
+			"source": "//user_auth_google"
+		},
+		{
+			"target": "user/user",
+			"source": "//user_user"
+		}
+	]
+}

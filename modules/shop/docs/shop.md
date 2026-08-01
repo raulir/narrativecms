@@ -102,7 +102,18 @@ Connectors advertise checkout without hard-coding module names:
 
 Boot aggregates into `$GLOBALS['config']['provides']['shop_checkout'][panel]`.
 
-**Shop settings** (`shop/shop` → field `shop_checkout`): dropdown built by custom input `shop/cms_input_provides`. Stores the **panel name** (e.g. `shopify/checkout`). Default empty.
+**Shop settings** (`shop/shop` → field `shop_checkout`): dropdown built by custom input `shop/cms_input_provides` (or `cms/cms_input_provides`). Stores the **panel name** (e.g. `shopify/checkout`). Default empty.
+
+**Subscription checkout** (parallel service, not cart):
+
+```json
+// stripe/config.json
+"provides": [
+  { "service": "subscription_checkout", "panel": "//subscription_checkout", "label": "Stripe subscription checkout" }
+]
+```
+
+Field **`subscription_checkout`** on shop settings is added by **subscription** module extend of `shop/shop`. Pricing **Purchase** calls that panel (`do=subscription_checkout`). See [`subscription/docs/subscription.md`](../../subscription/docs/subscription.md) and [`stripe/docs/stripe_checklist.md`](../../stripe/docs/stripe_checklist.md).
 
 | Setting | Cart checkout button |
 |---------|----------------------|
@@ -199,3 +210,5 @@ Timmy storefront PDP is **`//shop_product` extends** of `shop/product` (not a se
 
 - [CMS module extends](../../cms/docs/cms_module_extends.md)  
 - [CMS schema / panel tables](../../cms/docs/cms_schema.md)  
+- [Shop todo](todo.md)  
+- [Subscription / Stripe architecture notes](../../subscription/docs/stripe_vs_subscription_issues.md)  

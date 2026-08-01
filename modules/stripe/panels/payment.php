@@ -4,7 +4,12 @@ namespace stripe;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-require_once($GLOBALS['config']['base_path'] . 'vendor/stripe/init.php');
+$stripe_init = $GLOBALS['config']['base_path'].'vendor/stripe/stripe-php/init.php';
+if (is_file($stripe_init)){
+	require_once $stripe_init;
+} else if (is_file($GLOBALS['config']['base_path'].'vendor/autoload.php')){
+	require_once $GLOBALS['config']['base_path'].'vendor/autoload.php';
+}
 
 if (!function_exists(__NAMESPACE__.'\\get_user_ip')){
 

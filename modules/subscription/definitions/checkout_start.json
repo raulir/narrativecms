@@ -1,0 +1,7 @@
+{
+	"version": "2",
+	"label": "Subscription checkout start",
+	"description": "Domain handoff for paid pricing CTA — selects provider and starts checkout",
+	"item": [],
+	"settings": []
+}

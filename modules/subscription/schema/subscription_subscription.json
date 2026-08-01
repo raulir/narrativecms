@@ -1,0 +1,121 @@
+{
+	"table": "subscription_subscription",
+	"engine": "InnoDB",
+	"charset": "utf8mb4",
+	"collation": "utf8mb4_general_ci",
+	"columns": {
+		"subscription_subscription_id": {
+			"type": "INT",
+			"constraint": 10,
+			"unsigned": true,
+			"null": false,
+			"auto_increment": true
+		},
+		"user_id": {
+			"type": "INT",
+			"constraint": 10,
+			"unsigned": true,
+			"null": false
+		},
+		"status": {
+			"type": "VARCHAR",
+			"constraint": 64,
+			"null": false,
+			"default": ""
+		},
+		"active": {
+			"type": "TINYINT",
+			"constraint": 1,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
+		"billing_interval": {
+			"type": "VARCHAR",
+			"constraint": 16,
+			"null": false,
+			"default": ""
+		},
+		"ends": {
+			"type": "VARCHAR",
+			"constraint": 64,
+			"null": false,
+			"default": ""
+		},
+		"price_id": {
+			"type": "VARCHAR",
+			"constraint": 128,
+			"null": false,
+			"default": ""
+		},
+		"product_id": {
+			"type": "INT",
+			"constraint": 10,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
+		"plan": {
+			"type": "VARCHAR",
+			"constraint": 255,
+			"null": false,
+			"default": ""
+		},
+		"stripe_subscription_id": {
+			"type": "VARCHAR",
+			"constraint": 128,
+			"null": false,
+			"default": ""
+		},
+		"stripe_customer_id": {
+			"type": "VARCHAR",
+			"constraint": 128,
+			"null": false,
+			"default": ""
+		},
+		"currency_id": {
+			"type": "INT",
+			"constraint": 10,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
+		"cancel_at_period_end": {
+			"type": "TINYINT",
+			"constraint": 1,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
+		"archived": {
+			"type": "TINYINT",
+			"constraint": 1,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
+		"created": {
+			"type": "DATETIME",
+			"null": false
+		},
+		"updated": {
+			"type": "DATETIME",
+			"null": false
+		}
+	},
+	"indexes": {
+		"PRIMARY": {
+			"columns": ["subscription_subscription_id"],
+			"type": "primary"
+		},
+		"user_active_idx": {
+			"columns": ["user_id", "archived"]
+		},
+		"stripe_sub_idx": {
+			"columns": ["stripe_subscription_id"]
+		},
+		"stripe_cus_idx": {
+			"columns": ["stripe_customer_id"]
+		}
+	}
+}

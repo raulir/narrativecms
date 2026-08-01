@@ -38,6 +38,7 @@ $config['update']['master'] = [
 		'search',
 		'shop',
 		'shopify',
+		'subscription',
 		'stripe',
 		'user',
 		'video',

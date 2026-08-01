@@ -1,0 +1,365 @@
+// Generic subscription pricing (theme via site module extend SCSS)
+
+.pricing_container {
+	box-sizing: border-box;
+	padding: 3.0rem 0 4.0rem 0;
+	position: relative;
+}
+
+.pricing_content {
+	width: 100rem;
+	max-width: 100%;
+	margin: 0 auto;
+	box-sizing: border-box;
+	padding: 0 2.0rem;
+	text-align: center;
+	position: relative;
+}
+
+.pricing_error {
+	box-sizing: border-box;
+	padding: 2.0rem;
+	border: 0.12rem solid #aa0000;
+	color: #aa0000;
+	background-color: #fff8f8;
+	font-size: 1.6rem;
+	line-height: 2.2rem;
+	text-align: left;
+	max-width: 60rem;
+	margin: 0 auto;
+}
+
+.pricing_empty {
+	font-size: 1.5rem;
+	line-height: 2.0rem;
+	opacity: 0.7;
+	padding: 2.0rem 0;
+}
+
+.pricing_heading {
+	font-size: 2.4rem;
+	line-height: 3.0rem;
+	font-weight: bold;
+	padding: 0 0 2.5rem 0;
+}
+
+// Monthly / yearly filter buttons
+.pricing_toggle {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 0.6rem;
+	box-sizing: border-box;
+	margin: 0 0 2.0rem 0;
+	font-size: 0;
+	line-height: 0;
+}
+
+.pricing_toggle_option {
+	display: inline-block;
+	vertical-align: middle;
+	box-sizing: border-box;
+	padding: 0.35rem 0.8rem;
+	font-size: 1.2rem;
+	line-height: 1.3;
+	border-radius: 0.24rem;
+	border: 0.1rem solid #404040;
+	background-color: #ffffff;
+	color: #1c1a1f;
+	cursor: pointer;
+	user-select: none;
+}
+
+.pricing_toggle_active {
+	font-weight: bold;
+}
+
+.pricing_toggle_badge {
+	display: inline-block;
+	margin-left: 0.4rem;
+	padding: 0.05rem 0.4rem;
+	font-size: 1.0rem;
+	line-height: 1.3rem;
+	border-radius: 0.24rem;
+	border: 0.1rem solid #ffbf00;
+	background-color: transparent;
+	color: #000000;
+	font-weight: bold;
+	box-sizing: border-box;
+	// Stay black; do not follow parent button hover colour
+	pointer-events: none;
+	transition: none;
+}
+
+.pricing_toggle_option:hover .pricing_toggle_badge,
+.pricing_toggle_active .pricing_toggle_badge {
+	color: #000000;
+	box-shadow: none;
+	background-color: transparent;
+}
+
+// Two visible cards wide (free + one paid combo / month + year on manage)
+.pricing_plans {
+	width: 51.5rem;
+	max-width: 100%;
+	margin: 0 auto;
+	box-sizing: border-box;
+	text-align: left;
+}
+
+// Manage: same card grid; no interval toggle
+// Site theme supplies full settings-page band (min-height / padding)
+.pricing_manage {
+
+	.pricing_manage_message {
+		font-size: 1.6rem;
+		line-height: 2.2rem;
+		padding: 0 0 2.0rem 0;
+		max-width: 60rem;
+		margin: 0 auto;
+	}
+
+	.manage_status {
+		text-align: center;
+		padding: 0 0 4.0rem 0;
+		box-sizing: border-box;
+	}
+
+	.manage_status_plan {
+		font-size: 1.68rem;
+		line-height: 2.16rem;
+		font-weight: bold;
+		padding: 0 0 0.5rem 0;
+	}
+
+	.manage_status_period {
+		font-size: 1.4rem;
+		line-height: 1.6rem;
+		color: #000000;
+		min-height: 1.6rem;
+	}
+
+	// ~2.5rem below renews/ends: Automatic extension: [On] [Off]
+	.manage_auto_row {
+		padding: 2.5rem 0 0 0;
+		font-size: 0;
+		line-height: 0;
+		text-align: center;
+	}
+
+	.manage_auto_label {
+		display: inline-block;
+		vertical-align: middle;
+		font-size: 1.4rem;
+		line-height: 2.0rem;
+		padding: 0 0.6rem 0 0;
+		color: #000000;
+	}
+
+	.manage_auto_toggle {
+		display: inline-block;
+		vertical-align: middle;
+		font-size: 0;
+		line-height: 0;
+	}
+
+	.manage_auto_option {
+		display: inline-block;
+		vertical-align: middle;
+		box-sizing: border-box;
+		padding: 0.35rem 0.8rem;
+		font-size: 1.2rem;
+		line-height: 1.3;
+		border-radius: 0.24rem;
+		border: 0.1rem solid #404040;
+		background-color: #ffffff;
+		color: #1c1a1f;
+		cursor: pointer;
+		user-select: none;
+		margin-left: 0.35rem;
+	}
+
+	.manage_auto_option_active {
+		font-weight: bold;
+	}
+
+	.manage_auto_option.manage_auto_busy {
+		opacity: 0.55;
+		pointer-events: none;
+	}
+
+	.manage_action_area {
+		text-align: center;
+	}
+
+	.manage_action_title {
+		font-size: 1.68rem;
+		line-height: 2.16rem;
+		font-weight: bold;
+		padding: 0 0 1.5rem 0;
+	}
+
+	.manage_action_plans .pricing_cards {
+		justify-content: center;
+	}
+
+	// Login-style footer: Update payment method / Click here
+	.manage_payment_area {
+		padding: 3.5rem 0 0 0; // was 2.5rem + 1rem above the block
+		text-align: center;
+		box-sizing: border-box;
+	}
+
+	.manage_payment_heading {
+		font-size: 1.4rem;
+		line-height: 1.6rem;
+	}
+
+	.manage_payment_cta {
+		font-size: 1.3rem;
+		line-height: 1.6rem;
+		display: inline-block;
+		padding-top: 0.8rem;
+		cursor: pointer;
+		user-select: none;
+		border-bottom: 0.12rem solid #ffbf00;
+	}
+
+}
+
+.pricing_cards {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.5rem;
+	margin: 0;
+	box-sizing: border-box;
+}
+
+.pricing_card {
+	display: block;
+	box-sizing: border-box;
+	width: 25.0rem;
+	max-width: 100%;
+	margin: 0;
+	padding: 2.0rem 1.8rem 1.8rem 1.8rem;
+	border-radius: 1.0rem;
+	text-align: left;
+	font-size: 1.5rem;
+	line-height: 2.0rem;
+	border: 0.15rem solid #404040;
+	box-shadow: none;
+	background-color: #ffffff;
+	position: relative;
+	flex: 0 0 25.0rem;
+}
+
+// 2× default border width, yellow — no inset
+.pricing_card_featured {
+	border-width: 0.3rem;
+	border-color: #ffbf00;
+	box-shadow: none;
+}
+
+.pricing_card_hidden {
+	display: none !important;
+}
+
+.pricing_card_title {
+	font-size: 1.68rem;
+	line-height: 2.16rem;
+	font-weight: bold;
+	padding: 0 0 1.0rem 0;
+}
+
+.pricing_card_price_block {
+	padding: 0 0 1.4rem 0;
+	min-height: 5.0rem;
+}
+
+.pricing_card_price {
+	font-size: 2.4rem;
+	line-height: 2.8rem;
+	font-weight: bold;
+	color: #000000;
+}
+
+.pricing_card_period {
+	display: inline-block;
+	font-size: 1.4rem;
+	line-height: 1.8rem;
+	padding-left: 0.4rem;
+	opacity: 0.85;
+}
+
+.pricing_card_features {
+	padding: 0 0 1.6rem 0;
+	font-size: 1.4rem;
+	line-height: 1.6rem;
+
+	// Global normalise sets list-style:none — restore bullets
+	ul {
+		margin: 0;
+		padding: 0 0 0 1.8rem;
+		list-style: disc outside;
+	}
+
+	ol {
+		margin: 0;
+		padding: 0 0 0 1.8rem;
+		list-style: decimal outside;
+	}
+
+	li {
+		padding: 0.25rem 0;
+		list-style: inherit;
+		display: list-item;
+	}
+
+	p {
+		margin: 0 0 0.6rem 0;
+	}
+}
+
+.pricing_cta {
+	box-sizing: border-box;
+	display: block;
+	width: 100%;
+	text-align: center;
+	padding: 0.5rem 1.0rem;
+	font-size: 1.2rem;
+	line-height: 1.4;
+	border-radius: 0.24rem;
+	cursor: pointer;
+	user-select: none;
+	border: 0.1rem solid #404040;
+	background-color: #ffffff;
+	color: #1c1a1f;
+	transition: opacity 0.2s;
+}
+
+.pricing_cta:hover {
+	opacity: 0.9;
+}
+
+.pricing_cta_clicked {
+	opacity: 0.65;
+}
+
+// Placement for embedded shop/currency_selector under plans
+.pricing_currency_wrap {
+	display: block;
+	box-sizing: border-box;
+	width: 51.5rem;
+	max-width: 100%;
+	margin: 2.2rem auto 0 auto;
+	padding: 0;
+	text-align: right;
+	position: relative;
+	z-index: 10;
+
+	.currency_selector_container {
+		display: inline-block;
+		text-align: left;
+	}
+}

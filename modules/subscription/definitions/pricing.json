@@ -1,0 +1,41 @@
+{
+	"version": "2",
+	"label": "Pricing",
+	"description": "Subscription plans from a shop category (type subscription). Labels from Subscription settings.",
+	"image": "",
+	"js": [
+		"subscription/pricing"
+	],
+	"item": [
+		{
+			"type": "fk",
+			"name": "category_id",
+			"label": "Category",
+			"list": "shop/category",
+			"mandatory": "1",
+			"help": "Must be a shop category with Type = Subscription"
+		},
+		{
+			"type": "repeater",
+			"name": "currencies",
+			"label": "Currencies",
+			"help": "Display options on this panel (order = switcher order). Missing product price → base price × currency rate.",
+			"fields": [
+				{
+					"type": "fk",
+					"name": "currency_id",
+					"label": "Currency",
+					"list": "shop/currency",
+					"mandatory": "1"
+				}
+			]
+		},
+		{
+			"type": "text",
+			"name": "heading",
+			"label": "Heading",
+			"default": "Choose your plan",
+			"translate": "1"
+		}
+	]
+}

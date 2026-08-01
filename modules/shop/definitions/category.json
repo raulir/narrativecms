@@ -17,6 +17,18 @@
 			"search": "2"
 		},
 		{
+			"type": "select",
+			"name": "type",
+			"label": "Type",
+			"mandatory": "1",
+			"default": "",
+			"values": {
+				"": "—",
+				"stock": "Stock"
+			},
+			"help": "Product kind for this category. Other modules add options (e.g. Subscription) via panel extends."
+		},
+		{
 			"type": "textarea",
 			"name": "text",
 			"label": "Text",

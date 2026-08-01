@@ -55,6 +55,7 @@ class auth_google extends \Controller {
 		
 		$params['loggedin'] = $this->user_model->is_logged_in();
 		$params['success_url'] = $this->user_model->get_user_redirect_url();
+		// Checkout resume: subscription extends this panel (user_auth_google).
 		
 		if (!empty($params['error'])) {
 			$message_key = 'message_'.$params['error'];

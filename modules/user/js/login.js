@@ -21,6 +21,12 @@ function login_init(){
 				
 			} else {
 				
+				// Server may override (e.g. subscription intent vs already subscribed → /start/)
+				var url = (result.result && result.result.success_url) ? result.result.success_url : ''
+				if (url){
+					window.location.href = url
+					return
+				}
 				login_show_success()
 				
 			}

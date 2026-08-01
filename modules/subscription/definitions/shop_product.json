@@ -1,0 +1,50 @@
+{
+	"version": "2",
+	"label": "Subscription product fields",
+	"description": "Billing and presentation for subscription-type products",
+	"item": [
+		{
+			"type": "subtitle",
+			"label": "Subscription"
+		},
+		{
+			"type": "select",
+			"name": "billing_interval",
+			"label": "Billing interval",
+			"values": {
+				"none": "None (forever)",
+				"month": "Month",
+				"year": "Year"
+			},
+			"default": "none",
+			"help": "None = free or forever access (can purchase again). Month / year = recurring display intervals."
+		},
+		{
+			"type": "text",
+			"name": "period_months",
+			"label": "Period months",
+			"default": "0",
+			"help": "0 for none; 1 for month; 12 for year (hint for billing logic)"
+		},
+		{
+			"type": "select",
+			"name": "featured",
+			"label": "Featured",
+			"values": {
+				"0": "No",
+				"1": "Yes"
+			},
+			"default": "0",
+			"help": "Highlight this offer on the pricing card"
+		},
+		{
+			"type": "textarea",
+			"name": "features",
+			"label": "Features",
+			"lines": "8",
+			"html": "BLP",
+			"translate": "1",
+			"help": "HTML feature list (bold, list, paragraphs). Shown on the plan card."
+		}
+	]
+}

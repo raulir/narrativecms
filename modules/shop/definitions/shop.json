@@ -14,6 +14,14 @@
 			"help":"Panel that handles checkout handoff (from modules that provide shop_checkout).||Leave empty until configured — cart will show an error on the checkout button."
 		},
 		{
+			"type":"fk",
+			"name":"default_currency_id",
+			"label":"Default currency",
+			"list":"shop/currency",
+			"mandatory":"1",
+			"help":"Main shop currency. Product base price is in this currency. Other currencies use product overrides or rate × base."
+		},
+		{
 			"type":"text",
 			"name":"dimension_prefix",
 			"label":"Dimension prefix"

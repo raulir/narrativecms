@@ -130,6 +130,7 @@ class register extends \Controller {
 					
 					$params['success'] = 1;
 					$params['redirect_url'] = $this->user_model->get_user_redirect_url();
+					// Checkout resume: subscription extends panel_action (user_register).
 					
 				}
 				
@@ -208,6 +209,7 @@ class register extends \Controller {
 		$params['success_url'] = $this->user_model->get_user_redirect_url();
 		$params['progress_message'] = $this->user_model->get_progress_message();
 		$this->user_model->enqueue_progress_overlay();
+		// Checkout resume: subscription extends panel_params (user_register).
 		
 		return $params;
 	

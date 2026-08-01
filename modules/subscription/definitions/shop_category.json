@@ -1,0 +1,14 @@
+{
+	"version": "2",
+	"label": "Subscription category type",
+	"description": "Adds subscription option to shop/category type select",
+	"item": [
+		{
+			"type": "select",
+			"name": "type",
+			"values": {
+				"subscription": "Subscription"
+			}
+		}
+	]
+}

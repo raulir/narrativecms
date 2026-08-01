@@ -19,7 +19,8 @@
 			"type": "text",
 			"name": "heading",
 			"label": "Heading",
-			"search": "3"
+			"search": "3",
+			"translate": "1"
 		},
 		{
 			"type": "image",
@@ -38,12 +39,53 @@
 			"name": "text",
 			"label": "Text",
 			"lines": "8",
-			"search": "1"
+			"search": "1",
+			"translate": "1"
+		},
+		{
+			"type": "subtitle",
+			"label": "Prices"
+		},
+		{
+			"type": "text",
+			"name": "price",
+			"label": "Price",
+			"default": "0",
+			"help": "Amount in shop default currency"
+		},
+		{
+			"type": "repeater",
+			"name": "prices",
+			"label": "Currency prices",
+			"help": "Optional per-currency overrides (and Stripe Price ids). Missing currency → default price × currency rate.",
+			"fields": [
+				{
+					"type": "fk",
+					"name": "currency_id",
+					"label": "Currency",
+					"list": "shop/currency",
+					"mandatory": "1"
+				},
+				{
+					"type": "text",
+					"name": "price",
+					"label": "Price",
+					"mandatory": "1"
+				},
+				{
+					"type": "text",
+					"name": "stripe_price_id",
+					"label": "Stripe price ID",
+					"default": "",
+					"help": "Stripe Price id for this currency (checkout later)"
+				}
+			]
 		},
 		{
 			"type": "text",
 			"name": "min_price",
-			"label": "Min price"
+			"label": "Min price",
+			"help": "Legacy / variants — prefer Price + currency prices for new products"
 		},
 		{
 			"type": "text",

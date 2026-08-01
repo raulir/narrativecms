@@ -15,6 +15,53 @@
 				"0":"Use live payments"
 			},
 			"default":"1"
+		},
+		{
+			"name": "webhook_secret",
+			"type": "text",
+			"label": "Webhook signing secret",
+			"default": "",
+			"help": "whsec_… from Stripe Dashboard → Webhooks (see stripe/docs/stripe_checklist.md)"
+		},
+		{
+			"name": "success_link",
+			"type": "link",
+			"label": "Checkout success",
+			"help": "Where to send the user after successful Checkout. Empty → site home with ?subscription_checkout=success (or pricing resume)."
+		},
+		{
+			"name": "cancel_link",
+			"type": "link",
+			"label": "Checkout cancel",
+			"help": "Where to send the user if they cancel Checkout. Empty → resume pricing page or home with ?subscription_checkout=cancel."
+		},
+		{
+			"type": "subtitle",
+			"label": "Webhook notifications"
+		},
+		{
+			"type": "select",
+			"name": "notify_technical",
+			"label": "Technical email",
+			"values": {
+				"0": "Off",
+				"admin_email": "CMS technical admin email"
+			},
+			"default": "admin_email",
+			"help": "Uses Site settings → Technical admin email (admin_email) when set."
+		},
+		{
+			"type": "repeater",
+			"name": "notification_emails",
+			"label": "Extra notification emails",
+			"help": "Additional addresses for all Stripe webhook events we handle",
+			"fields": [
+				{
+					"type": "text",
+					"name": "email",
+					"label": "Email"
+				}
+			]
 		}
 	]
 }

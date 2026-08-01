@@ -1,0 +1,16 @@
+{
+	"version": "2",
+	"label": "Subscription shop settings",
+	"description": "Adds subscription checkout provider to shop settings",
+	"item": [],
+	"settings": [
+		{
+			"type": "cms/cms_input_provides",
+			"name": "subscription_checkout",
+			"label": "Subscription checkout provider",
+			"service": "subscription_checkout",
+			"default": "",
+			"help": "Handoff for pricing Purchase (e.g. Stripe). Leave empty until configured."
+		}
+	]
+}

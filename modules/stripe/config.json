@@ -1,20 +1,66 @@
 {
 	"panels":[
 		{
+			"id":"stripe",
+			"name":"Stripe settings"
+		},
+		{
+			"id":"payment",
+			"name":"Payment"
+		},
+		{
 			"id":"payment_hook_success",
 			"name":"Payment hook success"
 		},
 		{
 			"id":"payment_success",
 			"name":"Payment success"
+		},
+		{
+			"id":"subscription_checkout",
+			"name":"Stripe subscription checkout",
+			"flags":[
+				"hidden"
+			]
+		},
+		{
+			"id":"webhook",
+			"name":"Stripe webhook",
+			"flags":[
+				"hidden"
+			]
+		}
+	],
+	"provides":[
+		{
+			"service":"subscription_checkout",
+			"panel":"//subscription_checkout",
+			"label":"Stripe subscription checkout"
+		}
+	],
+	"api":[
+		{
+			"id":"webhook"
 		}
 	],
 	"cms_menu":[
+		{
+			"id":"shop",
+			"name":"Shop",
+			"order":200
+		},
 		{
 			"id":"stripe",
 			"name":"Stripe",
 			"parent":"shop",
 			"order":790
+		},
+		{
+			"id":"stripe_settings",
+			"name":"Stripe settings",
+			"parent":"stripe",
+			"url":"admin/panel_settings/stripe__stripe/",
+			"order":5
 		},
 		{
 			"id":"payment_settings",

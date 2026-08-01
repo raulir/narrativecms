@@ -1,0 +1,42 @@
+{
+	"version": "2",
+	"label": "My subscription",
+	"description": "Logged-in subscription manage / purchase. Labels from Subscription settings.",
+	"image": "",
+	"js": [
+		"subscription/pricing",
+		"subscription/manage"
+	],
+	"item": [
+		{
+			"type": "fk",
+			"name": "category_id",
+			"label": "Category",
+			"list": "shop/category",
+			"mandatory": "1",
+			"help": "Must be a shop category with Type = Subscription (same catalogue as pricing)"
+		},
+		{
+			"type": "repeater",
+			"name": "currencies",
+			"label": "Currencies",
+			"help": "Display options (order = switcher order).",
+			"fields": [
+				{
+					"type": "fk",
+					"name": "currency_id",
+					"label": "Currency",
+					"list": "shop/currency",
+					"mandatory": "1"
+				}
+			]
+		},
+		{
+			"type": "text",
+			"name": "heading",
+			"label": "Heading",
+			"default": "My subscription",
+			"translate": "1"
+		}
+	]
+}
