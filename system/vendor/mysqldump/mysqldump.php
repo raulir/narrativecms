@@ -48,15 +48,15 @@
                     $content .= "\n(";
                     for($j=0; $j<$fields_amount; $j++)  
                     { 
-                        $row[$j] = str_replace("\n","\\n", addslashes($row[$j]) ); 
-                        if (isset($row[$j]))
+                        // PHP 8.1+: addslashes() rejects null; dump real SQL NULL
+                        if ($row[$j] === null)
                         {
-                            $content .= '"'.$row[$j].'"' ; 
+                            $content .= 'NULL';
                         }
-                        else 
-                        {   
-                            $content .= '""';
-                        }     
+                        else
+                        {
+                            $content .= '"'.str_replace("\n","\\n", addslashes((string)$row[$j])).'"';
+                        }
                         if ($j<($fields_amount-1))
                         {
                                 $content.= ',';

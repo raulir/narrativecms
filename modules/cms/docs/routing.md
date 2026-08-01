@@ -37,7 +37,7 @@ After bad data (e.g. numeric product slugs), rebuild all public routes from curr
 
 | | |
 |--|--|
-| UI | Admin **Data dumps** page → **Rebuild routes** (`cms/cms_rebuild_routes`, ajax `panel_action`) |
+| UI | Admin **Data and backup** page → **Rebuild routes** (`cms/cms_rebuild_routes`, ajax `panel_action`) |
 | Method | `cms_slug_model::rebuild_all_routes()` |
 | Backup | Zipped SQL under **`cache/db/cms_route_YYYYMMDD_HHMMSS.zip`** (never a `*_bu` table — see agents.md DB backup rule) |
 | Effect | Then `TRUNCATE cms_route`, reinsert from main pages + all `link_target` list items (title/heading → slugify; repeated words dropped) |

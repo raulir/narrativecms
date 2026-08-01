@@ -31,12 +31,15 @@
     border: 0.1rem solid #a0a0a0;
     padding: 1.4rem;
     width: 58.0rem;
-    height: 440.5rem;
+    height: 44.0rem;
+    max-height: 90vh;
     box-shadow: 0.2rem 0.4rem 1.0rem rgba(0,0,0,0.75);
     background-color: white;
 	transition: opacity 0.3s;
 	position: relative;
 	display: inline-block;
+	text-align: left;
+	overflow: hidden;
 }
 
 .cms_popup_toolbar {

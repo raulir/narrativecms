@@ -190,7 +190,7 @@ Delete confirmation uses total usage (self + children for parents, self only for
 
 ## Purge unused images (admin/dump)
 
-On **Data dumps** (`admin/dump/`), a control **Images older than months** can soft-move unused library images to `cache/tmp/img/` (same recoverability pattern as Shopify image purge).
+On **Data and backup** (`admin/dump/`), a control **Images older than months** can soft-move unused library images to `cache/tmp/img/` (same recoverability pattern as Shopify image purge).
 
 | Control | Meaning |
 |---------|---------|

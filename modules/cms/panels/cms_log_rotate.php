@@ -123,7 +123,8 @@ class cms_log_rotate extends \Controller {
 		if ($has_errors){
 			$text .= 'Count - Last seen - Error'."\n";
 			foreach($errors as $error) {
-				$text .= sprintf('%7s', $error['count']).' - '.$error['times'][(count($error['times']) - 1)].' - '.$error['message'];
+				$msg = $this->_enrich_error_message_with_page_titles($error['message']);
+				$text .= sprintf('%7s', $error['count']).' - '.$error['times'][(count($error['times']) - 1)].' - '.$msg;
 			}
 		} else {
 			$text .= "(No new PHP errors since last report.)\n";
@@ -177,6 +178,87 @@ class cms_log_rotate extends \Controller {
 						: 'Empty PHP errors report emailed (daily OK)',
 		];
 	
+	}
+
+	/**
+	 * Append page titles for [cms_page_id=N] tags in log lines (e.g. missing layout).
+	 * Request-cached; safe if DB/page model unavailable.
+	 */
+	function _enrich_error_message_with_page_titles($message){
+
+		$message = (string)$message;
+		if ($message === '' || strpos($message, 'cms_page_id=') === false){
+			return $message;
+		}
+
+		if (!preg_match_all('/\[cms_page_id=(\d+)\]/', $message, $matches) || empty($matches[1])){
+			return $message;
+		}
+
+		static $title_cache = [];
+
+		try {
+			$this->load->model('cms/cms_page_model');
+		} catch (\Throwable $e){
+			return $message;
+		}
+
+		$suffixes = [];
+		foreach (array_unique($matches[1]) as $id_str){
+
+			$id = (int)$id_str;
+			if ($id < 1){
+				continue;
+			}
+
+			if (!array_key_exists($id, $title_cache)){
+				$title_cache[$id] = $this->_lookup_page_title_for_log($id);
+			}
+
+			$title = $title_cache[$id];
+			if ($title === null || $title === ''){
+				$suffixes[] = 'cms_page_id='.$id.' → [page not found]';
+			} else {
+				// Single-line safe
+				$title = str_replace(["\r", "\n"], ' ', $title);
+				$suffixes[] = 'cms_page_id='.$id.' → "'.$title.'"';
+			}
+
+		}
+
+		if ($suffixes === []){
+			return $message;
+		}
+
+		// Keep original line; append resolved titles once
+		return rtrim($message)." | ".implode('; ', $suffixes)."\n";
+
+	}
+
+	function _lookup_page_title_for_log($cms_page_id){
+
+		$cms_page_id = (int)$cms_page_id;
+		if ($cms_page_id < 1){
+			return null;
+		}
+
+		$page = $this->cms_page_model->get_page($cms_page_id, false);
+		if (empty($page) || !is_array($page) || empty($page['cms_page_id'])){
+			return null;
+		}
+
+		if (!empty($page['title'])){
+			return trim((string)$page['title']);
+		}
+		if (!empty($page['seo_title'])){
+			return trim((string)$page['seo_title']);
+		}
+		if (!empty($page['slug'])){
+			return '(slug: '.trim((string)$page['slug']).')';
+		}
+
+		return '(untitled page #'.$cms_page_id.')';
+
 	}
 
 }

@@ -18,12 +18,15 @@ class cms_search_model extends \Model {
 		$this->load->model('cms/cms_module_model');
 		
 		// all = admin-style (every field, looser page filters). all_fields = frontend: every field but still show=1.
+		// Exclude name='' (JSON param cache blob) — matching it is huge, slow, and not useful.
 		if (!empty($params['all'])){
-			$sql = "select * from cms_page_panel_param where value like ? ";
+			$sql = "select * from cms_page_panel_param where name != '' and value like ? ";
 		} else if (!empty($params['all_fields'])){
-			$sql = "select a.*, b.show from cms_page_panel_param a join cms_page_panel b on a.cms_page_panel_id = b.cms_page_panel_id where b.show = 1 and a.value like ? ";
+			$sql = "select a.*, b.show from cms_page_panel_param a join cms_page_panel b on a.cms_page_panel_id = b.cms_page_panel_id "
+					."where b.show = 1 and a.name != '' and a.value like ? ";
 		} else {
-			$sql = "select a.*, b.show from cms_page_panel_param a join cms_page_panel b on a.cms_page_panel_id = b.cms_page_panel_id where b.show = 1 and a.search > 0 and a.value like ? ";
+			$sql = "select a.*, b.show from cms_page_panel_param a join cms_page_panel b on a.cms_page_panel_id = b.cms_page_panel_id "
+					."where b.show = 1 and a.search > 0 and a.value like ? ";
 		}
 		
 		$query = $this->db->query($sql, array('%'.$term.'%', ));
@@ -85,37 +88,45 @@ class cms_search_model extends \Model {
 
 		$page_scores = array();
 		foreach($block_scores_page as $block_id => $block_score){
-			
-			// if child panel page, then not present in this array
-			if (empty($cms_page_panels[$block_id])){
+
+			// Parent may only exist via child score rollup — load by this block id (not leftover loop var)
+			if (empty($cms_page_panels[$block_id]) || !is_array($cms_page_panels[$block_id])
+					|| !array_key_exists('cms_page_id', $cms_page_panels[$block_id])){
 				$sql = "select * from cms_page_panel where cms_page_panel_id = ? ";
-				$query = $this->db->query($sql, array($cms_page_panel_id, ));
-				$cms_page_panels[$block_id] = $query->row_array();
+				$query = $this->db->query($sql, [(int)$block_id]);
+				$row = $query->num_rows() ? $query->row_array() : null;
+				if (empty($row) || !is_array($row)){
+					continue;
+				}
+				$cms_page_panels[$block_id] = $row;
 			}
-		
-			$page_id = !in_array($cms_page_panels[$block_id]['cms_page_id'], [0, 999999]) ? $cms_page_panels[$block_id]['cms_page_id'] : $cms_page_panels[$block_id]['panel_name'].'='.$cms_page_panels[$block_id]['cms_page_panel_id'];
-			
+
+			$panel = $cms_page_panels[$block_id];
+			$page_id = !in_array($panel['cms_page_id'], [0, 999999])
+					? $panel['cms_page_id']
+					: $panel['panel_name'].'='.$panel['cms_page_panel_id'];
+
 			// settings block is not page and should be excluded?
-			if (stristr($page_id, '=') && !in_array($cms_page_panels[$block_id]['panel_name'], $lists)){
+			if (stristr((string)$page_id, '=') && !in_array($panel['panel_name'], $lists)){
 				continue;
 			}
-			
+
 			// if do not show list main pages
-			if (empty($params['all']) && $cms_page_panels[$block_id]['cms_page_id'] != 0 && in_array($cms_page_panels[$block_id]['panel_name'], $lists)){
+			if (empty($params['all']) && $panel['cms_page_id'] != 0 && in_array($panel['panel_name'], $lists)){
 				continue;
 			}
-			
+
 			// don't show pages without slug
 			if (empty($params['all']) && empty($this->cms_slug_model->get_cms_slug_by_target($page_id))){
 				continue;
 			}
-			
+
 			if (empty($page_scores[$page_id])){
 				$page_scores[$page_id] = $block_score;
 			} else {
 				$page_scores[$page_id] += $block_score;
 			}
-			
+
 		}
 		
 		asort($block_scores);

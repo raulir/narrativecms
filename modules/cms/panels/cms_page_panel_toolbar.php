@@ -309,6 +309,17 @@ class cms_page_panel_toolbar extends \Controller {
 		
 		}
 		
+		// Data purge (orphaned fields / dead translation languages) — penultimate before Translation
+		if (!empty($cms_page_panel['cms_page_panel_id'])){
+			$params['buttons'][] = [
+					'name' => 'cms/cms_page_panel_button_data_purge',
+					'position' => 'hidden',
+					'cms_page_panel_id' => (int)$cms_page_panel['cms_page_panel_id'],
+					'panel_name' => $cms_page_panel['panel_name'] ?? ($params['panel_name'] ?? ''),
+			];
+			$params['hidden_section'] = 1;
+		}
+
 		// Translation under gear submenu (text label; only if multi-language + translatable fields)
 		if (!empty($cms_page_panel['cms_page_panel_id'])
 				&& !empty($GLOBALS['language']['languages'])

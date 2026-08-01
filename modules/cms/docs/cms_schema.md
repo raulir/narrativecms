@@ -43,6 +43,8 @@ Diagnostic panel standard for this project:
 ## JS notes
 
 - One click handler for `.cms_schema_fix` using `data-key`
+- After **fix** (module or row): HTML is replaced with a **fresh full schema check** (all modules on the main page). Green “all match” only when `has_errors` is false globally — not when only the fixed module is clean.
+- Status toasts use **`cms_notification`** (top edge): success or remaining-module message from the server; errors use the error style.
 
 ## Model integration
 

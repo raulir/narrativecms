@@ -298,6 +298,33 @@ class cms_schema_model extends \Model {
 	
 	// ====================== PANEL TABLE SCHEMAS ======================
 
+	/**
+	 * Schema-owned tables grouped by owning module (JSON schemas + definition panel tables).
+	 *
+	 * @return array<string, string[]> module => list of table names (sorted)
+	 */
+	function get_schema_tables_by_module() {
+
+		list($merged, $owner) = $this->_build_merged_schemas();
+		$by_module = [];
+
+		foreach ($merged as $table => $_def) {
+			$module = $owner[$table] ?? 'unknown';
+			if (!isset($by_module[$module])) {
+				$by_module[$module] = [];
+			}
+			$by_module[$module][] = $table;
+		}
+
+		foreach ($by_module as $module => $tables) {
+			sort($by_module[$module], SORT_STRING);
+		}
+		ksort($by_module, SORT_STRING);
+
+		return $by_module;
+
+	}
+
 	function get_panel_table_modules() {
 		list(, $owner) = $this->_build_panel_table_schemas();
 		return array_values(array_unique($owner));

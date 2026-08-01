@@ -1,0 +1,47 @@
+{
+	"table": "cms_page",
+	"engine": "InnoDB",
+	"charset": "utf8mb4",
+	"collation": "utf8mb4_general_ci",
+	"columns": {
+		"cms_page_id": {
+			"type": "INT",
+			"constraint": 11,
+			"unsigned": true,
+			"null": false,
+			"auto_increment": true
+		},
+		"position": {
+			"type": "VARCHAR",
+			"constraint": 20,
+			"null": false,
+			"charset": "ascii",
+			"collation": "ascii_bin"
+		},
+		"sort": {
+			"type": "INT",
+			"constraint": 11,
+			"unsigned": true,
+			"null": false
+		},
+		"slug": {
+			"type": "VARCHAR",
+			"constraint": 100,
+			"null": false
+		},
+		"meta": {
+			"type": "MEDIUMTEXT",
+			"null": false
+		}
+	},
+	"indexes": {
+		"PRIMARY": {
+			"columns": ["cms_page_id"],
+			"type": "primary"
+		},
+		"slug_idx": {
+			"columns": ["slug"],
+			"length": 4
+		}
+	}
+}

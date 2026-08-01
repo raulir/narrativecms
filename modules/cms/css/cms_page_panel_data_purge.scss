@@ -1,0 +1,134 @@
+// Fill popup under toolbar; list scrolls; Purge stays pinned at bottom
+
+.cms_popup_data_purge .cms_popup_content {
+	overflow: hidden;
+	text-align: left;
+}
+
+.cms_page_panel_data_purge_container {
+	position: absolute;
+	left: 1.4rem;
+	right: 1.4rem;
+	top: 5.5rem;
+	bottom: 1.4rem;
+	box-sizing: border-box;
+}
+
+// Scrollable orphan list (above footer)
+.cms_page_panel_data_purge_content {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 4.5rem; // footer height band
+	box-sizing: border-box;
+	padding: 0.5rem 0.5rem 1.0rem 0.5rem;
+	overflow-x: hidden;
+	overflow-y: auto;
+	font-size: 1.4rem;
+	line-height: 2.2rem;
+	text-align: left;
+}
+
+// When empty state: use full height (no footer)
+.cms_page_panel_data_purge_container:not(:has(.cms_page_panel_data_purge_footer)) .cms_page_panel_data_purge_content {
+	bottom: 0;
+}
+
+.cms_page_panel_data_purge_empty {
+	font-size: 1.6rem;
+	line-height: 2.4rem;
+	padding: 1.0rem 0;
+	text-align: left;
+}
+
+.cms_page_panel_data_purge_section {
+	margin: 0 0 1.8rem 0;
+	text-align: left;
+}
+
+.cms_page_panel_data_purge_section_title {
+	font-size: 1.6rem;
+	line-height: 2.4rem;
+	font-weight: bold;
+	margin: 0 0 0.8rem 0;
+	text-align: left;
+}
+
+// Export-like row: [check] label
+.cms_page_panel_data_purge_row {
+	display: block;
+	box-sizing: border-box;
+	margin: 0 0 0.6rem 0;
+	min-height: 2.4rem;
+	text-align: left;
+	cursor: pointer;
+	user-select: none;
+	font-size: 0;
+	line-height: 0;
+}
+
+.cms_page_panel_data_purge_col_check {
+	display: inline-block;
+	vertical-align: top;
+	width: 3.0rem;
+	text-align: center;
+	position: relative;
+	font-size: 1.4rem;
+	line-height: 2.2rem;
+}
+
+.cms_page_panel_data_purge_fake_check {
+	font-family: monospace;
+	font-size: 1.4rem;
+	line-height: 2.2rem;
+	cursor: pointer;
+	user-select: none;
+}
+
+.cms_page_panel_data_purge_opt_hidden {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+	width: 0;
+	height: 0;
+}
+
+.cms_page_panel_data_purge_col_label {
+	display: inline-block;
+	vertical-align: top;
+	width: calc(100% - 3.5rem);
+	box-sizing: border-box;
+	font-size: 1.4rem;
+	line-height: 2.2rem;
+	text-align: left;
+	word-break: break-word;
+}
+
+.cms_page_panel_data_purge_key {
+	font-family: monospace;
+	font-weight: bold;
+}
+
+.cms_page_panel_data_purge_val {
+	color: #444444;
+}
+
+// Always visible action bar
+.cms_page_panel_data_purge_footer {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 4.0rem;
+	box-sizing: border-box;
+	padding: 0.6rem 0.5rem 0 0.5rem;
+	border-top: 0.1rem solid #cccccc;
+	background-color: #ffffff;
+	text-align: left;
+}
+
+.cms_page_panel_data_purge_run {
+	display: inline-block;
+	cursor: pointer;
+}

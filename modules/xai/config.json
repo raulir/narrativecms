@@ -8,6 +8,11 @@
 	],
 	"cms_menu": [
 		{
+			"id": "cms_tools",
+			"name": "Tools",
+			"order": 40
+		},
+		{
 			"id": "xai",
 			"name": "xAI",
 			"parent": "cms_tools",

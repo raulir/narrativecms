@@ -166,41 +166,59 @@ class cms_schema extends \Controller {
 		$success = $this->cms_schema_model->fix_schema($key);
 		$sql_errors = $this->cms_schema_model->get_fix_errors();
 
+		$key_module = '';
+		if (!empty($key)){
+			$parts = explode(':', $key);
+			$key_module = trim((string)($parts[0] ?? ''));
+		}
+
 		if (!empty($sql_errors)) {
 			$_SESSION['cms_schema_latest_errors'] = $sql_errors;
 		} elseif ($success) {
 			unset($_SESSION['cms_schema_latest_errors']);
 		} else {
-			$parts = explode(':', $key);
 			$_SESSION['cms_schema_latest_errors'] = [[
-				'module' => $parts[0] ?? '',
+				'module' => $key_module,
 				'key' => $key,
 				'message' => 'Fix failed or no changes were needed',
 				'sql' => '',
 			]];
 		}
 
-		if ($filter_module === '' && !empty($key)){
-			$parts = explode(':', $key);
-			$filter_module = $parts[0] ?? '';
+		// Fragment embeds (updater): stay scoped to that module.
+		// Full schema page: always re-check ALL modules so "all OK" is not a false green.
+		if ($fragment){
+			if ($filter_module === '' && $key_module !== ''){
+				$filter_module = $key_module;
+			}
+		} else {
+			$filter_module = '';
 		}
 
-		if ($success) {
-			return [
-				'success' => true,
-				'fragment' => $fragment ? 1 : 0,
-				'schema_module' => $filter_module,
-				'filter_module' => $filter_module,
-			];
-		}
-
-		$message = 'Fix failed or no changes were needed';
-		if (!empty($sql_errors)) {
-			$message = $sql_errors[0]['message'];
+		// Message for cms_notification (top edge) — based on full re-check when not fragment
+		$message = '';
+		if ($success){
+			$recheck = $this->cms_schema_model->get_schema_errors_with_status(null);
+			$still_errors = !empty($recheck['has_errors']);
+			if ($still_errors){
+				$modules_left = is_array($recheck['grouped'] ?? null) ? array_keys($recheck['grouped']) : [];
+				$label = $key_module !== '' ? $key_module : 'Schema';
+				$message = $label.' fix applied. Other modules still have schema differences';
+				if ($modules_left !== []){
+					$message .= ' ('.implode(', ', $modules_left).')';
+				}
+			} else {
+				$message = 'All database tables match the schema definition files';
+			}
+		} else {
+			$message = 'Fix failed or no changes were needed';
+			if (!empty($sql_errors[0]['message'])){
+				$message = $sql_errors[0]['message'];
+			}
 		}
 
 		return [
-			'success' => false,
+			'success' => $success ? 1 : 0,
 			'message' => $message,
 			'fragment' => $fragment ? 1 : 0,
 			'schema_module' => $filter_module,

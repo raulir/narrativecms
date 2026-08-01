@@ -78,8 +78,11 @@ function cms_schema_init($root) {
 					var $new = cms_schema_replace_container(ctx.$container, res._html)
 					cms_schema_init($new.parent())
 				}
-				if (res.success) {
-					cms_notification('Schema fixed successfully', 4, 'success')
+				// Top-edge popup — never claim global OK without server message
+				var ok = res.success == 1 || res.success === true
+				var msg = res.message || (ok ? 'Schema fix applied' : 'Schema fix failed')
+				if (typeof cms_notification === 'function'){
+					cms_notification(msg, ok ? 4 : 6, ok ? 'success' : 'error')
 				}
 			})
 		})
@@ -110,9 +113,11 @@ function cms_schema_init($root) {
 					var $new = cms_schema_replace_container(ctx.$container, res._html)
 					cms_schema_init($new.parent())
 				}
-				if (res.success == 1 || res.success === true) {
-					cms_notification(res.message || 'Structure dump ready', 4, 'success')
-				} else {
+				var ok = res.success == 1 || res.success === true
+				if (typeof cms_notification === 'function'){
+					cms_notification(res.message || (ok ? 'Structure dump ready' : 'Structure dump failed'), ok ? 4 : 5, ok ? 'success' : 'error')
+				}
+				if (!ok){
 					$this.removeClass('cms_disabled').text(label)
 				}
 			})
@@ -158,8 +163,8 @@ function cms_schema_init($root) {
 					var $new = cms_schema_replace_container(ctx.$container, res._html)
 					cms_schema_init($new.parent())
 				}
-				if (ok) {
-					cms_notification(res.message || 'Panel tables synchronised', 5, 'success')
+				if (typeof cms_notification === 'function'){
+					cms_notification(res.message || (ok ? 'Panel tables synchronised' : 'Panel table sync failed'), ok ? 5 : 6, ok ? 'success' : 'error')
 				}
 			})
 		})

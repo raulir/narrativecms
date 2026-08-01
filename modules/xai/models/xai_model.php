@@ -97,10 +97,20 @@ class xai_model extends \Model {
 			return ['ok' => 0, 'error' => 'xAI request failed (no response'.($status ? ', HTTP '.$status : '').')'];
 		}
 
-		$decoded = json_decode((string)$response, true);
+		// API is UTF-8 JSON; sanitize before decode so a rare bad byte does not fail the whole call
+		$response = function_exists('cms_utf8_string') ? cms_utf8_string((string)$response) : (string)$response;
+		$decode_flags = 0;
+		if (defined('JSON_INVALID_UTF8_SUBSTITUTE')){
+			$decode_flags |= JSON_INVALID_UTF8_SUBSTITUTE;
+		}
+		$decoded = $decode_flags
+				? json_decode($response, true, 512, $decode_flags)
+				: json_decode($response, true);
 		if (!is_array($decoded)){
 			return ['ok' => 0, 'error' => 'Invalid JSON from xAI (HTTP '.$status.')'];
 		}
+		// Keep tree as real UTF-8 (no HTML entities)
+		$decoded = function_exists('cms_utf8_tree') ? cms_utf8_tree($decoded) : $decoded;
 
 		if ($status > 0 && ($status < 200 || $status >= 300)){
 			$msg = $decoded['error']['message'] ?? ($decoded['error'] ?? ('HTTP '.$status));
@@ -122,6 +132,9 @@ class xai_model extends \Model {
 		$content = $decoded['choices'][0]['message']['content'] ?? '';
 		if (!is_string($content)){
 			$content = '';
+		}
+		if (function_exists('cms_utf8_string')){
+			$content = cms_utf8_string($content);
 		}
 
 		return [

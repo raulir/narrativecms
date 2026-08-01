@@ -178,7 +178,12 @@ class ai extends \Controller {
 			if ($key === '' || empty($allowed_keys[$key])){
 				continue;
 			}
-			$suggestions[$key] = is_scalar($row['suggestion'] ?? '') ? (string)$row['suggestion'] : '';
+			$text = is_scalar($row['suggestion'] ?? '') ? (string)$row['suggestion'] : '';
+			// Real UTF-8 for CMS storage/UI — never HTML entities
+			if (function_exists('cms_utf8_string')){
+				$text = cms_utf8_string($text);
+			}
+			$suggestions[$key] = $text;
 		}
 
 		return [

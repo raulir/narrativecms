@@ -61,6 +61,37 @@ class cms_menu extends \Controller {
 	}
 
 	/**
+	 * Merge two cms_menu item definitions by id. Later non-empty fields win;
+	 * empty/null on the incoming side does not wipe an existing value.
+	 */
+	function _menu_merge_item($existing, $incoming){
+
+		if (!is_array($existing) || $existing === []){
+			return is_array($incoming) ? $incoming : [];
+		}
+		if (!is_array($incoming) || $incoming === []){
+			return $existing;
+		}
+
+		foreach($incoming as $key => $value){
+			if ($key === 'id'){
+				continue;
+			}
+			if ($value === null || $value === ''){
+				continue;
+			}
+			$existing[$key] = $value;
+		}
+
+		if (!empty($incoming['id'])){
+			$existing['id'] = $incoming['id'];
+		}
+
+		return $existing;
+
+	}
+
+	/**
 	 * Whether item has a keyboard ctrl shortcut assigned (top-level keyboard nav).
 	 */
 	function _menu_has_ctrl($item){
@@ -166,9 +197,32 @@ class cms_menu extends \Controller {
 			if (empty($flat[$id])){
 				$flat[$id] = $item;
 			} else {
-				$flat[$id] = array_merge($flat[$id], $item);
+				// Same id from another module — merge (redefine parent top-level safely)
+				$flat[$id] = $this->_menu_merge_item($flat[$id], $item);
 			}
 
+		}
+
+		// If a child references a missing parent, ensure a structural parent exists
+		// (modules should also redefine top-level parents for name/order/ctrl merge)
+		$ensure_parents = true;
+		while ($ensure_parents){
+			$ensure_parents = false;
+			foreach($flat as $id => $item){
+				if (!$this->_menu_parent_active($item['parent'] ?? null)){
+					continue;
+				}
+				$parent = $item['parent'];
+				if (!empty($flat[$parent])){
+					continue;
+				}
+				$flat[$parent] = [
+						'id' => $parent,
+						'name' => $parent,
+						'order' => 9000,
+				];
+				$ensure_parents = true;
+			}
 		}
 
 		$default_order = 9000;

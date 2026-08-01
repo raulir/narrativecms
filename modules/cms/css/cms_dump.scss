@@ -1,40 +1,294 @@
-.cms_dump_item_heading {
-	display: inline-block;
-	width: 30.0rem;
-	vertical-align: top;
-	line-height: 2.4rem;
+.cms_dump_content {
+	padding-bottom: 2.0rem;
 }
 
-.cms_dump_item_filemtime {
-	display: inline-block;
-	width: 20.0rem;
-	vertical-align: top;
-	line-height: 2.4rem;
+.cms_dump_section {
+	margin: 0 1.0rem 2.0rem;
+	border: 0.1rem solid $cms_border;
+	border-radius: 0.4rem;
+	background: #fff;
 }
 
-.cms_dump_item_size {
-	display: inline-block;
-	width: 10.0rem;
-	vertical-align: top;
-	line-height: 2.4rem;
+.cms_dump_section_header {
+	position: relative;
+	padding: 1.0rem 1.2rem;
+	border-bottom: 0.1rem solid $cms_border;
+	min-height: 3.0rem;
 }
 
-.cms_dump_item_generate {
+.cms_dump_section_title {
 	display: inline-block;
-	width: 10.0rem;
-	vertical-align: top;
-	line-height: 2.4rem;
+	font-size: 1.8rem;
+	line-height: 3.0rem;
+	font-weight: 700;
+	vertical-align: middle;
 }
 
-.cms_dump_item_download {
+.cms_dump_section_actions {
+	position: absolute;
+	right: 1.2rem;
+	top: 1.0rem;
+	text-align: right;
+	font-size: 0;
+}
+
+.cms_dump_section_actions .cms_tool_button {
+	margin-left: 0.8rem;
+	vertical-align: middle;
+}
+
+.cms_dump_section_body {
+	padding: 1.2rem;
+}
+
+.cms_dump_options {
+	padding: 1.2rem;
+	border-top: 0.1rem solid $cms_border;
+}
+
+.cms_dump_options_columns {
+	font-size: 0;
+}
+
+.cms_dump_col {
 	display: inline-block;
-	width: 10.0rem;
 	vertical-align: top;
-	line-height: 2.4rem;
+	width: 48%;
+	box-sizing: border-box;
+	font-size: 1.4rem;
+	line-height: 2.0rem;
+}
+
+.cms_dump_col_tables {
+	padding-right: 2%;
+}
+
+.cms_dump_col_resources {
+	padding-left: 2%;
+	border-left: 0.1rem solid $cms_border;
+}
+
+.cms_dump_col_title {
+	font-size: 1.5rem;
+	font-weight: 700;
+	padding-bottom: 0.8rem;
+	margin-bottom: 0.6rem;
+	border-bottom: 0.1rem solid $cms_border;
+}
+
+.cms_dump_module_block {
+	margin-bottom: 1.2rem;
+}
+
+.cms_dump_module_title {
+	font-weight: 700;
+	font-size: 1.35rem;
+	padding: 0.4rem 0;
+	color: #333;
+}
+
+.cms_dump_year_row .cms_dump_year_label {
+	font-family: inherit;
+	font-weight: 700;
+	font-size: 1.35rem;
+}
+
+.cms_dump_month_row {
+	padding-left: 0.4rem;
+}
+
+.cms_dump_check_row,
+.cms_dump_resize_row {
+	position: relative;
+	padding: 0.1rem 0;
+	min-height: 1.76rem;
+	line-height: 1.76rem;
+	white-space: nowrap;
+	font-size: 0;
+}
+
+.cms_dump_col_check {
+	display: inline-block;
+	width: 2.8rem;
+	vertical-align: middle;
+	text-align: left;
+	position: relative;
+	font-size: 1.3rem;
+	line-height: 1.76rem;
+}
+
+.cms_dump_check_label {
+	display: inline-block;
+	vertical-align: middle;
+	max-width: calc(100% - 3.0rem);
+	cursor: pointer;
+	font-family: monospace;
+	font-size: 1.3rem;
+	line-height: 1.76rem;
+	white-space: nowrap;
+}
+
+.cms_dump_fake_check {
+	display: inline-block;
+	font-family: monospace;
+	font-size: 1.3rem;
+	line-height: 1.76rem;
+	cursor: pointer;
+	user-select: none;
+	vertical-align: middle;
+}
+
+.cms_dump_opt_hidden {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+	width: 0;
+	height: 0;
+}
+
+.cms_dump_resize_row {
+	margin-top: 1.4rem;
+	padding-top: 1.0rem;
+	border-top: 0.1rem solid $cms_border;
+}
+
+.cms_dump_resize_row .cms_dump_check_label {
+	font-family: inherit;
+	width: auto;
+	max-width: none;
+	padding-right: 0.6rem;
+}
+
+.cms_dump_resize_px {
+	display: inline-block;
+	vertical-align: middle;
+	width: 5.0rem;
+	height: 1.76rem;
+	box-sizing: border-box;
+	font-size: 1.3rem;
+	line-height: 1.6rem;
+	padding: 0 0.3rem;
+	margin: 0 0.3rem 0 0;
+	border: 0.1rem solid #cccccc;
+	font-family: inherit;
+}
+
+.cms_dump_resize_px_unit {
+	display: inline-block;
+	vertical-align: middle;
+	font-size: 1.3rem;
+	line-height: 1.76rem;
+	color: #666;
+}
+
+.cms_dump_empty {
+	color: #666;
+	font-size: 1.4rem;
+	padding: 0.4rem 0 1.2rem;
+}
+
+.cms_dump_backup_list {
+	margin-bottom: 1.6rem;
+}
+
+.cms_dump_backup_row {
+	font-size: 0;
+	padding: 0.6rem 0;
+	border-bottom: 0.1rem solid $cms_border;
+}
+
+.cms_dump_backup_row_head {
+	font-weight: 700;
+	border-bottom: 0.1rem solid #999;
+}
+
+.cms_dump_backup_name,
+.cms_dump_backup_created,
+.cms_dump_backup_size,
+.cms_dump_backup_meta,
+.cms_dump_backup_actions {
+	display: inline-block;
+	vertical-align: top;
+	font-size: 1.3rem;
+	line-height: 1.8rem;
+	box-sizing: border-box;
+	padding-right: 0.6rem;
+	word-break: break-word;
+}
+
+.cms_dump_backup_name {
+	width: 20%;
+	font-family: monospace;
+	font-size: 1.15rem;
+}
+
+.cms_dump_backup_created {
+	width: 12%;
+}
+
+.cms_dump_backup_size {
+	width: 8%;
+}
+
+.cms_dump_backup_meta {
+	width: 30%;
+	color: #555;
+}
+
+.cms_dump_backup_actions {
+	width: 30%;
+	text-align: right;
+	font-size: 0;
+	padding-right: 0;
+}
+
+.cms_dump_row_form {
+	display: inline-block;
+	vertical-align: middle;
+	margin: 0 0 0 0.4rem;
+}
+
+.cms_dump_backup_actions .cms_small_button {
+	vertical-align: middle;
+}
+
+.cms_dump_restore_actions {
+	white-space: nowrap;
+}
+
+.cms_dump_upload_form {
+	display: inline-block;
+	vertical-align: middle;
+	font-size: 0;
+	margin-right: 0.4rem;
+}
+
+.cms_dump_upload_label {
+	display: inline-block;
+	vertical-align: middle;
+	font-size: 1.3rem;
+	line-height: 3.0rem;
+	margin-right: 0.5rem;
+	color: #555;
+}
+
+.cms_dump_upload_file {
+	display: inline-block;
+	vertical-align: middle;
+	max-width: 18rem;
+	font-size: 1.2rem;
+	line-height: 3.0rem;
+	margin-right: 0.5rem;
+}
+
+.cms_dump_upload_form .cms_tool_button,
+.cms_dump_restore_actions .cms_tool_button {
+	vertical-align: middle;
 }
 
 .cms_rebuild_routes {
-	margin-top: 1.0rem;
+	margin-top: 0.4rem;
+	margin-bottom: 1.6rem;
 }
 
 .cms_rebuild_routes_controls {
