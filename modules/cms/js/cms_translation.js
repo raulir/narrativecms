@@ -213,15 +213,33 @@ function cms_translation_ai($container){
 
 }
 
-function cms_translation_use_suggestion($row){
+function cms_translation_set_edit_value($row, text){
 
-	var $sug = $row.find('.cms_translation_ai_suggestion').first()
-	var text = $sug.text()
+	// Do not copy empty source — accidental click would wipe the edit field
+	// Use native String#trim — $.trim is not available in current jQuery
+	text = String(text || '').trim()
+	if (text === ''){
+		return
+	}
 	var $input = $row.find('.cms_translate_string_input').first()
 	if (!$input.length){
 		return
 	}
 	$input.val(text).trigger('change')
+
+}
+
+function cms_translation_use_suggestion($row){
+
+	var $sug = $row.find('.cms_translation_ai_suggestion').first()
+	cms_translation_set_edit_value($row, $sug.text())
+
+}
+
+function cms_translation_use_default($row){
+
+	var $def = $row.find('.cms_translation_default_text').first()
+	cms_translation_set_edit_value($row, $def.text())
 
 }
 
@@ -249,10 +267,22 @@ function cms_translation_init($root){
 			cms_translation_use_suggestion($(this).closest('.cms_translation_row'))
 		})
 
+		$container.on('click.cms', '.cms_translation_default_use', function(){
+			cms_translation_use_default($(this).closest('.cms_translation_row'))
+		})
+
 		$container.on('click.cms', '.cms_translation_ai_suggestion', function(){
 			var $row = $(this).closest('.cms_translation_row')
-			if ($row.find('.cms_translation_ai_use').length){
+			// Only when there is a non-empty suggestion (← button shown only then)
+			if ($row.find('.cms_translation_ai_use:visible').length){
 				cms_translation_use_suggestion($row)
+			}
+		})
+
+		$container.on('click.cms', '.cms_translation_default_text', function(){
+			var $row = $(this).closest('.cms_translation_row')
+			if ($row.find('.cms_translation_default_use:visible').length){
+				cms_translation_use_default($row)
 			}
 		})
 

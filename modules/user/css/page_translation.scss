@@ -1,0 +1,359 @@
+// Self-contained FE translation popup + grid (no full cms.scss)
+// CMS "source" font faces (same files as admin cms.scss)
+
+@font-face {
+	font-family: source;
+	src: url('../../cms/css/source/source_light.ttf') format('truetype');
+	font-weight: 200;
+	font-style: normal;
+	font-display: fallback;
+}
+
+@font-face {
+	font-family: source;
+	src: url('../../cms/css/source/source.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+	font-display: fallback;
+}
+
+@font-face {
+	font-family: source;
+	src: url('../../cms/css/source/source_bold.ttf') format('truetype');
+	font-weight: bold;
+	font-style: normal;
+	font-display: fallback;
+}
+
+.page_translation_overlay {
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 10000;
+	opacity: 0;
+	transition: opacity 0.2s;
+	box-sizing: border-box;
+}
+
+.page_translation_overlay_open {
+	opacity: 1;
+}
+
+.page_translation_dialog {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 1100px;
+	max-width: 95vw;
+	height: 95vh;
+	max-height: 95vh;
+	box-sizing: border-box;
+	background: #ffffff;
+	border: 0.1rem solid #a0a0a0;
+	box-shadow: 0.2rem 0.4rem 1.0rem rgba(0, 0, 0, 0.75);
+	padding: 1.0rem 1.4rem 1.4rem 1.4rem;
+	overflow: hidden;
+	// CMS admin typeface
+	font-family: source, Helvetica, Verdana, sans-serif;
+	font-size: 1.4rem;
+	color: #202020;
+	text-align: left;
+}
+
+.page_translation_dialog_inner {
+	position: absolute;
+	left: 1.4rem;
+	right: 1.4rem;
+	top: 1.0rem;
+	bottom: 1.4rem;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+.page_translation_container {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	overflow: hidden;
+	box-sizing: border-box;
+	font-family: source, Helvetica, Verdana, sans-serif;
+}
+
+// Toolbar
+.page_translation_toolbar {
+	position: relative;
+	box-sizing: border-box;
+	border-bottom: 0.1rem solid #a0a0a0;
+	padding: 0 0 1.0rem 0;
+	min-height: 3.0rem;
+	z-index: 5;
+}
+
+.page_translation_breadcrumb {
+	padding-right: 18.0rem;
+	min-height: 3.0rem;
+	line-height: 3.0rem;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.page_translation_bc_item {
+	display: inline-block;
+	vertical-align: top;
+	font-size: 1.6rem;
+	line-height: 3.0rem;
+	color: #202020;
+	text-decoration: none;
+	max-width: 20.0rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.page_translation_bc_disabled {
+	pointer-events: none;
+	cursor: default;
+	opacity: 0.85;
+}
+
+.page_translation_bc_gt {
+	display: inline-block;
+	vertical-align: top;
+	font-size: 1.4rem;
+	line-height: 3.0rem;
+	color: #606060;
+}
+
+.page_translation_toolbar_actions {
+	position: absolute;
+	right: 0;
+	top: 0;
+	white-space: nowrap;
+}
+
+.page_translation_btn {
+	display: inline-block;
+	vertical-align: top;
+	box-sizing: border-box;
+	height: 3.0rem;
+	line-height: 2.8rem;
+	min-width: 5.0rem;
+	margin-left: 0.6rem;
+	padding: 0 1.0rem;
+	font-family: source, Helvetica, Verdana, sans-serif;
+	font-size: 1.5rem;
+	border: 0.1rem solid #a0a0a0;
+	border-radius: 0.4rem;
+	background: #f8f8f8;
+	color: #404040;
+	cursor: pointer;
+	text-align: center;
+}
+
+.page_translation_btn:hover {
+	background: #efefef;
+}
+
+.page_translation_btn_disabled {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+.page_translation_save {
+	background: #e8f5e8;
+	border-color: #80a080;
+}
+
+.page_translation_note {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	padding: 0.3rem 1.0rem;
+	font-size: 1.3rem;
+	line-height: 1.8rem;
+	color: #206020;
+	background: rgba(255, 255, 255, 0.95);
+	border: 0.1rem solid #a0c0a0;
+	border-radius: 0.3rem;
+	white-space: nowrap;
+	z-index: 6;
+	pointer-events: none;
+}
+
+.page_translation_note_error {
+	color: #a02020;
+	border-color: #c0a0a0;
+}
+
+.page_translation_message {
+	padding: 2.0rem 0;
+	font-size: 1.4rem;
+	line-height: 2.0rem;
+	color: #404040;
+}
+
+// Scrollable grid: header + body in one flow so row height follows textarea
+.page_translation_content {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 4.6rem; // below toolbar
+	bottom: 0;
+	overflow-x: hidden;
+	overflow-y: auto;
+	box-sizing: border-box;
+}
+
+.page_translation_grid_header,
+.page_translation_row {
+	position: relative;
+	box-sizing: border-box;
+	// Grow with tallest cell (textarea) — do not clip mid-field
+	min-height: 4.0rem;
+	padding: 0.6rem 0;
+	border-bottom: 0.1rem solid #e8e8e8;
+	display: table;
+	table-layout: fixed;
+	width: 100%;
+}
+
+.page_translation_grid_header {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	background: #ffffff;
+	border-bottom: 0.12rem solid #a0a0a0;
+	font-weight: bold;
+	font-size: 1.3rem;
+	line-height: 2.2rem;
+	min-height: 2.8rem;
+	padding: 0.4rem 0;
+	color: #404040;
+}
+
+.page_translation_grid_body {
+	// In normal flow under sticky header (scrolls with content)
+	position: relative;
+	box-sizing: border-box;
+}
+
+.page_translation_row:last-child {
+	border-bottom: 0;
+}
+
+.page_translation_col {
+	display: table-cell;
+	vertical-align: top;
+	box-sizing: border-box;
+	padding: 0 0.5rem;
+	width: 14%;
+	// Let cell grow with textarea height
+	height: 100%;
+}
+
+.page_translation_col_label {
+	width: 12%;
+	padding-left: 0;
+}
+
+.page_translation_col_default,
+.page_translation_col_base,
+.page_translation_col_edit,
+.page_translation_col_ai {
+	width: 18%;
+}
+
+.page_translation_col_copy {
+	width: 4%;
+	padding: 0;
+	text-align: center;
+}
+
+.page_translation_label {
+	font-weight: bold;
+	font-size: 1.2rem;
+	line-height: 1.7rem;
+	word-break: break-word;
+}
+
+.page_translation_readonly {
+	font-size: 1.2rem;
+	line-height: 1.7rem;
+	color: #606060;
+	white-space: pre-wrap;
+	word-break: break-word;
+	min-height: 1.7rem;
+}
+
+.page_translation_default_text {
+	cursor: pointer;
+}
+
+.page_translation_input,
+.page_translation_textarea {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	font-size: 1.2rem;
+	line-height: 1.7rem;
+	font-family: source, Helvetica, Verdana, sans-serif;
+	border: 0.1rem solid #c0c0c0;
+	border-radius: 0.2rem;
+	padding: 0.4rem 0.5rem;
+	resize: vertical;
+	// Avoid browser default short height fighting min-height
+	height: auto;
+}
+
+// ~2 lines of 1.7rem + padding
+.page_translation_textarea {
+	min-height: 4.2rem;
+}
+
+// Definition textarea fields (rows=5)
+.page_translation_textarea[rows="5"] {
+	min-height: 10.0rem;
+}
+
+.page_translation_copy_btn {
+	display: inline-block;
+	box-sizing: border-box;
+	width: 2.2rem;
+	height: 2.2rem;
+	line-height: 2.0rem;
+	text-align: center;
+	border: 0.1rem solid #a0a0a0;
+	border-radius: 0.3rem;
+	background: #f4f4f4;
+	color: #404040;
+	cursor: pointer;
+	font-size: 1.3rem;
+	margin-top: 0.1rem;
+}
+
+.page_translation_copy_btn:hover {
+	background: #e8e8e8;
+}
+
+.page_translation_ai_suggestion {
+	font-size: 1.2rem;
+	line-height: 1.7rem;
+	color: #2060a0;
+	white-space: pre-wrap;
+	word-break: break-word;
+	min-height: 1.7rem;
+	cursor: pointer;
+}
+
+.page_translation_busy .page_translation_input,
+.page_translation_busy .page_translation_textarea {
+	opacity: 0.7;
+}

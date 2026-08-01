@@ -58,6 +58,7 @@ modules/music/
 | Asset | Supported | Handler |
 |-------|-----------|---------|
 | Definition `item` / `settings` | Yes | [`cms_panel_model::merge_structures()`](../../models/cms_panel_model.php) when loading `target` |
+| Definition **`list`** (e.g. `link_target`) | Yes | Same — extension `list` keys overlay the base list (e.g. set `link_target` to `"0"` to drop public slug / Pages → Lists shells) |
 | Settings **values** | Yes | [`get_cms_page_panel_settings()`](../../models/cms_page_panel_model.php) merges saved settings from each extend **source** into the target |
 | SCSS | Yes | [`controller::get_panel_filenames()`](../../../system/core/controller.php) |
 | JS | Yes | Same — appended after target panel JS; [`pack_js()`](../../../system/helpers/packer_helper.php) concatenates in order |

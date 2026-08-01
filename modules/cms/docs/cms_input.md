@@ -37,6 +37,19 @@ Cost is intentional: only panels that need this integrity should set the flag. C
 | `translate` | `"1"` — value is stored per language when multilingual CMS is enabled. |
 | `groups` | String or array — only inside a `repeater`; show this field when the active repeater tab matches (used with a sibling `groups` input). |
 
+### `multi` / `modules` — sticky chips
+
+| Property | Description |
+|----------|-------------|
+| `values` | Map of selectable keys → labels. |
+| `sticky` | Same map shape as `values`. Keys always appear first, cannot be removed or reordered (no drag, no ×). Still submitted in the field value. Labels fall back to `values` if omitted. |
+
+Example (Site settings modules — also hard-coded as default on `cms/cms_input_modules`):
+
+```json
+"sticky": { "cms": "cms" }
+```
+
 ## Default values
 
 | Pattern | Use |

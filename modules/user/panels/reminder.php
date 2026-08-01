@@ -129,7 +129,7 @@ class reminder extends \Controller {
 						(!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').
 						'Password reminder from '.$title,
 						$link,
-						['auto_submitted' => 1]
+						['auto_submitted' => 1, 'send_now' => 1]
 				);
 
 			}

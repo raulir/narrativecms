@@ -741,7 +741,71 @@ class cms_update_model extends \Model {
 	}
 
 	/**
+	 * Flatten cms_settings modules to unique slugs (order preserved).
+	 * cms is sticky first when present or when $keep_cms is true.
+	 */
+	function _normalise_settings_modules_list($modules, $keep_cms = true){
+
+		if (!is_array($modules)){
+			$modules = [];
+		}
+
+		$out = [];
+		$seen = [];
+		foreach ($modules as $m){
+			if (is_array($m)){
+				// Defensive: multi field sometimes nested
+				$m = $m['value'] ?? $m['name'] ?? reset($m);
+			}
+			$m = trim((string)$m);
+			if ($m === ''){
+				continue;
+			}
+			if (isset($seen[$m])){
+				continue;
+			}
+			$seen[$m] = 1;
+			$out[] = $m;
+		}
+
+		// Sticky cms always first in stored list (UI sticky + boot unshift stay consistent)
+		$out = array_values(array_filter($out, function($m){
+			return $m !== 'cms';
+		}));
+		if ($keep_cms){
+			array_unshift($out, 'cms');
+		}
+
+		return $out;
+
+	}
+
+	/**
+	 * Replace modules list on cms/cms_settings: delete old modules.* rows then write
+	 * (non-purge updates leave orphan numeric indices → duplicate chips in UI).
+	 */
+	function _write_settings_modules($settings_id, $modules){
+
+		$settings_id = (int)$settings_id;
+		$modules = $this->_normalise_settings_modules_list($modules);
+
+		// Remove scalar + indexed param rows for this field
+		$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? "
+				."and (name = 'modules' or name like 'modules.%') ";
+		$this->db->query($sql, [$settings_id]);
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->cms_page_panel_model->update_cms_page_panel($settings_id, [
+				'modules' => $modules,
+		]);
+
+		return $modules;
+
+	}
+
+	/**
 	 * Enable module in cms/cms_settings modules list as penultimate (before last site module).
+	 * cms is never stored — boot always prepends it.
 	 */
 	function enable_module_penultimate($name){
 
@@ -765,14 +829,11 @@ class cms_update_model extends \Model {
 
 		$settings_id = (int)$panels[0]['cms_page_panel_id'];
 		$settings = $this->cms_page_panel_model->get_cms_page_panel($settings_id);
-		$modules = $settings['modules'] ?? [];
-		if (!is_array($modules)){
-			$modules = [];
-		}
+		$modules = $this->_normalise_settings_modules_list($settings['modules'] ?? []);
 
-		// Drop cms (always prepended on boot) and any existing name
+		// Remove module if already present (re-insert as penultimate)
 		$modules = array_values(array_filter($modules, function($m) use ($name){
-			return $m !== 'cms' && $m !== $name;
+			return $m !== $name;
 		}));
 
 		if (count($modules) === 0){
@@ -780,14 +841,13 @@ class cms_update_model extends \Model {
 		} else if (count($modules) === 1){
 			$modules[] = $name;
 		} else {
+			// Insert before last (= site module, e.g. music) so extends load after libs
 			$last = array_pop($modules);
 			$modules[] = $name;
 			$modules[] = $last;
 		}
 
-		$this->cms_page_panel_model->update_cms_page_panel($settings_id, [
-				'modules' => $modules,
-		]);
+		$modules = $this->_write_settings_modules($settings_id, $modules);
 
 		return ['modules' => $modules];
 
@@ -818,18 +878,13 @@ class cms_update_model extends \Model {
 
 		$settings_id = (int)$panels[0]['cms_page_panel_id'];
 		$settings = $this->cms_page_panel_model->get_cms_page_panel($settings_id);
-		$modules = $settings['modules'] ?? [];
-		if (!is_array($modules)){
-			$modules = [];
-		}
+		$modules = $this->_normalise_settings_modules_list($settings['modules'] ?? []);
 
 		$modules = array_values(array_filter($modules, function($m) use ($name){
 			return $m !== $name;
 		}));
 
-		$this->cms_page_panel_model->update_cms_page_panel($settings_id, [
-				'modules' => $modules,
-		]);
+		$modules = $this->_write_settings_modules($settings_id, $modules);
 
 		return ['modules' => $modules];
 

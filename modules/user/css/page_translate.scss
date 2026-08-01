@@ -1,0 +1,129 @@
+// Footer Translate control — hover dropup (same pattern as basic/language pseudo-select).
+// Button chrome (.music_button_dark) is applied by music footer/hfooter CSS.
+
+.page_translate_container {
+	display: none;
+}
+
+.page_translate_button {
+	// Layout only; visual chrome from .cms_debug .page_translate_button (music footer)
+	position: relative;
+	box-sizing: border-box;
+	overflow: visible;
+	z-index: 50;
+}
+
+.page_translate_button_label {
+	box-sizing: border-box;
+	display: block;
+	height: 100%;
+	line-height: 2.3rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	// Chevron (points up — list opens upward)
+	&::after,
+	&::before {
+		content: '';
+		display: block;
+		width: 0.5rem;
+		height: 0.14rem;
+		background-color: currentColor;
+		position: absolute;
+		right: 0.7rem;
+		top: 50%;
+		transform: translate(0, -50%) rotate(45deg);
+	}
+
+	&::before {
+		transform: translate(0, -50%) rotate(-45deg);
+		right: 1.0rem;
+	}
+}
+
+// Closed by default — no transition / animation (instant like native select)
+.page_translate_list {
+	position: absolute;
+	left: -0.15rem;
+	right: -0.15rem;
+	bottom: 100%;
+	top: auto;
+	box-sizing: border-box;
+	// Match dark chrome surface
+	background-color: #1a1a1a;
+	border: 0.15rem solid #ffffff;
+	border-radius: 0.5rem;
+	padding: 0.4rem 0 0.3rem 0;
+	opacity: 0;
+	height: 0;
+	// Always hidden overflow — grow to content when open (no scrollbar)
+	overflow: hidden;
+	pointer-events: none;
+	z-index: 60;
+	text-align: left;
+
+	// Hover bridge so pointer stays on control while moving into list (upward)
+	&::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: -0.4rem;
+		height: 0.4rem;
+	}
+}
+
+// Simple hover open — height follows items, no max-height / scroll track
+.page_translate_button:hover .page_translate_list {
+	height: auto;
+	opacity: 1;
+	overflow: hidden;
+	pointer-events: auto;
+}
+
+// After pick — force closed until mouse leaves and re-enters (like language_dropdown_closed)
+.page_translate_button.page_translate_closed .page_translate_list {
+	opacity: 0;
+	height: 0;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.page_translate_option {
+	display: block;
+	box-sizing: border-box;
+	padding: 0.25rem 1.0rem;
+	font-size: 1.2rem;
+	line-height: 1.6rem;
+	color: #b8e0c0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	cursor: pointer;
+
+	&:hover {
+		color: #e8e0a0;
+	}
+}
+
+.page_translate_option_settings {
+	color: #90c0d0;
+}
+
+.page_translate_option_material {
+	color: #d0c090;
+}
+
+.page_translate_option_product {
+	color: #c0a0d0;
+}
+
+.page_translate_empty {
+	color: #808080;
+	cursor: default;
+
+	&:hover {
+		color: #808080;
+	}
+}

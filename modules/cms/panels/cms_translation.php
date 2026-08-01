@@ -4,6 +4,10 @@ namespace cms;
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Admin panel translation grid. Requires CMS admin session.
+ * Frontend translators use user/page_translation instead.
+ */
 class cms_translation extends \Controller {
 
 	function __construct(){

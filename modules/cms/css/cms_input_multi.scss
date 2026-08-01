@@ -48,7 +48,20 @@
 	    right: 0;
 	    top: 0.2rem;
 	}
-	
+
+}
+
+// Sticky items (e.g. cms module): fixed, no drag handle, no remove
+.cms_input_multi_item_sticky {
+	padding: 0 1.0rem 0 1.0rem;
+	cursor: default;
+	background-image: none !important;
+	background-color: #f0f0f0;
+	opacity: 0.95;
+
+	&::after {
+		display: none;
+	}
 }
 
 .cms_input_multi_bottom {

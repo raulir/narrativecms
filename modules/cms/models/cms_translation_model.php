@@ -107,8 +107,11 @@ class cms_translation_model extends \Model {
 
 	/**
 	 * Batch AI suggestions for translation grid (does not save).
+	 *
+	 * @param array|null $ui_values Optional map field_name => current UI edit value
+	 *        (unsaved). Used so emptied fields in the editor are treated as missing.
 	 */
-	function suggest_translations($cms_page_panel_id, $cms_language = ''){
+	function suggest_translations($cms_page_panel_id, $cms_language = '', $ui_values = null){
 
 		$cms_page_panel_id = (int)$cms_page_panel_id;
 		$this->load->model('cms/cms_page_panel_model');
@@ -138,11 +141,20 @@ class cms_translation_model extends \Model {
 
 		$ui = $this->get_ai_ui_options();
 		$only_missing = !empty($ui['only_missing']);
+		if (!is_array($ui_values)){
+			$ui_values = null;
+		}
 
 		$items = [];
 		foreach ($grid['rows'] as $row){
 			if (!empty($row['readonly'])){
 				continue;
+			}
+			// Unsaved editor state wins for "missing" detection (emptied fields)
+			if ($ui_values !== null && array_key_exists($row['field_name'], $ui_values)){
+				$row['selected_value'] = is_scalar($ui_values[$row['field_name']])
+						? (string)$ui_values[$row['field_name']]
+						: '';
 			}
 			// Prefer base language text; if empty, use definition default (as the site would fall back)
 			$source = $this->_source_text_for_ai($row);
@@ -224,7 +236,11 @@ class cms_translation_model extends \Model {
 		$clean = [];
 		foreach ($suggestions as $key => $text){
 			if (!empty($allowed[$key])){
-				$clean[$key] = is_scalar($text) ? (string)$text : '';
+				$text = is_scalar($text) ? (string)$text : '';
+				if (function_exists('cms_utf8_string')){
+					$text = cms_utf8_string($text);
+				}
+				$clean[$key] = $text;
 			}
 		}
 

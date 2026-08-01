@@ -36,7 +36,8 @@
 			"name":"welcome_email_subject",
 			"label":"Subject",
 			"default":"Welcome",
-			"help":"Plain text. Use {{name}} for the user's name. Non-live environments get [ENV] prefixed automatically."
+			"help":"Plain text. Use {{name}} for the user's name. Non-live environments get [ENV] prefixed automatically.",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
@@ -44,14 +45,16 @@
 			"label":"Body",
 			"lines":"8",
 			"default":"Hello {{name}},\n\nWelcome. Your account has been created successfully. You can sign in any time with the email address you registered with.",
-			"help":"Plain text. Use {{name}} for the user's name (first name, else username, else email)."
+			"help":"Plain text. Use {{name}} for the user's name (first name, else username, else email).",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"progress_message",
 			"label":"Progress message",
 			"default":"One moment...",
-			"help":"Shown on full-page overlay during slow sign-in/register (after ~1 second). Leave empty for default."
+			"help":"Shown on full-page overlay during slow sign-in/register (after ~1 second). Leave empty for default.",
+			"translate":"1"
 		},
 		{
 			"type":"subtitle",

@@ -319,6 +319,14 @@ class cms_panel_model extends \Model {
 				$structure_into['extra_buttons'][] = $btn;
 			}
 		}
+
+		// Overlay list meta (e.g. link_target: "0" to disable public slugs for catalogue lists)
+		if (!empty($structure_from['list']) && is_array($structure_from['list'])){
+			if (empty($structure_into['list']) || !is_array($structure_into['list'])){
+				$structure_into['list'] = [];
+			}
+			$structure_into['list'] = array_merge($structure_into['list'], $structure_from['list']);
+		}
 		
 		return $structure_into;
 		

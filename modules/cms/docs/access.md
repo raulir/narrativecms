@@ -130,6 +130,23 @@ When a panel has required `access`, the panel cache filename includes `get_cache
 
 ---
 
+## Frontend translation (`cms_translate`) — user module
+
+Requires the **user** module. Users who translate site copy **without full CMS admin** get the frontend access key **`cms_translate`**.
+
+| Surface | Behaviour |
+|---------|-----------|
+| Footer **[Translate]** | `user/page_translate` mount in site footers (`.cms_debug` strip). Visible when user has `cms_translate` **or** is logged in as **CMS admin** (`cms_user`). Guests: no control, no extra CSS/JS. |
+| Panel list | Ajax `do=page_translate_list` — page panels + type settings (+ music engine/exercise settings when unit/engine is active). Lazy on first open. |
+| Translation popup | **`user/page_translation`** — separate FE UI (own CSS/JS/template). Visitor language, **Cancel**, breadcrumb links only if `cms_user`. Save/AI via cms translation **models** only. |
+| Admin `/admin/translation/{id}` | **`cms/cms_translation`** — admin-only (`cms_user`). Not used on the public site. |
+
+Grant the key on the user Access repeater (`user/user`), not on CMS admin roles.
+
+**CSS:** FE panels load only `user/css/page_translate.scss` + `user/css/page_translation.scss` — not `cms.scss` / admin input chrome.
+
+---
+
 ## Examples
 
 **Hard gate (default login)** — e.g. exercise engine:
@@ -150,6 +167,8 @@ Guest with user module → soft redirect to login.
 Guest still sees the rest of the page; that panel slot is only the skip comment.
 
 **Site without user module** — any denied panel always skips; never login redirect.
+
+**Frontend translator only** — Access key `cms_translate` on the user; no CMS admin login required.
 
 ---
 

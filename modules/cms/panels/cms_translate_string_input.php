@@ -11,6 +11,11 @@ class cms_translate_string_input extends \Controller {
 		$params['field_type'] = $params['field_type'] ?? 'text';
 		$params['value'] = $params['value'] ?? '';
 		$params['language_id'] = $params['language_id'] ?? '';
+		$rows = (int)($params['rows'] ?? 0);
+		if ($rows < 1){
+			$rows = 2;
+		}
+		$params['rows'] = $rows;
 
 		return $params;
 

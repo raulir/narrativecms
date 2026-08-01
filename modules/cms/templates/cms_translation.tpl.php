@@ -71,6 +71,9 @@
 			<div class="cms_grid_field cms_grid_field_left cms_translation_col_default">
 				<div class="cms_grid_field_inner">Default</div>
 			</div>
+			<div class="cms_grid_field cms_grid_field_left cms_translation_col_copy">
+				<div class="cms_grid_field_inner"></div>
+			</div>
 			<div class="cms_grid_field cms_grid_field_left cms_translation_col_base">
 				<div class="cms_grid_field_inner"><?= htmlspecialchars($default_language ?? 'base', ENT_QUOTES) ?> (base)</div>
 			</div>
@@ -88,6 +91,10 @@
 		<div class="cms_translation_grid_body">
 
 			<?php foreach ($rows as $row): ?>
+				<?php
+					$default_text = (string)($row['definition_default'] ?? '');
+					$default_copy_visible = (empty($row['readonly']) && trim($default_text) !== '');
+				?>
 				<div class="cms_translation_row cms_grid_row"
 						data-field_name="<?= htmlspecialchars($row['field_name'], ENT_QUOTES) ?>"
 						data-field_type="<?= htmlspecialchars($row['field_type'], ENT_QUOTES) ?>">
@@ -98,7 +105,16 @@
 					</div>
 					<div class="cms_grid_field cms_grid_field_left cms_translation_col_default">
 						<div class="cms_grid_field_inner">
-							<div class="cms_translation_readonly"><?= htmlspecialchars($row['definition_default'] ?? '', ENT_QUOTES) ?></div>
+							<div class="cms_translation_readonly cms_translation_default_text"><?= htmlspecialchars($default_text, ENT_QUOTES) ?></div>
+						</div>
+					</div>
+					<div class="cms_grid_field cms_grid_field_left cms_translation_col_copy">
+						<div class="cms_grid_field_inner cms_translation_copy_cell">
+							<?php if (empty($row['readonly'])): ?>
+								<div class="cms_translation_copy_btn cms_translation_default_use"
+										title="Copy default into edit"
+										<?php if (!$default_copy_visible): ?>style="display:none;"<?php endif ?>>→</div>
+							<?php endif ?>
 						</div>
 					</div>
 					<div class="cms_grid_field cms_grid_field_left cms_translation_col_base">
@@ -111,10 +127,20 @@
 							<?php if (!empty($row['readonly'])): ?>
 								<div class="cms_translation_readonly"><?= htmlspecialchars($row['selected_value'] ?? '', ENT_QUOTES) ?></div>
 							<?php else: ?>
+								<?php
+									// Grid uses textareas for all free text; keep colour control for colour fields
+									$orig_type = strtolower((string)($row['field_type'] ?? ''));
+									$edit_type = ($orig_type === 'colour' || $orig_type === 'color')
+											? 'colour'
+											: 'textarea';
+									// Definition textareas: 5 lines; other types forced to textarea: 2 lines
+									$edit_rows = ($orig_type === 'textarea') ? 5 : 2;
+								?>
 								<?php _panel('cms/cms_translate_string_input', [
-										'field_type' => $row['field_type'],
+										'field_type' => $edit_type,
 										'value' => $row['selected_value'] ?? '',
 										'language_id' => $cms_language,
+										'rows' => $edit_rows,
 								]) ?>
 							<?php endif ?>
 						</div>
@@ -122,7 +148,7 @@
 					<div class="cms_grid_field cms_grid_field_left cms_translation_col_copy">
 						<div class="cms_grid_field_inner cms_translation_copy_cell">
 							<?php if (empty($row['readonly'])): ?>
-								<div class="cms_translation_ai_use" title="Copy AI into edit" style="display:none;">←</div>
+								<div class="cms_translation_copy_btn cms_translation_ai_use" title="Copy AI into edit" style="display:none;">←</div>
 							<?php endif ?>
 						</div>
 					</div>

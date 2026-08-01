@@ -51,31 +51,28 @@
 	}
 }
 
+// Proportional flex shares after fixed button columns (standard = 1)
+// Input 0.6 | Default 1 | btn | base 1 | edit 1 | btn | AI 1
 .cms_translation_col_label {
-	width: 16%;
+	flex: 0.6 1 0;
+	width: auto;
+	min-width: 0;
 }
 
-.cms_translation_col_default {
-	width: 12%;
-}
-
-.cms_translation_col_base {
-	width: 22%;
-}
-
-.cms_translation_col_selected {
-	width: 22%;
+.cms_translation_col_default,
+.cms_translation_col_base,
+.cms_translation_col_selected,
+.cms_translation_col_ai {
+	flex: 1 1 0;
+	width: auto;
+	min-width: 0;
 }
 
 .cms_translation_col_copy {
-	width: 2.4rem;
 	flex: 0 0 2.4rem;
+	width: 2.4rem;
 	max-width: 2.4rem;
 	min-width: 2.4rem;
-}
-
-.cms_translation_col_ai {
-	width: 25%;
 }
 
 .cms_translation_grid_header,
@@ -122,27 +119,28 @@
 .cms_translation_row {
 	align-items: flex-start;
 	border-bottom: 0.1rem solid #e8e8e8;
-	padding: 0.6rem 0;
+	padding: 0.3rem 0 0 0;
 
 	&:last-child {
 		border-bottom: 0;
 	}
 }
 
+// Body type: 0.9× previous 1.3 / 1.8 → 1.17 / 1.62
 .cms_translation_label {
 	font-weight: 600;
-	font-size: 1.3rem;
-	line-height: 1.8rem;
+	font-size: 1.17rem;
+	line-height: 1.62rem;
 	word-break: break-word;
 }
 
 .cms_translation_readonly {
-	font-size: 1.3rem;
-	line-height: 1.8rem;
+	font-size: 1.17rem;
+	line-height: 1.62rem;
 	color: #606060;
 	white-space: pre-wrap;
 	word-break: break-word;
-	min-height: 1.8rem;
+	min-height: 1.62rem;
 }
 
 .cms_translation_col_selected {
@@ -152,10 +150,18 @@
 	.cms_translate_string_colour_input {
 		width: 100%;
 		box-sizing: border-box;
+		font-size: 1.17rem;
+		line-height: 1.62rem;
 	}
 
+	// Min 2 lines (2 × 1.62rem); definition textareas use rows=5 → ~5 × 1.62rem
 	.cms_translate_string_textarea {
-		min-height: 5.0rem;
+		min-height: 3.24rem;
+		resize: vertical;
+	}
+
+	.cms_translate_string_textarea[rows="5"] {
+		min-height: 8.1rem;
 	}
 }
 
@@ -172,17 +178,19 @@
 }
 
 .cms_translation_ai_suggestion {
-	font-size: 1.3rem;
-	line-height: 1.8rem;
+	font-size: 1.17rem;
+	line-height: 1.62rem;
 	color: #2060a0;
 	white-space: pre-wrap;
 	word-break: break-word;
-	min-height: 1.8rem;
+	min-height: 1.62rem;
 	cursor: pointer;
 }
 
-// Square toolbar-style control (smaller than toolbar; height kept compact)
-.cms_translation_ai_use {
+// Square toolbar-style control (default → edit / AI → edit)
+.cms_translation_copy_btn,
+.cms_translation_ai_use,
+.cms_translation_default_use {
 	box-sizing: border-box;
 	display: flex;
 	align-items: center;

@@ -1,6 +1,6 @@
 <?php if ($field_type === 'textarea'): ?>
 
-	<textarea class="cms_translate_string_input cms_translate_string_textarea" rows="3"
+	<textarea class="cms_translate_string_input cms_translate_string_textarea" rows="<?= (int)($rows ?? 2) ?>"
 			data-language_id="<?= htmlspecialchars($language_id, ENT_QUOTES) ?>"><?= htmlspecialchars($value, ENT_QUOTES) ?></textarea>
 
 <?php elseif ($field_type === 'colour'): ?>

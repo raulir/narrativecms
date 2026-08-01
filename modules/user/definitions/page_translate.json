@@ -1,0 +1,6 @@
+{
+	"version": "2",
+	"label": "Page translate",
+	"description": "Frontend translation entry (cms_translate access). Mount in footer debug strip.",
+	"item": []
+}

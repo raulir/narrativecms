@@ -7,25 +7,29 @@
 			"type":"text",
 			"name":"heading",
 			"label":"Heading",
-			"default": "User profile"
+			"default": "User profile",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"profile_email",
 			"label":"Email label",
-			"default": "email"
+			"default": "email",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"profile_username",
 			"label":"Username label",
-			"default": "username"
+			"default": "username",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"fixed_text",
 			"label":"Fixed text",
-			"default": "To change this, please contact us."
+			"default": "To change this, please contact us.",
+			"translate":"1"
 		},
 		{
 			"type":"subtitle",
@@ -35,25 +39,29 @@
 			"type":"text",
 			"name":"profile_first_name",
 			"label":"First name label",
-			"default": "first name"
+			"default": "first name",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"profile_last_name",
 			"label":"Last name label",
-			"default": "last name"
+			"default": "last name",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"profile_phone",
 			"label":"Phone label",
-			"default": "phone"
+			"default": "phone",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"profile_submit",
 			"label":"Save label",
-			"default": "save"
+			"default": "save",
+			"translate":"1"
 		},
 		{
 			"type":"subtitle",
@@ -63,87 +71,96 @@
 			"type":"text",
 			"name":"password_heading",
 			"label":"Change password",
-			"default": "Change password"
+			"default": "Change password",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"profile_old_password",
 			"label":"Old password label",
-			"default": "old password"
+			"default": "old password",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"profile_password",
 			"label":"Password label",
-			"default": "new password"
+			"default": "new password",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"profile_password2",
 			"label":"Password x2 label",
-			"default": "new password again"
+			"default": "new password again",
+			"translate":"1"
 		},
 		{
 			"type":"text",
 			"name":"password_submit",
 			"label":"Password submit label",
-			"default": "change"
+			"default": "change",
+			"translate":"1"
 		},
 		{
 			"type":"subtitle",
 			"label":"Messages"
 		},
-		
-		
 		{
 			"type":"textarea",
 			"name":"loggedin_text",
 			"label":"Logged in message",
 			"lines":"2",
-			"default": "You are currently logged in. Please log out to profile a new account."
+			"default": "You are currently logged in. Please log out to profile a new account.",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
 			"name":"message_password_mismatch",
 			"label":"Password mismatch",
 			"lines":"2",
-			"default": "Your entered passwords didn't match"
+			"default": "Your entered passwords didn't match",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
 			"name":"message_bademail",
 			"label":"Bad email",
 			"lines":"2",
-			"default": "Email missing or not properly formed"
+			"default": "Email missing or not properly formed",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
 			"name":"message_usernamelength",
 			"label":"Username length",
 			"lines":"2",
-			"default": "Your username is too short"
+			"default": "Your username is too short",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
 			"name":"message_usernameexists",
 			"label":"Username exists",
 			"lines":"2",
-			"default": "Your selected username exists"
+			"default": "Your selected username exists",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
 			"name":"message_emailexists",
 			"label":"Email exists",
 			"lines":"2",
-			"default": "This email already is profileed"
+			"default": "This email already is profileed",
+			"translate":"1"
 		},
 		{
 			"type":"textarea",
 			"name":"message_password_missing",
 			"label":"Password missing",
 			"lines":"2",
-			"default": "Password has to be filled in"
+			"default": "Password has to be filled in",
+			"translate":"1"
 		}
 	]
 }
-	

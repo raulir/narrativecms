@@ -178,7 +178,7 @@ class user_model extends \Model {
 				(!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').
 				'Password update at '.$title,
 				'Password associated with this email updated.',
-				['auto_submitted' => 1]
+				['auto_submitted' => 1, 'send_now' => 1]
 		);
 
 	}
@@ -242,9 +242,30 @@ class user_model extends \Model {
 			return $default;
 		}
 
+		$user_id = (int)($user['user_id'] ?? $user['cms_page_panel_id'] ?? 0);
+		if ($user_id < 1){
+			return $default;
+		}
+
+		return $this->get_user_meta_value_for_id($user_id, $key, $default);
+
+	}
+
+	function get_user_meta_value_for_id($user_id, $key, $default = ''){
+
+		$user_id = (int)$user_id;
+		if ($user_id < 1){
+			return $default;
+		}
+
+		$user = $this->get_user($user_id);
+		if (empty($user)){
+			return $default;
+		}
+
 		$meta = $this->_parse_user_meta($user);
 
-		return $meta[$key] ?? $default;
+		return array_key_exists($key, $meta) ? $meta[$key] : $default;
 
 	}
 
@@ -256,17 +277,73 @@ class user_model extends \Model {
 			return false;
 		}
 
-		$meta = $this->_parse_user_meta($user);
-		$meta[$key] = $value;
+		$user_id = (int)($user['user_id'] ?? $user['cms_page_panel_id'] ?? 0);
+		return $this->set_user_meta_for_id($user_id, $key, $value);
 
-		$meta_json = json_encode($meta, JSON_PRETTY_PRINT);
+	}
+
+	/**
+	 * Set one meta key for a user by id (e.g. Stripe webhooks — no session user).
+	 * Value may be scalar or array (stored as nested JSON object).
+	 */
+	function set_user_meta_for_id($user_id, $key, $value){
+
+		return $this->update_user_meta_for_id($user_id, [$key => $value]);
+
+	}
+
+	/**
+	 * Apply multiple meta key sets and optional unsets in one write.
+	 *
+	 * @param array $set key => value (arrays become nested JSON objects)
+	 * @param array $unset list of top-level keys to remove
+	 */
+	function update_user_meta_for_id($user_id, $set = [], $unset = []){
+
+		$user_id = (int)$user_id;
+		if ($user_id < 1){
+			return false;
+		}
+
+		if (!is_array($set)){
+			$set = [];
+		}
+		if (!is_array($unset)){
+			$unset = [];
+		}
+		if ($set === [] && $unset === []){
+			return false;
+		}
 
 		$this->load->model('cms/cms_page_panel_model');
-		$this->cms_page_panel_model->update_cms_page_panel($user['user_id'], [
+		$user = $this->cms_page_panel_model->get_cms_page_panel($user_id);
+		if (empty($user) || !is_array($user)){
+			return false;
+		}
+
+		$meta = $this->_parse_user_meta($user);
+
+		foreach ($set as $key => $value){
+			if ($key === '' || $key === null){
+				continue;
+			}
+			$meta[$key] = $value;
+		}
+
+		foreach ($unset as $key){
+			if ($key === '' || $key === null){
+				continue;
+			}
+			unset($meta[$key]);
+		}
+
+		$meta_json = json_encode($meta, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+		$this->cms_page_panel_model->update_cms_page_panel($user_id, [
 				'meta' => $meta_json,
 		]);
 
-		if (!empty($_SESSION['user']['cms_page_panel_id']) && (int)$_SESSION['user']['cms_page_panel_id'] === (int)$user['user_id']){
+		if (!empty($_SESSION['user']['cms_page_panel_id']) && (int)$_SESSION['user']['cms_page_panel_id'] === $user_id){
 			$_SESSION['user']['meta'] = $meta_json;
 		}
 
@@ -574,7 +651,7 @@ class user_model extends \Model {
 				$user['email'],
 				$this->_email_subject_prefix().'Confirm your email for '.$title,
 				"Please confirm your email by opening this link:\n\n".$verify_url,
-				['auto_submitted' => 1]
+				['auto_submitted' => 1, 'send_now' => 1]
 		);
 		
 	}
