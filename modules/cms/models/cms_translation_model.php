@@ -17,6 +17,7 @@ class cms_translation_model extends \Model {
 	function get_ai_provider_panel(){
 
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_cms_model');
 		$settings = $this->cms_page_panel_model->get_cms_page_panel_settings('cms/cms_settings');
 		$panel = trim((string)($settings['ai_provider'] ?? ''));
 
@@ -49,6 +50,7 @@ class cms_translation_model extends \Model {
 	function get_ai_ui_options(){
 
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_cms_model');
 		$settings = $this->cms_page_panel_model->get_cms_page_panel_settings('cms/cms_settings');
 		if (!is_array($settings)){
 			$settings = [];
@@ -115,6 +117,7 @@ class cms_translation_model extends \Model {
 
 		$cms_page_panel_id = (int)$cms_page_panel_id;
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_cms_model');
 		$this->load->model('cms/cms_language_model');
 
 		$provider = $this->get_ai_provider_panel();
@@ -262,6 +265,7 @@ class cms_translation_model extends \Model {
 		$path = $this->_param_path_from_name($field_name);
 
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_cms_model');
 		$this->load->model('cms/cms_language_model');
 
 		$sql = "select panel_name, cms_page_id, parent_id, sort from cms_page_panel where cms_page_panel_id = ? limit 1 ";
@@ -337,10 +341,11 @@ class cms_translation_model extends \Model {
 		}
 
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_cms_model');
 		$this->load->model('cms/cms_language_model');
 
 		foreach ($values as $language_id => $value){
-			$this->cms_page_panel_model->set_translated_param(
+			$this->cms_page_panel_cms_model->set_translated_param(
 					$cms_page_panel_id,
 					$path,
 					$value,
@@ -348,7 +353,7 @@ class cms_translation_model extends \Model {
 			);
 		}
 
-		$this->cms_page_panel_model->rebuild_panel_param_cache($cms_page_panel_id);
+		$this->cms_page_panel_cms_model->rebuild_panel_param_cache($cms_page_panel_id);
 
 		if ($cms_language === null || $cms_language === ''){
 			$cms_language = $this->cms_language_model->get_cms_language();
@@ -380,6 +385,7 @@ class cms_translation_model extends \Model {
 		}
 
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_cms_model');
 		$this->load->model('cms/cms_panel_model');
 
 		$sql = "select panel_name, cms_page_id, parent_id, sort from cms_page_panel where cms_page_panel_id = ? limit 1 ";
@@ -410,6 +416,7 @@ class cms_translation_model extends \Model {
 
 		$cms_page_panel_id = (int)$cms_page_panel_id;
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_cms_model');
 		$this->load->model('cms/cms_language_model');
 
 		if ($cms_page_panel_id < 1){
@@ -482,6 +489,7 @@ class cms_translation_model extends \Model {
 
 		$cms_page_panel_id = (int)$cms_page_panel_id;
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_cms_model');
 		$this->load->model('cms/cms_language_model');
 
 		if ($cms_page_panel_id < 1){
@@ -517,7 +525,7 @@ class cms_translation_model extends \Model {
 				continue;
 			}
 
-			$this->cms_page_panel_model->set_translated_param(
+			$this->cms_page_panel_cms_model->set_translated_param(
 					$cms_page_panel_id,
 					$path,
 					$value,
@@ -527,7 +535,7 @@ class cms_translation_model extends \Model {
 		}
 
 		if ($saved > 0){
-			$this->cms_page_panel_model->rebuild_panel_param_cache($cms_page_panel_id);
+			$this->cms_page_panel_cms_model->rebuild_panel_param_cache($cms_page_panel_id);
 		}
 
 		return [
@@ -788,6 +796,7 @@ class cms_translation_model extends \Model {
 
 		$this->load->model('cms/cms_language_model');
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_cms_model');
 
 		$languages = [];
 

@@ -23,6 +23,7 @@ class cms_page_operations extends \Controller {
 		$this->load->model('cms/cms_page_model');
 		$this->load->model('cms/cms_slug_model');
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_cms_model');
 		
 		$do = $this->input->post('do');
 		if ($do == 'cms_page_delete'){
@@ -120,7 +121,7 @@ class cms_page_operations extends \Controller {
 
 			$block_orders = $this->input->post('orders');
 
-			$this->cms_page_panel_model->save_orders($block_orders);
+			$this->cms_page_panel_cms_model->save_orders($block_orders);
 
 		}
 	

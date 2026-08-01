@@ -35,8 +35,9 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 ## Panel data integrity
 
 - [x] **#114 ensure_data** — opt-in definition flag; create/purge fill missing fields from existing + defaults; JSON cache encode check. See [`cms_input.md`](cms_input.md) § Panel-level flags.
-- [x] **Orphaned panel data purge** — gear menu **Data purge** (before Translation); popup scans instance + settings for keys not in definition and translation languages not in CMS; purge selected. `cms_page_panel_data_purge` + model `scan_orphan_panel_data` / `purge_panel_param_keys` / `purge_panel_translation_languages`.
+- [x] **Orphaned panel data purge** — gear menu **Data purge** (before Translation); popup scans instance + settings for keys not in definition and translation languages not in CMS; purge selected. Logic on panel `cms_page_panel_data_purge` (scan/purge methods).
 - [x] **Orphan scan includes ghost translation fields** — `_translations.{lang}.*` keys not in item/settings definition (e.g. `yearly_badge` stuck on pricing instance). Panel still wins over settings on clash; clean via Data purge only.
+- [x] **#763 split cms_page_panel_model** — runtime core stays on `cms_page_panel_model`; CMS admin APIs on `cms_page_panel_cms_model`; admin list UI on `cms_page_panel_list_model`. See [`agents.md`](agents.md) § Page panel models.
 
 ---
 

@@ -305,12 +305,6 @@ class cms_page_panel_model extends \Model {
 		
 	}
 	
-	function get_list_stats($panel_name){
-		$sql = "select count(*) as count from `cms_page_panel` where panel_name = ? and (cms_page_id = ? or cms_page_id = ?) and `show` = 1 group by panel_name ";
-		$query = $this->db->query($sql, array($panel_name, 999999, 0, ));
-		return $query->row_array();
-	}
-
 	function get_list_item_title($row){
 
 		$panel_name = !empty($row['panel_name']) ? $row['panel_name'] : '';
@@ -411,194 +405,6 @@ class cms_page_panel_model extends \Model {
 			
 	}
 	
-	function is_list_slug($slug){
-
-		if ($slug === '' || $slug === null){
-			return false;
-		}
-
-		// Namespaced list template slugs: shop_product → shop/product
-		$this->load->model('cms/cms_page_model');
-		$panel_from_slug = $this->cms_page_model->list_template_panel_from_slug($slug);
-		if ($panel_from_slug !== ''){
-			foreach ($this->cms_page_model->get_linkable_list_types() as $type){
-				if ($type['panel_name'] === $panel_from_slug){
-					return true;
-				}
-			}
-		}
-
-		// Bare panel basename definitions (definitions/{slug}.json with list)
-		foreach ($GLOBALS['config']['modules'] as $module){
-
-			$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/'.$slug.'.json';
-
-			if (!file_exists($filename)){
-				continue;
-			}
-
-			$config = cms_json_decode(file_get_contents($filename), $filename);
-
-			if (!empty($config['list'])){
-				return true;
-			}
-
-		}
-
-		return false;
-
-	}
-
-	function get_lists(){
-	
-		$this->load->model('cms/cms_panel_model');
-	
-		$return = [];
-	
-		foreach ($GLOBALS['config']['modules'] as $module){
-			foreach(glob($GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/*.json') as $filename){
-				$list_name = basename($filename, '.json');
-				$block_config = $this->cms_panel_model->get_cms_panel_config($module.'/'.$list_name);
-				if (!empty($block_config['list'])){
-					$return[$module.'/'.$list_name] = $module.'/'.$list_name;
-				}
-			}
-		}
-	
-		return $return;
-	
-	}
-
-	/**
-	 * Search weights from panel definition item/settings fields ("search": "1"–"3").
-	 * Used when update_cms_page_panel does not receive search_params (API/sync saves).
-	 */
-	function get_search_params_for_panel_name($panel_name){
-
-		$panel_name = trim((string)$panel_name);
-		if ($panel_name === '' || !stristr($panel_name, '/')){
-			return [];
-		}
-
-		$this->load->model('cms/cms_panel_model');
-		$panel_config = $this->cms_panel_model->get_cms_panel_config($panel_name);
-		if (!is_array($panel_config)){
-			return [];
-		}
-
-		// List item structure (sort > 0) merges item fields + extends
-		$panel_structure = $this->cms_panel_model->get_cms_panel_edit_structure($panel_config, 0, 0, 1);
-		if (!is_array($panel_structure) || empty($panel_structure)){
-			$panel_structure = $this->cms_panel_model->get_cms_panel_edit_structure($panel_config, 0, 0, 0);
-		}
-		if (!is_array($panel_structure)){
-			return [];
-		}
-
-		$search_params = [];
-		foreach ($panel_structure as $struct){
-			if (empty($struct['name'])){
-				continue;
-			}
-			if (!empty($struct['search'])){
-				$search_params[$struct['name']] = $struct['search'];
-			}
-			if (($struct['type'] ?? '') === 'repeater' && !empty($struct['fields']) && is_array($struct['fields'])){
-				foreach ($struct['fields'] as $r_struct){
-					if (!empty($r_struct['name']) && !empty($r_struct['search'])){
-						$search_params[$struct['name']][$r_struct['name']] = $r_struct['search'];
-					}
-				}
-			}
-		}
-
-		return $search_params;
-
-	}
-
-	/**
-	 * Re-apply definition search weights on all params for panels of $panel_name.
-	 * Returns number of param rows updated.
-	 */
-	function reindex_search_weights_for_panel_name($panel_name){
-
-		$search_params = $this->get_search_params_for_panel_name($panel_name);
-		if (empty($search_params) || !is_array($search_params)){
-			return 0;
-		}
-
-		$updated = 0;
-		foreach ($search_params as $field => $weight){
-			if (is_array($weight)){
-				// repeater fields: name like images.000000.image — skip bulk SQL for nested
-				continue;
-			}
-			$weight = (int)$weight;
-			if ($weight < 1){
-				continue;
-			}
-			$sql = "update cms_page_panel_param p ".
-					"inner join cms_page_panel b on b.cms_page_panel_id = p.cms_page_panel_id ".
-					"set p.search = ? ".
-					"where b.panel_name = ? and p.name = ? and p.language = '' ";
-			$this->db->query($sql, [$weight, $panel_name, $field]);
-			$updated += (int)$this->db->affected_rows();
-		}
-
-		return $updated;
-
-	}
-	
-	/**
-	 * get previous and next item in list
-	 */
-	function get_list_neighbours($panel_name, $cms_page_panel_id, $circular = true){
-		
-		$return = [
-				'last_id' => false,
-				'next_id' => false,
-		];
-		
-		// get last and next events
-		$items = $this->cms_page_panel_model->get_list($panel_name);
-
-		$found = false;
-		foreach($items as $item){
-			if ($cms_page_panel_id == $item['cms_page_panel_id']){
-				$found = true;
-			} else {
-				if (!$found){
-					$return['last_id'] = $item['cms_page_panel_id'];
-				} else if (empty($return['next_id'])) {
-					$return['next_id'] = $item['cms_page_panel_id'];
-				}
-			}
-		}
-		
-		if ($circular){
-		
-			if (empty($return['last_id'])){
-				end($items);
-				$current = current($items);
-				$return['last_id'] = $current['cms_page_panel_id'];
-			}
-			 
-			if (empty($return['next_id'])){
-				reset($items);
-				$current = current($items);
-				$return['next_id'] = $current['cms_page_panel_id'];
-			}
-		
-		}
-		
-		$return = array_merge($return);
-		
-		return $return;
-		
-	}
-	
-	
-	// detailed data
 	function _insert_param($cms_page_panel_id, $name, $value, $search = 0){
 		if (is_array($value)){
 			foreach($value as $_name => $_value){
@@ -1143,20 +949,6 @@ class cms_page_panel_model extends \Model {
 
 	}
 
-	function refresh_all_cached_titles(){
-
-		$query = $this->db->query('select cms_page_panel_id from cms_page_panel order by cms_page_panel_id');
-		$count = 0;
-
-		foreach($query->result_array() as $row){
-			$this->_refresh_cached_title($row['cms_page_panel_id']);
-			$count++;
-		}
-
-		return $count;
-
-	}
-
 	function panel_matches_visitor_targets($panel){
 
 		if (empty($GLOBALS['config']['targets_enabled']) || empty($_SESSION['targets'])){
@@ -1219,125 +1011,6 @@ class cms_page_panel_model extends \Model {
 	
 	}
 	
-	function new_cms_page_panel(){
-		
-		$sql = "select max(sort) as sort from cms_page_panel";
-    	$query = $this->db->query($sql);
-    	$result = $query->row_array();
-		
-		return array(
-			'cms_page_panel_id' => 0,
-			'block_id' => 0,
-			'cms_page_id' => 0,
-			'parent_id' => 0,
-			'show' => 0,
-			'sort' => $result['sort'] + 1,
-			'title' => 'New block',
-			'panel_name' => '',
-			'submenu_anchor' => '',
-			'submenu_title' => '',
-		);
-		
-	}
-	
-	function restore_panel_settings_defaults($panel_name, $merge_existing = true) {
-
-		$this->load->model('cms/cms_panel_model');
-		$defaults = $this->cms_panel_model->get_settings_defaults($panel_name);
-		if (empty($defaults)) {
-			return false;
-		}
-
-		$settings_rows = $this->get_cms_page_panels_by([
-			'panel_name' => $panel_name,
-			'cms_page_id' => 0,
-			'parent_id' => 0,
-			'sort' => 0,
-		]);
-		if (empty($settings_rows[0]['cms_page_panel_id'])) {
-			return false;
-		}
-
-		$cms_page_panel_id = (int)$settings_rows[0]['cms_page_panel_id'];
-		$params = $defaults;
-
-		if ($merge_existing) {
-			$existing = $this->get_cms_page_panel_params($cms_page_panel_id);
-			if (is_array($existing)) {
-				foreach ($defaults as $key => $value) {
-					if (!array_key_exists($key, $existing) || $existing[$key] === '' || $existing[$key] === null) {
-						$params[$key] = $value;
-					} else {
-						$params[$key] = $existing[$key];
-					}
-				}
-			}
-		}
-
-		$this->update_cms_page_panel($cms_page_panel_id, ['panel_params' => $params], true);
-
-		return true;
-
-	}
-
-	/**
-	 * Opt-in (#114): when panel definition has ensure_data, fill missing top-level fields
-	 * from existing DB values, then definition defaults / type fallbacks.
-	 * Does not overwrite keys present in $new_params (including intentional "").
-	 *
-	 * @param array $context cms_page_id, parent_id, sort for item vs settings structure
-	 */
-	function ensure_panel_data($panel_name, $new_params, $existing_params = null, $context = []){
-
-		if ($panel_name === '' || !is_array($new_params)){
-			return is_array($new_params) ? $new_params : [];
-		}
-
-		$this->load->model('cms/cms_panel_model');
-		if (!$this->cms_panel_model->panel_has_ensure_data($panel_name)){
-			return $new_params;
-		}
-
-		$existing = is_array($existing_params) ? $existing_params : [];
-		$cms_page_id = $context['cms_page_id'] ?? 0;
-		$parent_id = $context['parent_id'] ?? 0;
-		$sort = $context['sort'] ?? 0;
-
-		$panel_config = $this->cms_panel_model->get_cms_panel_config($panel_name);
-		$structure = $this->cms_panel_model->get_cms_panel_edit_structure(
-				$panel_config, $cms_page_id, $parent_id, $sort);
-
-		$result = $new_params;
-
-		foreach ($structure as $field){
-			$name = $field['name'] ?? '';
-			if ($name === '' || $name === '_noname'){
-				continue;
-			}
-			if (array_key_exists($name, $result)){
-				continue;
-			}
-			if (array_key_exists($name, $existing)){
-				$result[$name] = $existing[$name];
-				continue;
-			}
-			$result[$name] = $this->cms_panel_model->resolve_field_default($field);
-		}
-
-		// Keep meta keys from existing when not in the write payload
-		foreach ($existing as $key => $value){
-			if ($key === '' || !is_string($key) || $key[0] !== '_'){
-				continue;
-			}
-			if (!array_key_exists($key, $result)){
-				$result[$key] = $value;
-			}
-		}
-
-		return $result;
-
-	}
-
 	function update_cms_page_panel($cms_page_panel_id, $data, $purge = false){
 
 		// Control flag: not stored — true force title, false skip, null auto (see _should_refresh_panel_title)
@@ -1701,15 +1374,6 @@ class cms_page_panel_model extends \Model {
 	 * save page panels order by array: block_id => sort
 	 * 
 	 */
-	function save_orders($orders){
-		
-		foreach($orders as $name => $value){
-    		$sql = "update cms_page_panel set sort = ? where cms_page_panel_id = ? ";
-	    	$this->db->query($sql, array($value, $name, ));
-		}
-    	
-	}
-	
 	function delete_cms_page_panel($cms_page_panel_id){
 		
 		if (empty($cms_page_panel_id)){
@@ -1776,190 +1440,6 @@ class cms_page_panel_model extends \Model {
 	    	
 	}
 	
-	function _cms_page_panels_list_query_context(&$filter){
-
-		$context = [
-			'limit' => null,
-			'offset' => null,
-			'order' => 'asc',
-			'sql_filter' => [],
-			'table_filter' => [],
-			'params_filter' => [],
-			'sql_arrays' => [],
-			'table_arrays' => [],
-			'sql_filter_str' => '',
-			'table_filter_str' => '',
-			'sql_arrays_str' => '',
-			'table_arrays_str' => '',
-			'where_str' => '',
-			'table_join' => '',
-			'table_select' => '',
-			'bind' => [],
-			'use_panel_table' => false,
-			'panel_table' => '',
-			'table_fields' => [],
-		];
-
-		if (isset($filter['_limit'])){
-			$context['limit'] = (int)$filter['_limit'];
-			unset($filter['_limit']);
-		}
-
-		if (isset($filter['_start'])){
-			$context['offset'] = (int)$filter['_start'];
-			unset($filter['_start']);
-		}
-
-		if (isset($filter['_order'])){
-			$context['order'] = $filter['_order'];
-			unset($filter['_order']);
-		}
-
-		if (!is_array($filter)){
-			error_log('Bad filter in cms_page_panel_model list query!');
-			$filter = [];
-		}
-
-		$panel_name = $filter['panel_name'] ?? '';
-		if (is_array($panel_name)){
-			$panel_name = $panel_name[0] ?? '';
-		}
-
-		if ($panel_name){
-			$context['table_fields'] = $this->get_panel_table_fields($panel_name);
-			if (!empty($context['table_fields']) && $this->panel_table_exists($panel_name)){
-				$context['use_panel_table'] = true;
-				$context['panel_table'] = $this->get_panel_table_name($panel_name);
-				$table_cols = [];
-				foreach (array_keys($context['table_fields']) as $col){
-					$table_cols[] = 't.`'.$col.'`';
-				}
-				$context['table_select'] = ', '.implode(', ', $table_cols);
-				$context['table_join'] = ' join `'.$context['panel_table'].'` t on t.cms_page_panel_id = a.cms_page_panel_id ';
-			}
-		}
-
-		foreach($filter as $key => $value){
-			$tkey = str_replace('!', '', $key);
-			if (in_array($tkey, ['cms_page_panel', 'cms_page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title', ])){
-
-				if (!is_array($value)){
-					$context['sql_filter'][$key] = $value;
-				} else if (!empty($value) && is_array($value)){
-
-					$new_array = [];
-					foreach($value as $el){
-						$new_array[] = str_replace(['\'', '"'], ['\\\'', '\\\"'], $el);
-					}
-
-					$context['sql_arrays'][] = ' a.`'.$tkey.'` '.($tkey != $key ? ' not ' : '')." in ('".implode("','", $new_array)."') ";
-				}
-
-			} else if ($context['use_panel_table'] && isset($context['table_fields'][$tkey])) {
-				if (!is_array($value)){
-					$context['table_filter'][$key] = $value;
-				} else if (!empty($value) && is_array($value)){
-
-					$new_array = [];
-					foreach($value as $el){
-						$new_array[] = str_replace(['\'', '"'], ['\\\'', '\\\"'], $el);
-					}
-
-					$context['table_arrays'][] = ' t.`'.$tkey.'` '.($tkey != $key ? ' not ' : '')." in ('".implode("','", $new_array)."') ";
-				}
-			} else {
-				$context['params_filter'][$key] = $value;
-			}
-		}
-
-		$sql_filter_parts = [];
-		foreach ($context['sql_filter'] as $key => $value){
-			$tkey = str_replace('!', '', $key);
-			$sql_filter_parts[] = 'a.`'.$tkey.'` '.($tkey != $key ? '!=' : '=').' ?';
-		}
-		if (!empty($sql_filter_parts)){
-			$context['sql_filter_str'] = implode(' and ', $sql_filter_parts);
-		}
-
-		$table_filter_parts = [];
-		foreach ($context['table_filter'] as $key => $value){
-			$tkey = str_replace('!', '', $key);
-			$table_filter_parts[] = 't.`'.$tkey.'` '.($tkey != $key ? '!=' : '=').' ?';
-		}
-		if (!empty($table_filter_parts)){
-			$context['table_filter_str'] = implode(' and ', $table_filter_parts);
-		}
-
-		$context['sql_arrays_str'] = !empty($context['sql_arrays']) ? implode(' and ', $context['sql_arrays']) : '';
-		$context['table_arrays_str'] = !empty($context['table_arrays']) ? implode(' and ', $context['table_arrays']) : '';
-
-		$where_parts = array_filter([$context['sql_filter_str'], $context['sql_arrays_str'], $context['table_filter_str'], $context['table_arrays_str']]);
-		$context['where_str'] = implode(' and ', $where_parts);
-		$context['bind'] = array_merge(array_values($context['sql_filter']), array_values($context['table_filter']));
-
-		return $context;
-
-	}
-
-	function count_cms_page_panels_list_by($filter){
-
-		$count_filter = $filter;
-		$ctx = $this->_cms_page_panels_list_query_context($count_filter);
-
-		if (!empty($ctx['params_filter'])){
-			return count($this->get_cms_page_panels_by($filter));
-		}
-
-		$sql = 'select count(*) as total from `cms_page_panel` a '.$ctx['table_join'].
-				($ctx['where_str'] ? ' where '.$ctx['where_str'].' ' : ' ');
-
-		$query = $this->db->query($sql, $ctx['bind']);
-		$return = $query->row_array();
-
-		return (int)$return['total'];
-
-	}
-
-	function get_cms_page_panels_list_by($filter){
-
-		$list_filter = $filter;
-		$ctx = $this->_cms_page_panels_list_query_context($list_filter);
-
-		if (!empty($ctx['params_filter'])){
-			return $this->get_cms_page_panels_by($filter);
-		}
-
-		$sql = 'select a.cms_page_panel_id, a.cms_page_id, a.parent_id, a.show, a.sort, a.title, a.panel_name, a.submenu_anchor, a.submenu_title, '.
-				'JSON_UNQUOTE(JSON_EXTRACT(p.value, \'$._title\')) as _title'.$ctx['table_select'].
-				' from `cms_page_panel` a '.
-				'left join cms_page_panel_param p on p.cms_page_panel_id = a.cms_page_panel_id and p.name = \'\' '.
-				$ctx['table_join'].
-				($ctx['where_str'] ? ' where '.$ctx['where_str'].' ' : ' ').
-				'order by a.sort '.$ctx['order'];
-
-		$bind = $ctx['bind'];
-
-		if ($ctx['limit'] > 0){
-			$sql .= ' limit ? offset ?';
-			$bind[] = $ctx['limit'];
-			$bind[] = $ctx['offset'] ?? 0;
-		}
-
-		$query = $this->db->query($sql, $bind);
-
-		if (!$query){
-			_html_error('Missing field or table: cms_page_panel list query');
-			die();
-		}
-
-		if ($query->num_rows()){
-			return $query->result_array();
-		}
-
-		return [];
-
-	}
-
 	function count_cms_page_panels_by($filter){
 		
 		$fields = array_keys($filter);
@@ -2339,611 +1819,6 @@ class cms_page_panel_model extends \Model {
 		
 	}
 	
-	function shift_sort($panel_name, $start, $shift){ // panel name, start, amount
-		$sql = "update `cms_page_panel` set sort = sort ".sprintf('%+d', $shift)." where panel_name = ? and sort >= ? and (cms_page_id = ? or cms_page_id = ?)";
-		$query = $this->db->query($sql, array($panel_name, $start, 999999, 0, ));
-	}
-	
-	function move_first($cms_page_panel_id){
-		
-		// get panel name
-		$block = $this->get_cms_page_panel($cms_page_panel_id);
-		
-		// move first
-		$this->shift_sort($block['panel_name'], 0, 1); // panel name, start, amount
-		$this->update_cms_page_panel($cms_page_panel_id, ['sort' => 1]);
-		
-	}
-	
-	function get_sort_stats($panel_name){
-		$sql = "select max(sort) as max_sort, count(*) as number from `cms_page_panel` where panel_name = ? and (cms_page_id = ? or cms_page_id = ?) group by panel_name ";
-		$query = $this->db->query($sql, array($panel_name, 999999, 0, ));
-		return $query->row_array();
-	}
-	
-	function get_page_panel_sort_stats($page_id){
-		$sql = "select max(sort) as max_sort, count(*) as number from `cms_page_panel` where cms_page_id = ? group by cms_page_id ";
-		$query = $this->db->query($sql, array($page_id, ));
-		$return = $query->row_array();
-		if (empty($return['number'])){
-			$return = array('max_sort' => 0, 'number' => 0, );
-		}
-		return $return;
-	}
-	
-	function get_page_panel_data_filenames($structure, $data){
-	
-		$return = [];
-	
-		foreach ($structure as $field){
-	
-			if ($field['type'] == 'file' && !empty($data[$field['name']])){
-	
-				$return[] = $data[$field['name']];
-	
-			} else if ($field['type'] == 'repeater' && !empty($data[$field['name']])){
-					
-				foreach($field['fields'] as $r_field){
-					if ($r_field['type'] == 'file'){
-						foreach($data[$field['name']] as $r_value){
-							if (!empty($r_value[$r_field['name']])){
-								$return[] = $r_value[$r_field['name']];
-							}
-						}
-					}
-				}
-					
-			}
-	
-		}
-	
-		return $return;
-	
-	}
-
-	/**
-	 * Unlink upload files present in $old_data but not in $new_data (or all of $old_data when $new_data is null).
-	 */
-	function delete_orphan_upload_files($structure, $old_data, $new_data = null){
-
-		$old_filenames = $this->get_page_panel_data_filenames($structure, $old_data);
-		if ($new_data === null){
-			$filenames_diff = $old_filenames;
-		} else {
-			$new_filenames = $this->get_page_panel_data_filenames($structure, $new_data);
-			$filenames_diff = array_diff($old_filenames, $new_filenames);
-		}
-
-		foreach($filenames_diff as $filename){
-			if (file_exists($GLOBALS['config']['upload_path'].$filename)){
-				unlink($GLOBALS['config']['upload_path'].$filename);
-			}
-		}
-
-	}
-
-	/**
-	 * Build admin form payload for save / title preview.
-	 * $input is a plain array (panel maps POST); not request-bound.
-	 *
-	 * @return array{data: array, data_merged: array, panel_config: array, panel_structure: array}
-	 */
-	function build_panel_data_for_save($input, $language){
-
-		$this->load->model('cms/cms_panel_model');
-
-		$block_id = !empty($input['cms_page_panel_id']) ? $input['cms_page_panel_id'] : 0;
-
-		$data = [];
-		$data['cms_page_id'] = $input['cms_page_id'] ?? null;
-		$data['parent_id'] = $input['parent_id'] ?? null;
-		$data['sort'] = $input['sort'] ?? null;
-		$data['title'] = $input['title'] ?? null;
-		$data['submenu_anchor'] = $input['submenu_anchor'] ?? null;
-		$data['panel_name'] = $input['panel_name'] ?? null;
-		$data['panel_params'] = $input['panel_params'] ?? [];
-
-		if (!is_array($data['panel_params'])){
-			$data['panel_params'] = [];
-		}
-
-		$panel_config = $this->cms_panel_model->get_cms_panel_config($data['panel_name']);
-
-		if (!empty($panel_config['extends'])){
-			$data['panel_params']['_extends'] = $panel_config['extends'];
-		}
-
-		if (!empty($panel_config['list']['templates'])){
-			$data['panel_params']['_template_page_id'] = $input['_template_page_id'] ?? null;
-		}
-
-		if (!empty($panel_config['list']['search_time_extra']) && is_array($panel_config['list']['search_time_extra'])
-				&& !empty($data['panel_params']['date'])){
-			$data['panel_params']['_search_time_extra'] = serialize($panel_config['list']['search_time_extra']);
-			$data['panel_params']['_search_time_timestamp_day'] = strtotime($data['panel_params']['date'])/86400;
-		}
-
-		if (!empty($panel_config['js']) && is_array($panel_config['js'])){
-			foreach($panel_config['js'] as $_js){
-				list($_js_module, $_js_panel) = explode('/', $_js);
-				$data['panel_params']['_js'][] = 'modules/'.$_js_module.'/js/'.$_js_panel.'.js';
-			}
-		}
-		if (!empty($panel_config['css']) && is_array($panel_config['css'])){
-			foreach($panel_config['css'] as $_css){
-				list($_css_module, $_css_panel) = explode('/', $_css);
-				$data['panel_params']['_css'][] = 'modules/'.$_css_module.'/css/'.$_css_panel.'.scss';
-			}
-		}
-
-		$data['search_params'] = [];
-		$data['translate_params'] = [];
-
-		$panel_structure = $this->cms_panel_model->get_cms_panel_edit_structure(
-				$panel_config, $data['cms_page_id'], $data['parent_id'], $data['sort']);
-
-		foreach($panel_structure as $struct){
-			if (!empty($struct['search'])){
-				$data['search_params'][$struct['name']] = $struct['search'];
-			}
-			if (!empty($struct['translate'])){
-				$data['translate_params'][$struct['name']] = $language;
-			}
-			if ($struct['type'] == 'repeater'){
-				foreach ($struct['fields'] as $r_struct){
-					if (!empty($r_struct['search'])){
-						$data['search_params'][$struct['name']][$r_struct['name']] = $r_struct['search'];
-					}
-					if (!empty($r_struct['translate'])){
-						$data['translate_params'][$struct['name']][$r_struct['name']] = $language;
-					}
-				}
-			}
-		}
-
-		foreach($panel_structure as $struct){
-
-			if ($struct['type'] == 'image'){
-				if (!empty($struct['meta']) && $struct['meta'] == 'image' && !empty($data['panel_params'][$struct['name']])){
-					$data['panel_params']['_images'][] = $data['panel_params'][$struct['name']];
-				}
-			}
-
-			if ($struct['type'] == 'repeater'){
-				foreach ($struct['fields'] as $r_struct){
-					if ($r_struct['type'] == 'image'){
-						if (!empty($r_struct['meta']) && $r_struct['meta'] == 'image' && !empty($data['panel_params'][$struct['name']])){
-							if (empty($data['panel_params']['_images'])){
-								$data['panel_params']['_images'] = [];
-							}
-							array_merge($data['panel_params']['_images'], $data['panel_params'][$struct['name']]);
-						}
-					}
-				}
-			}
-
-		}
-
-		foreach ($data['panel_params'] as $key => $value){
-
-			if (is_array($value) && is_array(reset($value))){
-				$temp_result = [];
-				foreach($value as $skey => $kvalues){
-					foreach ($kvalues as $nkey => $nvalue){
-						if (!is_array($nvalue)){
-							if (empty($temp_result[$nkey])){
-								$temp_result[$nkey] = [];
-							}
-							$temp_result[$nkey][$skey] = $nvalue;
-						} else {
-							foreach($nvalue as $nnkey => $nnvalue){
-								if (empty($temp_result[$nnkey][$skey])){
-									$temp_result[$nnkey][$skey] = [];
-								}
-								$temp_result[$nnkey][$skey][$nkey] = $nnvalue;
-							}
-						}
-					}
-				}
-				$data['panel_params'][$key] = $temp_result;
-			}
-
-		}
-
-		foreach($panel_structure as $struct){
-
-			if ($struct['type'] == 'cms_page_panels' && empty($data['panel_params'][$struct['name']])){
-				$data['panel_params'][$struct['name']] = [];
-			}
-
-			if ($struct['type'] == 'repeater' && empty($data['panel_params'][$struct['name']])){
-				$data['panel_params'][$struct['name']] = [];
-			}
-
-			if ($struct['type'] == 'grid' && !empty($struct['ds']) && empty($data['panel_params'][$struct['name']]) && $block_id){
-				$existing = $this->get_cms_page_panel($block_id, $language, false);
-				if (!empty($existing[$struct['name']]) && is_array($existing[$struct['name']])){
-					$data['panel_params'][$struct['name']] = $existing[$struct['name']];
-				}
-			}
-
-		}
-
-		$data_merged = $data;
-		unset($data_merged['panel_params']);
-		$data_merged = array_merge($data['panel_params'], $data_merged);
-		$data_merged['cms_page_panel_id'] = $block_id;
-
-		return [
-			'data' => $data,
-			'data_merged' => $data_merged,
-			'panel_config' => $panel_config,
-			'panel_structure' => $panel_structure,
-		];
-
-	}
-
-	/**
-	 * List-item title from definition + row (false when not a list item).
-	 */
-	function compile_list_item_title($data_merged, $panel_config, $block_id, $language){
-
-		if (empty($panel_config['list']) || $data_merged['cms_page_id'] != 0 || empty($data_merged['sort'])){
-			return false;
-		}
-
-		$title_row = $this->get_list_item_title_row($block_id, $data_merged, $language);
-
-		if (!is_array($title_row)){
-			return false;
-		}
-
-		return $this->get_list_item_title($title_row);
-
-	}
-
-	/**
-	 * Create or update from admin form data; list slug + parent children list.
-	 *
-	 * @param array $options panel_config, parent_name (optional), old_data (optional, for slug hide state)
-	 * @return array{cms_page_panel_id: int}
-	 */
-	function save_cms_page_panel_admin($block_id, $data_merged, $options = []){
-
-		$panel_config = $options['panel_config'] ?? [];
-		$parent_name = $options['parent_name'] ?? '';
-		$old_data = $options['old_data'] ?? [];
-
-		if ($block_id){
-
-			$this->update_cms_page_panel($block_id, $data_merged, true);
-
-		} else {
-
-			$block_id = $this->create_cms_page_panel($data_merged);
-
-			if (!empty($panel_config['list']['new_first'])){
-				$this->move_first($block_id);
-			}
-
-		}
-
-		if (!empty($panel_config['list']['link_target'])){
-
-			$this->load->model('cms/cms_slug_model');
-
-			$title_row = $this->get_list_item_title_row($block_id);
-			$list_title = is_array($title_row) ? $this->get_list_item_title($title_row) : '';
-
-			if (!empty($list_title)){
-				$slug_string = $list_title;
-			} else if (!empty($data_merged['title'])){
-				$slug_string = $data_merged['title'];
-			} else if (!empty($data_merged['heading'])){
-				$slug_string = $data_merged['heading'];
-			} else {
-				$slug_string = $data_merged['panel_name'].' '.$block_id;
-			}
-
-			$slug = $this->cms_slug_model->generate_list_item_slug($data_merged['panel_name'].'='.$block_id, $slug_string);
-
-			$this->cms_slug_model->set_page_slug(
-					$data_merged['panel_name'].'='.$block_id,
-					$slug,
-					empty($old_data['show']) ? '1' : '0');
-
-		}
-
-		if (!empty($data_merged['parent_id']) && !empty($parent_name)){
-
-			$parent = $this->get_cms_page_panel($data_merged['parent_id']);
-
-			if (empty($parent[$parent_name])){
-				$field_data = [];
-			} else {
-				if (!is_array($parent[$parent_name])){
-					$field_data = explode(',', $parent[$parent_name]);
-				} else {
-					$field_data = $parent[$parent_name];
-				}
-			}
-
-			if (!in_array($block_id, $field_data)){
-				$field_data[] = $block_id;
-				$field_data = array_values($field_data);
-				$this->update_cms_page_panel($data_merged['parent_id'], [$parent_name => $field_data, ]);
-			}
-
-		}
-
-		return ['cms_page_panel_id' => $block_id];
-
-	}
-
-	/**
-	 * Set show flag and update page visibility or list-item slug status.
-	 *
-	 * @return array{show: int, block: array}
-	 */
-	function set_cms_page_panel_show($cms_page_panel_id, $show){
-
-		$show = !empty($show) ? 1 : 0;
-
-		$block = $this->get_cms_page_panel($cms_page_panel_id);
-
-		$this->update_cms_page_panel($cms_page_panel_id, ['show' => $show, ]);
-
-		if (!empty($block['cms_page_id'])){
-			$this->load->model('cms/cms_page_model');
-			$this->cms_page_model->update_page_visibility($block['cms_page_id']);
-		} else {
-			$this->load->model('cms/cms_slug_model');
-			$this->cms_slug_model->update_slug_status($block['panel_name'].'='.$cms_page_panel_id, empty($show) ? 1 : 0);
-		}
-
-		return ['show' => $show, 'block' => $block];
-
-	}
-
-	/**
-	 * Deep-copy a panel including nested cms_page_panels children.
-	 *
-	 * @return int new cms_page_panel_id
-	 */
-	function copy_cms_page_panel($cms_page_panel_id){
-
-		$this->load->model('cms/cms_panel_model');
-
-		$data = $this->get_cms_page_panel($cms_page_panel_id);
-		$panel_structure = $this->cms_panel_model->get_cms_panel_definition($data['panel_name']);
-
-		$data['show'] = 0;
-		$data['title'] = 'Copy of '.$data['title'];
-		if (!empty($data['heading'])){
-			$data['heading'] = 'Copy of '.$data['heading'];
-		}
-
-		$all_children = [];
-		foreach($panel_structure as $struct){
-			if ($struct['type'] == 'cms_page_panels' && !empty($data[$struct['name']])){
-
-				if (!is_array($data[$struct['name']])){
-					$children = explode(',', $data[$struct['name']]);
-				} else {
-					$children = $data[$struct['name']];
-				}
-				$new_children = [];
-
-				foreach($children as $child_id){
-					$child_data = $this->get_cms_page_panel($child_id);
-					unset($child_data['block_id']);
-					unset($child_data['cms_page_panel_id']);
-					$new_children[] = $this->create_cms_page_panel($child_data);
-				}
-
-				$data[$struct['name']] = $new_children;
-
-				$all_children = $all_children + $new_children;
-
-			}
-		}
-
-		if ($data['cms_page_id'] == 999999 || $data['cms_page_id'] == 0){
-			$data['sort'] = $data['sort'] + 1;
-			$this->shift_sort($data['panel_name'], $data['sort'], 1);
-		}
-
-		unset($data['block_id']);
-		unset($data['cms_page_panel_id']);
-
-		$new_block_id = $this->create_cms_page_panel($data);
-
-		foreach($all_children as $new_child_id){
-			$this->update_cms_page_panel($new_child_id, ['parent_id' => $new_block_id, ]);
-		}
-
-		return $new_block_id;
-
-	}
-	
-	function get_fk_data($panel_name, $filter = [], $label_field = 'title'){
-
-		// Prefer list title_field from panel definition when caller uses default "title"
-		if ($label_field === 'title' && stristr((string)$panel_name, '/')){
-			$this->load->model('cms/cms_panel_model');
-			$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
-			if (!empty($config['list']['title_field'])){
-				$label_field = $config['list']['title_field'];
-			}
-		}
-
-		$panels = $this->get_cms_page_panels_by(['panel_name' => $panel_name, 'cms_page_id' => 0] + $filter);
-    	
-    	$return = array();
-    	
-    	foreach($panels as $row){
-			$label = '';
-			if ($label_field !== '' && isset($row[$label_field]) && (string)$row[$label_field] !== ''){
-				$label = (string)$row[$label_field];
-			} else if (!empty($row['heading'])){
-				$label = (string)$row['heading'];
-			} else if (!empty($row['_title'])){
-				$label = (string)$row['_title'];
-			} else if (!empty($row['title'])){
-				$label = (string)$row['title'];
-			} else {
-				$label = '#'.(int)$row['cms_page_panel_id'];
-			}
-    		$return[(int)$row['cms_page_panel_id']] = str_replace('"', '&quot;', $label);
-    	}
-    	
-    	return $return;
-	
-	}
-	
-	function extend_fk_repeater($panel_name, $data){
-		
-		foreach($data as $key => $item){
-			if (!empty($item)){
-				$item_a = $this->get_cms_page_panels_by(array('cms_page_panel_id' => $item[$panel_name.'_id'], ));
-				if (!empty($item_a[0])){
-					$data[$key] = $item_a[0];
-				}
-			}
-		}
-
-		return $data;
-		
-	}
-
-	function get_max_cms_page_panel_id($panel_name){
-	
-		$sql = "select max(cms_page_panel_id) as cms_page_panel_id from cms_page_panel where panel_name = ? and (cms_page_id = '999999' or cms_page_id = 0) ";
-		$query = $this->db->query($sql, array($panel_name, ));
-		$return = $query->row_array();
-	
-		return $return['cms_page_panel_id'];
-	
-	}
-	
-	function swap_param_value($old_value, $new_value){
-		
-		$sql = "select distinct cms_page_panel_id from cms_page_panel_param where value = ? ";
-		$query = $this->db->query($sql, [$old_value]);
-		if ($query->num_rows()){
-			$ids = $query->result_array();
-		} else {
-			$ids = [];
-		}
-		
-		$sql = "update cms_page_panel_param set `value` = ? where value = ? ";
-		$query = $this->db->query($sql, [$new_value, $old_value]);
-		
-		foreach($ids as $row){
-			$this->_update_cached_params($row['cms_page_panel_id']);
-		}
-
-	}
-	
-	/**
-	 * Write one scalar param for a language (admin translation UI).
-	 * Default language uses main param path; others use language-scoped rows.
-	 * Does not rebuild param cache — call rebuild_panel_param_cache() after a batch.
-	 */
-	function set_translated_param($cms_page_panel_id, $path, $value, $language_id){
-
-		$cms_page_panel_id = (int)$cms_page_panel_id;
-		$path = (string)$path;
-		if ($cms_page_panel_id < 1 || $path === ''){
-			return false;
-		}
-
-		$this->_ensure_language_model();
-		$language_id = $this->cms_language_model->normalise_language_id($language_id);
-		$default_lang = $this->cms_language_model->normalise_language_id($this->default_language);
-		$value = is_scalar($value) ? (string)$value : '';
-		$value = cms_utf8_string($value);
-
-		if ($language_id === $default_lang){
-			$this->_insert_or_update_param($cms_page_panel_id, $path, $value, 0, $default_lang);
-			return true;
-		}
-
-		$sql = "select cms_page_panel_param_id from cms_page_panel_param where cms_page_panel_id = ? and name = ? and language = ? limit 1 ";
-		$query = $this->db->query($sql, [$cms_page_panel_id, $path, $language_id]);
-
-		if ($query->num_rows()){
-			$row = $query->row_array();
-			$sql = "update cms_page_panel_param set value = ? , search = 0 where cms_page_panel_param_id = ? ";
-			$this->db->query($sql, [$value, $row['cms_page_panel_param_id']]);
-		} else {
-			$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = ? , value = ? , search = 0 , language = ? ";
-			$this->db->query($sql, [$cms_page_panel_id, $path, $value, $language_id]);
-		}
-
-		return true;
-
-	}
-
-	function rebuild_panel_param_cache($cms_page_panel_id){
-
-		$this->_update_cached_params((int)$cms_page_panel_id);
-
-	}
-
-	/**
-	 * Top-level field names from a definition structure (item or settings fields list).
-	 */
-	function collect_definition_field_names($fields){
-
-		$names = [];
-		if (!is_array($fields)){
-			return $names;
-		}
-		foreach ($fields as $field){
-			if (!is_array($field)){
-				continue;
-			}
-			$name = trim((string)($field['name'] ?? ''));
-			if ($name === '' || $name === '_noname'){
-				continue;
-			}
-			$names[$name] = 1;
-		}
-		return array_keys($names);
-
-	}
-
-	/**
-	 * Keys that are CMS meta / never treated as orphan content fields.
-	 */
-	function is_panel_param_meta_key($key){
-
-		$key = (string)$key;
-		if ($key === '' || $key[0] === '_'){
-			return true;
-		}
-		// Columns / merge noise sometimes present in blobs
-		static $system = [
-				'cms_page_panel_id' => 1,
-				'cms_page_id' => 1,
-				'parent_id' => 1,
-				'panel_name' => 1,
-				'sort' => 1,
-				'show' => 1,
-				'title' => 1,
-				'create_time' => 1,
-				'update_time' => 1,
-				'create_cms_user_id' => 1,
-				'update_cms_user_id' => 1,
-		];
-		return !empty($system[$key]);
-
-	}
-
-	/**
-	 * Settings panel row for panel_name (cms_page_id 0, parent 0, sort 0), or 0.
-	 */
 	function get_settings_panel_id($panel_name){
 
 		$panel_name = trim((string)$panel_name);
@@ -2967,446 +1842,6 @@ class cms_page_panel_model extends \Model {
 	 * Orphan top-level param keys vs allowed definition names.
 	 *
 	 * @return array name => preview string
-	 */
-	function find_orphan_param_fields($params, $allowed_names){
-
-		$out = [];
-		if (!is_array($params)){
-			return $out;
-		}
-		$allowed = [];
-		foreach ((array)$allowed_names as $n){
-			$allowed[(string)$n] = 1;
-		}
-		foreach ($params as $key => $value){
-			$key = (string)$key;
-			if ($this->is_panel_param_meta_key($key)){
-				continue;
-			}
-			if (!empty($allowed[$key])){
-				continue;
-			}
-			$out[$key] = $this->format_param_value_preview($value);
-		}
-		ksort($out);
-		return $out;
-
-	}
-
-	/**
-	 * Orphan field keys stored only (or also) under _translations.{lang}.* that are not
-	 * in the panel definition. Ghost labels (e.g. yearly_badge on a pricing instance)
-	 * live here and override shared settings after language merge.
-	 *
-	 * @return array field_name => preview "(en, es): −18%"
-	 */
-	function find_orphan_translation_fields($params, $allowed_names){
-
-		$out = [];
-		if (!is_array($params)){
-			return $out;
-		}
-		$tr = $params['_translations'] ?? null;
-		if (!is_array($tr) || $tr === []){
-			return $out;
-		}
-
-		$allowed = [];
-		foreach ((array)$allowed_names as $n){
-			$allowed[(string)$n] = 1;
-		}
-
-		// field => [ lang => value ]
-		$by_field = [];
-		foreach ($tr as $lang => $branch){
-			if (!is_array($branch)){
-				continue;
-			}
-			$lang = (string)$lang;
-			foreach ($branch as $key => $value){
-				$key = (string)$key;
-				if ($this->is_panel_param_meta_key($key)){
-					continue;
-				}
-				if (!empty($allowed[$key])){
-					continue;
-				}
-				if (!isset($by_field[$key])){
-					$by_field[$key] = [];
-				}
-				$by_field[$key][$lang] = $value;
-			}
-		}
-
-		foreach ($by_field as $key => $langs){
-			$lang_ids = array_keys($langs);
-			sort($lang_ids);
-			$first = reset($langs);
-			$preview = $this->format_param_value_preview($first);
-			$out[$key] = '('.implode(', ', $lang_ids).'): '.$preview;
-		}
-		ksort($out);
-		return $out;
-
-	}
-
-	/**
-	 * Merge top-level + translation-branch orphans (translation preview preferred if both).
-	 *
-	 * @return array name => preview
-	 */
-	function merge_orphan_field_maps($top_level, $translation_level){
-
-		$out = is_array($top_level) ? $top_level : [];
-		if (!is_array($translation_level)){
-			return $out;
-		}
-		foreach ($translation_level as $name => $preview){
-			if (!isset($out[$name])){
-				$out[$name] = $preview;
-			} else {
-				// Keep base preview and append translation note
-				$out[$name] = $out[$name].' | tr '.$preview;
-			}
-		}
-		ksort($out);
-		return $out;
-
-	}
-
-	function format_param_value_preview($value, $max_len = 120){
-
-		if (is_array($value)){
-			$encoded = json_encode($value, JSON_UNESCAPED_UNICODE);
-			if ($encoded === false){
-				$encoded = '[array]';
-			}
-			$text = $encoded;
-		} else if (is_bool($value)){
-			$text = $value ? '1' : '0';
-		} else if ($value === null){
-			$text = '';
-		} else {
-			$text = (string)$value;
-		}
-		$text = preg_replace('/\s+/u', ' ', trim($text));
-		if (function_exists('mb_strlen') && function_exists('mb_substr')){
-			if (mb_strlen($text) > $max_len){
-				return mb_substr($text, 0, $max_len - 1).'…';
-			}
-			return $text;
-		}
-		if (strlen($text) > $max_len){
-			return substr($text, 0, $max_len - 1).'…';
-		}
-		return $text;
-
-	}
-
-	/**
-	 * Full orphan scan for panel editor (instance + settings + dead translation languages).
-	 *
-	 * @return array{
-	 *   panel_id:int, settings_id:int, panel_name:string,
-	 *   panel_fields:array, settings_fields:array, languages:array,
-	 *   is_settings_panel:bool
-	 * }
-	 */
-	function scan_orphan_panel_data($cms_page_panel_id){
-
-		$cms_page_panel_id = (int)$cms_page_panel_id;
-		$empty = [
-				'panel_id' => $cms_page_panel_id,
-				'settings_id' => 0,
-				'panel_name' => '',
-				'panel_fields' => [],
-				'settings_fields' => [],
-				'languages' => [],
-				'is_settings_panel' => 0,
-		];
-		if ($cms_page_panel_id < 1){
-			return $empty;
-		}
-
-		// Row only — avoid settings merge / language overlay
-		$sql = "select panel_name, cms_page_id, parent_id, sort from cms_page_panel where cms_page_panel_id = ? limit 1 ";
-		$query = $this->db->query($sql, [$cms_page_panel_id]);
-		if (!$query->num_rows()){
-			return $empty;
-		}
-		$block = $query->row_array();
-
-		$panel_name = (string)($block['panel_name'] ?? '');
-		$is_settings = empty($block['cms_page_id']) && empty($block['parent_id']) && empty($block['sort']);
-
-		$this->load->model('cms/cms_panel_model');
-		$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
-		$item_names = $this->collect_definition_field_names($config['item'] ?? []);
-		$settings_names = $this->collect_definition_field_names($config['settings'] ?? []);
-
-		// Raw cache (no language merge)
-		$panel_params = $this->get_cms_page_panel_params($cms_page_panel_id, '');
-		if (!is_array($panel_params)){
-			$panel_params = [];
-		}
-
-		$settings_id = $this->get_settings_panel_id($panel_name);
-		$settings_params = [];
-		if ($settings_id > 0){
-			if ($settings_id === $cms_page_panel_id){
-				$settings_params = $panel_params;
-			} else {
-				$settings_params = $this->get_cms_page_panel_params($settings_id, '');
-				if (!is_array($settings_params)){
-					$settings_params = [];
-				}
-			}
-		}
-
-		$panel_fields = [];
-		$settings_fields = [];
-		if ($is_settings){
-			// Editing settings panel: orphans vs settings fields only (top-level + ghost tr fields)
-			$settings_fields = $this->merge_orphan_field_maps(
-					$this->find_orphan_param_fields($panel_params, $settings_names),
-					$this->find_orphan_translation_fields($panel_params, $settings_names)
-			);
-			$settings_id = $cms_page_panel_id;
-		} else {
-			// Page/list instance: item fields only — settings labels under _translations are orphans
-			$panel_fields = $this->merge_orphan_field_maps(
-					$this->find_orphan_param_fields($panel_params, $item_names),
-					$this->find_orphan_translation_fields($panel_params, $item_names)
-			);
-			if ($settings_id > 0){
-				$settings_fields = $this->merge_orphan_field_maps(
-						$this->find_orphan_param_fields($settings_params, $settings_names),
-						$this->find_orphan_translation_fields($settings_params, $settings_names)
-				);
-			}
-		}
-
-		// Configured CMS languages
-		$this->_ensure_language_model();
-		$configured = [];
-		$langs_map = $GLOBALS['language']['languages'] ?? [];
-		if (is_array($langs_map)){
-			foreach ($langs_map as $lid => $unused){
-				$configured[$this->cms_language_model->normalise_language_id($lid)] = 1;
-			}
-		}
-		// Also accept languages settings if globals empty
-		if ($configured === []){
-			$lang_settings = $this->get_cms_page_panel_settings('cms/cms_languages');
-			if (!empty($lang_settings['languages']) && is_array($lang_settings['languages'])){
-				foreach ($lang_settings['languages'] as $row){
-					if (!is_array($row)){
-						continue;
-					}
-					$lid = $this->cms_language_model->normalise_language_id($row['language_id'] ?? '');
-					if ($lid !== ''){
-						$configured[$lid] = 1;
-					}
-				}
-			}
-		}
-
-		$translation_langs = [];
-		foreach ([$panel_params, $settings_params] as $bag){
-			$tr = $bag['_translations'] ?? [];
-			if (!is_array($tr)){
-				continue;
-			}
-			foreach ($tr as $lid => $unused){
-				$norm = $this->cms_language_model->normalise_language_id($lid);
-				if ($norm === ''){
-					continue;
-				}
-				$translation_langs[$norm] = 1;
-			}
-		}
-
-		$orphan_langs = [];
-		foreach ($translation_langs as $lid => $unused){
-			if (empty($configured[$lid])){
-				$orphan_langs[] = $lid;
-			}
-		}
-		sort($orphan_langs);
-
-		return [
-				'panel_id' => $cms_page_panel_id,
-				'settings_id' => $settings_id,
-				'panel_name' => $panel_name,
-				'panel_fields' => $panel_fields,
-				'settings_fields' => $settings_fields,
-				'languages' => $orphan_langs,
-				'is_settings_panel' => $is_settings ? 1 : 0,
-		];
-
-	}
-
-	/**
-	 * Delete top-level param keys (base + each translation branch) and rewrite param bag.
-	 * $allowed_orphan_map: name => anything (only those keys may be removed when provided).
-	 */
-	function purge_panel_param_keys($cms_page_panel_id, $keys, $allowed_orphan_map = null){
-
-		$cms_page_panel_id = (int)$cms_page_panel_id;
-		if ($cms_page_panel_id < 1 || !is_array($keys) || $keys === []){
-			return 0;
-		}
-
-		$params = $this->get_cms_page_panel_params($cms_page_panel_id, '');
-		if (!is_array($params)){
-			$params = [];
-		}
-
-		$deleted = 0;
-		foreach ($keys as $key){
-			$key = trim((string)$key);
-			if ($key === '' || $this->is_panel_param_meta_key($key)){
-				continue;
-			}
-			if (is_array($allowed_orphan_map) && !array_key_exists($key, $allowed_orphan_map)){
-				continue;
-			}
-			if (array_key_exists($key, $params)){
-				unset($params[$key]);
-				$deleted++;
-			}
-			// Also strip from every language branch
-			if (!empty($params['_translations']) && is_array($params['_translations'])){
-				foreach ($params['_translations'] as $lang => $branch){
-					if (is_array($branch) && array_key_exists($key, $branch)){
-						unset($params['_translations'][$lang][$key]);
-						$deleted++;
-					}
-				}
-			}
-		}
-
-		if ($deleted < 1){
-			return 0;
-		}
-
-		$this->_rewrite_panel_params_bag($cms_page_panel_id, $params);
-		return $deleted;
-
-	}
-
-	/**
-	 * Delete translation language branches no longer in CMS; rewrite param bag.
-	 */
-	function purge_panel_translation_languages($cms_page_panel_id, $language_ids){
-
-		$cms_page_panel_id = (int)$cms_page_panel_id;
-		if ($cms_page_panel_id < 1 || !is_array($language_ids) || $language_ids === []){
-			return 0;
-		}
-
-		$this->_ensure_language_model();
-		$params = $this->get_cms_page_panel_params($cms_page_panel_id, '');
-		if (!is_array($params)){
-			$params = [];
-		}
-
-		$remove = [];
-		foreach ($language_ids as $lid){
-			$lid = $this->cms_language_model->normalise_language_id($lid);
-			if ($lid === ''){
-				continue;
-			}
-			$remove[$lid] = 1;
-		}
-
-		if ($remove === []){
-			return 0;
-		}
-
-		$deleted = 0;
-		if (!empty($params['_translations']) && is_array($params['_translations'])){
-			foreach ($params['_translations'] as $lang => $branch){
-				$norm = $this->cms_language_model->normalise_language_id($lang);
-				if (!empty($remove[$norm]) || !empty($remove[$lang])){
-					unset($params['_translations'][$lang]);
-					$deleted++;
-				}
-			}
-			if (empty($params['_translations'])){
-				unset($params['_translations']);
-			}
-		}
-
-		// Also drop raw language-column rows for those ids
-		foreach (array_keys($remove) as $lid){
-			$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and language = ? ";
-			$this->db->query($sql, [$cms_page_panel_id, $lid]);
-		}
-
-		$this->_rewrite_panel_params_bag($cms_page_panel_id, $params);
-		return $deleted;
-
-	}
-
-	/**
-	 * Replace all cms_page_panel_param rows for a panel from a cleaned params bag.
-	 * Base fields as language=''; translation branches as language-scoped rows.
-	 */
-	function _rewrite_panel_params_bag($cms_page_panel_id, $params){
-
-		$cms_page_panel_id = (int)$cms_page_panel_id;
-		if ($cms_page_panel_id < 1 || !is_array($params)){
-			return;
-		}
-
-		$translations = [];
-		if (!empty($params['_translations']) && is_array($params['_translations'])){
-			$translations = $params['_translations'];
-		}
-		unset($params['_translations']);
-
-		// Drop meta keys that must not be re-written as content fields
-		// (keep _title etc. if present — they are used)
-		// Remove empty-name cache if any
-		unset($params['']);
-
-		$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? ";
-		$this->db->query($sql, [$cms_page_panel_id]);
-
-		// Base language fields
-		if ($params !== []){
-			$this->_insert_or_update_param($cms_page_panel_id, '', $params, 0, '');
-		}
-
-		// Language branches: name=field, language=lang_id
-		$this->_ensure_language_model();
-		foreach ($translations as $lang => $branch){
-			$lang = $this->cms_language_model->normalise_language_id($lang);
-			if ($lang === '' || !is_array($branch)){
-				continue;
-			}
-			foreach ($branch as $fname => $fval){
-				$fname = (string)$fname;
-				if ($fname === '' || $this->is_panel_param_meta_key($fname)){
-					continue;
-				}
-				if (is_array($fval)){
-					// Nested translation rare; store JSON string
-					$fval = json_encode($fval, JSON_UNESCAPED_UNICODE);
-				}
-				$this->set_translated_param($cms_page_panel_id, $fname, (string)$fval, $lang);
-			}
-		}
-
-		$this->rebuild_panel_param_cache($cms_page_panel_id);
-
-	}
-
-	/* DEPRECATED */
-	
-	/**
-	 * get site default language
 	 */
 	function get_default_language(){
 		
@@ -3451,4 +1886,153 @@ class cms_page_panel_model extends \Model {
 
 	}
 	
+
+	// --- core helpers used by create/update/invalidate (kept on main) ---
+
+	function get_lists(){
+	
+		$this->load->model('cms/cms_panel_model');
+	
+		$return = [];
+	
+		foreach ($GLOBALS['config']['modules'] as $module){
+			foreach(glob($GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/*.json') as $filename){
+				$list_name = basename($filename, '.json');
+				$block_config = $this->cms_panel_model->get_cms_panel_config($module.'/'.$list_name);
+				if (!empty($block_config['list'])){
+					$return[$module.'/'.$list_name] = $module.'/'.$list_name;
+				}
+			}
+		}
+	
+		return $return;
+	
+	}
+
+	/**
+	 * Search weights from panel definition item/settings fields ("search": "1"–"3").
+	 * Used when update_cms_page_panel does not receive search_params (API/sync saves).
+	 */
+
+	function get_search_params_for_panel_name($panel_name){
+
+		$panel_name = trim((string)$panel_name);
+		if ($panel_name === '' || !stristr($panel_name, '/')){
+			return [];
+		}
+
+		$this->load->model('cms/cms_panel_model');
+		$panel_config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+		if (!is_array($panel_config)){
+			return [];
+		}
+
+		// List item structure (sort > 0) merges item fields + extends
+		$panel_structure = $this->cms_panel_model->get_cms_panel_edit_structure($panel_config, 0, 0, 1);
+		if (!is_array($panel_structure) || empty($panel_structure)){
+			$panel_structure = $this->cms_panel_model->get_cms_panel_edit_structure($panel_config, 0, 0, 0);
+		}
+		if (!is_array($panel_structure)){
+			return [];
+		}
+
+		$search_params = [];
+		foreach ($panel_structure as $struct){
+			if (empty($struct['name'])){
+				continue;
+			}
+			if (!empty($struct['search'])){
+				$search_params[$struct['name']] = $struct['search'];
+			}
+			if (($struct['type'] ?? '') === 'repeater' && !empty($struct['fields']) && is_array($struct['fields'])){
+				foreach ($struct['fields'] as $r_struct){
+					if (!empty($r_struct['name']) && !empty($r_struct['search'])){
+						$search_params[$struct['name']][$r_struct['name']] = $r_struct['search'];
+					}
+				}
+			}
+		}
+
+		return $search_params;
+
+	}
+
+	/**
+	 * Opt-in (#114): when panel definition has ensure_data, fill missing top-level fields
+	 * from existing DB values, then definition defaults / type fallbacks.
+	 */
+
+	function ensure_panel_data($panel_name, $new_params, $existing_params = null, $context = []){
+
+		if ($panel_name === '' || !is_array($new_params)){
+			return is_array($new_params) ? $new_params : [];
+		}
+
+		$this->load->model('cms/cms_panel_model');
+		if (!$this->cms_panel_model->panel_has_ensure_data($panel_name)){
+			return $new_params;
+		}
+
+		$existing = is_array($existing_params) ? $existing_params : [];
+		$cms_page_id = $context['cms_page_id'] ?? 0;
+		$parent_id = $context['parent_id'] ?? 0;
+		$sort = $context['sort'] ?? 0;
+
+		$panel_config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+		$structure = $this->cms_panel_model->get_cms_panel_edit_structure(
+				$panel_config, $cms_page_id, $parent_id, $sort);
+
+		$result = $new_params;
+
+		foreach ($structure as $field){
+			$name = $field['name'] ?? '';
+			if ($name === '' || $name === '_noname'){
+				continue;
+			}
+			if (array_key_exists($name, $result)){
+				continue;
+			}
+			if (array_key_exists($name, $existing)){
+				$result[$name] = $existing[$name];
+				continue;
+			}
+			$result[$name] = $this->cms_panel_model->resolve_field_default($field);
+		}
+
+		// Keep meta keys from existing when not in the write payload
+		foreach ($existing as $key => $value){
+			if ($key === '' || !is_string($key) || $key[0] !== '_'){
+				continue;
+			}
+			if (!array_key_exists($key, $result)){
+				$result[$key] = $value;
+			}
+		}
+
+		return $result;
+
+	}
+
+	function shift_sort($panel_name, $start, $shift){ // panel name, start, amount
+		$sql = "update `cms_page_panel` set sort = sort ".sprintf('%+d', $shift)." where panel_name = ? and sort >= ? and (cms_page_id = ? or cms_page_id = ?)";
+		$query = $this->db->query($sql, array($panel_name, $start, 999999, 0, ));
+	}
+
+	function get_sort_stats($panel_name){
+		$sql = "select max(sort) as max_sort, count(*) as number from `cms_page_panel` where panel_name = ? and (cms_page_id = ? or cms_page_id = ?) group by panel_name ";
+		$query = $this->db->query($sql, array($panel_name, 999999, 0, ));
+		return $query->row_array();
+	}
+
+	function get_page_panel_sort_stats($page_id){
+		$sql = "select max(sort) as max_sort, count(*) as number from `cms_page_panel` where cms_page_id = ? group by cms_page_id ";
+		$query = $this->db->query($sql, array($page_id, ));
+		$return = $query->row_array();
+		if (empty($return['number'])){
+			$return = array('max_sort' => 0, 'number' => 0, );
+		}
+		return $return;
+	}
+
+
 }

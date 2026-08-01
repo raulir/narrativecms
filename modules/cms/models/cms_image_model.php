@@ -552,7 +552,8 @@ class cms_image_model extends \Model {
 		]);
 
 		$this->load->model('cms/cms_page_panel_model');
-		$this->cms_page_panel_model->swap_param_value($old_filename, $new_filename);
+		$this->load->model('cms/cms_page_panel_cms_model');
+		$this->cms_page_panel_cms_model->swap_param_value($old_filename, $new_filename);
 
 		$this->load->model('cms/cms_page_model');
 		$pages = $this->cms_page_model->get_cms_pages();

@@ -167,6 +167,16 @@ Prefer `extends Controller` / `extends Model` — not new `CI_*` names. Details 
 
 **SQL lives in models only.** Panel controllers, templates, helpers, and APIs must not run `$this->db->query` / raw SQL. Put queries on a model (e.g. `timmy/timmy_shop_model`, `cms/cms_page_panel_model`) and call the model from the panel. Controllers assemble params and call models; models own the database.
 
+### Page panel models (#763)
+
+| Model | Role | Who loads it |
+|-------|------|----------------|
+| `cms/cms_page_panel_model` | **Runtime core** — get/create/update/delete, `get_list`, settings, panel tables, param cache, visitor targets, titles | FE + system + domain modules + CMS |
+| `cms/cms_page_panel_cms_model` | **CMS admin** — editor save pipeline, show/copy, FK options, translation param write, lists discovery helpers used only from admin | CMS panels/models; **FE translate** (`user/page_translate*`) may also load it |
+| `cms/cms_page_panel_list_model` | **Admin list UI** — filtered list pages (`get_cms_page_panels_list_by`), move first | `cms_list`, `cms_list_list` |
+
+**Rule:** main model must **not** load cms/list models. CMS/list models may call main. Orphan data purge logic lives on panel `cms_page_panel_data_purge` (admin-only), not on the runtime model.
+
 ### CMS field values (no serve-time migration / empty fallbacks)
 
 Do **not** paper over missing or old CMS param values at request time:

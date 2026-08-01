@@ -21,6 +21,7 @@ class cms_list_list extends \Controller {
 	function panel_params($params){
 
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_list_model');
 		$this->load->model('cms/cms_panel_model');
 		
 		$config = $this->cms_panel_model->get_cms_panel_config($params['panel_name']);
@@ -47,18 +48,18 @@ class cms_list_list extends \Controller {
 			
 			$return['total'] = 0;
 			foreach($params['panel_name'] as $panel_name){
-				$return['total'] += $this->cms_page_panel_model->count_cms_page_panels_list_by(array_merge($filter, ['panel_name' => $panel_name, ]));
+				$return['total'] += $this->cms_page_panel_list_model->count_cms_page_panels_list_by(array_merge($filter, ['panel_name' => $panel_name, ]));
 			}
 			
 		} else {
 			
-			$return['total'] = $this->cms_page_panel_model->count_cms_page_panels_list_by(array_merge($filter, ['panel_name' => $params['panel_name'], ]));
+			$return['total'] = $this->cms_page_panel_list_model->count_cms_page_panels_list_by(array_merge($filter, ['panel_name' => $params['panel_name'], ]));
 		
 		}
 		
 		$filter['_start'] = !empty($params['start']) ? $params['start'] : 0;
 		$filter['_limit'] = !empty($params['limit']) ? $params['limit'] : 0;
-		$return['list'] = $this->cms_page_panel_model->get_cms_page_panels_list_by($filter);
+		$return['list'] = $this->cms_page_panel_list_model->get_cms_page_panels_list_by($filter);
 
 		foreach($return['list'] as $key => $block){
 			$return['list'][$key]['title'] = $this->cms_page_panel_model->get_panel_admin_title($block, false);

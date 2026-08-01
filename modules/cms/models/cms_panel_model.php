@@ -382,6 +382,7 @@ class cms_panel_model extends \Model {
 	function get_cms_panel_fk_data($block_structure){
 		
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_cms_model');
 		$this->load->model('cms/cms_table_model');
 		
 		$return = [];
@@ -404,7 +405,7 @@ class cms_panel_model extends \Model {
 						
 							$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] =
 									$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] +
-									$this->cms_page_panel_model->get_fk_data($struct_table, $struct['filter'], (!empty($struct['label_field']) ? $struct['label_field'] : 'title'));
+									$this->cms_page_panel_cms_model->get_fk_data($struct_table, $struct['filter'], (!empty($struct['label_field']) ? $struct['label_field'] : 'title'));
 								
 						} else if ($struct['target'] == 'table') {
 								
@@ -414,7 +415,7 @@ class cms_panel_model extends \Model {
 								
 						} else {
 							
-							$return[$struct['target']] = $this->cms_page_panel_model->get_fk_data($struct['list'], $struct['filter'], (!empty($struct['label_field']) ? $struct['label_field'] : 'title'));
+							$return[$struct['target']] = $this->cms_page_panel_cms_model->get_fk_data($struct['list'], $struct['filter'], (!empty($struct['label_field']) ? $struct['label_field'] : 'title'));
 
 						}
 					
@@ -436,12 +437,12 @@ class cms_panel_model extends \Model {
 								
 									$return[(!empty($r_struct['field']) ? $r_struct['field'] : $r_struct['name'])] =
 									$return[(!empty($r_struct['field']) ? $r_struct['field'] : $r_struct['name'])] +
-									$this->cms_page_panel_model->get_fk_data($struct_table, $r_struct['filter'], (!empty($r_struct['label_field']) ? $r_struct['label_field'] : 'title'));
+									$this->cms_page_panel_cms_model->get_fk_data($struct_table, $r_struct['filter'], (!empty($r_struct['label_field']) ? $r_struct['label_field'] : 'title'));
 										
 								} else {
 										
 									$return[(!empty($r_struct['field']) ? $r_struct['field'] : $r_struct['name'])] = 
-									$this->cms_page_panel_model->get_fk_data($r_struct['list'], $r_struct['filter'], (!empty($r_struct['label_field']) ? $r_struct['label_field'] : 'title'));
+									$this->cms_page_panel_cms_model->get_fk_data($r_struct['list'], $r_struct['filter'], (!empty($r_struct['label_field']) ? $r_struct['label_field'] : 'title'));
 								
 								}
 							}

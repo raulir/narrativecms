@@ -33,6 +33,7 @@ class cms_list extends \Controller {
 			$value = $this->input->post('value');
 
 			$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_list_model');
 			$this->cms_page_panel_model->update_cms_page_panel($cms_page_panel_id, [
 					$field => $value,
 			]);
@@ -42,6 +43,7 @@ class cms_list extends \Controller {
 			$list_order = $this->input->post('list_order');
 
 			$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_list_model');
 
 			$previous_sort = [];
 			foreach ($list_order as $list_sort => $cms_page_panel_id){
@@ -65,12 +67,13 @@ class cms_list extends \Controller {
 			$limit = $this->input->post('limit');
 
 			$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_list_model');
 
 			$block = $this->cms_page_panel_model->get_cms_page_panel($block_id);
 
 			if ($target == 'first'){
 
-				$this->cms_page_panel_model->move_first($block_id);
+				$this->cms_page_panel_list_model->move_first($block_id);
 
 			} else if ($target == 'previous'){
 
@@ -88,7 +91,7 @@ class cms_list extends \Controller {
 						$filter = array_merge($filter, $filters);
 					}
 
-					$old_block_a = $this->cms_page_panel_model->get_cms_page_panels_list_by(
+					$old_block_a = $this->cms_page_panel_list_model->get_cms_page_panels_list_by(
 							array_merge($filter, ['_start' => $start - 1, '_limit' => 1, ])
 					);
 
@@ -130,7 +133,7 @@ class cms_list extends \Controller {
 					$filter = array_merge($filter, $filters);
 				}
 
-				$old_block_a = $this->cms_page_panel_model->get_cms_page_panels_list_by(
+				$old_block_a = $this->cms_page_panel_list_model->get_cms_page_panels_list_by(
 						array_merge($filter, ['_start' => $start + $limit, '_limit' => 1, ])
 				);
 
@@ -184,6 +187,7 @@ class cms_list extends \Controller {
 
 			$this->load->model('cms/cms_panel_model');
 			$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_list_model');
 				
 			// load definition
 			$panel_definition = $this->cms_panel_model->get_cms_panel_definition($params['filter']['panel_name']);

@@ -24,6 +24,7 @@ class cms_page extends \Controller {
 
 		$this->load->model('cms/cms_page_model');
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_cms_model');
 		$this->load->model('cms/cms_user_model');
 
 		$return['block_list'] = [];
@@ -50,7 +51,7 @@ class cms_page extends \Controller {
 		$page_class = $this->cms_page_model->get_page_class($return['page']);
 		$return['page_class'] = $page_class;
 		$return['is_list_item'] = ($page_class === 'list'
-				|| (!empty($return['page']['slug']) && $this->cms_page_panel_model->is_list_slug($return['page']['slug'])))
+				|| (!empty($return['page']['slug']) && $this->cms_page_panel_cms_model->is_list_slug($return['page']['slug'])))
 			? 1 : 0;
 
 		if (!empty($return['page']['create_cms_user_id'])) {

@@ -27,7 +27,7 @@ class cms_page_panel extends \Controller {
 
 	/**
 	 * Admin ajax actions (save, delete, show, copy, caching, shortcut, title preview).
-	 * Domain work lives on cms_page_panel_model; hooks stay here.
+	 * Domain work: cms_page_panel_model (core) + cms_page_panel_cms_model (admin editor).
 	 */
 	function panel_action($params){
 
@@ -40,6 +40,7 @@ class cms_page_panel extends \Controller {
 		$params['no_html'] = 1;
 
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_cms_model');
 		$this->load->model('cms/cms_panel_model');
 
 		if ($do == 'cms_page_panel_shortcut'){
@@ -103,17 +104,17 @@ class cms_page_panel extends \Controller {
 			$block = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
 
 			if (!empty($block['show'])){
-				$result = $this->cms_page_panel_model->set_cms_page_panel_show($cms_page_panel_id, 0);
+				$result = $this->cms_page_panel_cms_model->set_cms_page_panel_show($cms_page_panel_id, 0);
 			} else {
 				$params['notification'] = $this->run_panel_method($block['panel_name'], 'on_show', $block);
-				$result = $this->cms_page_panel_model->set_cms_page_panel_show($cms_page_panel_id, 1);
+				$result = $this->cms_page_panel_cms_model->set_cms_page_panel_show($cms_page_panel_id, 1);
 			}
 
 			$params['show'] = $result['show'];
 
 		} elseif ($do == 'cms_page_panel_copy'){
 
-			$this->cms_page_panel_model->copy_cms_page_panel($this->input->post('cms_page_panel_id'));
+			$this->cms_page_panel_cms_model->copy_cms_page_panel($this->input->post('cms_page_panel_id'));
 
 		} elseif ($do == 'cms_page_panel_preview_title'){
 
@@ -129,9 +130,9 @@ class cms_page_panel extends \Controller {
 					}
 				}
 			} else {
-				$built = $this->cms_page_panel_model->build_panel_data_for_save(
+				$built = $this->cms_page_panel_cms_model->build_panel_data_for_save(
 						$this->_post_panel_form_input($block_id), $language);
-				$compiled_title = $this->cms_page_panel_model->compile_list_item_title(
+				$compiled_title = $this->cms_page_panel_cms_model->compile_list_item_title(
 						$built['data_merged'], $built['panel_config'], $block_id, $language);
 
 				if ($compiled_title !== false){
@@ -147,7 +148,7 @@ class cms_page_panel extends \Controller {
 
 			$old_data = $this->cms_page_panel_model->get_cms_page_panel($block_id, $language);
 
-			$built = $this->cms_page_panel_model->build_panel_data_for_save(
+			$built = $this->cms_page_panel_cms_model->build_panel_data_for_save(
 					$this->_post_panel_form_input($block_id), $language);
 			$data_merged = $built['data_merged'];
 			$panel_config = $built['panel_config'];
@@ -160,7 +161,7 @@ class cms_page_panel extends \Controller {
 				$data_merged['_cache_time'] = $old_data['_cache_time'];
 			}
 
-			$compiled_title = $this->cms_page_panel_model->compile_list_item_title(
+			$compiled_title = $this->cms_page_panel_cms_model->compile_list_item_title(
 					$data_merged, $panel_config, $block_id, $language);
 
 			if ($compiled_title !== false && $this->cms_page_panel_model->_is_default_language($language)){
@@ -169,14 +170,14 @@ class cms_page_panel extends \Controller {
 
 			$data_merged = $this->run_panel_method($data_merged['panel_name'], 'on_update', $data_merged);
 
-			$saved = $this->cms_page_panel_model->save_cms_page_panel_admin($block_id, $data_merged, [
+			$saved = $this->cms_page_panel_cms_model->save_cms_page_panel_admin($block_id, $data_merged, [
 					'panel_config' => $panel_config,
 					'parent_name' => $this->input->post('parent_name'),
 					'old_data' => is_array($old_data) ? $old_data : [],
 			]);
 			$block_id = $saved['cms_page_panel_id'];
 
-			$this->cms_page_panel_model->delete_orphan_upload_files(
+			$this->cms_page_panel_cms_model->delete_orphan_upload_files(
 					$panel_structure, is_array($old_data) ? $old_data : [], $data_merged);
 
 			$params['cms_page_panel_id'] = $block_id;
@@ -196,7 +197,7 @@ class cms_page_panel extends \Controller {
 					$panel_config, $data['cms_page_id'], $data['parent_id'], $data['sort']);
 
 			$this->cms_page_panel_model->delete_cms_page_panel($block_id);
-			$this->cms_page_panel_model->delete_orphan_upload_files($panel_structure, $data);
+			$this->cms_page_panel_cms_model->delete_orphan_upload_files($panel_structure, $data);
 
 		}
 
@@ -236,6 +237,7 @@ class cms_page_panel extends \Controller {
 	function panel_params($params){
 		
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_cms_model');
 		$this->load->model('cms/cms_page_model');
 		$this->load->model('cms/cms_panel_model');
 		$this->load->model('cms/cms_module_model');
@@ -305,7 +307,7 @@ class cms_page_panel extends \Controller {
 		// if no filtered block returned but has panel name
 		if (empty($return['block']['cms_page_panel_id']) && !empty($params['panel_name']) && stristr($params['panel_name'], '/')){
 			
-			$return['block'] = $this->cms_page_panel_model->new_cms_page_panel();
+			$return['block'] = $this->cms_page_panel_cms_model->new_cms_page_panel();
 			
 			// new panel name
 			$title = ucfirst(trim(!empty($params['module_panel_name']) ? $params['module_panel_name'] : $params['panel_name']));
@@ -344,7 +346,7 @@ class cms_page_panel extends \Controller {
 			$return['block']['panel_name'] = $params['panel_name'];
 			
 			// get new sort too as this is should be real block
-			$return['block']['sort'] = $this->cms_page_panel_model->get_max_cms_page_panel_id($params['panel_name']) + 1;
+			$return['block']['sort'] = $this->cms_page_panel_cms_model->get_max_cms_page_panel_id($params['panel_name']) + 1;
 
 		}
 

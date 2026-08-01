@@ -104,6 +104,7 @@ class cms_images_upload extends \Controller {
 		} else if ($do == 'cms_images_replace'){
 			
 			$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_page_panel_cms_model');
 			$this->load->model('cms/cms_page_model');
 				
 			// collect data
@@ -115,7 +116,7 @@ class cms_images_upload extends \Controller {
 			if (!empty($new_image)){
 
 				// replace all image occassions
-				$this->cms_page_panel_model->swap_param_value($filename, $new_image);
+				$this->cms_page_panel_cms_model->swap_param_value($filename, $new_image);
 
 				// add page images to count
 				$pages = $this->cms_page_model->get_cms_pages();
