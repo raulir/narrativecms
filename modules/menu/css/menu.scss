@@ -1,3 +1,11 @@
+// Defaults when site/basic theme vars are not in the pack related chain
+$colour_black: black !default;
+$colour_white: white !default;
+$colour_grey: #a0a0a0 !default;
+$colour_light_background: #f0f0f0 !default;
+$menu_height: 6.0rem !default;
+$mobile_width: 900px !default;
+
 .menu_container {
 	padding: 0 3.0rem;
 	text-align: center;

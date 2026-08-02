@@ -33,6 +33,7 @@ $config['update']['master'] = [
 		'gdpr',
 		'lightbox',
 		'localisation',
+		'menu',
 		'news',
 		'onetrust',
 		'search',

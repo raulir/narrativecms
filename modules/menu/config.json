@@ -1,0 +1,9 @@
+{
+	"name": "Menu",
+	"panels": [
+		{
+			"id": "menu",
+			"name": "Menu"
+		}
+	]
+}

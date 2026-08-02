@@ -1,6 +1,6 @@
 # Basic module backlog
 
-Frontend utility panels (language, vimeo, lightbox, menu, …).
+Frontend utility panels (language, vimeo, lightbox, …). Site menu lives in the separate **`menu`** module (`menu/menu`).
 
 **Legend:** `[ ]` open · `[x]` done
 
