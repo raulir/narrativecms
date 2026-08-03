@@ -1,44 +1,43 @@
 {
-	"version":"2",
-	"label":"CMS target groups",
-	"item":[],
-	"settings":[
+	"label": "CMS target groups",
+	"item": [],
+	"settings": [
 		{
-			"type":"repeater",
-			"name":"groups",
-			"label":"Groups",
-			"fields":[
+			"type": "repeater",
+			"name": "groups",
+			"label": "Groups",
+			"fields": [
 				{
-					"type":"text",
-					"name":"heading",
-					"label":"Group ID",
-					"help":"Lowercase letters and numbers, one word"
+					"type": "text",
+					"name": "heading",
+					"label": "Group ID",
+					"help": "Lowercase letters and numbers, one word"
 				},
 				{
-					"type":"select",
-					"name":"strategy",
-					"label":"Strategy",
-					"values":{
+					"type": "select",
+					"name": "strategy",
+					"label": "Strategy",
+					"values": {
 						"random": "By random",
 						"loggedin": "Visitor is logged in",
 						"mobile": "Visitor is mobile",
 						"admin": "Visitor is logged in to CMS admin",
 						"language": "Visitor language"
 					},
-					"default":"day",
-					"help":"[Random] Visitors are divided randomly by weights setting||[Logged in] Visitors are logged in are in 1st division||[Mobile] Visitors on mobile are in 2nd division"
+					"default": "day",
+					"help": "[Random] Visitors are divided randomly by weights setting||[Logged in] Visitors are logged in are in 1st division||[Mobile] Visitors on mobile are in 2nd division"
 				},
 				{
-					"type":"text",
-					"name":"labels",
-					"label":"Labels",
-					"help":"Group labels separated by pipes"
+					"type": "text",
+					"name": "labels",
+					"label": "Labels",
+					"help": "Group labels separated by pipes"
 				},
 				{
-					"type":"text",
-					"name":"settings",
-					"label":"Settings",
-					"help":"Group settings||For random: positive weights separated by pipes (proportional, e.g. 20|30 — need not sum to 100)"
+					"type": "text",
+					"name": "settings",
+					"label": "Settings",
+					"help": "Group settings||For random: positive weights separated by pipes (proportional, e.g. 20|30 — need not sum to 100)"
 				}
 			]
 		}

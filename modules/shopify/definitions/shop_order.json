@@ -1,5 +1,4 @@
 {
-	"version": "2",
 	"label": "Shopify order fields",
 	"description": "Extends shop/order with Storefront cart handoff state",
 	"item": [

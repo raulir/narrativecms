@@ -1,5 +1,4 @@
 {
-	"version": "1",
 	"label": "Panel translations",
 	"description": "Translate all translate:1 fields of one page panel for the current CMS language",
 	"item": []

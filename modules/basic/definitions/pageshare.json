@@ -1,86 +1,85 @@
 {
-	"version":"2",
-	"label":"Social sharing settings",
-	"settings":[
+	"label": "Social sharing settings",
+	"settings": [
 		{
-			"type":"text",
-			"name":"hashtags",
-			"label":"Hashtags",
-			"help":"Comma separated list of hashtags"
+			"type": "text",
+			"name": "hashtags",
+			"label": "Hashtags",
+			"help": "Comma separated list of hashtags"
 		},
 		{
-			"type":"textarea",
-			"name":"body",
-			"label":"Email body"
+			"type": "textarea",
+			"name": "body",
+			"label": "Email body"
 		},
 		{
-			"type":"textarea",
-			"name":"content",
-			"label":"Twitter content"
+			"type": "textarea",
+			"name": "content",
+			"label": "Twitter content"
 		},
 		{
-			"type":"repeater",
-			"name":"channels",
-			"label":"Channels",
-			"fields":[
+			"type": "repeater",
+			"name": "channels",
+			"label": "Channels",
+			"fields": [
 				{
-					"type":"image",
-					"name":"image",
-					"label":"Image",
-					"category":"icon"
+					"type": "image",
+					"name": "image",
+					"label": "Image",
+					"category": "icon"
 				},
 				{
-					"type":"select",
-					"name":"type",
-					"label":"Type",
-					"values":{
-						"email":"Email",
-						"facebook":"Facebook",
-						"twitter":"Twitter",
-						"linkedin":"LinkedIn",
-						"instagram":"Instagram"
+					"type": "select",
+					"name": "type",
+					"label": "Type",
+					"values": {
+						"email": "Email",
+						"facebook": "Facebook",
+						"twitter": "Twitter",
+						"linkedin": "LinkedIn",
+						"instagram": "Instagram"
 					},
-					"default":"facebook"
+					"default": "facebook"
 				},
 				{
-					"type":"text",
-					"name":"text",
-					"label":"Text"
+					"type": "text",
+					"name": "text",
+					"label": "Text"
 				}
 			]
 		},
 		{
-			"type":"subtitle",
-			"label":"APIs"
+			"type": "subtitle",
+			"label": "APIs"
 		},
 		{
-			"type":"text",
-			"name":"fb_app_id",
-			"label":"FB app ID",
-			"help":"From FB dev console"
+			"type": "text",
+			"name": "fb_app_id",
+			"label": "FB app ID",
+			"help": "From FB dev console"
 		},
 		{
-			"type":"text",
-			"name":"bitly_token",
-			"label":"Bitly token",
-			"help":"Bitly: Acccount -> Settings -> API"
+			"type": "text",
+			"name": "bitly_token",
+			"label": "Bitly token",
+			"help": "Bitly: Acccount -> Settings -> API"
 		},
 		{
-			"type":"select",
-			"name":"twitter_hide_url",
-			"label":"URL in Twitter",
-			"values":{
-				"0":"Visible",
-				"1":"Hidden"
-			},
-			"default":"0",
-			"help":"If card or text already includes an url"
+			"type": "select",
+			"name": "twitter_hide_url",
+			"label": "URL in Twitter",
+			"values": [
+				"Visible",
+				"Hidden"
+			],
+			"default": "0",
+			"help": "If card or text already includes an url"
 		},
 		{
-			"type":"text",
-			"name":"twitter_suffix",
-			"label":"Twitter suffix",
-			"help":"Goes between text and url in share dialog"
+			"type": "text",
+			"name": "twitter_suffix",
+			"label": "Twitter suffix",
+			"help": "Goes between text and url in share dialog"
 		}
 	]
 }

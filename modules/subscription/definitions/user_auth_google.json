@@ -1,5 +1,4 @@
 {
-	"version": "2",
 	"label": "Subscription Google auth extend",
 	"description": "Checkout intent → post-Google resume",
 	"item": []

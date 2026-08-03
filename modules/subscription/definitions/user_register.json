@@ -1,5 +1,4 @@
 {
-	"version": "2",
 	"label": "Subscription register extend",
 	"description": "Checkout intent → post-register resume",
 	"item": []

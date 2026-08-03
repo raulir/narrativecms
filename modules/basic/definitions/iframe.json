@@ -1,43 +1,40 @@
 {
-    "version": "2",
-	"title":"Iframe",
-	"label":"Iframe",
-    "js": [
-
-    ],
-    "item": [
+	"title": "Iframe",
+	"label": "Iframe",
+	"js": [],
+	"item": [
 		{
-			"type":"text",
-			"name":"address",
-			"label":"Address"
+			"type": "text",
+			"name": "address",
+			"label": "Address"
 		},
 		{
-			"type":"select",
-			"name":"resizer",
-			"label":"Resizer enabled",
+			"type": "select",
+			"name": "resizer",
+			"label": "Resizer enabled",
 			"values": {
-				"yes":"Yes",
-				"no":"No"
+				"yes": "Yes",
+				"no": "No"
 			},
-			"default":"no"
+			"default": "no"
 		},
 		{
-			"type":"text",
-			"name":"id",
-			"label":"Iframe ID",
-			"default":"iframe"
+			"type": "text",
+			"name": "id",
+			"label": "Iframe ID",
+			"default": "iframe"
 		},
 		{
-			"type":"text",
-			"name":"initial_height",
-			"label":"Initial height",
-			"default":"2000px"
+			"type": "text",
+			"name": "initial_height",
+			"label": "Initial height",
+			"default": "2000px"
 		},
 		{
-			"type":"text",
-			"name":"delay",
-			"label":"Delay ms",
-			"default":"1000"
+			"type": "text",
+			"name": "delay",
+			"label": "Delay ms",
+			"default": "1000"
 		}
-    ]
+	]
 }

@@ -192,11 +192,14 @@ class cms_panel_model extends \Model {
 
 	}
 	
+	/**
+	 * Load panel definition JSON + apply config.json extends (merge_structures).
+	 * Only mechanism: site module config "extends" target/source — not definition "extends".
+	 */
 	function get_cms_panel_config($cms_panel){
 
 		$return = [
 				'item' => [],
-				'version' => 2,
 		];
 		
 		if (!stristr($cms_panel, '/')){
@@ -223,35 +226,13 @@ class cms_panel_model extends \Model {
 			
 			$return = cms_json_decode($json_data, $filename);
 
-			// if extends
-			if(!empty($return['extends']['panel'])){
-
-				$extends_config = $this->get_cms_panel_config($return['extends']['panel']);
-				
-				// join structures, do not overwrite item elements
-				$items = $return['item'] ?? [];
-				
-				if (empty($extends_config['item'])){
-					$extends_config['item'] = [];
-				}
-				
-				array_push($items, ...$extends_config['item']);
-
-				$return = array_merge_recursive_ex($extends_config, $return);
-				
-				$return['item'] = $items;
-				
-			}
-			
 		}
 		
 		$return['filename'] = $filename;
+		$return['module'] = !empty($default_module) ? $default_module : ($return['module'] ?? 'cms');
 		
-		if (!empty($return['version']) && is_array($return['version'])){
-			$return['version'] = end($return['version']);
-		}
 		
-			if (!empty($return['label']) && is_array($return['label'])){
+		if (!empty($return['label']) && is_array($return['label'])){
 			$return['label'] = end($return['label']);
 		}
 		
@@ -262,27 +243,166 @@ class cms_panel_model extends \Model {
 		if (!empty($return['image']) && is_array($return['image'])){
 			$return['image'] = end($return['image']);
 		}
-		
-		foreach($GLOBALS['config']['extends'] as $item){
-			if ($item['target'] == $cms_panel){
-				$return = $this->merge_structures($return, $this->get_cms_panel_config($item['source']));
-			}
+
+		$sources = $this->get_extend_sources_for_target($cms_panel);
+		foreach ($sources as $source){
+			$return = $this->merge_structures($return, $this->get_cms_panel_config($source));
 		}
 		
 		return $return;
 
 	}
-	
+
+	/**
+	 * Sources that extend $target (config.json extends), order preserved.
+	 * @return string[]
+	 */
+	function get_extend_sources_for_target($target){
+
+		$by_target = $GLOBALS['config']['extends_by_target'] ?? null;
+		if (is_array($by_target)){
+			return !empty($by_target[$target]) && is_array($by_target[$target])
+					? $by_target[$target] : [];
+		}
+
+		$sources = [];
+		if (empty($GLOBALS['config']['extends']) || !is_array($GLOBALS['config']['extends'])){
+			return $sources;
+		}
+		foreach ($GLOBALS['config']['extends'] as $item){
+			if (($item['target'] ?? '') === $target && !empty($item['source'])){
+				$sources[] = $item['source'];
+			}
+		}
+		return $sources;
+
+	}
+
+	/**
+	 * True if any module lists this panel as an extends target.
+	 */
+	function is_extend_target($panel_name){
+
+		$panel_name = trim((string)$panel_name);
+		if ($panel_name === ''){
+			return false;
+		}
+		$by_target = $GLOBALS['config']['extends_by_target'] ?? null;
+		if (is_array($by_target)){
+			return !empty($by_target[$panel_name]);
+		}
+		return $this->get_extend_sources_for_target($panel_name) !== [];
+
+	}
+
+	/**
+	 * Panel name appears as an extend source and not as a target (overlay-only id).
+	 */
+	function is_extend_source_only($panel_name){
+
+		$panel_name = trim((string)$panel_name);
+		if ($panel_name === ''){
+			return false;
+		}
+		if ($this->is_extend_target($panel_name)){
+			return false;
+		}
+		$sources = $GLOBALS['config']['extend_sources'] ?? null;
+		if (is_array($sources)){
+			return !empty($sources[$panel_name]);
+		}
+		if (empty($GLOBALS['config']['extends']) || !is_array($GLOBALS['config']['extends'])){
+			return false;
+		}
+		foreach ($GLOBALS['config']['extends'] as $item){
+			if (($item['source'] ?? '') === $panel_name){
+				return true;
+			}
+		}
+		return false;
+
+	}
+
+	/**
+	 * Enumerate definition panel ids (module/panel) for discovery.
+	 *
+	 * @param array $opts exclude_extend_sources (bool, default true)
+	 * @return string[]
+	 */
+	function list_definition_panel_names($opts = []){
+
+		$exclude_sources = !array_key_exists('exclude_extend_sources', $opts)
+				|| !empty($opts['exclude_extend_sources']);
+
+		$return = [];
+		$modules = $GLOBALS['config']['modules'] ?? [];
+		if (!is_array($modules)){
+			return $return;
+		}
+
+		foreach ($modules as $module){
+			$def_dir = $GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/';
+			if (!is_dir($def_dir)){
+				continue;
+			}
+			foreach (glob($def_dir.'*.json') as $file){
+				$panel = basename($file, '.json');
+				$name = $module.'/'.$panel;
+				if ($exclude_sources && $this->is_extend_source_only($name)){
+					continue;
+				}
+				$return[] = $name;
+			}
+		}
+
+		sort($return);
+		return $return;
+
+	}
+
+	/**
+	 * Whether merged list config looks like a real catalogue list (not a stub overlay).
+	 */
+	function is_real_list_config($config){
+
+		if (empty($config['list']) || !is_array($config['list'])){
+			return false;
+		}
+		if (!empty($config['item']) && is_array($config['item'])){
+			return true;
+		}
+		$list = $config['list'];
+		return !empty($list['list_title']) || !empty($list['item_title']);
+
+	}
+
+	/**
+	 * Merge extension definition ($from) onto base/target ($into).
+	 * Special keys: item/settings (field name merge), list (array_merge), extra_buttons/js (append).
+	 * label/description/image: source only if target empty.
+	 * filename/module: never from source.
+	 * All other keys: source overwrites.
+	 */
 	function merge_structures($structure_into, $structure_from){
-		
+
+		if (!is_array($structure_into)){
+			$structure_into = [];
+		}
+		if (!is_array($structure_from)){
+			return $structure_into;
+		}
+
+		$special = ['item', 'settings', 'list', 'extra_buttons', 'js', 'label', 'description', 'image', 'filename', 'module'];
+
+		// item fields by name
 		if (empty($structure_from['item'])) $structure_from['item'] = [];
 		if (empty($structure_into['item'])) $structure_into['item'] = [];
-		foreach($structure_from['item'] as $item){
-			
+		if (!is_array($structure_from['item'])) $structure_from['item'] = [];
+		if (!is_array($structure_into['item'])) $structure_into['item'] = [];
+		foreach ($structure_from['item'] as $item){
 			$copied = 0;
-			foreach($structure_into['item'] as $key => $into){
+			foreach ($structure_into['item'] as $key => $into){
 				if (!empty($item['name']) && !empty($into['name']) && $into['name'] == $item['name']){
-					// Overlay extension props onto base field (e.g. readonly) — keep type/list/etc.
 					$structure_into['item'][$key] = $this->_merge_field_definition($into, $item);
 					$copied = 1;
 				}
@@ -290,15 +410,16 @@ class cms_panel_model extends \Model {
 			if ($copied == 0){
 				$structure_into['item'][] = $item;
 			}
-			
 		}
-		
+
+		// settings fields by name
 		if (empty($structure_from['settings'])) $structure_from['settings'] = [];
 		if (empty($structure_into['settings'])) $structure_into['settings'] = [];
-		foreach($structure_from['settings'] as $item){
-				
+		if (!is_array($structure_from['settings'])) $structure_from['settings'] = [];
+		if (!is_array($structure_into['settings'])) $structure_into['settings'] = [];
+		foreach ($structure_from['settings'] as $item){
 			$copied = 0;
-			foreach($structure_into['settings'] as $key => $into){
+			foreach ($structure_into['settings'] as $key => $into){
 				if (!empty($item['name']) && !empty($into['name']) && $into['name'] == $item['name']){
 					$structure_into['settings'][$key] = $this->_merge_field_definition($into, $item);
 					$copied = 1;
@@ -307,10 +428,17 @@ class cms_panel_model extends \Model {
 			if ($copied == 0){
 				$structure_into['settings'][] = $item;
 			}
-				
 		}
 
-		// Extension panels may add CMS toolbar buttons (e.g. shopify product refresh)
+		// list meta — source keys win
+		if (!empty($structure_from['list']) && is_array($structure_from['list'])){
+			if (empty($structure_into['list']) || !is_array($structure_into['list'])){
+				$structure_into['list'] = [];
+			}
+			$structure_into['list'] = array_merge($structure_into['list'], $structure_from['list']);
+		}
+
+		// extra_buttons — append
 		if (!empty($structure_from['extra_buttons']) && is_array($structure_from['extra_buttons'])){
 			if (empty($structure_into['extra_buttons']) || !is_array($structure_into['extra_buttons'])){
 				$structure_into['extra_buttons'] = [];
@@ -320,12 +448,40 @@ class cms_panel_model extends \Model {
 			}
 		}
 
-		// Overlay list meta (e.g. link_target: "0" to disable public slugs for catalogue lists)
-		if (!empty($structure_from['list']) && is_array($structure_from['list'])){
-			if (empty($structure_into['list']) || !is_array($structure_into['list'])){
-				$structure_into['list'] = [];
+		// js — append unique string entries when both arrays
+		if (array_key_exists('js', $structure_from)){
+			if (is_array($structure_from['js']) && is_array($structure_into['js'] ?? null)){
+				foreach ($structure_from['js'] as $js){
+					if (!in_array($js, $structure_into['js'], true)){
+						$structure_into['js'][] = $js;
+					}
+				}
+			} else {
+				$structure_into['js'] = $structure_from['js'];
 			}
-			$structure_into['list'] = array_merge($structure_into['list'], $structure_from['list']);
+		}
+
+		// label / description / image — target wins if already set
+		foreach (['label', 'description', 'image'] as $meta_key){
+			if (!array_key_exists($meta_key, $structure_from)){
+				continue;
+			}
+			$from_val = $structure_from[$meta_key];
+			if ($from_val === null || $from_val === ''){
+				continue;
+			}
+			$into_val = $structure_into[$meta_key] ?? null;
+			if ($into_val === null || $into_val === ''){
+				$structure_into[$meta_key] = $from_val;
+			}
+		}
+
+		// all remaining keys — source overwrites (unknown future keys)
+		foreach ($structure_from as $key => $value){
+			if (in_array($key, $special, true)){
+				continue;
+			}
+			$structure_into[$key] = $value;
 		}
 		
 		return $structure_into;

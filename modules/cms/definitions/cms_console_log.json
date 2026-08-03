@@ -1,12 +1,11 @@
 {
-	"version":"2",
-	"label":"CMS console log settings",
-	"item":[
+	"label": "CMS console log settings",
+	"item": [
 		{
-			"type":"text",
-			"name":"filename",
-			"label":"Filename (in cache dir)",
-			"default":"console.log"
+			"type": "text",
+			"name": "filename",
+			"label": "Filename (in cache dir)",
+			"default": "console.log"
 		}
 	]
 }

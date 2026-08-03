@@ -1,15 +1,8 @@
 {
-    "version": "2",
-    "image":"",
-    "label":"Cart",
-    "description":"Cart panel",
-    "js": [
-
-    ],
-    "item": [
-
-    ],
-    "settings": [
-
-    ]
+	"image": "",
+	"label": "Cart",
+	"description": "Cart panel",
+	"js": [],
+	"item": [],
+	"settings": []
 }

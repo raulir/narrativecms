@@ -1,6 +1,5 @@
 {
-	"version":"2",
-	"label":"Analytics dashboard",
-	"item":[],
-	"settings":[]
+	"label": "Analytics dashboard",
+	"item": [],
+	"settings": []
 }

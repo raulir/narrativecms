@@ -1,95 +1,92 @@
 {
-	"version":"2",
-	"label":"User module settings",
-	"item":[
-	
-	],
-	"settings":[
+	"label": "User module settings",
+	"item": [],
+	"settings": [
 		{
-			"type":"select",
-			"name":"show_username",
-			"label":"Login username",
-			"values":{
-				"0":"Email is login name",
-				"1":"Username is login name"
-			},
-			"default":"0",
-			"help":"What field user uses to log in"
+			"type": "select",
+			"name": "show_username",
+			"label": "Login username",
+			"values": [
+				"Email is login name",
+				"Username is login name"
+			],
+			"default": "0",
+			"help": "What field user uses to log in"
 		},
 		{
-			"type":"select",
-			"name":"email_confirmation",
-			"label":"Email confirmation",
-			"values":{
-				"0":"No",
-				"1":"Yes"
-			},
-			"default":"0",
-			"help":"If yes, user must confirm email before login. If no, confirmation email is still sent but login is allowed."
+			"type": "select",
+			"name": "email_confirmation",
+			"label": "Email confirmation",
+			"values": [
+				"No",
+				"Yes"
+			],
+			"default": "0",
+			"help": "If yes, user must confirm email before login. If no, confirmation email is still sent but login is allowed."
 		},
 		{
-			"type":"subtitle",
-			"label":"Welcome email"
+			"type": "subtitle",
+			"label": "Welcome email"
 		},
 		{
-			"type":"text",
-			"name":"welcome_email_subject",
-			"label":"Subject",
-			"default":"Welcome",
-			"help":"Plain text. Use {{name}} for the user's name. Non-live environments get [ENV] prefixed automatically.",
-			"translate":"1"
+			"type": "text",
+			"name": "welcome_email_subject",
+			"label": "Subject",
+			"default": "Welcome",
+			"help": "Plain text. Use {{name}} for the user's name. Non-live environments get [ENV] prefixed automatically.",
+			"translate": "1"
 		},
 		{
-			"type":"textarea",
-			"name":"welcome_email_body",
-			"label":"Body",
-			"lines":"8",
-			"default":"Hello {{name}},\n\nWelcome. Your account has been created successfully. You can sign in any time with the email address you registered with.",
-			"help":"Plain text. Use {{name}} for the user's name (first name, else username, else email).",
-			"translate":"1"
+			"type": "textarea",
+			"name": "welcome_email_body",
+			"label": "Body",
+			"lines": "8",
+			"default": "Hello {{name}},\n\nWelcome. Your account has been created successfully. You can sign in any time with the email address you registered with.",
+			"help": "Plain text. Use {{name}} for the user's name (first name, else username, else email).",
+			"translate": "1"
 		},
 		{
-			"type":"text",
-			"name":"progress_message",
-			"label":"Progress message",
-			"default":"One moment...",
-			"help":"Shown on full-page overlay during slow sign-in/register (after ~1 second). Leave empty for default.",
-			"translate":"1"
+			"type": "text",
+			"name": "progress_message",
+			"label": "Progress message",
+			"default": "One moment...",
+			"help": "Shown on full-page overlay during slow sign-in/register (after ~1 second). Leave empty for default.",
+			"translate": "1"
 		},
 		{
-			"type":"subtitle",
-			"label":"Links"
+			"type": "subtitle",
+			"label": "Links"
 		},
 		{
-			"type":"link",
-			"name":"login_link",
-			"label":"Link to login",
-			"help":"Guest redirect target and header login CTA"
+			"type": "link",
+			"name": "login_link",
+			"label": "Link to login",
+			"help": "Guest redirect target and header login CTA"
 		},
 		{
-			"type":"link",
-			"name":"user_link",
-			"label":"Link to user",
-			"help":"Redirect after successful login or registration"
+			"type": "link",
+			"name": "user_link",
+			"label": "Link to user",
+			"help": "Redirect after successful login or registration"
 		},
 		{
-			"type":"link",
-			"name":"logout_link",
-			"label":"Log out redirect",
-			"help":"Redirect after logout"
+			"type": "link",
+			"name": "logout_link",
+			"label": "Log out redirect",
+			"help": "Redirect after logout"
 		},
 		{
-			"type":"repeater",
-			"name":"default_access",
-			"label":"Default access",
-			"help":"Granted to new users on register (merged with existing keys)",
-			"fields":[
+			"type": "repeater",
+			"name": "default_access",
+			"label": "Default access",
+			"help": "Granted to new users on register (merged with existing keys)",
+			"fields": [
 				{
-					"type":"text",
-					"name":"key",
-					"label":"Key",
-					"mandatory":"1",
-					"help":"e.g. music_student"
+					"type": "text",
+					"name": "key",
+					"label": "Key",
+					"mandatory": "1",
+					"help": "e.g. music_student"
 				}
 			]
 		}

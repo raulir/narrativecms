@@ -36,6 +36,12 @@ class page_translate extends \Controller {
 		}
 
 		$cms_page_id = (int)$this->input->post('cms_page_id');
+		// SPA: footer mount may still have old id; client prefers main position.
+		// If id missing, resolve from current path slug (e.g. /login/ → login).
+		if ($cms_page_id < 1){
+			$path = (string)$this->input->post('path');
+			$cms_page_id = $this->_page_id_from_path($path);
+		}
 		$unit_id = (int)$this->input->post('unit_id');
 		$types_raw = $this->input->post('types');
 		$types = [];
@@ -83,6 +89,53 @@ class page_translate extends \Controller {
 		$params['is_cms_user'] = !empty($_SESSION['cms_user']['cms_user_id']) ? 1 : 0;
 
 		return $params;
+
+	}
+
+	/**
+	 * Resolve main page id from URL path when SPA client could not supply cms_page_id.
+	 */
+	function _page_id_from_path($path){
+
+		$path = trim((string)$path);
+		if ($path === ''){
+			return 0;
+		}
+
+		// Accept full URL or path
+		if (strpos($path, '://') !== false){
+			$parts = parse_url($path);
+			$path = $parts['path'] ?? '';
+		}
+
+		$path = trim($path, '/');
+		if ($path === ''){
+			// Homepage often uses empty slug
+			$this->load->model('cms/cms_page_model');
+			$page = $this->cms_page_model->get_page_by_slug('');
+			return !empty($page['cms_page_id']) ? (int)$page['cms_page_id'] : 0;
+		}
+
+		// Prefer last segment as public slug (multi-segment list items still work via main page id from SPA)
+		$segments = explode('/', $path);
+		$slug = end($segments);
+		$slug = is_string($slug) ? $slug : '';
+
+		$this->load->model('cms/cms_page_model');
+		$page = $this->cms_page_model->get_page_by_slug($slug);
+		if (!empty($page['cms_page_id'])){
+			return (int)$page['cms_page_id'];
+		}
+
+		// Full path as slug (rare)
+		if ($slug !== $path){
+			$page = $this->cms_page_model->get_page_by_slug($path);
+			if (!empty($page['cms_page_id'])){
+				return (int)$page['cms_page_id'];
+			}
+		}
+
+		return 0;
 
 	}
 

@@ -1,5 +1,4 @@
 {
-	"version": "2",
 	"label": "Subscription product fields",
 	"description": "Billing and presentation for subscription-type products",
 	"item": [
@@ -30,10 +29,10 @@
 			"type": "select",
 			"name": "featured",
 			"label": "Featured",
-			"values": {
-				"0": "No",
-				"1": "Yes"
-			},
+			"values": [
+				"No",
+				"Yes"
+			],
 			"default": "0",
 			"help": "Highlight this offer on the pricing card"
 		},

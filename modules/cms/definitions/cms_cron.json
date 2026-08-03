@@ -1,37 +1,36 @@
 {
-	"version":"2",
-	"label":"CMS repeating tasks",
-	"settings":[
+	"label": "CMS repeating tasks",
+	"settings": [
 		{
-			"type":"repeater",
-			"name":"items",
-			"label":"Items",
-			"fields":[
+			"type": "repeater",
+			"name": "items",
+			"label": "Items",
+			"fields": [
 				{
-					"type":"cms_panel",
-					"name":"panel",
-					"flag":"cron",
-					"label":"Task name",
-					"help":"Calls panel_action() after every x time units||Minimum is 5 minutes"
+					"type": "cms_panel",
+					"name": "panel",
+					"flag": "cron",
+					"label": "Task name",
+					"help": "Calls panel_action() after every x time units||Minimum is 5 minutes"
 				},
 				{
-					"type":"select",
-					"name":"timeunit",
-					"label":"Time unit",
-					"values":{
-						"minute":"Minute",
-						"hour":"Hour",
-						"day":"Day"
+					"type": "select",
+					"name": "timeunit",
+					"label": "Time unit",
+					"values": {
+						"minute": "Minute",
+						"hour": "Hour",
+						"day": "Day"
 					},
-					"default":"day"
+					"default": "day"
 				},
 				{
-					"type":"text",
-					"name":"count",
-					"label":"Count",
-					"default":"1"
+					"type": "text",
+					"name": "count",
+					"label": "Count",
+					"default": "1"
 				}
 			]
 		}
- 	]
+	]
 }

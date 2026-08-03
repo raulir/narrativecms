@@ -1,5 +1,4 @@
 {
-	"version": "2",
 	"label": "Page translation grid",
 	"description": "Frontend translation editor popup (visitor language). Uses cms translation models.",
 	"item": []

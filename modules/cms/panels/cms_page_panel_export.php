@@ -546,7 +546,7 @@ class cms_page_panel_export extends \Controller {
 				}
 			}
 		}
-		if (!empty($files['template']) && file_exists($files['template']) && empty($files['template_extends'])){
+		if (!empty($files['template']) && file_exists($files['template']) && empty($files['template_from_extend'])){
 			$paths[] = str_replace($GLOBALS['config']['base_path'], '', $files['template']);
 		}
 

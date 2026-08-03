@@ -13,7 +13,7 @@ class cms_page_panel_cms_model extends \Model {
 
 	function __construct(){
 
-		parent::__construct();
+		// Base Model has no constructor — do not call parent::__construct()
 		$this->load->model('cms/cms_page_panel_model');
 		// Ensure language model is available for translation helpers
 		$this->cms_page_panel_model->_ensure_language_model();
@@ -38,35 +38,17 @@ class cms_page_panel_cms_model extends \Model {
 			return false;
 		}
 
-		// Namespaced list template slugs: shop_product → shop/product
+		// Namespaced list template slugs only: shop_product → shop/product
 		$this->load->model('cms/cms_page_model');
 		$panel_from_slug = $this->cms_page_model->list_template_panel_from_slug($slug);
-		if ($panel_from_slug !== ''){
-			foreach ($this->cms_page_model->get_linkable_list_types() as $type){
-				if ($type['panel_name'] === $panel_from_slug){
-					return true;
-				}
-			}
+		if ($panel_from_slug === ''){
+			return false;
 		}
 
-		// Bare panel basename definitions (definitions/{slug}.json with list)
-		foreach ($GLOBALS['config']['modules'] as $module){
-
-			$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/'.$slug.'.json';
-
-			if (!file_exists($filename)){
-				continue;
-			}
-
-			$config = cms_json_decode(file_get_contents($filename), $filename);
-
-			if (!empty($config['list'])){
-				return true;
-			}
-
-		}
-
-		return false;
+		// Any real list type (including non-linkable) — leftover shells still classify as list pages
+		$this->load->model('cms/cms_page_panel_model');
+		$lists = $this->cms_page_panel_model->get_lists();
+		return !empty($lists[$panel_from_slug]);
 
 	}
 
@@ -277,10 +259,6 @@ class cms_page_panel_cms_model extends \Model {
 		}
 
 		$panel_config = $this->cms_panel_model->get_cms_panel_config($data['panel_name']);
-
-		if (!empty($panel_config['extends'])){
-			$data['panel_params']['_extends'] = $panel_config['extends'];
-		}
 
 		if (!empty($panel_config['list']['templates'])){
 			$data['panel_params']['_template_page_id'] = $input['_template_page_id'] ?? null;

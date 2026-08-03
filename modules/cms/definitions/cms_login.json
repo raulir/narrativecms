@@ -1,7 +1,6 @@
 {
-    "version": "2",
-    "js": [
-    	"cms/cms_site_main",
-    	"cms/cms"
-    ]
+	"js": [
+		"cms/cms_site_main",
+		"cms/cms"
+	]
 }

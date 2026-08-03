@@ -1,53 +1,52 @@
 {
-	"version":"2",
-	"label":"Mockup image",
-	"item":[
+	"label": "Mockup image",
+	"item": [
 		{
-			"type":"image",
-			"name":"image",
-			"label":"Image",
-			"category":"content"
+			"type": "image",
+			"name": "image",
+			"label": "Image",
+			"category": "content"
 		},
 		{
-			"type":"colour",
-			"name":"colour",
-			"label":"Background colour"
+			"type": "colour",
+			"name": "colour",
+			"label": "Background colour"
 		},
 		{
-			"type":"select",
-			"name":"optimise",
-			"label":"Optimise",
+			"type": "select",
+			"name": "optimise",
+			"label": "Optimise",
 			"values": {
-				"":"No",
-				"1":"Yes"
+				"": "No",
+				"1": "Yes"
 			},
-			"default":"1"
+			"default": "1"
 		},
 		{
-			"type":"text",
-			"name":"width",
-			"label":"Image width rem",
-			"default":"100",
-			"help":"Image width on desktop in rems, default 100, leave empty for full screen width for any screen size"
+			"type": "text",
+			"name": "width",
+			"label": "Image width rem",
+			"default": "100",
+			"help": "Image width on desktop in rems, default 100, leave empty for full screen width for any screen size"
 		},
 		{
-			"type":"repeater",
-			"name":"links",
-			"label":"Links",
-			"fields":[
-		        { 
-		            "type": "link",
-		            "name": "link",
-		            "label": "Link"
-		        },
-		        {
-		        	"type":"mask",
-		        	"name":"area",
-		        	"label":"Area",
-		        	"target":"image",
-		        	"definition":"40"
-		        }
-		    ]
+			"type": "repeater",
+			"name": "links",
+			"label": "Links",
+			"fields": [
+				{
+					"type": "link",
+					"name": "link",
+					"label": "Link"
+				},
+				{
+					"type": "mask",
+					"name": "area",
+					"label": "Area",
+					"target": "image",
+					"definition": "40"
+				}
+			]
 		}
 	]
 }

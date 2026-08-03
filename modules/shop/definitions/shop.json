@@ -1,75 +1,72 @@
 {
-	"version":"2",
-	"label":"Shop settings",
-	"item": [
-	
-	],
-	"settings":[
+	"label": "Shop settings",
+	"item": [],
+	"settings": [
 		{
-			"type":"cms/cms_input_provides",
-			"name":"shop_checkout",
-			"label":"Checkout provider",
-			"service":"shop_checkout",
-			"default":"",
-			"help":"Panel that handles checkout handoff (from modules that provide shop_checkout).||Leave empty until configured — cart will show an error on the checkout button."
+			"type": "cms/cms_input_provides",
+			"name": "shop_checkout",
+			"label": "Checkout provider",
+			"service": "shop_checkout",
+			"default": "",
+			"help": "Panel that handles checkout handoff (from modules that provide shop_checkout).||Leave empty until configured — cart will show an error on the checkout button."
 		},
 		{
-			"type":"fk",
-			"name":"default_currency_id",
-			"label":"Default currency",
-			"list":"shop/currency",
-			"mandatory":"1",
-			"help":"Main shop currency. Product base price is in this currency. Other currencies use product overrides or rate × base."
+			"type": "fk",
+			"name": "default_currency_id",
+			"label": "Default currency",
+			"list": "shop/currency",
+			"mandatory": "1",
+			"help": "Main shop currency. Product base price is in this currency. Other currencies use product overrides or rate × base."
 		},
 		{
-			"type":"text",
-			"name":"dimension_prefix",
-			"label":"Dimension prefix"
+			"type": "text",
+			"name": "dimension_prefix",
+			"label": "Dimension prefix"
 		},
 		{
-			"type":"text",
-			"name":"dimension_suffix",
-			"label":"Dimension suffix"
+			"type": "text",
+			"name": "dimension_suffix",
+			"label": "Dimension suffix"
 		},
 		{
-			"type":"text",
-			"name":"price_prefix",
-			"label":"Price prefix"
+			"type": "text",
+			"name": "price_prefix",
+			"label": "Price prefix"
 		},
 		{
-			"type":"text",
-			"name":"price_suffix",
-			"label":"Price suffix"
+			"type": "text",
+			"name": "price_suffix",
+			"label": "Price suffix"
 		},
 		{
-			"type":"text",
-			"name":"dimension_extra",
-			"label":"Dimension extra"
+			"type": "text",
+			"name": "dimension_extra",
+			"label": "Dimension extra"
 		},
 		{
-			"type":"text",
-			"name":"dimension_rounding",
-			"label":"Dimension rounding"
+			"type": "text",
+			"name": "dimension_rounding",
+			"label": "Dimension rounding"
 		},
 		{
-			"type":"select",
-			"name":"show_tax",
-			"label":"Show tax",
-			"values":{
-				"0":"No",
-				"1":"Yes"
-			},
-			"default":"1"
+			"type": "select",
+			"name": "show_tax",
+			"label": "Show tax",
+			"values": [
+				"No",
+				"Yes"
+			],
+			"default": "1"
 		},
 		{
-			"type":"repeater",
-			"name":"emails",
-			"label":"Notification emails",
-			"fields":[
+			"type": "repeater",
+			"name": "emails",
+			"label": "Notification emails",
+			"fields": [
 				{
-					"type":"text",
-					"name":"email",
-					"label":"Email"
+					"type": "text",
+					"name": "email",
+					"label": "Email"
 				}
 			]
 		}

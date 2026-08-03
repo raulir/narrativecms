@@ -1,5 +1,4 @@
 {
-	"version": "2",
 	"label": "Shopify subcategory fields",
 	"description": "Extends shop/subcategory with Shopify collection match key",
 	"item": [

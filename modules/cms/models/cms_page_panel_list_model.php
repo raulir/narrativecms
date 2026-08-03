@@ -13,7 +13,7 @@ class cms_page_panel_list_model extends \Model {
 
 	function __construct(){
 
-		parent::__construct();
+		// Base Model has no constructor — do not call parent::__construct()
 		$this->load->model('cms/cms_page_panel_model');
 
 	}

@@ -1,19 +1,18 @@
 {
-    "version": "2",
-    "item": [
-        {
-            "type": "text",
-            "name": "height",
-            "label": "Height",
-            "help": "Rems",
-            "default":"3"
-        },
-        {
-            "type": "colour",
-            "name": "background_colour",
-            "label": "Background colour",
-            "help": "Html colour",
-            "default":"transparent"
-        }
-    ]
+	"item": [
+		{
+			"type": "text",
+			"name": "height",
+			"label": "Height",
+			"help": "Rems",
+			"default": "3"
+		},
+		{
+			"type": "colour",
+			"name": "background_colour",
+			"label": "Background colour",
+			"help": "Html colour",
+			"default": "transparent"
+		}
+	]
 }

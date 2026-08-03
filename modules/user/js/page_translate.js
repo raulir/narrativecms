@@ -1,6 +1,9 @@
 /**
  * Frontend Translate control in .cms_debug + opens user/page_translation popup.
  * Dropup opens on :hover (CSS), same pattern as basic/language.
+ *
+ * List is keyed by main cms_page_id + URL path (+ unit context). Footer mount
+ * survives SPA cms_position navigations — must not keep the previous page's panels.
  */
 
 function page_translate_notify(message, is_error){
@@ -36,6 +39,95 @@ function page_translate_unit_context(){
 	return {
 		unit_id: unit_id,
 		types: types
+	}
+
+}
+
+/**
+ * Read cms_page_id from a jQuery element (SPA sets .data(); first paint uses attr).
+ */
+function page_translate_read_page_id($el){
+
+	if (!$el || !$el.length){
+		return 0
+	}
+
+	var from_data = parseInt($el.data('cms_page_id'), 10)
+	if (from_data > 0){
+		return from_data
+	}
+
+	var from_attr = parseInt($el.attr('data-cms_page_id'), 10)
+	return from_attr > 0 ? from_attr : 0
+
+}
+
+/**
+ * Normalised path for cache key (trailing slash except bare root).
+ */
+function page_translate_url_path(){
+
+	var path = window.location.pathname || '/'
+	if (path !== '/' && path.slice(-1) !== '/'){
+		path += '/'
+	}
+	return path
+
+}
+
+/**
+ * Current page for the translate list.
+ * Prefer main position (updated on SPA nav); fall back to mount attribute.
+ */
+function page_translate_page_context($mount){
+
+	var page_id = 0
+	var $main = $('.cms_position_main, .cms_position[data-position="main"]').first()
+	if ($main.length){
+		page_id = page_translate_read_page_id($main)
+	}
+	if (page_id < 1 && $mount && $mount.length){
+		page_id = page_translate_read_page_id($mount)
+	}
+
+	return {
+		cms_page_id: page_id,
+		path: page_translate_url_path()
+	}
+
+}
+
+function page_translate_list_cache_key($mount){
+
+	var page = page_translate_page_context($mount)
+	var ctx = page_translate_unit_context()
+	return String(page.cms_page_id) + '|' + page.path + '|' + ctx.unit_id + '|' + ctx.types.join(',')
+
+}
+
+/**
+ * After SPA position swap: sync mount page id from main, drop stale list cache.
+ */
+function page_translate_on_position_change(){
+
+	var $mount = $('.page_translate_container').first()
+	var $button = $('.page_translate_button').first()
+	if (!$button.length){
+		return
+	}
+
+	var page = page_translate_page_context($mount)
+
+	if ($mount.length && page.cms_page_id > 0){
+		$mount.attr('data-cms_page_id', page.cms_page_id)
+		$mount.data('cms_page_id', page.cms_page_id)
+	}
+
+	var key = page_translate_list_cache_key($mount)
+	if ($button.data('page_translate_cache_key') !== key){
+		$button.removeData('page_translate_items')
+		$button.removeData('page_translate_cache_key')
+		$button.find('.page_translate_list').empty()
 	}
 
 }
@@ -89,15 +181,21 @@ function page_translate_load_list($mount, $button, force){
 	}
 
 	var cached = $button.data('page_translate_items')
-	var ctx = page_translate_unit_context()
-	var cache_key = String(ctx.unit_id) + '|' + ctx.types.join(',')
+	var cache_key = page_translate_list_cache_key($mount)
 
 	if (!force && cached && $button.data('page_translate_cache_key') === cache_key){
 		page_translate_render_list($button, cached)
 		return
 	}
 
-	var cms_page_id = parseInt($mount.attr('data-cms_page_id') || $mount.data('cms_page_id') || 0, 10) || 0
+	var page = page_translate_page_context($mount)
+	var ctx = page_translate_unit_context()
+
+	// Keep mount attribute aligned with what we request
+	if ($mount && $mount.length && page.cms_page_id > 0){
+		$mount.attr('data-cms_page_id', page.cms_page_id)
+		$mount.data('cms_page_id', page.cms_page_id)
+	}
 
 	$button.data('page_translate_loading', 1)
 	var $list_hint = $button.find('.page_translate_list')
@@ -105,11 +203,18 @@ function page_translate_load_list($mount, $button, force){
 
 	get_ajax('user/page_translate', {
 		'do': 'page_translate_list',
-		'cms_page_id': cms_page_id,
+		'cms_page_id': page.cms_page_id,
+		'path': page.path,
 		'unit_id': ctx.unit_id,
 		'types': JSON.stringify(ctx.types),
 		'success': function(data){
 			$button.data('page_translate_loading', 0)
+			// Drop response if user navigated away while loading
+			var key_now = page_translate_list_cache_key($mount)
+			if (key_now !== cache_key){
+				page_translate_load_list($mount, $button, true)
+				return
+			}
 			var res = (data && data.result) ? data.result : data
 			var items = (res && res.items) ? res.items : []
 			$button.data('page_translate_items', items)
@@ -243,6 +348,16 @@ $(document).ready(function(){
 
 	$(document).on('music_engine_ready.page_translate', function(){
 		page_translate_move_engine_debug()
+		// Unit SPA may change path / unit context without full position footer reload
+		page_translate_on_position_change()
+	})
+
+	// SPA: footer (and Translate control) stay mounted; main position swaps
+	if (!window.cms_position_link_after){
+		window.cms_position_link_after = []
+	}
+	window.cms_position_link_after.push(function(){
+		page_translate_on_position_change()
 	})
 
 })

@@ -1,41 +1,40 @@
 {
-	"version":"2",
-	"label":"Lightbox settings",
-    "js": [
-    	"cms/cms_preloader",
-    	"cms/cms_scroll_lock"
-    ],
-	"settings":[
+	"label": "Lightbox settings",
+	"js": [
+		"cms/cms_preloader",
+		"cms/cms_scroll_lock"
+	],
+	"settings": [
 		{
-			"type":"select",
-			"name":"covers",
-			"label":"Covers",
-			"values":{
-				"siblings":"Only siblings",
-				"page":"Whole page"
+			"type": "select",
+			"name": "covers",
+			"label": "Covers",
+			"values": {
+				"siblings": "Only siblings",
+				"page": "Whole page"
 			},
-			"default":"siblings"
+			"default": "siblings"
 		},
 		{
-			"type":"image",
-			"name":"close",
-			"label":"Close",
-			"category":"icon",
-			"default":"basic/lightbox_close.png"
+			"type": "image",
+			"name": "close",
+			"label": "Close",
+			"category": "icon",
+			"default": "basic/lightbox_close.png"
 		},
 		{
-			"type":"image",
-			"name":"next",
-			"label":"Next arrow",
-			"category":"icon",
-			"default":"basic/lightbox_right.png"
+			"type": "image",
+			"name": "next",
+			"label": "Next arrow",
+			"category": "icon",
+			"default": "basic/lightbox_right.png"
 		},
 		{
-			"type":"image",
-			"name":"previous",
-			"label":"Previous arrow",
-			"category":"icon",
-			"default":"basic/lightbox_left.png"
+			"type": "image",
+			"name": "previous",
+			"label": "Previous arrow",
+			"category": "icon",
+			"default": "basic/lightbox_left.png"
 		}
 	]
 }

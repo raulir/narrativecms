@@ -1,5 +1,4 @@
 {
-	"version": "2",
 	"label": "Cart",
 	"description": "Basic shop cart (badge + popup). Site modules extend for design.",
 	"item": [],

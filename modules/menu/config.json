@@ -1,5 +1,6 @@
 {
 	"name": "Menu",
+	"version": "0.0",
 	"panels": [
 		{
 			"id": "menu",

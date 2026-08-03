@@ -1,99 +1,98 @@
 {
-	"version":"2",
-	"list":{
-		"list_title":"Site users",
-		"item_title":"Site user",
-		"filter_fields":{
-			"show":"-- show --"
+	"list": {
+		"list_title": "Site users",
+		"item_title": "Site user",
+		"filter_fields": {
+			"show": "-- show --"
 		},
-		"link_target":"0"
+		"link_target": "0"
 	},
-	"item":[ 
+	"item": [
 		{
-			"type":"text",
-			"name":"email",
-			"label":"Email"
+			"type": "text",
+			"name": "email",
+			"label": "Email"
 		},
 		{
-			"type":"image",
-			"name":"image",
-			"label":"Image",
-			"category":"user"
+			"type": "image",
+			"name": "image",
+			"label": "Image",
+			"category": "user"
 		},
 		{
-			"type":"text",
-			"name":"username",
-			"label":"Username"
+			"type": "text",
+			"name": "username",
+			"label": "Username"
 		},
 		{
-			"type":"text",
-			"name":"first_name",
-			"label":"First name"
+			"type": "text",
+			"name": "first_name",
+			"label": "First name"
 		},
 		{
-			"type":"text",
-			"name":"last_name",
-			"label":"Last name"
+			"type": "text",
+			"name": "last_name",
+			"label": "Last name"
 		},
 		{
-			"type":"text",
-			"name":"password",
-			"label":"Password hash"
+			"type": "text",
+			"name": "password",
+			"label": "Password hash"
 		},
 		{
-			"type":"select",
-			"name":"email_verified",
-			"label":"Email verified",
-			"values":{
-				"yes":"Yes",
-				"no":"No"
+			"type": "select",
+			"name": "email_verified",
+			"label": "Email verified",
+			"values": {
+				"yes": "Yes",
+				"no": "No"
 			},
-			"default":"yes"
+			"default": "yes"
 		},
 		{
-			"type":"text",
-			"name":"phone",
-			"label":"Phone"
+			"type": "text",
+			"name": "phone",
+			"label": "Phone"
 		},
 		{
-			"type":"user/loginlink",
-			"name":"loginlink",
-			"label":"Magic login link",
-			"help":"Magic login link for log in without password. Send this to user, user has to know the email."
+			"type": "user/loginlink",
+			"name": "loginlink",
+			"label": "Magic login link",
+			"help": "Magic login link for log in without password. Send this to user, user has to know the email."
 		},
 		{
-			"type":"repeater",
-			"name":"access",
-			"label":"Access",
-			"fields":[
+			"type": "repeater",
+			"name": "access",
+			"label": "Access",
+			"fields": [
 				{
-					"type":"text",
-					"name":"key",
-					"label":"Key",
-					"mandatory":"1",
-					"help":"e.g. music_student or music_*"
+					"type": "text",
+					"name": "key",
+					"label": "Key",
+					"mandatory": "1",
+					"help": "e.g. music_student or music_*"
 				}
 			]
 		},
 		{
-			"type":"repeater",
-			"name":"usergroups",
-			"label":"User groups",
-			"fields":[
+			"type": "repeater",
+			"name": "usergroups",
+			"label": "User groups",
+			"fields": [
 				{
-					"type":"fk",
-					"name":"usergroup_id",
-					"label":"User group",
-					"list":"user/usergroup",
-					"add_empty":"1"
+					"type": "fk",
+					"name": "usergroup_id",
+					"label": "User group",
+					"list": "user/usergroup",
+					"add_empty": "1"
 				}
 			]
 		},
 		{
-			"type":"textarea",
-			"name":"meta",
-			"label":"Meta",
-			"lines":"12"
+			"type": "textarea",
+			"name": "meta",
+			"label": "Meta",
+			"lines": "12"
 		}
 	]
 }

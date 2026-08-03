@@ -1,148 +1,147 @@
 {
-    "version": "2",
-	"title":"Vimeo",
-	"label":"Vimeo",
-    "js": [
-     	"cms/cms_scroll_lock"
-    ],
-    "item": [
+	"title": "Vimeo",
+	"label": "Vimeo",
+	"js": [
+		"cms/cms_scroll_lock"
+	],
+	"item": [
 		{
-			"type":"image",
-			"name":"image",
-			"label":"Loading image",
-			"category":"content"
+			"type": "image",
+			"name": "image",
+			"label": "Loading image",
+			"category": "content"
 		},
 		{
-			"type":"text",
-			"name":"vimeo_id",
-			"label":"Vimeo ID"
+			"type": "text",
+			"name": "vimeo_id",
+			"label": "Vimeo ID"
 		},
 		{
-			"type":"select",
-			"name":"autoplay",
-			"label":"Autoplay",
+			"type": "select",
+			"name": "autoplay",
+			"label": "Autoplay",
 			"values": {
-				"1":"Yes",
-				"0":"No"
+				"1": "Yes",
+				"0": "No"
 			},
-			"default":""
+			"default": ""
 		},
 		{
-			"type":"select",
-			"name":"control_sound",
-			"label":"Control sound",
+			"type": "select",
+			"name": "control_sound",
+			"label": "Control sound",
 			"values": {
-				"1":"Yes",
-				"0":"No"
+				"1": "Yes",
+				"0": "No"
 			},
-			"default":"0"
+			"default": "0"
 		},
 		{
-			"type":"select",
-			"name":"control_progress",
-			"label":"Control progress",
+			"type": "select",
+			"name": "control_progress",
+			"label": "Control progress",
 			"values": {
-				"1":"Yes",
-				"0":"No"
+				"1": "Yes",
+				"0": "No"
 			},
-			"default":"0"
+			"default": "0"
 		},
 		{
-			"type":"file",
-			"name":"subtitle",
-			"label":"Subtitle",
-			"help":".srt"
+			"type": "file",
+			"name": "subtitle",
+			"label": "Subtitle",
+			"help": ".srt"
 		}
-    ],
-    "settings": [
+	],
+	"settings": [
 		{
-			"type":"image",
-			"name":"sound_off",
-			"label":"Sound is off",
-			"category":"icon",
-			"default":"//vimeo_sound_off.png"
+			"type": "image",
+			"name": "sound_off",
+			"label": "Sound is off",
+			"category": "icon",
+			"default": "//vimeo_sound_off.png"
 		},
 		{
-			"type":"image",
-			"name":"sound_on",
-			"label":"Sound is on",
-			"category":"icon",
-			"default":"//vimeo_sound_on.png"
+			"type": "image",
+			"name": "sound_on",
+			"label": "Sound is on",
+			"category": "icon",
+			"default": "//vimeo_sound_on.png"
 		},
 		{
-			"type":"image",
-			"name":"play_button",
-			"label":"Play button",
-			"category":"icon",
-			"default":"//vimeo_play.png"
+			"type": "image",
+			"name": "play_button",
+			"label": "Play button",
+			"category": "icon",
+			"default": "//vimeo_play.png"
 		},
 		{
-			"type":"image",
-			"name":"pause_button",
-			"label":"Pause button",
-			"category":"icon",
-			"default":"//vimeo_pause.png"
+			"type": "image",
+			"name": "pause_button",
+			"label": "Pause button",
+			"category": "icon",
+			"default": "//vimeo_pause.png"
 		},
 		{
-			"type":"image",
-			"name":"play_large",
-			"label":"Play large",
-			"category":"icon",
-			"default":"//vimeo_play.png"
+			"type": "image",
+			"name": "play_large",
+			"label": "Play large",
+			"category": "icon",
+			"default": "//vimeo_play.png"
 		},
 		{
-			"type":"image",
-			"name":"subtitles_button",
-			"label":"Subtitles",
-			"category":"icon",
-			"default":"//vimeo_subtitles.png"
+			"type": "image",
+			"name": "subtitles_button",
+			"label": "Subtitles",
+			"category": "icon",
+			"default": "//vimeo_subtitles.png"
 		},
 		{
-			"type":"image",
-			"name":"fullscreen_button",
-			"label":"Fullscreen",
-			"category":"icon",
-			"default":"//vimeo_fullscreen.png"
+			"type": "image",
+			"name": "fullscreen_button",
+			"label": "Fullscreen",
+			"category": "icon",
+			"default": "//vimeo_fullscreen.png"
 		},
 		{
-			"type":"image",
-			"name":"default_image",
-			"label":"Default image",
-			"category":"content",
-			"default":"//vimeo_image.png"
+			"type": "image",
+			"name": "default_image",
+			"label": "Default image",
+			"category": "content",
+			"default": "//vimeo_image.png"
 		},
 		{
-			"type":"select",
-			"name":"disable_fullscreen",
-			"label":"Disable fullscreen",
+			"type": "select",
+			"name": "disable_fullscreen",
+			"label": "Disable fullscreen",
+			"values": [
+				"No",
+				"Yes"
+			],
+			"default": "0",
+			"help": "Removes fullscreen button"
+		},
+		{
+			"type": "select",
+			"name": "scheme",
+			"label": "Colour scheme",
 			"values": {
-				"0":"No",
-				"1":"Yes"
+				"dark": "Dark",
+				"light": "Light"
 			},
-			"default":"0",
-			"help":"Removes fullscreen button"
+			"default": "light",
+			"help": "Background colour"
 		},
 		{
-			"type":"select",
-			"name":"scheme",
-			"label":"Colour scheme",
+			"type": "select",
+			"name": "size_by_image",
+			"label": "Size by image",
 			"values": {
-				"dark":"Dark",
-				"light":"Light"
+				"no": "No",
+				"yes": "Yes"
 			},
-			"default":"light",
-			"help":"Background colour"
-		},
-		{
-			"type":"select",
-			"name":"size_by_image",
-			"label":"Size by image",
-			"values": {
-				"no":"No",
-				"yes":"Yes"
-			},
-			"default":"no",
-			"help":"Set video size by cover image size"
+			"default": "no",
+			"help": "Set video size by cover image size"
 		}
-    ]
+	]
 }

@@ -552,36 +552,24 @@ class cms_schema_model extends \Model {
 	private function _build_panel_table_schemas() {
 		$merged = [];
 		$owner = [];
-		$modules = $GLOBALS['config']['modules'] ?? [];
 
-		foreach ($modules as $module) {
-			$def_dir = $GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/';
-			if (!is_dir($def_dir)) {
+		$this->load->model('cms/cms_panel_model');
+		$this->load->model('cms/cms_page_panel_model');
+
+		foreach ($this->cms_panel_model->list_definition_panel_names() as $panel_name) {
+			if (!stristr($panel_name, '/')) {
+				continue;
+			}
+			// Merged config (config.json extends) — table fields from target + sources
+			$table_fields = $this->cms_page_panel_model->get_panel_table_fields($panel_name);
+			if (empty($table_fields)) {
 				continue;
 			}
 
-			foreach (glob($def_dir.'*.json') as $file) {
-				$panel = basename($file, '.json');
-				$json = file_get_contents($file);
-				$def = cms_json_decode($json, basename($file));
-				if (!is_array($def) || empty($def['list']) || empty($def['item'])) {
-					continue;
-				}
-
-				$table_fields = [];
-				foreach ($def['item'] as $item) {
-					if (!empty($item['table']) && $item['table'] == '1' && !empty($item['name'])) {
-						$table_fields[$item['name']] = $item;
-					}
-				}
-				if (empty($table_fields)) {
-					continue;
-				}
-
-				$table = $module.'_'.$panel;
-				$merged[$table] = $this->_build_panel_table_schema($table, $table_fields);
-				$owner[$table] = $module;
-			}
+			list($module, $panel) = explode('/', $panel_name, 2);
+			$table = $module.'_'.$panel;
+			$merged[$table] = $this->_build_panel_table_schema($table, $table_fields);
+			$owner[$table] = $module;
 		}
 
 		return [$merged, $owner];
@@ -749,31 +737,26 @@ class cms_schema_model extends \Model {
 	private function _list_definition_panel_table_candidates() {
 
 		$out = [];
-		$modules = $GLOBALS['config']['modules'] ?? [];
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_panel_model');
 
-		foreach ($modules as $module) {
-			$def_dir = $GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/';
-			if (!is_dir($def_dir)) {
+		foreach ($this->cms_panel_model->list_definition_panel_names() as $panel_name) {
+			if (!stristr($panel_name, '/')) {
 				continue;
 			}
-			foreach (glob($def_dir.'*.json') as $file) {
-				$panel = basename($file, '.json');
-				$json = file_get_contents($file);
-				$def = cms_json_decode($json, basename($file));
-				if (!is_array($def) || empty($def['list']) || empty($def['item'])) {
-					continue;
-				}
-				$panel_name = $module.'/'.$panel;
-				$table = $module.'_'.$panel;
-				$table_fields = $this->cms_page_panel_model->get_panel_table_fields($panel_name);
-				$out[$table] = [
-						'module' => $module,
-						'panel' => $panel,
-						'panel_name' => $panel_name,
-						'has_table_fields' => !empty($table_fields),
-				];
+			$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+			if (!$this->cms_panel_model->is_real_list_config($config)) {
+				continue;
 			}
+			list($module, $panel) = explode('/', $panel_name, 2);
+			$table = $module.'_'.$panel;
+			$table_fields = $this->cms_page_panel_model->get_panel_table_fields($panel_name);
+			$out[$table] = [
+					'module' => $module,
+					'panel' => $panel,
+					'panel_name' => $panel_name,
+					'has_table_fields' => !empty($table_fields),
+			];
 		}
 
 		return $out;

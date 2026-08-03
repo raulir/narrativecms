@@ -345,11 +345,7 @@ class cms_page_panel_model extends \Model {
 
 		$ci = &get_instance();
 
-		if (!empty($row['_extends'])){
-			$files = $ci->get_panel_filenames($panel_name, $row, $row['_extends']);
-		} else {
-			$files = $ci->get_panel_filenames($panel_name, $row);
-		}
+		$files = $ci->get_panel_filenames($panel_name, $row);
 
 		$has = false;
 
@@ -1709,7 +1705,8 @@ class cms_page_panel_model extends \Model {
 
     	foreach($return as $key => $cms_page_panel){
     		if (!isset($cms_page_panel['cms_page_id'])){
-    			$return[$key]['cms_page_id'] = $cms_page_panel['page_id'];
+    			// Legacy alias; may be absent when _fields omits both columns
+    			$return[$key]['cms_page_id'] = $cms_page_panel['page_id'] ?? 0;
     		}
     	}
     	
@@ -1748,7 +1745,6 @@ class cms_page_panel_model extends \Model {
 		}
 		
 		$this->load->model('cms/cms_panel_model');
-		$config = $this->cms_panel_model->get_cms_panel_config($cms_panel_name);
 
 		$return = [];
 		
@@ -1761,57 +1757,43 @@ class cms_page_panel_model extends \Model {
 			}
 		}
 
-		// Legacy definition JSON extends
-		if (!empty($config['extends'])){
-			
-			$extends_settings = $this->get_cms_page_panel_settings($config['extends']['panel'], $language);
-			$return = array_merge_recursive_ex($extends_settings, $return);
-			
-		}
-
-		// Config.json extends: merge saved settings from each source panel (e.g. timmy/shop_product)
-		if (!empty($GLOBALS['config']['extends']) && is_array($GLOBALS['config']['extends'])){
-			foreach ($GLOBALS['config']['extends'] as $item){
-				if (($item['target'] ?? '') !== $cms_panel_name || empty($item['source'])){
+		// Config.json extends: merge saved settings from each source panel
+		foreach ($this->cms_panel_model->get_extend_sources_for_target($cms_panel_name) as $source){
+			if ($source === $cms_panel_name || !stristr($source, '/')){
+				continue;
+			}
+			// Prefer current source name; fall back to legacy short name (timmy/product → timmy/shop_product)
+			$source_candidates = [$source];
+			if (preg_match('#^([^/]+)/shop_(.+)$#', $source, $m)){
+				$source_candidates[] = $m[1].'/'.$m[2];
+			}
+			$source_params = [];
+			foreach ($source_candidates as $candidate){
+				$source_settings_a = $this->get_cms_page_panels_by([
+						'panel_name' => $candidate,
+						'cms_page_id' => 0,
+						'parent_id' => 0,
+						'sort' => 0,
+				]);
+				if (empty($source_settings_a[0]['cms_page_panel_id'])){
 					continue;
 				}
-				$source = $item['source'];
-				if ($source === $cms_panel_name || !stristr($source, '/')){
-					continue;
-				}
-				// Prefer current source name; fall back to legacy short name (timmy/product → timmy/shop_product)
-				$source_candidates = [$source];
-				if (preg_match('#^([^/]+)/shop_(.+)$#', $source, $m)){
-					$source_candidates[] = $m[1].'/'.$m[2];
-				}
-				$source_params = [];
-				foreach ($source_candidates as $candidate){
-					$source_settings_a = $this->get_cms_page_panels_by([
-							'panel_name' => $candidate,
-							'cms_page_id' => 0,
-							'parent_id' => 0,
-							'sort' => 0,
-					]);
-					if (empty($source_settings_a[0]['cms_page_panel_id'])){
-						continue;
+				$p = $this->get_cms_page_panel_params($source_settings_a[0]['cms_page_panel_id'], $language);
+				if (is_array($p) && $p){
+					$source_params = $p;
+					// Auto-migrate legacy settings panel_name once
+					if ($candidate !== $source){
+						$this->db->query(
+								'update cms_page_panel set panel_name = ? where cms_page_panel_id = ? ',
+								[$source, (int)$source_settings_a[0]['cms_page_panel_id']]
+								);
 					}
-					$p = $this->get_cms_page_panel_params($source_settings_a[0]['cms_page_panel_id'], $language);
-					if (is_array($p) && $p){
-						$source_params = $p;
-						// Auto-migrate legacy settings panel_name once
-						if ($candidate !== $source){
-							$this->db->query(
-									'update cms_page_panel set panel_name = ? where cms_page_panel_id = ? ',
-									[$source, (int)$source_settings_a[0]['cms_page_panel_id']]
-									);
-						}
-						break;
-					}
+					break;
 				}
-				if ($source_params){
-					// Source first, target wins on key clash (target already in $return)
-					$return = array_merge_recursive_ex($source_params, $return);
-				}
+			}
+			if ($source_params){
+				// Source first, target wins on key clash (target already in $return)
+				$return = array_merge_recursive_ex($source_params, $return);
 			}
 		}
 		
@@ -1895,13 +1877,10 @@ class cms_page_panel_model extends \Model {
 	
 		$return = [];
 	
-		foreach ($GLOBALS['config']['modules'] as $module){
-			foreach(glob($GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/*.json') as $filename){
-				$list_name = basename($filename, '.json');
-				$block_config = $this->cms_panel_model->get_cms_panel_config($module.'/'.$list_name);
-				if (!empty($block_config['list'])){
-					$return[$module.'/'.$list_name] = $module.'/'.$list_name;
-				}
+		foreach ($this->cms_panel_model->list_definition_panel_names() as $panel_name){
+			$block_config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+			if ($this->cms_panel_model->is_real_list_config($block_config)){
+				$return[$panel_name] = $panel_name;
 			}
 		}
 	

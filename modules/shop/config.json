@@ -1,211 +1,212 @@
 {
-	"panels":[
+	"version": "0.0",
+	"panels": [
 		{
-			"id":"basketmini",
-			"name":"Basket (mini)"
+			"id": "basketmini",
+			"name": "Basket (mini)"
 		},
 		{
-			"id":"checkout",
-			"name":"Checkout"
+			"id": "checkout",
+			"name": "Checkout"
 		},
 		{
-			"id":"basket",
-			"name":"Basket"
+			"id": "basket",
+			"name": "Basket"
 		},
 		{
-			"id":"cart",
-			"name":"Cart"
+			"id": "cart",
+			"name": "Cart"
 		},
 		{
-			"id":"product",
-			"name":"Product"
+			"id": "product",
+			"name": "Product"
 		},
 		{
-			"id":"category",
-			"name":"Category"
+			"id": "category",
+			"name": "Category"
 		},
 		{
-			"id":"subcategory",
-			"name":"Subcategory"
+			"id": "subcategory",
+			"name": "Subcategory"
 		},
 		{
-			"id":"collection",
-			"name":"Collection"
+			"id": "collection",
+			"name": "Collection"
 		},
 		{
-			"id":"producttext",
-			"name":"Product text"
+			"id": "producttext",
+			"name": "Product text"
 		},
 		{
-			"id":"product_item",
-			"name":"Product item"
+			"id": "product_item",
+			"name": "Product item"
 		},
 		{
-			"id":"product_dimension",
-			"name":"Product dimension"
+			"id": "product_dimension",
+			"name": "Product dimension"
 		},
 		{
-			"id":"stock_group",
-			"name":"Stock group"
+			"id": "stock_group",
+			"name": "Stock group"
 		},
 		{
-			"id":"dim_value_select",
-			"name":"Dimension value select"
+			"id": "dim_value_select",
+			"name": "Dimension value select"
 		}
 	],
-	"cms_menu":[
+	"cms_menu": [
 		{
-			"id":"shop",
-			"name":"Shop",
-			"order":200
+			"id": "shop",
+			"name": "Shop",
+			"order": 200
 		},
 		{
-			"id":"shop_products",
-			"name":"Products",
-			"parent":"shop",
-			"url":"admin/cms_list/shop__product/",
-			"order":100
+			"id": "shop_products",
+			"name": "Products",
+			"parent": "shop",
+			"url": "admin/cms_list/shop__product/",
+			"order": 100
 		},
 		{
-			"id":"shop_categories",
-			"name":"Product categories",
-			"parent":"shop",
-			"url":"admin/cms_list/shop__category/",
-			"order":110
+			"id": "shop_categories",
+			"name": "Product categories",
+			"parent": "shop",
+			"url": "admin/cms_list/shop__category/",
+			"order": 110
 		},
 		{
-			"id":"shop_currencies",
-			"name":"Currencies",
-			"parent":"shop",
-			"url":"admin/cms_list/shop__currency/",
-			"order":115
+			"id": "shop_currencies",
+			"name": "Currencies",
+			"parent": "shop",
+			"url": "admin/cms_list/shop__currency/",
+			"order": 115
 		},
 		{
-			"id":"shop_subcategories",
-			"name":"Product subcategories",
-			"parent":"shop",
-			"url":"admin/cms_list/shop__subcategory/",
-			"order":120
+			"id": "shop_subcategories",
+			"name": "Product subcategories",
+			"parent": "shop",
+			"url": "admin/cms_list/shop__subcategory/",
+			"order": 120
 		},
 		{
-			"id":"shop_collections",
-			"name":"Product collections",
-			"parent":"shop",
-			"url":"admin/cms_list/shop__collection/",
-			"order":125
+			"id": "shop_collections",
+			"name": "Product collections",
+			"parent": "shop",
+			"url": "admin/cms_list/shop__collection/",
+			"order": 125
 		},
 		{
-			"id":"shop_producttexts",
-			"name":"Product texts",
-			"parent":"shop",
-			"url":"admin/cms_list/shop__producttext/",
-			"order":130
+			"id": "shop_producttexts",
+			"name": "Product texts",
+			"parent": "shop",
+			"url": "admin/cms_list/shop__producttext/",
+			"order": 130
 		},
 		{
-			"id":"shop_product_items",
-			"name":"Product items",
-			"parent":"shop",
-			"url":"admin/cms_list/shop__product_item/",
-			"order":140
+			"id": "shop_product_items",
+			"name": "Product items",
+			"parent": "shop",
+			"url": "admin/cms_list/shop__product_item/",
+			"order": 140
 		},
 		{
-			"id":"shop_product_dimensions",
-			"name":"Product dimensions",
-			"parent":"shop",
-			"url":"admin/cms_list/shop__product_dimension/",
-			"order":150
+			"id": "shop_product_dimensions",
+			"name": "Product dimensions",
+			"parent": "shop",
+			"url": "admin/cms_list/shop__product_dimension/",
+			"order": 150
 		},
 		{
-			"id":"shop_stock_groups",
-			"name":"Stock groups",
-			"parent":"shop",
-			"url":"admin/cms_list/shop__stock_group/",
-			"order":160
+			"id": "shop_stock_groups",
+			"name": "Stock groups",
+			"parent": "shop",
+			"url": "admin/cms_list/shop__stock_group/",
+			"order": 160
 		},
 		{
-			"id":"shop_orders",
-			"name":"Orders",
-			"parent":"shop",
-			"access":"shop_orders",
-			"url":"admin/cms_list/shop__order/",
-			"order":200
+			"id": "shop_orders",
+			"name": "Orders",
+			"parent": "shop",
+			"access": "shop_orders",
+			"url": "admin/cms_list/shop__order/",
+			"order": 200
 		},
 		{
-			"id":"shop_order_lines",
-			"name":"Order lines",
-			"parent":"shop",
-			"access":"shop_order_lines",
-			"url":"admin/cms_list/shop__order_line/",
-			"order":210
+			"id": "shop_order_lines",
+			"name": "Order lines",
+			"parent": "shop",
+			"access": "shop_order_lines",
+			"url": "admin/cms_list/shop__order_line/",
+			"order": 210
 		},
 		{
-			"id":"shop_delivery",
-			"name":"Delivery methods",
-			"parent":"shop",
-			"url":"admin/cms_list/shop__delivery/",
-			"order":740
+			"id": "shop_delivery",
+			"name": "Delivery methods",
+			"parent": "shop",
+			"url": "admin/cms_list/shop__delivery/",
+			"order": 740
 		},
 		{
-			"id":"shop_delivery_set",
-			"name":"Delivery sets",
-			"parent":"shop",
-			"url":"admin/cms_list/shop__delivery_set/",
-			"order":750
+			"id": "shop_delivery_set",
+			"name": "Delivery sets",
+			"parent": "shop",
+			"url": "admin/cms_list/shop__delivery_set/",
+			"order": 750
 		},
 		{
-			"id":"shop_panel_settings",
-			"name":"Shop settings",
-			"parent":"shop",
-			"order":760
+			"id": "shop_panel_settings",
+			"name": "Shop settings",
+			"parent": "shop",
+			"order": 760
 		},
 		{
-			"id":"shop_settings",
-			"name":"General",
-			"parent":"shop_panel_settings",
-			"access":"shop_settings",
-			"url":"admin/panel_settings/shop__shop/",
-			"order":10
+			"id": "shop_settings",
+			"name": "General",
+			"parent": "shop_panel_settings",
+			"access": "shop_settings",
+			"url": "admin/panel_settings/shop__shop/",
+			"order": 10
 		},
 		{
-			"id":"productbuy_settings",
-			"name":"Product buy",
-			"parent":"shop_panel_settings",
-			"url":"admin/panel_settings/shop__productbuy/",
-			"order":20
+			"id": "productbuy_settings",
+			"name": "Product buy",
+			"parent": "shop_panel_settings",
+			"url": "admin/panel_settings/shop__productbuy/",
+			"order": 20
 		},
 		{
-			"id":"productdimensions_settings",
-			"name":"Product dimensions",
-			"parent":"shop_panel_settings",
-			"url":"admin/panel_settings/shop__productdimensions/",
-			"order":30
+			"id": "productdimensions_settings",
+			"name": "Product dimensions",
+			"parent": "shop_panel_settings",
+			"url": "admin/panel_settings/shop__productdimensions/",
+			"order": 30
 		},
 		{
-			"id":"checkout_settings",
-			"name":"Checkout",
-			"parent":"shop_panel_settings",
-			"url":"admin/panel_settings/shop__checkout/",
-			"order":40
+			"id": "checkout_settings",
+			"name": "Checkout",
+			"parent": "shop_panel_settings",
+			"url": "admin/panel_settings/shop__checkout/",
+			"order": 40
 		},
 		{
-			"id":"cart_settings",
-			"name":"Cart",
-			"parent":"shop_panel_settings",
-			"url":"admin/panel_settings/shop__cart/",
-			"order":50
+			"id": "cart_settings",
+			"name": "Cart",
+			"parent": "shop_panel_settings",
+			"url": "admin/panel_settings/shop__cart/",
+			"order": 50
 		},
 		{
-			"id":"category_settings",
-			"name":"Product category",
-			"parent":"shop_panel_settings",
-			"url":"admin/panel_settings/shop__category/",
-			"order":60
+			"id": "category_settings",
+			"name": "Product category",
+			"parent": "shop_panel_settings",
+			"url": "admin/panel_settings/shop__category/",
+			"order": 60
 		}
 	],
-	"extends":[
+	"extends": [
 		{
-			"target":"search/searchajax",
-			"source":"//search_searchajax"
+			"target": "search/searchajax",
+			"source": "//search_searchajax"
 		}
 	]
 }

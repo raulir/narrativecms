@@ -1,5 +1,4 @@
 {
-	"version": "2",
 	"label": "Reload Shopify data",
 	"description": "Mark all local products for Shopify refresh"
 }

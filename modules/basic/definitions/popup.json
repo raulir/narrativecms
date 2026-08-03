@@ -1,61 +1,60 @@
 {
-	"version":"2",
-	"label":"Popup settings",
-    "js": [
-    	"cms/cms_scroll_lock",
-    	"cms/cms_cookie"
-    ],
-    "settings":[
+	"label": "Popup settings",
+	"js": [
+		"cms/cms_scroll_lock",
+		"cms/cms_cookie"
+	],
+	"settings": [
 		{
-			"type":"image",
-			"name":"background",
-			"label":"Background",
-			"category":"content"
+			"type": "image",
+			"name": "background",
+			"label": "Background",
+			"category": "content"
 		}
-    ],
-	"item":[
+	],
+	"item": [
 		{
-			"type":"image",
-			"name":"image",
-			"label":"Image",
-			"category":"content"
+			"type": "image",
+			"name": "image",
+			"label": "Image",
+			"category": "content"
 		},
 		{
-			"type":"colour",
-			"name":"colour",
-			"label":"Background colour"
+			"type": "colour",
+			"name": "colour",
+			"label": "Background colour"
 		},
 		{
-			"type":"text",
-			"name":"width",
-			"label":"Width",
-			"default":"50"
+			"type": "text",
+			"name": "width",
+			"label": "Width",
+			"default": "50"
 		},
 		{
-			"type":"text",
-			"name":"days",
-			"label":"Days to hide",
-			"default":"7"
+			"type": "text",
+			"name": "days",
+			"label": "Days to hide",
+			"default": "7"
 		},
 		{
-			"type":"repeater",
-			"name":"links",
-			"label":"Links",
-			"fields":[
-		        { 
-		            "type": "link",
-		            "name": "link",
-		            "label": "Link",
-		            "help":"Use no link for close"
-		        },
-		        {
-		        	"type":"mask",
-		        	"name":"area",
-		        	"label":"Area",
-		        	"target":"image",
-		        	"definition":"30"
-		        }
-		    ]
+			"type": "repeater",
+			"name": "links",
+			"label": "Links",
+			"fields": [
+				{
+					"type": "link",
+					"name": "link",
+					"label": "Link",
+					"help": "Use no link for close"
+				},
+				{
+					"type": "mask",
+					"name": "area",
+					"label": "Area",
+					"target": "image",
+					"definition": "30"
+				}
+			]
 		}
 	]
 }

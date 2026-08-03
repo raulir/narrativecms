@@ -1,7 +1,6 @@
 {
-	"version":"2",
-	"label":"User forwarder",
-	"description":"Redirects logged-in users to Link to user in user settings. Add to login, register, or other guest pages.",
-	"image":"",
-	"item":[]
+	"label": "User forwarder",
+	"description": "Redirects logged-in users to Link to user in user settings. Add to login, register, or other guest pages.",
+	"image": "",
+	"item": []
 }

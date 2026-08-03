@@ -1,9 +1,7 @@
 {
-	"version": "2",
 	"label": "Shopify settings",
 	"description": "Shopify module settings",
-	"item": [
-	],
+	"item": [],
 	"settings": [
 		{
 			"type": "shopify/shopify_cms_sync",

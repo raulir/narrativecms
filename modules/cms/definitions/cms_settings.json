@@ -1,478 +1,474 @@
 {
-	"version":"2",
-	"label":"Site settings",
-	"item": [
-	
-	],
-	"settings":[
+	"label": "Site settings",
+	"item": [],
+	"settings": [
 		{
-			"type":"text",
-			"name":"site_title",
-			"label":"Site title",
-			"default":"New website - #page#",
-			"help":"Use #page# where page title etc has to appear"
+			"type": "text",
+			"name": "site_title",
+			"label": "Site title",
+			"default": "New website - #page#",
+			"help": "Use #page# where page title etc has to appear"
 		},
 		{
-			"type":"modules",
-			"name":"modules",
-			"label":"Modules",
-			"sticky":{
-				"cms":"cms"
+			"type": "modules",
+			"name": "modules",
+			"label": "Modules",
+			"sticky": {
+				"cms": "cms"
 			},
-			"help":"[modules]||Which modules and in what order to load from modules installed to the server||{cms} is sticky (always first, not removable)"
+			"help": "[modules]||Which modules and in what order to load from modules installed to the server||{cms} is sticky (always first, not removable)"
 		},
 		{
-			"type":"text",
-			"name":"site_title_delimiter",
-			"label":"Site title delimiter",
-			"default":"-"
+			"type": "text",
+			"name": "site_title_delimiter",
+			"label": "Site title delimiter",
+			"default": "-"
 		},
 		{
-			"type":"link",
-			"name":"landing_page",
-			"label":"Default landing page",
-			"targets":"page,lists",
-			"format":"short",
-			"help":"Page to land when empty slug (host domain name only)"
+			"type": "link",
+			"name": "landing_page",
+			"label": "Default landing page",
+			"targets": "page,lists",
+			"format": "short",
+			"help": "Page to land when empty slug (host domain name only)"
 		},
 		{
-			"type":"select",
-			"name":"panel_cache",
-			"label":"Panel cache",
-			"values":{
-				"0":"No cache",
-				"180":"3 minutes",
-				"900":"15 minutes",
-				"86400":"24 hours",
-				"7776000":"3 months"
+			"type": "select",
+			"name": "panel_cache",
+			"label": "Panel cache",
+			"values": {
+				"0": "No cache",
+				"180": "3 minutes",
+				"900": "15 minutes",
+				"86400": "24 hours",
+				"7776000": "3 months"
 			},
-			"default":"0"
+			"default": "0"
 		},
 		{
-			"type":"select",
-			"name":"inline_limit",
-			"label":"Css inlining limit",
-			"values":{
-				"0":"All",
-				"5000":"5k",
-				"8000":"8k",
-				"10000":"10k",
-				"11000":"11k",
-				"12000":"12k",
-				"20000":"20k",
-				"50000":"50k",
-				"100000":"100k"
+			"type": "select",
+			"name": "inline_limit",
+			"label": "Css inlining limit",
+			"values": {
+				"0": "All",
+				"5000": "5k",
+				"8000": "8k",
+				"10000": "10k",
+				"11000": "11k",
+				"12000": "12k",
+				"20000": "20k",
+				"50000": "50k",
+				"100000": "100k"
 			},
-			"default":"100000",
-			"help":"[css inlining limit]||Google likes when first pageful is inside first 14kB||Approximate amount of css to inline. Use lower numbers for fine tuning and higher for sanity checks||Must have {inline_css} be set and {pack_css} not set in config file"
+			"default": "100000",
+			"help": "[css inlining limit]||Google likes when first pageful is inside first 14kB||Approximate amount of css to inline. Use lower numbers for fine tuning and higher for sanity checks||Must have {inline_css} be set and {pack_css} not set in config file"
 		},
 		{
-			"type":"select",
-			"name":"targets_enabled",
-			"label":"Visitor target groups",
-			"values":{
-				"0":"Disabled",
-				"1":"Enabled"
+			"type": "select",
+			"name": "targets_enabled",
+			"label": "Visitor target groups",
+			"values": [
+				"Disabled",
+				"Enabled"
+			],
+			"default": "0",
+			"help": "Enable visitor target groups for languages, AB testing, logged in panels etc"
+		},
+		{
+			"type": "select",
+			"name": "cron_trigger",
+			"label": "Repeating tasks trigger",
+			"values": {
+				"cron": "Cron",
+				"visits": "Visits"
 			},
-			"default":"0",
-			"help":"Enable visitor target groups for languages, AB testing, logged in panels etc"
+			"default": "visits",
+			"help": "[visits] - need to run regularly repeating tasks is checked when users visit||[cron] - when server crontab calls /cms/cron/ (preferred, but not always available)"
 		},
 		{
-			"type":"select",
-			"name":"cron_trigger",
-			"label":"Repeating tasks trigger",
-			"values":{
-				"cron":"Cron",
-				"visits":"Visits"
+			"type": "text",
+			"name": "cms_update_url",
+			"label": "CMS update URL",
+			"default": "https://update.narrativecms.com/cms/updater/"
+		},
+		{
+			"type": "text",
+			"name": "not_found_log",
+			"label": "Not found log",
+			"default": "404.log",
+			"help": "File to log not found requests data. Under cache folder."
+		},
+		{
+			"type": "select",
+			"name": "allow_ajax_panels",
+			"label": "Ajax access to any panel",
+			"values": [
+				"Disabled",
+				"Enabled"
+			],
+			"default": "0",
+			"help": "Allow public AJAX HTML render of page panel instances by cms_page_panel_id. Does not affect do actions, no_html API calls, CMS admin, or position partials."
+		},
+		{
+			"type": "text",
+			"name": "salt",
+			"label": "Salt",
+			"default": "cms",
+			"help": "Salt for hash functions. Do not change when you don't know about this."
+		},
+		{
+			"type": "select",
+			"name": "allow_api_anywhere",
+			"label": "Allow API anywhere",
+			"values": [
+				"Disabled",
+				"Enabled"
+			],
+			"default": "0",
+			"help": "Enable API from anywhere. Adds Access-Control-Allow-Origin header to API requests"
+		},
+		{
+			"type": "text",
+			"name": "language",
+			"label": "Site default language",
+			"default": "en",
+			"help": "Default language for the site"
+		},
+		{
+			"type": "text",
+			"name": "desktop_preview_width",
+			"label": "Desktop preview width",
+			"default": "40",
+			"help": "Width of preview pane when desktop preview (D) is open in admin"
+		},
+		{
+			"type": "text",
+			"name": "mobile_preview_width",
+			"label": "Mobile preview width",
+			"default": "40",
+			"help": "Width of preview pane when mobile preview (M) is open in admin"
+		},
+		{
+			"type": "subtitle",
+			"label": "Layout",
+			"width": "wide",
+			"help": "Settings related to site layout"
+		},
+		{
+			"type": "layout",
+			"name": "layout",
+			"label": "Default layout",
+			"default": "cms/rem"
+		},
+		{
+			"type": "select",
+			"name": "single_page_mode",
+			"label": "Single page mode",
+			"values": [
+				"No",
+				"Yes"
+			],
+			"default": "0",
+			"help": "{Single page mode} wraps layout positions and loads only changed positions via ajax on in-site links (SPA-style). Default off."
+		},
+		{
+			"type": "select",
+			"name": "mobile_zoom",
+			"label": "Mobile zoom",
+			"values": [
+				"Disabled",
+				"Enabled"
+			],
+			"default": "0",
+			"help": "{Mobile zoom} enables pinch zoom for {rem} layout on mobile devices. [Disabled] is ignored by iOS."
+		},
+		{
+			"type": "subtitle",
+			"label": "Sizing",
+			"width": "wide",
+			"help": "Settings related content size on screen"
+		},
+		{
+			"type": "text",
+			"name": "rem_px",
+			"label": "Rem max width px",
+			"default": "1400",
+			"help": "{Default rems} layout max 100 rems width.||Leave empty when not set"
+		},
+		{
+			"type": "text",
+			"name": "rem_ratio",
+			"label": "Rem max ratio**",
+			"default": "2",
+			"help": "{Default rems} layout max 100 rems ratio to viewport height.||Leave empty when not set||**(will be removed)"
+		},
+		{
+			"type": "text",
+			"name": "rem_m_px",
+			"label": "Rem mobile px",
+			"default": "750",
+			"help": "{Default rems} layout breakpoint for mobile size. Rems are twice as big below this viewport width.||Leave empty when not set"
+		},
+		{
+			"type": "select",
+			"name": "rem_switched",
+			"label": "Desktop rem switched",
+			"values": [
+				"Use viewport width for rems",
+				"Use viewport height for rems"
+			],
+			"default": "0",
+			"help": "{Rem switched} on desktop sizes use width or height for rem calculation"
+		},
+		{
+			"type": "text",
+			"name": "rem_k",
+			"label": "Rem divider",
+			"default": "100",
+			"help": "{Rem divider} height of 1 rem to viewport size"
+		},
+		{
+			"type": "text",
+			"name": "rem_m_k",
+			"label": "Rem mobile divider",
+			"default": "50",
+			"help": "{Rem mobile divider} height of 1 rem to mobile viewport size"
+		},
+		{
+			"type": "subtitle",
+			"label": "Image optimisation",
+			"width": "wide",
+			"help": "Settings related to image optimisation"
+		},
+		{
+			"type": "text",
+			"name": "images_quality",
+			"label": "Image packing quality",
+			"default": "85",
+			"help": "[Image packing quality]||When jpgs are resized or pngs compressed, they are saved in this quality.||If you want to make {Google Page Insights} happy, set it to 85||Otherwise, when there is no problems with page speed, set this to 95.||Webp uses this - 5"
+		},
+		{
+			"type": "text",
+			"name": "images_1x",
+			"label": "Image 1x desktop modifier",
+			"default": "0.75",
+			"help": "[Image 1x desktop modifier]||Modifier to template suggested image size for natural pixel size screens"
+		},
+		{
+			"type": "text",
+			"name": "images_2x",
+			"label": "Image 2x desktop modifier",
+			"default": "1.5",
+			"help": "[Image 2x desktop modifier]||Modifier to template suggested image size for high density (retina) screens"
+		},
+		{
+			"type": "text",
+			"name": "images_textarea",
+			"label": "Image in textarea size",
+			"default": "0.5",
+			"help": "[Image in textarea size]||Images in textareas width to max width pixels||If result is zero or over 1000px, 1000px is used"
+		},
+		{
+			"type": "text",
+			"name": "images_mobile",
+			"label": "Image mobile modifier",
+			"default": "1.0",
+			"help": "[Image mobile modifier]||Modifier to template suggested image size for mobile devices"
+		},
+		{
+			"type": "text",
+			"name": "video_encode_max_load",
+			"label": "Video encode max load",
+			"default": "0.8",
+			"help": "[Video encode max load]||When average server CPU load is at or above this value (0-1), DASH video encoding is deferred until the next cron run.||Example: 0.8 means defer when load is 80% or higher.||Uploaded or fallback mp4 continues to serve while encoding waits."
+		},
+		{
+			"type": "subtitle",
+			"label": "Metadata and SEO",
+			"width": "wide",
+			"help": "Settings related to sharing and search engine metadata"
+		},
+		{
+			"type": "image",
+			"name": "meta_image",
+			"label": "Image",
+			"category": "content",
+			"help": "Imge to use when page or list item doesn't have meta image defined"
+		},
+		{
+			"type": "image",
+			"name": "favicon",
+			"label": "Favicon",
+			"category": "icon"
+		},
+		{
+			"type": "select",
+			"name": "meta_video_twitter",
+			"label": "Preferred Twitter card type",
+			"values": {
+				"summary_large_image": "Summary large image",
+				"player": "Video player"
 			},
-			"default":"visits",
-			"help":"[visits] - need to run regularly repeating tasks is checked when users visit||[cron] - when server crontab calls /cms/cron/ (preferred, but not always available)"
+			"default": "summary_large_image"
 		},
 		{
-			"type":"text",
-			"name":"cms_update_url",
-			"label":"CMS update URL",
-			"default":"https://update.narrativecms.com/cms/updater/"
+			"type": "subtitle",
+			"label": "CMS interface",
+			"width": "wide",
+			"help": "Settings related to CMS look"
 		},
 		{
-			"type":"text",
-			"name":"not_found_log",
-			"label":"Not found log",
-			"default":"404.log",
-			"help":"File to log not found requests data. Under cache folder."
+			"type": "image",
+			"name": "cms_background",
+			"label": "CMS Background",
+			"category": "content"
 		},
 		{
-			"type":"select",
-			"name":"allow_ajax_panels",
-			"label":"Ajax access to any panel",
-			"values":{
-				"0":"Disabled",
-				"1":"Enabled"
+			"type": "select",
+			"name": "images_rows",
+			"label": "Image library rows",
+			"values": {
+				"2": "2",
+				"3": "3",
+				"4": "4",
+				"5": "5"
 			},
-			"default":"0",
-			"help":"Allow public AJAX HTML render of page panel instances by cms_page_panel_id. Does not affect do actions, no_html API calls, CMS admin, or position partials."
+			"default": "3"
 		},
 		{
-			"type":"text",
-			"name":"salt",
-			"label":"Salt",
-			"default":"cms",
-			"help":"Salt for hash functions. Do not change when you don't know about this."
+			"type": "select",
+			"name": "input_link_order",
+			"label": "Link input order",
+			"values": [
+				"As sorted",
+				"Alphabetical"
+			],
+			"default": "0"
 		},
 		{
-			"type":"select",
-			"name":"allow_api_anywhere",
-			"label":"Allow API anywhere",
-			"values":{
-				"0":"Disabled",
-				"1":"Enabled"
-			},
-			"default":"0",
-			"help":"Enable API from anywhere. Adds Access-Control-Allow-Origin header to API requests"
+			"type": "subtitle",
+			"label": "Email",
+			"width": "wide",
+			"help": "Settings related to CMS system email"
 		},
 		{
-			"type":"text",
-			"name":"language",
-			"label":"Site default language",
-			"default":"en",
-			"help":"Default language for the site"
+			"type": "text",
+			"name": "from_name",
+			"label": "From name",
+			"default": "Noreply"
 		},
 		{
-			"type":"text",
-			"name":"desktop_preview_width",
-			"label":"Desktop preview width",
-			"default":"40",
-			"help":"Width of preview pane when desktop preview (D) is open in admin"
+			"type": "text",
+			"name": "email",
+			"label": "From email",
+			"default": "",
+			"help": "Email to send notifications from||If empty, defaults to domain@narrativecms.com"
 		},
 		{
-			"type":"text",
-			"name":"mobile_preview_width",
-			"label":"Mobile preview width",
-			"default":"40",
-			"help":"Width of preview pane when mobile preview (M) is open in admin"
+			"type": "text",
+			"name": "reply_name",
+			"label": "Reply to name",
+			"default": "Noreply"
 		},
 		{
-			"type":"subtitle",
-			"label":"Layout",
-			"width":"wide",
-			"help":"Settings related to site layout"
+			"type": "text",
+			"name": "reply_email",
+			"label": "Reply to email",
+			"default": ""
 		},
 		{
-			"type":"layout",
-			"name":"layout",
-			"label":"Default layout",
-			"default":"cms/rem"
+			"type": "text",
+			"name": "admin_email",
+			"label": "Technical admin email",
+			"default": "",
+			"help": "Email to send technical system messages. Eg error logs."
 		},
 		{
-			"type":"select",
-			"name":"single_page_mode",
-			"label":"Single page mode",
-			"values":{
-				"0":"No",
-				"1":"Yes"
-			},
-			"default":"0",
-			"help":"{Single page mode} wraps layout positions and loads only changed positions via ajax on in-site links (SPA-style). Default off."
+			"type": "text",
+			"name": "email_queue_limit",
+			"label": "Email queue process limit",
+			"default": "50",
+			"help": "Max messages the cms/cms_email_queue cron processes per run||Default 50"
 		},
 		{
-			"type":"select",
-			"name":"mobile_zoom",
-			"label":"Mobile zoom",
-			"values":{
-				"0":"Disabled",
-				"1":"Enabled"
-			},
-			"default":"0",
-			"help":"{Mobile zoom} enables pinch zoom for {rem} layout on mobile devices. [Disabled] is ignored by iOS."
+			"type": "text",
+			"name": "email_queue_max_attempts",
+			"label": "Email queue max attempts",
+			"default": "5",
+			"help": "Give up after this many failed sends||Backoff between tries: 2×n² minutes (n = attempts so far)||Default 5"
 		},
 		{
-			"type":"subtitle",
-			"label":"Sizing",
-			"width":"wide",
-			"help":"Settings related content size on screen"
+			"type": "subtitle",
+			"label": "SMTP"
 		},
 		{
-			"type":"text",
-			"name":"rem_px",
-			"label":"Rem max width px",
-			"default":"1400",
-			"help":"{Default rems} layout max 100 rems width.||Leave empty when not set"
+			"type": "text",
+			"name": "smtp_server",
+			"label": "SMTP server",
+			"help": "If empty, php mail is used"
 		},
 		{
-			"type":"text",
-			"name":"rem_ratio",
-			"label":"Rem max ratio**",
-			"default":"2",
-			"help":"{Default rems} layout max 100 rems ratio to viewport height.||Leave empty when not set||**(will be removed)"
+			"type": "text",
+			"name": "smtp_port",
+			"label": "SMTP port",
+			"help": "25 for normal, 587 for authenticated SMTP"
 		},
 		{
-			"type":"text",
-			"name":"rem_m_px",
-			"label":"Rem mobile px",
-			"default":"750",
-			"help":"{Default rems} layout breakpoint for mobile size. Rems are twice as big below this viewport width.||Leave empty when not set"
+			"type": "text",
+			"name": "smtp_username",
+			"label": "SMTP username"
 		},
 		{
-			"type":"select",
-			"name":"rem_switched",
-			"label":"Desktop rem switched",
-			"values":{
-				"0":"Use viewport width for rems",
-				"1":"Use viewport height for rems"
-			},
-			"default":"0",
-			"help":"{Rem switched} on desktop sizes use width or height for rem calculation"
+			"type": "text",
+			"name": "smtp_password",
+			"label": "SMTP password"
 		},
 		{
-			"type":"text",
-			"name":"rem_k",
-			"label":"Rem divider",
-			"default":"100",
-			"help":"{Rem divider} height of 1 rem to viewport size"
-		},
-		{
-			"type":"text",
-			"name":"rem_m_k",
-			"label":"Rem mobile divider",
-			"default":"50",
-			"help":"{Rem mobile divider} height of 1 rem to mobile viewport size"
-		},
-		{
-			"type":"subtitle",
-			"label":"Image optimisation",
-			"width":"wide",
-			"help":"Settings related to image optimisation"
-		},
-		{
-			"type":"text",
-			"name":"images_quality",
-			"label":"Image packing quality",
-			"default":"85",
-			"help":"[Image packing quality]||When jpgs are resized or pngs compressed, they are saved in this quality.||If you want to make {Google Page Insights} happy, set it to 85||Otherwise, when there is no problems with page speed, set this to 95.||Webp uses this - 5"
-		},
-		{
-			"type":"text",
-			"name":"images_1x",
-			"label":"Image 1x desktop modifier",
-			"default":"0.75",
-			"help":"[Image 1x desktop modifier]||Modifier to template suggested image size for natural pixel size screens"
-		},
-		{
-			"type":"text",
-			"name":"images_2x",
-			"label":"Image 2x desktop modifier",
-			"default":"1.5",
-			"help":"[Image 2x desktop modifier]||Modifier to template suggested image size for high density (retina) screens"
-		},
-		{
-			"type":"text",
-			"name":"images_textarea",
-			"label":"Image in textarea size",
-			"default":"0.5",
-			"help":"[Image in textarea size]||Images in textareas width to max width pixels||If result is zero or over 1000px, 1000px is used"
-		},
-		{
-			"type":"text",
-			"name":"images_mobile",
-			"label":"Image mobile modifier",
-			"default":"1.0",
-			"help":"[Image mobile modifier]||Modifier to template suggested image size for mobile devices"
-		},
-		{
-			"type":"text",
-			"name":"video_encode_max_load",
-			"label":"Video encode max load",
-			"default":"0.8",
-			"help":"[Video encode max load]||When average server CPU load is at or above this value (0-1), DASH video encoding is deferred until the next cron run.||Example: 0.8 means defer when load is 80% or higher.||Uploaded or fallback mp4 continues to serve while encoding waits."
-		},
-		{
-			"type":"subtitle",
-			"label":"Metadata and SEO",
-			"width":"wide",
-			"help":"Settings related to sharing and search engine metadata"
-		},
-		{
-			"type":"image",
-			"name":"meta_image",
-			"label":"Image",
-			"category":"content",
-			"help":"Imge to use when page or list item doesn't have meta image defined"
-		},
-		{
-			"type":"image",
-			"name":"favicon",
-			"label":"Favicon",
-			"category":"icon"
-		},
-		{
-			"type":"select",
-			"name":"meta_video_twitter",
-			"label":"Preferred Twitter card type",
-			"values":{
-				"summary_large_image":"Summary large image",
-				"player":"Video player"
-			},
-			"default":"summary_large_image"
-		},
-		{
-			"type":"subtitle",
-			"label":"CMS interface",
-			"width":"wide",
-			"help":"Settings related to CMS look"
-		},
-		{
-			"type":"image",
-			"name":"cms_background",
-			"label":"CMS Background",
-			"category":"content"
-		},
-		{
-			"type":"select",
-			"name":"images_rows",
-			"label":"Image library rows",
-			"values":{
-				"2":"2",
-				"3":"3",
-				"4":"4",
-				"5":"5"
-			},
-			"default":"3"
-		},
-		{
-			"type":"select",
-			"name":"input_link_order",
-			"label":"Link input order",
-			"values":{
-				"0":"As sorted",
-				"1":"Alphabetical"
-			},
-			"default":"0"
-		},
-		{
-			"type":"subtitle",
-			"label":"Email",
-			"width":"wide",
-			"help":"Settings related to CMS system email"
-		},
-		{
-			"type":"text",
-			"name":"from_name",
-			"label":"From name",
-			"default":"Noreply"
-		},
-		{
-			"type":"text",
-			"name":"email",
-			"label":"From email",
-			"default":"",
-			"help":"Do not change, as may go to spam",
-			"help":"Email to send notifications from||If empty, defaults to domain@narrativecms.com"
-		},
-		{
-			"type":"text",
-			"name":"reply_name",
-			"label":"Reply to name",
-			"default":"Noreply"
-		},
-		{
-			"type":"text",
-			"name":"reply_email",
-			"label":"Reply to email",
-			"default":""
-		},
-		{
-			"type":"text",
-			"name":"admin_email",
-			"label":"Technical admin email",
-			"default":"",
-			"help":"Email to send technical system messages. Eg error logs."
-		},
-		{
-			"type":"text",
-			"name":"email_queue_limit",
-			"label":"Email queue process limit",
-			"default":"50",
-			"help":"Max messages the cms/cms_email_queue cron processes per run||Default 50"
-		},
-		{
-			"type":"text",
-			"name":"email_queue_max_attempts",
-			"label":"Email queue max attempts",
-			"default":"5",
-			"help":"Give up after this many failed sends||Backoff between tries: 2×n² minutes (n = attempts so far)||Default 5"
-		},
-		{
-			"type":"subtitle",
-			"label":"SMTP"
-		},
-		{
-			"type":"text",
-			"name":"smtp_server",
-			"label":"SMTP server",
-			"help":"If empty, php mail is used"
-		},
-		{
-			"type":"text",
-			"name":"smtp_port",
-			"label":"SMTP port",
-			"help":"25 for normal, 587 for authenticated SMTP"
-		},
-		{
-			"type":"text",
-			"name":"smtp_username",
-			"label":"SMTP username"
-		},
-		{
-			"type":"text",
-			"name":"smtp_password",
-			"label":"SMTP password"
-		},
-		{
-			"type":"select",
-			"name":"smtp_debug",
-			"label":"SMTP debug",
-			"values":{
-				"0":"Off",
-				"1":"On"
-			},
-			"default":"0",
+			"type": "select",
+			"name": "smtp_debug",
+			"label": "SMTP debug",
+			"values": [
+				"Off",
+				"On"
+			],
+			"default": "0",
 			"help": "Saves SMTP debug log to cache folder"
 		},
 		{
-			"type":"subtitle",
-			"label":"AI",
-			"width":"wide",
-			"help":"Site-wide AI features (translations, etc). Provider modules (e.g. xAI) hold API keys and style profiles."
+			"type": "subtitle",
+			"label": "AI",
+			"width": "wide",
+			"help": "Site-wide AI features (translations, etc). Provider modules (e.g. xAI) hold API keys and style profiles."
 		},
 		{
-			"type":"cms/cms_input_provides",
-			"name":"ai_provider",
-			"label":"AI provider",
-			"service":"ai",
-			"default":"",
-			"help":"[AI provider]||Module panel that provides the generic {ai} service (e.g. xAI Grok).||Leave empty to disable AI features."
+			"type": "cms/cms_input_provides",
+			"name": "ai_provider",
+			"label": "AI provider",
+			"service": "ai",
+			"default": "",
+			"help": "[AI provider]||Module panel that provides the generic {ai} service (e.g. xAI Grok).||Leave empty to disable AI features."
 		},
 		{
-			"type":"select",
-			"name":"ai_ask_confirmation",
-			"label":"Ask confirmation",
-			"values":{
-				"1":"Yes",
-				"0":"No"
+			"type": "select",
+			"name": "ai_ask_confirmation",
+			"label": "Ask confirmation",
+			"values": {
+				"1": "Yes",
+				"0": "No"
 			},
-			"default":"1",
-			"help":"When Yes, the translations page shows a confirm dialog before calling the AI (cost warning)."
+			"default": "1",
+			"help": "When Yes, the translations page shows a confirm dialog before calling the AI (cost warning)."
 		},
 		{
-			"type":"select",
-			"name":"ai_only_missing",
-			"label":"Only missing texts",
-			"values":{
-				"0":"No — translate all fields with base text",
-				"1":"Yes — only empty / default / same as base"
-			},
-			"default":"0",
-			"help":"When Yes, AI only receives fields whose selected-language value is empty, equals the definition default, or equals the base language text."
+			"type": "select",
+			"name": "ai_only_missing",
+			"label": "Only missing texts",
+			"values": [
+				"No — translate all fields with base text",
+				"Yes — only empty / default / same as base"
+			],
+			"default": "0",
+			"help": "When Yes, AI only receives fields whose selected-language value is empty, equals the definition default, or equals the base language text."
 		}
 	]
 }

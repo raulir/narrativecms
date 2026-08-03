@@ -1,110 +1,111 @@
 {
-	"panels":[
+	"version": "0.0",
+	"panels": [
 		{
-			"id":"shopify",
-			"name":"Shopify settings"
+			"id": "shopify",
+			"name": "Shopify settings"
 		},
 		{
-			"id":"shopify_cms_sync",
-			"name":"Shopify product sync",
-			"flags":[
+			"id": "shopify_cms_sync",
+			"name": "Shopify product sync",
+			"flags": [
 				"hidden"
 			]
 		},
 		{
-			"id":"shopify_cms_reload",
-			"name":"Reload Shopify data",
-			"flags":[
+			"id": "shopify_cms_reload",
+			"name": "Reload Shopify data",
+			"flags": [
 				"hidden"
 			]
 		},
 		{
-			"id":"shopify_cron_sync",
-			"name":"Shopify product sync (cron)",
-			"flags":[
+			"id": "shopify_cron_sync",
+			"name": "Shopify product sync (cron)",
+			"flags": [
 				"hidden",
 				"cron"
 			]
 		},
 		{
-			"id":"shop_product",
-			"name":"Shopify product fields"
+			"id": "shop_product",
+			"name": "Shopify product fields"
 		},
 		{
-			"id":"shop_category",
-			"name":"Shopify category fields",
-			"flags":[
+			"id": "shop_category",
+			"name": "Shopify category fields",
+			"flags": [
 				"hidden"
 			]
 		},
 		{
-			"id":"shop_subcategory",
-			"name":"Shopify subcategory fields",
-			"flags":[
+			"id": "shop_subcategory",
+			"name": "Shopify subcategory fields",
+			"flags": [
 				"hidden"
 			]
 		},
 		{
-			"id":"shop_collection",
-			"name":"Shopify collection fields",
-			"flags":[
+			"id": "shop_collection",
+			"name": "Shopify collection fields",
+			"flags": [
 				"hidden"
 			]
 		},
 		{
-			"id":"cart",
-			"name":"Cart"
+			"id": "cart",
+			"name": "Cart"
 		},
 		{
-			"id":"checkout",
-			"name":"Shopify checkout handoff",
-			"flags":[
+			"id": "checkout",
+			"name": "Shopify checkout handoff",
+			"flags": [
 				"hidden"
 			]
 		}
 	],
-	"extends":[
+	"extends": [
 		{
-			"target":"shop/product",
-			"source":"//shop_product"
+			"target": "shop/product",
+			"source": "//shop_product"
 		},
 		{
-			"target":"shop/order",
-			"source":"//shop_order"
+			"target": "shop/order",
+			"source": "//shop_order"
 		},
 		{
-			"target":"shop/category",
-			"source":"//shop_category"
+			"target": "shop/category",
+			"source": "//shop_category"
 		},
 		{
-			"target":"shop/subcategory",
-			"source":"//shop_subcategory"
+			"target": "shop/subcategory",
+			"source": "//shop_subcategory"
 		},
 		{
-			"target":"shop/collection",
-			"source":"//shop_collection"
+			"target": "shop/collection",
+			"source": "//shop_collection"
 		}
 	],
-	"provides":[
+	"provides": [
 		{
-			"service":"shop_checkout",
-			"panel":"//checkout",
-			"label":"Shopify checkout"
+			"service": "shop_checkout",
+			"panel": "//checkout",
+			"label": "Shopify checkout"
 		}
 	],
-	"cms_menu":[
+	"cms_menu": [
 		{
-			"id":"shop_shopify",
-			"name":"Shopify",
-			"parent":"shop",
-			"order":800
+			"id": "shop_shopify",
+			"name": "Shopify",
+			"parent": "shop",
+			"order": 800
 		},
 		{
-			"id":"shopify_settings",
-			"name":"Shopify settings",
-			"parent":"shop_shopify",
-			"url":"admin/panel_settings/shopify__shopify/",
-			"order":810
+			"id": "shopify_settings",
+			"name": "Shopify settings",
+			"parent": "shop_shopify",
+			"url": "admin/panel_settings/shopify__shopify/",
+			"order": 810
 		}
 	]
 }

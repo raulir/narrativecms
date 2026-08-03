@@ -1,5 +1,4 @@
 {
-	"version": "2",
 	"label": "Shopify product fields",
 	"description": "Extends shop/product with Shopify sync metadata (readonly). Core catalogue fields stay editable for CMS-only products.",
 	"extra_buttons": [

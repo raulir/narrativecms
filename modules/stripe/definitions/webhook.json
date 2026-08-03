@@ -1,5 +1,4 @@
 {
-	"version": "2",
 	"label": "Stripe webhook",
 	"description": "Public endpoint for Stripe webhook events (subscription entitlement)",
 	"item": [],

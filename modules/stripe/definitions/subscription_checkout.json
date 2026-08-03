@@ -1,5 +1,4 @@
 {
-	"version": "2",
 	"label": "Stripe subscription checkout",
 	"description": "Creates Stripe Checkout Session (subscription mode) for pricing Purchase",
 	"item": [],

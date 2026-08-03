@@ -86,11 +86,7 @@ class cms_input_grid extends \Controller {
 				$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
 				$params['base_name'] = $base['panel_name'];
 			} else {
-				$panel_config = $this->cms_panel_model->get_cms_panel_config($params['base_name']);
 				$base['panel_name'] = $params['base_name'];
-				if (!empty($panel_config['extends'])){
-					$base['_extends'] = $panel_config['extends'];
-				}
 			}
 			
 			$params['fields'] = $params['fields'] ?? [];
@@ -102,10 +98,6 @@ class cms_input_grid extends \Controller {
 					'id' => $params['base_id'] ?? 0,
 					'fields' => $params['fields'],
 				];
-
-				if (!empty($base['_extends'])){
-					$ds_params['_extends'] = $base['_extends'];
-				}
 				
 				$fields = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], $ds_params);
 
@@ -140,10 +132,6 @@ class cms_input_grid extends \Controller {
 					'do' => 'L',
 					'id' => $params['base_id'] ?? 0,
 			];
-			
-			if (!empty($base['_extends'])){
-				$ds_params['_extends'] = $base['_extends'];
-			}
 			
 			$params['data'] = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], $ds_params);
 			

@@ -1,5 +1,4 @@
 {
-	"version": "2",
 	"label": "Subscription login extend",
 	"description": "Checkout intent → post-login resume",
 	"item": []

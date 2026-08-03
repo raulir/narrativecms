@@ -1,5 +1,4 @@
 {
-	"version": "2",
 	"label": "xAI AI service",
 	"description": "Provides the generic ai service (chat, translate, …)",
 	"item": []
