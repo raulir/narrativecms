@@ -57,13 +57,34 @@ modules/music/
 
 | Asset | Supported | Handler |
 |-------|-----------|---------|
-| Definition `item` / `settings` | Yes | [`cms_panel_model::merge_structures()`](../../models/cms_panel_model.php) when loading `target` |
-| Definition **`list`** (e.g. `link_target`) | Yes | Same — extension `list` keys overlay the base list (e.g. set `link_target` to `"0"` to drop public slug / Pages → Lists shells) |
+| Definition merge | Yes | [`get_cms_panel_config($target)`](../../models/cms_panel_model.php) → [`merge_structures()`](../../models/cms_panel_model.php) for each source (see merge rules below) |
 | Settings **values** | Yes | [`get_cms_page_panel_settings()`](../../models/cms_page_panel_model.php) merges saved settings from each extend **source** into the target |
 | SCSS | Yes | [`controller::get_panel_filenames()`](../../../system/core/controller.php) |
 | JS | Yes | Same — appended after target panel JS; [`pack_js()`](../../../system/helpers/packer_helper.php) concatenates in order |
 | Template | Yes | Same — if `modules/<ext>/templates/<source_panel>.tpl.php` exists, it **replaces** the target template entirely (no merge). Last extending module in `modules` order wins. |
 | PHP controller | Yes | `modules/<ext>/panels/<source>.php` if present. **`panel_params` / `panel_action`:** target first, then each extend in order (chain). **`panel_heading`:** reverse-walk extenders — only the **last** implementer runs (else target). |
+
+### Definition merge rules (`merge_structures`)
+
+Base = target definition; overlay = each source in module order. Boot indexes: `$GLOBALS['config']['extends_by_target']`, `extend_sources`.
+
+| Key | Rule |
+|-----|------|
+| `item`, `settings` | Merge fields by `name` (`_merge_field_definition`; nested `fields` same) |
+| `list` | `array_merge` — source subkeys win (e.g. `link_target: "0"`) |
+| `extra_buttons` | Append |
+| `js` | Append unique entries when both arrays |
+| `label`, `description`, `image` | Source only if target empty (keep product list titles) |
+| `filename`, `module` | Never from source |
+| **All other keys** | Source **overwrites** (including unknown future keys: `ensure_data`, `cache`, …) |
+
+**Do not** declare circular extends (A→B and B→A). No runtime cycle guard.
+
+### Discovery (lists / schema)
+
+Use [`list_definition_panel_names()`](../../models/cms_panel_model.php) (skips pure extend **sources** by default). Then `get_cms_panel_config` + `is_real_list_config` for lists. Schema builds table columns from **merged** target config, not raw source JSON.
+
+Semantic reads always go through `get_cms_panel_config` — never open definition JSON for `link_target` / fields / list flags.
 
 ### Naming convention
 
@@ -89,12 +110,14 @@ AJAX `panel_id` stays on **target** (e.g. `user/login`), not the extension panel
 
 Place the **target** panel on pages (`user/login`), not a duplicate panel id in the extending module. Music example: login / register / reminder use `user/login`, `user/register`, `user/reminder`; themes in `music/css/user_login.scss`, `user_register.scss`, `user_reminder.scss`.
 
-## Deprecated — do not use
+## Removed (do not reintroduce)
 
 | Mechanism | Notes |
 |-----------|-------|
-| Definition `"extends"` + `join_js` / `join_css` | Legacy child panel (`music/login` extending `user/login` via JSON). Removed from this project. |
-| DB per-block `_extends.*` params | Legacy; delete if found |
-| Definition `"extends"` code in core | Still present temporarily — todo: remove from `system/` when all projects migrated |
+| Definition JSON `"extends"` + `join_js` / `join_css` | Old child-panel model; removed from core |
+| Runtime `_extends` params / `cms_wrapper` from definition extends | Removed |
+| Bare `definitions/{slug}.json` scans for list slug detection | Use list template slug → panel name + `get_lists()` |
+
+Only **config.json** `extends` (`target` keeps original panel name; modules add fields/theme) is supported.
 
 See also [`cms_panel_js.md`](cms_panel_js.md) for panel JS contracts.

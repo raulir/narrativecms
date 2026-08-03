@@ -146,6 +146,16 @@ class Index extends Controller {
 				
 			}
 
+			// Visible page with no panels: red FE error (not error_log)
+			if (empty($blocks) && !empty($page['cms_page_id'])){
+				$page_config[] = [
+						'position' => 'main',
+						'panel' => 'cms/cms_page_empty',
+						'params' => [],
+						'_cms_layout' => $page['layout'] ?? '',
+				];
+			}
+
 			$cms_page_id = $page['cms_page_id'];
 
     	} else { // list item page

@@ -41,6 +41,10 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 ---
 
+## Pages / publish (#625)
+
+- [x] **Page hide + guarded delete** — remove Published status dropdown; toolbar **Hide/Show** (user + list main pages); gear **Delete** for user (enabled if no panels) and list templates (enabled if no list items, or list module/def gone, or merged `list.link_target` off after extends); system: neither. Visibility is binary visible/hidden. Empty main page FE shows red “No panels on the page” (not error_log). Hidden pages grey on Pages list (`cms_item_hidden`).
+
 ## Admin page load
 
 - [ ] Lazy-load `cms_page_positions` via AJAX
@@ -164,7 +168,7 @@ Implemented core: admin split-view (`cms/cms_preview`), D|M toggle, saved-data i
 - [x] **Empty dirs after update** — `update_cleanup` deepest-first; drop legacy `application/` / root `js/` roots
 - [x] **Install new modules** (#753) — list master `update.master` packages not on disk; Install → files + enable penultimate in settings `modules` (client gated by `update.allow`)
 
-## Module extends (legacy cleanup)
+## Module extends
 
 - [x] **config.json extends + JS** — `get_panel_filenames()` appends extension JS; detail: [`cms_module_extends.md`](cms_module_extends.md)
 - [x] **config extends: template replace** (#715) — extension `templates/<source>.tpl.php` replaces target template; last module wins; see [`cms_module_extends.md`](cms_module_extends.md)
@@ -172,8 +176,11 @@ Implemented core: admin split-view (`cms/cms_preview`), D|M toggle, saved-data i
 - [ ] **System/list auto content** — helper panels on empty system + list template pages
 - [x] **config extends: PHP controller** — extension `panels/<source>.php` chained after target; `panel_heading` last extender wins (reverse walk)
 - [x] **config extends PHP optimise** — shared chain helper, method map (`_panel_controller_methods`), no double-load for heading probe
-- [ ] **config extends: `extends_by_target` at boot** — index `$GLOBALS['config']['extends']` by target (+ optional precomputed controller/template/scss flags) so `get_panel_filenames` does O(extends for target) not O(all extends); see session plan notes
-- [ ] **Remove legacy extend code from core** — definition JSON `"extends"` / `join_js` / `join_css` in `controller.php` + `cms_panel_model.php`; DB `_extends.*` param handling
+- [x] **`extends_by_target` / `extend_sources` at boot** — indexed from module config extends; used by merge + `get_panel_filenames`
+- [x] **Remove legacy extend code from core** — definition JSON `"extends"` / `join_js` / `join_css` / `_extends` runtime plumbing removed; config.json target/source only
+- [x] **Definition discovery** — `list_definition_panel_names` skips pure extend sources; `get_lists` / linkable types / schema use merged config
+- [x] **`merge_structures` full key merge** — special rules for item/settings/list/buttons/js/label; unknowns overwrite
+- [ ] **Panel definition cache keyed on git** — optional live-env mode: cache merged panel configs / discovery results and invalidate when git HEAD (or tree) changes, so deploys that only `git pull` skip repeated definition glob + merge work. Align with `cache.vcs_check: git` for CSS. Useful when code updates are git-only and definition collection is hot-path cost.
 
 ---
 

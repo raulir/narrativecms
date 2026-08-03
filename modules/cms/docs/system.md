@@ -190,7 +190,7 @@ Public API modules: URI `module/api_id` short-circuits in `cms.php` before sessi
 
 - Host config: [`cms_config_basic.php`](../../../system/core/cms_config_basic.php); full (DB/modules): [`cms_config.php`](../../../system/core/cms_config.php)
 - Enabled modules drive which definitions, schema, menus, and extends load
-- **`config.json` `"extends"`** (target/source, `//panel` convention): merged at boot into `$GLOBALS['config']['extends']` — definition fields, SCSS, JS (not PHP/template yet). Detail: [`cms_module_extends.md`](cms_module_extends.md)
+- **`config.json` `"extends"`** (target/source, `//panel` convention): boot builds `$GLOBALS['config']['extends']`, `extends_by_target`, `extend_sources`. Definition merge via `get_cms_panel_config`; SCSS/JS/template/PHP via `get_panel_filenames`. Detail: [`cms_module_extends.md`](cms_module_extends.md)
 
 ---
 

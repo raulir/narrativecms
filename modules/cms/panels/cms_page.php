@@ -54,6 +54,18 @@ class cms_page extends \Controller {
 				|| (!empty($return['page']['slug']) && $this->cms_page_panel_cms_model->is_list_slug($return['page']['slug'])))
 			? 1 : 0;
 
+		$position = !empty($return['page']['position']) ? $return['page']['position'] : 'main';
+		$panel_count = count($return['cms_page_panels'] ?? []);
+		$page_status = !empty($return['page']['status']) ? (int)$return['page']['status'] : 0;
+
+		// Hide: main pages that are not system (user + list templates)
+		$return['can_hide'] = ($position === 'main' || $position === '') && $page_class !== 'system' ? 1 : 0;
+		// Delete in gear: user + list pages (not system); enabled when page_can_delete
+		$return['show_delete_control'] = ($page_class === 'user' || $page_class === 'list') ? 1 : 0;
+		$return['can_delete'] = $this->cms_page_model->page_can_delete($return['page']) ? 1 : 0;
+		$return['panel_count'] = $panel_count;
+		$return['page_status'] = $page_status;
+
 		if (!empty($return['page']['create_cms_user_id'])) {
 			$return['page']['create_user'] = $this->cms_user_model->get_cms_user($return['page']['create_cms_user_id']);
 		}

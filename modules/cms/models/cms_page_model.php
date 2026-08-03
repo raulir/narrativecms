@@ -267,24 +267,169 @@ class cms_page_model extends \Model {
     	
 	}
 	
+	/**
+	 * Whether this page may be deleted (admin UI + server guard).
+	 * User pages: only when no panels on the page.
+	 * List templates: when no list items exist, or orphaned (module/def gone, or
+	 * merged list.link_target off — shell not needed even if catalogue items remain).
+	 * System: never.
+	 */
+	function page_can_delete($page){
+
+		if (empty($page['cms_page_id'])){
+			return true; // unsaved
+		}
+
+		$page_class = $this->get_page_class($page);
+		if ($page_class === 'system'){
+			return false;
+		}
+
+		if ($page_class === 'list'){
+			if ($this->is_list_template_orphaned($page)){
+				return true;
+			}
+			return $this->count_list_template_items($page) === 0;
+		}
+
+		// user / partials
+		$this->load->model('cms/cms_page_panel_model');
+		$panels = $this->cms_page_panel_model->get_cms_page_panels_by([
+				'cms_page_id' => (int)$page['cms_page_id'],
+				'_fields' => ['cms_page_panel_id'],
+		]);
+
+		return empty($panels);
+
+	}
+
+	/**
+	 * Resolve list panel name (module/panel) for a list template page.
+	 */
+	function get_list_template_panel_name($page){
+
+		$panel_name = trim((string)($page['list_panel'] ?? ''));
+		if ($panel_name === '' || !stristr($panel_name, '/')){
+			$panel_name = $this->list_template_panel_from_slug($page['slug'] ?? '');
+		}
+		if ($panel_name === '' || !stristr($panel_name, '/')){
+			return '';
+		}
+		return $panel_name;
+
+	}
+
+	/**
+	 * How many list items exist for this list template (cms_page_id 0, sort != 0).
+	 */
+	function count_list_template_items($page){
+
+		$panel_name = $this->get_list_template_panel_name($page);
+		if ($panel_name === ''){
+			return 0;
+		}
+
+		$this->load->model('cms/cms_page_panel_model');
+		// Prefer list-model count when available (filters sort! 0)
+		$this->load->model('cms/cms_page_panel_list_model');
+		if (!empty($this->cms_page_panel_list_model)
+				&& method_exists($this->cms_page_panel_list_model, 'count_cms_page_panels_list_by')){
+			return (int)$this->cms_page_panel_list_model->count_cms_page_panels_list_by([
+					'panel_name' => $panel_name,
+					'cms_page_id' => 0,
+					'sort!' => '0',
+			]);
+		}
+
+		$items = $this->cms_page_panel_model->get_cms_page_panels_by([
+				'panel_name' => $panel_name,
+				'cms_page_id' => 0,
+				'_fields' => ['cms_page_panel_id'],
+		]);
+		return is_array($items) ? count($items) : 0;
+
+	}
+
+	/**
+	 * List template shell that is no longer needed: module/def gone, or merged
+	 * list config has no truthy link_target (e.g. site extend sets link_target "0").
+	 * Such shells may be deleted even when catalogue list items still exist.
+	 */
+	function is_list_template_orphaned($page){
+
+		if ($this->get_page_class($page) !== 'list'){
+			return false;
+		}
+
+		$panel_name = $this->get_list_template_panel_name($page);
+		if ($panel_name === ''){
+			return true;
+		}
+
+		list($module, $panel) = explode('/', $panel_name, 2);
+		$modules = $GLOBALS['config']['modules'] ?? [];
+		if (!in_array($module, $modules, true)){
+			return true;
+		}
+
+		$def = $GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/'.$panel.'.json';
+		if (!is_file($def)){
+			return true;
+		}
+
+		// Merged config (extends overlay) — shell only for linkable lists
+		$this->load->model('cms/cms_panel_model');
+		$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+		if (empty($config['list']) || !is_array($config['list'])){
+			return true;
+		}
+
+		return !$this->list_link_target_enabled($config['list']);
+
+	}
+
+	/**
+	 * Truthy list.link_target (same rules as get_linkable_list_types).
+	 * @param array $list_meta definition list block
+	 */
+	function list_link_target_enabled($list_meta){
+
+		if (!is_array($list_meta)){
+			return false;
+		}
+		$link_target = $list_meta['link_target'] ?? null;
+		if ($link_target === null || $link_target === '' || $link_target === '0' || $link_target === 0){
+			return false;
+		}
+		return true;
+
+	}
+
 	function delete_page($page_id){
-		
+
+		$page_id = (int)$page_id;
+		if ($page_id < 1){
+			return false;
+		}
+
+		$page = $this->get_page($page_id);
+		if (empty($page['cms_page_id']) || !$this->page_can_delete($page)){
+			return false;
+		}
+
 		$sql = "delete from cms_page where cms_page_id = ? ";
-	    $this->db->query($sql, array($page_id, ));
-	    
-	    if ($page_id > 0){
-	    
-		    $this->load->model('cms/cms_page_panel_model');
-		    $panels = $this->cms_page_panel_model->get_cms_page_panels_by(array('cms_page_id' => $page_id, ));
-		    foreach($panels as $panel){
-		    	$this->cms_page_panel_model->delete_cms_page_panel($panel['cms_page_panel_id']);
-		    }
-	    
-	    }
-	    
-	    // delete slug
-	    $this->load->model('cms/cms_slug_model');
-	    $this->cms_slug_model->delete_slug($page_id);
+		$this->db->query($sql, [$page_id]);
+
+		$this->load->model('cms/cms_page_panel_model');
+		$panels = $this->cms_page_panel_model->get_cms_page_panels_by(['cms_page_id' => $page_id]);
+		foreach ($panels as $panel){
+			$this->cms_page_panel_model->delete_cms_page_panel($panel['cms_page_panel_id']);
+		}
+
+		$this->load->model('cms/cms_slug_model');
+		$this->cms_slug_model->delete_slug($page_id);
+
+		return true;
 
 	}
 	
@@ -400,15 +545,14 @@ class cms_page_model extends \Model {
 			return $slug;
 		}
 
-		// User pages: normal slugify + automatic/hidden
+		// User pages: visible (status 0) vs hidden (status 1) only — no auto-by-panel-count
 		$slug = $this->cms_slug_model->generate_page_slug($cms_page_id, $data['slug']);
 
-		$panels = $this->cms_page_panel_model->get_cms_page_panels_by(['cms_page_id' => $cms_page_id, 'show' => 1, ]);
-		$number_panels = count($panels);
-
-		if (empty($data['status']) && $number_panels > 0){
+		if (empty($data['status'])){
+			// visible → public route
 			$this->cms_slug_model->set_page_slug($cms_page_id, $slug, 0);
 		} else {
+			// hidden → off public routes
 			$this->cms_slug_model->set_page_slug($cms_page_id, $slug, 1);
 		}
 
@@ -512,31 +656,29 @@ class cms_page_model extends \Model {
 
 		$return = [];
 
-		foreach ($GLOBALS['config']['modules'] as $module){
-			foreach (glob($GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/*.json') as $filename){
-				$list_name = basename($filename, '.json');
-				$panel_name = $module.'/'.$list_name;
-				$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
-				if (empty($config['list'])){
-					continue;
-				}
-				$link_target = $config['list']['link_target'] ?? null;
-				if ($link_target === null || $link_target === '' || $link_target === '0' || $link_target === 0){
-					continue;
-				}
-
-				$mod_config = $this->cms_module_model->get_module_config($module);
-				$module_label = !empty($mod_config['name']) ? $mod_config['name'] : ucfirst($module);
-				$panel_label = $config['label'] ?? ($config['list']['item_title'] ?? ucfirst(str_replace('_', ' ', $list_name)));
-
-				$return[] = [
-					'panel_name' => $panel_name,
-					'module' => $module,
-					'panel' => $list_name,
-					'title' => $module_label.' - '.$panel_label,
-					'slug' => $this->list_template_slug($module, $list_name),
-				];
+		foreach ($this->cms_panel_model->list_definition_panel_names() as $panel_name){
+			$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+			if (!$this->cms_panel_model->is_real_list_config($config)
+					|| !$this->list_link_target_enabled($config['list'])){
+				continue;
 			}
+
+			if (!stristr($panel_name, '/')){
+				continue;
+			}
+			list($module, $list_name) = explode('/', $panel_name, 2);
+
+			$mod_config = $this->cms_module_model->get_module_config($module);
+			$module_label = !empty($mod_config['name']) ? $mod_config['name'] : ucfirst($module);
+			$panel_label = $config['label'] ?? ($config['list']['item_title'] ?? ucfirst(str_replace('_', ' ', $list_name)));
+
+			$return[] = [
+				'panel_name' => $panel_name,
+				'module' => $module,
+				'panel' => $list_name,
+				'title' => $module_label.' - '.$panel_label,
+				'slug' => $this->list_template_slug($module, $list_name),
+			];
 		}
 
 		return $return;

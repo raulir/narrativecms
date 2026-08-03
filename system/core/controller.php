@@ -290,11 +290,7 @@ class Controller {
 	 */
 	function run_panel_method($panel_name_param, $panel_method, $params = []){
 
-		if (!empty($params['_extends'])){
-			$files = $this->get_panel_filenames($panel_name_param, $params, $params['_extends']);
-		} else {
-			$files = $this->get_panel_filenames($panel_name_param, $params);
-		}
+		$files = $this->get_panel_filenames($panel_name_param, $params);
 
 		return $this->_run_panel_controller_chain($files, $panel_method, $params);
 
@@ -315,11 +311,7 @@ class Controller {
 			];
 		}
 
-		if (!empty($params['_extends'])){
-			$files = $this->get_panel_filenames($name, $params, $params['_extends']);
-		} else {
-			$files = $this->get_panel_filenames($name, $params);
-		}
+		$files = $this->get_panel_filenames($name, $params);
 
 		$panel_js = $files['js'];
 		$panel_css = $files['css'];
@@ -370,13 +362,9 @@ class Controller {
 			$template_note = ' template from config extend "'.$files['template_from_extend'].'" ';
 		}
 		$return = "\n".'<!-- panel "' . $files['module'] . '/' . $files['name'] . '" '.
-						(!empty($params['_extends']['panel']) ? 'extends "'.$params['_extends']['panel'].'" ' : '' ).
 						$template_note.
 						'start -->'."\n".
-				(!empty($params['_extends']['panel']) && empty($params['_extends']['no_wrapper']) ? 
-						'<span class="cms_wrapper cms_wrapper_'.$files['module'].'_'.$files['name'].'">'."\n" : '').
 				$return .
-				(!empty($params['_extends']['panel']) && empty($params['_extends']['no_wrapper']) ? "\n</span>" : '').
 				"\n".'<!-- panel "' . $files['module'] . '/' . $files['name'] . 
 						'" ( '.(!empty($controller_timer_start) ? ' controller: '.($controller_timer_end - $controller_timer_start).'ms ' : '').
 				(!empty($template_timer_start) ? ' template: '.($template_timer_end - $template_timer_start).'ms' : ''). ' ) end -->'."\n";
@@ -745,9 +733,6 @@ class Controller {
 		$this->load->model('cms/cms_panel_model');
 		
 		$panel_config = $this->cms_panel_model->get_cms_panel_config($name);
-		if (!empty($panel_config['extends'])){
-			$params['_extends'] = $panel_config['extends'];
-		}
 
 		if (is_numeric($name)){
 			$params_db = $this->cms_page_panel_model->get_cms_page_panel($name);
@@ -791,9 +776,7 @@ class Controller {
 			if ($def_cache_path !== '' && is_file($def_cache_path)
 					&& (time() - filemtime($def_cache_path)) < $def_cache_ttl){
 				$def_cache_hit = true;
-				$files = !empty($params['_extends'])
-						? $this->get_panel_filenames($name, $params, $params['_extends'])
-						: $this->get_panel_filenames($name, $params);
+				$files = $this->get_panel_filenames($name, $params);
 				$return = [
 						'_html' => (string)file_get_contents($def_cache_path),
 						'js' => $files['js'] ?? [],
@@ -1247,7 +1230,11 @@ class Controller {
 
 	}
 
-	function get_panel_filenames($panel_name, $params = [], $extends = []){
+	/**
+	 * Resolve panel controller, template, js, scss for module/panel.
+	 * Config.json extends only (scss/js append, template replace, PHP chain).
+	 */
+	function get_panel_filenames($panel_name, $params = []){
 
 		if (!empty($GLOBALS['_panel_files'][$panel_name])){
 			return $GLOBALS['_panel_files'][$panel_name];
@@ -1255,18 +1242,6 @@ class Controller {
 		 
 		$return = [];
 		$return['extend_controllers'] = [];
-		$extends_files = null;
-		$def_extends_module = null;
-		$def_extends_name = null;
-	
-		if (!empty($extends['panel'])){
-			if (!stristr($extends['panel'], '/') && !empty($GLOBALS['config']['errors_visible'])){
-				_html_error('Bad panel extension panel name '.$extends['panel'].' (definition has to be "module/panel", save page panel in CMS after fixing)');
-			} else {
-				$extends_files = $this->get_panel_filenames($extends['panel']);
-				list($def_extends_module, $def_extends_name) = explode('/', $extends['panel']);
-			}
-		}
 
 		$module = '';
 
@@ -1294,21 +1269,9 @@ class Controller {
 		} else {
 			$return['controller'] = '';
 		}
-	
-		// Legacy definition "extends"."panel" → first entry in extend_controllers[]
-		if (!empty($extends_files['controller']) && !empty($def_extends_module)){
-			$return['extend_controllers'][] = [
-					'module' => $def_extends_module,
-					'name' => $def_extends_name,
-					'controller' => $extends_files['controller'],
-			];
-		}
 
 		if (!empty($template_filename) && file_exists($template_filename)){
 			$return['template'] = $template_filename;
-		} else if (!empty($extends_files['template'])){ // if no template, but has extends template, use this
-			$return['template'] = $extends_files['template'];
-			$return['template_extends'] = true;
 		} else {
 			$return['template'] = '';
 		}
@@ -1331,43 +1294,27 @@ class Controller {
 		if (!empty($params['_js'])){
 			$return['js'] = array_merge($return['js'], array_values($params['_js']));
 		}
-	
-		if (!empty($extends['join_js']) && !empty($extends['panel'])){
-			$return['js'] = array_merge($return['js'], $extends_files['js']);
-		}
+
 		if (file_exists($GLOBALS['config']['base_path'].'modules/'.$return['module'].'/js/'.$return['module'].'.js')) {
 			$return['js'][] = 'modules/'.$return['module'].'/js/'.$return['module'].'.js';
 		}
 		if (file_exists($GLOBALS['config']['base_path'].'modules/'.$return['module'].'/js/'.$return['name'].'.js')) {
 			$return['js'][] = 'modules/'.$return['module'].'/js/'.$return['name'].'.js';
-			$panel_js_exists = true;
-		}
-		// if no panel js exists, there is extends js and not already joined, use this (but keep module js from panel)
-		if (empty($panel_js_exists) && !empty($extends_files['js']) && empty($extends['join_js'])){
-			$return['js'] = array_merge($return['js'], $extends_files['js']);
 		}
 	
 		// collect panel related css files
 		$return['css'] = [];
-		if (!empty($extends['join_css']) && !empty($extends['panel'])){
-			$return['css'] = $extends_files['css'];
-		}
 		if (file_exists($GLOBALS['config']['base_path'].'modules/'.$return['module'].'/css/'.$return['module'].'.css')) {
 			$return['css'][] = array('script' => 'modules/'.$return['module'].'/css/'.$return['module'].'.css', 'top' => 1, );
 		}
 		if (file_exists($GLOBALS['config']['base_path'].'modules/'.$return['module'].'/css/'.$return['name'].'.css')) {
 			$return['css'][] = array('script' => 'modules/'.$return['module'].'/css/'.$return['name'].'.css', );
-			$panel_css_exists = true;
 		}
 		// scss files
 		$return['scss'] = [];
 		 
 		if (!empty($params['_css'])){
 			$return['scss'] = array_merge($return['scss'], $params['_css']);
-		}
-		 
-		if (!empty($extends['join_css']) && !empty($extends['panel'])){
-			$return['scss'] = array_merge($return['scss'], $extends_files['scss']);
 		}
 		
 		// main module scss
@@ -1389,64 +1336,65 @@ class Controller {
 					array('modules/'.$return['module'].'/css/'.$return['module'].'.scss', ) : array(),
 					'css' => 'cache/'.$return['module'].'__'.$return['name'].'.css',
 			);
-			$panel_css_exists = true; // scss replaces css here
 		}
 		
 		// extensions from module config.json (definition merge elsewhere; scss + js + full template replace)
-		// Loop order = modules load order; later extension templates overwrite earlier (last wins).
-		foreach($GLOBALS['config']['extends'] as $item){
-			if ($item['target'] == $return['module'].'/'.$return['name']){
-				
-				list($ext_module, $ext_panel) = explode('/', $item['source']);
-				
-				if (file_exists($GLOBALS['config']['base_path'].'modules/'.$ext_module.'/css/'.$ext_module.'.scss')){
-					$return['scss'][] = [
-							'script' => 'modules/'.$ext_module.'/css/'.$ext_module.'.scss',
-							'top' => 1,
-							'related' => [],
-							'css' => 'cache/'.$ext_module.'__'.$ext_module.'.css',
-							'module_path' => 'modules/'.$ext_module.'/',
-					];
-				}
-				
-				if (file_exists($GLOBALS['config']['base_path'].'modules/'.$ext_module.'/css/'.$ext_panel.'.scss')){
-
-					$return['scss'][] = [
-							'script' => 'modules/'.$ext_module.'/css/'.$ext_panel.'.scss',
-							'related' => file_exists($GLOBALS['config']['base_path'].'modules/'.$ext_module.'/css/'.$ext_module.'.scss') ?
-							['modules/'.$ext_module.'/css/'.$ext_module.'.scss', ] : [],
-							'css' => 'cache/'.$ext_module.'__'.$ext_panel.'.css',
-					];
-					
-					
-					$panel_css_exists = true; // scss replaces css here
-					
-				}
-
-				$this->_append_extend_module_js($return['js'], $ext_module, $ext_panel);
-
-				// Full template replace (no merge) — last extending module with a template file wins
-				$ext_template = $GLOBALS['config']['base_path'].'modules/'.$ext_module.'/templates/'.$ext_panel.'.tpl.php';
-				if (file_exists($ext_template)){
-					$return['template'] = $ext_template;
-					$return['template_from_extend'] = $item['source'];
-				}
-
-				// Config extends PHP: panels/<source>.php — chain after target (order = modules/extends order)
-				$ext_controller = $GLOBALS['config']['base_path'].'modules/'.$ext_module.'/panels/'.$ext_panel.'.php';
-				if (file_exists($ext_controller)){
-					$return['extend_controllers'][] = [
-							'module' => $ext_module,
-							'name' => $ext_panel,
-							'controller' => $ext_controller,
-					];
+		// Prefer boot index extends_by_target; fall back to flat extends list.
+		$target = $return['module'].'/'.$return['name'];
+		$extend_sources = [];
+		if (!empty($GLOBALS['config']['extends_by_target'][$target]) && is_array($GLOBALS['config']['extends_by_target'][$target])){
+			$extend_sources = $GLOBALS['config']['extends_by_target'][$target];
+		} else if (!empty($GLOBALS['config']['extends']) && is_array($GLOBALS['config']['extends'])){
+			foreach ($GLOBALS['config']['extends'] as $item){
+				if (($item['target'] ?? '') === $target && !empty($item['source'])){
+					$extend_sources[] = $item['source'];
 				}
 			}
 		}
 
-		if (empty($panel_css_exists) && !empty($extends_files['scss']) && empty($extends['join_css'])){
-			$return['css'] = array_merge($return['css'], $extends_files['css']);
-			$return['scss'] = array_merge($return['scss'], $extends_files['scss']);
+		foreach ($extend_sources as $source){
+			if (!stristr($source, '/')){
+				continue;
+			}
+			list($ext_module, $ext_panel) = explode('/', $source, 2);
+				
+			if (file_exists($GLOBALS['config']['base_path'].'modules/'.$ext_module.'/css/'.$ext_module.'.scss')){
+				$return['scss'][] = [
+						'script' => 'modules/'.$ext_module.'/css/'.$ext_module.'.scss',
+						'top' => 1,
+						'related' => [],
+						'css' => 'cache/'.$ext_module.'__'.$ext_module.'.css',
+						'module_path' => 'modules/'.$ext_module.'/',
+				];
+			}
+				
+			if (file_exists($GLOBALS['config']['base_path'].'modules/'.$ext_module.'/css/'.$ext_panel.'.scss')){
+				$return['scss'][] = [
+						'script' => 'modules/'.$ext_module.'/css/'.$ext_panel.'.scss',
+						'related' => file_exists($GLOBALS['config']['base_path'].'modules/'.$ext_module.'/css/'.$ext_module.'.scss') ?
+						['modules/'.$ext_module.'/css/'.$ext_module.'.scss', ] : [],
+						'css' => 'cache/'.$ext_module.'__'.$ext_panel.'.css',
+				];
+			}
+
+			$this->_append_extend_module_js($return['js'], $ext_module, $ext_panel);
+
+			// Full template replace (no merge) — last extending module with a template file wins
+			$ext_template = $GLOBALS['config']['base_path'].'modules/'.$ext_module.'/templates/'.$ext_panel.'.tpl.php';
+			if (file_exists($ext_template)){
+				$return['template'] = $ext_template;
+				$return['template_from_extend'] = $source;
+			}
+
+			// Config extends PHP: panels/<source>.php — chain after target
+			$ext_controller = $GLOBALS['config']['base_path'].'modules/'.$ext_module.'/panels/'.$ext_panel.'.php';
+			if (file_exists($ext_controller)){
+				$return['extend_controllers'][] = [
+						'module' => $ext_module,
+						'name' => $ext_panel,
+						'controller' => $ext_controller,
+				];
+			}
 		}
 	
 		// cache this

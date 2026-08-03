@@ -16,12 +16,31 @@
 		<div class="cms_page_toolbar_title"></div>
 	</div>
 	
+	<?php /* float:right — first in DOM is rightmost: language | gear | save | hide
+	         visual L→R: Hide · Save · gear · language (same as panel toolbars) */ ?>
 	<?php if (!empty($GLOBALS['language']['languages'])): ?>
 		<?php _panel('cms/cms_language_select') ?>
 	<?php endif ?>
-	
+
+	<?php if (!empty($show_delete_control)): ?>
+		<div class="cms_tool_button cms_right cms_toolbar_buttons_hidden cms_page_toolbar_gear"
+				<?php _ib('cms/cms_settings.png', 30) ?>>
+			<div class="cms_toolbar_buttons_hidden_arrow" <?php _ib('cms/cms_down.png', 12) ?>></div>
+			<div class="cms_toolbar_buttons_hidden_container">
+				<div class="cms_page_delete cms_tool_button<?= !empty($can_delete) ? '' : ' cms_tool_button_inactive' ?>"
+						<?= !empty($can_delete) ? '' : ' data-disabled="1"' ?>>Delete</div>
+			</div>
+		</div>
+	<?php endif ?>
+
 	<div class="cms_page_save cms_tool_button cms_right" data-cms_ctrl="s">Save</div>
-	<a class="cms_page_delete cms_tool_button cms_right">Delete</a>
+
+	<?php if (!empty($can_hide)): ?>
+		<div class="cms_page_hide cms_tool_button cms_right" data-cms_ctrl="h"
+				data-status="<?= !empty($page_status) ? 1 : 0 ?>">
+			<div class="cms_page_hide_label"><?= !empty($page_status) ? 'show' : 'hide' ?></div>
+		</div>
+	<?php endif ?>
 
 </div>
 
@@ -32,6 +51,7 @@
 		<input type="hidden" class="cms_page_id" name="page_id" value="<?php print($page['page_id']); ?>">
 		<input type="hidden" class="cms_page_sort" name="sort" value="<?php print($page['sort']); ?>">
 		<input type="hidden" class="cms_page_position" name="position" value="<?= $page['position'] ?>">
+		<input type="hidden" class="cms_page_status" name="cms_page_status" value="<?= !empty($page_status) ? 1 : 0 ?>">
 		
 		<div class="cms_page_content">
 			<div class="cms_column">
@@ -66,24 +86,6 @@
 				<?php endif ?>
 				
 				<?php if (in_array($page['position'], ['', 'main', ])): ?>
-				
-					<?php if(!$is_list_item): ?>
-							
-						<?php _panel('cms/cms_input_select', array(
-								'label' => 'Published status', 
-								'value' => (!empty($page['status']) ? $page['status'] : 0), 
-								'values' => ['0' => 'Automatic', '1' => 'Hidden', ],
-								'name' => 'cms_page_status',
-								'name_clean' => 'status',
-								'help' => '[Page published status]||"{Automatic}" - hidden when page doesn\'t have any panels added, otherwise visible.||
-										"{Hidden}" - visible only while logged into CMS admin.',
-						)) ?>
-							
-					<?php else: ?>
-						
-						<input type="hidden" name="cms_page_status" class="cms_page_status" value="0">
-						
-					<?php endif ?>
 						
 					<?php _panel('cms/cms_input_subtitle', ['label' => 'Structure', 'width' => 'narrow', 
 							'help' => '[Structure]||These fields define general layout and static areas of page, like header and footer']) ?>

@@ -179,6 +179,8 @@ function cms_config_load_full(){
 	$GLOBALS['config']['modules'] = array_values(array_unique($GLOBALS['config']['modules']));
 
 	$GLOBALS['config']['extends'] = [];
+	$GLOBALS['config']['extends_by_target'] = [];
+	$GLOBALS['config']['extend_sources'] = [];
 	$GLOBALS['config']['provides'] = [];
 
 	foreach($GLOBALS['config']['modules'] as $module_name){
@@ -204,6 +206,15 @@ function cms_config_load_full(){
 					$item['source'] = str_replace('//', $module_name.'/', $item['source']);
 				}
 				$GLOBALS['config']['extends'][] = $item;
+				$target = $item['target'] ?? '';
+				$source = $item['source'] ?? '';
+				if ($target !== '' && $source !== ''){
+					if (empty($GLOBALS['config']['extends_by_target'][$target]) || !is_array($GLOBALS['config']['extends_by_target'][$target])){
+						$GLOBALS['config']['extends_by_target'][$target] = [];
+					}
+					$GLOBALS['config']['extends_by_target'][$target][] = $source;
+					$GLOBALS['config']['extend_sources'][$source] = true;
+				}
 			}
 		}
 

@@ -335,9 +335,9 @@ Yes/no confirmation — reuse `cms/cms_popup_yes_no` with `panels_display_popup(
 
 ## Module panel extends
 
-Site module extends base panels via **`config.json` `"extends"`** (`target` / `source`, `//panel_name` convention). Merges definition fields, SCSS, and JS only — PHP/template override is todo. Detail: [`cms_module_extends.md`](cms_module_extends.md).
+Site module extends base panels via **`config.json` `"extends"`** (`target` / `source`, `//panel_name` convention). Target panel name stays the public id; sources add fields, list meta, SCSS, JS, optional template replace and PHP chain. Definitions load only via `get_cms_panel_config()` (merge rules + discovery: [`cms_module_extends.md`](cms_module_extends.md)).
 
-**Deprecated (do not use):** definition JSON `"extends"` + `join_js` / `join_css`; per-block DB `_extends.*` params. Legacy handling code remains in `system/` temporarily — see [`todo.md`](todo.md).
+**Do not use:** definition JSON `"extends"` / `join_js` / `join_css` (removed from core).
 
 ## Panel JavaScript
 

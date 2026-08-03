@@ -27,13 +27,60 @@ class cms_page_operations extends \Controller {
 		
 		$do = $this->input->post('do');
 		if ($do == 'cms_page_delete'){
-			 
-			$page_id = $this->input->post('page_id');
-			 
+
+			$page_id = (int)$this->input->post('page_id');
+			if ($page_id < 1){
+				return ['ok' => 0];
+			}
+
+			$page = $this->cms_page_model->get_page($page_id);
+			if (empty($page['cms_page_id']) || !$this->cms_page_model->page_can_delete($page)){
+				return ['ok' => 0, 'error' => 'delete_not_allowed'];
+			}
+
 			$this->load->model('cms/cms_page_cache_model');
 			$this->cms_page_cache_model->invalidate_page($page_id);
-			$this->cms_page_model->delete_page($page_id);
-			 
+			$ok = $this->cms_page_model->delete_page($page_id);
+
+			return ['ok' => $ok ? 1 : 0];
+
+		} else if ($do == 'cms_page_set_status'){
+
+			$page_id = (int)$this->input->post('page_id');
+			$status = !empty($this->input->post('status')) ? 1 : 0;
+
+			if ($page_id < 1){
+				return ['ok' => 0];
+			}
+
+			$page = $this->cms_page_model->get_page($page_id);
+			if (empty($page['cms_page_id'])){
+				return ['ok' => 0];
+			}
+
+			$page_class = $this->cms_page_model->get_page_class($page);
+			if ($page_class === 'system'){
+				return ['ok' => 0, 'error' => 'system'];
+			}
+
+			$position = !empty($page['position']) ? $page['position'] : 'main';
+			if ($position !== 'main' && $position !== ''){
+				return ['ok' => 0, 'error' => 'not_main'];
+			}
+
+			$this->cms_page_model->update_page($page_id, ['status' => $status]);
+			$slug = $this->cms_page_model->update_page_visibility($page_id);
+
+			$this->load->model('cms/cms_page_cache_model');
+			$this->cms_page_cache_model->invalidate_page($page_id);
+
+			return [
+					'ok' => 1,
+					'status' => $status,
+					'label' => $status ? 'show' : 'hide',
+					'slug' => $slug,
+			];
+
 		} else if ($do == 'cms_page_save'){
 
 			// collect data

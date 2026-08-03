@@ -72,6 +72,11 @@ function cms_page_save(params){
 
 function cms_page_delete(){
 
+	var $btn = $('.cms_page_delete')
+	if ($btn.attr('data-disabled') === '1' || $btn.hasClass('cms_tool_button_inactive')){
+		return
+	}
+
 	get_ajax_panel('cms/cms_popup_yes_no', {}, function(data){
 		panels_display_popup(data.result._html, {
 			'yes': function(){
@@ -84,7 +89,11 @@ function cms_page_delete(){
 						'page_id': page_id,
 						'do': 'cms_page_delete',
 						'success': function(data){
-							window.location.href = _cms_base + 'admin/pages/';
+							var res = (data && data.result) ? data.result : {}
+							if (res.ok){
+								window.location.href = _cms_base + 'admin/pages/';
+							}
+							// failed silently if not allowed
 						}
 					})
 				} else {
@@ -94,6 +103,51 @@ function cms_page_delete(){
 			}
 		}); 
 	});
+
+}
+
+function cms_page_hide_toggle(){
+
+	var $btn = $('.cms_page_hide')
+	if (!$btn.length){
+		return
+	}
+
+	var page_id = parseInt($('.cms_page_id').val() || '0', 10)
+	if (page_id < 1){
+		cms_notification('Save the page first', 3)
+		return
+	}
+
+	var cur = parseInt($btn.attr('data-status') || '0', 10) ? 1 : 0
+	var next = cur ? 0 : 1
+
+	get_ajax('cms/cms_page_operations', {
+		'do': 'cms_page_set_status',
+		'page_id': page_id,
+		'status': next,
+		'success': function(data){
+			var res = (data && data.result) ? data.result : {}
+			if (!res.ok){
+				return
+			}
+			var st = res.status ? 1 : 0
+			$btn.attr('data-status', st)
+			$btn.find('.cms_page_hide_label').text(res.label || (st ? 'show' : 'hide'))
+			$('.cms_page_status').val(st)
+
+			if (res.slug){
+				var $preview = $('.cms_preview_container').first()
+				if ($preview.length){
+					$preview.data('preview_url', _cms_base + res.slug + '/')
+					$preview.attr('data-preview_url', _cms_base + res.slug + '/')
+				}
+			}
+			if (typeof cms_preview_reload === 'function'){
+				cms_preview_reload()
+			}
+		}
+	})
 
 }
 
@@ -110,6 +164,12 @@ function cms_page_init($root){
 	$page_scope.find('.cms_page_delete').not('.cms_page_delete_ok').each(function() {
 		$(this).addClass('cms_page_delete_ok').on('click.cms', function() {
 			cms_page_delete();
+		});
+	});
+
+	$page_scope.find('.cms_page_hide').not('.cms_page_hide_ok').each(function() {
+		$(this).addClass('cms_page_hide_ok').on('click.cms', function() {
+			cms_page_hide_toggle();
 		});
 	});
 
