@@ -2,6 +2,8 @@
 
 Admin: **CMS → Update** (`cms/cms_update`).
 
+**Clean site install** (empty docroot, browser wizard): [`install.md`](install.md) — `_install/install.php` downloads the core release and applies cms schema + seed.
+
 ## Master endpoint (module API)
 
 Public, session-free API (early include in `system/cms.php`):
