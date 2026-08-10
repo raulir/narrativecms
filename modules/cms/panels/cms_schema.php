@@ -84,63 +84,6 @@ class cms_schema extends \Controller {
 
 		}
 
-		if (!empty($params['do']) && $params['do'] === 'sync_panel_tables') {
-			// Button data-module is the schema package to sync
-			$module = trim($params['schema_module'] ?? $this->input->post('schema_module') ?? $this->input->post('module') ?? '');
-			// Prefer explicit sync target from POST when panel() overwrote params['module']
-			if ($module === '' || $module === 'cms' && $this->input->post('module') && $this->input->post('module') !== 'cms'){
-				// keep post module for sync target if set
-			}
-			$sync_module = $this->input->post('schema_module');
-			if ($sync_module === null || $sync_module === false || $sync_module === ''){
-				$sync_module = $this->input->post('module');
-			}
-			if ($sync_module === null || $sync_module === false || $sync_module === ''){
-				$sync_module = $module;
-			}
-			$sync_module = trim((string)$sync_module);
-
-			$stats = $this->cms_schema_model->synchronise_panel_table_data($sync_module);
-
-			$success = empty($stats['errors']);
-
-			if ($success && $stats['synced'] === 0 && $stats['skipped'] > 0) {
-				$message = 'Already synchronised — skipped '.$stats['skipped'].' row(s)';
-			} else {
-				$message = 'Synced '.$stats['synced'].' row(s), skipped '.$stats['skipped'];
-			}
-
-			if (!empty($stats['errors'])) {
-				$message .= '. Errors: '.implode('; ', $stats['errors']);
-				if ($stats['synced'] === 0 && $stats['skipped'] === 0 && count($stats['errors']) === 1 && stristr($stats['errors'][0], 'table not found')) {
-					$message .= ' — use "fix module" first to create the table';
-				}
-				$latest = [];
-				foreach ($stats['errors'] as $err) {
-					$latest[] = [
-						'module' => $sync_module,
-						'key' => $sync_module.':sync_panel_tables',
-						'message' => $err,
-						'sql' => '',
-					];
-				}
-				$_SESSION['cms_schema_latest_errors'] = $latest;
-			} elseif ($success) {
-				unset($_SESSION['cms_schema_latest_errors']);
-			}
-
-			unset($params['do']);
-
-			return array_merge($params, [
-				'success' => $success ? 1 : 0,
-				'message' => $message,
-				'stats' => $stats,
-				'fragment' => $fragment ? 1 : 0,
-				'schema_module' => $filter_module !== '' ? $filter_module : $sync_module,
-				'filter_module' => $filter_module !== '' ? $filter_module : $sync_module,
-			]);
-		}
-
 		if (empty($params['do']) || $params['do'] !== 'fix_schema') {
 			if ($fragment || $filter_module !== '') {
 				return array_merge($params, [
@@ -208,7 +151,7 @@ class cms_schema extends \Controller {
 					$message .= ' ('.implode(', ', $modules_left).')';
 				}
 			} else {
-				$message = 'All database tables match the schema definition files';
+				$message = 'All database tables and data match the schema definition files';
 			}
 		} else {
 			$message = 'Fix failed or no changes were needed';
@@ -251,14 +194,6 @@ class cms_schema extends \Controller {
 	
 	    $params['grouped_errors'] = $data['grouped'];
 	    $params['has_errors']     = $data['has_errors'];
-
-	    $pending = $this->cms_schema_model->get_panel_table_modules_pending();
-	    if ($filter_module !== ''){
-	    	$pending = array_values(array_filter($pending, function($m) use ($filter_module){
-	    		return $m === $filter_module;
-	    	}));
-	    }
-	    $params['panel_table_modules_pending'] = $pending;
 
 	    $latest = $_SESSION['cms_schema_latest_errors'] ?? [];
 	    if ($filter_module !== '' && is_array($latest)){

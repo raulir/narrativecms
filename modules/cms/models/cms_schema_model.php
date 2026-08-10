@@ -106,6 +106,19 @@ class cms_schema_model extends \Model {
 					'" — definition has no table fields; reverse-migrate remaining item fields to params and drop table';
 		}
 
+		// Panel table data (after structure keys so module groups list them last)
+		foreach ($this->get_panel_tables_pending() as $row) {
+			$module = $row['module'] ?? '';
+			$table = $row['table'] ?? '';
+			if ($module === '' || $table === '') {
+				continue;
+			}
+			$labels = $row['reason_labels'] ?? [];
+			$errors[$module.':panel_table:'.$table] = !empty($labels)
+					? implode('; ', $labels)
+					: 'Panel table data needs synchronisation';
+		}
+
 		return $errors;
 	}
 
@@ -130,7 +143,23 @@ class cms_schema_model extends \Model {
 
 		list($merged, $owner) = $this->_build_merged_schemas();
 
-		// 1. Module level (all tables owned by this module + orphan panel tables)
+		// module:panel_table:{table} — data sync only
+		if (($parts[1] ?? '') === 'panel_table') {
+			$table = $parts[2] ?? '';
+			if ($table === '' || !preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+				return false;
+			}
+			$stats = $this->synchronise_panel_table_data($module, $table);
+			if (!empty($stats['errors'])) {
+				foreach ($stats['errors'] as $err) {
+					$this->record_fix_error($path, $err, '');
+				}
+				return false;
+			}
+			return true;
+		}
+
+		// 1. Module level (structure + orphans, then panel table data)
 		if (count($parts) === 1) {
 			$count = 0;
 			foreach ($owner as $table => $mod) {
@@ -144,6 +173,16 @@ class cms_schema_model extends \Model {
 				if ($this->_fix_orphan_panel_table($orphan['module'], $orphan['table'], $orphan['panel_name'])) {
 					$count++;
 				}
+			}
+			$stats = $this->synchronise_panel_table_data($module);
+			if (!empty($stats['errors'])) {
+				foreach ($stats['errors'] as $err) {
+					$this->record_fix_error($module, $err, '');
+				}
+				return false;
+			}
+			if (!empty($stats['synced'])) {
+				$count++;
 			}
 			return $count > 0 && empty($this->_fix_sql_errors);
 		}
@@ -335,34 +374,90 @@ class cms_schema_model extends \Model {
 		return array_keys($schemas);
 	}
 
+	/**
+	 * Modules that have at least one panel table needing data sync.
+	 * Prefer get_panel_tables_pending() for UI (lists table + panel + reasons).
+	 *
+	 * @return string[]
+	 */
 	function get_panel_table_modules_pending() {
+		$modules = [];
+		foreach ($this->get_panel_tables_pending() as $row) {
+			$m = $row['module'] ?? '';
+			if ($m !== '') {
+				$modules[$m] = $m;
+			}
+		}
+		return array_values($modules);
+	}
+
+	/**
+	 * Panel tables that need param→table data sync (structure may already be OK).
+	 *
+	 * @param string|null $module_filter limit to one module
+	 * @return array list of [
+	 *   'module' => 'shop',
+	 *   'panel_name' => 'shop/product',
+	 *   'table' => 'shop_product',
+	 *   'reasons' => ['legacy_params','missing_rows'],
+	 *   'reason_labels' => ['Legacy params still present', …],
+	 * ]
+	 */
+	function get_panel_tables_pending($module_filter = null) {
 		$this->load->model('cms/cms_page_panel_model');
 
 		list($schemas, $owner) = $this->_build_panel_table_schemas();
 		$pending = [];
+		$filter = $module_filter !== null && $module_filter !== '' ? (string)$module_filter : '';
 
 		foreach ($schemas as $table => $def) {
 			$table_module = $owner[$table] ?? '';
 			if (!$table_module) {
 				continue;
 			}
-			if ($this->_panel_table_needs_sync($table, $table_module)) {
-				$pending[$table_module] = $table_module;
+			if ($filter !== '' && $table_module !== $filter) {
+				continue;
 			}
+
+			$detail = $this->_panel_table_sync_detail($table, $table_module);
+			if (empty($detail['reasons'])) {
+				continue;
+			}
+
+			$pending[] = $detail;
 		}
 
-		return array_values($pending);
+		usort($pending, function($a, $b) {
+			$cm = strcmp($a['module'] ?? '', $b['module'] ?? '');
+			if ($cm !== 0) {
+				return $cm;
+			}
+			return strcmp($a['table'] ?? '', $b['table'] ?? '');
+		});
+
+		return $pending;
 	}
 
-	private function _panel_table_needs_sync($table, $table_module) {
+	/**
+	 * @return array{module:string,panel_name:string,table:string,reasons:string[],reason_labels:string[]}
+	 */
+	private function _panel_table_sync_detail($table, $table_module) {
+		$panel_name = $table_module.'/'.preg_replace('/^'.preg_quote($table_module, '/').'_/', '', $table);
+		$out = [
+			'module' => $table_module,
+			'panel_name' => $panel_name,
+			'table' => $table,
+			'reasons' => [],
+			'reason_labels' => [],
+		];
+
 		if (!$this->db->table_exists($table)) {
-			return false;
+			return $out;
 		}
 
-		$panel_name = $table_module.'/'.preg_replace('/^'.preg_quote($table_module, '/').'_/', '', $table);
 		$table_fields = $this->cms_page_panel_model->get_panel_table_fields($panel_name);
 		if (empty($table_fields)) {
-			return false;
+			return $out;
 		}
 
 		$field_names = array_keys($table_fields);
@@ -373,7 +468,8 @@ class cms_schema_model extends \Model {
 			"where a.panel_name = ? and p.name in (".$in_list.") and p.language = '' ";
 		$query = $this->db->query($sql, [$panel_name]);
 		if ((int)$query->row_array()['c'] > 0) {
-			return true;
+			$out['reasons'][] = 'legacy_params';
+			$out['reason_labels'][] = 'Legacy params still present';
 		}
 
 		$sql = "select count(*) as c from cms_page_panel a ".
@@ -381,10 +477,16 @@ class cms_schema_model extends \Model {
 			"where a.panel_name = ? and t.cms_page_panel_id is null ";
 		$query = $this->db->query($sql, [$panel_name]);
 		if ((int)$query->row_array()['c'] > 0) {
-			return true;
+			$out['reasons'][] = 'missing_rows';
+			$out['reason_labels'][] = 'List items missing table rows';
 		}
 
-		return false;
+		return $out;
+	}
+
+	private function _panel_table_needs_sync($table, $table_module) {
+		$detail = $this->_panel_table_sync_detail($table, $table_module);
+		return !empty($detail['reasons']);
 	}
 
 	/**

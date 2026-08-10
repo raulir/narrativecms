@@ -18,13 +18,15 @@ Do **not** leave recovery copies as MySQL `*_bu` / shadow tables. Snapshot table
 Diagnostic panel standard for this project:
 
 - Toolbar with cms_tool_text "Database schema"
+- Green **“All database tables and data match…”** only when `check_schema()` has no errors (structure **and** panel-table data)
 - Errors grouped by module
-- Per-module header: title + "fix module" button (right-aligned, flex)
+- Per-module header: title + **fix module**
 - Per-error row:
-  - Location — raw error key (e.g.
-    `cms:cms_image:columns:type:collation`)
+  - Location — raw error key (e.g. `cms:cms_image:columns:type:collation`, or `shop:panel_table:shop_product`)
   - Description — message from model
-  - Action — fix button
+  - Action — **fix** button
+
+Within a module, structure/orphan rows come first; panel-table data rows last.
 
 ## Unified fix buttons
 
@@ -43,14 +45,14 @@ Diagnostic panel standard for this project:
 ## JS notes
 
 - One click handler for `.cms_schema_fix` using `data-key`
-- After **fix** (module or row): HTML is replaced with a **fresh full schema check** (all modules on the main page). Green “all match” only when `has_errors` is false globally — not when only the fixed module is clean.
-- Status toasts use **`cms_notification`** (top edge): success or remaining-module message from the server; errors use the error style.
+- After **fix** (module or row): HTML is replaced with a **fresh full schema check** (all modules on the main page)
+- Status toasts use **`cms_notification`** (top edge): success or remaining-module message from the server; errors use the error style
 
 ## Model integration
 
 - `check_schema()` → error keys exactly as displayed
-- `fix_schema($path)` supports module / table / column / property / index
-  level
+- `fix_schema($path)` supports module / table / column / property / index /
+  `panel_table` level
 - Always re-checks issue still exists before any SQL
 
 ## Panel tables (definition-driven)
@@ -63,14 +65,17 @@ List panel fields may opt into a real SQL table `{module}_{panel}` (e.g. `shopif
 | `"table_type"` | Column type: `int` / `int:N` (unsigned INT default 0), `int_signed` / `int_signed:N`, `varchar:N`, or omit for TEXT |
 | `"table_index"` | Non-empty → secondary index; `"unique"` → unique index |
 
-Workflow:
+### Error keys and fix
 
-1. **Schema fix** (create/alter panel table) — builds structure **and** copies existing
-   field values from `cms_page_panel_param` (named row or JSON blob) into the new/updated
-   table, then removes legacy named param rows for those fields. Same work as “sync panel
-   tables”, done automatically after a successful structure fix for a definition panel table.
-2. **Sync panel tables** (optional) — re-run data migrate only (recovery if something was
-   skipped, or when structure is already OK but named params remain).
+| Key | Meaning | fix does |
+|-----|---------|----------|
+| `{module}:{table}` / columns / indexes | Structure | Create/alter as usual; after a definition panel table is OK, auto-syncs param → table data |
+| `{module}:{table}:orphan` | Table left after definition dropped table fields | Reverse-migrate remaining item fields, drop table |
+| `{module}:panel_table:{table}` | Data only (legacy params and/or missing table rows) | `synchronise_panel_table_data` for that table |
+
+**fix module** (`key` = module name): structure + orphans first, then panel-table data for that module.
+
+Reasons on data rows: `Legacy params still present`, `List items missing table rows` (joined with `; ` when both).
 
 Integer fields with no param value sync as `0` so every list item gets a row (INNER JOIN safe).
 

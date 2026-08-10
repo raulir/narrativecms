@@ -1,25 +1,18 @@
 <?php
 // One module block — full schema page + updater embed.
-// Expects: $module, $items, $panel_table_modules_pending (array)
+// Expects: $module, $items
 $module = $module ?? '';
 $items = $items ?? [];
-$panel_table_modules_pending = $panel_table_modules_pending ?? [];
 ?>
-<div class="cms_schema_module" data-module="<?= htmlspecialchars($module, ENT_QUOTES, 'UTF-8') ?>">
+<div class="cms_schema_module" data-module="<?= $module ?>">
 
 	<div class="cms_schema_module_header">
 		<div class="cms_schema_module_title">
-			<?= htmlspecialchars($module, ENT_QUOTES, 'UTF-8') ?>
+			<?= $module ?>
 		</div>
 		<div class="cms_schema_module_actions">
-			<?php if (in_array($module, $panel_table_modules_pending, true)): ?>
-				<div class="cms_schema_sync cms_small_button"
-				     data-module="<?= htmlspecialchars($module, ENT_QUOTES, 'UTF-8') ?>">
-					sync panel tables
-				</div>
-			<?php endif ?>
 			<div class="cms_schema_fix cms_small_button"
-			     data-key="<?= htmlspecialchars($module, ENT_QUOTES, 'UTF-8') ?>">
+			     data-key="<?= $module ?>">
 				fix module
 			</div>
 		</div>

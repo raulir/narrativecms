@@ -123,52 +123,6 @@ function cms_schema_init($root) {
 			})
 		})
 
-		$('.cms_schema_sync', $container).on('click.cms', function(e) {
-			e.preventDefault()
-
-			var $this = $(this)
-			var module = $this.data('module') || $this.attr('data-module')
-
-			if (!module) {
-				return
-			}
-
-			if (!confirm('Synchronise panel table data for module "' + module + '"?\n\nThis copies table fields from params into panel tables and removes migrated param rows. Ensure you have a database backup first.')) {
-				return
-			}
-
-			var ctx = cms_schema_request_context($this)
-
-			$this.addClass('cms_disabled').text('syncing...')
-
-			var data = {
-				do: 'sync_panel_tables',
-				schema_module: module,
-				module: module
-			}
-			if (ctx.fragment){
-				data.fragment = 1
-			}
-			if (ctx.module){
-				data.filter_module = ctx.module
-				data.schema_module = ctx.module
-			}
-
-			get_ajax_panel('cms/cms_schema', data, function(result) {
-				var res = result && result.result ? result.result : {}
-				var stats = res.stats || {}
-				var ok = res.success == 1 || res.success === true || (Array.isArray(stats.errors) && stats.errors.length === 0 && (stats.synced > 0 || stats.skipped > 0))
-
-				if (res._html) {
-					var $new = cms_schema_replace_container(ctx.$container, res._html)
-					cms_schema_init($new.parent())
-				}
-				if (typeof cms_notification === 'function'){
-					cms_notification(res.message || (ok ? 'Panel tables synchronised' : 'Panel table sync failed'), ok ? 5 : 6, ok ? 'success' : 'error')
-				}
-			})
-		})
-
 	})
 
 }

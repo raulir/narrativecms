@@ -11,28 +11,11 @@
 			<div class="cms_tool_text">Database schema</div>
 			<div class="cms_schema_dump_structure cms_tool_button cms_right">Structure</div>
 		</div>
-
-		<?php if (!empty($panel_table_modules_pending)): ?>
-
-			<div class="cms_schema_panel_tables">
-				<div class="cms_schema_panel_tables_title">Panel table data</div>
-				<?php foreach ($panel_table_modules_pending as $module): ?>
-					<div class="cms_schema_panel_tables_row">
-						<div class="cms_schema_panel_tables_module"><?= $module ?></div>
-						<div class="cms_schema_sync cms_small_button"
-						     data-module="<?= $module ?>">
-							sync panel tables
-						</div>
-					</div>
-				<?php endforeach ?>
-			</div>
-
-		<?php endif ?>
 		
 		<?php if (!$has_errors): ?>
 			
 			<div class="cms_schema_status cms_schema_status_ok">
-				All database tables match the schema definition files
+				All database tables and data match the schema definition files
 			</div>
 			
 		<?php else: ?>
@@ -51,15 +34,15 @@
 					<?php foreach ($latest_fix_errors as $fix_error): ?>
 						<div class="cms_schema_item_row cms_schema_latest_errors_row">
 							<div class="cms_schema_latest_errors_module">
-								<?= htmlspecialchars($fix_error['module'] ?? '') ?>
+								<?= $fix_error['module'] ?? '' ?>
 							</div>
 							<div class="cms_schema_location">
-								<?= htmlspecialchars($fix_error['key'] ?? '') ?>
+								<?= $fix_error['key'] ?? '' ?>
 							</div>
 							<div class="cms_schema_description cms_schema_latest_errors_message">
-								<?= htmlspecialchars($fix_error['message'] ?? '') ?>
+								<?= $fix_error['message'] ?? '' ?>
 								<?php if (!empty($fix_error['sql'])): ?>
-									<div class="cms_schema_latest_errors_sql"><?= htmlspecialchars($fix_error['sql']) ?></div>
+									<div class="cms_schema_latest_errors_sql"><?= $fix_error['sql'] ?></div>
 								<?php endif ?>
 							</div>
 						</div>
@@ -77,8 +60,8 @@
 				</div>
 				<?php foreach ($structure_dump as $row): ?>
 					<div class="cms_schema_structure_dump_table">
-						<div class="cms_schema_structure_dump_name"><?= htmlspecialchars($row['name'] ?? '') ?></div>
-						<pre class="cms_schema_structure_dump_create"><?= htmlspecialchars($row['create'] ?? '') ?></pre>
+						<div class="cms_schema_structure_dump_name"><?= $row['name'] ?? '' ?></div>
+						<pre class="cms_schema_structure_dump_create"><?= $row['create'] ?? '' ?></pre>
 					</div>
 				<?php endforeach ?>
 			</div>
