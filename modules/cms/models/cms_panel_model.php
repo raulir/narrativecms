@@ -65,16 +65,10 @@ class cms_panel_model extends \Model {
 
 		$type = $field['type'] ?? '';
 
+		// Default enabled list is empty (cms sticky only). Available folders stay
+		// pickable in the Modules UI; boot never auto-enables them from disk.
 		if ($type === 'modules'){
-			$modules = [];
-			foreach (glob($GLOBALS['config']['base_path'].'modules/*', GLOB_ONLYDIR) as $dir) {
-				$module = basename($dir);
-				if ($module !== 'cms') {
-					$modules[] = $module;
-				}
-			}
-			sort($modules);
-			return $modules;
+			return [];
 		}
 
 		if (array_key_exists('default', $field)){
