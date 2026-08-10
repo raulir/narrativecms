@@ -1,0 +1,47 @@
+{
+	"name": "Octopus Energy",
+	"version": "1.0",
+	"panels": [
+		{
+			"id": "octopusenergy",
+			"name": "Octopus Energy settings",
+			"flags": ["hidden"]
+		},
+		{
+			"id": "price",
+			"name": "Octopus Agile prices",
+			"flags": ["hidden"]
+		},
+		{
+			"id": "usage",
+			"name": "Octopus meter usage",
+			"flags": ["hidden"]
+		}
+	],
+	"provides": [
+		{
+			"service": "energy_price",
+			"panel": "//price",
+			"label": "Octopus Agile prices"
+		},
+		{
+			"service": "energy_usage",
+			"panel": "//usage",
+			"label": "Octopus meter usage"
+		}
+	],
+	"cms_menu": [
+		{
+			"id": "energy_menu",
+			"name": "Energy",
+			"order": 250
+		},
+		{
+			"id": "octopusenergy_settings",
+			"name": "Octopus Energy",
+			"parent": "energy_menu",
+			"url": "admin/panel_settings/octopusenergy__octopusenergy/",
+			"order": 10
+		}
+	]
+}

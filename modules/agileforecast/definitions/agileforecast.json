@@ -1,0 +1,14 @@
+{
+	"label": "Agile Forecast",
+	"description": "agileforecast.co.uk cache settings. Provides energy_price_forecast for the Energy module.",
+	"item": [],
+	"settings": [
+		{
+			"type": "text",
+			"name": "cache_minutes",
+			"label": "Cache minutes",
+			"default": "120",
+			"help": "Raw API file-cache TTL. 120 min (2 h) recommended — forecast updates can wait."
+		}
+	]
+}

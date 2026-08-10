@@ -1,0 +1,54 @@
+{
+	"label": "Octopus Energy",
+	"description": "API credentials and meter identity. Provides energy_price and energy_usage for the Energy module.",
+	"item": [],
+	"settings": [
+		{
+			"type": "text",
+			"name": "api_key",
+			"label": "API key",
+			"default": "",
+			"help": "From Octopus account → Personal details / API access. Server-side only. Do not commit."
+		},
+		{
+			"type": "text",
+			"name": "account_number",
+			"label": "Account number",
+			"default": "",
+			"help": "Optional. e.g. A-XXXXXXXX — helps resolve Home Mini deviceId"
+		},
+		{
+			"type": "text",
+			"name": "mpan",
+			"label": "MPAN",
+			"default": "",
+			"help": "Electricity meter point number"
+		},
+		{
+			"type": "text",
+			"name": "meter_serial",
+			"label": "Meter serial",
+			"default": "",
+			"help": "Meter serial number from Octopus / meter"
+		},
+		{
+			"type": "text",
+			"name": "device_id",
+			"label": "Mini device id",
+			"default": "",
+			"help": "Optional override. Auto-resolved from account/MPAN when empty"
+		},
+		{
+			"type": "subtitle",
+			"label": "Usage (Mini)",
+			"width": "wide"
+		},
+		{
+			"type": "text",
+			"name": "gap_fill_min_sec",
+			"label": "Gap-fill min seconds",
+			"default": "60",
+			"help": "Min seconds between Mini GraphQL backfill windows (pink usage holes toward REST). Default 60. Was 300 when KT-CT-1199 was blamed on telemetry; login rate limits are separate. Clamped 30–3600."
+		}
+	]
+}

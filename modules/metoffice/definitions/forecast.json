@@ -1,0 +1,6 @@
+{
+	"label": "Met Office weather forecast",
+	"description": "Provider panel for weather_forecast service (panel_action only)",
+	"item": [],
+	"settings": []
+}

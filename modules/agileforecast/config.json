@@ -1,0 +1,37 @@
+{
+	"name": "Agile Forecast",
+	"version": "1.0",
+	"panels": [
+		{
+			"id": "agileforecast",
+			"name": "Agile Forecast settings",
+			"flags": ["hidden"]
+		},
+		{
+			"id": "forecast",
+			"name": "Agile price forecast",
+			"flags": ["hidden"]
+		}
+	],
+	"provides": [
+		{
+			"service": "energy_price_forecast",
+			"panel": "//forecast",
+			"label": "Agile Forecast"
+		}
+	],
+	"cms_menu": [
+		{
+			"id": "energy_menu",
+			"name": "Energy",
+			"order": 250
+		},
+		{
+			"id": "agileforecast_settings",
+			"name": "Agile Forecast",
+			"parent": "energy_menu",
+			"url": "admin/panel_settings/agileforecast__agileforecast/",
+			"order": 20
+		}
+	]
+}

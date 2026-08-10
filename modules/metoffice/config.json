@@ -1,0 +1,41 @@
+{
+	"name": "Met Office",
+	"version": "1.0",
+	"panels": [
+		{
+			"id": "metoffice",
+			"name": "Met Office settings",
+			"flags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "forecast",
+			"name": "Met Office weather forecast",
+			"flags": [
+				"hidden"
+			]
+		}
+	],
+	"provides": [
+		{
+			"service": "weather_forecast",
+			"panel": "//forecast",
+			"label": "Met Office Global Spot"
+		}
+	],
+	"cms_menu": [
+		{
+			"id": "weather_menu",
+			"name": "Weather",
+			"order": 300
+		},
+		{
+			"id": "metoffice_settings",
+			"name": "Met Office",
+			"parent": "weather_menu",
+			"url": "admin/panel_settings/metoffice__metoffice/",
+			"order": 10
+		}
+	]
+}

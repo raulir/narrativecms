@@ -1,0 +1,41 @@
+{
+	"name": "Open-Meteo",
+	"version": "1.0",
+	"panels": [
+		{
+			"id": "openmeteo",
+			"name": "Open-Meteo settings",
+			"flags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "forecast",
+			"name": "Open-Meteo weather forecast",
+			"flags": [
+				"hidden"
+			]
+		}
+	],
+	"provides": [
+		{
+			"service": "weather_forecast",
+			"panel": "//forecast",
+			"label": "Open-Meteo"
+		}
+	],
+	"cms_menu": [
+		{
+			"id": "weather_menu",
+			"name": "Weather",
+			"order": 300
+		},
+		{
+			"id": "openmeteo_settings",
+			"name": "Open-Meteo",
+			"parent": "weather_menu",
+			"url": "admin/panel_settings/openmeteo__openmeteo/",
+			"order": 20
+		}
+	]
+}

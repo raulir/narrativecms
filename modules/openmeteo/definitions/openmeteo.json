@@ -1,0 +1,21 @@
+{
+	"label": "Open-Meteo",
+	"description": "Open-Meteo forecast settings (cache). Provides weather_forecast for the Weather module.",
+	"item": [],
+	"settings": [
+		{
+			"type": "text",
+			"name": "cache_minutes",
+			"label": "Cache minutes",
+			"default": "180",
+			"help": "Raw API response TTL. 180 min (3 h) recommended."
+		},
+		{
+			"type": "text",
+			"name": "models",
+			"label": "Models",
+			"default": "best_match",
+			"help": "Open-Meteo models param (best_match recommended for UK)."
+		}
+	]
+}
