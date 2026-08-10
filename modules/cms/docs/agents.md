@@ -6,6 +6,13 @@ Related docs: [`system.md`](system.md) (bootstrap, Loader, Controller), [`cms_pa
 
 **Do not** put long product/project rules here — those live in the site module’s docs (e.g. `modules/music/docs/agents.md`).
 
+## Git (agents)
+
+- **Never** run `git commit` or `git commit --amend` unless the user **explicitly** asks to commit in that turn.
+- **Especially never** create an **initial commit** or first commit for a repo — `.gitignore`, user.name/email, remotes, and what should be tracked may not be set up yet.
+- Staging (`git add`, `git rm --cached`) is OK when implementing an explicit request (e.g. untrack cache); **the human commits**, or the agent commits only when told to.
+- Do not force-add ignored paths (`cache/*`, secrets, generated assets) unless the user asks.
+
 ---
 
 ## Context
@@ -29,6 +36,7 @@ Open that file when changing or debugging core loading, request lifecycle, or ro
 - **Why absolute is preferred:** content width is **fixed in rem** — standard **100rem** page content, or a fixed project width such as **120rem** when the design calls for it. With a known fixed band, absolute layout is predictable, easier to manage, and has fewer side effects than flex (wrapping, shrink/grow, nested flex, percentage height quirks).
 - Prefer simple structure: outer full-width container → inner fixed-width content (`100rem` / `120rem` / `max-width: 100%`) → positioned children inside that content box.
 - Do not set `cursor:` on public site panels when the custom cursors system is in use (it fights `elementsFromPoint`).
+- **SCSS numeric decimals:** use **at least one** and **at most two** digits after the decimal point for lengths and similar values (`8.0rem`, `1.25rem`, `100.0vh`, `0.0`). **Exception:** `letter-spacing` may use more precision when needed (e.g. `0.05em`).
 
 ## HTTP from PHP
 
@@ -43,6 +51,7 @@ Open that file when changing or debugging core loading, request lifecycle, or ro
 - Frontend JS should talk to **this CMS** (`get_ajax` / `get_ajax_panel` / form posts). The server holds secrets, enforces auth, and shapes the provider request.
 - Avoid browser-direct provider SDKs/APIs that need secret keys, privileged webhooks, or business rules that must not be spoofed. Public publishable keys or pure client widgets are fine only when the provider’s model requires them (e.g. Stripe publishable key for Elements) — still keep charge/session creation on the server.
 - Same idea as module **providers** (`provides` + domain panel orchestrating `shopify/checkout`, `stripe/subscription_checkout`, AI, …): domain FE → our panel → third party.
+- **Full how-to (add a new provider without reverse-engineering):** [**provider_pattern.md**](provider_pattern.md).
 
 ## Encoding (UTF-8 / utf8mb4)
 
@@ -61,6 +70,10 @@ Open that file when changing or debugging core loading, request lifecycle, or ro
 - **Top level:** items with **`ctrl`** first, sorted by `order` only (Pages / Content / CMS / Tools / …). Remaining top items after that (Shop, …).
 - **Nested levels:** **submenu groups first**, then **direct links**, then by `order` (`_menu_sort_top_level` / `_menu_sort_siblings`).
 - Prefer groups under **Tools** for related admin areas (e.g. Analytics → Raport/Settings, xAI → Settings).
+- **No empty settings links:** only add a `cms_menu` URL to `admin/panel_settings/{module}__{panel}/` when that panel’s definition has a **non-empty `settings`** array. `panel_settings` edits the global row (`cms_page_id = 0`) and shows **`settings` only** — not `item`. If `settings` is missing or `[]`, the UI is “This panel doesn't have settings fields”; do not put that link in the menu.
+  - **Module / provider credentials** (API keys, cache minutes) → definition **`settings`** + optional menu link under the domain group (Energy, Weather, …).
+  - **Page-placed panel fields** (providers, labels, lat/lon on a public panel) → definition **`item`**; edit on the page panel in Pages, not via an empty `panel_settings` menu entry.
+  - A top-level group redefine with **no** child URL is fine when other modules add real settings children under it.
 
 ## JavaScript / jQuery
 

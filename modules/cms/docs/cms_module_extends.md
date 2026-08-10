@@ -4,7 +4,7 @@ Created: 2026-07-08
 
 Site/final module extends base panels from other modules. Declare in **`modules/<module>/config.json`** — not in panel definition JSON.
 
-Related: modules may also declare **`provides`** (capability → panel), e.g. Shopify `shop_checkout` → `shopify/checkout`, xAI `ai` → `xai/ai`. Aggregated in [`cms_config.php`](../../../system/core/cms_config.php) as `$GLOBALS['config']['provides']`. Admin select: **`cms/cms_input_provides`** (`service` field). See [shop.md cart section](../../shop/docs/shop.md), [xai.md](../../xai/docs/xai.md), [language.md](language.md) (AI translations).
+Related: modules may also declare **`provides`** (capability → panel), e.g. Shopify `shop_checkout` → `shopify/checkout`, xAI `ai` → `xai/ai`. Aggregated in [`cms_config.php`](../../../system/core/cms_config.php) as `$GLOBALS['config']['provides']`. Admin select: **`cms/cms_input_provides`** (`service` field). **Full guide:** [**provider_pattern.md**](provider_pattern.md). Also [shop.md cart section](../../shop/docs/shop.md), [xai.md](../../xai/docs/xai.md), [language.md](language.md) (AI translations).
 
 ## Panel names and `//` (current module)
 
