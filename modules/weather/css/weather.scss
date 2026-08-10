@@ -1,27 +1,561 @@
+// Weather forecast — dark energy palette, no horizontal scroll
+
 .weather_container {
-	padding: 0 0 0 5.2rem;
+	position: relative;
+	width: 100.0%;
+	height: 100.0%;
+	min-height: 100.0%;
+	overflow: hidden;
+	color: #e8eef8;
+	font-family: asap, Arial, Verdana, sans-serif;
+	background: linear-gradient(165.0deg, #0c1a36 0.0%, #132848 45.0%, #1a2a4a 100.0%);
 }
 
 .weather_content {
-	min-height:	calc(100vh - 5.2rem);
-	background-size: 100% 100%;
-	background-repeat: no-repeat;
-	background-position: center;
-	line-height: 7.1rem;
-	font-size: 6.98rem;
-	letter-spacing: 0.5rem;
-	padding: 3.4rem 3.0rem;
+	position: absolute;
+	left: 0.0;
+	top: 0.0;
+	width: 100.0%;
+	height: 100.0%;
+	box-sizing: border-box;
+	padding: 1.5rem 2.0rem 1.2rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.8rem;
+}
+
+// —— Day chips: 6 days + Later (7 equal columns), square ——
+.weather_days {
+	position: relative;
+	flex: 0.0 0.0 auto;
+	width: 100.0%;
+	height: auto;
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 0.4rem;
 	box-sizing: border-box;
 }
 
-.weather_time {
-	
+.weather_day {
+	flex: 1.0 1.0 0;
+	min-width: 0.0;
+	// Square: height matches width (6 days + Later → wider cells)
+	aspect-ratio: 1.0 / 1.0;
+	height: auto;
+	margin: 0.0;
+	padding: 0.6rem 0.3rem;
+	// Border always 0.25rem (no layout jump); inactive colour = background (invisible)
+	box-sizing: border-box;
+	border: 0.25rem solid rgba(8.0, 22.0, 48.0, 0.55);
+	border-radius: 0.5rem;
+	background: rgba(8.0, 22.0, 48.0, 0.55);
+	color: #9aacc4;
+	font-family: asap, Arial, Verdana, sans-serif;
+	cursor: pointer;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.35rem;
+	text-align: center;
+	appearance: none;
+	-webkit-appearance: none;
 }
 
-.weather_location {
-	
+// Hover: lighten bg + matching border (still no visible edge)
+.weather_day:hover,
+.weather_day:focus {
+	background: rgba(18.0, 40.0, 72.0, 0.9);
+	border-color: rgba(18.0, 40.0, 72.0, 0.9);
+	outline: none;
 }
 
-.weather_weather {
-	text-transform: capitalize;
+.weather_day_on {
+	color: #e8eef8;
+	border-color: rgba(92.0, 225.0, 255.0, 0.55);
+	background: rgba(18.0, 40.0, 72.0, 0.95);
+}
+
+.weather_day_on:hover,
+.weather_day_on:focus {
+	background: rgba(18.0, 40.0, 72.0, 0.95);
+	border-color: rgba(92.0, 225.0, 255.0, 0.55);
+}
+
+// Same as clock date
+.weather_day_label {
+	font-size: 1.6rem;
+	line-height: 1.1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100.0%;
+}
+
+.weather_day_icon {
+	width: 2.8rem;
+	// min-height (not fixed height) so drizzle/partial stacks are not squeezed
+	min-height: 2.8rem;
+	height: auto;
+	flex-shrink: 0.0;
+	margin-bottom: 0.3rem;
+	overflow: visible;
+}
+
+// Same as menu item extra; min stays darker
+.weather_day_temps {
+	display: flex;
+	flex-direction: row;
+	align-items: baseline;
+	justify-content: center;
+	gap: 0.45rem;
+	font-size: 1.6rem;
+	line-height: 1.1;
+}
+
+.weather_day_max {
+	color: #e8eef8;
+	font-size: 1.6rem;
+	font-weight: bold;
+}
+
+.weather_day_min {
+	color: #9aacc4;
+	font-size: 1.6rem;
+	font-weight: normal;
+}
+
+// —— Detail area (fills remaining height under day chips) ——
+.weather_detail {
+	position: relative;
+	flex: 1.0 1.0 auto;
+	min-height: 0.0;
+	width: 100.0%;
+	box-sizing: border-box;
+	background: rgba(8.0, 22.0, 48.0, 0.55);
+	border: 0.1rem solid rgba(80.0, 140.0, 220.0, 0.18);
+	border-radius: 0.6rem;
+	overflow: hidden;
+}
+
+.weather_detail_day,
+.weather_detail_later {
+	position: absolute;
+	left: 0.0;
+	top: 0.0;
+	width: 100.0%;
+	height: 100.0%;
+}
+
+// Day mode: flex column — temp band grows; times + wind fixed at bottom
+.weather_detail_day {
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	padding: 0.4rem 0.2rem 0.3rem;
+	overflow: hidden;
+}
+
+// Flexible temperature / mini-card area (BBC-style floating hour cards)
+.weather_temp_band {
+	flex: 1.0 1.0 auto;
+	position: relative;
+	min-height: 8.0rem;
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	width: 100.0%;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+.weather_hour_col {
+	flex: 1.0 1.0 0;
+	min-width: 0.0;
+	position: relative;
+	height: 100.0%;
+}
+
+// Mini-card: temp, sky, rain % — vertical position set in JS from temperature
+.weather_hour_card {
+	position: absolute;
+	left: 50.0%;
+	transform: translateX(-50.0%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.15rem;
+	width: 100.0%;
+	max-width: 3.6rem;
+	box-sizing: border-box;
+	pointer-events: none;
+	text-align: center;
+}
+
+.weather_hour_card_temp {
+	font-size: 1.35rem;
+	line-height: 1.1;
+	font-weight: bold;
+	color: #e8eef8;
+	font-family: asap, Arial, Verdana, sans-serif;
+}
+
+.weather_hour_card_sky {
+	font-size: 2.4rem;
+	line-height: 1.0;
+	margin-top: 0.2rem;
+	margin-bottom: 0.2rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: visible;
+}
+
+// Per-condition sky box (slug matches .weather_sky_stack_*)
+// Simple full sun reads large — tone down
+.weather_hour_card_sky_full_sun {
+	font-size: 2.2rem;
+}
+
+// Partly cloudy day (⛅) — optical align vs plain cloud
+.weather_hour_card_sky_partial_sun {
+	position: relative;
+	top: 0.2rem;
+}
+
+// Clear night moon only
+.weather_hour_card_sky_full_moon {
+	font-size: 1.6rem;
+}
+
+// Complex: moon + cloud — sit lower (user-tuned)
+.weather_hour_card_sky_partial_moon {
+	font-size: 1.6rem;
+	position: relative;
+	top: 0.3rem;
+}
+
+.weather_hour_card_pop {
+	font-size: 1.05rem;
+	line-height: 1.1;
+	color: #9aacc4;
+	font-family: asap, Arial, Verdana, sans-serif;
+	// Keep height even when text hidden (<5%)
+	min-height: 1.15rem;
+}
+
+// <5%: invisible but still occupies space (icons stay aligned)
+.weather_hour_card_pop_hidden {
+	visibility: hidden;
+}
+
+// ≥10% electric blue; ≥50% bold
+.weather_hour_card_pop_mid {
+	color: #5ce1ff;
+}
+
+.weather_hour_card_pop_high {
+	color: #5ce1ff;
+	font-weight: bold;
+}
+
+// Time labels under temp band
+.weather_hour_times {
+	flex: 0.0 0.0 auto;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	width: 100.0%;
+	height: 2.0rem;
+	box-sizing: border-box;
+	padding-top: 0.2rem;
+}
+
+.weather_hour_time_col {
+	flex: 1.0 1.0 0;
+	min-width: 0.0;
+	text-align: center;
+}
+
+.weather_hour_time {
+	font-size: 0.85rem;
+	line-height: 1.1;
+	color: #9aacc4;
+	font-family: asap, Arial, Verdana, sans-serif;
+	white-space: nowrap;
+}
+
+// Wind row always at bottom of detail day area
+.weather_hour_winds {
+	flex: 0.0 0.0 auto;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	width: 100.0%;
+	min-height: 3.2rem;
+	box-sizing: border-box;
+	padding-top: 0.2rem;
+	margin-top: auto;
+}
+
+.weather_hour_wind_col {
+	flex: 1.0 1.0 0;
+	min-width: 0.0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.1rem;
+}
+
+.weather_hour_mph {
+	font-size: 0.85rem;
+	line-height: 1.1;
+	color: #e8eef8;
+	font-family: asap, Arial, Verdana, sans-serif;
+}
+
+// Later week: keep previous canvas + row layout
+.weather_later_canvas {
+	position: absolute;
+	left: 0.0;
+	top: 0.0;
+	width: 100.0%;
+	height: 38.0%;
+	display: block;
+}
+
+.weather_later_hours {
+	position: absolute;
+	left: 0.0;
+	right: 0.0;
+	top: 38.0%;
+	bottom: 0.0;
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	box-sizing: border-box;
+	padding: 0.3rem 0.0 0.5rem;
+	overflow: hidden;
+}
+
+.weather_hour_wind {
+	height: 2.0rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.1rem;
+}
+
+.weather_wind_arrow {
+	width: 1.4rem;
+	height: 1.4rem;
+	// rotation set inline from wind direction
+	transform-origin: 50.0% 50.0%;
+}
+
+.weather_wind_flags {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+	justify-content: center;
+	height: 0.7rem;
+	gap: 0.06rem;
+}
+
+.weather_wind_flag {
+	width: 0.18rem;
+	height: 0.55rem;
+	background: #5ce1ff;
+	border-radius: 0.05rem;
+}
+
+.weather_wind_flag_half {
+	height: 0.3rem;
+}
+
+.weather_hour_ms {
+	font-size: 0.85rem;
+	line-height: 1.1;
+	color: #e8eef8;
+	white-space: nowrap;
+}
+
+// Later week: 6h cells; stronger border at day starts
+.weather_later_slot {
+	flex: 1.0 1.0 0;
+	min-width: 0.0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.25rem;
+	box-sizing: border-box;
+	border-left: 0.05rem solid rgba(80.0, 140.0, 220.0, 0.12);
+	padding: 0.25rem 0.1rem;
+	font-size: 0.95rem;
+	color: #9aacc4;
+}
+
+.weather_later_slot.weather_later_day_start {
+	border-left: 0.25rem solid rgba(92.0, 225.0, 255.0, 0.55);
+	padding-left: 0.2rem;
+}
+
+.weather_later_day_label {
+	font-size: 0.85rem;
+	color: #5ce1ff;
+	line-height: 1.1;
+	white-space: nowrap;
+}
+
+.weather_later_hour_label {
+	font-size: 0.85rem;
+	color: #9aacc4;
+}
+
+.weather_attr {
+	position: absolute;
+	left: 2.0rem;
+	right: 2.0rem;
+	bottom: 0.4rem;
+	height: 1.4rem;
+	font-size: 1.0rem;
+	line-height: 1.4rem;
+	color: rgba(154.0, 172.0, 196.0, 0.65);
+	text-align: right;
+	font-family: source, Helvetica, Verdana, sans-serif;
+}
+
+.weather_message {
+	position: absolute;
+	left: 2.0rem;
+	right: 2.0rem;
+	top: 40.0%;
+	text-align: center;
+	font-size: 2.0rem;
+	color: #9aacc4;
+}
+
+.weather_message_error {
+	color: #f078a0;
+}
+
+.weather_message_detail {
+	position: absolute;
+	left: 2.0rem;
+	right: 2.0rem;
+	top: 52.0%;
+	text-align: center;
+	font-size: 1.3rem;
+	color: #9aacc4;
+}
+
+// —— Sky icons: emoji stacks (no ::before / ::after for glyphs) ——
+// Nested under .weather_container so specificity beats cms_mini_normalise `span { font: inherit }`
+// without !important. Base + overlay both absolute inside a fixed em box.
+.weather_container .weather_sky {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1.0;
+	font-size: 1.6rem;
+	text-align: center;
+}
+
+.weather_container .weather_sky_stack {
+	position: relative;
+	display: block;
+	box-sizing: border-box;
+	line-height: 1.0;
+	// Size from parent context (.weather_hour_card_sky, .weather_day_icon, …)
+	font-size: 1.0em;
+	width: 1.15em;
+	height: 1.15em;
+	// Sit ~0.2rem higher (base + overlay as a unit)
+	transform: translateY(-0.2rem);
+}
+
+// Both layers absolute so SSR and JS never fall into block-stacked glyphs
+.weather_container .weather_sky_base {
+	position: absolute;
+	left: 50.0%;
+	top: 50.0%;
+	transform: translate(-50.0%, -50.0%);
+	display: block;
+	line-height: 1.0;
+	z-index: 1;
+	font-size: 1.0em;
+	font-family: inherit;
+}
+
+.weather_container .weather_sky_overlay {
+	position: absolute;
+	left: 50.0%;
+	top: 50.0%;
+	// Default centre; conditions override transform
+	transform: translate(-50.0%, -50.0%);
+	display: block;
+	line-height: 1.0;
+	pointer-events: none;
+	z-index: 0;
+	font-family: inherit;
+}
+
+// Per-condition stacks: style each sky type separately
+// .weather_sky_stack_full_sun / _full_moon / _partial_sun / _cloudy / _rain / …
+
+// Drizzle: ☁️ + 🌫️ behind (user-verified)
+.weather_container .weather_sky_stack_drizzle .weather_sky_overlay {
+	transform: translate(-50.0%, calc(-50.0% + 0.72em));
+	font-size: 0.7em;
+	z-index: 0;
+	filter: saturate(0.85);
+}
+
+// Partly cloudy night: 🌙 + ☁️ in front (user-tuned)
+.weather_container .weather_sky_stack_partial_moon .weather_sky_overlay {
+	transform: translate(-30.0%, calc(-50.0% + 0.22em));
+	font-size: 1.42em;
+	z-index: 2;
+}
+
+.weather_container .weather_day_icon.weather_sky {
+	font-size: 2.8rem;
+	overflow: visible;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+// Day chip: ⛅ is larger optically — sit ~0.3rem lower
+.weather_container .weather_day_icon .weather_sky_stack_partial_sun {
+	position: relative;
+	top: 0.3rem;
+}
+
+.weather_hour_sky.weather_sky {
+	font-size: 1.35rem;
+	width: 1.7rem;
+	height: 1.7rem;
+	overflow: visible;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+// Wind arrow (SVG-free CSS triangle in a box)
+.weather_wind_arrow::before {
+	content: '';
+	display: block;
+	width: 0.0;
+	height: 0.0;
+	margin: 0.15rem auto 0.0;
+	border-left: 0.35rem solid transparent;
+	border-right: 0.35rem solid transparent;
+	border-bottom: 1.0rem solid #5ce1ff;
 }

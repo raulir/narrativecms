@@ -1,0 +1,109 @@
+{
+	"table": "weather_history",
+	"engine": "InnoDB",
+	"charset": "utf8mb4",
+	"collation": "utf8mb4_general_ci",
+	"columns": {
+		"weather_history_id": {
+			"type": "INT",
+			"constraint": 11,
+			"unsigned": true,
+			"null": false,
+			"auto_increment": true
+		},
+		"location_key": {
+			"type": "VARCHAR",
+			"constraint": 64,
+			"null": false,
+			"charset": "ascii",
+			"collation": "ascii_bin"
+		},
+		"hour_start": {
+			"type": "INT",
+			"constraint": 11,
+			"unsigned": true,
+			"null": false
+		},
+		"temp_c": {
+			"type": "DECIMAL",
+			"constraint": "5,2",
+			"null": true
+		},
+		"weather_code": {
+			"type": "SMALLINT",
+			"constraint": 6,
+			"null": true
+		},
+		"precip_prob": {
+			"type": "TINYINT",
+			"constraint": 3,
+			"unsigned": true,
+			"null": true
+		},
+		"precip_mm": {
+			"type": "DECIMAL",
+			"constraint": "6,2",
+			"null": true
+		},
+		"wind_mph": {
+			"type": "DECIMAL",
+			"constraint": "5,1",
+			"null": true
+		},
+		"wind_dir": {
+			"type": "SMALLINT",
+			"constraint": 6,
+			"null": true
+		},
+		"is_day": {
+			"type": "TINYINT",
+			"constraint": 1,
+			"null": true
+		},
+		"sky": {
+			"type": "VARCHAR",
+			"constraint": 32,
+			"null": true
+		},
+		"source": {
+			"type": "VARCHAR",
+			"constraint": 32,
+			"null": false
+		},
+		"resolution": {
+			"type": "VARCHAR",
+			"constraint": 16,
+			"null": false
+		},
+		"is_final": {
+			"type": "TINYINT",
+			"constraint": 1,
+			"unsigned": true,
+			"null": false,
+			"default": "0"
+		},
+		"updated_at": {
+			"type": "INT",
+			"constraint": 11,
+			"unsigned": true,
+			"null": false
+		},
+		"meta": {
+			"type": "TEXT",
+			"null": true
+		}
+	},
+	"indexes": {
+		"PRIMARY": {
+			"columns": ["weather_history_id"],
+			"type": "primary"
+		},
+		"location_hour": {
+			"columns": ["location_key", "hour_start"],
+			"type": "unique"
+		},
+		"hour_start_idx": {
+			"columns": ["hour_start"]
+		}
+	}
+}

@@ -1,16 +1,23 @@
 {
-	"panels":[
+	"name": "Weather",
+	"version": "1.1",
+	"panels": [
 		{
-			"id":"weather",
-			"name":"Weather"
+			"id": "weather",
+			"name": "Weather forecast"
 		}
 	],
-	"cms_menu":[
+	"api": [
 		{
-			"id":"weather_settings",
-			"name":"Weather settings",
-			"parent":"content",
-			"url":"admin/panel_settings/weather__weather/"
+			"id": "refresh_weather"
+		}
+	],
+	"cms_menu": [
+		{
+			"id": "weather_menu",
+			"name": "Weather",
+			"order": 300
 		}
 	]
 }
+

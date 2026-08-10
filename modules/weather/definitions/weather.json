@@ -1,30 +1,58 @@
 {
-	"version":"2",
-	"label":"Weather",
-	"item":[
+	"description": "Forecast — selects a weather_forecast provider (Met Office / Open-Meteo); day chips + hourly detail",
+	"item": [
 		{
-			"type":"image",
-			"name":"image",
-			"label":"Image",
-			"category":"content"
+			"type": "cms/cms_input_provides",
+			"name": "weather_provider",
+			"label": "Forecast provider",
+			"service": "weather_forecast",
+			"default": "openmeteo/forecast",
+			"help": "Provider module that fetches and caches forecast data (e.g. Met Office Global Spot or Open-Meteo)."
 		},
 		{
-			"type":"text",
-			"name":"location",
-			"label":"Location text"
-		}
-	],
-	"settings":[
-		{
-			"type":"text",
-			"name":"coordinates",
-			"label":"Coordinates"
+			"type": "text",
+			"name": "location",
+			"label": "Location label",
+			"default": "Cheltenham"
 		},
 		{
-			"type":"text",
-			"name":"weather_api_key",
-			"label":"Weather API key",
-			"help":"For OpenWeatherMap API"
+			"type": "text",
+			"name": "latitude",
+			"label": "Latitude",
+			"default": "51.88964722230162",
+			"help": "Cheltenham (precise)"
+		},
+		{
+			"type": "text",
+			"name": "longitude",
+			"label": "Longitude",
+			"default": "-2.1204895339274916",
+			"help": "Cheltenham (precise)"
+		},
+		{
+			"type": "text",
+			"name": "label_later",
+			"label": "Later chip label",
+			"default": "Later"
+		},
+		{
+			"type": "text",
+			"name": "label_error",
+			"label": "Error message",
+			"default": "Could not load forecast"
+		},
+		{
+			"type": "text",
+			"name": "label_empty",
+			"label": "Empty message",
+			"default": "No forecast data yet"
+		},
+		{
+			"type": "text",
+			"name": "attribution",
+			"label": "Attribution override",
+			"default": "",
+			"help": "Leave empty to use the provider’s attribution string."
 		}
 	]
 }
