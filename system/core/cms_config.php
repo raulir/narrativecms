@@ -128,16 +128,13 @@ function cms_config_load_full(){
 				if (!$_name) {
 					continue;
 				}
+				// modules: only what is saved in cms_settings. Empty / missing → ['cms']
+				// so a fresh site can boot and build. Do NOT auto-enable every folder
+				// under modules/ (disk folders stay pickable in the Modules UI only).
+				// cms is also force-prepended below as sticky.
 				if (($_field['type'] ?? '') === 'modules') {
-					if (empty($GLOBALS['config']['modules']) || !is_array($GLOBALS['config']['modules']) || count($GLOBALS['config']['modules']) <= 1) {
-						$_mods = ['cms'];
-						foreach (glob($working_directory.'modules/*', GLOB_ONLYDIR) as $_dir) {
-							$_mod = basename($_dir);
-							if ($_mod !== 'cms') {
-								$_mods[] = $_mod;
-							}
-						}
-						$GLOBALS['config']['modules'] = $_mods;
+					if (empty($GLOBALS['config']['modules']) || !is_array($GLOBALS['config']['modules'])) {
+						$GLOBALS['config']['modules'] = ['cms'];
 					}
 					continue;
 				}
