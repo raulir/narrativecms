@@ -53,6 +53,21 @@ Open that file when changing or debugging core loading, request lifecycle, or ro
 - Same idea as module **providers** (`provides` + domain panel orchestrating `shopify/checkout`, `stripe/subscription_checkout`, AI, …): domain FE → our panel → third party.
 - **Full how-to (add a new provider without reverse-engineering):** [**provider_pattern.md**](provider_pattern.md).
 
+## No silent fails (APIs, config, optional paths)
+
+**Do not fail silently** when something cannot be loaded, configured, reached, decoded, or authorised — even if it is **not** on the critical path and the main flow continues.
+
+| Context | What to do |
+|---------|------------|
+| **Frontend / public request** | Log a clear warning (project error log / `error_log` with module + reason). Soft-fail the feature if needed, but leave a trace. |
+| **CMS admin / sync / tools UI** | Surface a **message or final status line** the operator can see (e.g. sync status `no graphql conf`). May **also** write the error log. |
+| **Missing config / scopes / host / token** | Explicit reason string (not an empty return with no side effects). Prefer reusable helpers that return `_reason` / flags **and** log or UI-warn once. |
+| **Optional / soft dependencies** | Soft-skip is fine; **silent** empty success is not. Example: Shopify REST works without GraphQL host, but sync must still say **`no graphql conf`**. |
+
+- Never log secrets (API keys, tokens) — same rule as HTTP section.
+- Prefer short, stable phrases for status UIs so operators and docs can match them.
+- Soft-fail paths that previously returned empty arrays/`''` with no log should at least log once per request (or set a status flag consumers already display).
+
 ## Encoding (UTF-8 / utf8mb4)
 
 - **Storage and APIs use real UTF-8** (MySQL **utf8mb4** connection via `mysqli_set_charset`). Do **not** store HTML entities (`&aacute;`, etc.) for normal copy — use Unicode characters.
@@ -168,7 +183,7 @@ Helper methods – always start with underscore: `_deep_merge()`, `_get_db_colum
 
 Always use `cms_json_decode($json_data, $filename = '')` instead of `json_decode()` for JSON files/data (shows exact file + line + column on error). `$filename` is for display only; if non-file JSON, leave empty.
 
-General philosophy – make errors impossible or instantly obvious (no silent failures, no whitespace-sensitive formats like YAML).
+General philosophy – make errors impossible or instantly obvious (no silent failures, no whitespace-sensitive formats like YAML). See also **No silent fails** above for APIs/config/optional paths.
 
 ### HTTP redirects
 

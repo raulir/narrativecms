@@ -111,6 +111,32 @@ function cms_input_image_popup($element){
 				cms_input_mask_init()
 				
 			}
+			// update imagemaker transform inputs (target image field)
+			if ($('.cms_input_transform_target_' + input_name).length){
+
+				var $tcont = $('.cms_input_transform_target_' + input_name)
+				var $icontainer = $('.cms_input_image_content_' + input_name).closest('.cms_input_image')
+				var img_val = $('.cms_input_image_input', $icontainer).val()
+
+				if ($('.cms_input_transform_image_inner', $tcont).length == 0 || $('.cms_input_transform_empty', $tcont).length){
+					$('.cms_input_transform_image', $tcont).html(
+						'<div class="cms_input_transform_image_inner">' +
+						'<svg class="cms_input_transform_preview_svg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg></div>'
+					)
+				}
+
+				$('.cms_input_transform_image_inner', $tcont).data('w', $icontainer.data('w'))
+				$('.cms_input_transform_image_inner', $tcont).data('h', $icontainer.data('h'))
+				$('.cms_input_transform_image_inner', $tcont)
+						.css({'background-image': 'url(' + _cms_base + 'img/' + img_val + ')'})
+				$tcont.data('target_image', img_val)
+
+				if (typeof cms_input_transform_init === 'function'){
+					$tcont.removeClass('cms_input_transform_ok')
+					cms_input_transform_init()
+				}
+
+			}
 		}
 	});
 	

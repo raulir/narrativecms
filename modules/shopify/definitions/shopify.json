@@ -7,7 +7,7 @@
 			"type": "shopify/shopify_cms_sync",
 			"name": "sync",
 			"label": "Sync products",
-			"help": "Loads the Shopify frontpage collection, creates missing CMS products, and fully refreshes products that changed on Shopify. When nothing is new or stale, fully refreshes one product with the oldest Shopify check (shopify_checked_at). Stops after about 50 seconds — click Sync again to continue."
+			"help": "Loads the Shopify frontpage collection, creates missing CMS products, and fully refreshes products that changed on Shopify. Status: new/stale → updated; when already in sync, refresh counts idle maintenance (one oldest-checked product per click). Stops after about 50 seconds if there is a large queue."
 		},
 		{
 			"type": "shopify/shopify_cms_purge",
@@ -76,6 +76,29 @@
 					"type": "text",
 					"name": "suffix",
 					"label": "Suffix",
+					"mandatory": "1"
+				}
+			]
+		},
+		{
+			"type": "repeater",
+			"name": "category_maps",
+			"label": "Shopify category map",
+			"help": "Match text found in Shopify Standard Product Category path (e.g. Artwork, Cards) to a shop category. Used for subcategory parent and for \"Other art\" / \"Other cards\" when no range collection.",
+			"fields": [
+				{
+					"type": "text",
+					"name": "shopify_match",
+					"label": "Shopify match",
+					"mandatory": "1",
+					"help": "Substring in category fullName (case-insensitive)"
+				},
+				{
+					"type": "fk",
+					"name": "category_id",
+					"label": "Shop category",
+					"list": "shop/category",
+					"add_empty": "1",
 					"mandatory": "1"
 				}
 			]

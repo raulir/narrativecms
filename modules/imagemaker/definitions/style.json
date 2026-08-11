@@ -1,0 +1,69 @@
+{
+	"version": "2",
+	"label": "Imagemaker style",
+	"image": "",
+	"description": "Warp grid + colour masks for layered product / print composites",
+	"list": {
+		"list_title": "Imagemaker styles",
+		"item_title": "Imagemaker style",
+		"filter_fields": {
+			"show": "-- show --"
+		},
+		"link_target": "0"
+	},
+	"js": [],
+	"item": [
+		{
+			"type": "text",
+			"name": "heading",
+			"label": "Heading",
+			"mandatory": "1"
+		},
+		{
+			"type": "image",
+			"name": "print_background",
+			"label": "Print background",
+			"category": "content",
+			"mandatory": "1",
+			"help": "Base layer (destination canvas)"
+		},
+		{
+			"type": "imagemaker/cms_input_transform",
+			"name": "transform",
+			"label": "Transform",
+			"target": "print_background",
+			"points": "5",
+			"help": "Edge control points on the print background (5 per side, corners shared). Percent of image size. Opens a drag editor."
+		},
+		{
+			"type": "select",
+			"name": "blending",
+			"label": "Blending",
+			"values": {
+				"on": "On",
+				"off": "Off"
+			},
+			"default": "on",
+			"help": "On: lightness-aware blend of artwork onto the background. Off: overwrite background pixels with artwork (no blend)."
+		},
+		{
+			"type": "subtitle",
+			"label": "Masks"
+		},
+		{
+			"type": "image",
+			"name": "colour_mask_1",
+			"label": "Colour mask 1",
+			"category": "content",
+			"help": "Black means no paint"
+		},
+		{
+			"type": "image",
+			"name": "colour_mask_2",
+			"label": "Colour mask 2",
+			"category": "content",
+			"help": "Black means no paint"
+		}
+	],
+	"settings": []
+}

@@ -103,9 +103,207 @@ class shopify_product_model extends \Model {
 			$settings['collection_collection_suffixes'] = [];
 		}
 
+		// Shopify Standard Product Category path → CMS shop/category (FK)
+		if (empty($settings['category_maps']) || !is_array($settings['category_maps'])){
+			$art_id = $this->_find_category_id_by_heading('Art');
+			$cards_id = $this->_find_category_id_by_heading('Cards');
+			$settings['category_maps'] = [];
+			if ($art_id > 0){
+				$settings['category_maps'][] = ['shopify_match' => 'Artwork', 'category_id' => $art_id];
+			}
+			if ($cards_id > 0){
+				$settings['category_maps'][] = ['shopify_match' => 'Cards', 'category_id' => $cards_id];
+			}
+		}
+
 		$GLOBALS['shopify_settings_cache'] = $settings;
 
 		return $settings;
+
+	}
+
+	/**
+	 * Admin GraphQL POST (product category, file_reference metafields, etc.).
+	 *
+	 * @param string $query
+	 * @param array $variables
+	 * @param int $force 0 ≈ 300s disk cache; 1 always network
+	 * @return array decoded data root or ['_soft_fail'=>1,…] / ['_errors'=>…]
+	 */
+	/**
+	 * Admin GraphQL needs store host + Admin API token.
+	 * REST may still work with a default host; GraphQL does not default host.
+	 * API version is optional (shopify_admin_api_version, else shopify_storefront_api_version, else built-in default).
+	 */
+	function graphql_config_ok(){
+
+		$token = trim((string)($GLOBALS['config']['shopify_api_token'] ?? ''));
+		$host = $GLOBALS['config']['shopify_store_domain']
+				?? ($GLOBALS['config']['shopify_host'] ?? '');
+		$host = preg_replace('#^https?://#', '', rtrim((string)$host, '/'));
+
+		return $token !== '' && $host !== '';
+
+	}
+
+	function graphql($query, $variables = [], $force = 0){
+
+		$query = trim((string)$query);
+		if ($query === ''){
+			return ['_soft_fail' => 1, '_reason' => 'empty_query'];
+		}
+
+		if (!$this->graphql_config_ok()){
+			return ['_soft_fail' => 1, '_reason' => 'no_graphql_conf'];
+		}
+
+		$cache_key = md5($query.json_encode($variables));
+		$filename = $GLOBALS['config']['base_path'].'cache/shopify_gql_'.substr($cache_key, 0, 16).'.json';
+
+		$needs_update = 0;
+		if (!file_exists($filename)){
+			$needs_update = 1;
+		} else if ((int)$force === 0 && (time() - filemtime($filename)) > 300){
+			$needs_update = 1;
+		} else if ((int)$force === 1){
+			$needs_update = 1;
+		}
+
+		if (!$needs_update && file_exists($filename)){
+			$cached = json_decode((string)file_get_contents($filename), true);
+			if (is_array($cached)){
+				return $cached;
+			}
+		}
+
+		if (!$this->_ensure_shopify_api()){
+			if (file_exists($filename)){
+				$cached = json_decode((string)file_get_contents($filename), true);
+				if (is_array($cached)){
+					return $cached;
+				}
+			}
+			return ['_soft_fail' => 1, '_reason' => 'shopify_not_configured'];
+		}
+
+		$host = $GLOBALS['config']['shopify_store_domain']
+				?? ($GLOBALS['config']['shopify_host'] ?? '');
+		$host = preg_replace('#^https?://#', '', rtrim((string)$host, '/'));
+		$token = $GLOBALS['config']['shopify_api_token'] ?? '';
+		$ver = $GLOBALS['config']['shopify_admin_api_version']
+				?? ($GLOBALS['config']['shopify_storefront_api_version'] ?? '2026-10');
+		$url = 'https://'.$host.'/admin/api/'.$ver.'/graphql.json';
+
+		$payload = json_encode([
+				'query' => $query,
+				'variables' => $variables ?: new \stdClass(),
+		]);
+
+		$ctx = stream_context_create([
+				'http' => [
+						'method' => 'POST',
+						'header' => "X-Shopify-Access-Token: {$token}\r\nContent-Type: application/json\r\n",
+						'content' => $payload,
+						'ignore_errors' => true,
+						'timeout' => 45,
+				],
+		]);
+
+		$body = @file_get_contents($url, false, $ctx);
+		if ($body === false || $body === ''){
+			return ['_soft_fail' => 1, '_reason' => 'graphql_empty'];
+		}
+
+		$decoded = json_decode($body, true);
+		if (!is_array($decoded)){
+			return ['_soft_fail' => 1, '_reason' => 'graphql_decode'];
+		}
+
+		if (!empty($decoded['errors'])){
+			$out = ['_errors' => $decoded['errors'], 'data' => $decoded['data'] ?? null];
+			@file_put_contents($filename, json_encode($out));
+			return $out;
+		}
+
+		$data = $decoded['data'] ?? [];
+		if (!is_array($data)){
+			$data = [];
+		}
+		@file_put_contents($filename, json_encode($data));
+		return $data;
+
+	}
+
+	/**
+	 * Category taxonomy + original_artwork file URL for one product (Admin GraphQL).
+	 *
+	 * @return array{category_fullName:string,category_name:string,original_artwork_url:string}
+	 */
+	function get_product_admin_extras($shopify_product_id, $force = 0){
+
+		$out = [
+				'category_fullName' => '',
+				'category_name' => '',
+				'original_artwork_url' => '',
+		];
+
+		$shopify_product_id = trim((string)$shopify_product_id);
+		if ($shopify_product_id === '' || !ctype_digit($shopify_product_id)){
+			return $out;
+		}
+
+		$gid = 'gid://shopify/Product/'.$shopify_product_id;
+		$query = <<<'GQL'
+query ProductExtras($id: ID!) {
+  product(id: $id) {
+    category {
+      fullName
+      name
+    }
+    metafield(namespace: "custom", key: "original_artwork") {
+      type
+      value
+      reference {
+        __typename
+        ... on MediaImage {
+          image { url }
+        }
+        ... on GenericFile {
+          url
+        }
+      }
+    }
+  }
+}
+GQL;
+
+		$data = $this->graphql($query, ['id' => $gid], $force);
+		if (!empty($data['_soft_fail']) || !empty($data['_errors'])){
+			return $out;
+		}
+
+		$product = $data['product'] ?? null;
+		if (!is_array($product)){
+			return $out;
+		}
+
+		if (!empty($product['category']['fullName'])){
+			$out['category_fullName'] = trim((string)$product['category']['fullName']);
+		}
+		if (!empty($product['category']['name'])){
+			$out['category_name'] = trim((string)$product['category']['name']);
+		}
+
+		$ref = $product['metafield']['reference'] ?? null;
+		if (is_array($ref)){
+			if (!empty($ref['image']['url'])){
+				$out['original_artwork_url'] = trim((string)$ref['image']['url']);
+			} else if (!empty($ref['url'])){
+				$out['original_artwork_url'] = trim((string)$ref['url']);
+			}
+		}
+
+		return $out;
 
 	}
 
@@ -489,14 +687,24 @@ class shopify_product_model extends \Model {
 
 	}
 
-	function _productthumb_cache_path($cms_page_panel_id){
+	/**
+	 * @param int $cms_page_panel_id
+	 * @param string $hash_suffix optional 8-char imagemaker composite hash (productthumb_{id}_{hash}.html)
+	 */
+	function _productthumb_cache_path($cms_page_panel_id, $hash_suffix = ''){
 
-		return $this->_productthumb_cache_dir().'productthumb_'.(int)$cms_page_panel_id.'.html';
+		$base = $this->_productthumb_cache_dir().'productthumb_'.(int)$cms_page_panel_id;
+		$hash_suffix = preg_replace('/[^a-f0-9]/i', '', (string)$hash_suffix);
+		if ($hash_suffix !== ''){
+			return $base.'_'.strtolower($hash_suffix).'.html';
+		}
+		return $base.'.html';
 
 	}
 
 	/**
 	 * Drop productthumb HTML so next list/related render rebuilds markup.
+	 * Removes plain and imagemaker-hash variants: productthumb_{id}.html, productthumb_{id}_*.html
 	 */
 	function invalidate_product_display_cache($cms_page_panel_id){
 
@@ -505,9 +713,13 @@ class shopify_product_model extends \Model {
 			return;
 		}
 
+		$dir = $this->_productthumb_cache_dir();
 		$path = $this->_productthumb_cache_path($cms_page_panel_id);
 		if (file_exists($path)){
 			@unlink($path);
+		}
+		foreach (glob($dir.'productthumb_'.$cms_page_panel_id.'_*.html') ?: [] as $variant){
+			@unlink($variant);
 		}
 
 	}
@@ -515,8 +727,10 @@ class shopify_product_model extends \Model {
 	/**
 	 * Read cached productthumb HTML if within thumb_html_ttl and not older than product update_time.
 	 * Returns HTML string or null.
+	 *
+	 * @param string $hash_suffix optional imagemaker composite hash for cache key
 	 */
-	function get_productthumb_html_cache($cms_page_panel_id, $update_time = 0){
+	function get_productthumb_html_cache($cms_page_panel_id, $update_time = 0, $hash_suffix = ''){
 
 		$cms_page_panel_id = (int)$cms_page_panel_id;
 		if ($cms_page_panel_id <= 0){
@@ -526,7 +740,7 @@ class shopify_product_model extends \Model {
 		$settings = $this->get_shopify_settings();
 		$thumb_ttl = max(1, (int)($settings['thumb_html_ttl'] ?? 900));
 
-		$filename = $this->_productthumb_cache_path($cms_page_panel_id);
+		$filename = $this->_productthumb_cache_path($cms_page_panel_id, $hash_suffix);
 		clearstatcache(true, $filename);
 		if (!file_exists($filename)){
 			return null;
@@ -552,8 +766,10 @@ class shopify_product_model extends \Model {
 
 	/**
 	 * Write rendered productthumb HTML.
+	 *
+	 * @param string $hash_suffix optional imagemaker composite hash for cache key
 	 */
-	function set_productthumb_html_cache($cms_page_panel_id, $html){
+	function set_productthumb_html_cache($cms_page_panel_id, $html, $hash_suffix = ''){
 
 		$cms_page_panel_id = (int)$cms_page_panel_id;
 		if ($cms_page_panel_id <= 0 || !is_string($html) || $html === ''){
@@ -565,7 +781,7 @@ class shopify_product_model extends \Model {
 			@mkdir($dir, 0755, true);
 		}
 
-		file_put_contents($this->_productthumb_cache_path($cms_page_panel_id), $html);
+		file_put_contents($this->_productthumb_cache_path($cms_page_panel_id, $hash_suffix), $html);
 
 	}
 
@@ -590,11 +806,12 @@ class shopify_product_model extends \Model {
 	 * Full productthumb panel_params: HTML cache → rebuild product → render + store HTML.
 	 * Parents only pass cms_page_panel_id (+ productthumb settings labels merged by CMS).
 	 * Template echoes $productthumb_html when set.
+	 * When imagemaker is installed: optional product composite (style cascade) before thumb image;
+	 * HTML cache key includes composite hash so style/artwork changes bust cache.
 	 */
 	function get_productthumb_params($params){
 
 		$this->load->model('cms/cms_page_panel_model');
-		$this->load->model('timmy/imagemaker_model');
 
 		$cms_page_panel_id = (int)($params['cms_page_panel_id'] ?? 0);
 		if ($cms_page_panel_id <= 0){
@@ -606,11 +823,16 @@ class shopify_product_model extends \Model {
 			return $params;
 		}
 
+		$imagemaker_on = in_array('imagemaker', $GLOBALS['config']['modules'] ?? [], true);
 		$update_time = (int)($params['update_time'] ?? 0);
-		$cached_html = $this->get_productthumb_html_cache($cms_page_panel_id, $update_time);
-		if ($cached_html !== null){
-			$params['productthumb_html'] = $cached_html;
-			return $params;
+
+		// Without imagemaker: fast path — HTML cache before product load
+		if (!$imagemaker_on){
+			$cached_html = $this->get_productthumb_html_cache($cms_page_panel_id, $update_time);
+			if ($cached_html !== null){
+				$params['productthumb_html'] = $cached_html;
+				return $params;
+			}
 		}
 
 		// Rebuild: CMS-first, Shopify recheck only when data TTL expired + budget
@@ -623,6 +845,47 @@ class shopify_product_model extends \Model {
 			];
 			$params['productthumb_html'] = $this->_render_productthumb_html($params);
 			return $params;
+		}
+
+		// Imagemaker: composite via shared resolve_product_composite; HTML cache uses hash when used
+		$thumb_hash = '';
+		if ($imagemaker_on){
+			$this->load->model('imagemaker/imagemaker_model');
+			if ($this->imagemaker_model->is_available()){
+				$artwork = trim((string)($product['original_artwork'] ?? ''));
+				$product_ut = (int)($product['update_time'] ?? $update_time);
+				$style_id = $this->imagemaker_model->resolve_style_id($product);
+
+				if ($style_id > 0 && $artwork !== ''){
+					$style = $this->cms_page_panel_model->get_cms_page_panel($style_id);
+					$style_ut = (int)($style['update_time'] ?? 0);
+					if ($style_ut <= 0){
+						$style_ut = (int)($style['create_time'] ?? 0);
+					}
+					$ck = $this->imagemaker_model->product_composite_cache_key(
+							$cms_page_panel_id, $artwork, $style_ut);
+					$expected_hash = $ck['hash8'];
+
+					$cached_html = $this->get_productthumb_html_cache(
+							$cms_page_panel_id, $product_ut, $expected_hash);
+					if ($cached_html !== null){
+						$params['productthumb_html'] = $cached_html;
+						return $params;
+					}
+
+					$im_path = $this->imagemaker_model->resolve_product_composite($product);
+					if ($im_path !== ''){
+						$product['thumbnail_image'] = $im_path;
+						$thumb_hash = $expected_hash;
+					}
+				} else {
+					$cached_html = $this->get_productthumb_html_cache($cms_page_panel_id, $product_ut);
+					if ($cached_html !== null){
+						$params['productthumb_html'] = $cached_html;
+						return $params;
+					}
+				}
+			}
 		}
 
 		$min_price = round($product['min_price'] ?? 0);
@@ -674,16 +937,6 @@ class shopify_product_model extends \Model {
 			}
 		}
 
-		if (!empty($product['imagemaker_style'])){
-			$style = $this->cms_page_panel_model->get_cms_page_panel($product['imagemaker_style']);
-			$product['generated_1'] = $this->imagemaker_model->add_colour(
-					$product['colour'] ?? '',
-					$style['print_background'] ?? '',
-					$style['colour_mask'] ?? ''
-			);
-			$product['thumbnail_image'] = $product['generated_1'];
-		}
-
 		if (($product['shopify_status'] ?? '') != 'active'){
 			$params['sold_out_label'] = $params['unavailable_label'] ?? 'unavailable';
 		}
@@ -691,7 +944,7 @@ class shopify_product_model extends \Model {
 		$params['product'] = $product;
 
 		$html = $this->_render_productthumb_html($params);
-		$this->set_productthumb_html_cache($cms_page_panel_id, $html);
+		$this->set_productthumb_html_cache($cms_page_panel_id, $html, $thumb_hash);
 		$params['productthumb_html'] = $html;
 
 		return $params;
@@ -956,8 +1209,34 @@ class shopify_product_model extends \Model {
 			}
 		}
 
-		// Assign subcategory from Shopify range collection when empty (admin override wins)
-		if ($this->_assign_organisation_from_shopify($cms_product)){
+		// GraphQL: Standard Product Category + custom.original_artwork file URL
+		$extras = $this->get_product_admin_extras($cms_product['shopify_id'], (int)$force === 1 ? 1 : 0);
+
+		// Range → subcategory under mapped category; else always "Other art" / "Other cards"
+		if ($this->_assign_organisation_from_shopify($cms_product, $extras)){
+			$needs_update = true;
+		}
+		// Guarantee subcategory on import when still empty (panel-table write path)
+		if ((int)($cms_product['subcategory_id'] ?? 0) < 1){
+			$cat_id = $this->_map_shopify_category_to_cms_id(
+					$extras['category_fullName'] ?? '',
+					$extras['category_name'] ?? ''
+			);
+			if ($cat_id < 1){
+				$cat_id = $this->_get_fallback_category_id();
+			}
+			$other = $this->_ensure_other_subcategory($cat_id);
+			if (!empty($other['cms_page_panel_id'])){
+				$cms_product['subcategory_id'] = (int)$other['cms_page_panel_id'];
+				$needs_update = true;
+			}
+		}
+
+		// Union product collections onto shop/category.collections (mega menu ranges)
+		$this->_sync_category_collections_from_product($cms_product);
+
+		// Timmy field: flat artwork PNG from Shopify metafield custom.original_artwork
+		if ($this->_sync_original_artwork_from_extras($cms_product, $extras)){
 			$needs_update = true;
 		}
 
@@ -1085,9 +1364,22 @@ class shopify_product_model extends \Model {
 
 	}
 
-	function _sync_format_status($found, $new_total, $stale_total, $updated){
+	/**
+	 * @param int $found Shopify list size
+	 * @param int $new_total new products to create
+	 * @param int $stale_total stale products to refresh
+	 * @param int $updated new+stale successfully written this run
+	 * @param int $refresh idle maintenance refreshes (no new/stale need)
+	 */
+	function _sync_format_status($found, $new_total, $stale_total, $updated, $refresh = 0){
 
-		return 'Found '.$found.', new '.$new_total.', stale '.$stale_total.', updated '.$updated;
+		$text = 'Found '.$found.', new '.$new_total.', stale '.$stale_total.
+				', updated '.$updated.', refresh '.$refresh;
+		if (!$this->graphql_config_ok()){
+			$text .= ', no graphql conf';
+		}
+
+		return $text;
 
 	}
 
@@ -1195,10 +1487,11 @@ class shopify_product_model extends \Model {
 
 			$new_total = count($new_list);
 			$stale_total = count($stale_list);
-			$updated = 0;
+			$updated = 0; // new + stale that needed work
+			$refresh = 0; // idle maintenance (no new/stale need)
 
 			$this->_sync_status_write(
-					$this->_sync_format_status($found, $new_total, $stale_total, $updated),
+					$this->_sync_format_status($found, $new_total, $stale_total, $updated, $refresh),
 					false
 			);
 
@@ -1228,7 +1521,7 @@ class shopify_product_model extends \Model {
 				}
 
 				$this->_sync_status_write(
-						$this->_sync_format_status($found, $new_total, $stale_total, $updated),
+						$this->_sync_format_status($found, $new_total, $stale_total, $updated, $refresh),
 						false
 				);
 
@@ -1248,7 +1541,7 @@ class shopify_product_model extends \Model {
 					}
 
 					$this->_sync_status_write(
-							$this->_sync_format_status($found, $new_total, $stale_total, $updated),
+							$this->_sync_format_status($found, $new_total, $stale_total, $updated, $refresh),
 							false
 					);
 
@@ -1260,22 +1553,22 @@ class shopify_product_model extends \Model {
 				}
 			}
 
-			// Idle: nothing new or stale — fully refresh one oldest-checked product
+			// Idle: catalogue in sync — fully refresh one oldest-checked product (rotates each click)
 			if (!$stopped && $new_total === 0 && $stale_total === 0){
 				$idle_id = $this->_oldest_checked_product_id($local);
 				if ($idle_id > 0){
 					$refreshed = $this->refresh_product($idle_id, 1);
 					if (!empty($refreshed)){
-						$updated++;
+						$refresh++;
 					}
 					$this->_sync_status_write(
-							$this->_sync_format_status($found, $new_total, $stale_total, $updated),
+							$this->_sync_format_status($found, $new_total, $stale_total, $updated, $refresh),
 							false
 					);
 				}
 			}
 
-			$text = $this->_sync_format_status($found, $new_total, $stale_total, $updated);
+			$text = $this->_sync_format_status($found, $new_total, $stale_total, $updated, $refresh);
 			if ($stopped){
 				$text .= ' - stopped (50s limit)';
 			} else {
@@ -1290,6 +1583,7 @@ class shopify_product_model extends \Model {
 					'new' => $new_total,
 					'stale' => $stale_total,
 					'updated' => $updated,
+					'refresh' => $refresh,
 					'stopped' => $stopped,
 					'done' => true,
 					'running' => false,
@@ -1920,6 +2214,204 @@ class shopify_product_model extends \Model {
 	}
 
 	/**
+	 * Find shop/category cms_page_panel_id by heading (case-insensitive).
+	 */
+	function _find_category_id_by_heading($heading){
+
+		$heading = trim((string)$heading);
+		if ($heading === ''){
+			return 0;
+		}
+
+		$this->load->model('cms/cms_page_panel_model');
+		$key = $this->_normalise_collection_key($heading);
+		$rows = $this->cms_page_panel_model->get_cms_page_panels_by([
+				'panel_name' => 'shop/category',
+		]);
+		foreach ($rows as $row){
+			if ($this->_normalise_collection_key($row['heading'] ?? '') === $key){
+				return (int)($row['cms_page_panel_id'] ?? 0);
+			}
+		}
+
+		return 0;
+
+	}
+
+	/**
+	 * Map Shopify Standard Product Category (fullName / name) → CMS shop/category id.
+	 * Uses settings category_maps (shopify_match found in path → category_id FK).
+	 * Longer matches preferred so "Greeting Cards" can beat "Cards" if both listed.
+	 */
+	function _map_shopify_category_to_cms_id($full_name, $name = ''){
+
+		$hay = trim((string)$full_name.' '.(string)$name);
+		if ($hay === ''){
+			return 0;
+		}
+
+		$hay_l = mb_strtolower($hay);
+		$settings = $this->get_shopify_settings();
+		$maps = $settings['category_maps'] ?? [];
+		if (!is_array($maps) || $maps === []){
+			return 0;
+		}
+
+		$best_len = 0;
+		$best_id = 0;
+		foreach ($maps as $row){
+			if (!is_array($row)){
+				continue;
+			}
+			$match = trim((string)($row['shopify_match'] ?? ''));
+			$category_id = (int)($row['category_id'] ?? 0);
+			// Legacy text heading rows (pre-FK)
+			if ($category_id < 1 && !empty($row['cms_heading'])){
+				$category_id = $this->_find_category_id_by_heading($row['cms_heading']);
+			}
+			if ($match === '' || $category_id < 1){
+				continue;
+			}
+			$m_l = mb_strtolower($match);
+			if ($m_l === '' || mb_strpos($hay_l, $m_l) === false){
+				continue;
+			}
+			$len = mb_strlen($m_l);
+			if ($len > $best_len){
+				$best_len = $len;
+				$best_id = $category_id;
+			}
+		}
+
+		return $best_id;
+
+	}
+
+	/**
+	 * Catch-all subcategory label under a CMS category, e.g. Art → "Other art".
+	 */
+	function _other_subcategory_heading_for_category($category_heading){
+
+		$category_heading = trim((string)$category_heading);
+		if ($category_heading === ''){
+			return 'Other';
+		}
+
+		return 'Other '.mb_strtolower($category_heading);
+
+	}
+
+	/**
+	 * Scrape Shopify custom.original_artwork into CMS product field original_artwork (Timmy).
+	 * Only when Timmy module is installed. Tracks original_artwork_src_hash for re-scrape.
+	 *
+	 * @param array $cms_product
+	 * @param array $extras
+	 * @return bool changed
+	 */
+	function _sync_original_artwork_from_extras(&$cms_product, $extras){
+
+		if (!in_array('timmy', $GLOBALS['config']['modules'] ?? [], true)){
+			return false;
+		}
+
+		$url = trim((string)($extras['original_artwork_url'] ?? ''));
+		$changed = false;
+
+		if ($url === ''){
+			if (!empty($cms_product['original_artwork']) || !empty($cms_product['original_artwork_src_hash'])){
+				$cms_product['original_artwork'] = '';
+				$cms_product['original_artwork_src_hash'] = '';
+				return true;
+			}
+			return false;
+		}
+
+		$path = parse_url($url, PHP_URL_PATH);
+		$hash = md5($path !== null && $path !== false ? $path : $url);
+		$need = empty($cms_product['original_artwork'])
+				|| ($cms_product['original_artwork_src_hash'] ?? '') !== $hash
+				|| !$this->_cms_image_path_ok($cms_product['original_artwork'] ?? '');
+
+		if (!$need){
+			return false;
+		}
+
+		$this->load->model('cms/cms_image_model');
+		$image = $this->cms_image_model->scrape_image($url, 'shopify', 'shopify');
+		if ($image === '' || $image === null){
+			return false;
+		}
+
+		if (($cms_product['original_artwork'] ?? '') !== $image
+				|| ($cms_product['original_artwork_src_hash'] ?? '') !== $hash){
+			$cms_product['original_artwork'] = $image;
+			$cms_product['original_artwork_src_hash'] = $hash;
+			$changed = true;
+		}
+
+		return $changed;
+
+	}
+
+	/**
+	 * Ensure "Other {category}" subcategory under $category_id (no Shopify range collection).
+	 * e.g. Art → "Other art", Cards → "Other cards". Used on import when no range/category collection.
+	 *
+	 * @return array|null subcategory panel
+	 */
+	function _ensure_other_subcategory($category_id){
+
+		$category_id = (int)$category_id;
+		if ($category_id < 1){
+			$category_id = $this->_get_fallback_category_id();
+		}
+		if ($category_id < 1){
+			return null;
+		}
+
+		$this->load->model('cms/cms_page_panel_model');
+		$cat = $this->cms_page_panel_model->get_cms_page_panel($category_id);
+		$cat_heading = trim((string)($cat['heading'] ?? ''));
+		$heading = $this->_other_subcategory_heading_for_category($cat_heading !== '' ? $cat_heading : 'items');
+
+		// Stable synthetic collection key for find/create
+		$full_title = 'cms:other:'.$category_id;
+
+		$sub = $this->_ensure_subcategory_for_collection($full_title, $heading, $category_id);
+		if (!empty($sub['cms_page_panel_id'])){
+			return $sub;
+		}
+
+		// Fallback: match by heading + parent category (e.g. manually created "Other art")
+		$rows = $this->cms_page_panel_model->get_cms_page_panels_by([
+				'panel_name' => 'shop/subcategory',
+				'heading' => $heading,
+		]);
+		$want = $this->_normalise_collection_key($heading);
+		foreach ($rows as $row){
+			if ($this->_normalise_collection_key($row['heading'] ?? '') !== $want){
+				continue;
+			}
+			if ((int)($row['category_id'] ?? 0) === $category_id || (int)($row['category_id'] ?? 0) === 0){
+				if ((int)($row['category_id'] ?? 0) !== $category_id){
+					$this->cms_page_panel_model->update_cms_page_panel(
+							(int)$row['cms_page_panel_id'],
+							['category_id' => $category_id, 'shopify_collection' => $full_title],
+							false
+					);
+					$row['category_id'] = $category_id;
+					$row['shopify_collection'] = $full_title;
+				}
+				return $row;
+			}
+		}
+
+		return null;
+
+	}
+
+	/**
 	 * Find panel by shopify_collection full title, else by heading (case-insensitive).
 	 */
 	function _find_panel_by_shopify_collection($panel_name, $full_title, $heading = ''){
@@ -2263,44 +2755,57 @@ class shopify_product_model extends \Model {
 	}
 
 	/**
-	 * Map Shopify collections → category / subcategory / collections on product.
-	 * Overwrites product subcategory from Shopify when a range/category-suffix match exists
-	 * (or clears it when Shopify no longer has one). Replaces collections list from Shopify.
+	 * Map Shopify collections + Standard Product Category → category / subcategory / collections.
+	 * Range collection → subcategory under mapped CMS category (Artwork→Art, Cards→Cards).
+	 * No range → "Other art" / "Other cards" (etc.) under mapped category.
+	 *
+	 * @param array $cms_product
+	 * @param array $extras from get_product_admin_extras()
 	 * @return bool true if $cms_product was modified
 	 */
-	function _assign_organisation_from_shopify(&$cms_product){
+	function _assign_organisation_from_shopify(&$cms_product, $extras = []){
 
 		$shopify_id = $cms_product['shopify_id'] ?? '';
 		if ($shopify_id === '' || $shopify_id === null){
 			return false;
 		}
 
+		if (!is_array($extras)){
+			$extras = [];
+		}
+
 		$collections = $this->_get_product_collections($shopify_id);
 		$class = $this->_classify_product_collections($collections);
 		$changed = false;
 
-		// shop/category is manual — new subcategories hang under fallback (e.g. Cards)
-		if (!empty($class['subcategory']['title'])){
+		$category_id = $this->_map_shopify_category_to_cms_id(
+				$extras['category_fullName'] ?? '',
+				$extras['category_name'] ?? ''
+		);
+		if ($category_id < 1){
 			$category_id = $this->_get_fallback_category_id();
+		}
+
+		// Range / subcategory-suffix collection wins; else catch-all "Other art" / "Other cards"
+		$new_sub_id = 0;
+		if (!empty($class['subcategory']['title'])){
 			$sub = $this->_ensure_subcategory_for_collection(
 					$class['subcategory']['title'],
 					$class['subcategory']['heading'] ?? '',
 					$category_id
 			);
-			// Always overwrite product subcategory from Shopify classification
 			$new_sub_id = !empty($sub['cms_page_panel_id']) ? (int)$sub['cms_page_panel_id'] : 0;
-			$old_sub_id = (int)($cms_product['subcategory_id'] ?? 0);
-			if ($new_sub_id > 0 && $old_sub_id !== $new_sub_id){
-				$cms_product['subcategory_id'] = $new_sub_id;
-				$changed = true;
-			}
-		} else {
-			// Shopify has no subcategory-suffix collection — clear CMS subcategory
-			$old_sub_id = (int)($cms_product['subcategory_id'] ?? 0);
-			if ($old_sub_id > 0){
-				$cms_product['subcategory_id'] = 0;
-				$changed = true;
-			}
+		}
+		// No usable Shopify subcategory (or ensure failed) → Other {category}
+		if ($new_sub_id < 1){
+			$sub = $this->_ensure_other_subcategory($category_id);
+			$new_sub_id = !empty($sub['cms_page_panel_id']) ? (int)$sub['cms_page_panel_id'] : 0;
+		}
+
+		$old_sub_id = (int)($cms_product['subcategory_id'] ?? 0);
+		if ($new_sub_id > 0 && $old_sub_id !== $new_sub_id){
+			$cms_product['subcategory_id'] = $new_sub_id;
+			$changed = true;
 		}
 
 		// Replace product.collections from classified Shopify collections
@@ -2346,6 +2851,114 @@ class shopify_product_model extends \Model {
 		}
 
 		return $changed;
+
+	}
+
+	/**
+	 * Ensure product's collections appear on its shop/category.collections repeater (add-only).
+	 * Category is resolved via product.subcategory_id → subcategory.category_id.
+	 * Does not remove collections from the category when a product leaves them.
+	 *
+	 * @param array $cms_product
+	 * @return bool true if category was updated
+	 */
+	function _sync_category_collections_from_product($cms_product){
+
+		if (!is_array($cms_product)){
+			return false;
+		}
+
+		$sub_id = (int)($cms_product['subcategory_id'] ?? 0);
+		if ($sub_id < 1){
+			return false;
+		}
+
+		$product_cids = [];
+		if (!empty($cms_product['collections']) && is_array($cms_product['collections'])){
+			foreach ($cms_product['collections'] as $row){
+				$cid = (int)($row['collection_id'] ?? 0);
+				if ($cid > 0){
+					$product_cids[$cid] = true;
+				}
+			}
+		}
+		if (empty($product_cids)){
+			return false;
+		}
+
+		$this->load->model('cms/cms_page_panel_model');
+		$sub = $this->cms_page_panel_model->get_cms_page_panel($sub_id);
+		$category_id = (int)($sub['category_id'] ?? 0);
+		if ($category_id < 1){
+			return false;
+		}
+
+		$category = $this->cms_page_panel_model->get_cms_page_panel($category_id);
+		if (empty($category['cms_page_panel_id'])){
+			return false;
+		}
+
+		$existing = [];
+		$list = [];
+		if (!empty($category['collections']) && is_array($category['collections'])){
+			foreach ($category['collections'] as $row){
+				$cid = (int)($row['collection_id'] ?? 0);
+				if ($cid < 1){
+					continue;
+				}
+				if (isset($existing[$cid])){
+					continue;
+				}
+				$existing[$cid] = true;
+				$list[] = ['collection_id' => $cid];
+			}
+		}
+
+		$added = false;
+		foreach (array_keys($product_cids) as $cid){
+			if (isset($existing[$cid])){
+				continue;
+			}
+			$existing[$cid] = true;
+			$list[] = ['collection_id' => (int)$cid];
+			$added = true;
+		}
+
+		if (!$added){
+			return false;
+		}
+
+		$this->cms_page_panel_model->update_cms_page_panel($category_id, [
+				'collections' => $list,
+		], false);
+
+		return true;
+
+	}
+
+	/**
+	 * One-shot / maintenance: walk shown products and union their collections onto categories.
+	 *
+	 * @return array{products:int,categories_updated:int}
+	 */
+	function rebuild_category_collections_from_products(){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$products = $this->cms_page_panel_model->get_list('shop/product');
+		if (!is_array($products)){
+			$products = [];
+		}
+
+		$n = 0;
+		$updated = 0;
+		foreach ($products as $product){
+			$n++;
+			if ($this->_sync_category_collections_from_product($product)){
+				$updated++;
+			}
+		}
+
+		return ['products' => $n, 'categories_updated' => $updated];
 
 	}
 

@@ -1,0 +1,84 @@
+.cms_input_transform_container {
+	.cms_input_button {
+		width: 12.0rem;
+	}
+}
+
+.cms_input_transform_content {
+	position: relative;
+	height: 100%;
+}
+
+.cms_input_transform_set {
+	top: 3.3rem;
+	left: 0;
+	position: absolute;
+}
+
+.cms_input_transform_clear {
+	top: 6.6rem;
+	left: 0;
+	position: absolute;
+}
+
+.cms_input_transform_image {
+	width: 21.0rem;
+	height: 13.0rem;
+	border: 0.1rem solid $cms_border;
+	background-position: center;
+	background-size: 4.0rem auto;
+	position: absolute;
+	left: 14.0rem;
+	top: 0;
+	box-sizing: border-box;
+	cursor: pointer;
+	overflow: hidden;
+	line-height: 12.8rem;
+	text-align: center;
+}
+
+.cms_input_transform_image_inner {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	background-position: center;
+	background-size: contain;
+	background-repeat: no-repeat;
+}
+
+.cms_input_transform_empty {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 1.6rem;
+	line-height: 1.6rem;
+	width: 100%;
+	text-align: center;
+	color: #888;
+}
+
+.cms_input_transform_preview_svg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	overflow: visible;
+}
+
+.cms_input_transform_preview_svg polyline {
+	fill: none;
+	stroke: rgba(220, 40, 40, 0.9);
+	stroke-width: 0.4;
+	vector-effect: non-scaling-stroke;
+}
+
+.cms_input_transform_preview_svg circle {
+	fill: rgba(220, 40, 40, 0.95);
+	stroke: #fff;
+	stroke-width: 0.25;
+	vector-effect: non-scaling-stroke;
+}

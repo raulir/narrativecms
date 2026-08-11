@@ -1,0 +1,47 @@
+{
+	"name": "Imagemaker",
+	"version": "0.1",
+	"panels": [
+		{
+			"id": "style",
+			"name": "Imagemaker style",
+			"flags": [
+				"hidden"
+			]
+		}
+	],
+	"extends": [
+		{
+			"target": "shop/product",
+			"source": "//shop_product"
+		},
+		{
+			"target": "shop/category",
+			"source": "//shop_category"
+		},
+		{
+			"target": "shop/subcategory",
+			"source": "//shop_subcategory"
+		}
+	],
+	"cms_menu": [
+		{
+			"id": "cms_content",
+			"name": "Content",
+			"order": "20"
+		},
+		{
+			"id": "imagemaker",
+			"name": "Imagemaker",
+			"parent": "cms_content",
+			"order": "80"
+		},
+		{
+			"id": "imagemaker_styles",
+			"name": "Styles",
+			"parent": "imagemaker",
+			"url": "admin/cms_list/imagemaker__style/",
+			"order": "10"
+		}
+	]
+}

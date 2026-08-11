@@ -237,6 +237,17 @@ Returns `['x' => …, 'y' => …]` — click position on image, percentages from
 
 Returns `['width' => …, 'height' => …, [0/1 grid values…]]`.
 
+### imagemaker/cms_input_transform
+
+Module field (Imagemaker). Edge control points for warping overlays onto a base image.
+
+| Property | Description |
+|----------|-------------|
+| `target` * | Image field name on the same panel (e.g. `print_background`) |
+| `points` | Points per edge including corners (default `5`) |
+
+Hidden JSON value (`units: percent`, sparse grid). Popup: drag handles + polyline. See [`modules/imagemaker/docs/imagemaker.md`](../../imagemaker/docs/imagemaker.md).
+
 ### colour
 
 | Property | Description |

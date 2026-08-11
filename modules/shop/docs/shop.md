@@ -33,6 +33,10 @@ Site modules **may** still add behaviour that checks whether `shopify` is instal
 
 ## Catalogue
 
+### Category collections
+
+`shop/category` field **collections** (repeater of FKs to `shop/collection`): which product ranges appear under that category (e.g. mega menu “Shop by range”). Shopify sync **adds** collections when a product in that category uses them; CMS can edit the list manually. Removal of unused ranges is manual (or a rebuild tool), not per-product sync.
+
 ### Unified product list
 
 | Piece | Name |
@@ -168,7 +172,9 @@ Timmy storefront PDP is **`//shop_product` extends** of `shop/product` (not a se
 
 ## Timmy-specific notes
 
-- Customisation, overlay images, imagemaker, PDP labels → **`timmy/shop_product`** extend.  
+- Customisation, overlay images, PDP labels → **`timmy/shop_product`** extend.  
+- Layered print/thumb generation → optional **`imagemaker`** module (own admin list + model API; not a shop extend until wired). See [`modules/imagemaker/docs/imagemaker.md`](../../imagemaker/docs/imagemaker.md).  
+
 - Frontend template/SCSS/JS for product page → same extend (full template replace).  
 - Product links / lists / list-item targets: **`shop/product` only**.  
 - Category URLs: **`shop/category`**, **`shop/subcategory`**.
@@ -180,7 +186,8 @@ Timmy storefront PDP is **`//shop_product` extends** of `shop/product` (not a se
 - Sync creates/updates **`shop/product`** rows.  
 - Extension panel: **`shopify/shop_product`**.  
 - Cart driver when selected: Storefront cart + checkout.  
-- No ownership of generic order admin for pure-Shopify checkout (optional mirror later).
+- No ownership of generic order admin for pure-Shopify checkout (optional mirror later).  
+- Product list, taxonomy→category map, `original_artwork` meta: see [`modules/shopify/docs/sync.md`](../../shopify/docs/sync.md).
 
 ---
 

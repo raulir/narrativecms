@@ -174,15 +174,28 @@ class cms_page_panel_model extends \Model {
 				$row[$name] = $this->_normalise_panel_table_value($data[$name], $spec);
 			}
 		}
-		if (empty($row)) {
-			return;
-		}
 
 		$table = $this->get_panel_table_name($panel_name);
 		$sql = "select cms_page_panel_id from `{$table}` where cms_page_panel_id = ? limit 1 ";
 		$query = $this->db->query($sql, [(int)$cms_page_panel_id]);
+		$exists = (bool)$query->num_rows();
 
-		if ($query->num_rows()) {
+		// List queries INNER JOIN the panel table — every list item must have a row.
+		// Insert with defaults when missing even if this write has no table field values.
+		if (!$exists) {
+			foreach ($fields as $name => $spec) {
+				if (!array_key_exists($name, $row)) {
+					$row[$name] = $this->_normalise_panel_table_value(
+							array_key_exists($name, $data) ? $data[$name] : null,
+							$spec
+					);
+				}
+			}
+			$row['cms_page_panel_id'] = (int)$cms_page_panel_id;
+			$cols = array_keys($row);
+			$sql = "insert into `{$table}` (`".implode('`, `', $cols)."`) values (".implode(', ', array_fill(0, count($cols), '?')).") ";
+			$this->db->query($sql, array_values($row));
+		} else if (!empty($row)) {
 			$sets = [];
 			$bind = [];
 			foreach ($row as $col => $val) {
@@ -193,10 +206,8 @@ class cms_page_panel_model extends \Model {
 			$sql = "update `{$table}` set ".implode(', ', $sets)." where cms_page_panel_id = ? ";
 			$this->db->query($sql, $bind);
 		} else {
-			$row['cms_page_panel_id'] = (int)$cms_page_panel_id;
-			$cols = array_keys($row);
-			$sql = "insert into `{$table}` (`".implode('`, `', $cols)."`) values (".implode(', ', array_fill(0, count($cols), '?')).") ";
-			$this->db->query($sql, array_values($row));
+			// Exists and nothing to update
+			return;
 		}
 
 		foreach (array_keys($fields) as $field_name) {
@@ -1172,7 +1183,10 @@ class cms_page_panel_model extends \Model {
 		
 		}
 
-		if (!empty($table_data) && $panel_name) {
+		// Ensure panel-table row exists even when this write has no table field keys
+		// (e.g. Shopify create without subcategory_id — list uses INNER JOIN)
+		if ($panel_name && $this->panel_table_exists($panel_name)
+				&& !empty($this->get_panel_table_fields($panel_name))) {
 			$this->_write_panel_table_row($cms_page_panel_id, $panel_name, $table_data);
 			$this->_update_cached_params($cms_page_panel_id);
 		}
@@ -1346,7 +1360,9 @@ class cms_page_panel_model extends \Model {
 			$this->_update_cached_params($insert_id);
 		}
 
-		if (!empty($table_data) && !empty($data['panel_name'])) {
+		// Always ensure panel-table row when the panel has table:1 fields (list INNER JOIN)
+		if (!empty($data['panel_name']) && $this->panel_table_exists($data['panel_name'])
+				&& !empty($this->get_panel_table_fields($data['panel_name']))) {
 			$this->_write_panel_table_row($insert_id, $data['panel_name'], $table_data);
 			$this->_update_cached_params($insert_id);
 		}

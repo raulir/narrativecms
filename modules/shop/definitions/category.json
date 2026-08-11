@@ -38,6 +38,21 @@
 			"type": "colour",
 			"name": "colour",
 			"label": "Colour"
+		},
+		{
+			"type": "repeater",
+			"name": "collections",
+			"label": "Collections",
+			"help": "Product ranges listed under this category (mega menu Shop by range). Shopify sync adds collections when products in this category use them; editable in CMS.",
+			"fields": [
+				{
+					"type": "fk",
+					"name": "collection_id",
+					"label": "Collection",
+					"list": "shop/collection",
+					"add_empty": "1"
+				}
+			]
 		}
 	]
 }

@@ -1,0 +1,18 @@
+{
+	"label": "Imagemaker category fields",
+	"description": "Default style for products in this category (overridden by subcategory / product)",
+	"item": [
+		{
+			"type": "subtitle",
+			"label": "Imagemaker"
+		},
+		{
+			"type": "fk",
+			"name": "imagemaker_style_id",
+			"label": "Style",
+			"list": "imagemaker/style",
+			"add_empty": "1",
+			"help": "Optional default style. Subcategory and product style override this."
+		}
+	]
+}

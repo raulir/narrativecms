@@ -45,6 +45,19 @@ Boot: [`cms_config_load_full()`](../../../system/core/cms_config.php) aggregates
 
 Convention: `<baseModule>_<panel>` in the extending module — e.g. `user_login` extends `user/login`, `shopify_product` extends `shopify/product`.
 
+## Extension field groups (subtitle)
+
+When a module’s extend definition adds CMS fields to a target panel, **start that field group with a `subtitle`** that names the extending feature/module (e.g. `"Shopify"`, `"Imagemaker"`, `"Timmy"`). Editors can see which package owns the extra fields.
+
+```json
+"item": [
+  { "type": "subtitle", "label": "Imagemaker" },
+  { "type": "fk", "name": "imagemaker_style", "label": "Style", "list": "imagemaker/style" }
+]
+```
+
+Shopify’s `shop_product` already follows this (`"label": "Shopify"`). Prefer the same for new extends.
+
 ## Files in extending module
 
 ```

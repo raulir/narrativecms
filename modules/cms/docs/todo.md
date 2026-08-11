@@ -12,6 +12,10 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 - [x] **#762 one mysqli + slim cms_db** — `$GLOBALS['db']` single connection; [`cms_db.php`](../../../system/core/cms_db.php) replaces `system/database/` (no AR/forge/multi-driver). See [`system.md`](system.md) § Database.
 
+## System / frontend page render
+
+- [ ] **Missing page `layout` → PHP warnings + empty `.tpl.php`** — pages whose meta has no `layout` hit undefined `$page['layout']` in [`controller_index.php`](../../../system/core/controller_index.php) and then `include modules/cms/layouts/.tpl.php` via [`Loader::layout`](../../../system/core/Loader.php). Do not invent a default layout; guard all layout reads, hard-fail with `_html_error`/500 + `[cms_page_id=…]` log, refuse empty layout file include. Find/fix pages missing layout in admin. (Seen in `cache/errors_timmy.log`; path/line may differ by clone.)
+
 ## System / routing
 
 - [ ] **Deprecate / remove module controller first-segment autoresolve** — public endpoints should use **module APIs** (`modules/{m}/api/{id}.php` + `config.json` `"api":[{"id":…}]`) or explicit reserved system controllers (`ajax_api`, `files`, `admin`, …). Avoid new public routes via `modules/*/controllers/{name}.php` (example: Stripe webhook moved to **`stripe/webhook`** API). Keep admin module controllers until admin routing is redesigned. See [`system.md`](system.md) § Bootstrap, [`routing.md`](routing.md).
@@ -132,6 +136,12 @@ Source: [`cms_panel_js.md`](cms_panel_js.md). Per-module remaining work also tra
 - [ ] **Repeater `$root` scoping** — pass new repeater row as `$root` to `*_init` instead of global scan
 - [ ] **Repeater row delete → `*_destroy`** — call destroy hooks when repeater blocks are removed
 - [ ] Ticket #24 (panel JS to jQuery objects) — closed; `*_init` + `*_ok` class guards instead
+
+---
+
+## CMS inputs — [`cms_input.md`](cms_input.md)
+
+- [ ] **xy / mask / transform targets JS** — target-image refresh (when the linked image field changes) for `cms_input_xy`, `cms_input_mask`, and imagemaker `cms_input_transform` should live in each input’s own JS (`cms_input_xy.js`, `cms_input_mask.js`, `cms_input_transform.js`), not only in `cms_input_image` or ad-hoc hooks. See `target` on those field types in [`cms_input.md`](cms_input.md).
 
 ---
 

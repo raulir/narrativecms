@@ -1,0 +1,18 @@
+{
+	"label": "Imagemaker product fields",
+	"description": "Optional style for productthumb composites (product overrides subcategory / category)",
+	"item": [
+		{
+			"type": "subtitle",
+			"label": "Imagemaker"
+		},
+		{
+			"type": "fk",
+			"name": "imagemaker_style_id",
+			"label": "Style",
+			"list": "imagemaker/style",
+			"add_empty": "1",
+			"help": "Optional. Product overrides subcategory; subcategory overrides category. Needs original artwork for productthumb composites."
+		}
+	]
+}
