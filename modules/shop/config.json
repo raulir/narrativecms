@@ -18,6 +18,31 @@
 			"name": "Cart"
 		},
 		{
+			"id": "products",
+			"name": "Products"
+		},
+		{
+			"id": "products_menu",
+			"name": "Products menu",
+			"flags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "products_grid",
+			"name": "Products grid",
+			"flags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "product_thumb",
+			"name": "Product thumbnail",
+			"flags": [
+				"hidden"
+			]
+		},
+		{
 			"id": "product",
 			"name": "Product"
 		},
@@ -201,6 +226,20 @@
 			"parent": "shop_panel_settings",
 			"url": "admin/panel_settings/shop__category/",
 			"order": 60
+		},
+		{
+			"id": "products_settings",
+			"name": "Products grid",
+			"parent": "shop_panel_settings",
+			"url": "admin/panel_settings/shop__products/",
+			"order": 70
+		},
+		{
+			"id": "product_thumb_settings",
+			"name": "Product thumbnail",
+			"parent": "shop_panel_settings",
+			"url": "admin/panel_settings/shop__product_thumb/",
+			"order": 80
 		}
 	],
 	"extends": [

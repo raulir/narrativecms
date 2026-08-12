@@ -159,14 +159,31 @@ Enough for a working small shop without a site theme module:
 | Panel | Role |
 |-------|------|
 | `shop/product` | Product page (base; site/connector extend via `//shop_product`) |
-| `shop/productthumb` / `shop/products` | Grid (to be consolidated over time) |
+| `shop/products` | Placeable product grid + filter bar (local catalogue) |
+| `shop/products_menu` | Filter header (category ▾, subcategory pills, collection ▾) — embedded |
+| `shop/products_grid` | Ajax product list — embedded; uses `shop/product_thumb` |
+| `shop/product_thumb` | Basic product card (image, heading, price) — local only |
 | `shop/category` (+ subcategory) | Category landings; site extends with `//shop_category` |
 | `shop/cart` | Cart badge + popup (sites extend design) |
 | `shop/basket`, `shop/basketmini` | Full basket (legacy local) |
 | `shop/checkout` | Local checkout |
 | `shop/productbuy`, `shop/productdimensions` | Add-to-cart / variants (local) |
 
-Timmy storefront PDP is **`//shop_product` extends** of `shop/product` (not a second placeable product panel). Grids may still use `timmy/productthumb` / `timmy/products` until similarly extended.
+### Products grid filters
+
+Place **`shop/products`** on a page. The shell renders `products_menu` + `products_grid`. Filter changes ajax-reload both (menu for pills/collection list; grid for thumbs).
+
+| Control | Behaviour |
+|---------|-----------|
+| Category dropdown | All categories (default) or one category; changing category clears subcategory + collection |
+| Subcategory pills | Only when a category is selected; “All” + each subcategory |
+| Collection dropdown | Only if any collections apply in context; intersects with category/subcategory |
+
+Queries live on **`shop_model`**: `get_products_for_filters`, `get_collections_for_filters`, collection helpers. No Shopify/imagemaker dependency.
+
+Site modules (e.g. dave) can restyle via extends on these panels later.
+
+Timmy storefront PDP remains **`//shop_product` extends** of `shop/product`. Timmy may still use its own `timmy/productthumb` / `timmy/products` until migrated.
 
 ---
 

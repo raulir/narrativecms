@@ -1,0 +1,20 @@
+{
+	"version": "2",
+	"image": "",
+	"label": "Product thumbnail",
+	"description": "Basic product card for shop grids (local catalogue)",
+	"settings": [
+		{
+			"type": "text",
+			"name": "sold_out_label",
+			"label": "Sold out label",
+			"default": "sold out"
+		},
+		{
+			"type": "text",
+			"name": "unavailable_label",
+			"label": "Unavailable label",
+			"default": "unavailable"
+		}
+	]
+}

@@ -31,7 +31,9 @@ Open that file when changing or debugging core loading, request lifecycle, or ro
 
 ## Markup and CSS style (front / panel HTML)
 
-- **Do not use `<button>` elements** — use `div` (or `a` when it is a real navigation link). Style and bind clicks with classes/JS.
+- **Default element is `<div>`** — structure, chrome, click targets, text bits, icons, pills, dropdowns, etc. **Everything that is not functional is a div.**
+- **Functional tags are OK only when their function is used:** `a` (real navigation URL), `input` / `textarea` / `select` / `form`, `label` (associates with a control: click focus + screen readers), `img` / `video` when media is actually shown, etc. If you are not using the browser behaviour the tag provides, use a `div` instead.
+- **Do not use** `span`, `button`, empty `a href="#"` shells, or other “semantic” wrappers for layout or click targets — style and bind with classes/JS on divs. Inline vs block is a **styling** concern, not a template tag choice.
 - **Avoid `display: flex` / flexbox** for new layouts. Prefer **absolute positioning**, block/inline-block, and fixed rem sizes. (Existing productthumb/grid flex is legacy; do not add new flex.)
 - **Why absolute is preferred:** content width is **fixed in rem** — standard **100rem** page content, or a fixed project width such as **120rem** when the design calls for it. With a known fixed band, absolute layout is predictable, easier to manage, and has fewer side effects than flex (wrapping, shrink/grow, nested flex, percentage height quirks).
 - Prefer simple structure: outer full-width container → inner fixed-width content (`100rem` / `120rem` / `max-width: 100%`) → positioned children inside that content box.

@@ -1,0 +1,21 @@
+$mobile_width: 900px;
+
+.products_container {
+	position: relative;
+	z-index: 20;
+	width: 100%;
+	box-sizing: border-box;
+	font-family: sans-serif;
+}
+
+.products_menu_area {
+	position: relative;
+	z-index: 40;
+	width: 100%;
+}
+
+.products_grid_area {
+	position: relative;
+	z-index: 20;
+	width: 100%;
+}

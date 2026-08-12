@@ -1,0 +1,34 @@
+{
+	"version": "2",
+	"image": "",
+	"label": "Products",
+	"description": "Product grid with category / subcategory / collection filters",
+	"item": [],
+	"settings": [
+		{
+			"type": "text",
+			"name": "label_all_categories",
+			"label": "All categories label",
+			"default": "All categories"
+		},
+		{
+			"type": "text",
+			"name": "label_all_in_category",
+			"label": "All in category label",
+			"default": "All",
+			"help": "Pill for whole category when a category is selected"
+		},
+		{
+			"type": "text",
+			"name": "label_all_collections",
+			"label": "All collections label",
+			"default": "All collections"
+		},
+		{
+			"type": "text",
+			"name": "empty_filter_message",
+			"label": "Empty filter message",
+			"default": "No products to show with this filter"
+		}
+	]
+}

@@ -13,4 +13,6 @@ Do not re-implement subscription checkout inside shop cart; keep `shop_checkout`
 ## Shop-local
 
 - [x] **`shop/currency_selector`** — embeddable currency dropdown (`currency_ids` optional → all; `default`; `add_empty`); writes `.currency_selector_container[data-value]` + `#currency_selector_value`
+- [x] **`shop/products` grid** — placeable shell + `products_menu` + ajax `products_grid` + `product_thumb` (local catalogue filters only)
 - [ ] **Dimensions / variants on product** — presentation of options/variants (dimension pickers, default variant, gallery `ids` linking) is still largely in **Timmy** `shop_product`. Move base logic into **shop** and/or **stock** (there is older stock/product-dimension machinery). Shopify should only supply raw options/variants; site modules stay for chrome (e.g. colour swatches).
+- [ ] **Dave / site styling** of `shop/products*` via extends

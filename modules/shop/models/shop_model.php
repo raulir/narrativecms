@@ -991,4 +991,355 @@ class shop_model extends \Model {
 
 	}
 
+	/**
+	 * True unless product is explicitly hidden (show 0 / false / '0').
+	 */
+	function product_is_shown($product){
+
+		if (!is_array($product) || !isset($product['show'])){
+			return true;
+		}
+		$show = $product['show'];
+
+		return !($show === 0 || $show === '0' || $show === false || $show === '');
+
+	}
+
+	/**
+	 * cms_page_panel_ids that list this collection_id under Organisation → collections.
+	 *
+	 * @return int[]
+	 */
+	function get_product_ids_for_collection($collection_id){
+
+		$collection_id = (int)$collection_id;
+		if ($collection_id < 1){
+			return [];
+		}
+
+		$value = (string)$collection_id;
+		$ids = [];
+
+		// Prefer indexed param lookup (works even if JSON cache is stale)
+		$sql = "select distinct cms_page_panel_id from cms_page_panel_param ".
+				"where name like 'collections.%collection_id' and value = ? ";
+		$query = $this->db->query($sql, [$value]);
+		if ($query){
+			foreach ($query->result_array() as $row){
+				$pid = (int)$row['cms_page_panel_id'];
+				if ($pid > 0){
+					$ids[$pid] = true;
+				}
+			}
+		}
+
+		// Also match unpadded / alternate key shapes
+		if (empty($ids)){
+			$sql = "select distinct cms_page_panel_id from cms_page_panel_param ".
+					"where name like 'collections.%' and name like '%collection_id' and value = ? ";
+			$query = $this->db->query($sql, [$value]);
+			if ($query){
+				foreach ($query->result_array() as $row){
+					$pid = (int)$row['cms_page_panel_id'];
+					if ($pid > 0){
+						$ids[$pid] = true;
+					}
+				}
+			}
+		}
+
+		return array_keys($ids);
+
+	}
+
+	/**
+	 * Full product rows for a collection (shown only), keyed by cms_page_panel_id.
+	 *
+	 * @return array<int,array>
+	 */
+	function get_products_for_collection($collection_id){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$products = [];
+		foreach ($this->get_product_ids_for_collection($collection_id) as $pid){
+			$product = $this->cms_page_panel_model->get_cms_page_panel($pid);
+			if (empty($product['cms_page_panel_id'])){
+				continue;
+			}
+			if (!$this->product_is_shown($product)){
+				continue;
+			}
+			$products[$pid] = $product;
+		}
+
+		return $products;
+
+	}
+
+	/**
+	 * Products in a collection that also belong to a category (via subcategory).
+	 * Keyed by cms_page_panel_id.
+	 *
+	 * @return array<int,array>
+	 */
+	function get_products_for_category_and_collection($category_id, $collection_id){
+
+		$category_id = (int)$category_id;
+		$collection_id = (int)$collection_id;
+		if ($category_id < 1 || $collection_id < 1){
+			return [];
+		}
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$subcategories = $this->cms_page_panel_model->get_list('shop/subcategory', [
+				'category_id' => $category_id,
+		]);
+		$sub_ids = [];
+		if (is_array($subcategories)){
+			foreach ($subcategories as $sub){
+				$sid = (int)($sub['cms_page_panel_id'] ?? 0);
+				if ($sid > 0){
+					$sub_ids[$sid] = true;
+				}
+			}
+		}
+		if (empty($sub_ids)){
+			return [];
+		}
+
+		$return = [];
+		foreach ($this->get_products_for_collection($collection_id) as $pid => $product){
+			$sid = (int)($product['subcategory_id'] ?? 0);
+			if (!empty($sub_ids[$sid])){
+				$return[$pid] = $product;
+			}
+		}
+
+		return $return;
+
+	}
+
+	/**
+	 * Keep products that list $collection_id in their collections[] param.
+	 *
+	 * @param array $products
+	 * @param int $collection_id
+	 * @return array
+	 */
+	function filter_products_by_collection($products, $collection_id){
+
+		$collection_id = (int)$collection_id;
+		if ($collection_id < 1 || !is_array($products)){
+			return $products;
+		}
+
+		$return = [];
+		foreach ($products as $key => $product){
+			$ok = false;
+			if (!empty($product['collections']) && is_array($product['collections'])){
+				foreach ($product['collections'] as $row){
+					if ((int)($row['collection_id'] ?? 0) === $collection_id){
+						$ok = true;
+						break;
+					}
+				}
+			}
+			if ($ok){
+				$return[$key] = $product;
+			}
+		}
+
+		return $return;
+
+	}
+
+	/**
+	 * Product list for products grid filters (local catalogue only).
+	 *
+	 * @return array products keyed by cms_page_panel_id or list-shaped array
+	 */
+	function get_products_for_filters($category_id = 0, $subcategory_id = 0, $collection_id = 0){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$category_id = (int)$category_id;
+		$subcategory_id = (int)$subcategory_id;
+		$collection_id = (int)$collection_id;
+
+		$products = [];
+
+		if ($subcategory_id > 0){
+
+			$products = $this->cms_page_panel_model->get_list('shop/product', [
+					'subcategory_id' => $subcategory_id,
+			]);
+			if (!is_array($products)){
+				$products = [];
+			}
+			if ($collection_id > 0){
+				$products = $this->filter_products_by_collection($products, $collection_id);
+			}
+
+		} else if ($collection_id > 0 && $category_id > 0){
+
+			$products = $this->get_products_for_category_and_collection($category_id, $collection_id);
+
+		} else if ($collection_id > 0){
+
+			$products = $this->get_products_for_collection($collection_id);
+
+		} else if ($category_id > 0){
+
+			$subcategories = $this->cms_page_panel_model->get_list('shop/subcategory', [
+					'category_id' => $category_id,
+			]);
+			$sub_ids = [];
+			if (is_array($subcategories)){
+				foreach ($subcategories as $sub){
+					$sid = (int)($sub['cms_page_panel_id'] ?? 0);
+					if ($sid > 0){
+						$sub_ids[] = $sid;
+					}
+				}
+			}
+			if ($sub_ids){
+				$products = $this->cms_page_panel_model->get_list('shop/product', [
+						'subcategory_id' => $sub_ids,
+				]);
+			}
+			if (!is_array($products)){
+				$products = [];
+			}
+
+		} else {
+
+			$products = $this->cms_page_panel_model->get_list('shop/product');
+			if (!is_array($products)){
+				$products = [];
+			}
+
+		}
+
+		// Drop hidden products when list did not already filter show
+		$return = [];
+		foreach ($products as $key => $product){
+			if (!$this->product_is_shown($product)){
+				continue;
+			}
+			$pid = (int)($product['cms_page_panel_id'] ?? 0);
+			if ($pid > 0){
+				$return[$pid] = $product;
+			} else {
+				$return[$key] = $product;
+			}
+		}
+
+		return $return;
+
+	}
+
+	/**
+	 * shop/collection rows for products under $category_id (or all collections with products when 0).
+	 *
+	 * @return array[]
+	 */
+	function get_collections_for_filters($category_id = 0){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$category_id = (int)$category_id;
+		$collection_ids = [];
+
+		if ($category_id > 0){
+
+			$subcategories = $this->cms_page_panel_model->get_list('shop/subcategory', [
+					'category_id' => $category_id,
+			]);
+			if (!is_array($subcategories) || empty($subcategories)){
+				return [];
+			}
+
+			$sub_ids = [];
+			foreach ($subcategories as $sub){
+				$sid = (int)($sub['cms_page_panel_id'] ?? 0);
+				if ($sid > 0){
+					$sub_ids[$sid] = true;
+				}
+			}
+			if (empty($sub_ids)){
+				return [];
+			}
+
+			$products = $this->cms_page_panel_model->get_list('shop/product', [
+					'subcategory_id' => array_keys($sub_ids),
+			]);
+			if (!is_array($products)){
+				return [];
+			}
+
+			foreach ($products as $product){
+				if (!$this->product_is_shown($product)){
+					continue;
+				}
+				if (empty($product['collections']) || !is_array($product['collections'])){
+					continue;
+				}
+				foreach ($product['collections'] as $row){
+					$cid = (int)($row['collection_id'] ?? 0);
+					if ($cid > 0){
+						$collection_ids[$cid] = true;
+					}
+				}
+			}
+
+		} else {
+
+			// All collections referenced by any shown product
+			$products = $this->cms_page_panel_model->get_list('shop/product');
+			if (!is_array($products)){
+				$products = [];
+			}
+			foreach ($products as $product){
+				if (!$this->product_is_shown($product)){
+					continue;
+				}
+				if (empty($product['collections']) || !is_array($product['collections'])){
+					continue;
+				}
+				foreach ($product['collections'] as $row){
+					$cid = (int)($row['collection_id'] ?? 0);
+					if ($cid > 0){
+						$collection_ids[$cid] = true;
+					}
+				}
+			}
+
+		}
+
+		if (empty($collection_ids)){
+			return [];
+		}
+
+		$collections = [];
+		foreach (array_keys($collection_ids) as $cid){
+			$col = $this->cms_page_panel_model->get_cms_page_panel($cid);
+			if (empty($col['cms_page_panel_id'])){
+				continue;
+			}
+			if (isset($col['show']) && ($col['show'] === 0 || $col['show'] === '0' || $col['show'] === false)){
+				continue;
+			}
+			$collections[] = $col;
+		}
+
+		usort($collections, function($a, $b){
+			return strcasecmp((string)($a['heading'] ?? ''), (string)($b['heading'] ?? ''));
+		});
+
+		return $collections;
+
+	}
+
 }

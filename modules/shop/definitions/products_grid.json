@@ -1,0 +1,7 @@
+{
+	"version": "2",
+	"image": "",
+	"label": "Products grid",
+	"description": "Ajax product list (embedded by shop/products)",
+	"settings": []
+}
