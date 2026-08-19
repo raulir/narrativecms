@@ -68,4 +68,19 @@ class shop_product extends \Controller {
 
 	}
 
+	/**
+	 * Admin save: drop productthumb HTML for this product.
+	 */
+	function on_update($params){
+
+		$id = (int)($params['cms_page_panel_id'] ?? 0);
+		if ($id > 0){
+			$this->load->model('shopify/shopify_product_model');
+			$this->shopify_product_model->invalidate_product_display_cache($id);
+		}
+
+		return $params;
+
+	}
+
 }

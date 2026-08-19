@@ -939,4 +939,200 @@ class imagemaker_model extends \Model {
 		return false;
 	}
 
+	/**
+	 * Drop productthumb HTML for every product that resolves to this style
+	 * (product FK → subcategory FK → category FK).
+	 */
+	function invalidate_thumbs_for_style($style_id){
+
+		$style_id = (int)$style_id;
+		if ($style_id <= 0){
+			return;
+		}
+
+		$this->_invalidate_product_thumbs($this->product_ids_resolving_to_style($style_id));
+
+	}
+
+	/**
+	 * Products in this subcategory with no product-level style.
+	 */
+	function invalidate_thumbs_for_subcategory($subcategory_id){
+
+		$subcategory_id = (int)$subcategory_id;
+		if ($subcategory_id <= 0){
+			return;
+		}
+
+		$pids = $this->_ids_for_panel_param('shop/product', 'subcategory_id', $subcategory_id);
+		$this->_invalidate_product_thumbs($this->_products_without_own_style($pids));
+
+	}
+
+	/**
+	 * Products in this category that inherit category style (no product/sub style).
+	 */
+	function invalidate_thumbs_for_category($category_id){
+
+		$category_id = (int)$category_id;
+		if ($category_id <= 0){
+			return;
+		}
+
+		$subs = $this->_ids_for_panel_param('shop/subcategory', 'category_id', $category_id);
+		foreach ($subs as $sid){
+			if ($this->_panel_param_int($sid, 'imagemaker_style_id') > 0){
+				continue;
+			}
+			$this->invalidate_thumbs_for_subcategory($sid);
+		}
+
+	}
+
+	/**
+	 * Product ids whose cascade style is $style_id.
+	 *
+	 * @return int[]
+	 */
+	function product_ids_resolving_to_style($style_id){
+
+		$style_id = (int)$style_id;
+		if ($style_id <= 0){
+			return [];
+		}
+
+		$ids = $this->_ids_for_panel_param('shop/product', 'imagemaker_style_id', $style_id);
+
+		$subs_with_style = $this->_ids_for_panel_param('shop/subcategory', 'imagemaker_style_id', $style_id);
+		$via_sub = [];
+		foreach ($subs_with_style as $sid){
+			foreach ($this->_ids_for_panel_param('shop/product', 'subcategory_id', $sid) as $pid){
+				$via_sub[] = $pid;
+			}
+		}
+		$ids = array_merge($ids, $this->_products_without_own_style($via_sub));
+
+		$cats_with_style = $this->_ids_for_panel_param('shop/category', 'imagemaker_style_id', $style_id);
+		$subs_in_cat = [];
+		foreach ($cats_with_style as $cid){
+			foreach ($this->_ids_for_panel_param('shop/subcategory', 'category_id', $cid) as $sid){
+				if ($this->_panel_param_int($sid, 'imagemaker_style_id') > 0){
+					continue;
+				}
+				$subs_in_cat[] = $sid;
+			}
+		}
+		$via_cat = [];
+		foreach ($subs_in_cat as $sid){
+			foreach ($this->_ids_for_panel_param('shop/product', 'subcategory_id', $sid) as $pid){
+				$via_cat[] = $pid;
+			}
+		}
+		$ids = array_merge($ids, $this->_products_without_own_style($via_cat));
+
+		$ids = array_values(array_unique(array_map('intval', $ids)));
+		return array_values(array_filter($ids, function($id){
+			return $id > 0;
+		}));
+
+	}
+
+	function _invalidate_product_thumbs($product_ids){
+
+		if (!is_array($product_ids) || empty($product_ids)){
+			return;
+		}
+		if (!in_array('shopify', $GLOBALS['config']['modules'] ?? [], true)){
+			return;
+		}
+
+		$this->load->model('shopify/shopify_product_model');
+		foreach ($product_ids as $pid){
+			$pid = (int)$pid;
+			if ($pid > 0){
+				$this->shopify_product_model->invalidate_product_display_cache($pid);
+			}
+		}
+
+	}
+
+	function _ids_for_panel_param($panel_name, $param_name, $value){
+
+		$panel_name = trim((string)$panel_name);
+		$param_name = trim((string)$param_name);
+		if ($panel_name === '' || $param_name === ''){
+			return [];
+		}
+
+		$sql = 'select distinct p.cms_page_panel_id from cms_page_panel p '.
+				'join cms_page_panel_param x on p.cms_page_panel_id = x.cms_page_panel_id '.
+				'where p.panel_name = ? and x.name = ? and x.value = ? ';
+		$query = $this->db->query($sql, [$panel_name, $param_name, (string)$value]);
+		if (!$query || !$query->num_rows()){
+			return [];
+		}
+
+		$ids = [];
+		foreach ($query->result_array() as $row){
+			$id = (int)($row['cms_page_panel_id'] ?? 0);
+			if ($id > 0){
+				$ids[] = $id;
+			}
+		}
+
+		return $ids;
+
+	}
+
+	function _panel_param_int($cms_page_panel_id, $param_name){
+
+		$cms_page_panel_id = (int)$cms_page_panel_id;
+		$param_name = trim((string)$param_name);
+		if ($cms_page_panel_id <= 0 || $param_name === ''){
+			return 0;
+		}
+
+		$sql = 'select value from cms_page_panel_param where cms_page_panel_id = ? and name = ? limit 1 ';
+		$query = $this->db->query($sql, [$cms_page_panel_id, $param_name]);
+		if (!$query || !$query->num_rows()){
+			return 0;
+		}
+
+		return (int)($query->row_array()['value'] ?? 0);
+
+	}
+
+	function _products_without_own_style($product_ids){
+
+		if (!is_array($product_ids) || empty($product_ids)){
+			return [];
+		}
+
+		$ids = [];
+		foreach ($product_ids as $pid){
+			$pid = (int)$pid;
+			if ($pid > 0){
+				$ids[$pid] = true;
+			}
+		}
+		if (empty($ids)){
+			return [];
+		}
+
+		$in = implode(',', array_keys($ids));
+		$sql = 'select cms_page_panel_id, value from cms_page_panel_param '.
+				'where name = ? and cms_page_panel_id in ('.$in.') ';
+		$query = $this->db->query($sql, ['imagemaker_style_id']);
+		if ($query){
+			foreach ($query->result_array() as $row){
+				if ((int)($row['value'] ?? 0) > 0){
+					unset($ids[(int)$row['cms_page_panel_id']]);
+				}
+			}
+		}
+
+		return array_keys($ids);
+
+	}
+
 }

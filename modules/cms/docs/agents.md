@@ -13,6 +13,26 @@ Related docs: [`system.md`](system.md) (bootstrap, Loader, Controller), [`cms_pa
 - Staging (`git add`, `git rm --cached`) is OK when implementing an explicit request (e.g. untrack cache); **the human commits**, or the agent commits only when told to.
 - Do not force-add ignored paths (`cache/*`, secrets, generated assets) unless the user asks.
 
+### `cache/` vs `grok/` — no executables in cache (architecture)
+
+**Hard rule (not AI-only):** **`cache/` must never hold executable or potentially executable code.**
+
+| Banned under `cache/` | Allowed under `cache/` |
+|----------------------|-------------------------|
+| `.php`, `.phtml`, `.phar`, `.cgi`, `.sh`, `.bat`, `.ps1`, `.exe`, … | Data/logs/assets: `.json`, `.txt`, `.log`, `.css`/packed js **output**, zip dumps, locks |
+| Agent smoke tests, `run_*`, `_audit_*`, one-off tools | Panel HTML cache (`_*.txt`), provider raw caches, `apis.log`, `garage.log` |
+| Anything a web server or `php` might run if requested | `cache/db/`, `cache/backup/` dumps |
+
+**Why:** `cache/` is writable, often web-adjacent, and cleared casually. Putting runnable scripts there is a security and ops footgun (accidental execution, deploy wipe, “where is that tool?”).
+
+| Need | Put it here |
+|------|-------------|
+| Agent / dev helpers (CLI, smoke, garage ESP tools) | Project **`grok/`** (and subfolders) |
+| App-generated non-code artefacts | **`cache/`** as today |
+| Real product code | `modules/`, `system/` |
+
+Document non-obvious `grok/` tools in `grok/README.md`. **Do not “just drop a .php in cache”** — not for AI, not for humans, not “temporary”.
+
 ---
 
 ## Context
@@ -166,7 +186,8 @@ If the only need is CSS/JS, prefer definition `"js"` / panel SCSS (or `add_*` fr
 Config access – use `$GLOBALS['config']`:
 
 - `$GLOBALS['config']['base_path']` — CMS installation absolute root (filesystem)
-- Cache: `$GLOBALS['config']['base_path'].'cache/'`
+- Cache: `$GLOBALS['config']['base_path'].'cache/'` — **runtime data only; no executables** (see **`cache/` vs `grok/`** above)
+- Dev/agent scripts: `$GLOBALS['config']['base_path'].'grok/'`
 - Images/files: `$GLOBALS['config']['base_path'].'img/'` (also `upload_path`)
 
 ### Database backups (no `*_bu` tables)

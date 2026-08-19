@@ -7,8 +7,7 @@
 			<input class="search_input" type="text"
 					placeholder="<?= $search_placeholder ?>"
 					value=""
-					autocomplete="off"
-					aria-label="<?= $search ?>" />
+					autocomplete="off" />
 		</div>
 	</div>
 

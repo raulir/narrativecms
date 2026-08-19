@@ -305,9 +305,14 @@ class octopusenergy_model extends \Model {
 			if (isset($row['kw']) && $row['kw'] !== null){
 				$kw = (float)$row['kw'];
 			}
+			$kw_mean = $kw;
+			if (isset($row['kw_mean']) && $row['kw_mean'] !== null){
+				$kw_mean = (float)$row['kw_mean'];
+			}
 			$slots[] = [
 				'slot_start' => $ts,
 				'usage_kw' => $kw,
+				'usage_kw_mean' => $kw_mean,
 				'usage_source' => $src,
 				'is_open' => (!empty($row['partial']) || $ts === $now_slot) ? 1 : 0,
 			];
@@ -1318,9 +1323,10 @@ class octopusenergy_model extends \Model {
 	/**
 	 * Half-hour series for the graph.
 	 * Complete slots: average kW (Mini mean demand, or REST kWh×2).
-	 * Open Mini slot (prediction fill): full 30 min width —
-	 *   display = curr×(elapsed/1800) + prev×(remaining/1800)
-	 * so the new half-hour starts near the previous level and slides toward truth.
+	 * Open Mini slot (Energy kW fill): full 30 min width —
+	 *   kw = curr×(elapsed/1800) + prev×(remaining/1800)
+	 * so a first-minute load (kettle) does not jump the kW step.
+	 * kw_mean is always the unblended Mini/REST mean (Cost uses this).
 	 */
 	function _usage_series_from_cache_half_hours($cache, $win_start, $win_end){
 
@@ -1386,6 +1392,7 @@ class octopusenergy_model extends \Model {
 				'ts_from' => $ts,
 				'ts_to' => $ts_to,
 				'kw' => $kw,
+				'kw_mean' => $mean_kw,
 				'source' => $source,
 				'partial' => $partial,
 			];
@@ -1404,10 +1411,12 @@ class octopusenergy_model extends \Model {
 			if (!isset($map[$ts])){
 				continue;
 			}
+			$kw = (float)$map[$ts];
 			$series[] = [
 				'ts_from' => $ts,
 				'ts_to' => $ts + 1800,
-				'kw' => (float)$map[$ts],
+				'kw' => $kw,
+				'kw_mean' => $kw,
 				'source' => 'rest',
 			];
 		}

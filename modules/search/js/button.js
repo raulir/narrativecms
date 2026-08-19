@@ -107,7 +107,6 @@ function search_button_open(){
 
 	search_button_position_modal()
 	$('.button_container').addClass('button_open')
-	$('.button_modal').attr('aria-hidden', 'false')
 	$('.menu_search').addClass('menu_search_open')
 
 	search_button_load_search(function(){
@@ -119,7 +118,6 @@ function search_button_open(){
 function search_button_close(){
 
 	$('.button_container').removeClass('button_open')
-	$('.button_modal').attr('aria-hidden', 'true')
 	$('.menu_search').removeClass('menu_search_open')
 
 }

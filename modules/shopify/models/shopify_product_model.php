@@ -689,16 +689,10 @@ GQL;
 
 	/**
 	 * @param int $cms_page_panel_id
-	 * @param string $hash_suffix optional 8-char imagemaker composite hash (productthumb_{id}_{hash}.html)
 	 */
-	function _productthumb_cache_path($cms_page_panel_id, $hash_suffix = ''){
+	function _productthumb_cache_path($cms_page_panel_id){
 
-		$base = $this->_productthumb_cache_dir().'productthumb_'.(int)$cms_page_panel_id;
-		$hash_suffix = preg_replace('/[^a-f0-9]/i', '', (string)$hash_suffix);
-		if ($hash_suffix !== ''){
-			return $base.'_'.strtolower($hash_suffix).'.html';
-		}
-		return $base.'.html';
+		return $this->_productthumb_cache_dir().'productthumb_'.(int)$cms_page_panel_id.'.html';
 
 	}
 
@@ -727,10 +721,8 @@ GQL;
 	/**
 	 * Read cached productthumb HTML if within thumb_html_ttl and not older than product update_time.
 	 * Returns HTML string or null.
-	 *
-	 * @param string $hash_suffix optional imagemaker composite hash for cache key
 	 */
-	function get_productthumb_html_cache($cms_page_panel_id, $update_time = 0, $hash_suffix = ''){
+	function get_productthumb_html_cache($cms_page_panel_id, $update_time = 0){
 
 		$cms_page_panel_id = (int)$cms_page_panel_id;
 		if ($cms_page_panel_id <= 0){
@@ -740,7 +732,7 @@ GQL;
 		$settings = $this->get_shopify_settings();
 		$thumb_ttl = max(1, (int)($settings['thumb_html_ttl'] ?? 900));
 
-		$filename = $this->_productthumb_cache_path($cms_page_panel_id, $hash_suffix);
+		$filename = $this->_productthumb_cache_path($cms_page_panel_id);
 		clearstatcache(true, $filename);
 		if (!file_exists($filename)){
 			return null;
@@ -765,11 +757,9 @@ GQL;
 	}
 
 	/**
-	 * Write rendered productthumb HTML.
-	 *
-	 * @param string $hash_suffix optional imagemaker composite hash for cache key
+	 * Write rendered productthumb HTML (`productthumb_{id}.html`).
 	 */
-	function set_productthumb_html_cache($cms_page_panel_id, $html, $hash_suffix = ''){
+	function set_productthumb_html_cache($cms_page_panel_id, $html){
 
 		$cms_page_panel_id = (int)$cms_page_panel_id;
 		if ($cms_page_panel_id <= 0 || !is_string($html) || $html === ''){
@@ -781,7 +771,7 @@ GQL;
 			@mkdir($dir, 0755, true);
 		}
 
-		file_put_contents($this->_productthumb_cache_path($cms_page_panel_id, $hash_suffix), $html);
+		file_put_contents($this->_productthumb_cache_path($cms_page_panel_id), $html);
 
 	}
 
@@ -806,8 +796,8 @@ GQL;
 	 * Full productthumb panel_params: HTML cache → rebuild product → render + store HTML.
 	 * Parents only pass cms_page_panel_id (+ productthumb settings labels merged by CMS).
 	 * Template echoes $productthumb_html when set.
-	 * When imagemaker is installed: optional product composite (style cascade) before thumb image;
-	 * HTML cache key includes composite hash so style/artwork changes bust cache.
+	 * File is always productthumb_{id}.html. Bust via invalidate_product_display_cache
+	 * (product/style/cat/sub on_update, Shopify sync).
 	 */
 	function get_productthumb_params($params){
 
@@ -823,16 +813,11 @@ GQL;
 			return $params;
 		}
 
-		$imagemaker_on = in_array('imagemaker', $GLOBALS['config']['modules'] ?? [], true);
 		$update_time = (int)($params['update_time'] ?? 0);
-
-		// Without imagemaker: fast path — HTML cache before product load
-		if (!$imagemaker_on){
-			$cached_html = $this->get_productthumb_html_cache($cms_page_panel_id, $update_time);
-			if ($cached_html !== null){
-				$params['productthumb_html'] = $cached_html;
-				return $params;
-			}
+		$cached_html = $this->get_productthumb_html_cache($cms_page_panel_id, $update_time);
+		if ($cached_html !== null){
+			$params['productthumb_html'] = $cached_html;
+			return $params;
 		}
 
 		// Rebuild: CMS-first, Shopify recheck only when data TTL expired + budget
@@ -847,43 +832,13 @@ GQL;
 			return $params;
 		}
 
-		// Imagemaker: composite via shared resolve_product_composite; HTML cache uses hash when used
-		$thumb_hash = '';
+		$imagemaker_on = in_array('imagemaker', $GLOBALS['config']['modules'] ?? [], true);
 		if ($imagemaker_on){
 			$this->load->model('imagemaker/imagemaker_model');
 			if ($this->imagemaker_model->is_available()){
-				$artwork = trim((string)($product['original_artwork'] ?? ''));
-				$product_ut = (int)($product['update_time'] ?? $update_time);
-				$style_id = $this->imagemaker_model->resolve_style_id($product);
-
-				if ($style_id > 0 && $artwork !== ''){
-					$style = $this->cms_page_panel_model->get_cms_page_panel($style_id);
-					$style_ut = (int)($style['update_time'] ?? 0);
-					if ($style_ut <= 0){
-						$style_ut = (int)($style['create_time'] ?? 0);
-					}
-					$ck = $this->imagemaker_model->product_composite_cache_key(
-							$cms_page_panel_id, $artwork, $style_ut);
-					$expected_hash = $ck['hash8'];
-
-					$cached_html = $this->get_productthumb_html_cache(
-							$cms_page_panel_id, $product_ut, $expected_hash);
-					if ($cached_html !== null){
-						$params['productthumb_html'] = $cached_html;
-						return $params;
-					}
-
-					$im_path = $this->imagemaker_model->resolve_product_composite($product);
-					if ($im_path !== ''){
-						$product['thumbnail_image'] = $im_path;
-						$thumb_hash = $expected_hash;
-					}
-				} else {
-					$cached_html = $this->get_productthumb_html_cache($cms_page_panel_id, $product_ut);
-					if ($cached_html !== null){
-						$params['productthumb_html'] = $cached_html;
-						return $params;
-					}
+				$im_path = $this->imagemaker_model->resolve_product_composite($product);
+				if ($im_path !== ''){
+					$product['thumbnail_image'] = $im_path;
 				}
 			}
 		}
@@ -944,7 +899,7 @@ GQL;
 		$params['product'] = $product;
 
 		$html = $this->_render_productthumb_html($params);
-		$this->set_productthumb_html_cache($cms_page_panel_id, $html, $thumb_hash);
+		$this->set_productthumb_html_cache($cms_page_panel_id, $html);
 		$params['productthumb_html'] = $html;
 
 		return $params;

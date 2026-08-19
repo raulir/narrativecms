@@ -142,7 +142,7 @@ style_id = product.imagemaker_style_id
    - Hit only when **both** file and DB row exist; if only one is present, purge both sides and rebuild  
 5. If cache complete → use as `thumbnail_image` / gallery  
 6. If missing and **script elapsed** (`$GLOBALS['timer']['start']`, ms) **≥ 15000** → skip generation, keep Shopify/CMS thumb  
-7. Productthumb HTML cache uses `productthumb_{id}_{hash8}.html` when a composite is used (style/artwork change busts cache)
+7. Productthumb HTML cache is `productthumb_{id}.html` (TTL + `invalidate_product_display_cache` on product/style/cat/sub save)
 
 API:
 
@@ -152,6 +152,8 @@ API:
 | `resolve_product_composite($product)` | Composite path or `''` (style + artwork + cache/timer) — use from productthumb, mega menu preview, etc. |
 | `product_composite_cache_key($product_id, $original, $style_update_time)` | `hash8` + relative path |
 | `get_product_composite_image($product_id, $original, $style_id)` | Cache hit / generate / timer skip |
+| `invalidate_thumbs_for_style($style_id)` | Drop productthumb HTML for products that resolve to this style |
+| `invalidate_thumbs_for_subcategory($id)` / `invalidate_thumbs_for_category($id)` | Same for inheriting products (no own style) |
 | `script_elapsed_ms()` | Uses existing `$GLOBALS['timer']['start']` |
 
 Colour masks / `add_colour` on thumbs are **not** wired yet (see todo).

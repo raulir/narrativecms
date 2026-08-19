@@ -48,6 +48,12 @@ $mobile_width: 900px;
 	background-repeat: no-repeat;
 }
 
+.button_no_label .button_icon {
+	flex-basis: 2.62rem;
+	width: 2.62rem;
+	height: 2.62rem;
+}
+
 // Full page-width modal under main menu / category filter bar
 // Nudge 0.01rem up to close subpixel gap under sticky stack
 .button_modal {
