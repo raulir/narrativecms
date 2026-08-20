@@ -330,23 +330,11 @@ class cms_page_model extends \Model {
 		}
 
 		$this->load->model('cms/cms_page_panel_model');
-		// Prefer list-model count when available (filters sort! 0)
-		$this->load->model('cms/cms_page_panel_list_model');
-		if (!empty($this->cms_page_panel_list_model)
-				&& method_exists($this->cms_page_panel_list_model, 'count_cms_page_panels_list_by')){
-			return (int)$this->cms_page_panel_list_model->count_cms_page_panels_list_by([
-					'panel_name' => $panel_name,
-					'cms_page_id' => 0,
-					'sort!' => '0',
-			]);
-		}
-
-		$items = $this->cms_page_panel_model->get_cms_page_panels_by([
+		return (int)$this->cms_page_panel_model->count_cms_page_panels_by([
 				'panel_name' => $panel_name,
 				'cms_page_id' => 0,
-				'_fields' => ['cms_page_panel_id'],
+				'sort!' => '0',
 		]);
-		return is_array($items) ? count($items) : 0;
 
 	}
 

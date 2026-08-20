@@ -1452,29 +1452,175 @@ class cms_page_panel_model extends \Model {
 	    	
 	}
 	
-	function count_cms_page_panels_by($filter){
-		
-		$fields = array_keys($filter);
-		
-		foreach($fields as $key => $field){
-			if (in_array($field, array('block_id', 'page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title', ))) {
-				unset($fields[$key]);
+	/**
+	 * Split a get/count filter into SQL WHERE + optional panel-table JOIN (LEFT).
+	 * Shared by get_cms_page_panels_by and count_cms_page_panels_by.
+	 *
+	 * Meta keys (_limit, _start, _order, _fields, _default_language) are consumed here.
+	 */
+	function _cms_page_panels_query_context($filter){
+
+		$context = [
+				'limit' => null,
+				'offset' => null,
+				'order' => 'asc',
+				'list_language' => false,
+				'fields_only' => false,
+				'select_fields' => [],
+				'params_filter' => [],
+				'where_str' => '',
+				'bind' => [],
+				'table_join' => '',
+		];
+
+		if (!is_array($filter)){
+			error_log('Bad filter in cms_page_panel_model!');
+			$filter = [];
+		}
+
+		if (isset($filter['_limit'])){
+			$context['limit'] = (int)$filter['_limit'];
+			unset($filter['_limit']);
+		}
+
+		if (isset($filter['_start'])){
+			$context['offset'] = (int)$filter['_start'];
+			unset($filter['_start']);
+		}
+
+		if (isset($filter['_order'])){
+			$context['order'] = $filter['_order'];
+			unset($filter['_order']);
+		}
+
+		if (!empty($filter['_default_language'])){
+			$context['list_language'] = '';
+			unset($filter['_default_language']);
+		}
+
+		if (isset($filter['_fields'])){
+			$context['select_fields'] = $filter['_fields'];
+			unset($filter['_fields']);
+			$base_table_fields = ['cms_page_panel_id', 'cms_page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title'];
+			$context['fields_only'] = !array_diff($context['select_fields'], $base_table_fields);
+		}
+
+		$sql_filter = [];
+		$table_filter = [];
+		$params_filter = [];
+		$sql_arrays = [];
+		$table_arrays = [];
+
+		$panel_name = $filter['panel_name'] ?? '';
+		if (is_array($panel_name)){
+			$panel_name = $panel_name[0] ?? '';
+		}
+
+		$table_fields = [];
+		$use_panel_table = false;
+		$panel_table = '';
+
+		if ($panel_name){
+			$table_fields = $this->get_panel_table_fields($panel_name);
+			if (!empty($table_fields) && $this->panel_table_exists($panel_name)){
+				$use_panel_table = true;
+				$panel_table = $this->get_panel_table_name($panel_name);
 			}
 		}
 
-		if (count($fields) == 0){
-			$fields = array_keys($filter);
-			$sql = "select count(*) as total from `cms_page_panel` where `" . preg_replace("/[^A-Za-z0-9_=?` ]/", '', implode('` = ? and `', $fields)) . "` = ? ";
-			
-	    	$query = $this->db->query($sql, $filter);
-		    $return = $query->row_array();
-	
-	    	return $return['total'];
-		} else {
-			$return = $this->get_cms_page_panels_by($filter);
-			return count($return);
+		foreach ($filter as $key => $value){
+			$tkey = str_replace('!', '', $key);
+			if (in_array($tkey, ['cms_page_panel', 'cms_page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title', ])){
+
+				if (!is_array($value)){
+					$sql_filter[$key] = $value;
+				} else if (!empty($value) && is_array($value)){
+					$new_array = [];
+					foreach ($value as $el){
+						$new_array[] = str_replace(["'", '"'], ["\\\'", '\\\"'], $el);
+					}
+					$sql_arrays[] = ' a.`'.$tkey.'` '.($tkey != $key ? ' not ' : '')." in ('".implode("','", $new_array)."') ";
+				}
+
+			} else if ($use_panel_table && isset($table_fields[$tkey])){
+				if (!is_array($value)){
+					$table_filter[$key] = $value;
+				} else if (!empty($value) && is_array($value)){
+					$new_array = [];
+					foreach ($value as $el){
+						$new_array[] = str_replace(["'", '"'], ["\\\'", '\\\"'], $el);
+					}
+					$table_arrays[] = ' t.`'.$tkey.'` '.($tkey != $key ? ' not ' : '')." in ('".implode("','", $new_array)."') ";
+				}
+			} else {
+				$params_filter[$key] = $value;
+			}
 		}
-    	
+
+		$sql_filter_parts = [];
+		foreach ($sql_filter as $key => $value){
+			$tkey = str_replace('!', '', $key);
+			$sql_filter_parts[] = 'a.`'.$tkey.'` '.($tkey != $key ? '!=' : '=').' ?';
+		}
+		$sql_filter_str = !empty($sql_filter_parts) ? implode(' and ', $sql_filter_parts) : '';
+
+		$table_filter_parts = [];
+		foreach ($table_filter as $key => $value){
+			$tkey = str_replace('!', '', $key);
+			$table_filter_parts[] = 't.`'.$tkey.'` '.($tkey != $key ? '!=' : '=').' ?';
+		}
+		$table_filter_str = !empty($table_filter_parts) ? implode(' and ', $table_filter_parts) : '';
+
+		$sql_arrays_str = !empty($sql_arrays) ? implode(' and ', $sql_arrays) : '';
+		$table_arrays_str = !empty($table_arrays) ? implode(' and ', $table_arrays) : '';
+
+		$where_parts = array_filter([$sql_filter_str, $sql_arrays_str, $table_filter_str, $table_arrays_str]);
+		$context['where_str'] = implode(' and ', $where_parts);
+		$context['bind'] = array_merge(array_values($sql_filter), array_values($table_filter));
+		$context['params_filter'] = $params_filter;
+
+		// LEFT JOIN: panel table rows optional until a table field is first saved
+		if ($use_panel_table){
+			$context['table_join'] = ' left join `'.$panel_table.'` t on t.cms_page_panel_id = a.cms_page_panel_id ';
+		}
+
+		return $context;
+
+	}
+
+	/**
+	 * Count panels matching filter (same WHERE as get_cms_page_panels_by, no hydrate).
+	 * SQL COUNT when filters are base/table columns; PHP count of get() when JSON/param filters remain.
+	 * _limit / _start do not apply (total matching).
+	 */
+	function count_cms_page_panels_by($filter){
+
+		if (!is_array($filter)){
+			$filter = [];
+		}
+
+		$count_filter = $filter;
+		unset($count_filter['_limit'], $count_filter['_start'], $count_filter['_order'], $count_filter['_fields'], $count_filter['_default_language']);
+
+		$ctx = $this->_cms_page_panels_query_context($count_filter);
+
+		if (!empty($ctx['params_filter'])){
+			$fallback = $filter;
+			unset($fallback['_limit'], $fallback['_start']);
+			return count($this->get_cms_page_panels_by($fallback));
+		}
+
+		$sql = 'select count(*) as total from `cms_page_panel` a '.$ctx['table_join'].
+				($ctx['where_str'] ? ' where '.$ctx['where_str'].' ' : ' ');
+
+		$query = $this->db->query($sql, $ctx['bind']);
+		if (!$query){
+			return 0;
+		}
+
+		$row = $query->row_array();
+		return (int)($row['total'] ?? 0);
+
 	}
 	
 	/*
@@ -1487,137 +1633,18 @@ class cms_page_panel_model extends \Model {
 	 * 
 	 */
 	function get_cms_page_panels_by($filter){
-		
-		if (isset($filter['_limit'])){
-			$limit = (int)$filter['_limit'];
-			unset($filter['_limit']);
-		}
 
-		if (isset($filter['_start'])){
-			$offset = (int)$filter['_start'];
-			unset($filter['_start']);
-		}
-		
-		if (isset($filter['_order'])){
-			$order = $filter['_order'];
-			unset($filter['_order']);
-		} else {
-			$order = 'asc';
-		}
+		$ctx = $this->_cms_page_panels_query_context($filter);
 
-		$list_language = false;
-		if (!empty($filter['_default_language'])){
-			$list_language = '';
-			unset($filter['_default_language']);
-		}
-
-		$fields_only = false;
-		$select_fields = [];
-
-		if (isset($filter['_fields'])){
-			$select_fields = $filter['_fields'];
-			unset($filter['_fields']);
-			$base_table_fields = ['cms_page_panel_id', 'cms_page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title'];
-			$fields_only = !array_diff($select_fields, $base_table_fields);
-		}
-				
-		// separate filters
-		$sql_filter = array();
-		$table_filter = array();
-		$params_filter = array();
-		$sql_arrays = array();
-		$table_arrays = array();
-		$sql_filter_str = '';
-		$table_filter_str = '';
-		
-		if (!is_array($filter)){
-			error_log('Bad filter in cms_page_panel_model!');
-			$filter = [];
-		}
-
-		$panel_name = $filter['panel_name'] ?? '';
-		$table_fields = [];
-		$use_panel_table = false;
-		$panel_table = '';
-
-		if ($panel_name) {
-			$table_fields = $this->get_panel_table_fields($panel_name);
-			if (!empty($table_fields) && $this->panel_table_exists($panel_name)) {
-				$use_panel_table = true;
-				$panel_table = $this->get_panel_table_name($panel_name);
-			}
-		}
-
-		foreach($filter as $key => $value){
-			$tkey = str_replace('!', '', $key);
-			if (in_array($tkey, array('cms_page_panel', 'cms_page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title', ))){
-				
-				// check for arrays in sql filter
-				if (!is_array($value)){
-					$sql_filter[$key] = $value;
-				} else if (!empty($value) && is_array($value)){
-					
-					// sanitise the array
-					$new_array = array();
-					foreach($value as $el){
-						$new_array[] = str_replace(array("'", '"'), array("\\\'", '\\\"'), $el);
-					}
-					
-					$sql_arrays[] = " a.`".$tkey."` ".($tkey != $key ? ' not ' : '')." in ('".implode("','", $new_array)."') ";
-				}
-			
-			} else if ($use_panel_table && isset($table_fields[$tkey])) {
-				if (!is_array($value)){
-					$table_filter[$key] = $value;
-				} else if (!empty($value) && is_array($value)){
-					$new_array = array();
-					foreach($value as $el){
-						$new_array[] = str_replace(array("'", '"'), array("\\\'", '\\\"'), $el);
-					}
-					$table_arrays[] = " t.`".$tkey."` ".($tkey != $key ? ' not ' : '')." in ('".implode("','", $new_array)."') ";
-				}
-			} else {
-				$params_filter[$key] = $value;
-			}
-		}
-
-		$sql_filter_parts = [];
-		foreach ($sql_filter as $key => $value) {
-			$tkey = str_replace('!', '', $key);
-			$sql_filter_parts[] = 'a.`'.$tkey.'` '.($tkey != $key ? '!=' : '=').' ?';
-		}
-		if (!empty($sql_filter_parts)) {
-			$sql_filter_str = implode(' and ', $sql_filter_parts);
-		}
-
-		$table_filter_parts = [];
-		foreach ($table_filter as $key => $value) {
-			$tkey = str_replace('!', '', $key);
-			$table_filter_parts[] = 't.`'.$tkey.'` '.($tkey != $key ? '!=' : '=').' ?';
-		}
-		if (!empty($table_filter_parts)) {
-			$table_filter_str = implode(' and ', $table_filter_parts);
-		}
-		
-		if(!empty($sql_arrays)){
-			$sql_arrays_str = implode(' and ', $sql_arrays);
-		} else {
-			$sql_arrays_str = '';
-		}
-
-		if(!empty($table_arrays)){
-			$table_arrays_str = implode(' and ', $table_arrays);
-		} else {
-			$table_arrays_str = '';
-		}
-
-		$where_parts = array_filter([$sql_filter_str, $sql_arrays_str, $table_filter_str, $table_arrays_str]);
-		$where_str = implode(' and ', $where_parts);
-
-		// LEFT JOIN: panel table rows are optional until a table field is first saved.
-		// INNER JOIN hid panels with no table row (e.g. shop/product without subcategory_id)
-		// so Shopify sync kept treating them as "new" and recreating duplicates.
-		$table_join = $use_panel_table ? " left join `{$panel_table}` t on t.cms_page_panel_id = a.cms_page_panel_id " : '';
+		$limit = $ctx['limit'];
+		$offset = $ctx['offset'];
+		$order = $ctx['order'];
+		$list_language = $ctx['list_language'];
+		$fields_only = $ctx['fields_only'];
+		$select_fields = $ctx['select_fields'];
+		$params_filter = $ctx['params_filter'];
+		$where_str = $ctx['where_str'];
+		$table_join = $ctx['table_join'];
 
 		if ($fields_only){
 
@@ -1642,7 +1669,7 @@ class cms_page_panel_model extends \Model {
 
 		}
 
-		$bind = array_merge(array_values($sql_filter), array_values($table_filter));
+		$bind = $ctx['bind'];
 		$query = $this->db->query($sql, $bind);
 		
 		if (!$query){
@@ -1712,7 +1739,7 @@ class cms_page_panel_model extends \Model {
     		}
     	}
     	
-    	if (isset($limit) || isset($offset)){
+    	if ($limit !== null || $offset !== null){
 	    	// return first limit rows
 			$return = array_slice($return, (empty($offset) ? 0 : $offset), (empty($limit) ? 1 : $limit));
     	} else {

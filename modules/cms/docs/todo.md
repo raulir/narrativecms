@@ -42,6 +42,7 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 - [x] **Orphaned panel data purge** — gear menu **Data purge** (before Translation); popup scans instance + settings for keys not in definition and translation languages not in CMS; purge selected. Logic on panel `cms_page_panel_data_purge` (scan/purge methods).
 - [x] **Orphan scan includes ghost translation fields** — `_translations.{lang}.*` keys not in item/settings definition (e.g. `yearly_badge` stuck on pricing instance). Panel still wins over settings on clash; clean via Data purge only.
 - [x] **#763 split cms_page_panel_model** — runtime core stays on `cms_page_panel_model`; CMS admin APIs on `cms_page_panel_cms_model`; admin list UI on `cms_page_panel_list_model`. See [`agents.md`](agents.md) § Page panel models.
+- [x] **#181 `count_cms_page_panels_by`** — shared `_cms_page_panels_query_context()` with `get_cms_page_panels_by` (LEFT JOIN); SQL `COUNT(*)` unless JSON/param filters; used by list-item delete counts + `get_list_stats`.
 
 ---
 

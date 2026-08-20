@@ -149,7 +149,7 @@ class cms_page_panel_list_model extends \Model {
 		$ctx = $this->_cms_page_panels_list_query_context($count_filter);
 
 		if (!empty($ctx['params_filter'])){
-			return count($this->cms_page_panel_model->get_cms_page_panels_by($filter));
+			return $this->cms_page_panel_model->count_cms_page_panels_by($filter);
 		}
 
 		$sql = 'select count(*) as total from `cms_page_panel` a '.$ctx['table_join'].
@@ -217,9 +217,15 @@ class cms_page_panel_list_model extends \Model {
 
 
 	function get_list_stats($panel_name){
-		$sql = "select count(*) as count from `cms_page_panel` where panel_name = ? and (cms_page_id = ? or cms_page_id = ?) and `show` = 1 group by panel_name ";
-		$query = $this->db->query($sql, array($panel_name, 999999, 0, ));
-		return $query->row_array();
+
+		$count = $this->cms_page_panel_model->count_cms_page_panels_by([
+				'panel_name' => $panel_name,
+				'cms_page_id' => [0, 999999],
+				'show' => 1,
+		]);
+
+		return ['count' => $count];
+
 	}
 
 	function get_list_neighbours($panel_name, $cms_page_panel_id, $circular = true){
