@@ -20,6 +20,11 @@ function cms_page_panel_save_submit(params){
 		
 		$.extend(data_to_submit, {
 			'success': function(data){
+				var result = (data && data.result) ? data.result : {}
+				if (result.ok === 0){
+					cms_notification(result.error || 'Cannot save panel', 3, 'error')
+					return
+				}
 				cms_page_panel_title_preview_on_save(data)
 				params.success(data);
 			}
@@ -29,6 +34,12 @@ function cms_page_panel_save_submit(params){
 		
 		$.extend(data_to_submit, {
 			'success': function(data){
+
+				var result = (data && data.result) ? data.result : {}
+				if (result.ok === 0){
+					cms_notification(result.error || 'Cannot save panel', 3, 'error')
+					return
+				}
 
 				cms_page_panel_title_preview_on_save(data)
 

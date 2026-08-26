@@ -37,9 +37,24 @@ class octopusenergy_model extends \Model {
 	 */
 	function get_current_demand_display(){
 
+		$w = $this->get_current_demand_w();
+		if ($w === null){
+			return '';
+		}
+		return $this->_format_demand_3sf($w);
+
+	}
+
+	/**
+	 * Mean Mini demand watts (same window as the chip). Null if no cache.
+	 *
+	 * @return float|null
+	 */
+	function get_current_demand_w(){
+
 		$samples = $this->_load_any_mini_samples();
 		if (empty($samples)){
-			return '';
+			return null;
 		}
 
 		$ts_list = array_map('intval', array_keys($samples));
@@ -48,7 +63,7 @@ class octopusenergy_model extends \Model {
 		// Drop newest (possibly incomplete 10s window)
 		array_shift($ts_list);
 		if (empty($ts_list)){
-			return '';
+			return null;
 		}
 
 		$take = array_slice($ts_list, 0, self::CURRENT_DEMAND_SAMPLES);
@@ -67,11 +82,9 @@ class octopusenergy_model extends \Model {
 			$n++;
 		}
 		if ($n < 1){
-			return '';
+			return null;
 		}
-
-		$mean_w = $sum / $n;
-		return $this->_format_demand_3sf($mean_w);
+		return $sum / $n;
 
 	}
 

@@ -27,7 +27,7 @@ if ( !function_exists('cms_cookie_create')) {
 					
 		}	
 		
-		header('Set-Cookie: '.urlencode($name).'='.urlencode($value).'; expires='.$expires.'; path='.urlencode($GLOBALS['config']['base_url']).''.$secure);
+		header('Set-Cookie: '.urlencode($name).'='.urlencode($value).'; expires='.$expires.'; path='.urlencode($GLOBALS['config']['base_url']).''.$secure, false);
 
 	}
 

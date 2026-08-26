@@ -89,3 +89,17 @@
 .cms_pages_section {
 	margin-bottom: 1.0rem;
 }
+
+.cms_pages_page_reserved {
+	background-color: #f4f4f4;
+	color: #808080;
+	border-color: #d0d0d0;
+
+	&:hover {
+		background-color: #ececec;
+	}
+
+	.cms_pages_label {
+		color: #808080;
+	}
+}

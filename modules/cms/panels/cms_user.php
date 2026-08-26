@@ -11,13 +11,13 @@ class cms_user extends \Controller {
 		$do = $this->input->post('do');
 
 		if ($do == 'admin_logout'){
-			unset($_SESSION['cms_user']);
+			cms_session_clear_cms_admin();
 			header('Location: '.$GLOBALS['config']['base_url'].'cms_login/', true, 302);
 			exit();
 		}
 
 		if ($do == 'admin_logout_soft'){
-			unset($_SESSION['cms_user']);
+			cms_session_clear_cms_admin();
 		}
 
 		return $params;

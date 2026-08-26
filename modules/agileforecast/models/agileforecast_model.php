@@ -51,19 +51,26 @@ class agileforecast_model extends \Model {
 			}
 		}
 
+		$old_by_ts = [];
+		$old_fetched_at = 0;
+		if (is_file($path)){
+			$raw_old = @file_get_contents($path);
+			$old = ($raw_old !== false && $raw_old !== '') ? json_decode($raw_old, true) : null;
+			if (is_array($old) && !empty($old['by_ts']) && is_array($old['by_ts'])){
+				$old_by_ts = $old['by_ts'];
+				$old_fetched_at = !empty($old['fetched_at']) ? (int)$old['fetched_at'] : 0;
+			}
+		}
+
 		$fetched = $this->_fetch_agile_forecast($region);
 		if (empty($fetched['ok']) || empty($fetched['by_ts'])){
-			// stale cache fallback
-			if (is_file($path)){
-				$raw = @file_get_contents($path);
-				$data = ($raw !== false && $raw !== '') ? json_decode($raw, true) : null;
-				if (is_array($data) && !empty($data['by_ts'])){
-					return $this->_payload_from_by_ts(
-							$data['by_ts'],
-							!empty($data['fetched_at']) ? (int)$data['fetched_at'] : 0,
-							1
-					);
-				}
+			// stale cache fallback (any age)
+			if (!empty($old_by_ts)){
+				return $this->_payload_from_by_ts(
+						$old_by_ts,
+						$old_fetched_at,
+						1
+				);
 			}
 			return [
 				'ok' => 0,
@@ -73,15 +80,16 @@ class agileforecast_model extends \Model {
 			];
 		}
 
+		$by_ts = $this->_merge_forecast_by_ts($old_by_ts, $fetched['by_ts'], $now);
 		$store = [
 			'fetched_at' => $now,
 			'region' => $region,
-			'by_ts' => $fetched['by_ts'],
+			'by_ts' => $by_ts,
 			'created_at' => $fetched['created_at'] ?? '',
 		];
 		@file_put_contents($path, json_encode($store, JSON_UNESCAPED_UNICODE));
 
-		return $this->_payload_from_by_ts($fetched['by_ts'], $now, 0);
+		return $this->_payload_from_by_ts($by_ts, $now, 0);
 
 	}
 
@@ -113,6 +121,46 @@ class agileforecast_model extends \Model {
 			'slots' => $slots,
 			'error' => '',
 		];
+
+	}
+
+	/**
+	 * Keep a longer existing tail if the live API returns fewer future slots.
+	 * New rows win on overlap. Past-only old keys stay (harmless).
+	 *
+	 * @param array<int|string,array> $existing
+	 * @param array<int|string,array> $fresh
+	 * @return array
+	 */
+	function _merge_forecast_by_ts($existing, $fresh, $now){
+
+		if (!is_array($fresh) || empty($fresh)){
+			return is_array($existing) ? $existing : [];
+		}
+		if (!is_array($existing) || empty($existing)){
+			return $fresh;
+		}
+		$now_slot = ((int)$now) - (((int)$now) % 1800);
+		$n_new = 0;
+		$n_old = 0;
+		foreach ($fresh as $k => $v){
+			if ((int)$k >= $now_slot){
+				$n_new++;
+			}
+		}
+		foreach ($existing as $k => $v){
+			if ((int)$k >= $now_slot){
+				$n_old++;
+			}
+		}
+		if ($n_new >= $n_old){
+			return $fresh;
+		}
+		$out = $existing;
+		foreach ($fresh as $k => $v){
+			$out[$k] = $v;
+		}
+		return $out;
 
 	}
 

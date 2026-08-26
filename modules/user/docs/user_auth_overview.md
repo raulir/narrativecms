@@ -59,6 +59,12 @@ Register → `send_email_verification()` → `/verify-email/?token=…` → sets
 
 Place **target** panels on pages. Extension defs may be empty `item:[]` (theme only). Base SCSS stays tiny under `user/css/`; ScoreTutor look is the music files.
 
+## Session length
+
+Frontend login (`$_SESSION['user']`) uses the PHP session in [`session.php`](../../../system/core/session.php) (`cms_session_boot()` — same boot as admin and APIs that need the session). **CMS → Site settings → Session length days** (default **30**, clamp 1–365). Cookie + session-file GC use that many days; the cookie expiry is refreshed **at most once per day** while the session is used (idle open tabs stay logged in). A new setting value applies on the **next request**; shortening days can expire session files (GC) before the browser cookie dies.
+
+CMS admin shares the same cookie but is **logged out 24 hours after last password entry** (`$_SESSION['cms_password_last_checked']`). Frontend login is not affected by that stamp.
+
 ## Passwords
 
 - Store: `password_hash(PASSWORD_DEFAULT)`.  

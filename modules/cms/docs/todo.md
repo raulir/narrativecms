@@ -14,7 +14,8 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 ## System / frontend page render
 
-- [ ] **Missing page `layout` → PHP warnings + empty `.tpl.php`** — pages whose meta has no `layout` hit undefined `$page['layout']` in [`controller_index.php`](../../../system/core/controller_index.php) and then `include modules/cms/layouts/.tpl.php` via [`Loader::layout`](../../../system/core/Loader.php). Do not invent a default layout; guard all layout reads, hard-fail with `_html_error`/500 + `[cms_page_id=…]` log, refuse empty layout file include. Find/fix pages missing layout in admin. (Seen in `cache/errors_timmy.log`; path/line may differ by clone.)
+- [x] **Missing page `layout` → 500** — empty layout no longer includes `cms/layouts/.tpl.php`. HTTP 500, log to `errors_log`, render saved `internal-error` page if it has a layout, else red-frame HTML. Reserved list/system pages are not auto-inserted; admin shows grey **create** rows. First panel save creates the page from a session draft.
+- [x] **Session boot + reserved slug cost** — one `cms_session_boot()` (cookie/GC from `session_length_days`; APIs must not `session_start()` raw). CMS admin re-login after 24h (`cms_password_last_checked`). `is_reserved_slug()` does not scan all panel defs on 404.
 
 ## System / routing
 

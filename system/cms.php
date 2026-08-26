@@ -137,8 +137,9 @@ if (!empty($GLOBALS['config']['cron_trigger']) && $GLOBALS['config']['cron_trigg
 
 }
 
-// start session
+// start session (front / admin / ajax — not module APIs, which die above)
 include($GLOBALS['config']['base_path'].'system/core/session.php');
+cms_session_boot();
 
 // Visitor targets (business: AB / language / mobile…) — after session; uses global $db from full config
 $_SESSION['config']['targets']['hash'] = '';

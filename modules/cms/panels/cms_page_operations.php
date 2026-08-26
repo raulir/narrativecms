@@ -26,7 +26,39 @@ class cms_page_operations extends \Controller {
 		$this->load->model('cms/cms_page_panel_cms_model');
 		
 		$do = $this->input->post('do');
-		if ($do == 'cms_page_delete'){
+		if ($do == 'reserved_page_draft_put'){
+
+			$layout = trim((string)$this->input->post('layout'));
+			if ($layout === ''){
+				return ['ok' => 0, 'error' => 'Set a layout before adding a panel'];
+			}
+
+			$page_class = trim((string)$this->input->post('page_class'));
+			$slug = trim((string)$this->input->post('slug'));
+			if (!in_array($page_class, ['list', 'system'], true) || $slug === ''){
+				return ['ok' => 0, 'error' => 'Invalid reserved page'];
+			}
+
+			$this->cms_page_model->put_reserved_page_draft([
+					'page_class' => $page_class,
+					'slug' => $slug,
+					'list_panel' => trim((string)$this->input->post('list_panel')),
+					'title' => (string)$this->input->post('title'),
+					'layout' => $layout,
+					'access' => trim((string)$this->input->post('access')),
+					'cache' => trim((string)$this->input->post('cache')),
+					'status' => (int)$this->input->post('status'),
+					'seo_title' => (string)$this->input->post('seo_title'),
+					'description' => (string)$this->input->post('description'),
+					'image' => (string)$this->input->post('image'),
+					'video' => (string)$this->input->post('video'),
+					'video_id' => (string)$this->input->post('video_id'),
+					'positions' => $this->input->post('positions'),
+			]);
+
+			return ['ok' => 1];
+
+		} else if ($do == 'cms_page_delete'){
 
 			$page_id = (int)$this->input->post('page_id');
 			if ($page_id < 1){
@@ -136,6 +168,18 @@ class cms_page_operations extends \Controller {
 					$data['slug'] = $existing['slug'];
 				}
 			} else {
+				$page_class_post = trim((string)$this->input->post('page_class'));
+				$list_panel_post = trim((string)$this->input->post('list_panel'));
+				$reserved_new = (int)$this->input->post('reserved_new');
+				if ($reserved_new && in_array($page_class_post, ['list', 'system'], true)){
+					$data['page_class'] = $page_class_post;
+					$data['list_panel'] = $list_panel_post;
+					$data['slug'] = trim((string)$this->input->post('slug'));
+					return [
+							'ok' => 0,
+							'error' => 'Add a panel before saving a reserved page',
+					];
+				}
 				// New pages from admin are user pages
 				if (empty($data['page_class'])) {
 					$data['page_class'] = 'user';
@@ -149,7 +193,7 @@ class cms_page_operations extends \Controller {
 				$page_id = $this->cms_page_model->create_page($data);
 			}
 			
-			$return = ['cms_page_id' => $page_id];
+			$return = ['ok' => 1, 'cms_page_id' => $page_id];
 
 			if ($data['position'] == 'main'){
 				$return['slug'] = $this->cms_page_model->update_page_visibility($page_id);

@@ -936,6 +936,15 @@ class Loader {
 	}
 	
 	function layout($layout, $data){
+
+		$layout = trim((string)$layout);
+		if ($layout === '' || $layout === 'cms/'){
+			if (function_exists('cms_show_500')){
+				cms_show_500('CMS missing page layout');
+			}
+			_html_error('CMS missing page layout', 500);
+			return '';
+		}
 	
 		if (stristr($layout, '/')){
 			list($layout_module, $layout_file) = explode('/', $layout);
@@ -943,7 +952,25 @@ class Loader {
 			$layout_module = 'cms';
 			$layout_file = $layout;
 		}
+
+		$layout_file = trim((string)$layout_file);
+		if ($layout_module === '' || $layout_file === ''){
+			if (function_exists('cms_show_500')){
+				cms_show_500('CMS missing page layout');
+			}
+			_html_error('CMS missing page layout', 500);
+			return '';
+		}
+
 		$layout_filename = $GLOBALS['config']['base_path'].'modules/'.$layout_module.'/layouts/'.$layout_file.'.tpl.php';
+
+		if (!is_file($layout_filename)){
+			if (function_exists('cms_show_500')){
+				cms_show_500('CMS layout file not found [layout='.$layout_module.'/'.$layout_file.']');
+			}
+			_html_error('CMS layout file not found: '.$layout_module.'/'.$layout_file, 500);
+			return '';
+		}
 		
 		ob_start();
 

@@ -638,6 +638,11 @@ class cms_page_model extends \Model {
 	 */
 	function get_linkable_list_types(){
 
+		static $return = null;
+		if ($return !== null){
+			return $return;
+		}
+
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_panel_model');
 		$this->load->model('cms/cms_module_model');
@@ -704,13 +709,216 @@ class cms_page_model extends \Model {
 	}
 
 	/**
-	 * Create missing list template + system main pages (page_class meta). Idempotent.
+	 * Sync class/slug/title on existing list + system pages. Does not insert new rows.
 	 */
 	function ensure_special_pages(){
 
 		$this->_ensure_cms_page_schema();
 		$this->ensure_list_template_pages();
 		$this->ensure_system_pages();
+
+	}
+
+	function is_reserved_slug($slug){
+
+		$slug = trim((string)$slug, '/');
+		if ($slug === ''){
+			return false;
+		}
+
+		foreach ($this->get_system_page_defs() as $def){
+			if (($def['slug'] ?? '') === $slug){
+				return true;
+			}
+		}
+
+		$panel_name = $this->list_template_panel_from_slug($slug);
+		if ($panel_name === ''){
+			return false;
+		}
+
+		return $this->_is_linkable_list_panel($panel_name);
+
+	}
+
+	function _is_linkable_list_panel($panel_name){
+
+		$panel_name = trim((string)$panel_name);
+		if ($panel_name === '' || !stristr($panel_name, '/')){
+			return false;
+		}
+
+		list($module, $panel) = explode('/', $panel_name, 2);
+		$filename = $GLOBALS['config']['base_path'].'modules/'.$module.'/definitions/'.$panel.'.json';
+		if (!is_file($filename)){
+			return false;
+		}
+
+		$this->load->model('cms/cms_panel_model');
+		$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+		if (!$this->cms_panel_model->is_real_list_config($config)
+				|| !$this->list_link_target_enabled($config['list'] ?? [])){
+			return false;
+		}
+
+		return true;
+
+	}
+
+	function reserved_page_exists($slug){
+
+		$slug = trim((string)$slug, '/');
+		if ($slug === ''){
+			return false;
+		}
+
+		$sql = 'select cms_page_id from cms_page where slug = ? limit 1';
+		$query = $this->db->query($sql, [$slug]);
+		if (!$query->num_rows()){
+			return false;
+		}
+
+		$row = $query->row_array();
+
+		return !empty($row['cms_page_id']);
+
+	}
+
+	/**
+	 * Reserved list/system defs that have no cms_page row yet (admin list placeholders).
+	 */
+	function get_virtual_reserved_pages(){
+
+		$pages = $this->get_cms_pages();
+		$have_slug = [];
+		$have_list = [];
+		foreach ($pages as $page){
+			if (!empty($page['slug'])){
+				$have_slug[(string)$page['slug']] = 1;
+			}
+			if (!empty($page['list_panel'])){
+				$have_list[(string)$page['list_panel']] = 1;
+			}
+		}
+
+		$out = [];
+
+		foreach ($this->get_system_page_defs() as $def){
+			$slug = (string)($def['slug'] ?? '');
+			if ($slug === '' || !empty($have_slug[$slug])){
+				continue;
+			}
+			$out[] = [
+					'cms_page_id' => 0,
+					'page_id' => 0,
+					'reserved' => 1,
+					'page_class' => 'system',
+					'position' => 'main',
+					'status' => 0,
+					'slug' => $slug,
+					'title' => (string)($def['title'] ?? $slug),
+			];
+		}
+
+		foreach ($this->get_linkable_list_types() as $type){
+			$slug = (string)($type['slug'] ?? '');
+			$panel = (string)($type['panel_name'] ?? '');
+			if ($slug === '' || !empty($have_slug[$slug]) || ($panel !== '' && !empty($have_list[$panel]))){
+				continue;
+			}
+			$out[] = [
+					'cms_page_id' => 0,
+					'page_id' => 0,
+					'reserved' => 1,
+					'page_class' => 'list',
+					'list_panel' => $panel,
+					'position' => 'main',
+					'status' => 0,
+					'slug' => $slug,
+					'title' => (string)($type['title'] ?? $slug),
+			];
+		}
+
+		return $out;
+
+	}
+
+	function put_reserved_page_draft($data){
+
+		if (!is_array($data)){
+			return false;
+		}
+
+		$cms_user_id = !empty($_SESSION['cms_user']['cms_user_id']) ? (int)$_SESSION['cms_user']['cms_user_id'] : 0;
+		$data['cms_user_id'] = $cms_user_id;
+		$_SESSION['cms_reserved_page_draft'] = $data;
+
+		return true;
+
+	}
+
+	function get_reserved_page_draft(){
+
+		$draft = $_SESSION['cms_reserved_page_draft'] ?? null;
+		if (!is_array($draft)){
+			return null;
+		}
+
+		$cms_user_id = !empty($_SESSION['cms_user']['cms_user_id']) ? (int)$_SESSION['cms_user']['cms_user_id'] : 0;
+		if ((int)($draft['cms_user_id'] ?? 0) !== $cms_user_id){
+			return null;
+		}
+
+		return $draft;
+
+	}
+
+	function clear_reserved_page_draft(){
+
+		unset($_SESSION['cms_reserved_page_draft']);
+
+	}
+
+	function create_page_from_reserved_draft(){
+
+		$draft = $this->get_reserved_page_draft();
+		if (!is_array($draft)){
+			return 0;
+		}
+
+		$layout = trim((string)($draft['layout'] ?? ''));
+		$slug = trim((string)($draft['slug'] ?? ''));
+		$page_class = (string)($draft['page_class'] ?? '');
+		if ($layout === '' || $slug === '' || ($page_class !== 'system' && $page_class !== 'list')){
+			return 0;
+		}
+
+		$data = [
+				'position' => 'main',
+				'slug' => $slug,
+				'title' => (string)($draft['title'] ?? $slug),
+				'page_class' => $page_class,
+				'list_panel' => (string)($draft['list_panel'] ?? ''),
+				'layout' => $layout,
+				'access' => (string)($draft['access'] ?? ''),
+				'cache' => (string)($draft['cache'] ?? ''),
+				'status' => (int)($draft['status'] ?? 0),
+				'seo_title' => (string)($draft['seo_title'] ?? ''),
+				'description' => (string)($draft['description'] ?? ''),
+				'image' => (string)($draft['image'] ?? ''),
+				'video' => (string)($draft['video'] ?? ''),
+				'video_id' => (string)($draft['video_id'] ?? ''),
+				'positions' => $draft['positions'] ?? [],
+		];
+
+		$cms_page_id = $this->create_page($data);
+		if ($cms_page_id < 1){
+			return 0;
+		}
+
+		$this->update_page_visibility($cms_page_id);
+
+		return $cms_page_id;
 
 	}
 
@@ -750,23 +958,8 @@ class cms_page_model extends \Model {
 					$this->update_page($existing['cms_page_id'], $need);
 					$this->update_page_visibility($existing['cms_page_id']);
 				}
-				continue;
 			}
 
-			$cms_page_id = $this->create_page([
-				'position' => 'main',
-				'sort' => 9000 + count($by_slug),
-				'slug' => $type['slug'],
-				'title' => $type['title'],
-				'page_class' => 'list',
-				'list_panel' => $type['panel_name'],
-				'status' => 0,
-				'description' => '',
-				'image' => '',
-			]);
-			$this->update_page_visibility($cms_page_id);
-			$by_slug[$type['slug']] = ['cms_page_id' => $cms_page_id];
-			$by_list_panel[$type['panel_name']] = ['cms_page_id' => $cms_page_id];
 		}
 
 	}
@@ -798,55 +991,9 @@ class cms_page_model extends \Model {
 					$this->update_page($existing['cms_page_id'], $need);
 					$this->update_page_visibility($existing['cms_page_id']);
 				}
-				continue;
 			}
 
-			$cms_page_id = $this->create_page([
-				'position' => 'main',
-				'sort' => 9500 + $i,
-				'slug' => $def['slug'],
-				'title' => $def['title'],
-				'page_class' => 'system',
-				'status' => 0,
-				'description' => '',
-				'image' => '',
-			]);
-			$this->update_page_visibility($cms_page_id);
-			$by_slug[$def['slug']] = ['cms_page_id' => $cms_page_id];
 		}
-
-	}
-
-	/**
-	 * Whether this main page is a list-type template shell (hidden public slug).
-	 */
-	function is_list_template_page($page){
-
-		if (!is_array($page)){
-			return false;
-		}
-
-		if ($this->get_page_class($page) === 'list'){
-			return true;
-		}
-
-		$slug = $page['slug'] ?? '';
-		if ($slug === ''){
-			return false;
-		}
-
-		$panel = $this->list_template_panel_from_slug($slug);
-		if ($panel === ''){
-			return false;
-		}
-
-		foreach ($this->get_linkable_list_types() as $type){
-			if ($type['panel_name'] === $panel){
-				return true;
-			}
-		}
-
-		return false;
 
 	}
 

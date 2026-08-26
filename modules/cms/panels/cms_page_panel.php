@@ -148,11 +148,33 @@ class cms_page_panel extends \Controller {
 
 			$old_data = $this->cms_page_panel_model->get_cms_page_panel($block_id, $language);
 
+			$created_page_id = 0;
+			if ((int)$this->input->post('reserved_page_draft') === 1
+					&& (int)$this->input->post('cms_page_id') === 0
+					&& (int)$block_id === 0){
+
+				$this->load->model('cms/cms_page_model');
+				$created_page_id = (int)$this->cms_page_model->create_page_from_reserved_draft();
+				if ($created_page_id < 1){
+					return [
+							'ok' => 0,
+							'error' => 'Cannot create page. Set a layout on the page first.',
+							'cms_page_panel_id' => 0,
+					];
+				}
+
+				$_POST['cms_page_id'] = $created_page_id;
+			}
+
 			$built = $this->cms_page_panel_cms_model->build_panel_data_for_save(
 					$this->_post_panel_form_input($block_id), $language);
 			$data_merged = $built['data_merged'];
 			$panel_config = $built['panel_config'];
 			$panel_structure = $built['panel_structure'];
+
+			if ($created_page_id > 0){
+				$data_merged['cms_page_id'] = $created_page_id;
+			}
 
 			if (!empty($old_data['_cache_lists'])){
 				$data_merged['_cache_lists'] = $old_data['_cache_lists'];
@@ -170,12 +192,27 @@ class cms_page_panel extends \Controller {
 
 			$data_merged = $this->run_panel_method($data_merged['panel_name'], 'on_update', $data_merged);
 
-			$saved = $this->cms_page_panel_cms_model->save_cms_page_panel_admin($block_id, $data_merged, [
-					'panel_config' => $panel_config,
-					'parent_name' => $this->input->post('parent_name'),
-					'old_data' => is_array($old_data) ? $old_data : [],
-			]);
-			$block_id = $saved['cms_page_panel_id'];
+			try {
+				$saved = $this->cms_page_panel_cms_model->save_cms_page_panel_admin($block_id, $data_merged, [
+						'panel_config' => $panel_config,
+						'parent_name' => $this->input->post('parent_name'),
+						'old_data' => is_array($old_data) ? $old_data : [],
+				]);
+				$block_id = $saved['cms_page_panel_id'];
+			} catch (\Throwable $e){
+				if ($created_page_id > 0){
+					$this->load->model('cms/cms_page_model');
+					$this->cms_page_model->delete_page($created_page_id);
+				}
+				throw $e;
+			}
+
+			if ($created_page_id > 0 && empty($block_id)){
+				$this->load->model('cms/cms_page_model');
+				$this->cms_page_model->delete_page($created_page_id);
+			} else if ($created_page_id > 0){
+				$this->cms_page_model->clear_reserved_page_draft();
+			}
 
 			$this->cms_page_panel_cms_model->delete_orphan_upload_files(
 					$panel_structure, is_array($old_data) ? $old_data : [], $data_merged);
@@ -245,6 +282,7 @@ class cms_page_panel extends \Controller {
 		$this->load->model('cms/cms_language_model');
 		
 		$return = [];
+		$return['reserved_page_draft'] = (int)$this->input->post('reserved_page_draft') === 1 ? 1 : 0;
 
 		// set up new page panel
 		$params['target_type'] = $this->input->post('target_type');

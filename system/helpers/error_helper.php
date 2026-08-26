@@ -197,3 +197,27 @@ function cms_timeout_output_html($home_url, $timeout_url = null){
 			.'</head><body><p>Script timeout. <a href="'.$home.'">Click here</a></p></body></html>';
 
 }
+
+/**
+ * Log HTTP 500 to PHP errors_log (CMS error report).
+ */
+function cms_log_http_500($message){
+
+	$uri = isset($_SERVER['REQUEST_URI']) ? (string)$_SERVER['REQUEST_URI'] : '';
+	error_log(
+			'HTTP 500: '.$message.
+			($uri !== '' ? ' [uri='.$uri.']' : '')
+	);
+
+}
+
+/**
+ * HTTP 500: log, then system page /internal-error/ if saved, else red-frame _html_error.
+ */
+function cms_show_500($message, $failed_page = ''){
+
+	$_error =& load_class('Exceptions');
+	$_error->show_500($message, $failed_page);
+	exit;
+
+}

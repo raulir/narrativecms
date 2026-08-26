@@ -39,10 +39,25 @@ Rough order:
 3. **Module API branch** — if `modules/{m}/api/{id}.php` **exists** and that module’s `config.json` lists `"api":[{"id":…}]`, include and **die**. No `cms_router`. Prefer this for public non-page endpoints (e.g. `stripe/webhook`, `cms/updater`, `analytics/beacon`). APIs that need DB load full config via requiring [`cms_config.php`](../../../system/core/cms_config.php) (calls **`cms_config_load_full()`**).
 4. **[`cms_config_load_full()`](../../../system/core/cms_config.php)** — one mysqli connect → **`$GLOBALS['db']`** (global `$db`), cms_settings, all modules, extends/provides.
 5. **`cms_route_resolve()`** ([`cms_router.php`](../../../system/core/cms_router.php)) → `$GLOBALS['cms_route']` (includes legacy **module controller first-segment** discovery — to be phased out for new public endpoints; see [`todo.md`](todo.md) § System / routing)
-6. Timeout shutdown, landing redirects, **session**, targets (uses global `$db`), page HTML cache try-serve
+6. Timeout shutdown, landing redirects, **session** ([`session.php`](../../../system/core/session.php) `cms_session_boot()`), targets (uses global `$db`), page HTML cache try-serve
 7. [`CodeIgniter.php`](../../../system/core/CodeIgniter.php) — dispatch Controller + method (loads [`cms_bootstrap.php`](../../../system/core/cms_bootstrap.php): `load_class` / `get_instance` / `show_404`; app loading stays in `Loader`). Loader attaches **`cms_db`** as `$this->db`.
 
 **Config access:** `$GLOBALS['config']` — host files: `config/<host>.json`. Full load: `cms_config_load_full()` / [`cms_config.php`](../../../system/core/cms_config.php).
+
+### Session
+
+Include [`session.php`](../../../system/core/session.php) for helpers, then call `cms_session_boot()` when the request needs `$_SESSION`. Front pages / admin / ajax do this from [`cms.php`](../../../system/cms.php) after the module-API short-circuit. Light APIs (`cms/cron`, updater, sitemap, image resize, Stripe webhook) never boot a session. Analytics beacon reads a logged-in user only if a session cookie is **already** on the request (`cms_session_has_cookie()`); anonymous hits stay session-free. Do not call `session_start()` directly — PHP GC uses **this request’s** `gc_maxlifetime` and would otherwise wipe sessions at php.ini’s 1440s.
+
+| Piece | Behaviour |
+|-------|-----------|
+| Length | Site setting `session_length_days` (1–365, default 30). Cookie lifetime + `session.gc_maxlifetime`. Applies on the next request. |
+| Cookie | `httponly`, `SameSite=Lax`, `Secure` when HTTPS / port 443 / `X-Forwarded-Proto: https`. Sliding `setcookie` at most once per day (`$_SESSION['_session_cookie_at']`). |
+| Frontend login | `$_SESSION['user']` lasts for `session_length_days` of idle (session file GC). |
+| CMS admin | Same cookie. `$_SESSION['cms_password_last_checked']` is set on password login. If missing or older than 24h, `cms_user` is cleared (admin must log in again). Frontend user is left intact. |
+| Page cache HIT | `session_write_close()` before sending cached HTML (releases the session lock). |
+| Other cookies | [`cookie_helper.php`](../../../system/helpers/cookie_helper.php) `cms_cookie_create()` **appends** `Set-Cookie` (`header(..., false)`). Replacing the header would drop `PHPSESSID`. |
+
+Helpers: `cms_session_mark_cms_password_checked()`, `cms_session_clear_cms_admin()`.
 
 ### Database (#762)
 

@@ -46,6 +46,36 @@ class cms_page extends \Controller {
 			$return['page'] = $this->cms_page_model->new_page();
 			$return['page']['position'] = !empty($params['position']) ? $params['position'] : 'main';
 			$return['page']['title'] = 'New '.(!empty($params['position']) ? $params['position'] : 'page');
+
+			$page_class_in = trim((string)$this->input->get('page_class'));
+			$slug_in = trim((string)$this->input->get('slug'));
+			$list_panel_in = trim((string)$this->input->get('list_panel'));
+			if (in_array($page_class_in, ['list', 'system'], true) && $slug_in !== ''){
+				$return['page']['page_class'] = $page_class_in;
+				$return['page']['slug'] = $slug_in;
+				$return['page']['list_panel'] = $list_panel_in;
+				$return['reserved_new'] = 1;
+				$title_from_def = $slug_in;
+				if ($page_class_in === 'system'){
+					foreach ($this->cms_page_model->get_system_page_defs() as $def){
+						if (($def['slug'] ?? '') === $slug_in){
+							$title_from_def = (string)($def['title'] ?? $slug_in);
+							break;
+						}
+					}
+				} else {
+					foreach ($this->cms_page_model->get_linkable_list_types() as $type){
+						if (($type['slug'] ?? '') === $slug_in || ($type['panel_name'] ?? '') === $list_panel_in){
+							$title_from_def = (string)($type['title'] ?? $slug_in);
+							if ($list_panel_in === '' && !empty($type['panel_name'])){
+								$return['page']['list_panel'] = $type['panel_name'];
+							}
+							break;
+						}
+					}
+				}
+				$return['page']['title'] = $title_from_def;
+			}
 		}
 
 		$page_class = $this->cms_page_model->get_page_class($return['page']);
@@ -65,6 +95,9 @@ class cms_page extends \Controller {
 		$return['can_delete'] = $this->cms_page_model->page_can_delete($return['page']) ? 1 : 0;
 		$return['panel_count'] = $panel_count;
 		$return['page_status'] = $page_status;
+		if (empty($return['reserved_new'])){
+			$return['reserved_new'] = 0;
+		}
 
 		if (!empty($return['page']['create_cms_user_id'])) {
 			$return['page']['create_user'] = $this->cms_user_model->get_cms_user($return['page']['create_cms_user_id']);

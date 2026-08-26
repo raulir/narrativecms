@@ -113,7 +113,7 @@ class cms_slug_model extends \Model {
 		while(!$ok){
 			$sql = 'select * from `'.$table.'` where `'.$slug_col.'` = ? limit 1';
 			$query = $this->db->query($sql, array($final_slug, ));
-			if ($query->num_rows()){
+			if ($query->num_rows() || $this->_slug_is_reserved($final_slug)){
 				$final_slug = $slug.'-'.$i;
 				$i = $i + 1;
 			} else {
@@ -122,6 +122,14 @@ class cms_slug_model extends \Model {
 		}
 
 		return $final_slug;
+
+	}
+
+	function _slug_is_reserved($slug){
+
+		$this->load->model('cms/cms_page_model');
+
+		return $this->cms_page_model->is_reserved_slug($slug);
 
 	}
 

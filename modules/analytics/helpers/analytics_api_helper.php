@@ -78,8 +78,9 @@ function analytics_is_pageview_bot($viewport_w, $viewport_h, $user_agent = '') {
 }
 
 /**
- * Logged-in CMS user id when the user module is installed; otherwise 0.
- * Safe for beacon API (may start PHP session lightly — same name rules as session.php).
+ * Logged-in frontend user id when the user module is installed; otherwise 0.
+ * Does not start a PHP session unless one is already open or the session cookie
+ * is already on the request (beacon stays session-free for anonymous hits).
  */
 function analytics_current_user_id() {
 
@@ -91,20 +92,29 @@ function analytics_current_user_id() {
 		return 0;
 	}
 
+	$boot_here = false;
 	if (!session_id()) {
-		if (!empty($GLOBALS['config']['base_url']) && $GLOBALS['config']['base_url'] !== '/') {
-			session_name('s_'.md5($GLOBALS['config']['base_url']));
+		require_once $GLOBALS['config']['base_path'].'system/core/session.php';
+		if (!cms_session_has_cookie()) {
+			return 0;
 		}
-		session_start();
+		cms_session_boot();
+		$boot_here = true;
 	}
 
-	if (empty($_SESSION['user']) || !is_array($_SESSION['user'])) {
-		return 0;
+	$user_id = 0;
+	if (!empty($_SESSION['user']) && is_array($_SESSION['user'])) {
+		$user_id = (int)($_SESSION['user']['cms_page_panel_id'] ?? $_SESSION['user']['user_id'] ?? 0);
+		if ($user_id < 1) {
+			$user_id = 0;
+		}
 	}
 
-	$user_id = (int)($_SESSION['user']['cms_page_panel_id'] ?? $_SESSION['user']['user_id'] ?? 0);
+	if ($boot_here && session_status() === PHP_SESSION_ACTIVE) {
+		session_write_close();
+	}
 
-	return $user_id > 0 ? $user_id : 0;
+	return $user_id;
 
 }
 

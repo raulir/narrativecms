@@ -195,6 +195,29 @@ function cms_input_page_panels_init($root){
 		if ($('.cms_page_panel_id').length == 0 && cms_page_id == 0){
 
 			// if no block id field, then must be on the page admin
+
+			if ($('.cms_page_reserved_new').val() === '1'){
+
+				if (typeof cms_page_save_fields !== 'function'){
+					cms_notification('Cannot add a panel yet', 3, 'error')
+					return
+				}
+
+				get_ajax('cms/cms_page_operations', $.extend({}, cms_page_save_fields(), {
+					'do': 'reserved_page_draft_put',
+					'success': function(data){
+						var result = (data && data.result) ? data.result : {}
+						if (result.ok === 0){
+							cms_notification(result.error || 'Cannot add a panel', 3, 'error')
+							return
+						}
+						window.cms_reserved_page_draft = 1
+						cms_input_page_panel_selector('page', 0)
+					}
+				}))
+
+				return
+			}
 			
 			// ask are you sure
 			get_ajax_panel('cms/cms_popup_yes_no', {
@@ -337,6 +360,9 @@ function cms_input_page_panel_selector(target_type, target_id, target_name, filt
 					$('.cms_params_form').append('<input type="hidden" name="target_type" value="' + target_type + '">')
 					$('.cms_params_form').append('<input type="hidden" name="target_id" value="' + target_id + '">')
 					$('.cms_params_form').append('<input type="hidden" name="panel_name" value="' + panel_name + '">')
+					if (window.cms_reserved_page_draft){
+						$('.cms_params_form').append('<input type="hidden" name="reserved_page_draft" value="1">')
+					}
 					
 					// open cms page panel editor with this panel
 					$('.cms_params_form').submit()

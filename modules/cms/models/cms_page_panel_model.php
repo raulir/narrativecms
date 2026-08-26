@@ -319,6 +319,7 @@ class cms_page_panel_model extends \Model {
 	function get_list_item_title($row){
 
 		$panel_name = !empty($row['panel_name']) ? $row['panel_name'] : '';
+		$title_html = $this->_list_title_allows_html($panel_name);
 
 		if ($this->_has_panel_heading($panel_name, $row)){
 
@@ -326,6 +327,9 @@ class cms_page_panel_model extends \Model {
 			$title = $ci->run_panel_method($panel_name, 'panel_heading', $row);
 
 			if (!is_array($title)){
+				if ($title_html){
+					return (string)$title;
+				}
 				return substr(strip_tags($title), 0, 98);
 			}
 
@@ -696,9 +700,27 @@ class cms_page_panel_model extends \Model {
 
 	}
 
+	function _list_title_allows_html($panel_name){
+
+		$panel_name = trim((string)$panel_name);
+		if ($panel_name === '' || !stristr($panel_name, '/')){
+			return false;
+		}
+
+		$this->load->model('cms/cms_panel_model');
+		$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+
+		return !empty($config['list']['title_html']);
+
+	}
+
 	function _compute_cached_title($base_title, $targets){
 
-		$base_title = substr(strip_tags((string)$base_title), 0, 98);
+		$base_title = (string)$base_title;
+		$plain = strip_tags($base_title);
+		if (strpos($base_title, '<') === false || strlen($plain) > 98){
+			$base_title = substr($plain, 0, 98);
+		}
 
 		return $this->build_visitor_target_badge_prefix($targets).$base_title;
 

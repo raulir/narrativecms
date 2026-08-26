@@ -20,6 +20,7 @@ function page_translate_unit_context(){
 
 	var unit_id = 0
 	var types = []
+	var term_ids = []
 
 	if (typeof engine_init_unit_id !== 'undefined' && engine_init_unit_id){
 		unit_id = parseInt(engine_init_unit_id, 10) || 0
@@ -27,18 +28,31 @@ function page_translate_unit_context(){
 
 	if (typeof music_set !== 'undefined' && Array.isArray(music_set)){
 		var seen = {}
+		var seen_terms = {}
 		music_set.forEach(function(el){
 			var t = String((el && el.type) || '').toLowerCase()
 			if (t && !seen[t]){
 				seen[t] = 1
 				types.push(t)
 			}
+			var ids = (el && el.term_ids) || []
+			if (!Array.isArray(ids)){
+				return
+			}
+			ids.forEach(function(id){
+				id = parseInt(id, 10)
+				if (id > 0 && !seen_terms[id]){
+					seen_terms[id] = 1
+					term_ids.push(id)
+				}
+			})
 		})
 	}
 
 	return {
 		unit_id: unit_id,
-		types: types
+		types: types,
+		term_ids: term_ids
 	}
 
 }
@@ -101,7 +115,7 @@ function page_translate_list_cache_key($mount){
 
 	var page = page_translate_page_context($mount)
 	var ctx = page_translate_unit_context()
-	return String(page.cms_page_id) + '|' + page.path + '|' + ctx.unit_id + '|' + ctx.types.join(',')
+	return String(page.cms_page_id) + '|' + page.path + '|' + ctx.unit_id + '|' + ctx.types.join(',') + '|' + ctx.term_ids.join(',')
 
 }
 
@@ -166,6 +180,8 @@ function page_translate_render_list($button, items){
 			$opt.addClass('page_translate_option_material')
 		} else if (kind === 'product'){
 			$opt.addClass('page_translate_option_product')
+		} else if (kind === 'term'){
+			$opt.addClass('page_translate_option_term')
 		}
 
 		$list.append($opt)
@@ -207,6 +223,7 @@ function page_translate_load_list($mount, $button, force){
 		'path': page.path,
 		'unit_id': ctx.unit_id,
 		'types': JSON.stringify(ctx.types),
+		'term_ids': JSON.stringify(ctx.term_ids),
 		'success': function(data){
 			$button.data('page_translate_loading', 0)
 			// Drop response if user navigated away while loading
@@ -300,22 +317,30 @@ function page_translate_build_control($mount){
 
 function page_translate_move_engine_debug(){
 
+	if (typeof engine_debug_move_to_strip === 'function'){
+		engine_debug_move_to_strip()
+		return
+	}
+
 	var $debug = $('.cms_debug').first()
 	if (!$debug.length){
 		return
 	}
 
-	var $btn = $('.engine_debug_button').first()
+	var $btn = $('.engine_container .engine_debug_button').first()
+	if (!$btn.length){
+		$btn = $('.engine_debug_button').first()
+	}
 	if (!$btn.length){
 		return
 	}
 
-	if ($btn.closest('.cms_debug').length){
-		$btn.removeClass('engine_debug_button_hidden').show()
-		return
+	$('.engine_debug_button').not($btn).remove()
+
+	if (!$btn.closest('.cms_debug').length){
+		$btn.detach().appendTo($debug)
 	}
 
-	$btn.detach().appendTo($debug)
 	$btn.removeClass('engine_debug_button_hidden').show()
 
 	if (typeof cms_debug_order_buttons === 'function'){
@@ -346,7 +371,7 @@ $(document).ready(function(){
 
 	page_translate_init()
 
-	$(document).on('music_engine_ready.page_translate', function(){
+	$(document).off('music_engine_ready.page_translate').on('music_engine_ready.page_translate', function(){
 		page_translate_move_engine_debug()
 		// Unit SPA may change path / unit context without full position footer reload
 		page_translate_on_position_change()

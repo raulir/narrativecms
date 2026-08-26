@@ -70,7 +70,7 @@ Cached aggregates per session: started, last activity, pageview count, total sec
 
 ### User identity (optional `user` module)
 
-When the **user** module is installed, analytics stores CMS login identity. If `user` is not in site modules, all of the following stay empty/`0` and no PHP user session is read.
+When the **user** module is installed, analytics stores CMS login identity. If `user` is not in site modules, all of the following stay empty/`0` and no PHP user session is read. The JS beacon API does **not** start a PHP session for guests — it opens the site session only when the session cookie is already on the request.
 
 | Store | Columns | Notes |
 |-------|---------|--------|
@@ -83,7 +83,7 @@ When the **user** module is installed, analytics stores CMS login identity. If `
 |------|----------------------|
 | PHP tracking | `record_php_pageview()` → `cms_analytics_pageview_php.user_id` via `analytics_current_user_id()` |
 | PHP → main | On match: fill main `user_id` if empty; on promote: copy from php row |
-| JS beacon API | `analytics_insert_pageview()` may start PHP session lightly (same `session_name` rules as `session.php`) and read logged-in user — not baked into HTML |
+| JS beacon API | `analytics_insert_pageview()` → `analytics_current_user_id()`: boot PHP session only if the session cookie is already present; otherwise `user_id = 0`. Not baked into HTML |
 
 Do not put `user_id` in cacheable page HTML (`data-*`).
 

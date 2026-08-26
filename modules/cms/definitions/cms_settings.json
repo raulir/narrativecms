@@ -149,6 +149,13 @@
 			"help": "Width of preview pane when mobile preview (M) is open in admin"
 		},
 		{
+			"type": "text",
+			"name": "session_length_days",
+			"label": "Session length days",
+			"default": "30",
+			"help": "Days the PHP session cookie and session file stay valid (1–365, default 30). Frontend login and CMS admin share this cookie. Idle open tabs stay logged in; cookie expiry is refreshed at most once per day while the session is used. CMS admin is logged out 24 hours after last password entry. A new value applies on the next request; shortening days can expire session files before the browser cookie dies."
+		},
+		{
 			"type": "subtitle",
 			"label": "Layout",
 			"width": "wide",

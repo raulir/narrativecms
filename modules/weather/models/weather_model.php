@@ -75,11 +75,9 @@ class weather_model extends \Model {
 
 		$temp = (int)round((float)$slot['temp_c']);
 		$sky = !empty($slot['sky']) ? preg_replace('/[^a-z0-9_]/', '', (string)$slot['sky']) : 'cloudy';
-		return '<span class="menu_item_extra_text">'
-				.htmlspecialchars((string)$temp, ENT_QUOTES, 'UTF-8')
+		return htmlspecialchars((string)$temp, ENT_QUOTES, 'UTF-8')
 				."\xC2\xB0"
-				.'</span>'
-				.'<span class="menu_item_sky" aria-hidden="true">'.$this->sky_html($sky).'</span>';
+				.'<div class="menu_item_sky" aria-hidden="true">'.$this->sky_html($sky).'</div>';
 
 	}
 

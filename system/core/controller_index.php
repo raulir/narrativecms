@@ -230,7 +230,7 @@ class Index extends Controller {
     		} else { // put a panel to main position
     			
     			if (empty($page)){
-    				_html_error('No panel template or page defined. Panel name: '.$panel_name, 500);
+    				cms_show_500('No panel template or page defined. Panel name: '.$panel_name, is_scalar($page_id) ? (string)$page_id : '');
     			}
     			
 	    		if ($list_item_data['show'] == 1){
@@ -327,29 +327,37 @@ class Index extends Controller {
 				$this->cache->write_partial_caches($page, $position_pages, $panel_data, $page_cache_ttl);
 			}
 
-			//  output to the template, deprecated - layout without module name
-			// Layout lives in page meta — missing/empty must not be silent
+			// output to the template
 			$layout = isset($page['layout']) ? trim((string)$page['layout']) : '';
 			if ($layout === ''){
 				$log_page_id = (int)($page['cms_page_id'] ?? $cms_page_id ?? 0);
 				$log_slug = trim((string)($page['slug'] ?? ''));
 				$log_route = is_scalar($page_id) ? (string)$page_id : '';
-				$log_uri = isset($_SERVER['REQUEST_URI']) ? (string)$_SERVER['REQUEST_URI'] : '';
-				// Structured tags for cms_log_rotate title resolution: [cms_page_id=N]
-				error_log(
+				cms_show_500(
 						'CMS missing page layout [cms_page_id='.$log_page_id.']'.
 						($log_slug !== '' ? ' [slug='.$log_slug.']' : '').
-						($log_route !== '' ? ' [route='.$log_route.']' : '').
-						($log_uri !== '' ? ' [uri='.$log_uri.']' : '')
+						($log_route !== '' ? ' [route='.$log_route.']' : ''),
+						$log_slug !== '' ? $log_slug : $log_route
 				);
-				// Keep empty so include still fails visibly (do not invent a default layout)
-				$page['layout'] = '';
 			}
-			if (!stristr($page['layout'], '/')){
-				$page['layout'] = 'cms/'.$page['layout'];
+			if (!stristr($layout, '/')){
+				$layout = 'cms/'.$layout;
 			}
-			if ($page['layout'] === 'cms/default'){
-				$page['layout'] = 'cms/fixed';
+			if ($layout === 'cms/default'){
+				$layout = 'cms/fixed';
+			}
+			$page['layout'] = $layout;
+
+			// System error pages keep the matching HTTP status
+			$sys_slug = trim((string)($page['slug'] ?? ''), '/');
+			if (($page['page_class'] ?? '') === 'system'){
+				if ($sys_slug === 'internal-error'){
+					set_status_header(500);
+				} else if ($sys_slug === 'not-found'){
+					set_status_header(404);
+				} else if ($sys_slug === 'timeout'){
+					set_status_header(504);
+				}
 			}
 
 			$page_cache_context = null;

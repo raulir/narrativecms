@@ -75,7 +75,7 @@ Show/hide on a list item updates slug visibility through `cms_page_panel_model::
 
 ### List type template pages (admin Pages → Lists)
 
-Each linkable list type gets a **main** CMS page used as the layout shell for all items of that type:
+Each linkable list type **may** have a **main** CMS page used as the layout shell for all items of that type. The slug is reserved even before the page exists (grey **create** on Pages admin). No `cms_page` row until the operator creates it and saves the first panel.
 
 | Field | Example |
 |-------|---------|
@@ -83,19 +83,21 @@ Each linkable list type gets a **main** CMS page used as the layout shell for al
 | `meta.list_panel` | `shop/product` |
 | Page slug | `shop_product` (`{module}_{panel}` with panel `_` → `-`) |
 
-Front controller resolves the shell by that slug only (no bare `product` fallback). The shell’s own public route stays **hidden**; list **items** still use title-based public slugs.
+Front controller resolves the shell by that slug only (no bare `product` fallback). The shell’s own public route stays **hidden**; list **items** still use title-based public slugs. Missing shell → HTTP 500.
 
 ### System pages (admin Pages → System)
 
-Reserved main pages (`meta.page_class` = `system`), **non-numeric** slugs (numeric strings would clash with `cms_page_id` routing):
+Reserved main pages (`meta.page_class` = `system`), **non-numeric** slugs (numeric strings would clash with `cms_page_id` routing). Shown as grey **create** until saved:
 
-| Title | Slug |
-|-------|------|
-| 404 - Not found | `not-found` |
-| 500 - Internal error | `internal-error` |
-| 504 - Timeout | `timeout` |
+| Title | Slug | HTTP status when rendered |
+|-------|------|---------------------------|
+| 404 - Not found | `not-found` | 404 |
+| 500 - Internal error | `internal-error` | 500 |
+| 504 - Timeout | `timeout` | 504 |
 
-`show_404()` redirects to `/not-found/` when that slug is in the route cache (one clean page request — no nested page build).
+`show_404()` redirects to `/not-found/` when that slug is in the route cache (page saved). A reserved slug that is **not** saved is HTTP 500 (log to `errors_log`; use `/internal-error/` if that page is saved with a layout, else red-frame HTML). Reserved-slug checks on 404 are cheap (three system names, or one list-template definition) — they do not scan all panel JSON.
+
+Empty `meta.layout` on a real page is also HTTP 500 (do not include `cms/layouts/.tpl.php`).
 
 **PHP max execution time:** after API branching, front requests register a shutdown handler ([`system/helpers/error_helper.php`](../../../system/helpers/error_helper.php)). On `Maximum execution time…` fatal: HTTP 504 + soft redirect (`meta refresh`) to `/timeout/` when not already there, and minimal HTML “Script timeout. Click here” linking to site root. Module **API** scripts do not register this handler (normal fatals).
 

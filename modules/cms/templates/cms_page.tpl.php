@@ -52,6 +52,9 @@
 		<input type="hidden" class="cms_page_sort" name="sort" value="<?php print($page['sort']); ?>">
 		<input type="hidden" class="cms_page_position" name="position" value="<?= $page['position'] ?>">
 		<input type="hidden" class="cms_page_status" name="cms_page_status" value="<?= !empty($page_status) ? 1 : 0 ?>">
+		<input type="hidden" class="cms_page_class" name="page_class" value="<?= htmlspecialchars((string)($page_class ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+		<input type="hidden" class="cms_page_list_panel" name="list_panel" value="<?= htmlspecialchars((string)($page['list_panel'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+		<input type="hidden" class="cms_page_reserved_new" name="reserved_new" value="<?= !empty($reserved_new) ? 1 : 0 ?>">
 		
 		<div class="cms_page_content">
 			<div class="cms_column">

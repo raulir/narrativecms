@@ -13,3 +13,7 @@ Provider for **energy_price_forecast** (agileforecast.co.uk). Does **not** write
 ## Cache
 
 - `cache/agileforecast_raw_{REGION}.json`
+- TTL **`cache_minutes`**. Network only when the file is older than TTL (or missing).
+- HTTP / invalid JSON / no `prices`: **keep** the previous file (any age) and return it.
+- HTTP ok with a **shorter** future map: **merge** — keep the longer cached tail; new overlapping slots win.
+- Energy history: domain writes **all future** forecast slots (14 d cap). Not clipped to the kiosk graph window.

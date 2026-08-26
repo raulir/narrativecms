@@ -58,6 +58,10 @@ class cache {
 			return false;
 		}
 
+		if (session_status() === PHP_SESSION_ACTIVE){
+			session_write_close();
+		}
+
 		header('Content-Type: text/html; charset=UTF-8');
 		header('X-CMS-Page-Cache: HIT');
 		print(file_get_contents($html_path));

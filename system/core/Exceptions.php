@@ -102,7 +102,72 @@ class Exceptions {
 			return;
 		}
 
+		// Reserved slug with no saved CMS page → 500 (not 404)
+		if ($this->_reserved_slug_missing_page($page)){
+			$this->show_500('Reserved page not created [slug='.trim((string)$page, '/').']', $page);
+			return;
+		}
+
 		_html_error(''.$heading.' - '.$message, 404, ['backtrace' => 2]);
+	}
+
+	/**
+	 * HTTP 500. Prefer saved system page internal-error; else red-frame HTML.
+	 * Caller should already have cms_log_http_500 / cms_show_500.
+	 */
+	function show_500($message = '', $failed_page = ''){
+
+		$heading = '500 Internal Server Error';
+		$text = trim((string)$message);
+		if ($text === ''){
+			$text = 'The page could not be displayed.';
+		}
+
+		if (function_exists('cms_log_http_500')){
+			cms_log_http_500($text);
+		} else {
+			error_log('HTTP 500: '.$text);
+		}
+
+		if ($this->_redirect_system_error_page('internal-error', $failed_page)){
+			return;
+		}
+
+		_html_error($heading.' - '.$text, 500, ['backtrace' => 2]);
+	}
+
+	function _reserved_slug_missing_page($page){
+
+		$slug = trim((string)$page, '/');
+		if ($slug === '' || strpos($slug, '=') !== false){
+			return false;
+		}
+
+		// Keep in sync with cms_page_model::get_system_page_defs()
+		$maybe_system = ($slug === 'not-found' || $slug === 'internal-error' || $slug === 'timeout');
+		if (!$maybe_system && strpos($slug, '_') === false){
+			return false;
+		}
+
+		if (!function_exists('get_instance')){
+			return false;
+		}
+
+		$CI =& get_instance();
+		if (empty($CI) || empty($CI->load)){
+			return false;
+		}
+
+		$CI->load->model('cms/cms_page_model');
+		if (empty($CI->cms_page_model) || !method_exists($CI->cms_page_model, 'is_reserved_slug')){
+			return false;
+		}
+
+		if (!$CI->cms_page_model->is_reserved_slug($slug)){
+			return false;
+		}
+
+		return !$CI->cms_page_model->reserved_page_exists($slug);
 	}
 
 	/**

@@ -22,10 +22,11 @@ class cms_pages extends \Controller {
 
 		$this->load->model('cms/cms_page_model');
 
-		// Reserve list templates + system pages (empty shells)
+		// Sync class/slug on existing special pages only (does not insert)
 		$this->cms_page_model->ensure_special_pages();
 
 		$pages = $this->cms_page_model->get_cms_pages();
+		$virtual = $this->cms_page_model->get_virtual_reserved_pages();
 
 		// Right column: module layout positions (header/footer)
 		$return['positions'] = $this->cms_page_model->get_positions();
@@ -59,6 +60,13 @@ class cms_pages extends \Controller {
 				$return['main_pages'][$class][] = $page;
 			}
 
+		}
+
+		foreach ($virtual as $page){
+			$class = $this->cms_page_model->get_page_class($page);
+			if ($class === 'list' || $class === 'system'){
+				$return['main_pages'][$class][] = $page;
+			}
 		}
 
 		// Alphabetical per section; landing page first in user Pages

@@ -54,7 +54,18 @@ class page_translate extends \Controller {
 			$types = $types_raw;
 		}
 
-		$items = $this->_list_translatable_panels($cms_page_id, $unit_id, $types);
+		$term_ids_raw = $this->input->post('term_ids');
+		$term_ids = [];
+		if (is_string($term_ids_raw) && $term_ids_raw !== ''){
+			$decoded_ids = cms_json_decode($term_ids_raw, 'page_translate_term_ids');
+			if (is_array($decoded_ids)){
+				$term_ids = $decoded_ids;
+			}
+		} else if (is_array($term_ids_raw)){
+			$term_ids = $term_ids_raw;
+		}
+
+		$items = $this->_list_translatable_panels($cms_page_id, $unit_id, $types, $term_ids);
 
 		print(json_encode(['result' => ['ok' => 1, 'items' => $items]], JSON_PRETTY_PRINT));
 		die();
@@ -139,7 +150,7 @@ class page_translate extends \Controller {
 
 	}
 
-	function _list_translatable_panels($cms_page_id, $unit_id = 0, $types = []){
+	function _list_translatable_panels($cms_page_id, $unit_id = 0, $types = [], $term_ids = []){
 
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_translation_model');
@@ -227,7 +238,7 @@ class page_translate extends \Controller {
 
 		$settings_panel_names = array_keys($panel_names_on_page);
 
-		$extra_names = $this->_get_extra_settings_panel_names($cms_page_id, $unit_id, $types, $panel_names_on_page);
+		$extra_names = $this->_get_extra_settings_panel_names($cms_page_id, $unit_id, $types, $panel_names_on_page, $term_ids);
 		foreach ($extra_names as $extra_name){
 			if (!in_array($extra_name, $settings_panel_names, true)){
 				$settings_panel_names[] = $extra_name;
@@ -260,7 +271,7 @@ class page_translate extends \Controller {
 		}
 
 		// List-item extras (e.g. unit material) — by cms_page_panel_id
-		foreach ($this->_get_extra_panels($cms_page_id, $unit_id, $types, $panel_names_on_page) as $extra){
+		foreach ($this->_get_extra_panels($cms_page_id, $unit_id, $types, $panel_names_on_page, $term_ids) as $extra){
 			$id = (int)($extra['id'] ?? 0);
 			if ($id < 1){
 				continue;
@@ -294,7 +305,7 @@ class page_translate extends \Controller {
 
 	}
 
-	function _get_extra_settings_panel_names($cms_page_id, $unit_id, $types, $panel_names_on_page){
+	function _get_extra_settings_panel_names($cms_page_id, $unit_id, $types, $panel_names_on_page, $term_ids = []){
 
 		$names = [];
 		$CI =& get_instance();
@@ -302,6 +313,7 @@ class page_translate extends \Controller {
 				'cms_page_id' => $cms_page_id,
 				'unit_id' => $unit_id,
 				'types' => $types,
+				'term_ids' => $term_ids,
 				'panel_names' => array_keys($panel_names_on_page),
 		];
 
@@ -335,7 +347,7 @@ class page_translate extends \Controller {
 	/**
 	 * Module hook: full panel rows (materials, subscription products, …).
 	 */
-	function _get_extra_panels($cms_page_id, $unit_id, $types, $panel_names_on_page){
+	function _get_extra_panels($cms_page_id, $unit_id, $types, $panel_names_on_page, $term_ids = []){
 
 		$items = [];
 		$CI =& get_instance();
@@ -343,6 +355,7 @@ class page_translate extends \Controller {
 				'cms_page_id' => $cms_page_id,
 				'unit_id' => $unit_id,
 				'types' => $types,
+				'term_ids' => $term_ids,
 				'panel_names' => array_keys($panel_names_on_page),
 		];
 

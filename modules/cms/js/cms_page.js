@@ -14,13 +14,10 @@ function cms_page_toolbar_title(){
 
 }
 
-function cms_page_save(params){
-	
-	params = params || {'success':function(){}};
+function cms_page_save_fields(){
 
-	get_ajax('cms/cms_page_operations', {
+	return {
 		'cms_page_id': $('.cms_page_id').val(),
-		'do': 'cms_page_save',
 		'language': $('.cms_language_select_current').data('language'),
 		'sort': $('.cms_page_sort').val(),
 		'title': $('#page_title').val(),
@@ -35,19 +32,39 @@ function cms_page_save(params){
 		'video_id': $('#cms_page_video_id').val(),
 		'layout': $('.cms_page_layout').val(),
 		'position': $('.cms_page_position').val(),
-		'positions': $('.cms_page_positions > select').map((ok, ob) => {return {name:$(ob).attr('name'), value:$(ob).val()}}).get(),
+		'page_class': $('.cms_page_class').val(),
+		'list_panel': $('.cms_page_list_panel').val(),
+		'reserved_new': $('.cms_page_reserved_new').val(),
+		'positions': $('.cms_page_positions > select').map((ok, ob) => {return {name:$(ob).attr('name'), value:$(ob).val()}}).get()
+	}
+
+}
+
+function cms_page_save(params){
+	
+	params = params || {'success':function(){}};
+
+	get_ajax('cms/cms_page_operations', $.extend({}, cms_page_save_fields(), {
+		'do': 'cms_page_save',
 		'success': function(data){
+
+			var result = (data && data.result) ? data.result : {}
+			if (result.ok === 0){
+				cms_notification(result.error || 'Cannot save page', 3, 'error')
+				return
+			}
 			
 			// update possible changes on form
-			$('.cms_page_id').val(data.result.cms_page_id)
-			$('.cms_page_slug').val(data.result.slug),
+			$('.cms_page_id').val(result.cms_page_id)
+			$('.cms_page_slug').val(result.slug)
+			$('.cms_page_reserved_new').val('0')
 			cms_notification('Page saved', 3);
 
-			if (data.result && data.result.slug){
+			if (result.slug){
 				var $preview = $('.cms_preview_container').first();
 				if ($preview.length){
-					$preview.data('preview_url', _cms_base + data.result.slug + '/');
-					$preview.attr('data-preview_url', _cms_base + data.result.slug + '/');
+					$preview.data('preview_url', _cms_base + result.slug + '/');
+					$preview.attr('data-preview_url', _cms_base + result.slug + '/');
 				}
 			}
 
@@ -66,7 +83,7 @@ function cms_page_save(params){
 			params.success(data);
 			
 		}
-	})
+	}))
 
 }
 

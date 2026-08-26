@@ -76,18 +76,35 @@
 
 	<?php foreach($pages as $page): ?>
 
+		<?php
+			$reserved = !empty($page['reserved']);
+			$landing = !$reserved && (int)($page['cms_page_id'] ?? 0) === (int)($GLOBALS['config']['landing_page']['_value'] ?? 0);
+			$create_qs = '';
+			if ($reserved){
+				$create_qs = 'page_class='.rawurlencode((string)($page['page_class'] ?? '')).
+						'&slug='.rawurlencode((string)($page['slug'] ?? ''));
+				if (!empty($page['list_panel'])){
+					$create_qs .= '&list_panel='.rawurlencode((string)$page['list_panel']);
+				}
+			}
+		?>
 		<li class="cms_pages_page
-				<?= !empty($page['status']) ? ' cms_item_hidden ' : '' ?>
-				<?= $page['cms_page_id'] == $GLOBALS['config']['landing_page']['_value'] ? ' cms_pages_page_landing ' : '' ?>">
+				<?= !empty($page['status']) && !$reserved ? ' cms_item_hidden ' : '' ?>
+				<?= $reserved ? ' cms_pages_page_reserved ' : '' ?>
+				<?= $landing ? ' cms_pages_page_landing ' : '' ?>">
 		
-			<?php if($page['cms_page_id'] == $GLOBALS['config']['landing_page']['_value']): ?>
+			<?php if($landing): ?>
 				<div class="cms_pages_landing" <?php _ib('cms/cms_landing.png', 16) ?>></div>
 			<?php endif ?>
 
 			<div class="cms_pages_label"><?= !empty($page['title']) ? $page['title'] : '[ no title ]' ?></div>
-			<a class="cms_small_button" <?php _lh('admin/page/' . $page['cms_page_id']) ?>>edit</a>
-			
-			<a class="cms_pages_link" <?php _lh('admin/page/' . $page['cms_page_id']) ?>></a>
+			<?php if ($reserved): ?>
+				<a class="cms_small_button" href="<?= $GLOBALS['config']['base_url'] ?>admin/page/0/?<?= $create_qs ?>">create</a>
+				<a class="cms_pages_link" href="<?= $GLOBALS['config']['base_url'] ?>admin/page/0/?<?= $create_qs ?>"></a>
+			<?php else: ?>
+				<a class="cms_small_button" <?php _lh('admin/page/' . $page['cms_page_id']) ?>>edit</a>
+				<a class="cms_pages_link" <?php _lh('admin/page/' . $page['cms_page_id']) ?>></a>
+			<?php endif ?>
 		
 		</li>
 

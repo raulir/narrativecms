@@ -21,6 +21,7 @@ class cms_user_login extends \Controller {
 			if (!empty($cms_user_data)){
 
 				$_SESSION['cms_user'] = $cms_user_data;
+				cms_session_mark_cms_password_checked();
 
 				header('Location: '.$GLOBALS['config']['base_url'].'admin/', true, 302);
 				exit();
