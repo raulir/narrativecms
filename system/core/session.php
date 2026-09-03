@@ -5,6 +5,8 @@
  * request needs the site session (front pages, admin). Module APIs should boot
  * only if a session cookie is already present (cms_session_has_cookie()).
  * Cookie/GC from Site setting session_length_days (default 30).
+ * Host JSON session_path (e.g. cache/sessions) is ini_set before session_start
+ * and overrides php.ini session.save_path for this request.
  */
 
 if (!function_exists('cms_session_boot')){
@@ -40,6 +42,75 @@ if (!function_exists('cms_session_boot')){
 		}
 
 		return $session_days * 86400;
+
+	}
+
+	function cms_session_cookie_path(){
+
+		$base = (string)($GLOBALS['config']['base_url'] ?? '/');
+		if ($base === '' || $base === '/'){
+			return '/';
+		}
+
+		$path = parse_url($base, PHP_URL_PATH);
+		if (!is_string($path) || $path === ''){
+			$path = $base;
+		}
+		if (isset($path[0]) && $path[0] !== '/'){
+			$path = '/'.$path;
+		}
+		if ($path !== '/'){
+			$path = rtrim($path, '/').'/';
+		}
+
+		return $path === '' ? '/' : $path;
+
+	}
+
+	function cms_session_apply_save_path(){
+
+		$raw = trim(str_replace('\\', '/', (string)($GLOBALS['config']['session_path'] ?? '')));
+		if ($raw === '' || strpos($raw, '..') !== false){
+			return;
+		}
+
+		$base = rtrim(str_replace('\\', '/', (string)($GLOBALS['config']['base_path'] ?? '')), '/');
+		if ($base === ''){
+			return;
+		}
+
+		if (preg_match('#^([a-zA-Z]:)?/#', $raw)){
+			$path = $raw;
+			$base_slash = $base.'/';
+			if ($path !== $base && strpos($path.'/', $base_slash) !== 0 && strpos($path, $base_slash) !== 0){
+				error_log('cms_session: session_path outside base_path');
+				return;
+			}
+		} else {
+			$path = $base.'/'.ltrim($raw, '/');
+		}
+
+		if (!is_dir($path)){
+			if (!@mkdir($path, 0700, true) && !is_dir($path)){
+				error_log('cms_session: cannot create session_path');
+				return;
+			}
+			@file_put_contents($path.'/.htaccess', "Require all denied\n");
+		}
+
+		ini_set('session.save_path', $path);
+
+	}
+
+	function cms_session_send_cookie($session_seconds, $secure){
+
+		setcookie(session_name(), session_id(), [
+				'expires' => time() + (int)$session_seconds,
+				'path' => cms_session_cookie_path(),
+				'secure' => !empty($secure),
+				'httponly' => true,
+				'samesite' => 'Lax',
+		]);
 
 	}
 
@@ -95,11 +166,15 @@ if (!function_exists('cms_session_boot')){
 
 			$session_seconds = cms_session_length_seconds();
 			$secure = cms_session_cookie_is_secure();
+			$cookie_path = cms_session_cookie_path();
 
+			cms_session_apply_save_path();
 			ini_set('session.gc_maxlifetime', (string)$session_seconds);
+			ini_set('session.cookie_lifetime', (string)$session_seconds);
+			ini_set('session.use_strict_mode', '1');
 			session_set_cookie_params([
 					'lifetime' => $session_seconds,
-					'path' => '/',
+					'path' => $cookie_path,
 					'secure' => $secure,
 					'httponly' => true,
 					'samesite' => 'Lax',
@@ -107,20 +182,9 @@ if (!function_exists('cms_session_boot')){
 
 			session_start();
 
-			$session_cookie_at = (int)($_SESSION['_session_cookie_at'] ?? 0);
-			if ($session_cookie_at < 1){
-				$_SESSION['_session_cookie_at'] = time();
-			} else if ((time() - $session_cookie_at) >= 86400){
-				$cookie = session_get_cookie_params();
-				setcookie(session_name(), session_id(), [
-						'expires' => time() + $session_seconds,
-						'path' => $cookie['path'] !== '' ? $cookie['path'] : '/',
-						'domain' => $cookie['domain'] ?? '',
-						'secure' => !empty($cookie['secure']),
-						'httponly' => true,
-						'samesite' => 'Lax',
-				]);
-				$_SESSION['_session_cookie_at'] = time();
+			if (empty($_COOKIE[session_name()]) || empty($_SESSION['_session_cookie_ok'])){
+				cms_session_send_cookie($session_seconds, $secure);
+				$_SESSION['_session_cookie_ok'] = 1;
 			}
 
 			if (!empty($_SESSION['timezone'])){

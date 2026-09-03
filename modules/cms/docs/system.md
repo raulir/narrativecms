@@ -51,11 +51,12 @@ Include [`session.php`](../../../system/core/session.php) for helpers, then call
 | Piece | Behaviour |
 |-------|-----------|
 | Length | Site setting `session_length_days` (1–365, default 30). Cookie lifetime + `session.gc_maxlifetime`. Applies on the next request. |
-| Cookie | `httponly`, `SameSite=Lax`, `Secure` when HTTPS / port 443 / `X-Forwarded-Proto: https`. Sliding `setcookie` at most once per day (`$_SESSION['_session_cookie_at']`). |
-| Frontend login | `$_SESSION['user']` lasts for `session_length_days` of idle (session file GC). |
+| Files | Host JSON `session_path` (e.g. `"cache/sessions"`). `ini_set('session.save_path')` **before** `session_start()` overrides php.ini for this request. Host `sessionclean` still uses php.ini’s path (`/var/lib/php/session` on AlmaLinux), so files here are not deleted at 1440s. Happy path: `is_dir` + `ini_set`. `mkdir` + `.htaccess` `Require all denied` only if the directory is missing. |
+| Cookie | `httponly`, `SameSite=Lax`, `Secure` when HTTPS / port 443 / `X-Forwarded-Proto: https`. Path `/` (or subdirectory `base_url`). `Set-Cookie` with the 30-day expiry is sent when the request has no session cookie, or once per PHP session (`$_SESSION['_session_cookie_ok']`) so an old Session cookie is upgraded. `session.use_strict_mode` on. |
+| Frontend login | `$_SESSION['user']` lasts for `session_length_days` of idle (session file GC in `session_path`). |
 | CMS admin | Same cookie. `$_SESSION['cms_password_last_checked']` is set on password login. If missing or older than 24h, `cms_user` is cleared (admin must log in again). Frontend user is left intact. |
 | Page cache HIT | `session_write_close()` before sending cached HTML (releases the session lock). |
-| Other cookies | [`cookie_helper.php`](../../../system/helpers/cookie_helper.php) `cms_cookie_create()` **appends** `Set-Cookie` (`header(..., false)`). Replacing the header would drop `PHPSESSID`. |
+| Other cookies | [`cookie_helper.php`](../../../system/helpers/cookie_helper.php) `cms_cookie_create()` **appends** `Set-Cookie` (`header(..., false)`). Path `/` (or `base_url` subdirectory), `SameSite=Lax`, `Secure` on HTTPS. Replacing the header would drop `PHPSESSID`. |
 
 Helpers: `cms_session_mark_cms_password_checked()`, `cms_session_clear_cms_admin()`.
 

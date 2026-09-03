@@ -890,6 +890,27 @@ class cms_page_panel_model extends \Model {
 	}
 
 	/**
+	 * Parse control flag _invalidate from data array (not stored).
+	 * Returns [cleaned $data, true|false] — true = run HTML/page cache invalidation (default).
+	 */
+	function _extract_invalidate_flag($data){
+
+		if (!is_array($data) || !array_key_exists('_invalidate', $data)){
+			return [$data, true];
+		}
+
+		$raw = $data['_invalidate'];
+		unset($data['_invalidate']);
+
+		if ($raw === false || $raw === 0 || $raw === '0' || $raw === ''){
+			return [$data, false];
+		}
+
+		return [$data, true];
+
+	}
+
+	/**
 	 * Whether to recompute _title after update_cms_page_panel.
 	 *
 	 * @param bool $purge full panel replace
@@ -1044,6 +1065,7 @@ class cms_page_panel_model extends \Model {
 
 		// Control flag: not stored — true force title, false skip, null auto (see _should_refresh_panel_title)
 		list($data, $update_title_flag) = $this->_extract_update_title_flag($data);
+		list($data, $invalidate_flag) = $this->_extract_invalidate_flag($data);
 		// Requested purge (before settings-panel demotion) counts as full save for title auto
 		$requested_purge = !empty($purge);
 
@@ -1224,8 +1246,10 @@ class cms_page_panel_model extends \Model {
 			$this->_refresh_cached_title($cms_page_panel_id, $title_for_refresh);
 		}
 
-		$this->invalidate_html_cache($cms_page_panel_id);
-		$this->_invalidate_page_cache($cms_page_panel_id);
+		if ($invalidate_flag !== false){
+			$this->invalidate_html_cache($cms_page_panel_id);
+			$this->_invalidate_page_cache($cms_page_panel_id);
+		}
 		
 	}
 
@@ -1290,6 +1314,7 @@ class cms_page_panel_model extends \Model {
 
 		// Optional skip: _update_title => 0 after create (rare bulk load that sets title later)
 		list($data, $update_title_flag) = $this->_extract_update_title_flag($data);
+		list($data, $invalidate_flag) = $this->_extract_invalidate_flag($data);
 		
 		if (!empty($data['panel_params']) && is_array($data['panel_params'])){
 			$data = array_merge($data['panel_params'], $data);
@@ -1393,9 +1418,11 @@ class cms_page_panel_model extends \Model {
 		if ($update_title_flag !== false){
 			$this->_refresh_cached_title($insert_id, $data['title'] ?? null);
 		}
-		
-		$this->invalidate_html_cache($insert_id);
-		$this->_invalidate_page_cache($insert_id);
+
+		if ($invalidate_flag !== false){
+			$this->invalidate_html_cache($insert_id);
+			$this->_invalidate_page_cache($insert_id);
+		}
 		
 		return $insert_id;
 		

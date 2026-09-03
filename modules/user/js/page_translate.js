@@ -25,6 +25,9 @@ function page_translate_unit_context(){
 	if (typeof engine_init_unit_id !== 'undefined' && engine_init_unit_id){
 		unit_id = parseInt(engine_init_unit_id, 10) || 0
 	}
+	if (unit_id < 1 && typeof music_unit_id !== 'undefined' && music_unit_id){
+		unit_id = parseInt(music_unit_id, 10) || 0
+	}
 
 	if (typeof music_set !== 'undefined' && Array.isArray(music_set)){
 		var seen = {}
@@ -182,6 +185,8 @@ function page_translate_render_list($button, items){
 			$opt.addClass('page_translate_option_product')
 		} else if (kind === 'term'){
 			$opt.addClass('page_translate_option_term')
+		} else if (kind === 'unit'){
+			$opt.addClass('page_translate_option_unit')
 		}
 
 		$list.append($opt)

@@ -6,7 +6,7 @@ CMS list rows use a cached admin title stored as panel param **`_title`**.
 
 | When | Behaviour |
 |------|-----------|
-| **`create_cms_page_panel`** | Always runs full title process after params are written (`panel_heading` / `heading` / badges). Pass `_update_title => 0` only for rare bulk creates that set the title later. |
+| **`create_cms_page_panel`** | Always runs full title process after params are written (`panel_heading` / `heading` / badges). Pass `_update_title => 0` only for rare bulk creates that set the title later (e.g. engine prepare for `music/exercise`). |
 | **`update_cms_page_panel`** | Runs full title process only when needed (see below). |
 | **List UI** | If `_title` empty, may lazy-refresh once via `get_panel_admin_title`. |
 
@@ -28,6 +28,15 @@ CMS list rows use a cached admin title stored as panel param **`_title`**.
 **Auto skip when** the update only touches meta keys such as `show`, `sort`, `sync_needed`, `shopify_checked_at`, `last_update`, `update_time`, `update_cms_user_id`, image hash stamps, etc.
 
 List-item titles prefer `panel_heading()` when defined, else definition `heading`, else a fallback. Do not put HTML badges into the `cms_page_panel.title` column — badges live in `_title`.
+
+### Create/update flag `_invalidate` (not stored)
+
+| Value | Meaning |
+|-------|---------|
+| omitted / `1` / true | Run `invalidate_html_cache` + page-cache invalidation (default) |
+| `0` / false | Skip both — for bulk/prepare creates that are not shown on a public page |
+
+Engine prepare uses `_invalidate => 0` when inserting `music/exercise` rows. Normal CMS admin create/save still invalidates.
 
 ## Save integrity (`ensure_data`, #114)
 

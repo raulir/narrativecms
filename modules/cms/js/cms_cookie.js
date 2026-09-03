@@ -1,33 +1,34 @@
 function cms_cookie_create(name, value, days) {
-	
-    var expires = ''
-    var secure = ''
 
-    if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000))
-        expires = '; expires=' + date.toGMTString()
-    }
-    
-    if (location.protocol === 'https:') {
-        secure = '; SameSite=None; Secure'
-    }
+	var expires = ''
+	var path = (typeof _cms_base === 'string' && _cms_base) ? _cms_base : '/'
+	var flags = '; path=' + path + '; SameSite=Lax'
 
-    document.cookie = encodeURIComponent(name) + '=' + encodeURIComponent(value) + expires + '; path=' + _cms_base + secure
+	if (days) {
+		var date = new Date()
+		date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000))
+		expires = '; expires=' + date.toGMTString()
+	}
+
+	if (location.protocol === 'https:') {
+		flags += '; Secure'
+	}
+
+	document.cookie = encodeURIComponent(name) + '=' + encodeURIComponent(value) + expires + flags
 
 }
 
 function cms_cookie_read(name) {
-	
-    var nameeq = encodeURIComponent(name) + '='
-    var ca = document.cookie.split(';')
-    for (var i = 0; i < ca.length; i++) {
-        var c = ca[i]
-        while (c.charAt(0) === ' ') c = c.substring(1, c.length)
-        if (c.indexOf(nameeq) === 0) return decodeURIComponent(c.substring(nameeq.length, c.length))
-    }
-    
-    return null
+
+	var nameeq = encodeURIComponent(name) + '='
+	var ca = document.cookie.split(';')
+	for (var i = 0; i < ca.length; i++) {
+		var c = ca[i]
+		while (c.charAt(0) === ' ') c = c.substring(1, c.length)
+		if (c.indexOf(nameeq) === 0) return decodeURIComponent(c.substring(nameeq.length, c.length))
+	}
+
+	return null
 
 }
 
