@@ -19,7 +19,11 @@ function _html_error($error, $exit = 0, $extra = []){
 		if (empty($extra['backtrace'])){
 			$extra['backtrace'] = 0;
 		}
-		$extra['location'] = basename($backtrace[$extra['backtrace']]['file']).':'.$backtrace[$extra['backtrace']]['line'];
+		$bt_file = $backtrace[$extra['backtrace']]['file'] ?? '';
+		$bt_line = (int)($backtrace[$extra['backtrace']]['line'] ?? 0);
+		$extra['location'] = function_exists('cms_error_loc_token')
+				? cms_error_loc_token($bt_file, $bt_line)
+				: (basename(str_replace('\\', '/', (string)$bt_file)).':'.$bt_line);
 	}
 
 	$return = ('<pre style="background-color: white; color: black; display: block; border: 0.1rem solid red; white-space: normal; '.
@@ -30,8 +34,33 @@ function _html_error($error, $exit = 0, $extra = []){
 	$return .= ($formatted);
 	$return .= ('</div></pre>');
 
-	if(empty($extra['silent']) && (!empty($GLOBALS['config']['errors_visible']) || empty($GLOBALS['config']['base_path']))){
+	$show = !empty($extra['force'])
+			|| (empty($extra['silent']) && (!empty($GLOBALS['config']['errors_visible']) || empty($GLOBALS['config']['base_path'])));
+	if ($show){
 		print($return);
+	}
+
+	if (empty($extra['nolog'])){
+		$plain = trim(html_entity_decode(strip_tags(str_replace(
+				['<br>', '<br/>', '<br />'],
+				' ',
+				$error
+		)), ENT_QUOTES, 'UTF-8'));
+		$plain = preg_replace('/\s+/', ' ', $plain);
+		if ($plain !== ''){
+			$code = (string)($extra['log_code'] ?? '');
+			if ($code === ''){
+				$code = !empty($exit) ? (string)(int)$exit : '500';
+				if ($code === '0'){
+					$code = '500';
+				}
+			}
+			if (function_exists('cms_log_cms')){
+				cms_log_cms($code, $plain, (string)($extra['location'] ?? ''));
+			} else {
+				error_log('CMS '.$code.' '.$plain);
+			}
+		}
 	}
 
 	if ($exit){

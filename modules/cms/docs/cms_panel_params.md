@@ -44,6 +44,8 @@ Optional definition flag `"ensure_data": "1"` makes `cms_page_panel_model` fill 
 
 The cached params blob (`cms_page_panel_param` name `''`) is only written if `json_encode` succeeds; encode errors are reported and the previous cache row is left alone.
 
+Param **`name`** is `VARCHAR(191)`. Nested repeater keys are `{repeater}.{000000}.{field}` — keep repeater `name`s short so the dotted path fits. Writes longer than 191 characters are rejected (`_html_error`); they are not truncated.
+
 ## `panel_params` is frontend-only
 
 `panel_params($params)` on a **site / page panel** (e.g. `music/engine`, `user/userforward`) runs when that panel is **rendered on the public site** (or via ajax panel / position load that builds frontend HTML).

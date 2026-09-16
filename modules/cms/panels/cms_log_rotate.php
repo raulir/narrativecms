@@ -58,6 +58,7 @@ class cms_log_rotate extends \Controller {
 		}
 		
 		$errors = [];
+		$errors_404 = [];
 		$skipped = [];
 		
 		foreach($lines as $line){
@@ -68,32 +69,21 @@ class cms_log_rotate extends \Controller {
 			}
 			
 			list($time, $error_text) = explode($explode_str, $line);
-		
-			$error_found = 0;
-			foreach($errors as $key => $error) {
-				if ($error['message'] == $error_text){
-					$errors[$key]['count'] += 1;
-					$errors[$key]['times'][] = trim($time, $trim_str);
-					$error_found = 1;
-				}
-			}
-		
-			if ($error_found == 0){
-				$errors[] = array(
-						'message' => $error_text,
-						'count' => 1,
-						'times' => array(trim($time, $trim_str)),
-				);
+			$time = trim($time, $trim_str);
+			if ($this->_is_cms_404_line($error_text)){
+				$this->_group_error($errors_404, $error_text, $time);
+			} else {
+				$this->_group_error($errors, $error_text, $time);
 			}
 		
 		}
 		
-		// Sort by count descending
-		usort($errors, function($a, $b){
-			return ((int)$b['count']) <=> ((int)$a['count']);
-		});
+		usort($errors, [$this, '_sort_errors_by_count']);
+		usort($errors_404, [$this, '_sort_errors_by_count']);
 
-		$has_errors = !empty($errors);
+		$has_php_errors = !empty($errors);
+		$has_404s = !empty($errors_404);
+		$has_errors = $has_php_errors || $has_404s;
 
 		// Empty report: email at most once per ~day (23h 45m since last real send)
 		if (!$has_errors){
@@ -120,14 +110,18 @@ class cms_log_rotate extends \Controller {
 		$text .= 'Server name: '.strtolower($_SERVER['SERVER_NAME'] ?? '')."\n";
 		$text .= 'Errors from: '.$email_filename."\n\n";
 
-		if ($has_errors){
-			$text .= 'Count - Last seen - Error'."\n";
-			foreach($errors as $error) {
-				$msg = $this->_enrich_error_message_with_page_titles($error['message']);
-				$text .= sprintf('%7s', $error['count']).' - '.$error['times'][(count($error['times']) - 1)].' - '.$msg;
-			}
+		if ($has_php_errors){
+			$text .= $this->_error_table($errors);
+		} else if ($has_404s){
+			$text .= "No PHP errors\n";
 		} else {
-			$text .= "(No new PHP errors since last report.)\n";
+			$text .= "No PHP or 404 errors since the last report.\n";
+		}
+
+		if ($has_404s){
+			$text .= "\n\n";
+			$text .= '<b>CMS 404 Page Not Found:</b>'."\n\n";
+			$text .= $this->_error_table($errors_404);
 		}
 		
 		if ($skipped){
@@ -172,12 +166,55 @@ class cms_log_rotate extends \Controller {
 
 		}
 
+		$unique = count($errors) + count($errors_404);
 		return [
 				'message' => $has_errors
-						? 'PHP errors report emailed ('.count($errors).' unique)'
+						? 'PHP errors report emailed ('.$unique.' unique)'
 						: 'Empty PHP errors report emailed (daily OK)',
 		];
 	
+	}
+
+	function _is_cms_404_line($error_text){
+
+		return strpos(ltrim((string)$error_text), 'CMS 404') === 0;
+
+	}
+
+	function _group_error(&$errors, $error_text, $time){
+
+		foreach ($errors as $key => $error){
+			if ($error['message'] == $error_text){
+				$errors[$key]['count'] += 1;
+				$errors[$key]['times'][] = $time;
+				return;
+			}
+		}
+
+		$errors[] = [
+				'message' => $error_text,
+				'count' => 1,
+				'times' => [$time],
+		];
+
+	}
+
+	function _sort_errors_by_count($a, $b){
+
+		return ((int)$b['count']) <=> ((int)$a['count']);
+
+	}
+
+	function _error_table($errors){
+
+		$text = 'Count - Last seen - Error'."\n";
+		foreach ($errors as $error){
+			$msg = $this->_enrich_error_message_with_page_titles($error['message']);
+			$text .= sprintf('%7s', $error['count']).' - '.$error['times'][(count($error['times']) - 1)].' - '.$msg;
+		}
+
+		return $text;
+
 	}
 
 	/**

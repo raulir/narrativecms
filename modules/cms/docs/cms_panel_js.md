@@ -92,6 +92,17 @@ Some panels delegate to `$.fn.*` plugins (`cms_images_lazy`, `cms_images_hq`, `c
 
 Panel files call `<panel>_init()` from `$(document).ready()` (or `$(() => ...)`). Re-init is triggered by repeaters, `cms_input_repeater_select_reinit`, or other CMS code calling the same init function again — safe because of `*_ok`.
 
+## Frontend resize / scroll
+
+Public site panel JS also exposes **`<panel>_resize`** and **`<panel>_scroll`**, even when the bodies are empty.
+
+On `$(document).ready()`:
+
+- bind `$(window).on('resize.cms', <panel>_resize)` and `$(window).on('scroll.cms', <panel>_scroll)`
+- call `<panel>_init()`, then `<panel>_resize()`, then `<panel>_scroll()` once
+
+Admin / CMS input field panels (`cms_input_*`) do not need these. Do not skip the stubs on frontend panels just because they are empty — they are the hook for later layout work and a consistent place to look.
+
 ## Exceptions
 
 - **`cms_page_panel_fields_init($root)`** (in `cms_page_panel.js`) — field-grid layout only; intentionally has no `*_ok` guard so repeaters/grid can re-run it after DOM changes.

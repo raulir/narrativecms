@@ -2,7 +2,7 @@
 
 How to develop in this CMS (PHP, JS, SCSS panels). Ships with the CMS installation so other projects can reuse the same rules.
 
-Related docs: [`system.md`](system.md) (bootstrap, Loader, Controller), [`cms_panel_js.md`](cms_panel_js.md), [`cms_module_extends.md`](cms_module_extends.md), [`access.md`](access.md), image/video docs under this folder.
+Related docs: [`system.md`](system.md) (bootstrap, Loader, Controller), [`cms_panel_js.md`](cms_panel_js.md), [`cms_module_extends.md`](cms_module_extends.md), [`access.md`](access.md), [`review.md`](review.md) (architecture review after a 4–16h slice), image/video docs under this folder.
 
 **Do not** put long product/project rules here — those live in the site module’s docs (e.g. `modules/music/docs/agents.md`).
 
@@ -59,6 +59,7 @@ Open that file when changing or debugging core loading, request lifecycle, or ro
 - Prefer simple structure: outer full-width container → inner fixed-width content (`100rem` / `120rem` / `max-width: 100%`) → positioned children inside that content box.
 - Do not set `cursor:` on public site panels when the custom cursors system is in use (it fights `elementsFromPoint`).
 - **SCSS numeric decimals:** use **at least one** and **at most two** digits after the decimal point for lengths and similar values (`8.0rem`, `1.25rem`, `100.0vh`, `0.0`). **Exception:** `letter-spacing` may use more precision when needed (e.g. `0.05em`).
+- **Module SCSS file** (`modules/<module>/css/<module>.scss`) is prepended when compiling each panel SCSS **and** emitted as its own top CSS (`cache/<module>__<module>.css`) on every page that renders a panel from that module. Create it only for shared tokens or base rules used by **several** panels. A variable used by one panel belongs at the top of that panel’s SCSS. Do **not** add an empty or vars-only module SCSS just so a panel can compile.
 
 ## HTTP from PHP
 
@@ -81,7 +82,7 @@ Open that file when changing or debugging core loading, request lifecycle, or ro
 
 | Context | What to do |
 |---------|------------|
-| **Frontend / public request** | Log a clear warning (project error log / `error_log` with module + reason). Soft-fail the feature if needed, but leave a trace. |
+| **Frontend / public request** | Log a clear warning with **`error_log_user($message)`** (not raw `error_log()`). Soft-fail the feature if needed, but leave a trace. |
 | **CMS admin / sync / tools UI** | Surface a **message or final status line** the operator can see (e.g. sync status `no graphql conf`). May **also** write the error log. |
 | **Missing config / scopes / host / token** | Explicit reason string (not an empty return with no side effects). Prefer reusable helpers that return `_reason` / flags **and** log or UI-warn once. |
 | **Optional / soft dependencies** | Soft-skip is fine; **silent** empty success is not. Example: Shopify REST works without GraphQL host, but sync must still say **`no graphql conf`**. |
@@ -97,6 +98,20 @@ Open that file when changing or debugging core loading, request lifecycle, or ro
 - Sanitize untrusted / external strings with **`cms_utf8_string()`** / **`cms_utf8_tree()`** (`system/helpers/string_helper.php`) — e.g. AI API responses, translation save, param cache rebuild.
 - HTTP status codes: **`set_status_header()`** in `system/helpers/error_helper.php` (not json_helper).
 - JSON: prefer `JSON_UNESCAPED_UNICODE` so multibyte stays readable Unicode in cache/API.
+
+## Module `config.json` → `panels`
+
+`panels` is the set of types that have a **web representation**: a public or ajax/embed template, and/or CSS/JS, and/or a panel controller used on the site.
+
+The page panel picker (`cms_panel_selector`) lists **every** entry here, including `flags: ["hidden"]`. Hidden only hides a panel from unfiltered `get_cms_panels()` (e.g. `cms_input_panel` with no `flag`).
+
+| Put in `panels` | Do not put in `panels` |
+|-----------------|------------------------|
+| Placeable page panels (`offer/bar`, `shop/products`, `shop/cart`) | List-only items: definition JSON + `cms_list` / FKs, no front template (`offer/offer`, `shop/collection`, `shop/collection_type`, `shop/product_item`, …) |
+| Product/category **pages** (`shop/product`, `shop/category`, `shop/subcategory` — `link_target` 1, site may extend the template) | Admin-only lists (`shop/order`, currencies, delivery, …) |
+| Embed/ajax fragments that still render HTML (`shop/products_grid`, `shop/product_thumb`) — use `flags: ["hidden"]` so they are not the default add-to-page choice | |
+
+List-only types live as `modules/<module>/definitions/<name>.json` and a `cms_menu` URL to `admin/cms_list/{module}__{panel}/`. Discovery for lists is the definition files, not `config.json` `panels`.
 
 ## Admin CMS menu (`config.json` → `cms_menu`)
 
@@ -392,7 +407,7 @@ Site module extends base panels via **`config.json` `"extends"`** (`target` / `s
 
 ## Panel JavaScript
 
-Each panel JS file exposes `<panel>_init($root)` and optionally `<panel>_destroy($root)`. Init guards use a `<panel>_ok` CSS class on the panel root — not `.data()` flags. Without `$root`, init scans the whole document; with `$root`, only that subtree. Repeater fields auto-call `{panel}_init` via `data-init_hooks`. Full contract: [`cms_panel_js.md`](cms_panel_js.md).
+Each panel JS file exposes `<panel>_init($root)` and optionally `<panel>_destroy($root)`. Init guards use a `<panel>_ok` CSS class on the panel root — not `.data()` flags. Without `$root`, init scans the whole document; with `$root`, only that subtree. Repeater fields auto-call `{panel}_init` via `data-init_hooks`. **Frontend** (public site) panel JS also includes `<panel>_resize` and `<panel>_scroll` (empty stubs are fine), bound on `window` as `resize.cms` / `scroll.cms` and called once after init. Full contract: [`cms_panel_js.md`](cms_panel_js.md).
 
 ## Images
 

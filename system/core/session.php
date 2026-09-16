@@ -83,7 +83,7 @@ if (!function_exists('cms_session_boot')){
 			$path = $raw;
 			$base_slash = $base.'/';
 			if ($path !== $base && strpos($path.'/', $base_slash) !== 0 && strpos($path, $base_slash) !== 0){
-				error_log('cms_session: session_path outside base_path');
+				error_log_user('cms_session: session_path outside base_path');
 				return;
 			}
 		} else {
@@ -92,7 +92,7 @@ if (!function_exists('cms_session_boot')){
 
 		if (!is_dir($path)){
 			if (!@mkdir($path, 0700, true) && !is_dir($path)){
-				error_log('cms_session: cannot create session_path');
+				error_log_user('cms_session: cannot create session_path');
 				return;
 			}
 			@file_put_contents($path.'/.htaccess', "Require all denied\n");

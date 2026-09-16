@@ -29,7 +29,7 @@ class cms_email_model extends \Model {
 	function send_mail($to, $subject, $body, $params = []){
 
 		if (empty($to) || empty($subject)){
-			error_log('cms_email_model send_mail: missing recipient or subject');
+			error_log_user('cms_email_model send_mail: missing recipient or subject');
 			return false;
 		}
 
@@ -44,7 +44,7 @@ class cms_email_model extends \Model {
 	/**
 	 * Process pending queue files. Called by cms/cms_email_queue cron panel.
 	 *
-	 * @return array{message?: string, processed: int, sent: int, failed: int, skipped: int, abandoned: int}
+	 * @return array{message?: string, processed: int, sent: int, failed: int, skipped: int, abandoned: int, waiting?: int}
 	 */
 	function process_mail_queue(){
 
@@ -62,11 +62,13 @@ class cms_email_model extends \Model {
 		];
 
 		if (!is_dir($dir)){
+			$stats['message'] = "email_queue empty\nnoop";
 			return $stats;
 		}
 
 		$files = glob($dir.DIRECTORY_SEPARATOR.'*.json');
 		if (empty($files)){
+			$stats['message'] = "email_queue empty\nnoop";
 			return $stats;
 		}
 
@@ -89,7 +91,7 @@ class cms_email_model extends \Model {
 
 			$item = json_decode($raw, true);
 			if (!is_array($item) || empty($item['to']) || empty($item['subject'])){
-				error_log('cms_email_model process_mail_queue: invalid queue file '.$path);
+				error_log_user('cms_email_model process_mail_queue: invalid queue file '.$path);
 				@unlink($path);
 				$stats['abandoned']++;
 				continue;
@@ -99,7 +101,7 @@ class cms_email_model extends \Model {
 			$last_try = (int)($item['last_try'] ?? 0);
 
 			if ($attempts >= $max_attempts){
-				error_log('cms_email_model process_mail_queue: abandoning after '.$attempts.
+				error_log_user('cms_email_model process_mail_queue: abandoning after '.$attempts.
 						' attempts to '.($item['to'] ?? '').' — '.($item['subject'] ?? '').
 						' — last_error: '.($item['last_error'] ?? ''));
 				@unlink($path);
@@ -119,7 +121,7 @@ class cms_email_model extends \Model {
 			$item['last_try'] = $now;
 			$item['last_error'] = '';
 			if (!$this->_write_queue_file($path, $item)){
-				error_log('cms_email_model process_mail_queue: failed to claim '.$path);
+				error_log_user('cms_email_model process_mail_queue: failed to claim '.$path);
 				$stats['failed']++;
 				continue;
 			}
@@ -146,7 +148,7 @@ class cms_email_model extends \Model {
 			$stats['failed']++;
 
 			if ($item['attempts'] >= $max_attempts){
-				error_log('cms_email_model process_mail_queue: max attempts reached for '.
+				error_log_user('cms_email_model process_mail_queue: max attempts reached for '.
 						$item['to'].' — '.$item['subject']);
 				@unlink($path);
 				$stats['abandoned']++;
@@ -154,11 +156,20 @@ class cms_email_model extends \Model {
 
 		}
 
+		$left = glob($dir.DIRECTORY_SEPARATOR.'*.json');
+		$waiting = is_array($left) ? count($left) : 0;
+		$stats['waiting'] = $waiting;
+
 		$stats['message'] = 'email_queue sent='.$stats['sent'].
 				' failed='.$stats['failed'].
 				' skipped='.$stats['skipped'].
 				' abandoned='.$stats['abandoned'].
-				' processed='.$stats['processed'];
+				' processed='.$stats['processed'].
+				' waiting='.$waiting;
+		if ($stats['sent'] === 0 && $stats['failed'] === 0 && $stats['abandoned'] === 0
+				&& $stats['processed'] === 0 && $waiting === 0){
+			$stats['message'] .= "\nnoop";
+		}
 
 		return $stats;
 
@@ -193,7 +204,7 @@ class cms_email_model extends \Model {
 		$dir = $this->_queue_dir();
 		if (!is_dir($dir)){
 			if (!@mkdir($dir, 0755, true) && !is_dir($dir)){
-				error_log('cms_email_model send_mail: cannot create queue dir '.$dir);
+				error_log_user('cms_email_model send_mail: cannot create queue dir '.$dir);
 				return false;
 			}
 		}
@@ -218,7 +229,7 @@ class cms_email_model extends \Model {
 		];
 
 		if (!$this->_write_queue_file($path, $item)){
-			error_log('cms_email_model send_mail: failed to write queue file for '.$to.' — '.$subject);
+			error_log_user('cms_email_model send_mail: failed to write queue file for '.$to.' — '.$subject);
 			return false;
 		}
 
@@ -389,7 +400,7 @@ class cms_email_model extends \Model {
 			return $sent;
 
 		} catch (\Exception $e) {
-			error_log('cms_email_model send_mail: SMTP send failed to '.$to.' — '.$subject.' — '.$e->getMessage());
+			error_log_user('cms_email_model send_mail: SMTP send failed to '.$to.' — '.$subject.' — '.$e->getMessage());
 			return false;
 		}
 
@@ -427,7 +438,7 @@ class cms_email_model extends \Model {
 		$sent = @mail($to, $subject, $mail_body, $header);
 
 		if (!$sent){
-			error_log('cms_email_model send_mail: PHP mail() failed to '.$to.' — '.$subject);
+			error_log_user('cms_email_model send_mail: PHP mail() failed to '.$to.' — '.$subject);
 		}
 
 		return $sent;

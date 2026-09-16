@@ -42,7 +42,7 @@ function gtag_init(){
 
 		if ($items.length == 0) return;
 		
-		ids = [];
+		var ids = [];
 		
 		$items.each(function(){
 			var $this = $(this)

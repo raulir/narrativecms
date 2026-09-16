@@ -58,7 +58,7 @@ class cms_page_panel_list_model extends \Model {
 		}
 
 		if (!is_array($filter)){
-			error_log('Bad filter in cms_page_panel_model list query!');
+			error_log_user('Bad filter in cms_page_panel_model list query!');
 			$filter = [];
 		}
 

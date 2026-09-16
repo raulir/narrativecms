@@ -71,46 +71,42 @@ function show_404($page = ''){
 
 function _exception_handler($severity, $message, $filepath, $line){
 
-	ini_set('display_errors', '0');
-
-	if ( ! empty($GLOBALS['config']['errors_log'])){
-		ini_set('error_log', $GLOBALS['config']['base_path'].$GLOBALS['config']['errors_log']);
+	if (function_exists('cms_errors_log_init')){
+		cms_errors_log_init();
+	} else {
+		ini_set('display_errors', '0');
 	}
 
 	if ($severity == E_STRICT){
-		return false;
+		return true;
 	}
 
-	$levels = [
-		E_ERROR => 'Error',
-		E_WARNING => 'Warning',
-		E_PARSE => 'Parsing Error',
-		E_NOTICE => 'Notice',
-		E_CORE_ERROR => 'Core Error',
-		E_CORE_WARNING => 'Core Warning',
-		E_COMPILE_ERROR => 'Compile Error',
-		E_COMPILE_WARNING => 'Compile Warning',
-		E_USER_ERROR => 'User Error',
-		E_USER_WARNING => 'User Warning',
-		E_USER_NOTICE => 'User Notice',
-		E_STRICT => 'Runtime Notice',
-	];
-
-	$severity = $levels[$severity] ?? $severity;
-
-	$filepath = str_replace('\\', '/', $filepath);
-	if (stristr($filepath, '/')){
-		$x = explode('/', $filepath);
-		$filepath = $x[count($x) - 2].'/'.end($x);
+	$word = function_exists('cms_php_severity_word') ? cms_php_severity_word($severity) : 'Error';
+	if (function_exists('cms_log_php')){
+		cms_log_php($word, $message, $filepath, $line);
 	}
 
-	if ( ! empty($GLOBALS['config']['errors_visible'])){
+	if ( ! empty($GLOBALS['config']['errors_visible']) && function_exists('_html_error')){
+		$loc = function_exists('cms_error_loc_token')
+				? cms_error_loc_token($filepath, $line)
+				: (basename(str_replace('\\', '/', (string)$filepath)).':'.$line);
 		$error_text = "<b>A PHP Error was encountered</b>\n".
-			'Severity: '.$severity."\n".
+			'Severity: '.$word."\n".
 			'Message: '.$message."\n";
-		_html_error($error_text, 0, ['location' => $filepath.':'.$line]);
+		_html_error($error_text, 0, ['location' => $loc, 'nolog' => 1]);
 	}
 
-	return false;
+	return true;
 
+}
+
+if (function_exists('cms_errors_log_init')){
+	cms_errors_log_init();
+}
+if (function_exists('cms_exception_handler')){
+	set_exception_handler('cms_exception_handler');
+}
+set_error_handler('_exception_handler');
+if (function_exists('cms_register_timeout_shutdown')){
+	cms_register_timeout_shutdown();
 }

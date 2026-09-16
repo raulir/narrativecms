@@ -97,18 +97,36 @@ class Exceptions {
 			
 		}
 
+		$uri = function_exists('cms_request_log_uri') ? cms_request_log_uri() : '';
+		if (function_exists('cms_log_cms')){
+			$ip = preg_replace('/\s+/', '', (string)($_SERVER['REMOTE_ADDR'] ?? ''));
+			$bits = ['Page Not Found'];
+			if ($ip !== ''){
+				$bits[] = $ip;
+			}
+			if ($uri !== ''){
+				$bits[] = $uri;
+			}
+			cms_log_cms('404', implode(' ', $bits));
+		}
+
 		// Redirect to public system page — single clean page build on next request
 		if ($this->_redirect_system_error_page('not-found', $page)){
 			return;
 		}
 
-		// Reserved slug with no saved CMS page → 500 (not 404)
+		// Reserved slug with no saved CMS page: stay on this URL, red frame
 		if ($this->_reserved_slug_missing_page($page)){
-			$this->show_500('Reserved page not created [slug='.trim((string)$page, '/').']', $page);
+			$slug = trim((string)$page, '/');
+			$loc = function_exists('cms_error_caller_location') ? cms_error_caller_location() : '';
+			_html_error('500 Internal Server Error ('.$slug.')', 500, [
+					'location' => $loc,
+					'force' => 1,
+			]);
 			return;
 		}
 
-		_html_error(''.$heading.' - '.$message, 404, ['backtrace' => 2]);
+		_html_error(''.$heading.' - '.$message, 404, ['backtrace' => 2, 'nolog' => 1, 'log_code' => '404']);
 	}
 
 	/**
@@ -125,15 +143,29 @@ class Exceptions {
 
 		if (function_exists('cms_log_http_500')){
 			cms_log_http_500($text);
+		} else if (function_exists('cms_log_cms')){
+			cms_log_cms('500', $text);
 		} else {
-			error_log('HTTP 500: '.$text);
+			error_log('CMS 500 '.$text);
 		}
 
 		if ($this->_redirect_system_error_page('internal-error', $failed_page)){
 			return;
 		}
 
-		_html_error($heading.' - '.$text, 500, ['backtrace' => 2]);
+		$slug = 'internal-error';
+		$failed = trim((string)$failed_page, '/');
+		if ($failed === 'timeout' || $failed === 'not-found' || $failed === 'internal-error'){
+			$slug = $failed;
+		}
+
+		$loc = function_exists('cms_error_caller_location') ? cms_error_caller_location() : '';
+		_html_error('500 Internal Server Error ('.$slug.')', 500, [
+				'location' => $loc,
+				'force' => 1,
+				'nolog' => 1,
+				'log_code' => '500',
+		]);
 	}
 
 	function _reserved_slug_missing_page($page){
@@ -208,6 +240,18 @@ class Exceptions {
 		// Only redirect if a visible public route exists for this system slug (DB)
 		if (!function_exists('cms_route_lookup_slug') || cms_route_lookup_slug($slug) === null){
 			return false;
+		}
+
+		// Page with no layout (or missing layout file) would 500 again — show fallback instead
+		if (function_exists('get_instance')){
+			$CI =& get_instance();
+			if (!empty($CI) && !empty($CI->load)){
+				$CI->load->model('cms/cms_page_model');
+				if (!empty($CI->cms_page_model) && method_exists($CI->cms_page_model, 'system_error_page_usable')
+						&& !$CI->cms_page_model->system_error_page_usable($slug)){
+					return false;
+				}
+			}
 		}
 
 		if (headers_sent() || empty($GLOBALS['config']['base_url'])){

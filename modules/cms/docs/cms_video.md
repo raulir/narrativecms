@@ -23,7 +23,7 @@ Triggered by:
 
 Skips when:
 
-- ffmpeg not configured / not found
+- ffmpeg not configured / not found (host JSON `ffmpeg`: full path with `<filename>`, e.g. `/usr/local/bin/<filename>`, or just `<filename>`). Name-only is resolved on PHP’s PATH **plus** `/usr/local/bin` (php-fpm often has only `/usr/bin`). Not the ssh root shell PATH.
 - ffprobe metadata fails
 - Same `videofile` path already in queue
 
@@ -33,7 +33,7 @@ Skips when:
 2. Cron runner: [`cms_helper_model::run_cron()`](../models/cms_helper_model.php) → `cms_video_encode::panel_action()` → `cms_video_model::process_encode_queue()`
 3. Also triggered on site visits when `cron_trigger: visits` (via `cms_cron_run.js` hitting `/cms/cron/`)
 
-Each cron tick processes **one** queue item (if allowed).
+Each cron tick processes **one** queue item (if allowed). The `/cms/cron/` response prefixes each task with `panel:` (e.g. `cms/cms_video_encode:`). Idle messages end with a last line `noop` (stripped on HTTP); those blocks are **not** written to `cache/cron.log`. Real work/errors are appended (`{time}` + output).
 
 ### Defer / skip conditions
 

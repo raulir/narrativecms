@@ -785,6 +785,44 @@ class cms_page_model extends \Model {
 	}
 
 	/**
+	 * System error page can be rendered (saved page + layout file).
+	 * Empty layout must not be used — that 500s again.
+	 */
+	function system_error_page_usable($slug){
+
+		$slug = trim((string)$slug, '/');
+		if ($slug === ''){
+			return false;
+		}
+
+		$page = $this->get_page_by_slug($slug);
+		if (empty($page['cms_page_id'])){
+			return false;
+		}
+
+		$layout = trim((string)($page['layout'] ?? ''));
+		if ($layout === ''){
+			return false;
+		}
+		if (!stristr($layout, '/')){
+			$layout = 'cms/'.$layout;
+		}
+		if ($layout === 'cms/default'){
+			$layout = 'cms/fixed';
+		}
+
+		$parts = explode('/', $layout, 2);
+		if (count($parts) !== 2 || $parts[0] === '' || $parts[1] === ''){
+			return false;
+		}
+
+		$file = $GLOBALS['config']['base_path'].'modules/'.$parts[0].'/layouts/'.$parts[1].'.tpl.php';
+
+		return is_file($file);
+
+	}
+
+	/**
 	 * Reserved list/system defs that have no cms_page row yet (admin list placeholders).
 	 */
 	function get_virtual_reserved_pages(){

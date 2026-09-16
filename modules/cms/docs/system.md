@@ -44,6 +44,24 @@ Rough order:
 
 **Config access:** `$GLOBALS['config']` — host files: `config/<host>.json`. Full load: `cms_config_load_full()` / [`cms_config.php`](../../../system/core/cms_config.php).
 
+### Errors
+
+Host JSON `errors_log` (e.g. `cache/errors_timmy.log`) is the log file (`ini_set` in [`cms_bootstrap.php`](../../../system/core/cms_bootstrap.php)). PHP still prefixes `[dd-Mon-YYYY HH:MM:SS TZ]`. Engine `log_errors` is off so the default `in /abs/path on line N` sentence is not written; handlers write:
+
+```
+[…] PHP Warning modules/…/article.php:34 Undefined array key "category_id"
+[…] PHP User modules/shopify/api/webhook.php:93 CMS error [shopify/webhook]: hmac mismatch
+[…] CMS 404 Page Not Found /blue-print/?something=11
+[…] CMS 500 system/core/controller_index.php:233 …
+[…] CMS Timeout system/helpers/error_helper.php:159 500 Internal Server Error (timeout)
+```
+
+App code uses `error_log_user($message)` (not raw `error_log()`). Call site is added automatically.
+
+File is project-relative. 404 has no file (path + query only; `#fragment` is not sent to the server). Daily cron `cms/cms_log_rotate` splits on `] ` (timestamp prefix). The email keeps PHP/other CMS errors in the first table and lists `CMS 404` rows in a second section (**CMS 404 Page Not Found:**). 404 log lines include the visitor IP.
+
+`errors_visible` only controls the red on-page frame, not whether the line is written.
+
 ### Session
 
 Include [`session.php`](../../../system/core/session.php) for helpers, then call `cms_session_boot()` when the request needs `$_SESSION`. Front pages / admin / ajax do this from [`cms.php`](../../../system/cms.php) after the module-API short-circuit. Light APIs (`cms/cron`, updater, sitemap, image resize, Stripe webhook) never boot a session. Analytics beacon reads a logged-in user only if a session cookie is **already** on the request (`cms_session_has_cookie()`); anonymous hits stay session-free. Do not call `session_start()` directly — PHP GC uses **this request’s** `gc_maxlifetime` and would otherwise wipe sessions at php.ini’s 1440s.

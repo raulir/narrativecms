@@ -29,7 +29,7 @@ Everything else (forms, webhooks, welcome mail, log rotate, Stripe notifications
 |-------|-------------|
 | Queue dir | `cache/email_queue/*.json` |
 | Cron panel | `cms/cms_email_queue` (`flag: cron`) |
-| Runner | CMS repeating tasks (`cms/cms_cron`) — add item, e.g. every **5 minutes** |
+| Runner | CMS repeating tasks (`cms/cms_cron`) — add item, e.g. every **5 minutes**. `/cms/cron/` prints `cms/cms_email_queue:` plus the queue line. Empty queue uses last line `noop` (HTTP only, not `cache/cron.log`). |
 | Process API | `cms_email_model::process_mail_queue()` |
 
 ### Queue file shape

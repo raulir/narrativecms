@@ -3,7 +3,8 @@
 /**
  * CMS error helpers: HTTP status, timeout handling.
  *
- * PHP max_execution_time: soft-redirect to system page /timeout/ + minimal HTML fallback.
+ * PHP max_execution_time: redirect to /timeout/ when that system page exists;
+ * otherwise stay on the current URL and print _html_error (timeout file:line).
  * Timeout shutdown registered only for front/router requests (not module API includes).
  */
 
@@ -83,6 +84,182 @@ function set_status_header($code = 200, $text = ''){
 
 }
 
+function cms_errors_log_init(){
+
+	if (empty($GLOBALS['config']['errors_log']) || empty($GLOBALS['config']['base_path'])){
+		return;
+	}
+	ini_set('error_log', $GLOBALS['config']['base_path'].$GLOBALS['config']['errors_log']);
+	ini_set('log_errors', '0');
+	ini_set('display_errors', '0');
+
+}
+
+function cms_project_rel_path($file){
+
+	$file = str_replace('\\', '/', (string)$file);
+	if ($file === ''){
+		return '';
+	}
+
+	$base = str_replace('\\', '/', (string)($GLOBALS['config']['base_path'] ?? ''));
+	$base = rtrim($base, '/').'/';
+	if ($base !== '/' && strncasecmp($file, $base, strlen($base)) === 0){
+		return ltrim(substr($file, strlen($base)), '/');
+	}
+
+	// Already project-relative
+	if ($file !== '' && $file[0] !== '/' && !preg_match('#^[A-Za-z]:/#', $file)){
+		return ltrim($file, '/');
+	}
+
+	if (strpos($file, '/') !== false){
+		$parts = explode('/', $file);
+		$n = count($parts);
+		if ($n >= 2){
+			return $parts[$n - 2].'/'.$parts[$n - 1];
+		}
+	}
+
+	return basename($file);
+
+}
+
+function cms_error_loc_token($file, $line = 0, $column = null){
+
+	$rel = cms_project_rel_path($file);
+	if ($rel === ''){
+		return '';
+	}
+	$line = (int)$line;
+	$token = $rel.($line > 0 ? ':'.$line : '');
+	if ($column !== null && $column !== '' && (int)$column > 0){
+		$token .= ':'.(int)$column;
+	}
+
+	return $token;
+
+}
+
+function cms_request_log_uri(){
+
+	$uri = (string)($_SERVER['REQUEST_URI'] ?? '');
+	if ($uri === ''){
+		$path = function_exists('cms_request_path') ? trim((string)cms_request_path(), '/') : '';
+		return $path !== '' ? '/'.$path : '/';
+	}
+
+	$base_path = (string)(parse_url((string)($GLOBALS['config']['base_url'] ?? '/'), PHP_URL_PATH) ?: '');
+	$base_path = '/'.trim($base_path, '/');
+	if ($base_path !== '/' && strpos($uri, $base_path) === 0){
+		$uri = substr($uri, strlen($base_path));
+		if ($uri === '' || $uri[0] !== '/'){
+			$uri = '/'.$uri;
+		}
+	}
+
+	return $uri !== '' ? $uri : '/';
+
+}
+
+function cms_error_one_line($text){
+
+	$text = html_entity_decode(strip_tags(str_replace(['<br>', '<br/>', '<br />'], ' ', (string)$text)), ENT_QUOTES, 'UTF-8');
+	$text = preg_replace('/\s+/', ' ', $text);
+
+	return trim((string)$text);
+
+}
+
+function cms_log_php($severity, $message, $file = '', $line = 0, $column = null){
+
+	cms_errors_log_init();
+	$severity = trim((string)$severity);
+	if ($severity === ''){
+		$severity = 'Error';
+	}
+	$msg = cms_error_one_line($message);
+	$loc = cms_error_loc_token($file, $line, $column);
+	$line_out = 'PHP '.$severity.($loc !== '' ? ' '.$loc : '').($msg !== '' ? ' '.$msg : '');
+	error_log($line_out);
+
+}
+
+function error_log_user($message){
+
+	$bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+	$frame = $bt[1] ?? $bt[0] ?? [];
+	cms_log_php('User', $message, (string)($frame['file'] ?? ''), (int)($frame['line'] ?? 0));
+
+}
+
+function cms_log_cms($code, $message, $file = '', $line = 0, $column = null){
+
+	cms_errors_log_init();
+	$code = trim((string)$code);
+	if ($code === ''){
+		$code = 'error';
+	}
+	$msg = cms_error_one_line($message);
+	if ((int)$line > 0){
+		$loc = cms_error_loc_token($file, $line, $column);
+	} else {
+		$loc = trim((string)$file);
+	}
+	$line_out = 'CMS '.$code.($loc !== '' ? ' '.$loc : '').($msg !== '' ? ' '.$msg : '');
+	error_log($line_out);
+
+}
+
+function cms_php_severity_word($severity){
+
+	$severity = (int)$severity;
+	if (defined('E_DEPRECATED') && $severity === E_DEPRECATED){
+		return 'Deprecated';
+	}
+	if (defined('E_USER_DEPRECATED') && $severity === E_USER_DEPRECATED){
+		return 'Deprecated';
+	}
+
+	$map = [
+			E_ERROR => 'Error',
+			E_WARNING => 'Warning',
+			E_PARSE => 'Error',
+			E_NOTICE => 'Notice',
+			E_CORE_ERROR => 'Error',
+			E_CORE_WARNING => 'Warning',
+			E_COMPILE_ERROR => 'Error',
+			E_COMPILE_WARNING => 'Warning',
+			E_USER_ERROR => 'Error',
+			E_USER_WARNING => 'Warning',
+			E_USER_NOTICE => 'Notice',
+			E_STRICT => 'Notice',
+			E_RECOVERABLE_ERROR => 'Error',
+	];
+
+	return $map[$severity] ?? 'Error';
+
+}
+
+function cms_exception_handler($e){
+
+	if (!($e instanceof \Throwable)){
+		return;
+	}
+	cms_log_php('Error', $e->getMessage(), $e->getFile(), $e->getLine());
+	if (!empty($GLOBALS['config']['errors_visible']) && function_exists('_html_error')){
+		_html_error(
+				'<b>Uncaught exception</b>'."\n".$e->getMessage(),
+				0,
+				[
+						'location' => cms_error_loc_token($e->getFile(), $e->getLine()),
+						'nolog' => 1,
+				]
+		);
+	}
+
+}
+
 function cms_register_timeout_shutdown(){
 
 	static $registered = false;
@@ -91,6 +268,64 @@ function cms_register_timeout_shutdown(){
 	}
 	$registered = true;
 	register_shutdown_function('cms_shutdown_timeout_handler');
+
+}
+
+/**
+ * First backtrace frame outside CMS error wrappers.
+ */
+function cms_error_caller_location(){
+
+	$skip = [
+			'cms.php' => true,
+			'Exceptions.php' => true,
+			'error_helper.php' => true,
+			'cms_bootstrap.php' => true,
+	];
+
+	foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) as $frame){
+		$file = str_replace('\\', '/', (string)($frame['file'] ?? ''));
+		if ($file === ''){
+			continue;
+		}
+		$base = basename($file);
+		if (!empty($skip[$base])){
+			continue;
+		}
+		return cms_error_loc_token($file, (int)($frame['line'] ?? 0));
+	}
+
+	return '';
+
+}
+
+/**
+ * Reserved system page exists and has a layout file.
+ */
+function cms_system_error_page_is_usable($slug){
+
+	$slug = trim((string)$slug, '/');
+	if ($slug === ''){
+		return false;
+	}
+
+	if (!function_exists('get_instance')){
+		return false;
+	}
+
+	try {
+		$CI =& get_instance();
+		if (empty($CI) || empty($CI->load)){
+			return false;
+		}
+		$CI->load->model('cms/cms_page_model');
+		if (empty($CI->cms_page_model) || !method_exists($CI->cms_page_model, 'system_error_page_usable')){
+			return false;
+		}
+		return (bool)$CI->cms_page_model->system_error_page_usable($slug);
+	} catch (\Throwable $e){
+		return false;
+	}
 
 }
 
@@ -117,21 +352,49 @@ function cms_shutdown_timeout_handler(){
 	if ($msg === ''){
 		return;
 	}
-	if (stripos($msg, 'Maximum execution time') === false
-			&& stripos($msg, 'max_execution_time') === false){
+
+	$is_timeout = (stripos($msg, 'Maximum execution time') !== false
+			|| stripos($msg, 'max_execution_time') !== false);
+
+	if (!$is_timeout){
+		cms_log_php(
+				cms_php_severity_word((int)($error['type'] ?? E_ERROR)),
+				$msg,
+				(string)($error['file'] ?? ''),
+				(int)($error['line'] ?? 0)
+		);
 		return;
 	}
 
 	$GLOBALS['cms_timeout_handling'] = 1;
 
+	$file = str_replace('\\', '/', (string)($error['file'] ?? ''));
+	$line = (int)($error['line'] ?? 0);
+	$loc = cms_error_loc_token($file, $line);
+
+	cms_log_cms('Timeout', '500 Internal Server Error (timeout)', $file, $line);
+
 	$base = !empty($GLOBALS['config']['base_url']) ? $GLOBALS['config']['base_url'] : '/';
 	$base = rtrim((string)$base, '/').'/';
-	$timeout_url = $base.'timeout/';
 
-	// Loop guard: already on system timeout page → static HTML only (no meta refresh)
 	$on_timeout_page = cms_request_is_timeout_slug();
+	$usable = !$on_timeout_page && cms_system_error_page_is_usable('timeout');
 
-	cms_timeout_output_html($base, $on_timeout_page ? null : $timeout_url);
+	if ($usable && !headers_sent()){
+		cms_timeout_output_html($base, $base.'timeout/');
+		exit;
+	}
+
+	if (function_exists('_html_error')){
+		_html_error('500 Internal Server Error (timeout)', 500, [
+				'location' => $loc,
+				'force' => 1,
+				'nolog' => 1,
+				'log_code' => 'Timeout',
+		]);
+	} else {
+		cms_timeout_output_html($base, null);
+	}
 	exit;
 
 }
@@ -203,16 +466,17 @@ function cms_timeout_output_html($home_url, $timeout_url = null){
  */
 function cms_log_http_500($message){
 
-	$uri = isset($_SERVER['REQUEST_URI']) ? (string)$_SERVER['REQUEST_URI'] : '';
-	error_log(
-			'HTTP 500: '.$message.
-			($uri !== '' ? ' [uri='.$uri.']' : '')
-	);
+	$uri = cms_request_log_uri();
+	$text = cms_error_one_line($message);
+	if ($uri !== '' && $uri !== '/'){
+		$text = ($text !== '' ? $text.' ' : '').$uri;
+	}
+	cms_log_cms('500', $text, cms_error_caller_location());
 
 }
 
 /**
- * HTTP 500: log, then system page /internal-error/ if saved, else red-frame _html_error.
+ * HTTP 500: log, then /internal-error/ if usable; else red-frame on the current URL.
  */
 function cms_show_500($message, $failed_page = ''){
 

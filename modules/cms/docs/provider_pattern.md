@@ -105,6 +105,8 @@ Only **enabled site modules** (site `modules` list) are scanned. Enable the prov
 | `energy_usage` | energy | octopusenergy/usage |
 | `energy_price_forecast` | energy | agileforecast/forecast |
 | `shop_checkout` | shop | shopify/checkout |
+| `shop_fulfilment` | shop (paid order lines) | shop/fulfilment_email |
+| `image_compose` | shop (product artwork onto a print background) | imagemaker/compose |
 | `subscription_checkout` | subscription | stripe/subscription_checkout |
 | `ai` | cms (translations, etc.) | xai/ai |
 
@@ -364,10 +366,10 @@ Never put vendor secrets on the domain panel.
 
 | Piece | Location |
 |-------|----------|
-| Domain | `shop` cart / `subscription` pricing |
-| Providers | `shopify` → `shop_checkout`; `stripe` → `subscription_checkout` |
-| Select | shop settings fields via `cms/cms_input_provides` |
-| Call | cart / checkout `run_action($provider, …)` |
+| Domain | `shop` cart / `subscription` pricing / product images |
+| Providers | `shopify` → `shop_checkout`; `stripe` → `subscription_checkout`; `imagemaker` → `image_compose` |
+| Select | shop settings fields via `cms/cms_input_provides` (`shop_checkout`, `image_compose`) |
+| Call | cart / checkout / `shop_image_model` → `run_action($provider, …)` |
 
 ---
 

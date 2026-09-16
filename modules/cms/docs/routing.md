@@ -95,11 +95,16 @@ Reserved main pages (`meta.page_class` = `system`), **non-numeric** slugs (numer
 | 500 - Internal error | `internal-error` | 500 |
 | 504 - Timeout | `timeout` | 504 |
 
-`show_404()` redirects to `/not-found/` when that slug is in the route cache (page saved). A reserved slug that is **not** saved is HTTP 500 (log to `errors_log`; use `/internal-error/` if that page is saved with a layout, else red-frame HTML). Reserved-slug checks on 404 are cheap (three system names, or one list-template definition) — they do not scan all panel JSON.
+`show_404()` redirects to `/not-found/` when that slug is in the route cache (page saved). A reserved slug that is **not** saved stays on the **current URL** (no bounce to `/timeout/` or `/internal-error/`): red `_html_error` frame `500 Internal Server Error (timeout)` (slug in brackets), location = the caller (timeout: PHP file:line that hit max execution time). Reserved-slug checks on 404 are cheap (three system names, or one list-template definition) — they do not scan all panel JSON.
 
 Empty `meta.layout` on a real page is also HTTP 500 (do not include `cms/layouts/.tpl.php`).
 
-**PHP max execution time:** after API branching, front requests register a shutdown handler ([`system/helpers/error_helper.php`](../../../system/helpers/error_helper.php)). On `Maximum execution time…` fatal: HTTP 504 + soft redirect (`meta refresh`) to `/timeout/` when not already there, and minimal HTML “Script timeout. Click here” linking to site root. Module **API** scripts do not register this handler (normal fatals).
+**PHP max execution time:** after API branching, front requests register a shutdown handler ([`system/helpers/error_helper.php`](../../../system/helpers/error_helper.php)). On `Maximum execution time…` fatal:
+
+- Timeout system page **usable** (saved + layout): HTTP 504 + soft redirect (`meta refresh`) to `/timeout/`.
+- Timeout page **not** created: keep the original URL (e.g. `/cards/`), print `500 Internal Server Error (timeout)` with location `filename.php:line` of the timeout. Same for missing `internal-error` / `not-found`.
+
+Module **API** scripts do not register this handler (normal fatals).
 
 ## Slug generation
 

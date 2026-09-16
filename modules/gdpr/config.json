@@ -15,14 +15,15 @@
 	],
 	"cms_menu":[
 		{
-			"id":"tools",
-			"name":"Tools"
+			"id":"cms_tools",
+			"name":"Tools",
+			"order":40
 		},
 		{
 			"id":"gdpr",
 			"name":"GDPR settings",
 			"url":"admin/panel_settings/gdpr__gdpr/",
-			"parent":"tools"
+			"parent":"cms_tools"
 		}
 	]
 }

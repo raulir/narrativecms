@@ -55,6 +55,9 @@ if (!function_exists(__NAMESPACE__.'\\recursive_keys')){
 }
 
 class cms_page_panel_model extends \Model {
+
+	/** Max length of cms_page_panel_param.name (schema VARCHAR). Nested repeater keys must fit. */
+	const PARAM_NAME_MAX = 191;
 	
 	var $default_language;
 	var $_panel_table_cache = [];
@@ -416,6 +419,20 @@ class cms_page_panel_model extends \Model {
 			
 	}
 	
+	function _param_name_too_long($name){
+
+		$name = (string)$name;
+		if ($name === '' || strlen($name) <= self::PARAM_NAME_MAX){
+			return false;
+		}
+
+		_html_error('cms_page_panel_param.name too long ('.strlen($name).' > '.self::PARAM_NAME_MAX.
+				'): '.$name.' — shorten the repeater/field name. Value not written.');
+
+		return true;
+
+	}
+
 	function _insert_param($cms_page_panel_id, $name, $value, $search = 0){
 		if (is_array($value)){
 			foreach($value as $_name => $_value){
@@ -427,6 +444,9 @@ class cms_page_panel_model extends \Model {
 				
 			}
 		} else {
+			if ($this->_param_name_too_long($name)){
+				return;
+			}
 			$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = ? , value = ? , search = ? ";
 			$this->db->query($sql, array($cms_page_panel_id, $name, $value, $search, ));
 		}
@@ -479,7 +499,10 @@ class cms_page_panel_model extends \Model {
 			
 		} else {
 
-				
+			if ($this->_param_name_too_long($name)){
+				return;
+			}
+
 			if (empty($translate)){
 				$translate = '';
 			}
@@ -1438,7 +1461,7 @@ class cms_page_panel_model extends \Model {
 	function delete_cms_page_panel($cms_page_panel_id){
 		
 		if (empty($cms_page_panel_id)){
-			error_log('Deleting empty block '.serialize(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)));
+			error_log_user('Deleting empty block '.serialize(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)));
 			return;
 		}
 		
@@ -1523,7 +1546,7 @@ class cms_page_panel_model extends \Model {
 		];
 
 		if (!is_array($filter)){
-			error_log('Bad filter in cms_page_panel_model!');
+			error_log_user('Bad filter in cms_page_panel_model!');
 			$filter = [];
 		}
 
