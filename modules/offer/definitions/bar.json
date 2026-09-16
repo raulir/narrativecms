@@ -1,0 +1,65 @@
+{
+	"version": "2",
+	"image": "//panel_bar.png",
+	"label": "Offer bar",
+	"description": "Bar with 3 offers on top of page",
+	"item": [
+		{
+			"type": "repeater",
+			"name": "items",
+			"label": "Emotes",
+			"fields": [
+				{
+					"type": "image",
+					"name": "image",
+					"label": "Image",
+					"category": "icon"
+				}
+			]
+		},
+		{
+			"type": "subtitle",
+			"label": "Design"
+		},
+		{
+			"type": "colour",
+			"name": "background",
+			"label": "Background",
+			"default": "#ffffff"
+		},
+		{
+			"type": "colour",
+			"name": "text_colour",
+			"label": "Text",
+			"default": "#000000"
+		},
+		{
+			"type": "colour",
+			"name": "bold_colour",
+			"label": "Bold",
+			"default": "#000000"
+		},
+		{
+			"type": "image",
+			"name": "arrow_left",
+			"label": "Arrow left",
+			"category": "icon"
+		},
+		{
+			"type": "image",
+			"name": "arrow_right",
+			"label": "Arrow right",
+			"category": "icon"
+		},
+		{
+			"type": "select",
+			"name": "endings",
+			"label": "Show end emotes",
+			"values": {
+				"no": "Don't show",
+				"yes": "Show"
+			},
+			"default": "no"
+		}
+	]
+}

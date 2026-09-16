@@ -1,0 +1,30 @@
+{
+	"name": "Offer",
+	"version": "0.0",
+	"panels": [
+		{
+			"id": "bar",
+			"name": "Offer bar"
+		}
+	],
+	"cms_menu": [
+		{
+			"id": "shop",
+			"name": "Shop",
+			"order": 200
+		},
+		{
+			"id": "shop_offer",
+			"name": "Offer",
+			"parent": "shop",
+			"order": 790
+		},
+		{
+			"id": "offers",
+			"name": "Offers",
+			"parent": "shop_offer",
+			"url": "admin/cms_list/offer__offer/",
+			"order": 10
+		}
+	]
+}

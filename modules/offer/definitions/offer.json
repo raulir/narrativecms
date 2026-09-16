@@ -1,0 +1,26 @@
+{
+	"version": "2",
+	"list": {
+		"list_title": "Offers",
+		"item_title": "Offer",
+		"filter_fields": {
+			"show": "-- show --"
+		},
+		"link_target": "0"
+	},
+	"item": [
+		{
+			"name": "heading",
+			"type": "textarea",
+			"label": "Heading",
+			"mandatory": "1",
+			"lines": "4",
+			"html": "B"
+		},
+		{
+			"name": "link",
+			"type": "link",
+			"label": "Link"
+		}
+	]
+}
