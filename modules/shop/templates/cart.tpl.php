@@ -1,12 +1,17 @@
 <div class="cart_container<?= !empty($cart_visible) ? ' cart_visible' : '' ?><?= empty($cart['number']) ? ' cart_empty' : '' ?>"
 		data-cart_quantity="<?= (int)($cart['number'] ?? 0) ?>"
+		data-cart_source="<?= htmlspecialchars($cart_source ?? '', ENT_QUOTES, 'UTF-8') ?>"
 		data-checkout_panel="<?= htmlspecialchars($checkout_panel ?? '', ENT_QUOTES, 'UTF-8') ?>"
-		data-checkout_missing="<?= !empty($checkout_provider_missing) ? '1' : '0' ?>">
+		data-checkout_missing="<?= !empty($checkout_provider_missing) ? '1' : '0' ?>"
+		data-mixed_source_error="<?= htmlspecialchars($mixed_source_error ?? '', ENT_QUOTES, 'UTF-8') ?>"
+		data-stock_error="<?= htmlspecialchars($stock_error ?? '', ENT_QUOTES, 'UTF-8') ?>"
+		data-missing_variant_error="<?= htmlspecialchars($missing_variant_error ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
 	<div class="cart_content">
 	<div class="cart_area">
 
-		<div class="cart_label"><?= $cart['number_text'] ?></div>
+		<div class="cart_label cart_label_desktop"><?= $cart['number_text'] ?></div>
+		<div class="cart_label cart_label_mobile"><?= $cart['number_text_mobile'] ?></div>
 
 <?php if (empty($cart_details)): ?>
 
@@ -50,6 +55,9 @@
 					<div class="cart_popup_total_label"><?= $total_label ?></div>
 					<div class="cart_popup_total_amount"><?= $cart['total'] ?></div>
 				</div>
+				<?php if (!empty($note)): ?>
+					<div class="cart_popup_note"><?= $note ?></div>
+				<?php endif ?>
 			</div>
 			<div class="cart_popup_checkout_row">
 				<div class="cart_popup_checkout"><?= $checkout_label ?></div>

@@ -20,12 +20,8 @@ class checkout extends \Controller{
 
 			$this->load->model('shop/shop_model');
 			$this->load->model('shopify/shopify_product_model');
-			$this->load->model('user/user_model');
 
-			$user = $this->user_model->get_current();
-			if (empty($user)){
-				$user = [];
-			}
+			$user = $this->shop_model->get_front_user();
 
 			$order = $this->shop_model->get_current_order_if_any($user);
 			if (empty($order['cms_page_panel_id'])){
@@ -35,17 +31,22 @@ class checkout extends \Controller{
 
 			// If previous remote cart is already dead, close site cart instead of reusing
 			if (!empty($order['shopify_cart_id'])){
-				$remote = $this->shopify_product_model->_storefront_cart_query($order['shopify_cart_id'], false);
-				if (empty($remote['id'])){
-					$this->shop_model->close_cart_order($order['cms_page_panel_id'], 'paid');
-					print(json_encode([
-							'ok' => 0,
-							'error' => 'Previous checkout completed. Your cart was cleared — add items again.',
-							'changed' => 1,
-							'quantity' => 0,
-							'closed' => 1,
-					]));
-					exit();
+				$cart_status = $this->shopify_product_model->storefront_cart_status($order['shopify_cart_id']);
+				if ($cart_status === 'gone'){
+					$this->load->model('shopify/shopify_order_model');
+					$gone = $this->shopify_order_model->on_storefront_cart_gone($order);
+					if (!empty($gone['changed'])){
+						print(json_encode([
+								'ok' => 0,
+								'error' => !empty($gone['abandoned'])
+										? 'Previous checkout expired. Your cart was cleared — add items again.'
+										: 'Previous checkout completed. Your cart was cleared — add items again.',
+								'changed' => 1,
+								'quantity' => 0,
+								'closed' => 1,
+						]));
+						exit();
+					}
 				}
 			}
 
@@ -59,12 +60,8 @@ class checkout extends \Controller{
 
 			$this->load->model('shop/shop_model');
 			$this->load->model('shopify/shopify_product_model');
-			$this->load->model('user/user_model');
 
-			$user = $this->user_model->get_current();
-			if (empty($user)){
-				$user = [];
-			}
+			$user = $this->shop_model->get_front_user();
 
 			$order = $this->shop_model->get_current_order_if_any($user);
 			if (empty($order['cms_page_panel_id']) || empty($order['shopify_cart_id'])){

@@ -26,6 +26,14 @@
 			"label": "Category",
 			"list": "shop/category",
 			"help": "Parent category"
+		},
+		{
+			"type": "fk",
+			"name": "product_type_id",
+			"label": "Product type",
+			"list": "shop/product_type",
+			"add_empty": "1",
+			"help": "Default for products in this subcategory when the product has no type."
 		}
 	]
 }

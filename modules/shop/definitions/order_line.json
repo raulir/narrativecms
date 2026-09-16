@@ -34,6 +34,27 @@
 			"help": "Linking the line to the product if present"
 		},
 		{
+			"type": "fk",
+			"name": "product_item_id",
+			"list": "shop/product_item",
+			"label": "Product item",
+			"add_empty": "1",
+			"help": "Master SKU this line sold. Dims, sku, and default price come from that item. Same as ref_id."
+		},
+		{
+			"type": "select",
+			"name": "status",
+			"label": "Status",
+			"values": {
+				"": "Draft",
+				"unfulfilled": "Unfulfilled",
+				"in_progress": "In progress",
+				"fulfilled": "Fulfilled",
+				"cancelled": "Cancelled"
+			},
+			"help": "Fulfilment of this line. The order status is rolled up from these."
+		},
+		{
 			"type": "text",
 			"name": "dimension",
 			"label": "Dimension",
@@ -62,6 +83,18 @@
 			"name": "link",
 			"label": "Link",
 			"help": "Optional link to product page"
+		},
+		{
+			"type": "text",
+			"name": "shopify_line_id",
+			"label": "Shopify line id",
+			"help": "Paid Shopify line item id. Empty on cart leftovers and non-Shopify checkouts."
+		},
+		{
+			"type": "datetime",
+			"name": "fulfilment_sent_time",
+			"label": "Fulfilment sent",
+			"format": "timestamp"
 		}
 	]
 }

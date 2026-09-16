@@ -1,0 +1,21 @@
+{
+	"label": "Email fulfilment",
+	"description": "Queues one fulfilment email per recipient for paid order lines",
+	"item": [],
+	"settings": [
+		{
+			"type": "text",
+			"name": "subject",
+			"label": "Subject",
+			"default": "Fulfilment request — order {{order_id}}",
+			"help": "Placeholders: {{order_id}}, {{shopify_order_id}} (visible Shopify Admin name, e.g. #1267), {{shopify_order_name}}, {{buyer_name}}"
+		},
+		{
+			"type": "textarea",
+			"name": "intro",
+			"label": "Intro",
+			"lines": "4",
+			"help": "Optional text at the top of each email. Same placeholders as subject."
+		}
+	]
+}

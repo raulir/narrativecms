@@ -17,14 +17,15 @@ class delivery_model extends \Model {
 		
 			$product = $this->cms_page_panel_model->get_cms_page_panel($product_id);
 			
-			if (!empty($product['product_stock_id'])){
-				$product_stock = $this->cms_page_panel_model->get_cms_page_panel($product['product_stock_id']);
-				if (!empty($product_stock['delivery_set_id'])){
-					$delivery_set = $this->cms_page_panel_model->get_cms_page_panel($product_stock['delivery_set_id']);
-					if (!$delivery_set['secondary']){
+			$this->load->model('shop/shop_dim_model');
+			$product_type = $this->shop_dim_model->resolve_product_type($product);
+			if (!empty($product_type['delivery_set_id'])){
+				$delivery_set = $this->cms_page_panel_model->get_cms_page_panel($product_type['delivery_set_id']);
+				if (!empty($delivery_set['cms_page_panel_id'])){
+					if (empty($delivery_set['secondary'])){
 						$has_primary = true;
 					}
-					$delivery_sets[$product_stock['delivery_set_id']] = $delivery_set;
+					$delivery_sets[$product_type['delivery_set_id']] = $delivery_set;
 				}
 			}
 		

@@ -13,6 +13,13 @@
 			]
 		},
 		{
+			"id": "shopify_cms_order_sync",
+			"name": "Shopify order sync",
+			"flags": [
+				"hidden"
+			]
+		},
+		{
 			"id": "shopify_cms_reload",
 			"name": "Reload Shopify data",
 			"flags": [
@@ -22,6 +29,14 @@
 		{
 			"id": "shopify_cron_sync",
 			"name": "Shopify product sync (cron)",
+			"flags": [
+				"hidden",
+				"cron"
+			]
+		},
+		{
+			"id": "shopify_cron_orders",
+			"name": "Shopify order sync (cron)",
 			"flags": [
 				"hidden",
 				"cron"
@@ -64,6 +79,11 @@
 			]
 		}
 	],
+	"api": [
+		{
+			"id": "webhook"
+		}
+	],
 	"extends": [
 		{
 			"target": "shop/product",
@@ -84,6 +104,10 @@
 		{
 			"target": "shop/collection",
 			"source": "//shop_collection"
+		},
+		{
+			"target": "shop/product_item",
+			"source": "//shop_product_item"
 		}
 	],
 	"provides": [

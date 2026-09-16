@@ -2,8 +2,11 @@
 	"list": {
 		"list_title": "Orders",
 		"item_title": "Order",
+		"title_field": "heading",
 		"filter_fields": {
-			"show": "-- show --"
+			"show": "-- show --",
+			"status": "Status",
+			"payment_status": "Payment"
 		},
 		"link_target": "0"
 	},
@@ -12,7 +15,8 @@
 			"type": "text",
 			"name": "heading",
 			"label": "Order ID",
-			"mandatory": "1"
+			"mandatory": "1",
+			"help": "Same as the CMS panel id. The cart uses this id until checkout."
 		},
 		{
 			"type": "fk",
@@ -24,12 +28,125 @@
 		{
 			"type": "datetime",
 			"name": "created",
-			"label": "Created"
+			"label": "Cart created",
+			"format": "timestamp"
 		},
 		{
 			"type": "datetime",
-			"name": "updated",
-			"label": "Updated"
+			"name": "order_created",
+			"label": "Order created",
+			"format": "timestamp",
+			"help": "When the cart left draft and became an order."
+		},
+		{
+			"type": "datetime",
+			"name": "paid_time",
+			"label": "Paid",
+			"format": "timestamp"
+		},
+		{
+			"type": "select",
+			"name": "status",
+			"label": "Status",
+			"values": {
+				"": "Draft cart",
+				"abandoned": "Abandoned",
+				"unfulfilled": "Unfulfilled",
+				"in_progress": "In progress",
+				"fulfilled": "Fulfilled",
+				"finished": "Finished",
+				"cancelled": "Cancelled",
+				"paid": "Paid (legacy)"
+			},
+			"help": "Line fulfilment rolled up. Finished is the final state (paid and lines resolved, or set by hand) and cannot be undone. Listed stock is posted then; those lines drop out of inventory."
+		},
+		{
+			"type": "select",
+			"name": "payment_status",
+			"label": "Payment",
+			"values": {
+				"unpaid": "Unpaid",
+				"pending": "Pending",
+				"partially_paid": "Partially paid",
+				"paid": "Paid",
+				"refunded": "Refunded",
+				"voided": "Voided"
+			},
+			"default": "unpaid",
+			"help": "Money state. Independent of Status. CMS fulfilment emails only when Payment is paid and Status is unfulfilled."
+		},
+		{
+			"type": "datetime",
+			"name": "fulfilment_sent_time",
+			"label": "Fulfilment sent",
+			"format": "timestamp",
+			"help": "When every payable line had a fulfilment request queued."
+		},
+		{
+			"type": "datetime",
+			"name": "stock_posted_time",
+			"label": "Stock posted",
+			"format": "timestamp",
+			"readonly": "1",
+			"help": "When listed product_item.number was reduced for this finished order. Empty: not posted yet."
+		},
+		{
+			"type": "subtitle",
+			"label": "Buyer"
+		},
+		{
+			"type": "text",
+			"name": "buyer_name",
+			"label": "Buyer name"
+		},
+		{
+			"type": "text",
+			"name": "buyer_email",
+			"label": "Buyer email"
+		},
+		{
+			"type": "subtitle",
+			"label": "Delivery"
+		},
+		{
+			"type": "text",
+			"name": "shipping_name",
+			"label": "Shipping name"
+		},
+		{
+			"type": "text",
+			"name": "shipping_address1",
+			"label": "Address"
+		},
+		{
+			"type": "text",
+			"name": "shipping_address2",
+			"label": "Address 2"
+		},
+		{
+			"type": "text",
+			"name": "shipping_city",
+			"label": "City"
+		},
+		{
+			"type": "text",
+			"name": "shipping_postcode",
+			"label": "Postcode"
+		},
+		{
+			"type": "text",
+			"name": "shipping_county",
+			"label": "County"
+		},
+		{
+			"type": "text",
+			"name": "shipping_country",
+			"label": "Country"
+		},
+		{
+			"type": "text",
+			"name": "shipping_phone",
+			"label": "Phone"
 		}
 	]
 }

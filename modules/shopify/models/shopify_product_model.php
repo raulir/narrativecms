@@ -81,8 +81,7 @@ class shopify_product_model extends \Model {
 
 		// Integer TTL/budget defaults
 		$int_defaults = [
-				'thumb_html_ttl' => 900,
-				'shopify_data_ttl' => 3600,
+				'shopify_data_ttl' => 86400,
 				'product_page_recheck_ttl' => 300,
 				'max_refresh_time' => 30,
 		];
@@ -97,10 +96,10 @@ class shopify_product_model extends \Model {
 		// Collection mapping suffixes (Shopify naming → CMS type). shop/category is manual.
 		if (!isset($settings['collection_subcategory_suffix']) || $settings['collection_subcategory_suffix'] === null
 				|| $settings['collection_subcategory_suffix'] === ''){
-			$settings['collection_subcategory_suffix'] = 'range';
+			$settings['collection_subcategory_suffix'] = 'category';
 		}
-		if (empty($settings['collection_collection_suffixes']) || !is_array($settings['collection_collection_suffixes'])){
-			$settings['collection_collection_suffixes'] = [];
+		if (empty($settings['collections']) || !is_array($settings['collections'])){
+			$settings['collections'] = [];
 		}
 
 		// Shopify Standard Product Category path → CMS shop/category (FK)
@@ -235,9 +234,9 @@ class shopify_product_model extends \Model {
 	}
 
 	/**
-	 * Category taxonomy + original_artwork file URL for one product (Admin GraphQL).
+	 * Category taxonomy + original_artwork + print_file URLs (Admin GraphQL).
 	 *
-	 * @return array{category_fullName:string,category_name:string,original_artwork_url:string}
+	 * @return array{category_fullName:string,category_name:string,original_artwork_url:string,print_file_url:string}
 	 */
 	function get_product_admin_extras($shopify_product_id, $force = 0){
 
@@ -245,6 +244,7 @@ class shopify_product_model extends \Model {
 				'category_fullName' => '',
 				'category_name' => '',
 				'original_artwork_url' => '',
+				'print_file_url' => '',
 		];
 
 		$shopify_product_id = trim((string)$shopify_product_id);
@@ -260,7 +260,20 @@ query ProductExtras($id: ID!) {
       fullName
       name
     }
-    metafield(namespace: "custom", key: "original_artwork") {
+    originalArtwork: metafield(namespace: "custom", key: "original_artwork") {
+      type
+      value
+      reference {
+        __typename
+        ... on MediaImage {
+          image { url }
+        }
+        ... on GenericFile {
+          url
+        }
+      }
+    }
+    printFile: metafield(namespace: "custom", key: "print_file") {
       type
       value
       reference {
@@ -294,16 +307,29 @@ GQL;
 			$out['category_name'] = trim((string)$product['category']['name']);
 		}
 
-		$ref = $product['metafield']['reference'] ?? null;
-		if (is_array($ref)){
-			if (!empty($ref['image']['url'])){
-				$out['original_artwork_url'] = trim((string)$ref['image']['url']);
-			} else if (!empty($ref['url'])){
-				$out['original_artwork_url'] = trim((string)$ref['url']);
-			}
-		}
+		$out['original_artwork_url'] = $this->_metafield_file_url($product['originalArtwork'] ?? null);
+		$out['print_file_url'] = $this->_metafield_file_url($product['printFile'] ?? null);
 
 		return $out;
+
+	}
+
+	function _metafield_file_url($metafield){
+
+		if (!is_array($metafield)){
+			return '';
+		}
+		$ref = $metafield['reference'] ?? null;
+		if (!is_array($ref)){
+			return '';
+		}
+		if (!empty($ref['image']['url'])){
+			return trim((string)$ref['image']['url']);
+		}
+		if (!empty($ref['url'])){
+			return trim((string)$ref['url']);
+		}
+		return '';
 
 	}
 
@@ -619,10 +645,10 @@ GQL;
 	}
 
 	/**
-	 * Product page / display: refresh Shopify only when shopify_checked_at is older than TTL.
-	 * $mode: 'page' uses product_page_recheck_ttl; 'thumb' uses shopify_data_ttl.
+	 * Product page: refresh Shopify when shopify_checked_at is older than product_page_recheck_ttl.
+	 * Grids/thumbs must not call this.
 	 */
-	function get_product_by_id($product_id, $mode = 'page'){
+	function get_product_by_id($product_id){
 
 		$this->load->model('cms/cms_page_panel_model');
 
@@ -633,20 +659,20 @@ GQL;
 			return [];
 		}
 
+		if (empty($cms_product['shopify_id'])){
+			return $cms_product;
+		}
+
 		$checked_at = (int)($cms_product['shopify_checked_at'] ?? 0);
 		$age = $checked_at > 0 ? (time() - $checked_at) : PHP_INT_MAX;
 
 		$data_ttl = (int)$settings['shopify_data_ttl'];
 		$page_ttl = (int)$settings['product_page_recheck_ttl'];
-		$recheck_ttl = ($mode === 'thumb') ? $data_ttl : $page_ttl;
 
-		// Fresh enough: CMS + last Shopify disk payload (no Admin API)
-		if ($age <= $recheck_ttl){
+		if ($age <= $page_ttl){
 			return $this->_product_from_cms($cms_product, -1, false);
 		}
 
-		// Stale for page recheck but within full data TTL: soft recheck (300s file / force 0)
-		// Older than full data TTL: force live Admin when budget allows
 		$force = ($age > $data_ttl) ? 1 : 0;
 
 		return $this->refresh_product($product_id, $force, true);
@@ -658,6 +684,8 @@ GQL;
 	 */
 	function _product_from_cms($cms_product, $force = -1, $respect_budget = false){
 
+		$this->load->model('cms/cms_page_panel_model');
+
 		if (empty($cms_product['shopify_id'])){
 			return $cms_product;
 		}
@@ -668,6 +696,16 @@ GQL;
 			$cms_product['options'] = $shopify_product['options'] ?? [];
 			$cms_product['variants'] = $shopify_product['variants'] ?? [];
 			$cms_product['shopify_images'] = $shopify_product['images'] ?? [];
+			$this->load->model('shopify/shopify_dim_model');
+			if ($this->shopify_dim_model->sync_product($cms_product, $shopify_product)){
+				$pid = (int)($cms_product['cms_page_panel_id'] ?? 0);
+				if ($pid > 0){
+					$this->cms_page_panel_model->update_cms_page_panel($pid, [
+							'product_type_id' => $cms_product['product_type_id'] ?? 0,
+							'images' => $cms_product['images'] ?? [],
+					], true);
+				}
+			}
 		} else {
 			$cms_product['options'] = $cms_product['options'] ?? [];
 			$cms_product['variants'] = $cms_product['variants'] ?? [];
@@ -675,6 +713,47 @@ GQL;
 		}
 
 		return $cms_product;
+
+	}
+
+	/**
+	 * Variant price string from a CMS/Shopify product row, or null if not found.
+	 */
+	function variant_price_from_product($product, $variant_id, $merchandise_id = ''){
+
+		if (!is_array($product) || empty($product['variants']) || !is_array($product['variants'])){
+			return null;
+		}
+
+		$want = trim((string)$variant_id);
+		$gid = trim((string)$merchandise_id);
+		if ($want === '' && $gid !== '' && preg_match('#ProductVariant/(\d+)#', $gid, $m)){
+			$want = $m[1];
+		}
+		if ($want !== '' && strpos($want, 'gid://') === 0 && preg_match('#ProductVariant/(\d+)#', $want, $m)){
+			$want = $m[1];
+		}
+		if ($want === ''){
+			return null;
+		}
+
+		foreach ($product['variants'] as $variant){
+			$vid = (string)($variant['id'] ?? '');
+			if ($vid === $want){
+				if (isset($variant['price']) && $variant['price'] !== '' && $variant['price'] !== null){
+					return $variant['price'];
+				}
+				return null;
+			}
+			if (preg_match('#ProductVariant/(\d+)#', $vid, $m) && $m[1] === $want){
+				if (isset($variant['price']) && $variant['price'] !== '' && $variant['price'] !== null){
+					return $variant['price'];
+				}
+				return null;
+			}
+		}
+
+		return null;
 
 	}
 
@@ -719,8 +798,8 @@ GQL;
 	}
 
 	/**
-	 * Read cached productthumb HTML if within thumb_html_ttl and not older than product update_time.
-	 * Returns HTML string or null.
+	 * Read cached productthumb HTML if the file is not older than product update_time.
+	 * No time TTL — purge via invalidate_product_display_cache on product save.
 	 */
 	function get_productthumb_html_cache($cms_page_panel_id, $update_time = 0){
 
@@ -728,9 +807,6 @@ GQL;
 		if ($cms_page_panel_id <= 0){
 			return null;
 		}
-
-		$settings = $this->get_shopify_settings();
-		$thumb_ttl = max(1, (int)($settings['thumb_html_ttl'] ?? 900));
 
 		$filename = $this->_productthumb_cache_path($cms_page_panel_id);
 		clearstatcache(true, $filename);
@@ -740,9 +816,6 @@ GQL;
 
 		$filemtime = filemtime($filename);
 		$update_time = (int)$update_time;
-		if ((time() - $filemtime) > $thumb_ttl){
-			return null;
-		}
 		if ($update_time > 0 && $update_time > $filemtime){
 			return null;
 		}
@@ -793,11 +866,8 @@ GQL;
 	}
 
 	/**
-	 * Full productthumb panel_params: HTML cache → rebuild product → render + store HTML.
-	 * Parents only pass cms_page_panel_id (+ productthumb settings labels merged by CMS).
-	 * Template echoes $productthumb_html when set.
-	 * File is always productthumb_{id}.html. Bust via invalidate_product_display_cache
-	 * (product/style/cat/sub on_update, Shopify sync).
+	 * Productthumb: CMS only (no Shopify). HTML cache until this product's update_time.
+	 * Bust via invalidate_product_display_cache (product on_update / Shopify refresh write).
 	 */
 	function get_productthumb_params($params){
 
@@ -813,15 +883,13 @@ GQL;
 			return $params;
 		}
 
-		$update_time = (int)($params['update_time'] ?? 0);
+		$product = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
+		$update_time = (int)($product['update_time'] ?? $params['update_time'] ?? 0);
 		$cached_html = $this->get_productthumb_html_cache($cms_page_panel_id, $update_time);
 		if ($cached_html !== null){
 			$params['productthumb_html'] = $cached_html;
 			return $params;
 		}
-
-		// Rebuild: CMS-first, Shopify recheck only when data TTL expired + budget
-		$product = $this->get_product_by_id($cms_page_panel_id, 'thumb');
 
 		if (empty($product) || empty($product['cms_page_panel_id'])){
 			$params['product'] = [
@@ -832,15 +900,10 @@ GQL;
 			return $params;
 		}
 
-		$imagemaker_on = in_array('imagemaker', $GLOBALS['config']['modules'] ?? [], true);
-		if ($imagemaker_on){
-			$this->load->model('imagemaker/imagemaker_model');
-			if ($this->imagemaker_model->is_available()){
-				$im_path = $this->imagemaker_model->resolve_product_composite($product);
-				if ($im_path !== ''){
-					$product['thumbnail_image'] = $im_path;
-				}
-			}
+		$this->load->model('shop/shop_image_model');
+		$im_path = $this->shop_image_model->resolve_product_composite($product);
+		if ($im_path !== ''){
+			$product['thumbnail_image'] = $im_path;
 		}
 
 		$min_price = round($product['min_price'] ?? 0);
@@ -858,10 +921,10 @@ GQL;
 					($params['currency_label'] ?? '£').$min_price;
 		}
 
-		// Category label + light colour for thumb hover (via product → subcategory → category)
+		// Category label + hover colour for thumb hover (via product → subcategory → category)
 		$product['category_heading'] = '';
 		$product['subcategory_heading'] = '';
-		$product['category_light_colour'] = '';
+		$product['category_hover_colour'] = '';
 		if (!empty($product['subcategory_id'])){
 			$subcategory = $this->cms_page_panel_model->get_cms_page_panel($product['subcategory_id']);
 			$product['subcategory_heading'] = trim((string)($subcategory['heading'] ?? ''));
@@ -874,10 +937,9 @@ GQL;
 				if ($product['category_heading'] === '' && !empty($category['title'])){
 					$product['category_heading'] = trim((string)$category['title']);
 				}
-				// Filter-bar light colour — baked into HTML as --category_menu_bg for hover
-				$light = trim((string)($category['light_colour'] ?? ''));
-				if ($light !== ''){
-					$product['category_light_colour'] = $light;
+				$hover = trim((string)($category['hover_colour'] ?? ''));
+				if ($hover !== ''){
+					$product['category_hover_colour'] = $hover;
 				}
 			}
 		}
@@ -975,9 +1037,7 @@ GQL;
 		}
 		
 		if (empty($cms_product['shopify_id'])){
-			// Local product without Shopify id — hide (config error, not network)
-			$this->cms_page_panel_model->update_cms_page_panel($cms_product_id, ['show' => 0, ]);
-			return [];
+			return $cms_product;
 		}
 		
 		$shopify_product = $this->get_product($cms_product['shopify_id'], $force, $respect_budget);
@@ -1192,6 +1252,15 @@ GQL;
 
 		// Timmy field: flat artwork PNG from Shopify metafield custom.original_artwork
 		if ($this->_sync_original_artwork_from_extras($cms_product, $extras)){
+			$needs_update = true;
+		}
+
+		if ($this->_sync_print_file_from_extras($cms_product, $extras)){
+			$needs_update = true;
+		}
+
+		$this->load->model('shopify/shopify_dim_model');
+		if ($this->shopify_dim_model->sync_product($cms_product, $shopify_product)){
 			$needs_update = true;
 		}
 
@@ -2066,15 +2135,25 @@ GQL;
 
 		$settings = $this->get_shopify_settings();
 		// shop/subcategory
-		$sub_suf = trim((string)($settings['collection_subcategory_suffix'] ?? 'range'));
-		// shop/collection — multi-membership
+		$sub_suf = trim((string)($settings['collection_subcategory_suffix'] ?? 'category'));
+		// shop/collection — suffix heading + FK from settings repeater
 		$col_sufs = [];
-		if (!empty($settings['collection_collection_suffixes']) && is_array($settings['collection_collection_suffixes'])){
-			foreach ($settings['collection_collection_suffixes'] as $row){
-				$s = trim((string)($row['suffix'] ?? ''));
-				if ($s !== ''){
-					$col_sufs[] = $s;
+		$this->load->model('cms/cms_page_panel_model');
+		if (!empty($settings['collections']) && is_array($settings['collections'])){
+			foreach ($settings['collections'] as $row){
+				$tid = (int)($row['collection_type_id'] ?? 0);
+				if ($tid < 1){
+					continue;
 				}
+				$type_row = $this->cms_page_panel_model->get_cms_page_panel($tid);
+				$s = trim((string)($type_row['heading'] ?? ''));
+				if ($s === ''){
+					continue;
+				}
+				$col_sufs[] = [
+						'suffix' => $s,
+						'collection_type_id' => $tid,
+				];
 			}
 		}
 
@@ -2107,12 +2186,16 @@ GQL;
 
 			// 2) Collection suffixes → shop/collection
 			foreach ($col_sufs as $cs){
-				if ($this->_collection_title_ends_with_suffix($title, $cs)){
+				$suf = $cs['suffix'] ?? '';
+				$tid = (int)($cs['collection_type_id'] ?? 0);
+				if ($suf === '' || $tid < 1){
+					continue;
+				}
+				if ($this->_collection_title_ends_with_suffix($title, $suf)){
 					$out['collections'][] = [
 							'title' => $title,
-							'heading' => $this->_strip_collection_suffix($title, $cs),
-							// Original matched word stored on shop/collection.type
-							'type' => $cs,
+							'heading' => $this->_strip_collection_suffix($title, $suf),
+							'collection_type_id' => $tid,
 					];
 					break;
 				}
@@ -2310,6 +2393,57 @@ GQL;
 	}
 
 	/**
+	 * Scrape Shopify custom.print_file (one PDF / AI / ZIP) into shop/product.print_file.
+	 * Category-independent. Hash print_file_src_hash avoids re-download when unchanged.
+	 *
+	 * @param array $cms_product
+	 * @param array $extras
+	 * @return bool changed
+	 */
+	function _sync_print_file_from_extras(&$cms_product, $extras){
+
+		$url = trim((string)($extras['print_file_url'] ?? ''));
+		$changed = false;
+
+		if ($url === ''){
+			if (!empty($cms_product['print_file']) || !empty($cms_product['print_file_src_hash'])){
+				$cms_product['print_file'] = '';
+				$cms_product['print_file_src_hash'] = '';
+				return true;
+			}
+			return false;
+		}
+
+		$path = parse_url($url, PHP_URL_PATH);
+		$hash = md5($path !== null && $path !== false ? $path : $url);
+		$need = empty($cms_product['print_file'])
+				|| ($cms_product['print_file_src_hash'] ?? '') !== $hash
+				|| !$this->_cms_image_path_ok($cms_product['print_file'] ?? '');
+
+		if (!$need){
+			return false;
+		}
+
+		$this->load->model('cms/cms_file_model');
+		$file = $this->cms_file_model->scrape_file($url);
+		if ($file === '' || $file === null){
+			error_log_user('CMS error [shopify/print_file]: scrape failed shopify_id='.
+					($cms_product['shopify_id'] ?? ''));
+			return false;
+		}
+
+		if (($cms_product['print_file'] ?? '') !== $file
+				|| ($cms_product['print_file_src_hash'] ?? '') !== $hash){
+			$cms_product['print_file'] = $file;
+			$cms_product['print_file_src_hash'] = $hash;
+			$changed = true;
+		}
+
+		return $changed;
+
+	}
+
+	/**
 	 * Ensure "Other {category}" subcategory under $category_id (no Shopify range collection).
 	 * e.g. Art → "Other art", Cards → "Other cards". Used on import when no range/category collection.
 	 *
@@ -2450,13 +2584,13 @@ GQL;
 	/**
 	 * @param string $full_title Full Shopify collection title (after parenthesis strip)
 	 * @param string $heading Display heading (suffix stripped)
-	 * @param string $type Matched collection suffix word (e.g. "category") — stored as type
+	 * @param int $collection_type_id shop/collection_type FK
 	 */
-	function _ensure_collection_for_collection($full_title, $heading = '', $type = ''){
+	function _ensure_collection_for_collection($full_title, $heading = '', $collection_type_id = 0){
 
 		$full_title = trim((string)$full_title);
 		$heading = trim((string)$heading);
-		$type = trim((string)$type);
+		$collection_type_id = (int)$collection_type_id;
 		if ($heading === ''){
 			$heading = $full_title;
 		}
@@ -2467,15 +2601,14 @@ GQL;
 		$existing = $this->_find_panel_by_shopify_collection('shop/collection', $full_title, $heading);
 		if (!empty($existing['cms_page_panel_id'])){
 			$this->load->model('cms/cms_page_panel_model');
-			// Backfill type when empty and we know the matched suffix
-			$existing_type = trim((string)($existing['type'] ?? ''));
-			if ($existing_type === '' && $type !== ''){
+			$existing_tid = (int)($existing['collection_type_id'] ?? 0);
+			if ($collection_type_id > 0 && $existing_tid !== $collection_type_id){
 				$this->cms_page_panel_model->update_cms_page_panel(
 						(int)$existing['cms_page_panel_id'],
-						['type' => $type],
+						['collection_type_id' => $collection_type_id],
 						false
 				);
-				$existing['type'] = $type;
+				$existing['collection_type_id'] = $collection_type_id;
 			}
 			// Category page #hash (not a public cms_slug)
 			$this->_ensure_collection_hash((int)$existing['cms_page_panel_id'], $heading);
@@ -2492,8 +2625,8 @@ GQL;
 				'heading' => $heading,
 				'shopify_collection' => $full_title,
 		];
-		if ($type !== ''){
-			$new_row['type'] = $type;
+		if ($collection_type_id > 0){
+			$new_row['collection_type_id'] = $collection_type_id;
 		}
 
 		$new_id = $this->cms_page_panel_model->create_cms_page_panel($new_row);
@@ -2774,7 +2907,7 @@ GQL;
 				$row = $this->_ensure_collection_for_collection(
 						$c['title'],
 						$c['heading'] ?? '',
-						$c['type'] ?? ''
+						(int)($c['collection_type_id'] ?? 0)
 				);
 				if (empty($row['cms_page_panel_id'])){
 					continue;
@@ -2977,8 +3110,12 @@ GQL;
 
 			$this->load->model('cms/cms_page_panel_model');
 
+			// Catalogue list items only — not the product page panel (cms_page_id > 0)
+			// and not shop/product settings (sort = 0)
 			$products = $this->cms_page_panel_model->get_cms_page_panels_by([
 					'panel_name' => 'shop/product',
+					'cms_page_id' => 0,
+					'sort!' => 0,
 			]);
 
 			usort($products, function($a, $b){
@@ -3481,25 +3618,41 @@ GQL;
 
 	}
 
+	function _line_shopify_variant_id($line){
+
+		$this->load->model('shop/shop_model');
+		$item_id = $this->shop_model->order_line_item_id($line);
+		if ($item_id > 0){
+			$this->load->model('cms/cms_page_panel_model');
+			$item = $this->cms_page_panel_model->get_cms_page_panel($item_id);
+			if (($item['panel_name'] ?? '') === 'shop/product_item'){
+				$from_item = trim((string)($item['shopify_variant_id'] ?? ''));
+				if ($from_item !== ''){
+					return $from_item;
+				}
+			}
+		}
+
+		return trim((string)($line['shopify_variant_id'] ?? ''));
+
+	}
+
 	/**
 	 * Build Storefront CartLineInput[] from local order lines (site → Shopify only).
-	 * Never reads remote lines into CMS.
+	 * Merchandise comes from the CMS item connector, then the line field.
 	 */
 	function _local_lines_to_cart_inputs($lines){
 
 		$cart_lines = [];
 		foreach($lines as $line){
 
-			$merchandise = $line['merchandise_id'] ?? '';
-			$variant = $line['shopify_variant_id'] ?? '';
-			if ($merchandise === '' && $variant === ''){
+			$variant = $this->_line_shopify_variant_id($line);
+			if ($variant === ''){
 				continue;
 			}
-			if ($merchandise === ''){
-				$merchandise = (strpos((string)$variant, 'gid://') === 0)
-						? $variant
-						: 'gid://shopify/ProductVariant/'.$variant;
-			}
+			$merchandise = (strpos($variant, 'gid://') === 0)
+					? $variant
+					: 'gid://shopify/ProductVariant/'.$variant;
 
 			$qty = max(1, (int)($line['qty'] ?? $line['quantity'] ?? 1));
 			$entry = [
@@ -3570,11 +3723,27 @@ GQL;
 
 		$response = $this->storefront_graphql($query, ['id' => $cart_id]);
 		if (!empty($response['errors'])){
-			// Treat API errors as dead cart for status purposes when id is invalid
-			return null;
+			return ['_query_error' => 1];
 		}
 
-		return $response['data']['cart'] ?? null;
+		$cart = $response['data']['cart'] ?? null;
+		return is_array($cart) ? $cart : [];
+
+	}
+
+	/**
+	 * open | gone | error — error must not be treated as cart gone.
+	 */
+	function storefront_cart_status($cart_id){
+
+		$remote = $this->_storefront_cart_query($cart_id, false);
+		if (!is_array($remote) || !empty($remote['_query_error'])){
+			return 'error';
+		}
+		if (!empty($remote['id'])){
+			return 'open';
+		}
+		return 'gone';
 
 	}
 
@@ -3591,11 +3760,117 @@ GQL;
 
 	}
 
-	function _cart_create_with_lines($cart_lines){
+	function _cms_order_cart_attributes($order_id){
+
+		return [
+				[
+						'key' => 'cms_order_id',
+						'value' => (string)(int)$order_id,
+				],
+		];
+
+	}
+
+	/**
+	 * Cart-level attribute cms_order_id copies to the Shopify order customAttributes / note_attributes.
+	 * cartAttributesUpdate replaces the whole set — merge existing keys.
+	 */
+	function _cart_ensure_cms_order_id($cart_id, $order_id){
+
+		$order_id = (string)(int)$order_id;
+		if ($cart_id === '' || $order_id === '0'){
+			return ['ok' => 0, 'error' => 'Missing cart or order id'];
+		}
+
+		$query = '
+			query GetCartAttrs($id: ID!) {
+				cart(id: $id) {
+					id
+					checkoutUrl
+					attributes { key value }
+				}
+			}
+		';
+		$response = $this->storefront_graphql($query, ['id' => $cart_id]);
+		if (!empty($response['errors'])){
+			error_log_user('CMS error [shopify/cart attributes]: '.
+					($response['errors'][0]['message'] ?? 'Storefront error'));
+			return ['ok' => 0, 'error' => $response['errors'][0]['message'] ?? 'Storefront error'];
+		}
+
+		$cart = $response['data']['cart'] ?? null;
+		if (empty($cart['id'])){
+			return ['ok' => 0, 'error' => 'Remote cart gone', 'dead' => 1];
+		}
+
+		$attrs = [];
+		$has = false;
+		foreach (($cart['attributes'] ?? []) as $a){
+			$key = (string)($a['key'] ?? '');
+			$val = (string)($a['value'] ?? '');
+			if ($key === ''){
+				continue;
+			}
+			if ($key === 'cms_order_id'){
+				if ($val === $order_id){
+					$has = true;
+				}
+				continue;
+			}
+			$attrs[] = [
+					'key' => $key,
+					'value' => $val,
+			];
+		}
+
+		if ($has){
+			return ['ok' => 1, 'unchanged' => 1];
+		}
+
+		$attrs[] = [
+				'key' => 'cms_order_id',
+				'value' => $order_id,
+		];
+
+		$mut = '
+			mutation CartAttributesUpdate($cartId: ID!, $attributes: [AttributeInput!]!) {
+				cartAttributesUpdate(cartId: $cartId, attributes: $attributes) {
+					cart { id checkoutUrl }
+					userErrors { field message }
+				}
+			}
+		';
+		$res = $this->storefront_graphql($mut, [
+				'cartId' => $cart_id,
+				'attributes' => $attrs,
+		]);
+		if (!empty($res['errors'])){
+			error_log_user('CMS error [shopify/cart attributes]: '.
+					($res['errors'][0]['message'] ?? 'cartAttributesUpdate failed'));
+			return ['ok' => 0, 'error' => $res['errors'][0]['message'] ?? 'cartAttributesUpdate failed'];
+		}
+		if (!empty($res['data']['cartAttributesUpdate']['userErrors'])){
+			$ue = $res['data']['cartAttributesUpdate']['userErrors'][0]['message'] ?? 'cartAttributesUpdate rejected';
+			error_log_user('CMS error [shopify/cart attributes]: '.$ue);
+			return ['ok' => 0, 'error' => $ue];
+		}
+
+		return ['ok' => 1];
+
+	}
+
+	function _cart_create_with_lines($cart_lines, $attributes = []){
+
+		$input = [
+				'lines' => $cart_lines,
+		];
+		if ($attributes){
+			$input['attributes'] = $attributes;
+		}
 
 		$mutation = '
-			mutation CartCreate($lines: [CartLineInput!]!) {
-				cartCreate(input: { lines: $lines }) {
+			mutation CartCreate($input: CartInput!) {
+				cartCreate(input: $input) {
 					cart {
 						id
 						checkoutUrl
@@ -3609,7 +3884,7 @@ GQL;
 			}
 		';
 
-		$response = $this->storefront_graphql($mutation, ['lines' => $cart_lines]);
+		$response = $this->storefront_graphql($mutation, ['input' => $input]);
 		if (!empty($response['errors'])){
 			return ['ok' => 0, 'error' => $response['errors'][0]['message'] ?? 'Storefront error'];
 		}
@@ -3637,6 +3912,9 @@ GQL;
 	function _cart_replace_lines($cart_id, $cart_lines){
 
 		$remote = $this->_storefront_cart_query($cart_id, true);
+		if (!empty($remote['_query_error'])){
+			return ['ok' => 0, 'error' => 'Remote cart query failed'];
+		}
 		if (empty($remote['id'])){
 			return ['ok' => 0, 'error' => 'Remote cart gone', 'dead' => 1];
 		}
@@ -3722,6 +4000,13 @@ GQL;
 			return ['ok' => 0, 'error' => 'Cart is empty'];
 		}
 
+		$this->load->model('shop/shop_dim_model');
+		foreach ($lines as $line){
+			if ($this->shop_dim_model->cart_line_is_local($line)){
+				return ['ok' => 0, 'error' => 'Shopify checkout can\'t take CMS-only products'];
+			}
+		}
+
 		$cart_lines = $this->_local_lines_to_cart_inputs($lines);
 		if (empty($cart_lines)){
 			return ['ok' => 0, 'error' => 'No Shopify products in cart'];
@@ -3733,13 +4018,21 @@ GQL;
 		// Reuse open remote cart
 		if ($existing_id !== ''){
 			$remote = $this->_storefront_cart_query($existing_id, false);
+			if (!empty($remote['_query_error'])){
+				return ['ok' => 0, 'error' => 'Shopify cart query failed'];
+			}
 
 			if (empty($remote['id'])){
-				// Dead / completed checkout — end site cart (do not create a new remote cart with same lines)
-				$this->shop_model->close_cart_order($order_id, 'paid');
+				$this->load->model('shopify/shopify_order_model');
+				$gone = $this->shopify_order_model->on_storefront_cart_gone($order);
+				if (empty($gone['changed'])){
+					return ['ok' => 0, 'error' => $gone['error'] ?? 'Checkout is not available'];
+				}
 				return [
 						'ok' => 0,
-						'error' => 'Previous checkout completed. Your cart was cleared — add items again.',
+						'error' => !empty($gone['abandoned'])
+								? 'Previous checkout expired. Your cart was cleared — add items again.'
+								: 'Previous checkout completed. Your cart was cleared — add items again.',
 						'changed' => 1,
 						'quantity' => 0,
 						'closed' => 1,
@@ -3751,6 +4044,7 @@ GQL;
 					return ['ok' => 0, 'error' => 'No checkout URL on remote cart'];
 				}
 				$this->_save_shopify_cart_on_order($order_id, $existing_id, $fingerprint, $checkout_url);
+				$this->_cart_ensure_cms_order_id($existing_id, $order_id);
 				return [
 						'ok' => 1,
 						'redirect' => $checkout_url,
@@ -3762,7 +4056,8 @@ GQL;
 				// Local cart changed — overwrite remote lines from site only
 				$replaced = $this->_cart_replace_lines($existing_id, $cart_lines);
 				if (!empty($replaced['dead'])){
-					$this->shop_model->close_cart_order($order_id, 'paid');
+					$this->load->model('shopify/shopify_order_model');
+					$this->shopify_order_model->on_storefront_cart_gone($order);
 					return [
 							'ok' => 0,
 							'error' => 'Previous checkout completed. Your cart was cleared — add items again.',
@@ -3781,6 +4076,7 @@ GQL;
 						$fingerprint,
 						$cart['checkoutUrl']
 				);
+				$this->_cart_ensure_cms_order_id($cart['id'], $order_id);
 				return [
 						'ok' => 1,
 						'redirect' => $cart['checkoutUrl'],
@@ -3792,12 +4088,13 @@ GQL;
 		}
 
 		// New Storefront cart
-		$created = $this->_cart_create_with_lines($cart_lines);
+		$created = $this->_cart_create_with_lines($cart_lines, $this->_cms_order_cart_attributes($order_id));
 		if (empty($created['ok'])){
 			return $created;
 		}
 		$cart = $created['cart'];
 		$this->_save_shopify_cart_on_order($order_id, $cart['id'], $fingerprint, $cart['checkoutUrl']);
+		$this->_cart_ensure_cms_order_id($cart['id'], $order_id);
 
 		return [
 				'ok' => 1,
@@ -3834,22 +4131,17 @@ GQL;
 		}
 		$_SESSION[$throttle_key] = $now;
 
-		$remote = $this->_storefront_cart_query($cart_id, false);
+		$cart_status = $this->storefront_cart_status($cart_id);
 
-		if (!empty($remote['id'])){
-			// Still open (user may have edited lines on Shopify — site cart unchanged)
+		if ($cart_status === 'open'){
 			return ['ok' => 1, 'changed' => 0, 'open' => 1];
 		}
+		if ($cart_status === 'error'){
+			return ['ok' => 1, 'changed' => 0];
+		}
 
-		// Dead cart → treat as completed checkout; empty site cart session
-		$this->shop_model->close_cart_order($order['cms_page_panel_id'], 'paid');
-
-		return [
-				'ok' => 1,
-				'changed' => 1,
-				'quantity' => 0,
-				'closed' => 1,
-		];
+		$this->load->model('shopify/shopify_order_model');
+		return $this->shopify_order_model->on_storefront_cart_gone($order);
 
 	}
 

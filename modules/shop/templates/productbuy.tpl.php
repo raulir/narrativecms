@@ -12,11 +12,18 @@
 				</div>
 			<?php endif ?>
 			
-			<div class="shop_productbuy_dimensions">
-				<?php _panel('shop/productdimensions', ['product_id' => $product_id, 'errors' => (!empty($errors) ? $errors : []), ]) ?>
+			<div class="shop_productbuy_dims">
+				<?php _panel('shop/productdims', ['product_id' => $product_id, 'errors' => (!empty($errors) ? $errors : []), ]) ?>
 			</div>
 
 			<div class="cg_cta shop_productbuy_add"><?= $add_label ?></div>
+
+			<?php if(!empty($errors['_cart'])): ?>
+				<div class="shop_productbuy_error_text"><?= $errors['_cart'] ?></div>
+			<?php endif ?>
+			<?php if(!empty($errors['_stock'])): ?>
+				<div class="shop_productbuy_error_text"><?= $errors['_stock'] ?></div>
+			<?php endif ?>
 		
 		<?php else: ?>
 			

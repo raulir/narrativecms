@@ -18,13 +18,9 @@ class cart extends \Controller{
 		}
 
 		$this->load->model('shop/shop_model');
-		$this->load->model('user/user_model');
 		$this->load->model('cms/cms_page_panel_model');
 
-		$user = $this->user_model->get_current();
-		if (empty($user)){
-			$user = [];
-		}
+		$user = $this->shop_model->get_front_user();
 
 		if ($do == 'set_visible'){
 			$_SESSION['shop']['cart_visible'] = $params['value'] ?? $this->input->post('value');
@@ -46,43 +42,114 @@ class cart extends \Controller{
 			}
 
 			$product_id = (int)($params['product_id'] ?? $this->input->post('product_id') ?? 0);
-			$variant_id = $params['shopify_variant_id'] ?? $this->input->post('shopify_variant_id') ?? '';
-			$merchandise_id = $params['merchandise_id'] ?? $this->input->post('merchandise_id') ?? '';
 			$qty = max(1, (int)($params['quantity'] ?? $params['qty'] ?? $this->input->post('quantity') ?? 1));
 			$expected_price = $params['expected_price'] ?? $this->input->post('expected_price') ?? '';
 			$item = $params['item'] ?? $this->input->post('item') ?? '';
 			$image = $params['image'] ?? $this->input->post('image') ?? '';
+			$product_item_id = (int)($params['product_item_id'] ?? $this->input->post('product_item_id') ?? 0);
 
-			if ($product_id && ($item === '' || $image === '')){
-				$product = $this->cms_page_panel_model->get_cms_page_panel($product_id);
-				if ($item === ''){
-					$item = $product['heading'] ?? '';
+			$dims = $params['dims'] ?? $this->input->post('dims') ?? [];
+			if (is_string($dims) && $dims !== ''){
+				$decoded = json_decode($dims, true);
+				$dims = is_array($decoded) ? $decoded : [];
+			}
+			if (!is_array($dims)){
+				$dims = [];
+			}
+
+			$this->load->model('shop/shop_dim_model');
+			$item_row = $this->shop_dim_model->resolve_cart_item($product_id, $product_item_id, $dims);
+			if (!empty($item_row['cms_page_panel_id'])){
+				$product_item_id = (int)$item_row['cms_page_panel_id'];
+				if ($product_id <= 0){
+					$product_id = (int)($item_row['product_id'] ?? 0);
 				}
-				if ($image === ''){
-					$image = $product['image'] ?? '';
+			} else {
+				$item_row = [];
+				$product_item_id = 0;
+			}
+
+			$product_row = $product_id > 0 ? $this->cms_page_panel_model->get_cms_page_panel($product_id) : [];
+			$variant_id = (string)($item_row['shopify_variant_id'] ?? '');
+			$shopify_product = !empty($product_row['shopify_id']);
+			$adding_local = !$shopify_product && $variant_id === '';
+
+			if ($expected_price === '' && !empty($item_row['price'])){
+				$expected_price = $item_row['price'];
+			}
+
+			if ($shopify_product && $variant_id !== ''
+					&& in_array('shopify', $GLOBALS['config']['modules'] ?? [], true)){
+				$this->load->model('shopify/shopify_product_model');
+				$refreshed = $this->shopify_product_model->refresh_product($product_id, 1, false);
+				$live_price = $this->shopify_product_model->variant_price_from_product(
+						is_array($refreshed) ? $refreshed : [],
+						$variant_id,
+						''
+				);
+				if ($live_price !== null && $live_price !== ''){
+					$expected_price = $live_price;
 				}
 			}
 
-			if ($variant_id === '' && $merchandise_id === '' && empty($params['product_item_id'])){
-				print(json_encode(['ok' => 0, 'error' => 'Missing product variant']));
+			if ($product_id && ($item === '' || $image === '')){
+				if ($item === ''){
+					$item = $product_row['heading'] ?? '';
+				}
+				if ($image === ''){
+					$image = $product_row['image'] ?? '';
+				}
+			}
+
+			$mixed_error = $params['mixed_source_error'] ?? 'Cart can\'t contain mixed source items';
+			$stock_error = $params['stock_error'] ?? 'Not enough in stock';
+			$missing_error = $params['missing_variant_error'] ?? 'Missing product variant';
+
+			if ($this->shop_dim_model->cart_source_conflict($order, $adding_local)){
+				print(json_encode(['ok' => 0, 'error' => $mixed_error]));
 				exit();
 			}
 
-			if (!empty($params['product_item_id']) || $this->input->post('product_item_id')){
+			if ($shopify_product && ($product_item_id <= 0 || $variant_id === '')){
+				print(json_encode(['ok' => 0, 'error' => $missing_error]));
+				exit();
+			}
+
+			if ($adding_local){
+				$product = is_array($product_row) ? $product_row : [];
+				$type = $this->shop_dim_model->resolve_product_type($product);
+				if (($type['stock_control'] ?? 'none') === 'count'){
+					if ($product_item_id <= 0){
+						print(json_encode(['ok' => 0, 'error' => $stock_error]));
+						exit();
+					}
+					if (!$this->shop_dim_model->type_allows_negative($type)){
+						$avail = $this->shop_dim_model->master_available($item_row, (int)$order['cms_page_panel_id']);
+						if ($avail < $qty){
+							print(json_encode(['ok' => 0, 'error' => $stock_error]));
+							exit();
+						}
+					}
+				}
 				$this->shop_model->create_order_line($order['cms_page_panel_id'], [
-						'product_item_id' => $params['product_item_id'] ?? $this->input->post('product_item_id'),
+						'product_item_id' => $product_item_id,
+						'product_id' => $product_id,
+						'qty' => $qty,
+						'item' => $item,
+						'image' => $image,
+						'dims' => $dims,
 				]);
 			} else {
 				$this->shop_model->create_order_line($order['cms_page_panel_id'], [
 						'product_id' => $product_id,
-						'shopify_variant_id' => $variant_id,
-						'merchandise_id' => $merchandise_id,
+						'product_item_id' => $product_item_id,
 						'qty' => $qty,
 						'expected_price' => $expected_price,
 						'price' => $expected_price,
 						'attributes' => $attributes,
 						'item' => $item,
 						'image' => $image,
+						'dims' => $dims,
 				]);
 			}
 
@@ -114,13 +181,9 @@ class cart extends \Controller{
 	function panel_params($params){
 
 		$this->load->model('shop/shop_model');
-		$this->load->model('user/user_model');
 		$this->load->model('cms/cms_page_panel_model');
 
-		$user = $this->user_model->get_current();
-		if (empty($user)){
-			$user = [];
-		}
+		$user = $this->shop_model->get_front_user();
 
 		// Panel name saved in shop settings (from provides dropdown) — no module scan at cart time
 		$params['checkout_panel'] = $this->shop_model->get_checkout_panel();
@@ -142,6 +205,21 @@ class cart extends \Controller{
 			$quantity = $this->shop_model->get_order_quantity($order['cms_page_panel_id']);
 		}
 
+		$cart_source = '';
+		if ($lines){
+			$this->load->model('shop/shop_dim_model');
+			foreach ($lines as $line){
+				if ($this->shop_dim_model->cart_line_is_shopify($line)){
+					$cart_source = 'shopify';
+					break;
+				}
+				if ($this->shop_dim_model->cart_line_is_local($line)){
+					$cart_source = 'local';
+				}
+			}
+		}
+		$params['cart_source'] = $cart_source;
+
 		$params['cart'] = [
 				'number' => $quantity,
 				'items' => null,
@@ -149,17 +227,20 @@ class cart extends \Controller{
 				'checkout_url' => '',
 		];
 
-		$params['cart']['number_text'] = str_replace(
-				'{{number}}',
-				'<div class="cart_quantity">'.$quantity.'</div>',
-				$params['cart_label']
-		);
+		$qty_html = '<div class="cart_quantity">'.$quantity.'</div>';
+		$params['cart']['number_text'] = str_replace('{{number}}', $qty_html, $params['cart_label']);
+		$mobile_label = trim((string)($params['cart_label_mobile'] ?? ''));
+		if ($mobile_label === ''){
+			$mobile_label = $params['cart_label'];
+		}
+		$params['cart']['number_text_mobile'] = str_replace('{{number}}', $qty_html, $mobile_label);
 
 		$params['cart_visible'] = !empty($_SESSION['shop']['cart_visible']);
 		$params['empty_label'] = $params['empty_label'] ?? 'Please add items to cart';
 
 		if ($want_details){
 
+			$this->load->model('shop/shop_dim_model');
 			$params['cart_details'] = 1;
 			$params['cart']['items'] = [];
 			$total = 0.0;
@@ -172,7 +253,20 @@ class cart extends \Controller{
 				$line_total = $unit * $qty;
 				$total += $line_total;
 
-				$text = $line['description'] ?? '';
+				$blocks = [];
+				$dim_text = '';
+				$item_id = $this->shop_model->order_line_item_id($line);
+				if ($item_id > 0){
+					$ref = $this->cms_page_panel_model->get_cms_page_panel($item_id);
+					if (($ref['panel_name'] ?? '') === 'shop/product_item'){
+						$dim_text = $this->shop_dim_model->dims_description($ref);
+					}
+				}
+				if ($dim_text !== ''){
+					$blocks[] = '<div class="cart_popup_item_dims">'.
+							htmlspecialchars($dim_text, ENT_QUOTES, 'UTF-8').'</div>';
+				}
+
 				if (!empty($line['attributes']) && is_array($line['attributes'])){
 					$bits = [];
 					foreach($line['attributes'] as $k => $v){
@@ -183,15 +277,16 @@ class cart extends \Controller{
 						}
 					}
 					if ($bits){
-						$text = '<div class="cart_popup_item_customisation">'.
+						$blocks[] = '<div class="cart_popup_item_customisation">'.
 								($params['customisation_label'] ?? 'Customisation').'<br>'.
 								implode('<br>', $bits).'</div>';
 					}
-				} else if ($text !== ''){
-					$text = '<div class="cart_popup_item_customisation">'.
-							($params['customisation_label'] ?? 'Customisation').'<br>'.
-							nl2br(htmlspecialchars($text, ENT_QUOTES, 'UTF-8')).'</div>';
+				} else if ($dim_text === '' && !empty($line['description'])){
+					$blocks[] = '<div class="cart_popup_item_customisation">'.
+							nl2br(htmlspecialchars((string)$line['description'], ENT_QUOTES, 'UTF-8')).'</div>';
 				}
+
+				$text = implode('', $blocks);
 
 				$params['cart']['items'][] = [
 						'heading' => $line['item'] ?? '',

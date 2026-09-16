@@ -68,6 +68,13 @@
 			"label": "Original artwork URL hash",
 			"readonly": "1",
 			"help": "md5 of Shopify original_artwork file path; used to re-scrape when meta image changes"
+		},
+		{
+			"type": "text",
+			"name": "print_file_src_hash",
+			"label": "Print file URL hash",
+			"readonly": "1",
+			"help": "md5 of Shopify custom.print_file path; used to re-download when the file changes"
 		}
 	]
 }

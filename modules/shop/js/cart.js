@@ -95,6 +95,7 @@ function cart_add_items(items, attributes){
 	var item = items[0]
 	var merchandise = item.merchandiseId || item.merchandise_id || ''
 	var variant = item.shopify_variant_id || ''
+	var product_item_id = item.product_item_id || item.product_item || 0
 	if (!variant && merchandise && merchandise.indexOf('gid://') === 0){
 		var parts = merchandise.split('/')
 		variant = parts[parts.length - 1]
@@ -103,15 +104,32 @@ function cart_add_items(items, attributes){
 		merchandise = variant.indexOf('gid://') === 0 ? variant : ('gid://shopify/ProductVariant/' + variant)
 	}
 
+	var adding_local = !variant && !merchandise
+	var existing_source = ($('.cart_container').attr('data-cart_source') || '').toString()
+	if ((existing_source === 'shopify' && adding_local) || (existing_source === 'local' && !adding_local)){
+		var mixed = ($('.cart_container').attr('data-mixed_source_error') || '').toString()
+		if (!mixed){
+			mixed = "Cart can't contain mixed source items"
+		}
+		if (typeof window !== 'undefined' && window.alert){
+			window.alert(mixed)
+		}
+		return Promise.resolve(null)
+	}
+
 	var data = {
 		'do': 'add',
 		'product_id': item.product_id || $('.product_container').data('product_id') || 0,
 		'shopify_variant_id': variant,
 		'merchandise_id': merchandise,
+		'product_item_id': product_item_id,
 		'quantity': item.quantity || 1,
 		'expected_price': item.expectedPrice != null ? item.expectedPrice : (item.expected_price || ''),
 		'item': item.item || item.heading || '',
 		'image': item.image || '',
+	}
+	if (item.dims && typeof item.dims === 'object'){
+		data.dims = JSON.stringify(item.dims)
 	}
 
 	if (attributes && typeof attributes === 'object'){
@@ -127,6 +145,7 @@ function cart_add_items(items, attributes){
 			}
 			if (body && body.ok){
 				cart_set_badge(body.quantity || 0)
+				$('.cart_container').attr('data-cart_source', adding_local ? 'local' : 'shopify')
 				if (cart_is_open()){
 					cart_load_details().then(function(){
 						resolve(body)

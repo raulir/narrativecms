@@ -9,13 +9,9 @@ class checkout extends \Controller{
 	function panel_action($params){
 		
 		$this->load->model('cms/cms_page_panel_model');
-		$this->load->model('user/user_model');
 		$this->load->model('shop/shop_model');
 		
-		$user = $this->user_model->get_current();
-		if (empty($user)){
-			$user = [];
-		}
+		$user = $this->shop_model->get_front_user();
 		
 		$do = $this->input->post('do');
 		
@@ -28,9 +24,10 @@ class checkout extends \Controller{
 			
 			foreach($lines as $line){
 				
-				$line['ref'] = $this->cms_page_panel_model->get_cms_page_panel($line['ref_id']);
+				$rid = $this->shop_model->order_line_ref_id($line);
+				$line['ref'] = $rid ? $this->cms_page_panel_model->get_cms_page_panel($rid) : [];
 				
-				if ($line['ref']['panel_name'] == 'shop/delivery'){
+				if (($line['ref']['panel_name'] ?? '') == 'shop/delivery'){
 					$this->cms_page_panel_model->delete_cms_page_panel($line['cms_page_panel_id']);
 				}
 				
@@ -45,9 +42,10 @@ class checkout extends \Controller{
 			
 			foreach($lines as $line){
 				
-				$line['ref'] = $this->cms_page_panel_model->get_cms_page_panel($line['ref_id']);
+				$rid = $this->shop_model->order_line_ref_id($line);
+				$line['ref'] = $rid ? $this->cms_page_panel_model->get_cms_page_panel($rid) : [];
 				
-				if ($line['ref']['panel_name'] == 'shop/delivery'){
+				if (($line['ref']['panel_name'] ?? '') == 'shop/delivery'){
 					$this->cms_page_panel_model->delete_cms_page_panel($line['cms_page_panel_id']);
 				}
 
@@ -88,9 +86,10 @@ class checkout extends \Controller{
 				
 				foreach($lines as $line){
 					
-					$line['ref'] = $this->cms_page_panel_model->get_cms_page_panel($line['ref_id']);
+					$rid = $this->shop_model->order_line_ref_id($line);
+					$line['ref'] = $rid ? $this->cms_page_panel_model->get_cms_page_panel($rid) : [];
 					
-					if ($line['ref']['panel_name'] == 'shop/delivery'){
+					if (($line['ref']['panel_name'] ?? '') == 'shop/delivery'){
 						$this->cms_page_panel_model->update_cms_page_panel($line['cms_page_panel_id'],
 								['meta' => json_encode($params['delivery_meta'], JSON_PRETTY_PRINT)]
 						);
@@ -108,14 +107,12 @@ class checkout extends \Controller{
 
 	function panel_params($params){
 
-		$this->load->model('user/user_model');
 		$this->load->model('shop/shop_model');
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('shop/delivery_model');
 		
 		// get current basket
-		$user = $this->user_model->get_current();
-		if (empty($user)) $user = [];
+		$user = $this->shop_model->get_front_user();
 
 		$params['order'] = $this->shop_model->get_current_order($user);
 		$params['lines'] = $this->cms_page_panel_model->get_list('shop/order_line', ['order_id' => $params['order']['cms_page_panel_id']]);
@@ -134,7 +131,8 @@ class checkout extends \Controller{
 
 		foreach($params['lines'] as &$line){
 			
-			$line['ref'] = $this->cms_page_panel_model->get_cms_page_panel($line['ref_id']);
+			$rid = $this->shop_model->order_line_ref_id($line);
+			$line['ref'] = $rid ? $this->cms_page_panel_model->get_cms_page_panel($rid) : [];
 			
 			if (!empty($line['ref']['product_id'])){
 				

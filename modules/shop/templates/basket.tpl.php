@@ -21,7 +21,7 @@
 									<div class="shop_basket_element_label"><?= $price_label ?></div>
 									<div class="cg_h4 shop_basket_element_text shop_basket_element_price"><?= $item['price'] ?></div>
 								</div>
-								<?php foreach($item['dimensions'] as $dim): ?>
+								<?php foreach(($item['dims'] ?? []) as $dim): ?>
 									<div class="shop_basket_element">
 										<div class="shop_basket_element_label"><?= $dim['label'] ?></div>
 										<div class="shop_basket_element_text"><?= $dim['value'] ?></div>
