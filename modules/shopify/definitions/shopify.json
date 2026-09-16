@@ -10,6 +10,12 @@
 			"help": "Loads the Shopify frontpage collection, creates missing CMS products, and fully refreshes products that changed on Shopify. Status: new/stale → updated; when already in sync, refresh counts idle maintenance (one oldest-checked product per click). Stops after about 50 seconds if there is a large queue."
 		},
 		{
+			"type": "shopify/shopify_cms_order_sync",
+			"name": "sync_orders",
+			"label": "Sync orders",
+			"help": "Pulls Shopify onto CMS carts and orders: attach missing order ids, refresh payment and per-line fulfilment, then queue CMS fulfilment for still-unfulfilled paid lines. Stops after about 50 seconds — click again to continue. Same job as the Shopify order sync repeating task."
+		},
+		{
 			"type": "shopify/shopify_cms_purge",
 			"name": "purge",
 			"label": "Purge products",
@@ -29,17 +35,10 @@
 		},
 		{
 			"type": "text",
-			"name": "thumb_html_ttl",
-			"label": "Thumb HTML cache (seconds)",
-			"default": "900",
-			"help": "How long product thumbnail HTML/payload may be reused without rebuild (default 900 = 15 minutes)"
-		},
-		{
-			"type": "text",
 			"name": "shopify_data_ttl",
 			"label": "Shopify data recheck (seconds)",
-			"default": "3600",
-			"help": "How long CMS product data is treated as fresh without a full Shopify Admin recheck (default 3600 = 1 hour)"
+			"default": "86400",
+			"help": "How long CMS product data is treated as fresh without a full Shopify Admin recheck on the product page (default 86400 = 1 day). Grids never call Shopify."
 		},
 		{
 			"type": "text",
@@ -63,19 +62,21 @@
 			"type": "text",
 			"name": "collection_subcategory_suffix",
 			"label": "Subcategory suffix",
-			"default": "range",
-			"help": "Shopify titles ending with this become shop/subcategory (Shop by range). Parent shop/category is set manually (or fallback). Example: suffix \"range\" → \"Sugar & Sass Range\" → subcategory Sugar & Sass. Matching is case-insensitive; suffix is stripped from the heading."
+			"default": "category",
+			"help": "Shopify titles ending with this become shop/subcategory. This match runs before collection types. Example: suffix {category} → {Birthday Category} → subcategory Birthday. Matching is case-insensitive; suffix is stripped from the heading."
 		},
 		{
 			"type": "repeater",
-			"name": "collection_collection_suffixes",
+			"name": "collections",
 			"label": "Collection suffixes",
-			"help": "Shopify titles ending with any of these become shop/collection (multi-membership on the product). Example: suffix \"category\" → \"Birthday Category\" → collection Birthday. Add one row per client naming pattern.",
+			"help": "Shopify titles ending with the collection type heading become shop/collection of that type. Example: type heading {group} → {Birthday Group} → collection Birthday. Do not use the same word as Subcategory suffix (that match wins).",
 			"fields": [
 				{
-					"type": "text",
-					"name": "suffix",
-					"label": "Suffix",
+					"type": "fk",
+					"name": "collection_type_id",
+					"label": "Collection type",
+					"list": "shop/collection_type",
+					"add_empty": "1",
 					"mandatory": "1"
 				}
 			]

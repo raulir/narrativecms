@@ -1,0 +1,4 @@
+{
+	"label": "Shopify order sync (cron)",
+	"description": "Cron: attach Shopify order ids, refresh linked orders (payment + per-line fulfilment), queue CMS fulfilment"
+}

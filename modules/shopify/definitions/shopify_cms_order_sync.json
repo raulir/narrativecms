@@ -1,0 +1,4 @@
+{
+	"label": "Sync orders",
+	"description": "Admin control to pull Shopify orders onto CMS shop/order rows"
+}

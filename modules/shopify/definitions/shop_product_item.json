@@ -1,0 +1,13 @@
+{
+	"label": "Shopify product item fields",
+	"description": "Extends shop/product_item with the Shopify variant id (checkout connector).",
+	"item": [
+		{
+			"type": "text",
+			"name": "shopify_variant_id",
+			"label": "Shopify variant id",
+			"readonly": "1",
+			"help": "Filled by Shopify sync. Shop cart/checkout use this to build a Storefront line. Not a second dim system."
+		}
+	]
+}

@@ -3,6 +3,24 @@
 	"description": "Extends shop/order with Storefront cart handoff state",
 	"item": [
 		{
+			"type": "subtitle",
+			"label": "Shopify"
+		},
+		{
+			"type": "text",
+			"name": "shopify_order_id",
+			"label": "Shopify order id",
+			"readonly": "1",
+			"help": "API id (legacyResourceId). Used for GraphQL and matching. Not the # number in Shopify Admin."
+		},
+		{
+			"type": "text",
+			"name": "shopify_order_name",
+			"label": "Shopify order",
+			"readonly": "1",
+			"help": "Visible Shopify Admin name, e.g. {#1267}. Used in fulfilment emails."
+		},
+		{
 			"type": "text",
 			"name": "shopify_cart_id",
 			"label": "Shopify cart id",
