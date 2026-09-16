@@ -73,7 +73,8 @@ class cms_video_model extends \Model {
 			return false;
 		}
 
-		return is_file($this->_ffmpeg_path());
+		$path = $this->_ffmpeg_path();
+		return $path !== '' && is_file($path);
 
 	}
 
@@ -155,13 +156,13 @@ class cms_video_model extends \Model {
 		}
 
 		if ($this->_is_queue_locked()){
-			return ['message' => 'locked, encoding in progress'];
+			return ['message' => "locked, encoding in progress\nnoop"];
 		}
 
 		$queue = $this->_read_queue();
 
 		if (empty($queue[0])){
-			return ['message' => 'queue empty'];
+			return ['message' => "queue empty\nnoop"];
 		}
 
 		$load = $this->_server_cpu_load_ratio();
@@ -211,13 +212,79 @@ class cms_video_model extends \Model {
 
 	function _ffmpeg_path(){
 
-		return str_replace('<filename>', 'ffmpeg', $GLOBALS['config']['ffmpeg']);
+		return $this->_resolve_ffmpeg_binary('ffmpeg');
 
 	}
 
 	function _ffprobe_path(){
 
-		return str_replace('<filename>', 'ffprobe', $GLOBALS['config']['ffmpeg']);
+		return $this->_resolve_ffmpeg_binary('ffprobe');
+
+	}
+
+	/**
+	 * Host JSON ffmpeg: full path with <filename>, or just "<filename>" / "ffmpeg"
+	 * (name-only is looked up on PATH — is_file('ffmpeg') only checks cwd).
+	 */
+	function _resolve_ffmpeg_binary($name){
+
+		static $resolved = [];
+
+		$name = (string)$name;
+		if (isset($resolved[$name])){
+			return $resolved[$name];
+		}
+
+		$tpl = (string)($GLOBALS['config']['ffmpeg'] ?? '');
+		$path = str_replace('<filename>', $name, $tpl);
+		if ($path !== '' && is_file($path)){
+			$resolved[$name] = $path;
+			return $path;
+		}
+
+		$base = ($path === '' || strpbrk($path, '/\\') === false) ? ($path !== '' ? $path : $name) : $name;
+		$found = $this->_binary_on_path($base);
+		$resolved[$name] = $found !== '' ? $found : $path;
+
+		return $resolved[$name];
+
+	}
+
+	function _binary_on_path($name){
+
+		$name = (string)$name;
+		if ($name === '' || strpbrk($name, '/\\') !== false){
+			return '';
+		}
+
+		$dirs = [];
+		$path_env = getenv('PATH');
+		$win = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+		$sep = $win ? ';' : ':';
+		if ($path_env !== false && $path_env !== ''){
+			foreach (explode($sep, $path_env) as $dir){
+				$dir = trim($dir);
+				if ($dir !== ''){
+					$dirs[$dir] = 1;
+				}
+			}
+		}
+
+		// php-fpm PATH is often only /usr/bin — interactive shells also have /usr/local/bin
+		if (!$win){
+			foreach (['/usr/local/bin', '/usr/local/sbin', '/opt/bin', '/opt/ffmpeg/bin'] as $dir){
+				$dirs[$dir] = 1;
+			}
+		}
+
+		foreach (array_keys($dirs) as $dir){
+			$full = rtrim($dir, '/\\').DIRECTORY_SEPARATOR.$name;
+			if (is_file($full)){
+				return $full;
+			}
+		}
+
+		return '';
 
 	}
 
@@ -434,7 +501,7 @@ class cms_video_model extends \Model {
 
 		exec($normalise_cmd . ' 2>&1', $out_norm, $ret_norm);
 		if ($ret_norm !== 0) {
-			error_log("Normalisation failed for $input_file: " . implode("\n", $out_norm));
+			error_log_user("Normalisation failed for $input_file: " . implode("\n", $out_norm));
 			return $input_file;
 		}
 

@@ -388,3 +388,45 @@
 	margin-bottom: 0.6rem;
 	text-align: center;
 }
+
+// Leftover tools column under View (in-flow Zoom + Edge + View = 23.2rem)
+.cms_transform_picker_json_block {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 23.2rem;
+	bottom: 0;
+}
+
+.cms_transform_picker_json {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 2.5rem;
+	bottom: 3.2rem;
+	width: 100%;
+	box-sizing: border-box;
+	resize: none;
+	overflow: auto;
+	margin: 0;
+	padding: 0.4rem;
+	border: 0.1rem solid $cms_border;
+	font-family: Consolas, Monaco, monospace;
+	font-size: 1.2rem;
+	line-height: 1.5rem;
+	letter-spacing: 0;
+	white-space: pre;
+	tab-size: 2;
+}
+
+.cms_transform_picker_apply.cms_input_button {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	margin: 0;
+	text-align: center;
+}

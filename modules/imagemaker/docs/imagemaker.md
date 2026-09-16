@@ -12,20 +12,25 @@ Not Timmy-specific. Site modules use it only when installed (soft dependency).
 
 ## Inter-module API
 
-No `extends` / `provides` required to call the engine. Check install, load model, call steps:
+**Prefer `provides.image_compose`.** Domain modules must not `load->model('imagemaker/imagemaker_model')` for product (or other) composites. Shop is the first consumer (`shop/shop_image_model`).
 
 ```php
-if (in_array('imagemaker', $GLOBALS['config']['modules'] ?? [], true)) {
-	$this->load->model('imagemaker/imagemaker_model');
-
-	// 1) Warp overlay onto base (optional)
-	$pair = $this->imagemaker_model->add_image($ontop_key, $base_key, $transform_json);
-	// $pair['image'], $pair['mask'] — relative keys under upload_path
-
-	// 2) Tint (optional mask: black = no paint)
-	$out = $this->imagemaker_model->add_colour('#a4ebf4', $pair['image'], $pair['mask']);
-}
+$CI = get_instance();
+$result = $CI->run_action($compose_panel, [
+	'do' => 'compose',
+	'overlay' => $ontop_key,
+	'base' => $base_key,
+	'transform' => $transform_json,
+	'blending' => 'on',
+	'return_result' => 1,
+	'no_html' => 1,
+]);
+// $result['image'], $result['mask'], $result['_reason']
 ```
+
+`$compose_panel` is the stored provides panel (e.g. `imagemaker/compose`). Shop setting **Image compose** on `shop/shop`; if empty and only one provider is registered, shop uses that panel.
+
+Engine (inside the provider only): `add_image` / `add_colour` on `imagemaker_model`.
 
 | Method | Role |
 |--------|------|
@@ -39,7 +44,7 @@ if (in_array('imagemaker', $GLOBALS['config']['modules'] ?? [], true)) {
 **Image args:** CMS relative keys (`2025/04/x.png`), keys under `imagemaker/…`, or absolute paths.  
 **Returns:** relative under `upload_path` (cached as `imagemaker/a_*`, `m_*`, `c_*`).
 
-Do not hard-require this module from shop/timmy/shopify core paths without an `in_array` guard.
+Shop/Timmy/Shopify must not load this model; they go through `provides.image_compose`.
 
 ## Style list (`imagemaker/style`)
 
@@ -48,7 +53,7 @@ Do not hard-require this module from shop/timmy/shopify core paths without an `i
 | `heading` | Label |
 | `print_background` | Base layer |
 | `transform` | Edge control grid — input `imagemaker/cms_input_transform` (see below) |
-| `blending` | RGB only: `on` (default) = lightness-aware blend; `off` = overwrite with artwork RGB. **Alpha always multiplies transparencies** (\(T_\text{out}=T_\text{base}\times T_\text{overlay}\); GD 0=opaque, 127=clear) |
+| `blending` | RGB only: `on` (default) = lightness-aware blend; `off` = overwrite with artwork RGB. **Alpha always multiplies transparencies** (\(T_\text{out}=T_\text{base}\times T_\text{overlay}\); GD 0=opaque, 127=clear). Base PNG alpha is kept on save. Fully transparent base pixels are not painted (their RGB is ignored — often leftover black). |
 | `colour_mask_1` / `colour_mask_2` | Black = no paint for tint steps |
 
 ### Transform field UI
@@ -73,10 +78,11 @@ Definition:
 - Field value is JSON in a **hidden textarea** (same idea as `mask`)
 - **Edit** opens `imagemaker/transform_picker` popup:
   - **Left:** nearly square image stage (image + polyline + handles)
-  - **Right:** tools (Select / Cancel, zoom slider, reset view, reset points, point readout)
+  - **Right:** tools (Select / Cancel, zoom slider, reset view, reset points, JSON textarea + Apply)
   - **Zoom** (0.5–8, wheel or slider) grows the image stage; point **positions** track the image, handle **drawing** stays fixed rem size (not CSS-scaled)
   - **Pan** by dragging empty image area (not handles)
   - Handles stay draggable; positions always `%` of the image
+- JSON textarea shows the generated value (pretty-printed). Edit it and **Apply** to update handles. **Select** still saves the current handles (Apply first if you edited JSON).
 - Corners shared; tooltips show label + `x%, y%`
 - Thumbnail preview draws the current polygon on the target image
 
@@ -128,55 +134,44 @@ style_id = product.imagemaker_style_id
         ?: category.imagemaker_style_id
 ```
 
-### Productthumb composite
+Used as the **main** (non-variant) product image and for grid thumbs.
 
-`timmy/productthumb` → `shopify_product_model::get_productthumb_params` (soft-loads imagemaker only if module is in `config['modules']`):
+### Product dimension rules
 
-1. Resolve style via cascade  
-2. Need non-empty product **`original_artwork`** (Timmy/Shopify-synced flat art)  
-3. Warp artwork **onto** style `print_background` with style `transform` (`add_image`)  
-4. Cache:  
-   - File: `imagemaker/product_{product_id}_{hash8}.png`  
-     (`hash8 = substr(md5(basename(original_artwork) . '.' . style_update_time), 0, 8)`)  
-   - **`cms_image` row** (category `imagemaker`) so `_ib()` can build sized derivatives / webp  
-   - Hit only when **both** file and DB row exist; if only one is present, purge both sides and rebuild  
-5. If cache complete → use as `thumbnail_image` / gallery  
-6. If missing and **script elapsed** (`$GLOBALS['timer']['start']`, ms) **≥ 15000** → skip generation, keep Shopify/CMS thumb  
-7. Productthumb HTML cache is `productthumb_{id}.html` (TTL + `invalidate_product_display_cache` on product/style/cat/sub save)
+Admin: **Tools → Imagemaker → Product dimension rules** (`imagemaker/dimension_rules` settings).
 
-API:
+Repeater: `product_dimension` (e.g. `frame`) + `dimension_value` (e.g. `black`) + `imagemaker_style_id`. Match is case-insensitive against CMS dim slug + value id/label. Field names stay as stored.
 
-| Method | Role |
-|--------|------|
-| `resolve_style_id($product)` | Cascade FK |
-| `resolve_product_composite($product)` | Composite path or `''` (style + artwork + cache/timer) — use from productthumb, mega menu preview, etc. |
-| `product_composite_cache_key($product_id, $original, $style_update_time)` | `hash8` + relative path |
-| `get_product_composite_image($product_id, $original, $style_id)` | Cache hit / generate / timer skip |
-| `invalidate_thumbs_for_style($style_id)` | Drop productthumb HTML for products that resolve to this style |
-| `invalidate_thumbs_for_subcategory($id)` / `invalidate_thumbs_for_category($id)` | Same for inheriting products (no own style) |
-| `script_elapsed_ms()` | Uses existing `$GLOBALS['timer']['start']` |
+When a product has that option value:
+
+- Compose `original_artwork` onto **that style** (own photo + transform).
+- Cache `imagemaker/product_{id}_{styleId}_{hash8}.png`.
+- Put the file in the gallery with `ids` = those variant ids (all sizes for that frame).
+- Strip those ids from Shopify gallery images (drop the row if no ids remain).
+- Variant ids that no rule claims (e.g. Oak, Unframed) are put on the **cascade** composite so the picker does not fall through to White/Black.
+- Shopify / CMS gallery rows that lose all variant ids stay in the gallery as **non-variant** images (always visible under the active generated frame).
+
+No matching rule: cascade style is still the main image (as before).
+
+### Productthumb + PDP gallery (shop consumes compose)
+
+Shop **`shop_image_model`** owns cascade, dimension rules, 15s generate budget, gallery insert, and thumb HTML bust. Thumbs use the cascade style only.
+
+Call path: productthumb / mega-menu preview / PDP after Shopify catalogue merge → `shop_image_model` → `run_action(image_compose)`. Overlay is product **`original_artwork`**.
 
 Colour masks / `add_colour` on thumbs are **not** wired yet (see todo).
 
 ### Product page gallery (`shop/product` chain)
 
-On this site the `panel_params` chain is:
-
 ```
-shop/product → shopify/shop_product → imagemaker/shop_product → timmy/shop_product
+shop/product → shopify/shop_product (catalogue + shop_image_model compose) → imagemaker (style FK extend only) → timmy
 ```
 
 | Layer | Role |
 |-------|------|
-| **shopify** | TTL recheck / refresh; merge catalogue fields; attach `options`, `variants`, `shopify_images` |
-| **imagemaker** | Composite into `images` (after variant-linked rows; drops primary `image` slide when same as main product photo) |
-| **timmy** | Presentation only (dimensions UI, variant_active order, customisation) — **does not** overwrite catalogue / images |
-
-Imagemaker step:
-
-1. Same cascade + `get_product_composite_image` as productthumb  
-2. `apply_composite_to_images` — variant `ids` first, then composite (no `ids`), then other  
-3. Field names only (`original_artwork`, style FKs) — no Timmy dependency  
+| **shopify** | TTL recheck / refresh; merge catalogue; then `shop_image_model->apply_to_product_params` |
+| **imagemaker** | Style FK fields on product/category/subcategory; `provides.image_compose` |
+| **timmy** | Presentation only — **does not** overwrite catalogue / images |
 
 **Module order:** `shopify` before `imagemaker` before site presentation (`timmy`).
 

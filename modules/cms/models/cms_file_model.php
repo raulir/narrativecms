@@ -221,28 +221,28 @@ class cms_file_model extends \Model {
 			}
 		}
 	
-		$return = '';
-	
-
-		$image_content = file_get_contents($source);
-		if (!empty($image_content)){
-
-			// move it to year/month directory
-			if (!file_exists($GLOBALS['config']['upload_path'].date('Y'))){
-				mkdir($GLOBALS['config']['upload_path'].date('Y'));
-			}
-
-			if (!file_exists($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'))){
-				mkdir($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'));
-			}
-
-			$return = $this->create_cms_file('/', $filename, true);
-
-			file_put_contents($GLOBALS['config']['upload_path'].$return['filename'], $image_content);
-
+		$content = @file_get_contents($source);
+		if ($content === false || $content === ''){
+			return '';
 		}
-	
-		return $return['filename'];
+
+		if (!file_exists($GLOBALS['config']['upload_path'].date('Y'))){
+			mkdir($GLOBALS['config']['upload_path'].date('Y'));
+		}
+
+		if (!file_exists($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'))){
+			mkdir($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'));
+		}
+
+		$created = $this->create_cms_file('/', $filename, true);
+		$saved = is_array($created) ? (string)($created['filename'] ?? '') : '';
+		if ($saved === ''){
+			return '';
+		}
+
+		file_put_contents($GLOBALS['config']['upload_path'].$saved, $content);
+
+		return $saved;
 	
 	}
 	

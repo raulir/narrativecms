@@ -1,0 +1,6 @@
+{
+	"label": "Image compose",
+	"description": "Provides image_compose (warp overlay onto base).",
+	"item": [],
+	"settings": []
+}

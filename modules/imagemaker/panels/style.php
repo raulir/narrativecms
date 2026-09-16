@@ -12,9 +12,9 @@ class style extends \Controller {
 	function on_update($params){
 
 		$id = (int)($params['cms_page_panel_id'] ?? 0);
-		if ($id > 0){
-			$this->load->model('imagemaker/imagemaker_model');
-			$this->imagemaker_model->invalidate_thumbs_for_style($id);
+		if ($id > 0 && in_array('shop', $GLOBALS['config']['modules'] ?? [], true)){
+			$this->load->model('shop/shop_image_model');
+			$this->shop_image_model->invalidate_thumbs_for_style($id);
 		}
 
 		return $params;

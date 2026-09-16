@@ -7,13 +7,8 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 /**
  * GD compositing for layered images (warp overlay + colour tint).
  *
- * Inter-module use (soft dependency — only when this module is installed):
- *
- *   if (in_array('imagemaker', $GLOBALS['config']['modules'] ?? [], true)) {
- *       $this->load->model('imagemaker/imagemaker_model');
- *       $pair = $this->imagemaker_model->add_image($ontop, $base, $transform_json);
- *       $out  = $this->imagemaker_model->add_colour($hex, $pair['image'], $pair['mask']);
- *   }
+ * Domain modules should call provides.image_compose (run_action imagemaker/compose),
+ * not this model. Engine: add_image / add_colour.
  *
  * Image arguments: CMS relative keys under upload_path (e.g. "2025/04/x.png")
  * or relative keys already under imagemaker/, or absolute filesystem paths.
@@ -26,347 +21,6 @@ class imagemaker_model extends \Model {
 	 */
 	function is_available(){
 		return in_array('imagemaker', $GLOBALS['config']['modules'] ?? [], true);
-	}
-
-	/**
-	 * Max script elapsed ms (from $GLOBALS['timer']['start']) before skipping product composite generation.
-	 * Cache hits still return immediately.
-	 */
-	const PRODUCT_COMPOSITE_MAX_MS = 15000;
-
-	/**
-	 * Resolve style FK: product → subcategory → category.
-	 * Outer guard: only call when is_available() (callers wrap module check).
-	 *
-	 * @param array $product product panel (needs imagemaker_style_id, subcategory_id)
-	 * @return int style cms_page_panel_id or 0
-	 */
-	function resolve_style_id($product){
-
-		if (!$this->is_available()){
-			return 0;
-		}
-
-		$product = is_array($product) ? $product : [];
-		$style_id = (int)($product['imagemaker_style_id'] ?? 0);
-		if ($style_id > 0){
-			return $style_id;
-		}
-
-		$subcategory_id = (int)($product['subcategory_id'] ?? 0);
-		if ($subcategory_id <= 0){
-			return 0;
-		}
-
-		$this->load->model('cms/cms_page_panel_model');
-		$sub = $this->cms_page_panel_model->get_cms_page_panel($subcategory_id);
-		$style_id = (int)($sub['imagemaker_style_id'] ?? 0);
-		if ($style_id > 0){
-			return $style_id;
-		}
-
-		$category_id = (int)($sub['category_id'] ?? 0);
-		if ($category_id <= 0){
-			return 0;
-		}
-
-		$cat = $this->cms_page_panel_model->get_cms_page_panel($category_id);
-		return (int)($cat['imagemaker_style_id'] ?? 0);
-
-	}
-
-	/**
-	 * Composite image key for a product panel array, or '' if none / unavailable.
-	 * Uses style cascade + original_artwork + get_product_composite_image (disk/DB cache, 15s timer).
-	 * Callers soft-check module; is_available() is checked here too.
-	 *
-	 * @param array $product needs cms_page_panel_id, original_artwork, imagemaker_style_id and/or subcategory_id
-	 * @return string relative upload key e.g. imagemaker/product_123_abcd1234.png
-	 */
-	function resolve_product_composite($product){
-
-		if (!$this->is_available()){
-			return '';
-		}
-
-		$product = is_array($product) ? $product : [];
-		$product_id = (int)($product['cms_page_panel_id'] ?? 0);
-		$artwork = trim((string)($product['original_artwork'] ?? ''));
-		if ($product_id <= 0 || $artwork === ''){
-			return '';
-		}
-
-		$style_id = $this->resolve_style_id($product);
-		if ($style_id <= 0){
-			return '';
-		}
-
-		return $this->get_product_composite_image($product_id, $artwork, $style_id);
-
-	}
-
-	/**
-	 * Insert composite into a product gallery images[] list.
-	 * Order: variant-linked (non-empty ids) → composite → other non-variant.
-	 *
-	 * @param array $images gallery rows with optional image, ids, shopify_id, …
-	 * @param string $composite_rel relative key under upload_path
-	 * @param array $opts drop_main_image: if set, remove non-variant rows whose image equals this path
-	 * @return array
-	 */
-	function apply_composite_to_images($images, $composite_rel, $opts = []){
-
-		$composite_rel = trim((string)$composite_rel);
-		if ($composite_rel === ''){
-			return is_array($images) ? $images : [];
-		}
-
-		$images = is_array($images) ? $images : [];
-		foreach ($images as $img){
-			if (($img['image'] ?? '') === $composite_rel){
-				return $images;
-			}
-		}
-
-		$drop_main = trim((string)($opts['drop_main_image'] ?? ''));
-		$variant = [];
-		$other = [];
-		foreach ($images as $img){
-			if (!is_array($img)){
-				continue;
-			}
-			if (!empty($img['ids'])){
-				$variant[] = $img;
-				continue;
-			}
-			if ($drop_main !== '' && ($img['image'] ?? '') === $drop_main){
-				continue;
-			}
-			$other[] = $img;
-		}
-
-		$composite = [
-				'image' => $composite_rel,
-				'heading' => '',
-		];
-
-		return array_merge($variant, [$composite], $other);
-
-	}
-
-	/**
-	 * Relative cache key for a product composite PNG.
-	 * hash8 = first 8 of md5(basename(original) . '.' . style_update_time)
-	 *
-	 * @return array{hash8:string,rel:string}
-	 */
-	function product_composite_cache_key($product_id, $original_artwork, $style_update_time){
-
-		$product_id = (int)$product_id;
-		$name = basename(str_replace('\\', '/', (string)$original_artwork));
-		// alpha_mul: bust when warp alpha formula changes
-		$hash8 = substr(md5($name.'.'.(string)$style_update_time.'.alpha_mul'), 0, 8);
-		$rel = 'imagemaker/product_'.$product_id.'_'.$hash8.'.png';
-		return ['hash8' => $hash8, 'rel' => $rel];
-
-	}
-
-	/**
-	 * Elapsed ms since request start ($GLOBALS['timer']['start'] from index.php).
-	 */
-	function script_elapsed_ms(){
-
-		$start = $GLOBALS['timer']['start'] ?? null;
-		if ($start === null || $start === ''){
-			return 0;
-		}
-		return (int)round(microtime(true) * 1000) - (int)$start;
-
-	}
-
-	/**
-	 * True when cms_image has a row for this relative filename.
-	 */
-	function product_composite_record_ok($rel){
-
-		$rel = str_replace('\\', '/', ltrim((string)$rel, '/'));
-		if ($rel === ''){
-			return false;
-		}
-
-		$this->load->model('cms/cms_image_model');
-		$row = $this->cms_image_model->get_cms_image_by_filename($rel);
-		return !empty($row['cms_image_id']);
-
-	}
-
-	/**
-	 * Remove file, size derivatives, and cms_image row for a product composite path.
-	 * Used when only one of file/DB is present (partial = suspect).
-	 */
-	function purge_product_composite($rel){
-
-		$rel = str_replace('\\', '/', ltrim((string)$rel, '/'));
-		if ($rel === ''){
-			return;
-		}
-
-		$this->load->model('cms/cms_image_model');
-		// Deletes file, _name.*.* derivatives, .data, and cms_image row
-		$this->cms_image_model->delete_cms_image_by_filename($rel, true);
-
-		$abs = $this->cache_absolute($rel);
-		if (is_file($abs)){
-			@unlink($abs);
-		}
-
-		if (!empty($GLOBALS['cache']['images_by_filename'][$rel])){
-			unset($GLOBALS['cache']['images_by_filename'][$rel]);
-		}
-
-	}
-
-	/**
-	 * Register product composite on disk into cms_image (category imagemaker).
-	 * Call only after the file exists at $rel.
-	 *
-	 * @return bool
-	 */
-	function register_product_composite_cms_image($rel){
-
-		$rel = str_replace('\\', '/', ltrim((string)$rel, '/'));
-		$abs = $this->cache_absolute($rel);
-		if ($rel === '' || !is_file($abs)){
-			return false;
-		}
-
-		$this->load->model('cms/cms_image_model');
-
-		// Already registered
-		$row = $this->cms_image_model->get_cms_image_by_filename($rel);
-		if (!empty($row['cms_image_id'])){
-			return true;
-		}
-
-		// Fresh insert — name is product_{id}_{hash8} (unique); purge first if partial
-		$base = basename($rel);
-		$created = $this->cms_image_model->create_cms_image('imagemaker/', $base, 'imagemaker');
-		$filename = is_array($created) ? (string)($created['filename'] ?? '') : (string)$created;
-
-		if ($filename === '' || $filename !== $rel){
-			// Name clash renamed the row away from our path — wipe and fail (caller may regenerate)
-			if ($filename !== '' && $filename !== $rel){
-				$this->cms_image_model->delete_cms_image_by_filename($filename, true);
-			}
-			return false;
-		}
-
-		// Prime request cache with dimensions (get fills original_width from file)
-		if (!empty($GLOBALS['cache']['images_by_filename'][$rel])){
-			unset($GLOBALS['cache']['images_by_filename'][$rel]);
-		}
-		$row = $this->cms_image_model->get_cms_image_by_filename($rel);
-
-		return !empty($row['cms_image_id']);
-
-	}
-
-	/**
-	 * Warp original artwork onto style print_background for productthumb (etc.).
-	 * Cached as imagemaker/product_{id}_{hash8}.png + cms_image row (for _ib optimisation).
-	 * Cache hit only when both file and DB record exist; any partial is purged and rebuilt.
-	 * Skips generation if script has already run ≥ PRODUCT_COMPOSITE_MAX_MS (uses $GLOBALS['timer']).
-	 *
-	 * @param int $product_id cms_page_panel_id
-	 * @param string $original_artwork overlay CMS image key
-	 * @param int $style_id imagemaker/style panel id
-	 * @return string relative key under upload_path, or '' on skip/fail
-	 */
-	function get_product_composite_image($product_id, $original_artwork, $style_id){
-
-		if (!$this->is_available()){
-			return '';
-		}
-
-		$product_id = (int)$product_id;
-		$style_id = (int)$style_id;
-		$original_artwork = trim((string)$original_artwork);
-
-		if ($product_id <= 0 || $style_id <= 0 || $original_artwork === ''){
-			return '';
-		}
-
-		$this->load->model('cms/cms_page_panel_model');
-		$style = $this->cms_page_panel_model->get_cms_page_panel($style_id);
-		if (empty($style) || empty($style['cms_page_panel_id'])){
-			return '';
-		}
-
-		$print_background = trim((string)($style['print_background'] ?? ''));
-		$transform = $style['transform'] ?? '';
-		if ($print_background === '' || $transform === '' || $transform === null){
-			return '';
-		}
-
-		$style_update_time = (int)($style['update_time'] ?? 0);
-		if ($style_update_time <= 0){
-			$style_update_time = (int)($style['create_time'] ?? 0);
-		}
-
-		$cache = $this->product_composite_cache_key($product_id, $original_artwork, $style_update_time);
-		$rel = $cache['rel'];
-		$abs = $this->cache_absolute($rel);
-
-		$file_ok = is_file($abs);
-		$db_ok = $this->product_composite_record_ok($rel);
-
-		// Full cache: file + cms_image row
-		if ($file_ok && $db_ok){
-			return $rel;
-		}
-
-		// Partial (only file or only DB) is suspect — wipe and rebuild from scratch
-		if ($file_ok || $db_ok){
-			$this->purge_product_composite($rel);
-		}
-
-		// Budget: do not start heavy warp if request already long-running
-		if ($this->script_elapsed_ms() >= self::PRODUCT_COMPOSITE_MAX_MS){
-			return '';
-		}
-
-		$blending = $this->style_blending_enabled($style);
-		$pair = $this->add_image($original_artwork, $print_background, $transform, $blending);
-		$src_rel = trim((string)($pair['image'] ?? ''));
-		if ($src_rel === '' || !empty($pair['error'])){
-			return '';
-		}
-
-		$src_abs = $this->cache_absolute($src_rel);
-		if (!is_file($src_abs)){
-			return '';
-		}
-
-		$this->ensure_cache_dir();
-		if ($src_abs !== $abs){
-			if (!@copy($src_abs, $abs)){
-				return '';
-			}
-		} else if (!is_file($abs)){
-			return '';
-		}
-
-		if (!is_file($abs)){
-			return '';
-		}
-
-		if (!$this->register_product_composite_cms_image($rel)){
-			// Leave file; next request will purge partial and retry
-			return $rel;
-		}
-
-		return $rel;
-
 	}
 
 	/**
@@ -410,8 +64,8 @@ class imagemaker_model extends \Model {
 
 		$blending = (bool)$blending;
 		$points_key = is_string($transform) ? $transform : json_encode($transform);
-		// alpha_mul: cache bust after transparency-multiply alpha (always on)
-		$cache_key = md5($image_ontop.'_'.$image_base.'_'.$points_key.'_'.($blending ? 'blend' : 'copy').'_alpha_mul');
+		// keep_alpha: cache bust after preserving base PNG alpha (savealpha + skip fully transparent)
+		$cache_key = md5($image_ontop.'_'.$image_base.'_'.$points_key.'_'.($blending ? 'blend' : 'copy').'_keep_alpha');
 		$rel_image = 'imagemaker/a_'.$cache_key.'.png';
 		$rel_mask = 'imagemaker/m_'.$cache_key.'.png';
 		$abs_image = $this->cache_absolute($rel_image);
@@ -449,6 +103,10 @@ class imagemaker_model extends \Model {
 		}
 
 		$build_image = !is_file($abs_image);
+		if ($build_image){
+			imagealphablending($base, false);
+			imagesavealpha($base, true);
+		}
 
 		for ($y = 0; $y < $grid_h; $y++){
 			for ($x = 0; $x < $grid_w; $x++){
@@ -507,20 +165,23 @@ class imagemaker_model extends \Model {
 						if ($build_image && $ax >= 0 && $ax < $aw && $ay >= 0 && $ay < $ah
 								&& $bx >= 0 && $by >= 0 && $bx < imagesx($base) && $by < imagesy($base)){
 							$brgba = imagecolorsforindex($base, imagecolorat($base, $bx, $by));
-							$argba = imagecolorsforindex($addon, imagecolorat($addon, $ax, $ay));
-							if ($blending){
-								$nc = $this->blend_colour($brgba, $argba);
-							} else {
-								// RGB overwrite; alpha always multiplied (below)
-								$nc = [
-										'red' => $argba['red'],
-										'green' => $argba['green'],
-										'blue' => $argba['blue'],
-								];
+							// Fully transparent base: keep the hole; RGB is often junk (black)
+							if ((int)($brgba['alpha'] ?? 0) < 127){
+								$argba = imagecolorsforindex($addon, imagecolorat($addon, $ax, $ay));
+								if ($blending){
+									$nc = $this->blend_colour($brgba, $argba);
+								} else {
+									// RGB overwrite; alpha always multiplied (below)
+									$nc = [
+											'red' => $argba['red'],
+											'green' => $argba['green'],
+											'blue' => $argba['blue'],
+									];
+								}
+								$nc['alpha'] = $this->blend_alpha($brgba['alpha'] ?? 0, $argba['alpha'] ?? 0);
+								imagesetpixel($base, $bx, $by,
+										imagecolorallocatealpha($base, $nc['red'], $nc['green'], $nc['blue'], $nc['alpha']));
 							}
-							$nc['alpha'] = $this->blend_alpha($brgba['alpha'] ?? 0, $argba['alpha'] ?? 0);
-							imagesetpixel($base, $bx, $by,
-									imagecolorallocatealpha($base, $nc['red'], $nc['green'], $nc['blue'], $nc['alpha']));
 						}
 
 						if ($build_mask && $mask && $bx >= 0 && $by >= 0 && $bx < $maxx && $by < $maxy){
@@ -534,6 +195,8 @@ class imagemaker_model extends \Model {
 		$this->ensure_cache_dir();
 
 		if ($build_image){
+			imagealphablending($base, false);
+			imagesavealpha($base, true);
 			imagepng($base, $abs_image);
 		}
 		if ($build_mask && $mask){
@@ -933,206 +596,13 @@ class imagemaker_model extends \Model {
 			ob_start();
 			$src = imagecreatefrompng($abs);
 			ob_end_clean();
+			if ($src){
+				imagealphablending($src, false);
+				imagesavealpha($src, true);
+			}
 			return $src;
 		}
 
 		return false;
 	}
-
-	/**
-	 * Drop productthumb HTML for every product that resolves to this style
-	 * (product FK → subcategory FK → category FK).
-	 */
-	function invalidate_thumbs_for_style($style_id){
-
-		$style_id = (int)$style_id;
-		if ($style_id <= 0){
-			return;
-		}
-
-		$this->_invalidate_product_thumbs($this->product_ids_resolving_to_style($style_id));
-
-	}
-
-	/**
-	 * Products in this subcategory with no product-level style.
-	 */
-	function invalidate_thumbs_for_subcategory($subcategory_id){
-
-		$subcategory_id = (int)$subcategory_id;
-		if ($subcategory_id <= 0){
-			return;
-		}
-
-		$pids = $this->_ids_for_panel_param('shop/product', 'subcategory_id', $subcategory_id);
-		$this->_invalidate_product_thumbs($this->_products_without_own_style($pids));
-
-	}
-
-	/**
-	 * Products in this category that inherit category style (no product/sub style).
-	 */
-	function invalidate_thumbs_for_category($category_id){
-
-		$category_id = (int)$category_id;
-		if ($category_id <= 0){
-			return;
-		}
-
-		$subs = $this->_ids_for_panel_param('shop/subcategory', 'category_id', $category_id);
-		foreach ($subs as $sid){
-			if ($this->_panel_param_int($sid, 'imagemaker_style_id') > 0){
-				continue;
-			}
-			$this->invalidate_thumbs_for_subcategory($sid);
-		}
-
-	}
-
-	/**
-	 * Product ids whose cascade style is $style_id.
-	 *
-	 * @return int[]
-	 */
-	function product_ids_resolving_to_style($style_id){
-
-		$style_id = (int)$style_id;
-		if ($style_id <= 0){
-			return [];
-		}
-
-		$ids = $this->_ids_for_panel_param('shop/product', 'imagemaker_style_id', $style_id);
-
-		$subs_with_style = $this->_ids_for_panel_param('shop/subcategory', 'imagemaker_style_id', $style_id);
-		$via_sub = [];
-		foreach ($subs_with_style as $sid){
-			foreach ($this->_ids_for_panel_param('shop/product', 'subcategory_id', $sid) as $pid){
-				$via_sub[] = $pid;
-			}
-		}
-		$ids = array_merge($ids, $this->_products_without_own_style($via_sub));
-
-		$cats_with_style = $this->_ids_for_panel_param('shop/category', 'imagemaker_style_id', $style_id);
-		$subs_in_cat = [];
-		foreach ($cats_with_style as $cid){
-			foreach ($this->_ids_for_panel_param('shop/subcategory', 'category_id', $cid) as $sid){
-				if ($this->_panel_param_int($sid, 'imagemaker_style_id') > 0){
-					continue;
-				}
-				$subs_in_cat[] = $sid;
-			}
-		}
-		$via_cat = [];
-		foreach ($subs_in_cat as $sid){
-			foreach ($this->_ids_for_panel_param('shop/product', 'subcategory_id', $sid) as $pid){
-				$via_cat[] = $pid;
-			}
-		}
-		$ids = array_merge($ids, $this->_products_without_own_style($via_cat));
-
-		$ids = array_values(array_unique(array_map('intval', $ids)));
-		return array_values(array_filter($ids, function($id){
-			return $id > 0;
-		}));
-
-	}
-
-	function _invalidate_product_thumbs($product_ids){
-
-		if (!is_array($product_ids) || empty($product_ids)){
-			return;
-		}
-		if (!in_array('shopify', $GLOBALS['config']['modules'] ?? [], true)){
-			return;
-		}
-
-		$this->load->model('shopify/shopify_product_model');
-		foreach ($product_ids as $pid){
-			$pid = (int)$pid;
-			if ($pid > 0){
-				$this->shopify_product_model->invalidate_product_display_cache($pid);
-			}
-		}
-
-	}
-
-	function _ids_for_panel_param($panel_name, $param_name, $value){
-
-		$panel_name = trim((string)$panel_name);
-		$param_name = trim((string)$param_name);
-		if ($panel_name === '' || $param_name === ''){
-			return [];
-		}
-
-		$sql = 'select distinct p.cms_page_panel_id from cms_page_panel p '.
-				'join cms_page_panel_param x on p.cms_page_panel_id = x.cms_page_panel_id '.
-				'where p.panel_name = ? and x.name = ? and x.value = ? ';
-		$query = $this->db->query($sql, [$panel_name, $param_name, (string)$value]);
-		if (!$query || !$query->num_rows()){
-			return [];
-		}
-
-		$ids = [];
-		foreach ($query->result_array() as $row){
-			$id = (int)($row['cms_page_panel_id'] ?? 0);
-			if ($id > 0){
-				$ids[] = $id;
-			}
-		}
-
-		return $ids;
-
-	}
-
-	function _panel_param_int($cms_page_panel_id, $param_name){
-
-		$cms_page_panel_id = (int)$cms_page_panel_id;
-		$param_name = trim((string)$param_name);
-		if ($cms_page_panel_id <= 0 || $param_name === ''){
-			return 0;
-		}
-
-		$sql = 'select value from cms_page_panel_param where cms_page_panel_id = ? and name = ? limit 1 ';
-		$query = $this->db->query($sql, [$cms_page_panel_id, $param_name]);
-		if (!$query || !$query->num_rows()){
-			return 0;
-		}
-
-		return (int)($query->row_array()['value'] ?? 0);
-
-	}
-
-	function _products_without_own_style($product_ids){
-
-		if (!is_array($product_ids) || empty($product_ids)){
-			return [];
-		}
-
-		$ids = [];
-		foreach ($product_ids as $pid){
-			$pid = (int)$pid;
-			if ($pid > 0){
-				$ids[$pid] = true;
-			}
-		}
-		if (empty($ids)){
-			return [];
-		}
-
-		$in = implode(',', array_keys($ids));
-		$sql = 'select cms_page_panel_id, value from cms_page_panel_param '.
-				'where name = ? and cms_page_panel_id in ('.$in.') ';
-		$query = $this->db->query($sql, ['imagemaker_style_id']);
-		if ($query){
-			foreach ($query->result_array() as $row){
-				if ((int)($row['value'] ?? 0) > 0){
-					unset($ids[(int)$row['cms_page_panel_id']]);
-				}
-			}
-		}
-
-		return array_keys($ids);
-
-	}
-
 }

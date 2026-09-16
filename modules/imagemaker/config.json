@@ -3,11 +3,18 @@
 	"version": "0.1",
 	"panels": [
 		{
-			"id": "style",
-			"name": "Imagemaker style",
+			"id": "compose",
+			"name": "Image compose",
 			"flags": [
 				"hidden"
 			]
+		}
+	],
+	"provides": [
+		{
+			"service": "image_compose",
+			"panel": "//compose",
+			"label": "Imagemaker compose"
 		}
 	],
 	"extends": [
@@ -26,14 +33,14 @@
 	],
 	"cms_menu": [
 		{
-			"id": "cms_content",
-			"name": "Content",
-			"order": "20"
+			"id": "cms_tools",
+			"name": "Tools",
+			"order": 40
 		},
 		{
 			"id": "imagemaker",
 			"name": "Imagemaker",
-			"parent": "cms_content",
+			"parent": "cms_tools",
 			"order": "80"
 		},
 		{
@@ -42,6 +49,13 @@
 			"parent": "imagemaker",
 			"url": "admin/cms_list/imagemaker__style/",
 			"order": "10"
+		},
+		{
+			"id": "imagemaker_dimension_rules",
+			"name": "Product dimension rules",
+			"parent": "imagemaker",
+			"url": "admin/panel_settings/imagemaker__dimension_rules/",
+			"order": "20"
 		}
 	]
 }

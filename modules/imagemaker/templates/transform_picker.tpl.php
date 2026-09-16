@@ -86,6 +86,12 @@ $value_attr = htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 							</div>
 						</div>
 
+						<div class="cms_transform_picker_json_block">
+							<div class="cms_transform_picker_tool_label">JSON</div>
+							<textarea class="cms_transform_picker_json" spellcheck="false"></textarea>
+							<div class="cms_transform_picker_apply cms_input_button">Apply</div>
+						</div>
+
 					</div>
 
 				</div>

@@ -171,6 +171,45 @@ function transform_picker_get_value($container){
 
 }
 
+function transform_picker_json_stringify(value){
+	return JSON.stringify(value, null, 2)
+}
+
+function transform_picker_sync_json($container, force){
+
+	var $ta = $('.cms_transform_picker_json', $container)
+	if (!$ta.length){
+		return
+	}
+	if (!force && $ta.is(':focus')){
+		return
+	}
+	$ta.val(transform_picker_json_stringify(transform_picker_get_value($container)))
+
+}
+
+function transform_picker_apply_json($container){
+
+	var raw = $('.cms_transform_picker_json', $container).val()
+	var value
+	try {
+		value = JSON.parse(raw)
+	} catch (e){
+		cms_error('Invalid JSON', 3)
+		return
+	}
+	if (!value || !value.data || !value.data.length){
+		cms_error('JSON missing data', 3)
+		return
+	}
+
+	var n = parseInt($container.data('points'), 10) || 5
+	$container.data('grid', transform_picker_from_value(value, n))
+	transform_picker_draw($container)
+	transform_picker_sync_json($container, true)
+
+}
+
 function transform_picker_handle_label(x, y, n){
 
 	var last = n - 1
@@ -492,6 +531,7 @@ function transform_picker_draw($container){
 	var $svg = $('.cms_transform_picker_svg', $container)
 	var $handles = $('.cms_transform_picker_handles', $container)
 	if (!$svg.length || !$handles.length){
+		transform_picker_sync_json($container)
 		return
 	}
 
@@ -546,6 +586,7 @@ function transform_picker_draw($container){
 	}
 
 	transform_picker_bind_handles($container)
+	transform_picker_sync_json($container)
 
 }
 
@@ -745,6 +786,7 @@ function transform_picker_init($root){
 		$container.data('zoom', 1)
 		$container.data('pan_x', 0)
 		$container.data('pan_y', 0)
+		transform_picker_sync_json($container)
 
 		setTimeout(function(){
 			transform_picker_layout_stage($container)
@@ -756,6 +798,11 @@ function transform_picker_init($root){
 			e.preventDefault()
 			$container.data('grid', transform_picker_default_grid(n))
 			transform_picker_draw($container)
+		})
+
+		$('.cms_transform_picker_apply', $container).off('click.cms_apply').on('click.cms_apply', function(e){
+			e.preventDefault()
+			transform_picker_apply_json($container)
 		})
 
 	})

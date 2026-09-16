@@ -1,0 +1,34 @@
+{
+	"label": "Product dimension rules",
+	"description": "Map a product option name and value to an Imagemaker style (e.g. frame + black)",
+	"item": [],
+	"settings": [
+		{
+			"type": "repeater",
+			"name": "rules",
+			"label": "Rules",
+			"help": "When a product has this dim value, compose with the style and tag those product items.||Example: dimension {frame}, value {black} (CMS dim slug + value id/label).||No matching rule: category / subcategory / product style is still the main image.",
+			"fields": [
+				{
+					"type": "text",
+					"name": "product_dimension",
+					"label": "Product dimension",
+					"help": "CMS dim id (slug), e.g. {frame}"
+				},
+				{
+					"type": "text",
+					"name": "dimension_value",
+					"label": "Dimension value",
+					"help": "CMS dim value id or label, e.g. {black}"
+				},
+				{
+					"type": "fk",
+					"name": "imagemaker_style_id",
+					"label": "Style",
+					"list": "imagemaker/style",
+					"add_empty": "1"
+				}
+			]
+		}
+	]
+}
