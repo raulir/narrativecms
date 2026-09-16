@@ -1,0 +1,102 @@
+.subscribe_container {
+	position: relative;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 2.0rem 0;
+}
+
+.subscribe_content {
+	width: 100.0rem;
+	max-width: 100%;
+	margin: 0 auto;
+	box-sizing: border-box;
+	padding: 0 2.0rem;
+	text-align: center;
+}
+
+.subscribe_heading {
+	font-size: 2.4rem;
+	line-height: 3.0rem;
+	padding: 0 0 1.0rem 0;
+}
+
+.subscribe_text {
+	font-size: 1.6rem;
+	line-height: 2.2rem;
+	padding: 0 0 2.0rem 0;
+}
+
+.subscribe_form {
+	position: relative;
+	display: block;
+	max-width: 40.0rem;
+	margin: 0 auto;
+}
+
+.subscribe_email {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	font-size: 1.6rem;
+	line-height: 2.2rem;
+	padding: 0.6rem 0;
+	border: 0;
+	border-bottom: 0.2rem solid #000000;
+	background: transparent;
+}
+
+.subscribe_submit {
+	display: inline-block;
+	margin: 1.2rem 0 0 0;
+	padding: 0.4rem 1.4rem;
+	font-size: 1.6rem;
+	line-height: 2.2rem;
+	border: 0.2rem solid #000000;
+}
+
+.subscribe_error {
+	display: none;
+	padding: 0.6rem 0 0 0;
+	font-size: 1.2rem;
+	line-height: 1.6rem;
+}
+
+.subscribe_error_show {
+	display: block;
+}
+
+.subscribe_message {
+	display: none;
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	padding: 1.0rem 0;
+	box-sizing: border-box;
+	background-color: #ffffff;
+}
+
+.subscribe_message_active {
+	display: block;
+}
+
+.subscribe_message_sending,
+.subscribe_message_text {
+	display: none;
+	font-size: 1.6rem;
+	line-height: 2.2rem;
+}
+
+.subscribe_message_sending_on .subscribe_message_sending {
+	display: block;
+}
+
+.subscribe_message_ok .subscribe_message_text {
+	display: block;
+}
+
+.subscribe_confirm {
+	font-size: 1.8rem;
+	line-height: 2.4rem;
+	padding: 2.0rem 0;
+}
