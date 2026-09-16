@@ -1,7 +1,7 @@
 <div class="dim_value_select_container">
 	<div class="dim_value_select_content">
 
-		<select class="dim_value_select_select" data-item_id="<?= $item_id ?>" data-dimension="<?= $dimension ?>">
+		<select class="dim_value_select_select" data-item_id="<?= $item_id ?>" data-dim="<?= $dim ?>">
 			<?php if(empty($current) || empty($available[$current])): ?>
 				<option value="">--</option>
 			<?php endif ?>

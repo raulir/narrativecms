@@ -11,6 +11,14 @@
 			"help": "Panel that handles checkout handoff (from modules that provide shop_checkout).||Leave empty until configured — cart will show an error on the checkout button."
 		},
 		{
+			"type": "cms/cms_input_provides",
+			"name": "image_compose",
+			"label": "Image compose",
+			"service": "image_compose",
+			"default": "",
+			"help": "Optional. Warp/composite product artwork onto a print background.||Empty: use the only installed provider, or skip if none."
+		},
+		{
 			"type": "fk",
 			"name": "default_currency_id",
 			"label": "Default currency",

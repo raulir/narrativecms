@@ -6,149 +6,44 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class shop_model extends \Model {
 
+	/**
+	 * Logged-in front user, or [] when the user module is not installed.
+	 * Cart/checkout must not load user/user_model unless user is in config modules.
+	 */
+	function get_front_user(){
+
+		if (!in_array('user', $GLOBALS['config']['modules'] ?? [], true)){
+			return [];
+		}
+
+		$this->load->model('user/user_model');
+		$user = $this->user_model->get_current();
+
+		return is_array($user) ? $user : [];
+
+	}
+
 	function get_product_variations($product_id, $params = []){
-		
-		$this->load->model('cms/cms_page_panel_model');
-		
-		$product = $this->cms_page_panel_model->get_cms_page_panel($product_id);
-		if (!empty($product['product_stock_id'])){
-			$product_stock_group = $this->cms_page_panel_model->get_cms_page_panel($product['product_stock_id']);
-		}
-		
-		$exlude_items = [];
-			
-		// if stock control limited
-		if (!empty($product_stock_group['stock_control']) && $product_stock_group['stock_control'] == 'individual'){
-			$product_items = $this->cms_page_panel_model->get_list('shop/product_item', ['product_id' => $product_id, 'order_id' => [0, '']]);
-			if (!empty($params['exclude_order_id'])){
-				$exclude_lines = $this->cms_page_panel_model->get_list('shop/order_line', ['order_id' => $params['exclude_order_id']]);
-				foreach($exclude_lines as $line){
-					
-					$exlude_items[] = $line['ref_id'];
-					
-				}
-			}
-		} else {
-			$product_items = $this->cms_page_panel_model->get_list('shop/product_item', ['product_id' => $product_id]);
-		}
-		
-		// filter out if limited to certain dimension value
-		if (!empty($params['dimension_name'])){
-			
-			$params['dimensions'] = [
-					$params['dimension_name'] => $params['dimension_value'],
-			];
-			
-		}
-		
-		if (!empty($params['dimensions'])){
 
-			foreach($product_items as $item_key => $item){
-
-				$found = 0;
-
-				foreach($params['dimensions'] as $dim_name => $dim_value){
-					foreach($item['dimensions'] as $variation){
-						if ($variation['value'] == ($dim_name . '=' . $dim_value)){
-							$found += 1;
-						}
-					}
-				}
-
-				if ($found < count($params['dimensions'])){
-					unset($product_items[$item_key]);
-				}
-			
-			}
-			
-		}
-
-		$return = [];
-		foreach($product_items as $item){
-			
-			if (!in_array($item['cms_page_panel_id'], $exlude_items)){
-			
-				foreach($item['dimensions'] as $variation){
-					
-					list($dimension_name, $dimension_value_id) = explode('=', $variation['value']);
-					
-					if (empty($return[$dimension_name])){
-						$return[$dimension_name] = [];
-					}
-					
-					if (empty($return[$dimension_name][$dimension_value_id])){
-						$return[$dimension_name][$dimension_value_id] = [
-								'data' => $this->get_dimension_value_data($dimension_name, $dimension_value_id),
-								'count' => 0,
-								'items' => [],
-						];
-					}
-					
-					$return[$dimension_name][$dimension_value_id]['count'] += 1;
-					$return[$dimension_name][$dimension_value_id]['items'][$item['cms_page_panel_id']] = 
-							!empty($item['price']) ? $item['price'] : $product['price'];
-					
-					// fill in availability, go again over variations
-					if (empty($return[$dimension_name][$dimension_value_id]['availability'])){
-						$return[$dimension_name][$dimension_value_id]['availability'] = [];
-					}
-					foreach($item['dimensions'] as $avail_var){
-						
-						if ($avail_var['value'] != $variation['value']){
-							list($avail_var_name, $avail_var_value_id) = explode('=', $avail_var['value']);
-							$return[$dimension_name][$dimension_value_id]['availability'][$avail_var_name][$avail_var_value_id] = true;
-						}
-					
-					}
-					
-				}
-			
-			}
-			
-		}
-		
-		foreach($return as &$dimension_data){
-			ksort($dimension_data);
-		}
-
-		return $return;
+		$this->load->model('shop/shop_dim_model');
+		return $this->shop_dim_model->get_product_dim_variations($product_id, $params);
 
 	}
 
-	function get_dimension_value_data($dimension_name, $dimension_value_id){
-		
-		$this->load->model('cms/cms_page_panel_model');
-		
-		$dimensions = $this->cms_page_panel_model->get_list('shop/product_dimension', ['id' => $dimension_name]);
-		
-		$return = ['label' => '[no value]', 'description' => ''];
-		foreach($dimensions as $dimension){
-			foreach($dimension['values'] as $value){
-				if ($value['id'] == $dimension_value_id){
-					$return = ['label' => $value['label'], 'description' => $value['description']];
-				}
-			}
-		}
-		
-		return $return;
-		
+	function get_dim_value_data($dimension_name, $dimension_value_id){
+
+		$this->load->model('shop/shop_dim_model');
+		return $this->shop_dim_model->get_dim_value_data($dimension_name, $dimension_value_id);
+
 	}
-	
-	function get_dimension_label($dimension_name){
-		
-		$this->load->model('cms/cms_page_panel_model');
-		
-		$dimensions = $this->cms_page_panel_model->get_list('shop/product_dimension', ['id' => $dimension_name]);
-		
-		$return = '[no value]';
-		foreach($dimensions as $dimension){
-			$return = $dimension['heading'];
-		}
-	
-		return $return;
-		
+
+	function get_dim_label($dimension_name){
+
+		$this->load->model('shop/shop_dim_model');
+		return $this->shop_dim_model->get_dim_label($dimension_name);
+
 	}
-	
+
 	/**
 	 * Long-lived cookie identity for anonymous carts (not sequential order id).
 	 */
@@ -181,11 +76,364 @@ class shop_model extends \Model {
 		unset($_COOKIE[$this->get_cart_cookie_name()]);
 	}
 
+	function order_is_draft($order){
+
+		return (string)($order['status'] ?? '') === '';
+
+	}
+
+	/**
+	 * Money state. Legacy rows with status=paid and empty payment_status count as paid.
+	 */
+	function order_payment_status($order){
+
+		$pay = trim((string)($order['payment_status'] ?? ''));
+		if ($pay !== ''){
+			return $pay;
+		}
+		if (!empty($order['paid_time']) || (string)($order['status'] ?? '') === 'paid'){
+			return 'paid';
+		}
+		return 'unpaid';
+
+	}
+
+	/**
+	 * Physical / fulfilment lifecycle. Legacy status=paid maps to unfulfilled.
+	 */
+	function order_physical_status($order){
+
+		$st = (string)($order['status'] ?? '');
+		if ($st === 'paid'){
+			return 'unfulfilled';
+		}
+		return $st;
+
+	}
+
+	function order_is_paid($order){
+
+		return $this->order_payment_status($order) === 'paid';
+
+	}
+
+	/**
+	 * CMS fulfilment emails: paid, not finished. Per-line skip is in _pending_lines.
+	 */
+	function order_cms_fulfilment_ok($order){
+
+		if ($this->order_is_finished($order)){
+			return false;
+		}
+		if (!$this->order_is_paid($order)){
+			return false;
+		}
+		$st = $this->order_physical_status($order);
+		return !in_array($st, ['', 'abandoned', 'cancelled', 'finished'], true);
+
+	}
+
+	function order_is_finished($order){
+
+		return $this->order_physical_status($order) === 'finished';
+
+	}
+
+	/**
+	 * Unfinished claims against listed stock. Finished orders have already posted number.
+	 */
+	function order_holds_stock($order){
+
+		$st = $this->order_physical_status($order);
+		if (in_array($st, ['abandoned', 'cancelled', 'finished'], true)){
+			return false;
+		}
+		$pay = $this->order_payment_status($order);
+		if (in_array($pay, ['refunded', 'voided'], true)){
+			return false;
+		}
+		return true;
+
+	}
+
+	function order_line_item_id($line){
+
+		$id = (int)($line['product_item_id'] ?? 0);
+		if ($id > 0){
+			return $id;
+		}
+		$ref = (int)($line['ref_id'] ?? 0);
+		if ($ref <= 0){
+			return 0;
+		}
+		$this->load->model('cms/cms_page_panel_model');
+		$row = $this->cms_page_panel_model->get_cms_page_panel($ref);
+		if (($row['panel_name'] ?? '') === 'shop/product_item'){
+			return $ref;
+		}
+		return 0;
+
+	}
+
+	function order_line_ref_id($line){
+
+		$id = (int)($line['ref_id'] ?? 0);
+		if ($id > 0){
+			return $id;
+		}
+		return $this->order_line_item_id($line);
+
+	}
+
+	function order_line_status($line){
+
+		return trim((string)($line['status'] ?? ''));
+
+	}
+
+	function order_line_is_fulfilable($line){
+
+		$this->load->model('shop/shop_fulfilment_model');
+		if ($this->shop_fulfilment_model->_is_delivery_line($line)){
+			return false;
+		}
+		if (trim((string)($line['shopify_variant_id'] ?? $line['shopify_line_id'] ?? '')) !== ''){
+			return true;
+		}
+		$product_id = (int)($line['product_id'] ?? 0);
+		if ($product_id <= 0){
+			return false;
+		}
+		$this->load->model('cms/cms_page_panel_model');
+		$product = $this->cms_page_panel_model->get_cms_page_panel($product_id);
+		$cat = $this->shop_fulfilment_model->_category_for_product(is_array($product) ? $product : []);
+		return trim((string)($cat['fulfilment'] ?? '')) !== '';
+
+	}
+
+	function stamp_draft_lines_unfulfilled($order_id){
+
+		$this->load->model('cms/cms_page_panel_model');
+		foreach ($this->get_order_lines($order_id) as $line){
+			if ($this->order_line_status($line) !== ''){
+				continue;
+			}
+			$this->cms_page_panel_model->update_cms_page_panel($line['cms_page_panel_id'], [
+					'status' => 'unfulfilled',
+			]);
+		}
+
+	}
+
+	function set_line_physical_status($line, $physical){
+
+		$physical = (string)$physical;
+		if (!in_array($physical, ['unfulfilled', 'in_progress', 'fulfilled', 'cancelled'], true)){
+			return false;
+		}
+		$this->load->model('shop/shop_fulfilment_model');
+		if ($this->shop_fulfilment_model->_is_delivery_line($line)){
+			return false;
+		}
+		$cur = $this->order_line_status($line);
+		if ($cur === $physical){
+			return false;
+		}
+		if ($cur === 'cancelled' && $physical !== 'cancelled'){
+			return false;
+		}
+		if (in_array($cur, ['fulfilled', 'in_progress'], true) && $physical === 'unfulfilled'){
+			return false;
+		}
+		if ($cur === 'fulfilled' && $physical === 'in_progress'){
+			return false;
+		}
+		$this->load->model('cms/cms_page_panel_model');
+		$this->cms_page_panel_model->update_cms_page_panel($line['cms_page_panel_id'], [
+				'status' => $physical,
+		]);
+		return true;
+
+	}
+
+	function apply_lines_physical_status($order_id, $physical){
+
+		foreach ($this->get_order_lines($order_id) as $line){
+			$this->set_line_physical_status($line, $physical);
+		}
+
+	}
+
+	function rollup_order_status($order_id){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('shop/shop_fulfilment_model');
+
+		$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
+		if (empty($order['cms_page_panel_id'])){
+			return;
+		}
+		if ($this->order_is_draft($order) || $this->order_is_finished($order)){
+			return;
+		}
+		if ($this->order_physical_status($order) === 'abandoned'){
+			return;
+		}
+
+		$has = [
+				'unfulfilled' => 0,
+				'in_progress' => 0,
+				'fulfilled' => 0,
+				'cancelled' => 0,
+		];
+		$n = 0;
+		foreach ($this->get_order_lines($order_id) as $line){
+			if ($this->shop_fulfilment_model->_is_delivery_line($line)){
+				continue;
+			}
+			$st = $this->order_line_status($line);
+			if ($st === ''){
+				$st = 'unfulfilled';
+			}
+			if (!isset($has[$st])){
+				$st = 'unfulfilled';
+			}
+			$has[$st]++;
+			$n++;
+		}
+
+		if ($n === 0){
+			$next = 'unfulfilled';
+		} else if ($has['unfulfilled'] === 0 && $has['in_progress'] === 0 && $has['fulfilled'] === 0){
+			$next = 'cancelled';
+		} else if ($has['unfulfilled'] === 0 && $has['in_progress'] === 0){
+			$next = 'fulfilled';
+		} else if ($has['in_progress'] > 0 || $has['fulfilled'] > 0){
+			$next = 'in_progress';
+		} else {
+			$next = 'unfulfilled';
+		}
+
+		if ($this->order_physical_status($order) !== $next){
+			$this->cms_page_panel_model->update_cms_page_panel($order_id, [
+					'status' => $next,
+			]);
+			$order['status'] = $next;
+		}
+
+		$this->maybe_finish_order($order_id);
+
+	}
+
+	function maybe_finish_order($order_id){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
+		if (empty($order['cms_page_panel_id']) || $this->order_is_finished($order)){
+			return false;
+		}
+		if (!$this->order_is_paid($order)){
+			return false;
+		}
+
+		foreach ($this->get_order_lines($order_id) as $line){
+			if (!$this->order_line_is_fulfilable($line)){
+				continue;
+			}
+			$st = $this->order_line_status($line);
+			if ($st === ''){
+				$st = 'unfulfilled';
+			}
+			if (!in_array($st, ['fulfilled', 'cancelled'], true)){
+				return false;
+			}
+		}
+
+		return $this->finish_order($order_id);
+
+	}
+
+	function finish_order($order_id){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
+		if (empty($order['cms_page_panel_id'])){
+			return false;
+		}
+		if ($this->order_is_finished($order)){
+			$this->post_listed_stock($order_id);
+			return true;
+		}
+
+		$this->cms_page_panel_model->update_cms_page_panel($order_id, [
+				'status' => 'finished',
+		]);
+		$this->post_listed_stock($order_id);
+		return true;
+
+	}
+
+	/**
+	 * Count-mode: subtract fulfilled/in_progress line qty from listed item.number once.
+	 * Finished orders are then ignored by held_qty.
+	 */
+	function post_listed_stock($order_id){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('shop/shop_dim_model');
+		$this->load->model('shop/shop_fulfilment_model');
+
+		$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
+		if (empty($order['cms_page_panel_id'])){
+			return false;
+		}
+		if (!empty($order['stock_posted_time'])){
+			return true;
+		}
+
+		foreach ($this->get_order_lines($order_id) as $line){
+			if ($this->shop_fulfilment_model->_is_delivery_line($line)){
+				continue;
+			}
+			$st = $this->order_line_status($line);
+			if (!in_array($st, ['fulfilled', 'in_progress'], true)){
+				continue;
+			}
+			$item_id = $this->order_line_item_id($line);
+			if ($item_id <= 0){
+				continue;
+			}
+			$item = $this->cms_page_panel_model->get_cms_page_panel($item_id);
+			if (($item['panel_name'] ?? '') !== 'shop/product_item'){
+				continue;
+			}
+			if ($this->shop_dim_model->item_stock_control($item) !== 'count'){
+				continue;
+			}
+			$qty = (int)($line['qty'] ?? $line['quantity'] ?? 1);
+			if ($qty < 1){
+				$qty = 1;
+			}
+			$listed = (int)($item['number'] ?? 0);
+			$this->cms_page_panel_model->update_cms_page_panel($item_id, [
+					'number' => $listed - $qty,
+			]);
+		}
+
+		$this->cms_page_panel_model->update_cms_page_panel($order_id, [
+				'stock_posted_time' => time(),
+		]);
+		return true;
+
+	}
+
 	/**
 	 * End draft cart session after remote checkout completes (or force close).
 	 * Order is no longer status '' so it will not be reused as a basket.
+	 * $status is physical (unfulfilled / in_progress / fulfilled / cancelled).
+	 * Legacy $status 'paid' becomes unfulfilled + payment_status paid.
 	 */
-	function close_cart_order($order_id, $status = 'paid'){
+	function close_cart_order($order_id, $status = 'unfulfilled', $payment_status = ''){
 
 		$this->load->model('cms/cms_page_panel_model');
 
@@ -194,10 +442,34 @@ class shop_model extends \Model {
 			return false;
 		}
 
-		$this->cms_page_panel_model->update_cms_page_panel($order_id, [
-				'status' => $status,
-				'paid_time' => !empty($order['paid_time']) ? $order['paid_time'] : time(),
-		]);
+		$physical = (string)$status;
+		$pay = trim((string)$payment_status);
+		if ($physical === 'paid'){
+			$physical = 'unfulfilled';
+			if ($pay === ''){
+				$pay = 'paid';
+			}
+		}
+		if ($physical === ''){
+			$physical = 'unfulfilled';
+		}
+		if ($pay === ''){
+			$pay = 'unpaid';
+		}
+
+		$now = time();
+		$update = [
+				'status' => $physical,
+				'payment_status' => $pay,
+		];
+		if ($pay === 'paid'){
+			$update['paid_time'] = !empty($order['paid_time']) ? $order['paid_time'] : $now;
+		}
+		if (empty($order['order_created'])){
+			$update['order_created'] = $now;
+		}
+		$this->cms_page_panel_model->update_cms_page_panel($order_id, $update);
+		$this->stamp_draft_lines_unfulfilled($order_id);
 
 		$cookie_key = $this->get_cart_key_from_cookie();
 		if ($cookie_key !== '' && !empty($order['cart_key']) && $cookie_key === $order['cart_key']){
@@ -212,6 +484,46 @@ class shop_model extends \Model {
 		}
 
 		// Invalidate shop settings cache not needed; clear order session shopify side keys
+		if (!empty($_SESSION['shopify'])){
+			unset($_SESSION['shopify']['shopify_cart_id'], $_SESSION['shopify']['checkout_url']);
+		}
+
+		return true;
+
+	}
+
+	/**
+	 * Unpaid draft whose remote checkout never became an order. Never sets paid_time.
+	 */
+	function abandon_cart_order($order_id){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
+		if (empty($order['cms_page_panel_id'])){
+			return false;
+		}
+		if ($this->order_is_paid($order)){
+			return false;
+		}
+
+		$this->cms_page_panel_model->update_cms_page_panel($order_id, [
+				'status' => 'abandoned',
+				'payment_status' => 'unpaid',
+				'shopify_cart_id' => '',
+		]);
+
+		$cookie_key = $this->get_cart_key_from_cookie();
+		if ($cookie_key !== '' && !empty($order['cart_key']) && $cookie_key === $order['cart_key']){
+			$this->clear_cart_cookie();
+		}
+
+		if (!empty($_SESSION['order_id']) && (int)$_SESSION['order_id'] === (int)$order_id){
+			unset($_SESSION['order_id']);
+		}
+		if (!empty($_SESSION['cart_key']) && !empty($order['cart_key']) && $_SESSION['cart_key'] === $order['cart_key']){
+			unset($_SESSION['cart_key']);
+		}
 		if (!empty($_SESSION['shopify'])){
 			unset($_SESSION['shopify']['shopify_cart_id'], $_SESSION['shopify']['checkout_url']);
 		}
@@ -248,10 +560,41 @@ class shop_model extends \Model {
 
 	}
 
+	/**
+	 * Order ID / Worldpay cartId = CMS panel id (decimal string).
+	 */
+	function ensure_order_identity($order){
+
+		if (empty($order['cms_page_panel_id'])){
+			return $order;
+		}
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$id_str = (string)(int)$order['cms_page_panel_id'];
+		$update = [];
+		if (($order['heading'] ?? '') === ''){
+			$update['heading'] = $id_str;
+			$order['heading'] = $id_str;
+		}
+		if (($order['number'] ?? '') === ''){
+			$update['number'] = $id_str;
+			$order['number'] = $id_str;
+		}
+		if ($update){
+			$this->cms_page_panel_model->update_cms_page_panel($order['cms_page_panel_id'], $update);
+		}
+
+		return $order;
+
+	}
+
 	function ensure_order_cart_key($order){
 		if (empty($order['cms_page_panel_id'])){
 			return $order;
 		}
+		$this->load->model('cms/cms_page_panel_model');
+		$order = $this->ensure_order_identity($order);
 		if (empty($order['cart_key']) || !preg_match('/^[a-f0-9]{32,64}$/', $order['cart_key'])){
 			$cart_key = bin2hex(random_bytes(16));
 			$this->cms_page_panel_model->update_cms_page_panel($order['cms_page_panel_id'], ['cart_key' => $cart_key]);
@@ -370,8 +713,12 @@ class shop_model extends \Model {
 					'panel_name' => 'shop/order',
 					'show' => 1,
 					'sort' => 'first',
+					'heading' => '',
 					'number' => '',
 					'status' => '',
+					'payment_status' => 'unpaid',
+					'created' => time(),
+					'order_created' => '',
 					'paid_time' => '',
 					'last_result' => '',
 					'cart_key' => $cart_key,
@@ -379,10 +726,11 @@ class shop_model extends \Model {
 			];
 				
 			$order_id = $this->cms_page_panel_model->create_cms_page_panel($order);
-		
-			$order_number = substr(md5($order_id), 0, 8);
-		
-			$this->cms_page_panel_model->update_cms_page_panel($order_id, ['number' => $order_number]);
+			$id_str = (string)(int)$order_id;
+			$this->cms_page_panel_model->update_cms_page_panel($order_id, [
+					'heading' => $id_str,
+					'number' => $id_str,
+			]);
 		
 			$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
 		
@@ -510,39 +858,78 @@ class shop_model extends \Model {
 		return trim($panel);
 
 	}
+
+	/**
+	 * image_compose provider panel. Setting wins; if empty and exactly one provider, use it.
+	 */
+	function get_image_compose_panel(){
+
+		$settings = $this->get_shop_settings();
+		$panel = $settings['image_compose'] ?? '';
+		if (is_string($panel)){
+			$panel = trim($panel);
+			if ($panel !== ''){
+				return $panel;
+			}
+		}
+
+		$list = $GLOBALS['config']['provides']['image_compose'] ?? [];
+		if (!is_array($list) || count($list) !== 1){
+			return '';
+		}
+		$first = reset($list);
+		if (!is_array($first)){
+			return '';
+		}
+		$from_list = trim((string)($first['panel'] ?? ''));
+		return $from_list;
+
+	}
 	
 	function create_order_line($order_id, $params){
-// _print_r($params);		
+
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('shop/shop_dim_model');
 		
-		$ref_id = 0;
+		$ref_id = (int)($params['product_item_id'] ?? $params['ref_id'] ?? 0);
+		$product_item_id = 0;
 		$description = '';
 		$product = [];
 		$product_item = [];
+
+		$dims_param = $params['dims'] ?? [];
+		if (is_string($dims_param) && $dims_param !== ''){
+			$decoded = json_decode($dims_param, true);
+			$dims_param = is_array($decoded) ? $decoded : [];
+		}
+		if (!is_array($dims_param)){
+			$dims_param = [];
+		}
 		
-		if(!empty($params['product_item_id'])){
-			
-			$product_item = $this->cms_page_panel_model->get_cms_page_panel($params['product_item_id']);
-			if (!empty($product_item['panel_name']) && $product_item['panel_name'] == 'shop/product_item'){
+		if ($ref_id > 0){
+
+			$row = $this->cms_page_panel_model->get_cms_page_panel($ref_id);
+			if (($row['panel_name'] ?? '') === 'shop/product_item'){
+				$product_item = $row;
+				$product_item_id = $ref_id;
 				$product = $this->cms_page_panel_model->get_cms_page_panel($product_item['product_id']);
+				$params['shopify_variant_id'] = (string)($product_item['shopify_variant_id'] ?? '');
+				$params['merchandise_id'] = '';
 			}
-			
-			$ref_id = $params['product_item_id'];
-			
-			if (!empty($product_item['dimensions'])){
-				foreach($product_item['dimensions'] as $dimension){
-					list($did, $dval) = explode('=', $dimension['value']);
-					$description .= $this->get_dimension_label($did) .': '.$this->get_dimension_value_data($did, $dval)['label'].' ';
-				}
-			}
-			
+
 		}
 
-		// Shopify / freeform catalogue line (variant on product, not product_item stock row)
+		if ($product_item_id <= 0 && $dims_param){
+			$description = $this->shop_dim_model->dims_description([
+					'dims' => $this->shop_dim_model->dims_rows_from_map($dims_param),
+			]);
+		}
+
+		// Checkout connector on the item (shopify extend). Cart is the CMS item + dims.
 		if (!empty($params['shopify_variant_id']) || !empty($params['merchandise_id'])){
 
-			$product_id = (int)($params['product_id'] ?? 0);
-			if ($product_id){
+			$product_id = (int)($params['product_id'] ?? ($product['cms_page_panel_id'] ?? 0));
+			if ($product_id && empty($product['cms_page_panel_id'])){
 				$product = $this->cms_page_panel_model->get_cms_page_panel($product_id);
 			}
 
@@ -582,7 +969,8 @@ class shop_model extends \Model {
 				}
 			}
 			if ($attr_bits){
-				$description = implode("\n", $attr_bits);
+				$attr_s = implode("\n", $attr_bits);
+				$description = $description !== '' ? $description."\n".$attr_s : $attr_s;
 			}
 
 			$order_line = [
@@ -590,6 +978,7 @@ class shop_model extends \Model {
 					'show' => 1,
 					'sort' => 'first',
 					'ref_id' => $ref_id,
+					'product_item_id' => $product_item_id ? $product_item_id : '',
 					'product_id' => $product_id,
 					'shopify_variant_id' => (string)$variant_id,
 					'merchandise_id' => $merchandise_id,
@@ -609,15 +998,25 @@ class shop_model extends \Model {
 
 		}
 		
+		if (empty($product['cms_page_panel_id']) && !empty($params['product_id'])){
+			$product = $this->cms_page_panel_model->get_cms_page_panel($params['product_id']);
+		}
+
+		$qty = max(1, (int)($params['qty'] ?? $params['quantity'] ?? 1));
 		$order_line = [
 				'panel_name' => 'shop/order_line',
 				'show' => 1,
 				'sort' => 'first',
 				'ref_id' => $ref_id,
-				'qty' => 1,
+				'product_item_id' => $product_item_id ? $product_item_id : '',
+				'product_id' => (int)($product['cms_page_panel_id'] ?? $params['product_id'] ?? 0),
+				'line_type' => 'local_item',
+				'qty' => $qty,
+				'quantity' => $qty,
 				'price' => !empty($product_item['price']) ? $product_item['price'] : (!empty($product['price']) ? $product['price'] : 0),
 				'description' => $description,
 				'item' => !empty($product['heading']) ? $product['heading'] : ($product_item['heading'] ?? ''),
+				'image' => $params['image'] ?? ($product['image'] ?? ''),
 				'order_id' => $order_id,
 		];
 		
@@ -668,71 +1067,35 @@ class shop_model extends \Model {
 	}
 	
 	function calculate_product_item_hash($ref){
-		
-		$rvs = [];
-		foreach($ref['dimensions'] as $rd){
-			$rvs[] = $rd['value'];
-		}
-		sort($rvs);
-		$ref_dimension = implode('|', $rvs);
-		
-		return md5($ref_dimension);
-		
+
+		$this->load->model('shop/shop_dim_model');
+		return $this->shop_dim_model->item_dims_hash($ref);
+
 	}
 	
 	function set_order_paid($order_id, $wp_data = []){
 		
 		$this->load->model('cms/cms_page_panel_model');
-		
-		$this->cms_page_panel_model->update_cms_page_panel($order_id, [
-				'status' => 'paid',
-				'last_result' => 'authorized',
-				'paid_time' => time(),
-				'meta' => json_encode(['worldpay' => $wp_data], JSON_PRETTY_PRINT),
-		]);
-		
-		$lines = $this->cms_page_panel_model->get_list('shop/order_line', ['order_id' => $order_id]);
-		
-		foreach($lines as $line){
-			
-			if (!empty($line['ref_id'])){
-				
-				$ref = $this->cms_page_panel_model->get_cms_page_panel($line['ref_id']);
-				
-				if ($ref['panel_name'] == 'shop/product_item'){
-					
-					$this->cms_page_panel_model->update_cms_page_panel($ref['cms_page_panel_id'], ['order_id' => $order_id]);
-					
-					// check if another ref with same properties is available?
-					$ref_hash = $this->calculate_product_item_hash($ref);
-					
-					$replacement_id = 0;
-					
-					$refs = $this->cms_page_panel_model->get_list('shop/product_item', ['product_id' => $ref['product_id'], 'order_id' => 0]);
-					foreach($refs as $ref_item){
-						$ref_item_hash = $this->calculate_product_item_hash($ref_item);
-						if ($ref_hash == $ref_item_hash){
-							$replacement_id = $ref_item['cms_page_panel_id'];
-						}
-					}
 
-					// replace or remove product item in all other baskets
-					$order_lines = $this->cms_page_panel_model->get_list('shop/order_line', ['ref_id' => $ref['cms_page_panel_id']]);
-					foreach($order_lines as $order_line){
-						if ($order_line['order_id'] != $order_id){
-							if (!empty($replacement_id)){
-								$this->cms_page_panel_model->update_cms_page_panel($order_line['cms_page_panel_id'], ['ref_id' => $replacement_id]);
-							} else {
-								$this->cms_page_panel_model->update_cms_page_panel($order_line['cms_page_panel_id'], ['show' => 0]);
-							}
-						}
-					}
-					
-				}
-				
-			}
-			
+		$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
+		$now = time();
+		$update = [
+				'status' => 'unfulfilled',
+				'payment_status' => 'paid',
+				'last_result' => 'authorized',
+				'paid_time' => !empty($order['paid_time']) ? $order['paid_time'] : $now,
+				'meta' => json_encode(['worldpay' => $wp_data], JSON_PRETTY_PRINT),
+		];
+		if (empty($order['order_created'])){
+			$update['order_created'] = $now;
 		}
+		
+		$this->cms_page_panel_model->update_cms_page_panel($order_id, $update);
+		$this->stamp_draft_lines_unfulfilled($order_id);
+
+		$this->load->model('shop/shop_fulfilment_model');
+		$this->shop_fulfilment_model->request_fulfilment($order_id);
+		$this->rollup_order_status($order_id);
 		
 		// recipients
 		$shop_config = $this->cms_page_panel_model->get_cms_page_panel_settings('shop/shop');
@@ -761,7 +1124,11 @@ class shop_model extends \Model {
 		$lines = $this->cms_page_panel_model->get_list('shop/order_line', ['order_id' => $order_id]);
 		foreach($lines as $line){
 			
-			$product_item = $this->cms_page_panel_model->get_cms_page_panel($line['ref_id']);
+			$item_id = $this->order_line_item_id($line);
+			if ($item_id <= 0){
+				continue;
+			}
+			$product_item = $this->cms_page_panel_model->get_cms_page_panel($item_id);
 
 			if(!empty($product_item['product_id']) && $product_item['product_id'] == $product_id){
 				$return = true;

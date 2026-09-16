@@ -1,8 +1,8 @@
 {
-	"label": "Product dimension",
+	"label": "Product dim",
 	"list": {
-		"list_title": "Product dimensions",
-		"item_title": "Product dimension",
+		"list_title": "Product dims",
+		"item_title": "Product dim",
 		"title_field": "heading",
 		"filter_fields": {
 			"show": "-- show --"
@@ -14,14 +14,14 @@
 			"type": "text",
 			"name": "heading",
 			"label": "Label",
-			"help": "Visible text for dimension||Examples: {Shoe size}, {Finish}",
+			"help": "Visible name for this dim||Examples: {Size}, {Frame}",
 			"mandatory": "1"
 		},
 		{
 			"type": "text",
 			"name": "id",
 			"label": "ID",
-			"help": "Lowercase only letters and numbers, no spaces, less than 10 characters||Examples: {size}, {colour}",
+			"help": "Lowercase letters and numbers, no spaces, less than 10 characters||Examples: {size}, {frame}",
 			"mandatory": "1"
 		},
 		{
@@ -44,14 +44,14 @@
 					"type": "text",
 					"name": "id",
 					"label": "ID",
-					"help": "Lowercase only letters and numbers, no spaces, less than 10 characters"
+					"help": "Lowercase letters and numbers, no spaces, less than 10 characters"
 				},
 				{
 					"type": "textarea",
 					"name": "description",
 					"label": "Description",
 					"lines": "2",
-					"help": "Description for this value to help customer decide||Example for shoe size - {UK 12, US 15, Australia 33}"
+					"help": "Help the customer choose||Example for size: {UK 12, US 15}"
 				}
 			]
 		}

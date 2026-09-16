@@ -28,6 +28,13 @@
 			"category": "product"
 		},
 		{
+			"type": "file",
+			"name": "print_file",
+			"label": "Print file",
+			"accept": ".pdf,.zip,.ai",
+			"help": "Synced from Shopify custom.print_file (one PDF, Illustrator, or ZIP). For art fulfilment later."
+		},
+		{
 			"type": "text",
 			"name": "type",
 			"label": "Type",
@@ -138,6 +145,14 @@
 			"table": "1",
 			"table_type": "int",
 			"table_index": "1"
+		},
+		{
+			"type": "fk",
+			"name": "product_type_id",
+			"label": "Product type",
+			"list": "shop/product_type",
+			"add_empty": "1",
+			"help": "Dims and stock control. Empty: use subcategory, then category. Empty at all levels: no limit, no dims."
 		},
 		{
 			"type": "repeater",

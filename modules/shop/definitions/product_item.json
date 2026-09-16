@@ -1,5 +1,5 @@
 {
-	"label": "Product individual item",
+	"label": "Product item",
 	"list": {
 		"list_title": "Product items",
 		"item_title": "Product item",
@@ -17,14 +17,6 @@
 			"list": "shop/product"
 		},
 		{
-			"type": "fk",
-			"name": "order_id",
-			"label": "Order",
-			"add_empty": "1",
-			"list": "shop/order",
-			"readonly": "1"
-		},
-		{
 			"type": "text",
 			"name": "price",
 			"label": "Price",
@@ -39,31 +31,27 @@
 			"type": "text",
 			"name": "number",
 			"label": "Number",
-			"default": "1"
+			"default": "1",
+			"help": "Listed stock. Available = this minus qty on unfinished order lines that point here. Can go negative until those orders are Finished."
 		},
 		{
 			"type": "repeater",
-			"name": "dimensions",
-			"label": "Dimensions",
+			"name": "dims",
+			"label": "Dims",
+			"help": "One row per dim. Value is the value id from the dim list (custom picker later).",
 			"fields": [
+				{
+					"type": "fk",
+					"name": "product_dim_id",
+					"label": "Dim",
+					"list": "shop/product_dim",
+					"add_empty": "1"
+				},
 				{
 					"type": "text",
 					"name": "value",
 					"label": "Value",
-					"help": "[dimension_id]=[value_id]||For example {size=e39}"
-				}
-			]
-		},
-		{
-			"type": "repeater",
-			"name": "images",
-			"label": "Images",
-			"fields": [
-				{
-					"type": "image",
-					"name": "image",
-					"label": "Image",
-					"category": "product"
+					"help": "Value id from the dim, e.g. {a4} or {black}"
 				}
 			]
 		}

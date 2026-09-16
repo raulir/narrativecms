@@ -1,0 +1,29 @@
+{
+	"version": "2",
+	"label": "Collection type",
+	"description": "Kind of shop/collection. Heading is the Shopify title suffix (e.g. range, group).",
+	"list": {
+		"list_title": "Collection types",
+		"item_title": "Collection type",
+		"title_field": "heading",
+		"filter_fields": {
+			"show": "-- show --"
+		},
+		"link_target": "0"
+	},
+	"item": [
+		{
+			"type": "text",
+			"name": "heading",
+			"label": "Heading",
+			"mandatory": "1",
+			"help": "Shopify collection title suffix (case-insensitive). Example: heading {group} matches {Birthday Group} → collection Birthday, type group."
+		},
+		{
+			"type": "text",
+			"name": "menu_header",
+			"label": "Menu header",
+			"help": "Category filter dropdown label on the right (e.g. - range)."
+		}
+	]
+}

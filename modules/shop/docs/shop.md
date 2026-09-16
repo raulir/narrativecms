@@ -23,6 +23,7 @@ Site modules (e.g. `timmy`) own branding and site-specific product UX. Connector
 |--------|------|
 | **shop** | Products, categories, cart **contract** + **local** cart driver, checkout shell, orders, delivery, basic product/category views. Admin top-level **Shop** menu. |
 | **shopify** | API tokens, sync/purge, product fields via **extends**, **`provides.shop_checkout`** handoff (`shopify/checkout`). Admin under **Shop → Shopify**. |
+| **imagemaker** | **`provides.image_compose`**: warp overlay onto a print background. Shop calls it for product composites (`shop_image_model`). Optional Style FK via imagemaker **extends** of product/category/subcategory. |
 | **timmy** | Site frontend, customisation fields (extends product), Timmy-only chrome. Product/cart settings under **Shop → Timmy**. |
 | **stripe** | Collect payment for a payable order/session |
 | **booking** | Treatments / treatment categories (moved from legacy stock) |
@@ -35,7 +36,7 @@ Site modules **may** still add behaviour that checks whether `shopify` is instal
 
 ### Category collections
 
-`shop/category` field **collections** (repeater of FKs to `shop/collection`): which product ranges appear under that category (e.g. mega menu “Shop by range”). Shopify sync **adds** collections when a product in that category uses them; CMS can edit the list manually. Removal of unused ranges is manual (or a rebuild tool), not per-product sync.
+`shop/category` field **collections** (repeater of FKs to `shop/collection`): collections listed under that category. Each `shop/collection` has **`collection_type_id`** → `shop/collection_type`. Mega menu columns are chosen in Timmy categories settings (**Include collection types**: type FK + label string). Shopify sync **adds** collections when products in this category use them; CMS can edit the list. Removal of unused collections is manual (or a rebuild tool).
 
 ### Unified product list
 
@@ -54,18 +55,13 @@ Stored rows use **`panel_name = shop/product`**. Config extends merge definition
 |------|--------|
 | Product categories | `shop/category` (Timmy UI via `//shop_category`) |
 | Product subcategories | `shop/subcategory` (Timmy UI via `//shop_subcategory`; Shopify fields via shopify `//shop_subcategory`) |
+| Product collections | `shop/collection` (`collection_type_id` → `shop/collection_type`) |
+| Collection types | `shop/collection_type` (heading = Shopify title suffix; **Menu header** = category filter dropdown label, e.g. `- range`) |
 | Product texts | `shop/producttext` |
 
-### Local stock / variants (in shop)
+### Local stock / dims
 
-| List | Panel |
-|------|--------|
-| Product items (SKU rows) | `shop/product_item` |
-| Product dimensions | `shop/product_dimension` |
-| Stock groups | `shop/stock_group` (was `stock/product_stock`) |
-| Dimension value select (admin helper) | `shop/dim_value_select` |
-
-Products may still store a `product_stock_id` FK pointing at a stock group row by `cms_page_panel_id`.
+CMS-only size/frame/colour options, product types, and master/clone stock: **[`dims.md`](dims.md)**.
 
 
 
@@ -77,7 +73,12 @@ Products may still store a `product_stock_id` FK pointing at a stock group row b
 
 - **Cookie** `shop_cart` (60 days): opaque `cart_key` on the draft `shop/order`  
 - **DB**: `shop/order` + `shop/order_line` hold lines, qty, attributes, price snapshots  
+- **Order ID** (`heading`) and Worldpay `number` are the CMS panel id as a decimal string. The same row is the cart until checkout (`status` empty) and the order after (`status` unfulfilled / in progress / fulfilled).  
+- Times: **Cart created** (`created`) when the draft row is created; **Order created** (`order_created`) when it leaves draft; **Paid** (`paid_time`).  
 - PHP session may cache `order_id` for the request; cookie is source of recovery after session dies  
+- **User module optional** — guest cart uses the cookie. Do not load `user/user_model` unless `user` is in enabled modules (`shop_model::get_front_user()`).  
+
+One-off backfill of empty headings: `php grok/_migrate_shop_order_heading.php`  
 
 ### Panel
 
@@ -124,17 +125,66 @@ Field **`subscription_checkout`** on shop settings is added by **subscription** 
 | **empty** | Red error: “Select shop checkout provider!” |
 | **panel set** | `do=shop_checkout` → provider materialise → redirect |
 
-### One-way line sync + status-only reverse
+### Product images via `image_compose`
+
+Shop settings field **`image_compose`** (`cms/cms_input_provides`, service `image_compose`). Empty + exactly one registered provider → use it; none → skip compose.
+
+`shop/shop_image_model` resolves style (product → subcategory → category FKs from the imagemaker extend), calls `run_action($panel, do=compose)`, caches `imagemaker/product_{id}_{hash8}.png`, and inserts the result into the PDP gallery / productthumb. Overlay key is product **`original_artwork`** (still a Timmy/Shopify field until moved onto `shop/product`). Shopify and Timmy must not load `imagemaker_model`.
+
+### One-way line sync until paid; then paid Shopify lines win
 
 | Direction | Data | When |
 |-----------|------|------|
 | **Site → provider** | Lines (variants, qty, attributes) | Checkout click only |
-| **Provider → site** | **Never** lines | — |
-| **Provider → site** | **Status** (open vs dead/completed) | Throttled `do=reconcile` on cart page / open |
+| **Provider → site** | **Never** lines while browsing | — |
+| **Provider → site** | **Status** + Shopify **order id** + **paid lines** + buyer/shipping | Webhook `orders/create`, `orders/paid`, `orders/updated`; cron. Match **only** `cms_order_id`. Faire/other channels ignored. |
 
-Local cart is always truth for products. User edits on Shopify checkout (remove line, etc.) do **not** change the site cart; cart id stays until checkout completes.
+Local cart is truth until the order is **paid**. Then CMS lines are overlaid from Shopify; leftover cart lines the buyer removed at checkout are **deleted** (unless already fulfilment-sent).
 
-**Reuse remote cart** (e.g. `shopify_cart_id` on order via Shopify extends `shop/order`): same cart keeps address/vouchers. If local lines fingerprint changed, **replace** remote lines from site. If remote cart is **dead** (paid/completed), **close site order** (`status=paid`), clear cookie, empty cart — user starts a new draft.
+### Order status
+
+Two independent fields on `shop/order`. Cart identity stays **`status === ''`**. Never write physical `status` to `paid` — that was the old overloaded value. Legacy rows with `status=paid` and empty `payment_status` are treated as **unfulfilled + paid**.
+
+The sale atom is the **order line**. It points at `shop/product_item` (dims, sku, default price). Line `status` is fulfilment of that line. Order `status` is a **rollup**, except **Finished**.
+
+**Status** (physical / fulfilment):
+
+| CMS `status` | Meaning | Shopify |
+|--------------|---------|---------|
+| `''` (draft) | Active cart | No order yet |
+| `abandoned` | Checkout never became an order | Storefront cart gone, no Admin match |
+| `unfulfilled` | All fulfilable lines unfulfilled | `UNFULFILLED` / partial / on hold |
+| `in_progress` | Some lines in progress or mixed | `IN_PROGRESS`, `PENDING_FULFILLMENT` |
+| `fulfilled` | All fulfilable lines fulfilled (or cancelled+fulfilled) | `FULFILLED` |
+| `finished` | Final. Paid and lines resolved, or set by hand (loss, return, …). Listed stock posted; lines ignored in inventory. Cannot be undone. | — |
+| `cancelled` | Cancelled | `cancelledAt` / `cancelled_at` set |
+
+**Payment** (`payment_status`):
+
+| CMS | Shopify `displayFinancialStatus` / `financial_status` |
+|-----|------------------------------------------------------|
+| `unpaid` | unpaid / empty |
+| `pending` | `PENDING`, `AUTHORIZED`, `EXPIRED` |
+| `partially_paid` | `PARTIALLY_PAID` |
+| `paid` | `PAID`, `PARTIALLY_REFUNDED` |
+| `refunded` | `REFUNDED` |
+| `voided` | `VOIDED` |
+
+**Stock (count mode):** listed `product_item.number` minus qty on unfinished holding lines (can be negative in reports). Abandoned / cancelled / refunded / **finished** do not hold. On finish, fulfilled/in_progress qty is subtracted from listed `number` once (`stock_posted_time`).
+
+Child / sub-orders (when payment or delivery rules differ) and `shop/payment` rows are later.
+
+### Fulfilment (`provides.shop_fulfilment`)
+
+Shop **provides** `shop/fulfilment_email`. Each `shop/category` picks a fulfilment provider and a repeater of recipient emails.
+
+CMS emails run only when **payment is paid** and **status is unfulfilled** (Shopify webhook/cron, or `set_order_paid` for Stripe/CMS later). If Shopify is **in progress** or **fulfilled**, CMS does not send and cron does not keep checking those lines. Group unsent lines by provider → `run_action`. Email provider sends **one queued mail per recipient**, containing only that recipient’s lines. `fulfilment_sent_time` is stored on each line and the line `status` becomes `in_progress`. Empty category fulfilment = CMS does not fulfil that line (no log, no stamp); set Email fulfilment on categories that should mail. Order status rolls up from lines; paid + all fulfilable lines fulfilled/cancelled → **Finished**.
+
+Print file: if `shop/product.print_file` exists, the email includes the CMS download URL (`/files/get/…`, same as admin file download). Missing file: omit, still send.
+
+Need **CMS email queue** on repeating tasks. Subject/intro: Shop settings → Email fulfilment.
+
+**Reuse remote cart** (e.g. `shopify_cart_id` on order via Shopify extends `shop/order`): same cart keeps address/vouchers. If local lines fingerprint changed, **replace** remote lines from site. If remote cart is **dead** (Shopify order exists, or checkout abandoned), **close the site cart** (`status` no longer empty), clear cookie, empty cart — user starts a new draft.
 
 Shopify is **not** cart-of-record while browsing — no Storefront on every add.
 
@@ -167,7 +217,7 @@ Enough for a working small shop without a site theme module:
 | `shop/cart` | Cart badge + popup (sites extend design) |
 | `shop/basket`, `shop/basketmini` | Full basket (legacy local) |
 | `shop/checkout` | Local checkout |
-| `shop/productbuy`, `shop/productdimensions` | Add-to-cart / variants (local) |
+| `shop/productbuy`, `shop/productdims` | Add-to-cart / dim pickers (local) |
 
 ### Products grid filters
 
@@ -189,6 +239,7 @@ Timmy storefront PDP remains **`//shop_product` extends** of `shop/product`. Tim
 
 ## Timmy-specific notes
 
+- Product dim pickers on the PDP → [`dims.md`](dims.md) (`shop_dim_model` presentation; Timmy colour swatches).  
 - Customisation, overlay images, PDP labels → **`timmy/shop_product`** extend.  
 - Layered print/thumb generation → optional **`imagemaker`** module (own admin list + model API; not a shop extend until wired). See [`modules/imagemaker/docs/imagemaker.md`](../../imagemaker/docs/imagemaker.md).  
 
@@ -213,25 +264,15 @@ Timmy storefront PDP remains **`//shop_product` extends** of `shop/product`. Tim
 | End state | Location |
 |-----------|----------|
 | product, category, subcategory, producttext | **shop** |
-| product_item, product_dimension, stock_group, dim_value_select | **shop** |
+| product_item, product_dim, product_type, dim_value_select | **shop** |
 | treatments | **booking** |
 | brands, lines, menu* | removed (site-specific if needed later) |
 
 ---
 
-## Phase roadmap (high level)
-
-1. Unified **shop/product** (+ category/subcategory + stock leftovers) — done  
-2. Cart provider API + local driver  
-3. Shopify cart driver behind provider  
-4. Timmy UI on shop cart API  
-5. Local checkout + stripe hook  
-6. Basic shop grid/PDP panels complete for greenfield 
-
----
-
 ## Related docs
 
+- [Product dims](dims.md)  
 - [CMS module extends](../../cms/docs/cms_module_extends.md)  
 - [CMS schema / panel tables](../../cms/docs/cms_schema.md)  
 - [Shop todo](todo.md)  

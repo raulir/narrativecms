@@ -7,7 +7,7 @@ function dim_value_select_init(){
 		var data = {
 				'do': 'set_dim',
 				'item_id': $this.data('item_id'),
-				'dimension': $this.data('dimension'),
+				'dim': $this.data('dim'),
 				'value': $this.val()
 		}
 
@@ -15,7 +15,7 @@ function dim_value_select_init(){
 
 			$this.closest('.cms_grid_field_inner').html(result.result.html)
 			
-			cms_notification('Dimension ' + $this.data('dimension') + ' updated', 2)
+			cms_notification('Dim ' + $this.data('dim') + ' updated', 2)
 
 			dim_value_select_init()
 

@@ -55,28 +55,36 @@
 			"name": "Subcategory"
 		},
 		{
-			"id": "collection",
-			"name": "Collection"
-		},
-		{
 			"id": "producttext",
 			"name": "Product text"
 		},
 		{
-			"id": "product_item",
-			"name": "Product item"
-		},
-		{
-			"id": "product_dimension",
-			"name": "Product dimension"
-		},
-		{
-			"id": "stock_group",
-			"name": "Stock group"
-		},
-		{
 			"id": "dim_value_select",
-			"name": "Dimension value select"
+			"name": "Dim value select",
+			"flags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "productdims",
+			"name": "Product dims",
+			"flags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "fulfilment_email",
+			"name": "Email fulfilment",
+			"flags": [
+				"hidden"
+			]
+		}
+	],
+	"provides": [
+		{
+			"service": "shop_fulfilment",
+			"panel": "//fulfilment_email",
+			"label": "Email fulfilment"
 		}
 	],
 	"cms_menu": [
@@ -121,6 +129,13 @@
 			"order": 125
 		},
 		{
+			"id": "shop_collection_types",
+			"name": "Collection types",
+			"parent": "shop",
+			"url": "admin/cms_list/shop__collection_type/",
+			"order": 126
+		},
+		{
 			"id": "shop_producttexts",
 			"name": "Product texts",
 			"parent": "shop",
@@ -135,17 +150,17 @@
 			"order": 140
 		},
 		{
-			"id": "shop_product_dimensions",
-			"name": "Product dimensions",
+			"id": "shop_product_dims",
+			"name": "Product dims",
 			"parent": "shop",
-			"url": "admin/cms_list/shop__product_dimension/",
+			"url": "admin/cms_list/shop__product_dim/",
 			"order": 150
 		},
 		{
-			"id": "shop_stock_groups",
-			"name": "Stock groups",
+			"id": "shop_product_types",
+			"name": "Product types",
 			"parent": "shop",
-			"url": "admin/cms_list/shop__stock_group/",
+			"url": "admin/cms_list/shop__product_type/",
 			"order": 160
 		},
 		{
@@ -200,10 +215,10 @@
 			"order": 20
 		},
 		{
-			"id": "productdimensions_settings",
-			"name": "Product dimensions",
+			"id": "productdims_settings",
+			"name": "Product dims",
 			"parent": "shop_panel_settings",
-			"url": "admin/panel_settings/shop__productdimensions/",
+			"url": "admin/panel_settings/shop__productdims/",
 			"order": 30
 		},
 		{
@@ -240,6 +255,13 @@
 			"parent": "shop_panel_settings",
 			"url": "admin/panel_settings/shop__product_thumb/",
 			"order": 80
+		},
+		{
+			"id": "fulfilment_email_settings",
+			"name": "Email fulfilment",
+			"parent": "shop_panel_settings",
+			"url": "admin/panel_settings/shop__fulfilment_email/",
+			"order": 90
 		}
 	],
 	"extends": [

@@ -1,31 +1,30 @@
-.shop_productdimensions_container {
+.shop_productdims_container {
 	
 }
 
-.shop_productdimensions_content {
+.shop_productdims_content {
 	
 }
 
-.shop_productdimensions_dimension {
+.shop_productdims_dim {
 
 }
 
-.shop_productdimensions_dimension_label {
+.shop_productdims_dim_label {
 	
 }
 
-.shop_productdimensions_dimension_text {
+.shop_productdims_dim_text {
 	.product_buy_area & {
 		white-space: normal;
 	}
 }
 
-.shop_productdimensions_dimension_value {
+.shop_productdims_dim_value {
 	display: inline-block;
 	vertical-align: top;
 	position: relative;
 	padding: 0 2.0rem 0 2.0rem;
-	cursor: pointer;
 	&::before {
 		content: '';
 		display: block;
@@ -37,7 +36,7 @@
 		width: 1.0rem;
 		height: 1.0rem;
 	}
-	&.shop_productdimensions_dimension_value_active {
+	&.shop_productdims_dim_value_active {
 		&::after {
 			content: '';
 			display: block;
@@ -57,15 +56,15 @@
 	}
 }
 
-.shop_productdimensions_dimension_value_label {
+.shop_productdims_dim_value_label {
 	display: inline-block;
 }
 
-.shop_productdimensions_dimension_value_description {
+.shop_productdims_dim_value_description {
 
 	display: none;
 	
-	.shop_productdimensions_dimension_value:hover & {
+	.shop_productdims_dim_value:hover & {
 		display: block;
 		position: absolute;
 		left: 0.8rem;
@@ -100,11 +99,11 @@
 	
 }
 
-.shop_productdimensions_dimension_value_description_text {
+.shop_productdims_dim_value_description_text {
 	white-space: pre-line;
 }
 
-.shop_productdimensions_dimension_value_description_heading {
+.shop_productdims_dim_value_description_heading {
 	text-transform: uppercase;
 	top: 0.4rem 0 0.2rem 0;
 	font-family: suisse;
@@ -117,11 +116,11 @@
     margin: 0.5rem 0 0.2rem 0;
 }
 
-.shop_productdimensions_dimension_value_description_availability {
+.shop_productdims_dim_value_description_availability {
 
 }
 
-.shop_productdimensions_dimension_value_description_availability_label {
+.shop_productdims_dim_value_description_availability_label {
 	display: inline-block;
 	font-size: 0.75rem;
 	line-height: 0.8rem;
@@ -131,7 +130,7 @@
 	}
 }
 
-.shop_productdimensions_dimension_value_description_availability_item {
+.shop_productdims_dim_value_description_availability_item {
 	display: inline-block;
 	font-size: 0.8rem;
 	line-height: 0.8rem;
@@ -144,11 +143,11 @@
 	}
 }
 
-.shop_productdimensions_dimension_value_count {
+.shop_productdims_dim_value_count {
 	display: inline-block;
 	display: none;
 }
 
-.shop_productdimensions_error {
+.shop_productdims_error {
 	color: $colour_red;	
 }

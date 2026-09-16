@@ -12,6 +12,13 @@
 		},
 		{
 			"type": "text",
+			"name": "cart_label_mobile",
+			"label": "Cart (mobile)",
+			"default": "[{{number}}]",
+			"help": "Badge on small screens. Use {{number}} for the live item count. Empty uses Cart."
+		},
+		{
+			"type": "text",
 			"name": "popup_heading",
 			"label": "Popup heading",
 			"default": "Cart"
@@ -47,10 +54,39 @@
 			"default": "Customisation"
 		},
 		{
+			"type": "textarea",
+			"name": "note",
+			"label": "Note",
+			"lines": "2",
+			"help": "Shown above the bottom line of the cart popup. Leave empty to hide."
+		},
+		{
 			"type": "text",
 			"name": "currency_prefix",
 			"label": "Currency prefix",
 			"default": ""
+		},
+		{
+			"type": "subtitle",
+			"label": "Errors"
+		},
+		{
+			"type": "text",
+			"name": "mixed_source_error",
+			"label": "Mixed source",
+			"default": "Cart can't contain mixed source items"
+		},
+		{
+			"type": "text",
+			"name": "stock_error",
+			"label": "Not in stock",
+			"default": "Not enough in stock"
+		},
+		{
+			"type": "text",
+			"name": "missing_variant_error",
+			"label": "Missing variant",
+			"default": "Missing product variant"
 		}
 	]
 }

@@ -40,10 +40,43 @@
 			"label": "Colour"
 		},
 		{
+			"type": "fk",
+			"name": "product_type_id",
+			"label": "Product type",
+			"list": "shop/product_type",
+			"add_empty": "1",
+			"help": "Default for products in this category when product and subcategory have no type."
+		},
+		{
+			"type": "subtitle",
+			"label": "Fulfilment"
+		},
+		{
+			"type": "cms/cms_input_provides",
+			"name": "fulfilment",
+			"label": "Fulfilment",
+			"service": "shop_fulfilment",
+			"add_empty": "1",
+			"help": "How paid unfulfilled lines in this category are fulfilled. Empty: CMS does not fulfil. Skipped when Shopify status is in progress or fulfilled. Email: one message per recipient, containing only that recipient's lines."
+		},
+		{
+			"type": "repeater",
+			"name": "fulfilment_emails",
+			"label": "Fulfilment emails",
+			"help": "Recipients for Email fulfilment. The same address on several categories gets one combined email per order.",
+			"fields": [
+				{
+					"type": "text",
+					"name": "email",
+					"label": "Email"
+				}
+			]
+		},
+		{
 			"type": "repeater",
 			"name": "collections",
 			"label": "Collections",
-			"help": "Product ranges listed under this category (mega menu Shop by range). Shopify sync adds collections when products in this category use them; editable in CMS.",
+			"help": "Collections listed under this category (mega menu columns by type). Shopify sync adds them when products in this category use them; editable in CMS.",
 			"fields": [
 				{
 					"type": "fk",

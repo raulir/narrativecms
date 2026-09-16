@@ -6,6 +6,29 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class collection extends \Controller {
 
+	function panel_heading($params){
+
+		$name = trim((string)($params['heading'] ?? ''));
+		if ($name === ''){
+			$name = 'Collection';
+		}
+
+		$tid = (int)($params['collection_type_id'] ?? 0);
+		$type = '';
+		if ($tid > 0){
+			$this->load->model('cms/cms_page_panel_model');
+			$type_row = $this->cms_page_panel_model->get_cms_page_panel($tid);
+			$type = trim((string)($type_row['heading'] ?? ''));
+		}
+
+		if ($type === ''){
+			return $name;
+		}
+
+		return '['.$type.'] '.$name;
+
+	}
+
 	/**
 	 * Admin save: fill hash from heading before write.
 	 */

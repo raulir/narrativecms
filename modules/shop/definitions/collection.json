@@ -15,10 +15,12 @@
 			"label": "Heading"
 		},
 		{
-			"type": "text",
-			"name": "type",
+			"type": "fk",
+			"name": "collection_type_id",
 			"label": "Type",
-			"help": "Shopify collection suffix that created this row (e.g. range, category). Set by sync; identifies collection kind."
+			"list": "shop/collection_type",
+			"add_empty": "1",
+			"help": "Collection type (Shopify title suffix). Set by sync from Collection suffixes."
 		},
 		{
 			"type": "text",

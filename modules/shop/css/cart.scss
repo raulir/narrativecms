@@ -1,3 +1,5 @@
+$mobile_width: 900px;
+
 /* Basic cart structure — site modules extend for visual design */
 
 .cart_container {
@@ -19,6 +21,22 @@
 		min-width: 1.8rem;
 		text-align: center;
 	}
+}
+
+.cart_label.cart_label_mobile {
+	display: none;
+}
+
+@media only screen and (max-width: $mobile_width) {
+
+	.cart_label.cart_label_desktop {
+		display: none;
+	}
+
+	.cart_label.cart_label_mobile {
+		display: inline-block;
+	}
+
 }
 
 .cart_popup {

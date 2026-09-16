@@ -1,0 +1,74 @@
+{
+	"label": "Product type",
+	"list": {
+		"list_title": "Product types",
+		"item_title": "Product type",
+		"title_field": "heading",
+		"filter_fields": {
+			"show": "-- show --"
+		},
+		"link_target": "0"
+	},
+	"item": [
+		{
+			"type": "text",
+			"name": "heading",
+			"label": "Heading"
+		},
+		{
+			"type": "textarea",
+			"name": "description",
+			"label": "Description",
+			"lines": "4"
+		},
+		{
+			"type": "select",
+			"name": "stock_control",
+			"label": "Stock control",
+			"values": {
+				"none": "No limit",
+				"count": "Amount available in stock"
+			},
+			"default": "none",
+			"help": "No limit: no item accounting.||Amount: master product items hold remaining stock; paid orders clone a slice onto the order."
+		},
+		{
+			"type": "select",
+			"name": "allow_sale_when_not_in_stock",
+			"label": "Allow sale when not in stock",
+			"values": {
+				"0": "No",
+				"1": "Yes"
+			},
+			"default": "0",
+			"help": "When yes, master item number may go negative on paid orders."
+		},
+		{
+			"type": "fk",
+			"name": "delivery_set_id",
+			"label": "Delivery set",
+			"list": "shop/delivery_set",
+			"add_empty": "1",
+			"help": "Empty: standard delivery (later)."
+		},
+		{
+			"type": "panel",
+			"name": "panel",
+			"label": "Custom buy panel",
+			"help": "Legacy. Not used. Storefront always uses shop/productdims. Kept for a possible future custom buy panel."
+		},
+		{
+			"type": "repeater",
+			"name": "dims",
+			"label": "Dims",
+			"fields": [
+				{
+					"type": "fk",
+					"name": "product_dim_id",
+					"label": "Dim",
+					"list": "shop/product_dim"
+				}
+			]
+		}
+	]
+}
