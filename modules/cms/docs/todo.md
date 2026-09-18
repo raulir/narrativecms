@@ -15,6 +15,7 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 ## System / frontend page render
 
 - [x] **Missing page `layout` → 500** — empty layout no longer includes `cms/layouts/.tpl.php`. HTTP 500, log to `errors_log`, render saved `internal-error` page if it has a layout, else red-frame HTML. Reserved list/system pages are not auto-inserted; admin shows grey **create** rows. First panel save creates the page from a session draft.
+- [x] **List item URL missing shell / wrong type → 404** — `{panel}={id}` 404s if the item is missing, the URL type does not match the row, or the list template page was never created (grey). No 500 “No panel template”; no automatic panel-on-main fallback. Malformed `=` targets 404 in the router before Index. Slug write no longer maps `_/` to the last module. See [`routing.md`](routing.md).
 - [x] **Session boot + reserved slug cost** — one `cms_session_boot()` (cookie/GC from `session_length_days`; APIs must not `session_start()` raw). CMS admin re-login after 24h (`cms_password_last_checked`). `is_reserved_slug()` does not scan all panel defs on 404.
 
 ## System / routing

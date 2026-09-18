@@ -160,90 +160,71 @@ class Index extends Controller {
 
     	} else { // list item page
 
-    		list($panel_name, $cms_page_panel_id) = explode('=', $page_id);
+    		list($panel_name, $cms_page_panel_id) = explode('=', $page_id, 2);
+			$panel_name = trim((string)$panel_name);
+			$cms_page_panel_id = trim((string)$cms_page_panel_id);
+
+			if ($panel_name === '' || !ctype_digit($cms_page_panel_id) || (int)$cms_page_panel_id < 1){
+				show_404($page_id);
+			}
+
  			$extra_params = array($panel_name => $cms_page_panel_id, '_panel_name' => $panel_name, '_cms_page_panel_id' => $cms_page_panel_id, '_page_id' => $page_id, );
  			$GLOBALS['_page_params'] = $extra_params;
 
- 			// list item panel data, for example article
-    		$list_item_data = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
+ 			$list_item_data = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
 
-    		// if can't find list item - error 404
-    		if (!is_array($list_item_data)){
+    		if (!is_array($list_item_data)
+    				|| (int)($list_item_data['cms_page_panel_id'] ?? 0) !== (int)$cms_page_panel_id
+    				|| (string)($list_item_data['panel_name'] ?? '') !== $panel_name){
     			show_404($page_id);
     		}
- 			
+
     		if (empty($list_item_data['_template_page_id'])){
 
-	    		// List type template page: namespaced slug only (e.g. shop/product → shop_product)
 	    		$template_slug = $this->cms_page_model->list_template_slug_from_panel($panel_name);
 	    		$page = $template_slug !== ''
 	    			? $this->cms_page_model->get_page_by_slug($template_slug)
 	    			: [];
 
     		} else {
-    			
-    			// special template
+
     			$page = $this->cms_page_model->get_page($list_item_data['_template_page_id'], 'auto');
-    			
+
     		}
 
-    		if (!empty($page['page_id'])){
-    			
-    			$this->_auth_redirect_if_needed($page, $page['page_id']);
-    			$this->_enforce_main_page_access($page);
+    		if (empty($page['page_id']) || empty($page['cms_page_id'])){
+    			show_404($page_id);
+    		}
 
-    			// if page exists, overload this
-	    		$blocks = $this->_get_cms_page_panels($page['page_id']);
-	    		 
-				foreach($blocks as $block){
-					
-					// if the same block, load extra variable params, eg panel_name comes from url: "article=42" 
-					// and block['panel_name'] is "article" or "news/article"
-					if(stristr($block['panel_name'], '/')){
-						list($block_module, $block_panel_name) = explode('/', $block['panel_name']);
-					} else {
-						$block_panel_name = $block['panel_name'];
-					}
+			$this->_auth_redirect_if_needed($page, $page['page_id']);
+			$this->_enforce_main_page_access($page);
 
-					if ($panel_name === $block_panel_name || stristr($panel_name.'|', '/'.$block_panel_name.'|')){
-						$extra_params_2 = array_merge($list_item_data, $extra_params);
-					} else {
-						$extra_params_2 = $extra_params;
-					}
+			$blocks = $this->_get_cms_page_panels($page['page_id']);
 
-					$page_config[] = [
-							'position' => 'main',
-							'panel' => $block['panel_name'],
-							'params' => array_merge($get_params, $block, $extra_params_2, // keep submenu details from settings ->
-									[
-											'submenu_anchor' => $block['submenu_anchor'], 
-											'submenu_title' =>  $block['submenu_title'], 
-											'cms_page_id' => $page['cms_page_id'],
-									]),
-							'_cms_layout' => $page['layout'],
-					];
-					
+			foreach($blocks as $block){
+
+				if ((string)($block['panel_name'] ?? '') === $panel_name){
+					$extra_params_2 = array_merge($list_item_data, $extra_params);
+				} else {
+					$extra_params_2 = $extra_params;
 				}
-				
-				$cms_page_id = $page['cms_page_id'];
 
-    		} else { // put a panel to main position
-    			
-    			if (empty($page)){
-    				cms_show_500('No panel template or page defined. Panel name: '.$panel_name, is_scalar($page_id) ? (string)$page_id : '');
-    			}
-    			
-	    		if ($list_item_data['show'] == 1){
-	    			$page_config[] = [
-							'position' => 'main',
-							'panel' => $panel_name,
-							'params' => array_merge($get_params, $list_item_data, $extra_params, ['cms_page_id' => $page['cms_page_id'], ]),
-							'_cms_layout' => $page['layout'],
-					];
-	    		}
-	    		
-    		}
-    		
+				$page_config[] = [
+						'position' => 'main',
+						'panel' => $block['panel_name'],
+						'params' => array_merge($get_params, $block, $extra_params_2,
+								[
+										'submenu_anchor' => $block['submenu_anchor'],
+										'submenu_title' =>  $block['submenu_title'],
+										'cms_page_id' => $page['cms_page_id'],
+								]),
+						'_cms_layout' => $page['layout'],
+				];
+
+			}
+
+			$cms_page_id = $page['cms_page_id'];
+
     	}
 
     	$position_pages = [];

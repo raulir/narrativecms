@@ -495,24 +495,12 @@ class shopify_order_model extends \Model {
 
 	}
 
-	function _admin_order_detail($gid){
+	function _admin_order_detail_query($with_pii){
 
-		$this->load->model('shopify/shopify_product_model');
-
-		$gql = '
-			query OrderDetail($id: ID!) {
-				order(id: $id) {
-					id
-					legacyResourceId
-					name
-					createdAt
-					processedAt
-					cancelledAt
-					displayFinancialStatus
-					displayFulfillmentStatus
-					fullyPaid
+		$pii = '';
+		if ($with_pii){
+			$pii = '
 					email
-					customAttributes { key value }
 					shippingAddress {
 						name
 						firstName
@@ -524,7 +512,23 @@ class shopify_order_model extends \Model {
 						province
 						country
 						phone
-					}
+					}';
+		}
+
+		return '
+			query OrderDetail($id: ID!) {
+				order(id: $id) {
+					id
+					legacyResourceId
+					name
+					createdAt
+					processedAt
+					cancelledAt
+					displayFinancialStatus
+					displayFulfillmentStatus
+					fullyPaid
+					customAttributes { key value }
+					'.$pii.'
 					lineItems(first: 100) {
 						nodes {
 							id
@@ -542,7 +546,39 @@ class shopify_order_model extends \Model {
 			}
 		';
 
-		$data = $this->shopify_product_model->graphql($gql, ['id' => $gid], 1);
+	}
+
+	function _graphql_is_pii_denied($data){
+
+		$bits = [];
+		if (!empty($data['_reason'])){
+			$bits[] = (string)$data['_reason'];
+		}
+		foreach (($data['_errors'] ?? []) as $row){
+			if (is_array($row) && !empty($row['message'])){
+				$bits[] = (string)$row['message'];
+			} else if (is_string($row)){
+				$bits[] = $row;
+			}
+		}
+		$blob = strtolower(implode(' ', $bits));
+		if ($blob === ''){
+			return false;
+		}
+		return (strpos($blob, 'customer object') !== false
+				|| strpos($blob, 'personally identifiable') !== false);
+	}
+
+	function _admin_order_detail($gid){
+
+		$this->load->model('shopify/shopify_product_model');
+
+		$data = $this->shopify_product_model->graphql($this->_admin_order_detail_query(true), ['id' => $gid], 1);
+		if (!empty($data['_soft_fail']) || !empty($data['_errors'])){
+			if ($this->_graphql_is_pii_denied($data)){
+				$data = $this->shopify_product_model->graphql($this->_admin_order_detail_query(false), ['id' => $gid], 1);
+			}
+		}
 		if (!empty($data['_soft_fail']) || !empty($data['_errors'])){
 			$reason = $data['_reason'] ?? '';
 			if ($reason === ''){

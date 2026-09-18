@@ -40,10 +40,6 @@ class cms_slug_model extends \Model {
 
 	function generate_list_item_slug($target, $slug_string){
 
-		if (substr($target, 0, 2) == '_/'){
-			$target = str_replace('_/', end($GLOBALS['config']['modules']).'/', $target);
-		}
-
 		$this->delete_slug($target);
 
 		$slug = $this->slugify_slug($slug_string);
@@ -139,10 +135,6 @@ class cms_slug_model extends \Model {
 	 * @param int $status 0 = visible, 1 = not visible
 	 */
 	function set_page_slug($target, $slug, $status){
-
-		if (substr($target, 0, 2) == '_/'){
-			$target = str_replace('_/', end($GLOBALS['config']['modules']).'/', $target);
-		}
 
 		list($table, $slug_col) = $this->_route_table();
 
