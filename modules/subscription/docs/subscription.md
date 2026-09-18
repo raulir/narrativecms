@@ -60,10 +60,22 @@ Admin **Site users** → field **Elevated plan** (FK `shop/product`, optional). 
 | | |
 |--|--|
 | Source of truth | User panel field `elevated_plan` (not meta) |
-| Access | `user_has_active_subscription()` = paid meta **or** elevated product exists |
-| Precedence | Active Stripe meta wins; else elevated synthetic sub (`source=elevated`) |
-| Clear | Set FK empty in admin. Stripe cancel does **not** clear elevated |
-| Use | Testing / comps without Checkout |
+| Access | `user_has_active_subscription()` = paid Stripe row **or** elevated product exists |
+| Precedence | Active Stripe row wins; else elevated synthetic sub (`source=elevated`) |
+| Clear | Set FK empty in admin |
+| Use | Testing / comps, or when Stripe no longer has the subscription |
+
+Manage-page Stripe sync (and webhooks):
+
+| Stripe | CMS |
+|--------|-----|
+| `canceled` / `incomplete_expired` / `customer.subscription.deleted` | Archive paid row. **No** elevated grant (natural end). |
+| `resource_missing` / 404 (id in CMS, Stripe cannot confirm) | Same product → `elevated_plan`, archive paid row. |
+| Network / other API error | No change. |
+
+Checkout is blocked only for **paid** Stripe (`user_has_paid_subscription`); elevated users can buy again.
+
+Manage UI for elevated: banner (plan title + “administratively set”) then the Basic / purchase block.
 
 Stripe webhook and `meta.subscription` stay separate so sync cannot wipe an elevated grant.
 

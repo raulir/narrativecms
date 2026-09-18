@@ -43,6 +43,13 @@
 
 		<?php else: ?>
 
+			<?php if (!empty($show_elevated_banner) && !empty($elevated_plan_title)): ?>
+				<div class="manage_elevated_banner">
+					<div class="manage_elevated_plan"><?= $elevated_plan_title ?></div>
+					<div class="manage_elevated_note"><?= $manage_administratively_set ?></div>
+				</div>
+			<?php endif ?>
+
 			<div class="manage_status">
 				<?php if ($status_plan_title): ?>
 					<div class="manage_status_plan"><?= $status_plan_title ?></div>

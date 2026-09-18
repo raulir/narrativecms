@@ -15,4 +15,8 @@ Support the **manage subscription** page actions via Stripe (not Dashboard-only)
 ## Other
 
 - [ ] Live mode keys + Price ids checklist (see [`stripe_checklist.md`](stripe_checklist.md))
-- [ ] Harden webhook secret (reject unsigned in non-dev)
+- [x] Harden webhook secret (reject unsigned in non-dev)
+- [x] Webhook 5xx when entitlement apply fails (Stripe retries)
+- [x] `error_log_user` + `cache/stripe.log` on Stripe errors; visitor JSON is generic
+- [x] Invoice paid/failed webhooks → same entitlement sync
+- [x] Checkout Session idempotency key (`sub_co_{user}_{price}_{currency}`)

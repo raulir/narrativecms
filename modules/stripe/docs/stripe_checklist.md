@@ -57,6 +57,8 @@ You do **not** create Checkout Sessions in the Dashboard. The provider creates t
    - `customer.subscription.created` — same handler as updated (belt-and-braces)
    - `customer.subscription.updated` — renewals / status / plan changes
    - `customer.subscription.deleted` — cancel / end
+   - `invoice.paid` / `invoice.payment_succeeded` — successful invoice (renewals)
+   - `invoice.payment_failed` — failed renewal; CMS syncs `past_due` from the subscription
 3. Copy **Signing secret** (`whsec_…`) into CMS:  
    **Shop → Stripe → Stripe settings** (`admin/panel_settings/stripe__stripe/`) → **Webhook signing secret**  
    (or host config `stripe_webhook_secret`).

@@ -4,7 +4,7 @@
 - [x] **Webhook** → user meta entitlement (`/stripe/webhook/` module API)
 - [x] **User meta**: subscription fields + Stripe ids
 - [x] Architecture 1–4: domain orchestration, entitlement in subscription, thin pricing, user extends (see [`stripe_vs_subscription_issues.md`](stripe_vs_subscription_issues.md))
-- [ ] Architecture 5–12: category validation, webhook secret hardening, etc. (same doc)
+- [ ] Architecture 7–9, 11–12: FE diagnostics, user-meta API, success UX, access/ads (same doc; 5–6 and 10 done)
 - [ ] **Access / ads** — premium vs basic (read `meta.subscription.active`)
 - [ ] **Billing intervals**: weekly, fortnightly
 - [ ] Auto-detect visitor currency
@@ -28,5 +28,7 @@ Logged-in **manage subscription** UI (domain in subscription; Stripe implements 
 - [x] **Arch cleanup A1–A5 / B1 B3–B5** — server-filtered manage cards + pricing_cards partial; thin manage panel; category validation; webhook secret gate; facts/`product_id`; settings trim; header premium helper
 - [x] **Template partials + currency_selector** — `templates/pricing/card.tpl.php` (parent loops); `shop/currency_selector` panel (data-value + `#currency_selector_value`); trust-CMS templates; agents.md trust/parent-loop
 - [x] **Elevated plan** — user admin FK `elevated_plan` → shop/product; premium without payment; manage status-only
+- [x] **Lost Stripe sub → elevated** — only when Stripe **cannot confirm** (404 / `resource_missing`). Natural `canceled` / deleted archives with no grant. Domain owns convert; Stripe probe reports state.
+- [ ] **CMS user item: subscription readout** — custom CMS input on `user/user` (list item page) showing current `subscription_subscription` (status, active, interval, ends, plan, Stripe ids). Read-only; not editable. Elevated plan field stays as-is.
 - [ ] Deep-link from public pricing when already subscribed
 - [ ] Optional user-facing email on manage changes (Stripe Dashboard + technical webhook cover ops)

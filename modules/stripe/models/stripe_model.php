@@ -96,6 +96,42 @@ class stripe_model extends \Model {
 	}
 
 	/**
+	 * Digest via error_log_user (PHP User → cms_log_rotate). Details also in cache/stripe.log.
+	 */
+	function _log_stripe_error($short, $detail = ''){
+
+		$short = function_exists('cms_error_one_line') ? cms_error_one_line($short) : trim((string)$short);
+		if ($short === ''){
+			$short = 'Stripe error';
+		}
+		if (function_exists('error_log_user')){
+			error_log_user('CMS error [stripe]: '.$short);
+		}
+
+		$line = $short;
+		$detail = trim((string)$detail);
+		if ($detail !== ''){
+			$detail = function_exists('cms_error_one_line') ? cms_error_one_line($detail) : $detail;
+			$line .= ' | '.$detail;
+		}
+
+		$base = (string)($GLOBALS['config']['base_path'] ?? '');
+		if ($base === ''){
+			return;
+		}
+		@file_put_contents($base.'cache/stripe.log', date('c').' '.$line."\n", FILE_APPEND | LOCK_EX);
+
+	}
+
+	function _public_stripe_fail($short, $detail, $public){
+
+		$this->_log_stripe_error($short, $detail);
+
+		return ['ok' => 0, 'error' => $public];
+
+	}
+
+	/**
 	 * Resolve optional Checkout success/cancel links from Stripe settings (CMS link fields).
 	 * @return array{success_url:string,cancel_url:string}
 	 */
@@ -221,16 +257,31 @@ class stripe_model extends \Model {
 					],
 			];
 
-			$session = \Stripe\Checkout\Session::create($session_params);
+			$user_id = (int)($user['user_id'] ?? $user['cms_page_panel_id'] ?? 0);
+			$currency_id = (int)($meta['cms_currency_id'] ?? 0);
+			$idempotency_key = 'sub_co_'.$user_id.'_'.$stripe_price_id.'_'.$currency_id;
+
+			$session = \Stripe\Checkout\Session::create($session_params, [
+					'idempotency_key' => $idempotency_key,
+			]);
 			$url = (string)($session->url ?? '');
 			if ($url === ''){
-				return ['ok' => 0, 'error' => 'Stripe did not return a checkout URL'];
+				return $this->_public_stripe_fail(
+						'Checkout session empty URL user '.$user_id,
+						'',
+						'Checkout could not be started'
+				);
 			}
 
 			return ['ok' => 1, 'redirect' => $url, 'session_id' => (string)($session->id ?? '')];
 
 		} catch (\Exception $e){
-			return ['ok' => 0, 'error' => $e->getMessage()];
+			$user_id = (int)($user['user_id'] ?? $user['cms_page_panel_id'] ?? 0);
+			return $this->_public_stripe_fail(
+					'Checkout session failed user '.$user_id,
+					$e->getMessage(),
+					'Checkout could not be started'
+			);
 		}
 
 	}
@@ -253,6 +304,7 @@ class stripe_model extends \Model {
 
 		// Non-DEV: require signing secret (fail closed)
 		if ($secret === '' && !$is_dev){
+			$this->_log_stripe_error('Webhook secret not configured');
 			http_response_code(500);
 			print(json_encode(['ok' => 0, 'error' => 'Webhook secret not configured']));
 			exit();
@@ -268,18 +320,21 @@ class stripe_model extends \Model {
 					$event = $data;
 				}
 			} else if ($secret !== '' && $sig === ''){
+				$this->_log_stripe_error('Missing Stripe-Signature');
 				http_response_code(400);
 				print(json_encode(['ok' => 0, 'error' => 'Missing Stripe-Signature']));
 				exit();
 			}
 		} catch (\Exception $e){
+			$this->_log_stripe_error('Webhook signature failed', $e->getMessage());
 			http_response_code(400);
-			print(json_encode(['ok' => 0, 'error' => $e->getMessage()]));
+			print(json_encode(['ok' => 0, 'error' => 'Invalid signature']));
 			exit();
 		}
 
 		if (empty($event)){
 			http_response_code(400);
+			$this->_log_stripe_error('Invalid webhook payload');
 			print(json_encode(['ok' => 0, 'error' => 'Invalid payload']));
 			exit();
 		}
@@ -287,7 +342,6 @@ class stripe_model extends \Model {
 		$type = is_object($event) ? (string)($event->type ?? '') : (string)($event['type'] ?? '');
 		$obj = is_object($event) ? ($event->data->object ?? null) : ($event['data']['object'] ?? null);
 
-		$handler_error = null;
 		try {
 			if ($type === 'checkout.session.completed'){
 				$this->_webhook_checkout_session($obj, $type);
@@ -295,10 +349,11 @@ class stripe_model extends \Model {
 				$this->_webhook_subscription($obj, $type);
 			} else if ($type === 'customer.subscription.deleted'){
 				$this->_webhook_subscription_deleted($obj, $type);
+			} else if ($type === 'invoice.paid' || $type === 'invoice.payment_succeeded' || $type === 'invoice.payment_failed'){
+				$this->_webhook_invoice($obj, $type);
 			}
 		} catch (\Exception $e){
-			// Transient handler failure — ask Stripe to retry
-			error_log('stripe_model webhook handler: '.$e->getMessage());
+			$this->_log_stripe_error('Webhook handler failed '.$type, $e->getMessage());
 			http_response_code(500);
 			print(json_encode(['ok' => 0, 'error' => 'Handler error']));
 			exit();
@@ -342,6 +397,10 @@ class stripe_model extends \Model {
 		}
 
 		if ($user_id < 1 || $sub_id === ''){
+			$this->_log_stripe_error(
+					'Incomplete checkout session',
+					'session='.$session_id.' user='.$user_id.' sub='.$sub_id
+			);
 			$this->_notify_webhook_event($event_type, [
 					'note' => 'Incomplete session (missing user or subscription id)',
 					'session_id' => $session_id,
@@ -381,13 +440,14 @@ class stripe_model extends \Model {
 			$this->_enrich_notify_facts($facts);
 			$this->_notify_webhook_event($event_type, $facts);
 		} catch (\Exception $e){
+			$this->_log_stripe_error('Entitlement failed user '.$user_id, $e->getMessage());
 			$this->_notify_webhook_event($event_type, [
 					'note' => 'Entitlement failed: '.$e->getMessage(),
 					'user_id' => $user_id,
 					'stripe_subscription_id' => $sub_id,
 					'checkout_session_id' => $session_id,
 			]);
-			// leave Stripe to retry if needed
+			throw $e;
 		}
 
 	}
@@ -403,15 +463,71 @@ class stripe_model extends \Model {
 		$facts['user_id'] = $user_id;
 
 		if ($user_id < 1){
+			$this->_log_stripe_error('Webhook subscription missing cms_user_id', $event_type);
 			$this->_notify_webhook_event($event_type, array_merge($facts, [
 					'note' => 'No cms_user_id on subscription metadata',
 			]));
 			return;
 		}
 
-		$this->_apply_entitlement($user_id, $facts);
+		$status = strtolower(trim((string)($facts['status'] ?? '')));
+		if (in_array($status, ['canceled', 'incomplete_expired'], true)){
+			$this->load->model('subscription/subscription_model');
+			$this->subscription_model->archive_current_subscription($user_id);
+		} else {
+			$this->_apply_entitlement($user_id, $facts);
+		}
 		$this->_enrich_notify_facts($facts);
 		$this->_notify_webhook_event($event_type, $facts);
+
+	}
+
+	function _subscription_id_from_invoice($invoice){
+
+		if (is_object($invoice)){
+			if (!empty($invoice->subscription)){
+				$sub = $invoice->subscription;
+				return is_object($sub) ? (string)($sub->id ?? '') : (string)$sub;
+			}
+			if (!empty($invoice->parent->subscription_details->subscription)){
+				return (string)$invoice->parent->subscription_details->subscription;
+			}
+			return '';
+		}
+
+		if (!is_array($invoice)){
+			return '';
+		}
+
+		$sub = $invoice['subscription'] ?? '';
+		if (is_array($sub)){
+			return (string)($sub['id'] ?? '');
+		}
+		if ($sub !== '' && $sub !== null){
+			return (string)$sub;
+		}
+
+		$parent = $invoice['parent']['subscription_details']['subscription'] ?? '';
+		return is_array($parent) ? (string)($parent['id'] ?? '') : (string)$parent;
+
+	}
+
+	function _webhook_invoice($invoice, $event_type){
+
+		if (empty($invoice)){
+			return;
+		}
+
+		$sub_id = $this->_subscription_id_from_invoice($invoice);
+		if ($sub_id === ''){
+			$this->_log_stripe_error('Invoice without subscription', $event_type);
+			return;
+		}
+
+		$subscription = \Stripe\Subscription::retrieve($sub_id, [
+				'expand' => ['items.data.price'],
+		]);
+		$this->_webhook_subscription($subscription, $event_type);
 
 	}
 
@@ -423,7 +539,8 @@ class stripe_model extends \Model {
 		$facts['status'] = 'canceled';
 
 		if ($user_id > 0){
-			$this->_clear_entitlement($user_id);
+			$this->load->model('subscription/subscription_model');
+			$this->subscription_model->archive_current_subscription($user_id);
 		}
 
 		$this->_enrich_notify_facts($facts);
@@ -622,9 +739,52 @@ class stripe_model extends \Model {
 					'expand' => ['items.data.price'],
 			]);
 		} catch (\Exception $e) {
-			error_log('stripe_model retrieve_subscription_for_user: '.$e->getMessage());
+			$this->_log_stripe_error('Retrieve subscription failed user '.$user_id, $e->getMessage());
 			return null;
 		}
+
+	}
+
+	/**
+	 * @return array{state:string,subscription?:object} none|found|ended|missing|error
+	 */
+	function probe_user_stripe_subscription($user_id){
+
+		$user_id = (int)$user_id;
+		if ($user_id < 1){
+			return ['state' => 'none'];
+		}
+
+		$this->load->model('subscription/subscription_model');
+		$sub = $this->subscription_model->get_user_subscription($user_id);
+		$sub_id = trim((string)($sub['stripe_subscription_id'] ?? ''));
+		if ($sub_id === ''){
+			return ['state' => 'none'];
+		}
+
+		try {
+			$subscription = \Stripe\Subscription::retrieve($sub_id, [
+					'expand' => ['items.data.price'],
+			]);
+		} catch (\Stripe\Exception\InvalidRequestException $e) {
+			$code = (string)$e->getStripeCode();
+			$status = (int)$e->getHttpStatus();
+			if ($status === 404 || $code === 'resource_missing'){
+				return ['state' => 'missing'];
+			}
+			$this->_log_stripe_error('Probe subscription failed user '.$user_id, $e->getMessage());
+			return ['state' => 'error'];
+		} catch (\Exception $e) {
+			$this->_log_stripe_error('Probe subscription failed user '.$user_id, $e->getMessage());
+			return ['state' => 'error'];
+		}
+
+		$status = strtolower(trim((string)($subscription->status ?? '')));
+		if (in_array($status, ['canceled', 'incomplete_expired'], true)){
+			return ['state' => 'ended', 'subscription' => $subscription];
+		}
+
+		return ['state' => 'found', 'subscription' => $subscription];
 
 	}
 
@@ -641,10 +801,20 @@ class stripe_model extends \Model {
 
 		$this->load->model('subscription/subscription_model');
 		$before = $this->subscription_model->get_user_subscription($user_id);
-		$subscription = $this->retrieve_subscription_for_user($user_id);
+		$probe = $this->probe_user_stripe_subscription($user_id);
+		$state = (string)($probe['state'] ?? 'error');
 
-		if ($subscription === null){
-			// No Stripe id or retrieve failed — no silent clear
+		if ($state === 'none' || $state === 'error' || $state === 'ended' || $state === 'missing'){
+			return [
+					'ok' => 1,
+					'changed' => 0,
+					'state' => $state,
+					'subscription' => $before,
+			];
+		}
+
+		$subscription = $probe['subscription'] ?? null;
+		if (empty($subscription)){
 			return [
 					'ok' => 1,
 					'changed' => 0,
@@ -672,6 +842,7 @@ class stripe_model extends \Model {
 		return [
 				'ok' => 1,
 				'changed' => $changed,
+				'state' => 'found',
 				'subscription' => $after,
 		];
 
@@ -698,8 +869,11 @@ class stripe_model extends \Model {
 					'cancel_at_period_end' => empty($auto_renew) ? true : false,
 			]);
 		} catch (\Exception $e) {
-			error_log('stripe_model set_auto_renew_for_user: '.$e->getMessage());
-			return ['ok' => 0, 'error' => $e->getMessage()];
+			return $this->_public_stripe_fail(
+					'Auto-renew update failed user '.$user_id,
+					$e->getMessage(),
+					'Could not update subscription'
+			);
 		}
 
 		$this->load->model('subscription/subscription_model');
@@ -769,12 +943,19 @@ class stripe_model extends \Model {
 			]);
 			$url = (string)($session->url ?? '');
 			if ($url === ''){
-				return ['ok' => 0, 'error' => 'Portal did not return a URL'];
+				return $this->_public_stripe_fail(
+						'Payment method portal empty URL user '.$user_id,
+						'',
+						'Could not open payment method update'
+				);
 			}
 			return ['ok' => 1, 'redirect' => $url];
 		} catch (\Exception $e) {
-			error_log('stripe_model create_payment_method_update_session: '.$e->getMessage());
-			return ['ok' => 0, 'error' => $e->getMessage()];
+			return $this->_public_stripe_fail(
+					'Payment method portal failed user '.$user_id,
+					$e->getMessage(),
+					'Could not open payment method update'
+			);
 		}
 
 	}
@@ -817,8 +998,11 @@ class stripe_model extends \Model {
 					// Keep a single item — one subscription per user
 			]);
 		} catch (\Exception $e) {
-			error_log('stripe_model change_subscription_price_for_user: '.$e->getMessage());
-			return ['ok' => 0, 'error' => $e->getMessage()];
+			return $this->_public_stripe_fail(
+					'Change plan failed user '.$user_id,
+					$e->getMessage(),
+					'Could not change plan'
+			);
 		}
 
 		$this->load->model('subscription/subscription_model');
@@ -959,7 +1143,10 @@ class stripe_model extends \Model {
 		}
 
 		$this->load->model('subscription/subscription_model');
-		$this->subscription_model->apply_entitlement_from_provider($user_id, $facts);
+		$ok = $this->subscription_model->apply_entitlement_from_provider($user_id, $facts);
+		if ($ok === false){
+			throw new \RuntimeException('Entitlement apply failed for user '.$user_id);
+		}
 
 	}
 

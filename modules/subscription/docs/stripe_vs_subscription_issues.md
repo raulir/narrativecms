@@ -57,9 +57,7 @@ Prefer `get_user_meta_value_for_id` / `set_user_meta_for_id` only (partially don
 
 ### 10. Webhook HTTP status / retries
 
-Handler often returns `ok: 1` even if entitlement apply fails after a valid signature, so Stripe may not retry.
-
-**Later:** log failures; return non-2xx only when retry is useful; avoid non-2xx for permanent mapping errors.
+**Done:** entitlement apply failures log (`error_log_user` + `cache/stripe.log`), notify, and **rethrow** so the handler returns **500** and Stripe retries. Permanent mapping misses (no user id) stay 200.
 
 ### 11. Success UX
 

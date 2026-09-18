@@ -26,7 +26,7 @@ Say what was reviewed (module + feature), not “the whole site”.
 2. **Horizontal** — which **module** owns data, UI, HTTP, cache (table).
 3. **Vertical** — which **layer** inside that module (table).
 4. **Contracts** — checklist below.
-5. **Output** — keep / unused / wrong layer / contract, then todos.
+5. **Output** — a short list of **improvements** (see below). Use keep / unused / wrong layer / contract as working notes, not the delivered result.
 
 Do not restyle or “clean up” unrelated code during the review write-up.
 
@@ -79,20 +79,20 @@ Panel `panel_params` is **frontend-only** ([`cms_panel_params.md`](cms_panel_par
 
 ## Output shape
 
+The **result** is a list of suggestions to improve the code or system — **only if something should change**.
+
+For **small and medium** review rounds, cap at about **5** items: the most important issues, most severe or highest leverage first. Skip nits, style, and “nice someday” unless they are in that top set. If nothing needs fixing, say so in one line (no empty Keep/Wrong-layer tables).
+
+Larger reviews (whole module, go-live) may go slightly over 5; still rank and stop when extra items would dilute the list.
+
 ```markdown
-## Keep
-| Piece | Where |
-
-## Unused / dead
-…
-
-## Wrong layer
-…
-
-## Contract
-…
+## Improvements
+1. …
+2. …
 ```
 
-Then add `[ ]` items to `modules/<owner>/docs/todo.md` (not root `AGENTS.md`).
+Each item: what is wrong or missing, why it matters, and a concrete fix. Optional one-line “Fine as-is” if a risky area was checked and left.
+
+Then add those `[ ]` items to `modules/<owner>/docs/todo.md` (not root `AGENTS.md`) if they are not being implemented in the same turn.
 
 Optional: a short “Architecture” note in that module’s main doc if the map helps the next person.

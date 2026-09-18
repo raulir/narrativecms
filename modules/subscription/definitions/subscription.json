@@ -115,6 +115,13 @@
 		},
 		{
 			"type": "text",
+			"name": "manage_administratively_set",
+			"label": "Administratively set label",
+			"default": "administratively set",
+			"translate": "1"
+		},
+		{
+			"type": "text",
 			"name": "manage_renews_prefix",
 			"label": "Renews prefix",
 			"default": "renews",

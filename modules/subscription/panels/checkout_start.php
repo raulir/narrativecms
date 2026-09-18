@@ -34,7 +34,7 @@ class checkout_start extends \Controller {
 		}
 
 		// Already entitled — one subscription per user; do not open another Checkout
-		if ($this->subscription_model->user_has_active_subscription()){
+		if ($this->subscription_model->user_has_paid_subscription()){
 			$this->subscription_model->clear_checkout_intent();
 			$this->load->model('user/user_model');
 			$redirect = $this->user_model->get_user_redirect_url();

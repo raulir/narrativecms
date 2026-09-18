@@ -304,8 +304,80 @@ class subscription_model extends \Model {
 
 	}
 
+	function archive_current_subscription($user_id){
+
+		$user_id = $this->_resolve_user_id($user_id);
+		if ($user_id < 1 || !$this->db->table_exists('subscription_subscription')){
+			return false;
+		}
+
+		$existing = $this->db->query(
+				'select subscription_subscription_id from subscription_subscription '.
+				'where user_id = ? and archived = 0 order by subscription_subscription_id desc limit 1',
+				[$user_id]
+		)->row_array();
+		if (empty($existing['subscription_subscription_id'])){
+			return false;
+		}
+
+		$this->db->query(
+				'update subscription_subscription set archived = 1, active = 0, status = ?, updated = ? '.
+				'where subscription_subscription_id = ?',
+				['ended', date('Y-m-d H:i:s'), (int)$existing['subscription_subscription_id']]
+		);
+
+		return true;
+
+	}
+
+	function set_elevated_plan($user_id, $product_id){
+
+		$user_id = $this->_resolve_user_id($user_id);
+		$product_id = (int)$product_id;
+		if ($user_id < 1 || $product_id < 1){
+			return false;
+		}
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->cms_page_panel_model->update_cms_page_panel($user_id, [
+				'panel_params' => [
+						'elevated_plan' => $product_id,
+				],
+				'_update_title' => 0,
+		], false);
+
+		return true;
+
+	}
+
 	/**
-	 * True when meta.subscription.active is paid/active (Stripe path only).
+	 * Stripe sub gone: grant the same product as elevated_plan and archive the paid row.
+	 */
+	function convert_lost_stripe_to_elevated($user_id){
+
+		$user_id = $this->_resolve_user_id($user_id);
+		if ($user_id < 1){
+			return false;
+		}
+
+		$sub = $this->get_user_subscription($user_id);
+		$product_id = (int)($sub['product_id'] ?? 0);
+		if ($product_id > 0){
+			$this->set_elevated_plan($user_id, $product_id);
+		}
+
+		$archived = $this->archive_current_subscription($user_id);
+		if (function_exists('error_log_user')){
+			error_log_user('CMS error [subscription]: Stripe sub gone, elevated user '.$user_id.
+					' product '.$product_id);
+		}
+
+		return $archived || $product_id > 0;
+
+	}
+
+	/**
+	 * True when the current table row is a live paid Stripe sub.
 	 */
 	function user_has_paid_subscription($user_id = 0){
 
@@ -428,8 +500,8 @@ class subscription_model extends \Model {
 			return null;
 		}
 
-		// Already paying member: do not send to payment again
-		if ($this->user_has_active_subscription()){
+		// Already paying member: do not send to payment again (elevated can still buy)
+		if ($this->user_has_paid_subscription()){
 			$this->clear_checkout_intent();
 			$this->load->model('user/user_model');
 			return $this->user_model->get_user_redirect_url();
@@ -688,7 +760,7 @@ class subscription_model extends \Model {
 
 		if ($do_auto_checkout && !empty($params['user_logged_in'])){
 			// Already subscribed: drop guest checkout intent — no auto payment
-			if ($this->user_has_active_subscription()){
+			if ($this->user_has_paid_subscription()){
 				$this->clear_checkout_intent();
 			} else {
 				$intent = $this->get_checkout_intent();
@@ -1057,12 +1129,18 @@ class subscription_model extends \Model {
 
 		$sub = $this->get_effective_subscription();
 		$params['subscription'] = $sub;
-		$is_premium = $this->user_has_active_subscription();
+		$is_paid = $this->user_has_paid_subscription();
 		$is_elevated = (($sub['source'] ?? '') === 'elevated');
 		$params['subscription_source'] = (string)($sub['source'] ?? '');
 		$params['show_payment'] = 0;
+		$params['show_elevated_banner'] = 0;
+		$params['elevated_plan_title'] = '';
 
-		if (!$is_premium){
+		if (!$is_paid){
+			if ($is_elevated){
+				$params['show_elevated_banner'] = 1;
+				$params['elevated_plan_title'] = $this->resolve_subscription_plan_title($sub);
+			}
 			// Basic: month+year for one currency only (switcher reloads page with currency_id)
 			$active_override = (int)($params['active_currency_override'] ?? 0);
 			// Resolve currency options first without card filter
@@ -1097,10 +1175,14 @@ class subscription_model extends \Model {
 			$params['cards_all_visible'] = 1;
 			$params['layout'] = 'side_by_side';
 			$params = $this->_manage_label_defaults($params);
+			if ($is_elevated){
+				$params['show_elevated_banner'] = 1;
+				$params['elevated_plan_title'] = $this->resolve_subscription_plan_title($sub);
+			}
 			return $params;
 		}
 
-		// Premium — one subscription per user (paid Stripe or elevated plan)
+		// Premium — live Stripe-paid subscription
 		$params['manage_view'] = 'premium';
 		$params['show_currency_switcher'] = 0;
 		$params['cards_all_visible'] = 1;
@@ -1215,6 +1297,7 @@ class subscription_model extends \Model {
 		$defaults = [
 				'manage_login_message' => 'Please log in to manage your subscription.',
 				'manage_basic_label' => 'Basic',
+				'manage_administratively_set' => 'administratively set',
 				'manage_renews_prefix' => 'renews',
 				'manage_ends_prefix' => 'ends',
 				'manage_auto_extension_label' => 'Automatic extension',
@@ -1343,6 +1426,18 @@ class subscription_model extends \Model {
 		if (empty($result['ok'])){
 			return $result;
 		}
+
+		$state = (string)($result['state'] ?? '');
+		if ($state === 'missing'){
+			$converted = $this->convert_lost_stripe_to_elevated($user_id);
+			$result['changed'] = $converted ? 1 : 0;
+			$result['subscription'] = $this->get_user_subscription($user_id);
+		} else if ($state === 'ended'){
+			$ended = $this->archive_current_subscription($user_id);
+			$result['changed'] = $ended ? 1 : 0;
+			$result['subscription'] = $this->get_user_subscription($user_id);
+		}
+
 		$sub = $result['subscription'] ?? $this->get_user_subscription($user_id);
 		$copy = $this->build_auto_renew_copy($sub);
 		return array_merge($result, $copy, [
@@ -1379,7 +1474,7 @@ class subscription_model extends \Model {
 		if (empty($GLOBALS['config']['modules']) || !in_array('stripe', $GLOBALS['config']['modules'], true)){
 			return ['ok' => 0, 'error' => 'Stripe not available'];
 		}
-		if (!$this->user_has_active_subscription($user_id)){
+		if (!$this->user_has_paid_subscription($user_id)){
 			return ['ok' => 0, 'error' => 'No active subscription'];
 		}
 		$return_url = trim((string)$return_url);
@@ -1409,7 +1504,7 @@ class subscription_model extends \Model {
 		if (empty($GLOBALS['config']['modules']) || !in_array('stripe', $GLOBALS['config']['modules'], true)){
 			return ['ok' => 0, 'error' => 'Stripe not available'];
 		}
-		if (!$this->user_has_active_subscription($user_id)){
+		if (!$this->user_has_paid_subscription($user_id)){
 			return ['ok' => 0, 'error' => 'No active subscription'];
 		}
 
