@@ -17,7 +17,7 @@ class pageshare extends \Controller{
         	$long_url = $this->input->post('long_url');
         	$title = $this->input->post('title');
         	 
-        	$filename = $GLOBALS['config']['base_path'].'/cache/bitly_'.$url_key.'.json';
+        	$filename = cms_path('tmp').'bitly_'.$url_key.'.json';
 
         	if (md5($url) == $url_key){
         		
@@ -88,7 +88,7 @@ class pageshare extends \Controller{
 
 					$url_key = md5($params['url'] ?? '');
 					
-					$filename = $GLOBALS['config']['base_path'].'/cache/bitly_'.$url_key.'.json';
+					$filename = cms_path('tmp').'bitly_'.$url_key.'.json';
 					
 					if (file_exists($filename)){
 						

@@ -40,6 +40,10 @@ class cms_slug_model extends \Model {
 
 	function generate_list_item_slug($target, $slug_string){
 
+		if (substr($target, 0, 2) == '_/'){
+			$target = str_replace('_/', end($GLOBALS['config']['modules']).'/', $target);
+		}
+
 		$this->delete_slug($target);
 
 		$slug = $this->slugify_slug($slug_string);
@@ -136,6 +140,10 @@ class cms_slug_model extends \Model {
 	 */
 	function set_page_slug($target, $slug, $status){
 
+		if (substr($target, 0, 2) == '_/'){
+			$target = str_replace('_/', end($GLOBALS['config']['modules']).'/', $target);
+		}
+
 		list($table, $slug_col) = $this->_route_table();
 
 		$this->delete_slug($target);
@@ -180,7 +188,7 @@ class cms_slug_model extends \Model {
 
 	function sitemap_cache_path(){
 
-		return $GLOBALS['config']['base_path'].'cache/sitemap.xml';
+		return cms_path('tmp').'sitemap.xml';
 
 	}
 
@@ -540,7 +548,7 @@ class cms_slug_model extends \Model {
 			return false;
 		}
 
-		$dir = $GLOBALS['config']['base_path'].'cache/db/';
+		$dir = cms_path('tmp').'db/';
 		if (!is_dir($dir)){
 			if (!@mkdir($dir, 0755, true) && !is_dir($dir)){
 				return false;
@@ -590,7 +598,7 @@ class cms_slug_model extends \Model {
 			return false;
 		}
 
-		return 'cache/db/'.$zip_name;
+		return 'tmp/db/'.$zip_name;
 
 	}
 
@@ -610,7 +618,7 @@ class cms_slug_model extends \Model {
 
 		$backup = $this->backup_table_sql_zip($table);
 		if ($backup === false){
-			return array('ok' => 0, 'error' => 'Failed to write backup under cache/db/', 'pages' => 0, 'list_items' => 0);
+			return array('ok' => 0, 'error' => 'Failed to write backup under tmp/db/', 'pages' => 0, 'list_items' => 0);
 		}
 
 		$this->db->query('TRUNCATE TABLE `'.$table.'`');

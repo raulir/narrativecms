@@ -620,7 +620,7 @@ class analytics_model extends \Model {
 
 	private function _geo_cache_path() {
 
-		return $GLOBALS['config']['base_path'].'cache/analytics_geo_cache.json';
+		return cms_path('tmp').'analytics_geo_cache.json';
 
 	}
 

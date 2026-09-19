@@ -202,7 +202,7 @@ class payment extends \Controller {
 
 				// save payment intent, plan_id and plan_licences
 				
-				$filename = $GLOBALS['config']['base_path'].'cache/'.$payment_intent->id.'.json';
+				$filename = cms_path('tmp').$payment_intent->id.'.json';
 				file_put_contents($filename, json_encode([
 						'plan_id' => $params['plan_id'],
 						'plan_licences' => $params['plan_licences'],
@@ -225,7 +225,7 @@ class payment extends \Controller {
 							]
 					);
 				
-					$filename = $GLOBALS['config']['base_path'].'cache/'.$payment_intent->id.'_2.json';
+					$filename = cms_path('tmp').$payment_intent->id.'_2.json';
 					file_put_contents($filename, json_encode([
 							'plan_id' => $params['plan_id'],
 							'plan_licences' => $params['plan_licences'],

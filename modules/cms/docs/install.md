@@ -18,7 +18,7 @@ After a successful install, the script is **kept by default**. Step 4 offers a d
 - PHP with `mysqli`, writable document root  
 - MySQL/MariaDB admin credentials able to `CREATE DATABASE` / `CREATE USER`  
 - Network access to the master updater URL (default `https://update.narrativecms.com/cms/updater/`)  
-- Master must have a **published Release** of the core package (`cache/master/cms/` on the master host)
+- Master must have a **published Release** of the core package (`tmp/master/cms/` on the master host)
 
 Local master: set `$update_url` at the top of `install.php` (e.g. `http://cms.localhost/`).
 
@@ -35,7 +35,7 @@ Local master: set `$update_url` at the top of `install.php` (e.g. `http://cms.lo
 
 ### Files
 
-- POST `do=files` / `do=file` to `{master}/cms/updater/` for the **core** package (`module` / `area` empty → release snapshot `cache/master/cms/`)  
+- POST `do=files` / `do=file` to `{master}/cms/updater/` for the **core** package (`module` / `area` empty → release snapshot `tmp/master/cms/`)  
 - Prefers **batch** `filenames[]` (20 paths per request); falls back to single-file `filename=`  
 - Progress: `{install_root}/cache/install.txt` (`n/total` or `done`)  
 - Writes under **install root** only (`system/`, `modules/cms/`, `index.php`, …)
@@ -45,7 +45,7 @@ Local master: set `$update_url` at the top of `install.php` (e.g. `http://cms.lo
 After files are on disk:
 
 1. Create database and app user (`CREATE USER` / `GRANT`)  
-2. Bootstrap a minimal CMS loader and call **`cms_schema_model::fix_schema('cms')`**  
+2. Bootstrap a minimal CMS loader (`cms_path` + `cms_ensure_runtime_dirs`, same dirs as CMS Update) and call **`cms_schema_model::fix_schema('cms')`**  
 3. Tables come from [`modules/cms/schema/*.json`](../schema/) (e.g. `cms_page`, `cms_page_panel`, `cms_page_panel_param`, `cms_route`, …) — **not** hardcoded DDL  
 
 No legacy tables (`cms_slug`, `cms_api`, …).

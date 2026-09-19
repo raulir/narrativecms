@@ -28,7 +28,7 @@ class loginlink extends \Controller {
 
 			$this->load->model('user/user_model');
 			$this->load->model('cms/cms_page_panel_model');
-			$filename = $GLOBALS['config']['base_path'].'cache/user_reminders.json';
+			$filename = cms_path('tmp').'user_reminders.json';
 
 			$user_id = $this->input->post('user_id');
 			$user = $this->user_model->get_user($user_id);

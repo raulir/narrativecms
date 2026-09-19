@@ -423,7 +423,7 @@ class user_model extends \Model {
 		$user = [];
 	
 		// check if in file
-		$filename = $GLOBALS['config']['base_path'].'cache/user_tempuser.json';
+		$filename = cms_path('tmp').'user_tempuser.json';
 		if (file_exists($filename)){
 			$tempusers = json_decode(file_get_contents($filename), true);
 		} else {
@@ -621,7 +621,7 @@ class user_model extends \Model {
 			return false;
 		}
 		
-		$filename = $GLOBALS['config']['base_path'].'cache/user_email_verifications.json';
+		$filename = cms_path('tmp').'user_email_verifications.json';
 		
 		if (file_exists($filename)){
 			$tokens = cms_json_decode(file_get_contents($filename), $filename);
@@ -706,7 +706,7 @@ class user_model extends \Model {
 	
 	function verify_email_token($token){
 		
-		$filename = $GLOBALS['config']['base_path'].'cache/user_email_verifications.json';
+		$filename = cms_path('tmp').'user_email_verifications.json';
 		
 		if (!file_exists($filename)){
 			return ['error' => 'invalid_token'];

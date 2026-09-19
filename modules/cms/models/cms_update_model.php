@@ -4,6 +4,8 @@ namespace cms;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+require_once BASEPATH.'helpers/path_helper.php';
+
 class cms_update_model extends \Model {
 
 	/**
@@ -42,9 +44,27 @@ class cms_update_model extends \Model {
 
 	}
 
+	function _ensure_update_dirs(){
+
+		static $done = false;
+		if ($done){
+			return;
+		}
+		$done = true;
+		if (function_exists('cms_ensure_runtime_dirs')){
+			cms_ensure_runtime_dirs();
+		}
+		if (function_exists('cms_migrate_update_master_dirs')){
+			cms_migrate_update_master_dirs();
+		}
+
+	}
+
 	function _release_dir($area){
 
-		return $GLOBALS['config']['base_path'].'cache/master/'.$this->_release_id($area).'/';
+		$this->_ensure_update_dirs();
+
+		return cms_path('tmp').'master/'.$this->_release_id($area).'/';
 
 	}
 
@@ -57,10 +77,10 @@ class cms_update_model extends \Model {
 	function _local_version_path($area){
 
 		if ($area === '' || $area === null){
-			return $GLOBALS['config']['base_path'].'cache/version.json';
+			return cms_path('tmp').'version.json';
 		}
 
-		return $GLOBALS['config']['base_path'].'cache/version_'.$area.'.json';
+		return cms_path('tmp').'version_'.$area.'.json';
 
 	}
 
@@ -127,7 +147,8 @@ class cms_update_model extends \Model {
 				}
 
 				// Never package release snapshots or local update staging
-				if (strpos($cms_filename, 'cache/master/') === 0 || strpos($cms_filename, 'cache/update/') === 0){
+				if (strpos($cms_filename, 'tmp/master/') === 0 || strpos($cms_filename, 'tmp/update/') === 0
+						|| strpos($cms_filename, 'cache/master/') === 0 || strpos($cms_filename, 'cache/update/') === 0){
 					continue;
 				}
 
@@ -1390,20 +1411,22 @@ class cms_update_model extends \Model {
 
 	function _stage_update_cache_file($filename, $base64_content){
 
-		$pathinfo = pathinfo($GLOBALS['config']['base_path'].'cache/update/'.$filename);
+		$this->_ensure_update_dirs();
+
+		$pathinfo = pathinfo(cms_path('tmp').'update/'.$filename);
 		if (!file_exists($pathinfo['dirname'])){
 			mkdir($pathinfo['dirname'], 0777, true);
 		}
 
 		if ($base64_content !== '' && $base64_content !== null){
 			file_put_contents(
-					$GLOBALS['config']['base_path'].'cache/update/'.$filename,
+					cms_path('tmp').'update/'.$filename,
 					base64_decode($base64_content)
 			);
 		} else {
 			// Delete marker (file not on master / empty body)
 			file_put_contents(
-					$GLOBALS['config']['base_path'].'cache/update/'.$filename,
+					cms_path('tmp').'update/'.$filename,
 					'_DELETE_'
 			);
 		}
@@ -1412,8 +1435,9 @@ class cms_update_model extends \Model {
 	
 	function update_copy($area){
 
-		// go over all cache files recursively
-		$folder = $GLOBALS['config']['base_path']. 'cache/update/';
+		$this->_ensure_update_dirs();
+
+		$folder = cms_path('tmp').'update/';
 		
 		if (!empty($area)){
 			$folder_area = $folder.'modules/'.$area.'/';
@@ -1487,9 +1511,9 @@ class cms_update_model extends \Model {
 
 		// load cache file
 		if (empty($area)){
-			$filename = $GLOBALS['config']['base_path'] . 'cache/version.json';
+			$filename = cms_path('tmp').'version.json';
 		} else {
-			$filename = $GLOBALS['config']['base_path'] . 'cache/version_'.$area.'.json';
+			$filename = cms_path('tmp').'version_'.$area.'.json';
 		}
 		
 		$data = json_decode(file_get_contents($filename), true);

@@ -35,7 +35,7 @@ class payment_success extends \Controller {
 		
 		if ($payment_intent->status == 'succeeded'){
 			
-			$filename = $GLOBALS['config']['base_path'].'cache/'.$payment_intent->id.'.json';
+			$filename = cms_path('tmp').$payment_intent->id.'.json';
 			
 			$order = json_decode(file_get_contents($filename), true);
 			

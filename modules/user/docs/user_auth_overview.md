@@ -61,7 +61,7 @@ Place **target** panels on pages. Extension defs may be empty `item:[]` (theme o
 
 ## Session length
 
-Frontend login (`$_SESSION['user']`) uses the PHP session in [`session.php`](../../../system/core/session.php) (`cms_session_boot()` — same boot as admin and APIs that need the session). **CMS → Site settings → Session length days** (default **30**, clamp 1–365). Cookie + session-file GC use that many days. `Set-Cookie` is sent when the browser has no session cookie, or **once per PHP session** (`_session_cookie_ok`) so a leftover Session cookie is upgraded to the 30-day expiry. A new setting value applies on the **next request**; shortening days can expire session files (GC) before the browser cookie dies. Host JSON `session_path` (e.g. `cache/sessions`) isolates files from the system 1440s GC.
+Frontend login (`$_SESSION['user']`) uses the PHP session in [`session.php`](../../../system/core/session.php) (`cms_session_boot()` — same boot as admin and APIs that need the session). **CMS → Site settings → Session length days** (default **30**, clamp 1–365). Cookie + session-file GC use that many days. `Set-Cookie` is sent when the browser has no session cookie, or **once per PHP session** (`_session_cookie_ok`) so a leftover Session cookie is upgraded to the 30-day expiry. A new setting value applies on the **next request**; shortening days can expire session files (GC) before the browser cookie dies. `dir.session` (default `tmp/sessions`) isolates files from the system 1440s GC.
 
 CMS admin shares the same cookie but is **logged out 24 hours after last password entry** (`$_SESSION['cms_password_last_checked']`). Frontend login is not affected by that stamp.
 

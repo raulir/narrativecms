@@ -707,7 +707,7 @@ class cms_page_panel_export extends \Controller {
 			return false;
 		}
 
-		$pattern = $GLOBALS['config']['base_path'].'cache/*__'.$cms_page_panel_id.'__*.zip';
+		$pattern = cms_path('tmp').'*__'.$cms_page_panel_id.'__*.zip';
 		$files = glob($pattern);
 
 		if (empty($files)){
@@ -748,7 +748,7 @@ class cms_page_panel_export extends \Controller {
 			$meta = $query->row_array();
 		}
 
-		return $GLOBALS['config']['base_path'].'cache/'.date('ymd').'__'.str_replace('/', '_', $meta['panel_name']).'__'.$cms_page_panel_id.'__'.
+		return cms_path('tmp').date('ymd').'__'.str_replace('/', '_', $meta['panel_name']).'__'.$cms_page_panel_id.'__'.
 			trim(substr(preg_replace('/[ _]+/', '_', preg_replace('/[^0-9a-zA-Z ]/', '', $meta['title'])), 0, 24), '_');
 
 	}

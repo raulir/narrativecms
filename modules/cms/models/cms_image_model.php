@@ -403,7 +403,7 @@ class cms_image_model extends \Model {
 			return $filename;
 		}
 
-		$lockfile = $GLOBALS['config']['base_path'].'cache/gif_normalise_lock.json';
+		$lockfile = cms_path('tmp').'gif_normalise_lock.json';
 		if (file_exists($lockfile)){
 			$locked = json_decode(file_get_contents($lockfile), true);
 		} else {
@@ -1736,7 +1736,7 @@ class cms_image_model extends \Model {
 		}
 
 		if ($dest_root === '' || $dest_root === null){
-			$dest_root = $GLOBALS['config']['base_path'].'cache/tmp/img/';
+			$dest_root = cms_path('tmp').'img/';
 		}
 		$dest_root = rtrim(str_replace('\\', '/', $dest_root), '/').'/';
 
@@ -2170,11 +2170,11 @@ class cms_image_model extends \Model {
 	}
 
 	function _unused_purge_status_path(){
-		return $GLOBALS['config']['base_path'].'cache/cms_images_unused_purge_status.txt';
+		return cms_path('cache').'cms_images_unused_purge_status.txt';
 	}
 
 	function _unused_purge_lock_path(){
-		return $GLOBALS['config']['base_path'].'cache/cms_images_unused_purge.lock';
+		return cms_path('tmp').'cms_images_unused_purge.lock';
 	}
 
 	function unused_purge_status_read(){

@@ -111,7 +111,7 @@ class cache {
 
 	function write($stem_with_hash, $html, $meta) {
 
-		$base = $GLOBALS['config']['base_path'].'cache/';
+		$base = cms_path('tmp');
 		$html_path = $base.$stem_with_hash.'.html';
 		$meta_path = $base.$stem_with_hash.'.meta.json';
 		$html_tmp = $html_path.'.tmp';
@@ -306,7 +306,7 @@ class cache {
 			return;
 		}
 
-		$base = $GLOBALS['config']['base_path'].'cache/';
+		$base = cms_path('tmp');
 		$this->_delete_stem_files('page_cache_id_'.$cms_page_id);
 		$this->_delete_stem_files('partial_cache_id_'.$cms_page_id);
 
@@ -394,7 +394,7 @@ class cache {
 
 	function _registry_path() {
 
-		return $GLOBALS['config']['base_path'].'cache/page_cache_registry.json';
+		return cms_path('tmp').'page_cache_registry.json';
 
 	}
 
@@ -502,13 +502,13 @@ class cache {
 
 	function _html_path($stem_with_hash) {
 
-		return $GLOBALS['config']['base_path'].'cache/'.$stem_with_hash.'.html';
+		return cms_path('tmp').$stem_with_hash.'.html';
 
 	}
 
 	function _meta_path($stem_with_hash) {
 
-		return $GLOBALS['config']['base_path'].'cache/'.$stem_with_hash.'.meta.json';
+		return cms_path('tmp').$stem_with_hash.'.meta.json';
 
 	}
 
@@ -532,7 +532,7 @@ class cache {
 
 	function _delete_stem_files($stem) {
 
-		$base = $GLOBALS['config']['base_path'].'cache/';
+		$base = cms_path('tmp');
 		foreach (glob($base.$stem.'*.html') as $file) {
 			@unlink($file);
 		}

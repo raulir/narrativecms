@@ -45,7 +45,7 @@ class cms_cssjs_settings extends \Controller {
 					'css' => $panels,
 			]);
 
-			$cache_file = $GLOBALS['config']['base_path'].'cache/cms_cssjs_settings.json';
+			$cache_file = cms_path('tmp').'cms_cssjs_settings.json';
 			if (file_exists($cache_file)){
 				unlink($cache_file);
 			}

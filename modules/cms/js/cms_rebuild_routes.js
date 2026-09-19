@@ -10,7 +10,7 @@ function cms_rebuild_routes_run($root){
 		return
 	}
 
-	if (!window.confirm('Rebuild all public URL routes (cms_route) from pages and list titles? Current table is backed up as a zip under cache/db/ first.')){
+	if (!window.confirm('Rebuild all public URL routes (cms_route) from pages and list titles? Current table is backed up as a zip under tmp/db/ first.')){
 		return
 	}
 

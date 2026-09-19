@@ -22,7 +22,7 @@ if ( !function_exists('pack_css')) {
 				$return['module_scss'] = $module_scss;
 			}
 			
-			$return['css_cache'] = 'cache/'.$m_module.'__'.pathinfo($scss_filename, PATHINFO_FILENAME).'.css';
+			$return['css_cache'] = cms_cache_rel($m_module.'__'.pathinfo($scss_filename, PATHINFO_FILENAME).'.css');
 				
 		}
 		
@@ -237,8 +237,8 @@ if ( !function_exists('pack_css')) {
 	
 				$hash = substr(md5(serialize($csss)), 0, 8);
 				// check if any of files is changed
-				$filename = $GLOBALS['config']['base_path'].'cache/'.$hash.'.css';
-				$fileurl = $GLOBALS['config']['base_url'].'cache/'.$hash.'.css';
+				$filename = cms_path('cache').$hash.'.css';
+				$fileurl = cms_path_url('cache').$hash.'.css';
 	
 				if (file_exists($filename)){
 					$filetime = filemtime($filename);
@@ -376,8 +376,8 @@ if ( !function_exists('pack_css')) {
 				
 			$hash = substr(md5(implode(' ', $js_to_cache)), 0, 8);
 			// check if any of files is changed
-			$filename = $GLOBALS['config']['base_path'].'cache/'.$hash.'.js';
-			$fileurl = ($GLOBALS['config']['base_site']??'').$GLOBALS['config']['base_url'].'cache/'.$hash.'.js';
+			$filename = cms_path('cache').$hash.'.js';
+			$fileurl = ($GLOBALS['config']['base_site']??'').cms_path_url('cache').$hash.'.js';
 				
 			if (file_exists($filename)){
 				$filetime = filemtime($filename);

@@ -8,7 +8,7 @@ class cms_helper_model extends \Model {
 	
 	function run_cron(){
 		
-		$cron_data_filename = $GLOBALS['config']['base_path'].'cache/cron.json';
+		$cron_data_filename = cms_path('tmp').'cron.json';
 		
 		// check if run less than 5 mins ago
 		if (file_exists($cron_data_filename) && (time() - filemtime($cron_data_filename)) < 240){
@@ -116,16 +116,16 @@ class cms_helper_model extends \Model {
 
 	function _append_cron_log($output){
 
-		$dir = $GLOBALS['config']['base_path'].'cache';
+		$dir = rtrim(cms_path('log'), '/');
 		if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)){
-			error_log_user('CMS error [cms/cron]: cannot create cache/ for cron.log');
+			error_log_user('CMS error [cms/cron]: cannot create log/ for cron.log');
 			return;
 		}
 
 		$block = date('Y-m-d H:i:s')."\n".rtrim($output)."\n\n";
 		$ok = @file_put_contents($dir.'/cron.log', $block, FILE_APPEND | LOCK_EX);
 		if ($ok === false){
-			error_log_user('CMS error [cms/cron]: failed to write cache/cron.log');
+			error_log_user('CMS error [cms/cron]: failed to write log/cron.log');
 		}
 
 	}

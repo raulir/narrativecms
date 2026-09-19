@@ -115,11 +115,7 @@ class stripe_model extends \Model {
 			$line .= ' | '.$detail;
 		}
 
-		$base = (string)($GLOBALS['config']['base_path'] ?? '');
-		if ($base === ''){
-			return;
-		}
-		@file_put_contents($base.'cache/stripe.log', date('c').' '.$line."\n", FILE_APPEND | LOCK_EX);
+		@file_put_contents(cms_path('log').'stripe.log', date('c').' '.$line."\n", FILE_APPEND | LOCK_EX);
 
 	}
 

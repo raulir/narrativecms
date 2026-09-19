@@ -13,25 +13,27 @@ Related docs: [`system.md`](system.md) (bootstrap, Loader, Controller), [`cms_pa
 - Staging (`git add`, `git rm --cached`) is OK when implementing an explicit request (e.g. untrack cache); **the human commits**, or the agent commits only when told to.
 - Do not force-add ignored paths (`cache/*`, secrets, generated assets) unless the user asks.
 
-### `cache/` vs `grok/` — no executables in cache (architecture)
+### Dirs: `cache/`, `tmp/`, `log/` — no executables (architecture)
 
-**Hard rule (not AI-only):** **`cache/` must never hold executable or potentially executable code.**
+Host JSON `dir.cache` / `dir.tmp` / `dir.log` (defaults: project `cache/`, `tmp/`, `log/`). See [`system.md`](system.md). HTTP deny for `tmp/` and `log/` lives in the **project root `.htaccess` only** — do not add `.htaccess` inside those dirs.
 
-| Banned under `cache/` | Allowed under `cache/` |
-|----------------------|-------------------------|
-| `.php`, `.phtml`, `.phar`, `.cgi`, `.sh`, `.bat`, `.ps1`, `.exe`, … | Data/logs/assets: `.json`, `.txt`, `.log`, `.css`/packed js **output**, zip dumps, locks |
-| Agent smoke tests, `run_*`, `_audit_*`, one-off tools | Panel HTML cache (`_*.txt`), provider raw caches, `apis.log`, `garage.log` |
-| Anything a web server or `php` might run if requested | `cache/db/`, `cache/backup/` dumps |
+**Hard rule:** public **`cache/`** must never hold executable or potentially executable code (`.php`, `.phtml`, `.phar`, `.cgi`, `.sh`, `.bat`, …). **`tmp/`** may hold anything temporary (including PHP updater snapshots); it can be wiped at any time and must not be the only copy of real product code.
 
-**Why:** `cache/` is writable, often web-adjacent, and cleared casually. Putting runnable scripts there is a security and ops footgun (accidental execution, deploy wipe, “where is that tool?”).
+| Dir | Public HTTP | Holds |
+|-----|-------------|--------|
+| **`cache/`** | yes | Packed CSS/JS only (`*.css`, `*.js`) |
+| **`tmp/`** | **no** (root `.htaccess`) | Panel HTML, page cache, dumps, updater master/update, sessions, locks, queues — disposable |
+| **`log/`** | **no** (root `.htaccess`) | `error.log` and other logs |
 
 | Need | Put it here |
 |------|-------------|
-| Agent / dev helpers (CLI, smoke, garage ESP tools) | Project **`grok/`** (and subfolders) |
-| App-generated non-code artefacts | **`cache/`** as today |
+| Agent / dev helpers (CLI, smoke) | Project **`grok/`** |
+| Public packed CSS/JS | **`cache/`** |
+| Private generated artefacts | **`tmp/`** |
+| Logs | **`log/`** |
 | Real product code | `modules/`, `system/` |
 
-Document non-obvious `grok/` tools in `grok/README.md`. **Do not “just drop a .php in cache”** — not for AI, not for humans, not “temporary”.
+Document non-obvious `grok/` tools in `grok/README.md`. **Do not drop a .php in public `cache/`.**
 
 ---
 
@@ -215,7 +217,7 @@ When code needs a DB snapshot before a destructive change:
 2. Store under **`cache/db/`** as a **zipped** file, e.g. `cache/db/{table}_YYYYMMDD_HHMMSS.zip` containing `{table}_….sql`
 3. Optionally keep only the tables you will mutate (single-table zip is fine)
 
-Full environment dumps stay on the dump page under **`cache/backup/`** (`dump_<project>_YYYY_MM_DD[_N].zip` + sidecar `.json` + embedded `dump.json`). Table-level recovery archives live in `cache/db/`.
+Full environment dumps stay on the dump page under **`tmp/backup/`** (`dump_<project>_YYYY_MM_DD[_N].zip` + sidecar `.json` + embedded `dump.json`). Table-level recovery archives live in `tmp/db/`.
 
 Helper methods – always start with underscore: `_deep_merge()`, `_get_db_columns()`
 
@@ -244,6 +246,8 @@ Prefer `extends Controller` / `extends Model` — not new `CI_*` names. Details 
 **Rule:** main model must **not** load cms/list models. CMS/list models may call main. Orphan data purge logic lives on panel `cms_page_panel_data_purge` (admin-only), not on the runtime model.
 
 ### CMS field values (no serve-time migration / empty fallbacks)
+
+CMS data and a finished install are **trusted**: dirs (`cache/`, `tmp/`, `log/`, sessions) exist after install/update; panel fields have their definition keys. Do not add per-request “does this folder exist?” / empty-fallback trees for shapes that never happen on a live site.
 
 Do **not** paper over missing or old CMS param values at request time:
 

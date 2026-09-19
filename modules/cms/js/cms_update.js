@@ -530,7 +530,7 @@ function cms_update_init($root){
 		var label = $(this).closest('.cms_update_row').find('.cms_update_cell').first().text() || 'module'
 
 		get_ajax_panel('cms/cms_popup_yes_no', {
-			'text': 'Release ' + label + ' from the live tree into cache/master?<br>Clients will receive this snapshot only.',
+			'text': 'Release ' + label + ' from the live tree into tmp/master?<br>Clients will receive this snapshot only.',
 		}, function(data){
 			panels_display_popup(data.result._html, {
 				'yes': function(){

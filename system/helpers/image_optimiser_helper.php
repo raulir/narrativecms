@@ -232,7 +232,7 @@ if ( !function_exists('_iw')) {
 				// optimise on linux
 				if(!empty($GLOBALS['config']['images_pngquant'])){
 					
-					$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($new_image).'.png';
+					$temp_name = cms_path('tmp').md5($new_image).'.png';
 					
 					rename($GLOBALS['config']['upload_path'].$new_image, $temp_name);
 					
@@ -247,7 +247,7 @@ if ( !function_exists('_iw')) {
 
 				if(!empty($GLOBALS['config']['images_zopflipng'])){
 					
-					$temp_name = $GLOBALS['config']['base_path'].'cache/'.md5($new_image).'.png';
+					$temp_name = cms_path('tmp').md5($new_image).'.png';
 					
 					rename($GLOBALS['config']['upload_path'].$new_image, $temp_name);
 					

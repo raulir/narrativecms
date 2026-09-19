@@ -66,7 +66,7 @@ require_once BASEPATH.'core/cms_config.php';
 		}
 		
 		// lock the file
-		$lockfile = $GLOBALS['config']['base_path'].'cache/image_resize_lock.json';
+		$lockfile = cms_path('tmp').'image_resize_lock.json';
 		if (file_exists($lockfile)){
 			$locked = json_decode(file_get_contents($lockfile), true);
 		} else {

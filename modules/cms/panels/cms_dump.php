@@ -64,7 +64,7 @@ class cms_dump extends \Controller {
 	}
 
 	function _backup_dir(){
-		return $GLOBALS['config']['base_path'].'cache/backup/';
+		return cms_path('tmp').'backup/';
 	}
 
 	function _ensure_backup_dir(){
@@ -416,7 +416,7 @@ class cms_dump extends \Controller {
 	function _apply_backup_zip($zip_path){
 
 		$upload = $this->_upload_path_abs();
-		$tmp = $GLOBALS['config']['base_path'].'cache/dump_restore/';
+		$tmp = cms_path('tmp').'dump_restore/';
 		if (is_dir($tmp)){
 			$this->rrmdir($tmp);
 		}
@@ -816,7 +816,7 @@ class cms_dump extends \Controller {
 			$backup_dir = $this->_ensure_backup_dir();
 			$basename = $this->_allocate_backup_basename();
 			$outfile = $backup_dir.$basename.'.zip';
-			$sql_temp = $GLOBALS['config']['base_path'].'cache/_database_'.$basename.'.sql';
+			$sql_temp = cms_path('tmp').'_database_'.$basename.'.sql';
 			if (file_exists($sql_temp)){
 				unlink($sql_temp);
 			}
@@ -870,7 +870,7 @@ class cms_dump extends \Controller {
 		// Upload zip into backup library (does not restore)
 		if ($do === 'cms_dump_upload' || $do === 'upload_backup'){
 
-			$tmp_dir = $GLOBALS['config']['base_path'].'cache/dump_upload/';
+			$tmp_dir = cms_path('tmp').'dump_upload/';
 			if (is_dir($tmp_dir)){
 				$this->rrmdir($tmp_dir);
 			}

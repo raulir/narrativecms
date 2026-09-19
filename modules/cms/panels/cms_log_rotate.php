@@ -15,7 +15,7 @@ class cms_log_rotate extends \Controller {
 	}
 
 	function _last_email_marker_path(){
-		return $GLOBALS['config']['base_path'].'cache/php_errors_last_email_at';
+		return cms_path('tmp').'php_errors_last_email_at';
 	}
 
 	function _get_last_email_time(){
@@ -39,14 +39,16 @@ class cms_log_rotate extends \Controller {
 
 	function panel_action(){
 		
-		if (empty($GLOBALS['config']['errors_log'])){
+		$filename = (string)($GLOBALS['config']['paths']['error_log'] ?? '');
+		if ($filename === '' && function_exists('cms_path')){
+			$filename = rtrim(cms_path('log'), '/').'/error.log';
+		}
+		if ($filename === ''){
 			return;
 		}
 		
 		$explode_str = '] ';
 		$trim_str = '[';
-				
-		$filename = $GLOBALS['config']['errors_log'];
 
 		if (!is_string($filename) || $filename === '' || !is_file($filename)){
 			return;
@@ -130,7 +132,7 @@ class cms_log_rotate extends \Controller {
 		}
 
 		// add stats to archive too
-		file_put_contents($GLOBALS['config']['base_path'].'cache/php_errors_'.date('Y-m-d_H-i-s').'.log', $text);
+		file_put_contents(cms_path('log').'php_errors_'.date('Y-m-d_H-i-s').'.log', $text);
 
 		// empty logfile
 		file_put_contents($filename, '');

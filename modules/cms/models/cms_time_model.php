@@ -16,7 +16,7 @@ class cms_time_model extends \Model {
 		$coordinates_url = trim(str_replace(array(' ', ), '', $coordinates));
 		
 		// get delta
-		$filename = $GLOBALS['config']['base_path'] . 'cache/time_'.$coordinates_txt.'.json';
+		$filename = cms_path('tmp').'time_'.$coordinates_txt.'.json';
 		
 		if (!file_exists($filename) || time() - filemtime($filename) > 3600){
 			

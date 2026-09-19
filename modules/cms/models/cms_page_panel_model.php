@@ -1295,7 +1295,7 @@ class cms_page_panel_model extends \Model {
 	
 	function invalidate_html_cache($cms_page_panel_id){
 		
-		$filestart = $GLOBALS['config']['base_path'].'cache/_'.(int)$cms_page_panel_id.'_';
+		$filestart = cms_path('tmp').'_'.(int)$cms_page_panel_id.'_';
 		array_map('unlink', glob($filestart.'*'));
 		
 		// if list item, invalidate all related panel caches as well
@@ -1319,7 +1319,7 @@ class cms_page_panel_model extends \Model {
     				}
     				
 					foreach($ids as $id){
-    					$filestart = $GLOBALS['config']['base_path'].'cache/_'.(int)$id.'_';
+    					$filestart = cms_path('tmp').'_'.(int)$id.'_';
     					array_map('unlink', glob($filestart.'*'));
     				}
     				

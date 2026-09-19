@@ -131,7 +131,7 @@
 			<div class="cms_dump_section_body cms_dump_backups_body" style="display: none;">
 
 				<?php if (empty($backups)): ?>
-					<div class="cms_dump_empty">No backups in cache/backup/ yet. Generate one above or upload a zip.</div>
+					<div class="cms_dump_empty">No backups in tmp/backup/ yet. Generate one above or upload a zip.</div>
 				<?php else: ?>
 					<div class="cms_dump_backup_list">
 						<div class="cms_dump_backup_row cms_dump_backup_row_head">
@@ -198,14 +198,14 @@
 
 				<?php _panel('cms/cms_rebuild_routes', [
 						'label' => 'Public URL routes',
-						'help' => '[Rebuild routes]||Writes a zipped SQL backup of cms_route to cache/db/, truncates the table, then rebuilds from main pages and all link_target list items (title/heading → slug). Use after bad slug data (e.g. numeric product URLs).',
+						'help' => '[Rebuild routes]||Writes a zipped SQL backup of cms_route to tmp/db/, truncates the table, then rebuilds from main pages and all link_target list items (title/heading → slug). Use after bad slug data (e.g. numeric product URLs).',
 				]); ?>
 
 				<?php _panel('cms/cms_images_unused_purge', [
 						'label' => 'Images older than months',
 						'min_months' => 3,
 						'category' => '',
-						'help' => '[Purge unused images]||Moves unused dated library images (YYYY/MM/…) older than the given months to cache/tmp/img/. Skips module paths (cms/, timmy/, …), parents with children, and any file still referenced in panel params. Use Test to estimate count and disk size first.',
+						'help' => '[Purge unused images]||Moves unused dated library images (YYYY/MM/…) older than the given months to tmp/img/. Skips module paths (cms/, timmy/, …), parents with children, and any file still referenced in panel params. Use Test to estimate count and disk size first.',
 				]); ?>
 
 			</div>

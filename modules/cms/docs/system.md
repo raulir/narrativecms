@@ -46,7 +46,7 @@ Rough order:
 
 ### Errors
 
-Host JSON `errors_log` (e.g. `cache/errors_timmy.log`) is the log file (`ini_set` in [`cms_bootstrap.php`](../../../system/core/cms_bootstrap.php)). PHP still prefixes `[dd-Mon-YYYY HH:MM:SS TZ]`. Engine `log_errors` is off so the default `in /abs/path on line N` sentence is not written; handlers write:
+Host JSON `dir.log` (default `log/`) plus file **`error.log`**. `ini_set` in [`cms_bootstrap.php`](../../../system/core/cms_bootstrap.php) via `cms_errors_log_init()`. PHP still prefixes `[dd-Mon-YYYY HH:MM:SS TZ]`. Engine `log_errors` is off so the default `in /abs/path on line N` sentence is not written; handlers write:
 
 ```
 […] PHP Warning modules/…/article.php:34 Undefined array key "category_id"
@@ -58,7 +58,22 @@ Host JSON `errors_log` (e.g. `cache/errors_timmy.log`) is the log file (`ini_set
 
 App code uses `error_log_user($message)` (not raw `error_log()`). Call site is added automatically.
 
-File is project-relative. 404 has no file (path + query only; `#fragment` is not sent to the server). Daily cron `cms/cms_log_rotate` splits on `] ` (timestamp prefix). The email keeps PHP/other CMS errors in the first table and lists `CMS 404` rows in a second section (**CMS 404 Page Not Found:**). 404 log lines include the visitor IP.
+Log file is `{dir.log}/error.log` (helpers `cms_path('log')`, `cms_error_log_path()`). 404 has no file (path + query only; `#fragment` is not sent to the server). Daily cron `cms/cms_log_rotate` splits on `] ` (timestamp prefix). The email keeps PHP/other CMS errors in the first table and lists `CMS 404` rows in a second section (**CMS 404 Page Not Found:**). 404 log lines include the visitor IP.
+
+### Directories (`dir`)
+
+Host JSON `dir` (optional). Relative values are under the project, or under `dir.base` if set. Absolute if the value starts with `/` or `X:`.
+
+| Key | Default | HTTP |
+|-----|---------|------|
+| `cache` | `cache` | public — packed CSS/JS |
+| `tmp` | `tmp` | denied in root `.htaccess` — HTML cache, dumps, updater snapshots |
+| `log` | `log` | denied in root `.htaccess` — `error.log` and other logs |
+| `session` | `{tmp}/sessions` | denied with `tmp/` in root `.htaccess` |
+| `upload` | `img/` | public |
+| `base` | (unset) | parent for relative dir values |
+
+`cms_path()`, `cms_path_url()`, and `cms_cache_rel()` are globals in [`cms_config_basic.php`](../../../system/core/cms_config_basic.php) (`cms_path()` fills `config['paths']` on first use). `cms_ensure_runtime_dirs()` and updater migrate live in [`path_helper.php`](../../../system/helpers/path_helper.php) — **install and CMS Update only**.
 
 `errors_visible` only controls the red on-page frame, not whether the line is written.
 
@@ -69,7 +84,7 @@ Include [`session.php`](../../../system/core/session.php) for helpers, then call
 | Piece | Behaviour |
 |-------|-----------|
 | Length | Site setting `session_length_days` (1–365, default 30). Cookie lifetime + `session.gc_maxlifetime`. Applies on the next request. |
-| Files | Host JSON `session_path` (e.g. `"cache/sessions"`). `ini_set('session.save_path')` **before** `session_start()` overrides php.ini for this request. Host `sessionclean` still uses php.ini’s path (`/var/lib/php/session` on AlmaLinux), so files here are not deleted at 1440s. Happy path: `is_dir` + `ini_set`. `mkdir` + `.htaccess` `Require all denied` only if the directory is missing. |
+| Files | `dir.session` (default `{tmp}/sessions`). `ini_set('session.save_path')` **before** `session_start()`. Host `sessionclean` still uses php.ini’s path (`/var/lib/php/session` on AlmaLinux), so files here are not deleted at 1440s. HTTP deny is `tmp/` in the **project root `.htaccess`**. |
 | Cookie | `httponly`, `SameSite=Lax`, `Secure` when HTTPS / port 443 / `X-Forwarded-Proto: https`. Path `/` (or subdirectory `base_url`). `Set-Cookie` with the 30-day expiry is sent when the request has no session cookie, or once per PHP session (`$_SESSION['_session_cookie_ok']`) so an old Session cookie is upgraded. `session.use_strict_mode` on. |
 | Frontend login | `$_SESSION['user']` lasts for `session_length_days` of idle (session file GC in `session_path`). |
 | CMS admin | Same cookie. `$_SESSION['cms_password_last_checked']` is set on password login. If missing or older than 24h, `cms_user` is cleared (admin must log in again). Frontend user is left intact. |

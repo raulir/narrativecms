@@ -83,11 +83,7 @@ Each linkable list type **may** have a **main** CMS page used as the layout shel
 | `meta.list_panel` | `shop/product` |
 | Page slug | `shop_product` (`{module}_{panel}` with panel `_` → `-`) |
 
-Front controller resolves the shell by that slug only (no bare `product` fallback, no `_/` / last-module rewrite). The shell’s own public route stays **hidden**; list **items** still use title-based public slugs.
-
-`{panel_name}={id}` 404s as soon as: id is not a positive integer, the panel row is missing, `panel_name` does not match the URL type, or the list shell is still grey (**create** — no `cms_page` row). No 500 for a missing shell; no “put the panel on main” fallback.
-
-Malformed list targets (empty type or non-integer id) are `not_found` in [`cms_route_resolve()`](../../../system/core/cms_router.php) **before** Index. Slug writes do not rewrite `_/` to the last loaded module; list save uses the real panel name (`shop/product=`).
+Front controller resolves the shell by that slug only (no bare `product` fallback). The shell’s own public route stays **hidden**; list **items** still use title-based public slugs. Missing shell → HTTP 500.
 
 ### System pages (admin Pages → System)
 

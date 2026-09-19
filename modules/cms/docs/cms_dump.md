@@ -4,13 +4,13 @@ Admin page: **`admin/dump/`** (menu id `cms_dump`).
 
 Panel: [`cms_dump.php`](../panels/cms_dump.php). Related: route rebuild [`cms_rebuild_routes`](../panels/cms_rebuild_routes.php), image purge [`cms_images_unused_purge`](../panels/cms_images_unused_purge.php).
 
-**Ticket:** #26 Database backup inside CMS  
+**Ticket:** #26 Database backup inside CMS. GitHub **#266** (2018 dump UX) is superseded by this page; leftovers below.  
 
 **Legend:** `[ ]` open · `[x]` done  
 
 DB table snapshots must **not** use MySQL `*_bu` tables — zip SQL under `cache/db/` ([`agents.md`](agents.md) § Database backups).
 
-Full environment backups live under **`cache/backup/`** as:
+Full environment backups live under **`tmp/backup/`** as:
 
 ```
 dump_<project>_<YYYY>_<MM>_<DD>.zip
@@ -45,10 +45,12 @@ Three sections (schema-manager style):
 - [x] Defaults: all schema-owned tables + last two resource months
 - [x] Options: two columns — tables (by module) and resources (Y and Y−1 by month, newest first; older years as year-only; year master checkbox)
 - [x] Pseudo-checkboxes (`[v]` / `[ ]`) same pattern as panel export settings
-- [x] Output: `cache/backup/dump_<project>_YYYY_MM_DD[_N].zip`
+- [x] Output: `tmp/backup/dump_<project>_YYYY_MM_DD[_N].zip`
 - [x] Sidecar JSON + **`dump.json` inside zip** (created, filesize, project, tables, resources, resize_*)
 - [x] Optional **resize images** (editable max side, default 1400 px): writes `_{name}.{px}.{ext}` next to original, packs under original name in zip; reuses existing size file on later dumps
-- [x] Never delete/overwrite existing backups on generate
+- [x] Never delete/overwrite existing backups on generate (history of dumps)
+- [ ] **Keep smaller image** — after resize, compare byte size of original vs derivative; pack whichever is smaller (#266)
+- [ ] **Success message** after generate and after restore (what ran, output path / what was imported) (#266)
 
 ### Tables encoding (JSON)
 
@@ -71,7 +73,7 @@ Dump inventory uses `cms_schema_model::get_schema_tables_by_module()` (JSON sche
 
 - [x] Section title **Backups and restore**
 - [x] Collapsible body via **Backups** (header rightmost)
-- [x] Header **Upload** — stores zip into `cache/backup/` with new allocated name (does **not** apply)
+- [x] Header **Upload** — stores zip into `tmp/backup/` with new allocated name (does **not** apply)
 - [x] Inventory from sidecar, else `dump.json` inside zip
 - [x] Per row: **Restore** / **Download** / **Delete** (confirm on Restore + Delete)
 - [x] Restore: extract resources + import `db.sql` with `DROP TABLE IF EXISTS` (no `*_bu`)
@@ -79,6 +81,7 @@ Dump inventory uses `cms_schema_model::get_schema_tables_by_module()` (JSON sche
 ### Open / later
 
 - [ ] **Restore confirm: select which tables to overwrite** — dialog (or step) listing tables from dump meta / `db.sql`; only drop+import checked tables; resources still full extract unless further scoped
+- [ ] **After restore, say what landed where** — tables imported, resource root (`upload_path`) (#266)
 - [ ] **More warnings / help texts** on generate, upload, restore, routes, images
 - [ ] **Preflight PHP limits** before upload/restore
 - [ ] **Validate upload contents** (structure, path traversal)
@@ -108,6 +111,6 @@ Dump inventory uses `cms_schema_model::get_schema_tables_by_module()` (JSON sche
 | Styles | [`modules/cms/css/cms_dump.scss`](../css/cms_dump.scss) |
 | JS | [`modules/cms/js/cms_dump.js`](../js/cms_dump.js) |
 | Menu entry | [`modules/cms/config.json`](../config.json) → `cms_dump` |
-| Backup dir | `cache/backup/` |
+| Backup dir | `tmp/backup/` |
 | SQL dump helper | [`system/vendor/mysqldump/mysqldump.php`](../../../system/vendor/mysqldump/mysqldump.php) |
 | Tables inventory | `cms_schema_model::get_schema_tables_by_module()` |

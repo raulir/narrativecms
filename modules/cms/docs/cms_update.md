@@ -68,7 +68,7 @@ When config maj.min **changes**, the next Release starts patch at **0** again. S
 
 | Role | Control | Effect |
 |------|---------|--------|
-| **Master** (`update.master` / `is_master`) | **[Release]** | Scan live tree → `cache/master/{id}/` + `version.json` |
+| **Master** (`update.master` / `is_master`) | **[Release]** | Scan live tree → `tmp/master/{id}/` + `version.json` |
 | **Client** (`update.allow`) | **[Update]** | Download **released** files from remote master only |
 
 Unreleased live edits are invisible to clients until Release.
@@ -92,11 +92,11 @@ Release button presence already means “can publish”; no “(not released)”
 ## Layout on master
 
 ```
-cache/master/cms/           # core: system/ + modules/cms/ (+ index.php, LICENSE)
+tmp/master/cms/           # core: system/ + modules/cms/ (+ index.php, LICENSE)
   version.json
   system/...
   modules/cms/...
-cache/master/music/
+tmp/master/music/
   version.json
   modules/music/...
 ```
@@ -104,7 +104,7 @@ cache/master/music/
 - Release id: area `''` → folder `cms`; else module name  
 - Master API reads **only** the release snapshot (not live tree)
 
-Local working hashes remain under `cache/version.json` / `cache/version_{module}.json`.
+Local working hashes remain under `tmp/version.json` / `tmp/version_{module}.json`. On first use, `cache/master/` and `cache/update/` are moved to `tmp/` if the new location is empty.
 
 ## Client update popup + schema
 

@@ -275,15 +275,15 @@ class admin extends \Controller {
 	
 	function export($filename){
 		 
-		if ($filename && file_exists($GLOBALS['config']['base_path'].'cache/'.$filename.'.zip')){
+		if ($filename && file_exists(cms_path('tmp').$filename.'.zip')){
 	
 			header('Content-Disposition: attachment; filename="'.$filename.'.zip"');
 			header('Content-Type: application/zip');
-			header('Content-Length: ' . filesize($GLOBALS['config']['base_path'].'cache/'.$filename.'.zip'));
+			header('Content-Length: ' . filesize(cms_path('tmp').$filename.'.zip'));
 			
 			ini_set('memory_limit','1G');
 			
-			readfile($GLOBALS['config']['base_path'].'cache/'.$filename.'.zip');
+			readfile(cms_path('tmp').$filename.'.zip');
 
 			exit();
 	

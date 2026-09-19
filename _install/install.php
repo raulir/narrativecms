@@ -269,12 +269,21 @@ if (!empty($_POST['do'])){
 		if (!file_exists($root.'cache/')){
 			mkdir($root.'cache/', 0777, true);
 		}
+		if (!file_exists($root.'tmp/')){
+			mkdir($root.'tmp/', 0777, true);
+		}
+		if (!file_exists($root.'log/')){
+			mkdir($root.'log/', 0777, true);
+		}
+		if (!file_exists($root.'tmp/sessions/')){
+			mkdir($root.'tmp/sessions/', 0777, true);
+		}
 		if (!file_exists($root.'img/')){
 			mkdir($root.'img/', 0777, true);
 		}
 
 		$progress_file = $root.'cache/install.txt';
-		$stall_file = $root.'cache/install_stall.json';
+		$stall_file = $root.'tmp/install_stall.json';
 
 		$needed = install_files_needed($root, $by_path);
 		$done = $master_length - count($needed);
@@ -524,11 +533,9 @@ if (!empty($_POST['do'])){
 		$config = [
 				'base_path' => '_auto_',
 				'base_url' => $base_url,
-				'upload_path' => 'img/',
 				'upload_url' => 'img/',
 				'environment' => $env,
 				'errors_visible' => 1,
-				'errors_log' => 'cache/errors_'.$project.'.log',
 				'analytics' => 0,
 				'cache' => [
 						'force_download' => ($env === 'DEV' || $env === 'STG') ? 1 : 0,
@@ -565,10 +572,7 @@ if (!empty($_POST['do'])){
 		if ($delete_install){
 			$script = install_script_dir().'install.php';
 			if (file_exists($script)){
-				if (!file_exists($root.'cache/')){
-					mkdir($root.'cache/', 0777, true);
-				}
-				@rename($script, $root.'cache/install.tmp');
+				@rename($script, $root.'tmp/install.tmp');
 			}
 			// Remove empty _install dir
 			$install_dir = rtrim(install_script_dir(), '/');
@@ -615,12 +619,16 @@ function install_apply_cms_schema($root, $db_cfg, $mysqli_admin){
 	if (!defined('BASEPATH')){
 		define('BASEPATH', $root.'system/');
 	}
+	if (!defined('CMS_INSTALL_SCHEMA')){
+		define('CMS_INSTALL_SCHEMA', true);
+	}
+
+	require_once $root.'system/core/cms_config_basic.php';
 
 	$GLOBALS['config'] = [
 			'base_path' => $root,
 			'base_url' => '/',
-			'upload_path' => $root.'img/',
-			'upload_url' => '/img/',
+			'upload_url' => 'img/',
 			'database' => [
 					'hostname' => $db_cfg['hostname'],
 					'username' => $db_cfg['username'],
@@ -634,8 +642,10 @@ function install_apply_cms_schema($root, $db_cfg, $mysqli_admin){
 			'extends_by_target' => [],
 			'extend_sources' => [],
 			'errors_visible' => 0,
-			'errors_log' => '',
 	];
+	require_once $root.'system/helpers/path_helper.php';
+	cms_path('tmp');
+	cms_ensure_runtime_dirs();
 
 	$cms_cfg_path = $root.'modules/cms/config.json';
 	if (is_file($cms_cfg_path)){
@@ -954,9 +964,13 @@ AddOutputFilterByType DEFLATE font/opentype
 
 RewriteEngine on
 
-# Protect cache
-RewriteCond %{REQUEST_URI} ^/cache [NC]
-RewriteCond %{REQUEST_URI} !\.(css|js|xml)$ [NC]
+# Deny private dirs (no per-directory .htaccess)
+RewriteRule ^tmp(/|$) - [F,L]
+RewriteRule ^log(/|$) - [F,L]
+
+# Public cache: packed CSS/JS (and json/xml/txt used as client assets)
+RewriteCond %{REQUEST_URI} /cache/ [NC]
+RewriteCond %{REQUEST_URI} !\.(css|js|json|xml|txt)$ [NC]
 RewriteRule .* - [F,L]
 
 # Everything not set domain → set domain

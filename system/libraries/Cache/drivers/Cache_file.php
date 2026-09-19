@@ -35,7 +35,7 @@ class CI_Cache_file extends CI_Driver {
 	public function __construct()
 	{
 
-		$this->_cache_path = $GLOBALS['config']['base_path'].'cache/';
+		$this->_cache_path = cms_path('tmp');
 		
 	}
 

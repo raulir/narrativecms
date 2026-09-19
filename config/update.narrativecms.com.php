@@ -1,0 +1,67 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+$config['base_path'] = str_replace("\\", "/", rtrim(getcwd(), " /\\")).'/';
+$config['base_url']	= '/';
+$config['upload_path'] = $config['base_path'].'img/';
+$config['upload_url'] = $config['base_url'].'img/';
+$config['errors_visible'] = 0;
+$config['errors_log'] = 'cache/errors_cms.log';
+$config['analytics'] = 0;
+
+$config['cache']['force_download'] = 0;
+$config['cache']['pack_js'] = 1;
+$config['cache']['pack_css'] = 1;
+$config['cache']['vcs_check'] = 'git';
+
+$config['inline_css'] = 1;
+
+$config['update']['is_master'] = 1;
+$config['update']['allow'] = ['*'];
+$config['update']['master'] = [
+		'',
+		'acfsync',
+		'agileforecast',
+		'analytics',
+		'basic',
+		'booking',
+		'carousel',
+		'documents',
+		'download',
+		'emailer',
+		'faq',
+		'feed',
+		'form',
+		'gdpr',
+		'imagemaker',
+		'lightbox',
+		'localisation',
+		'menu',
+		'metoffice',
+		'news',
+		'octopusenergy',
+		'offer',
+		'onetrust',
+		'openmeteo',
+		'search',
+		'shop',
+		'shopify',
+		'subscription',
+		'stripe',
+		'user',
+		'video',
+		'weather',
+		'xai'
+];
+
+// depending of availability: none - '', PHP - 'gd', Google cwebp - 'cwebp'
+$config['images_webp'] = 'gd'; 
+
+$config['database']['hostname'] = '127.0.0.1';
+$config['database']['username'] = 'cms';
+$config['database']['password'] = '3YGkfAFf';
+$config['database']['database'] = 'cms';
+$config['database']['dbdriver'] = 'mysqli';
+
+// admin superuser password
+$config['admin_username'] = 'cms';
+$config['admin_password'] = '1C2ywmqn';

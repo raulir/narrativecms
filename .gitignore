@@ -12,8 +12,11 @@ _feed
 !/img/.gitkeep
 /cache/*
 !/cache/.gitkeep
-/config/*
-!/config/.gitkeep 
+/tmp/*
+!/tmp/.gitkeep
+/log/*
+!/log/.gitkeep
+ 
 /vendor
 !/vendor/.gitkeep
 
@@ -24,4 +27,4 @@ npm-debug.log*
 
 /agent-tools/
 /grok/
-/config/update.narrativecms.com.php
+/grok_cms/

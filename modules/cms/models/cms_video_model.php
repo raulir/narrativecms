@@ -300,13 +300,13 @@ class cms_video_model extends \Model {
 
 	function _queue_filename(){
 
-		return $GLOBALS['config']['base_path'].'cache/video_queue.json';
+		return cms_path('tmp').'video_queue.json';
 
 	}
 
 	function _queue_lock_path(){
 
-		return $GLOBALS['config']['base_path'].'cache/video_queue.lock';
+		return cms_path('tmp').'video_queue.lock';
 
 	}
 
@@ -430,7 +430,7 @@ class cms_video_model extends \Model {
 	function _log_encode($message){
 
 		$line = date('Y-m-d H:i:s').' '.$message."\n";
-		file_put_contents($GLOBALS['config']['base_path'].'cache/video_encode.log', $line, FILE_APPEND);
+		file_put_contents(cms_path('log').'video_encode.log', $line, FILE_APPEND);
 
 	}
 

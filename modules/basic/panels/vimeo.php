@@ -26,7 +26,7 @@ class vimeo extends \Controller{
 			
 			$filename = 'sub_'.md5($params['subtitle'].filemtime($GLOBALS['config']['upload_path'].$params['subtitle'])).'.json';
 			
-			if (!file_exists($GLOBALS['config']['base_path'].'cache/'.$filename)){
+			if (!file_exists(cms_path('cache').$filename)){
 
 				define('SRT_STATE_SUBNUMBER', 0);
 				define('SRT_STATE_TIME',      1);
@@ -91,11 +91,11 @@ class vimeo extends \Controller{
 				
 				}
 			
-				file_put_contents($GLOBALS['config']['base_path'].'cache/'.$filename, json_encode($subs, JSON_PRETTY_PRINT));
+				file_put_contents(cms_path('cache').$filename, json_encode($subs, JSON_PRETTY_PRINT));
 				
 			}
 
-			$params['subsfile'] = $GLOBALS['config']['base_url'].'cache/'.$filename;
+			$params['subsfile'] = cms_path_url('cache').$filename;
 			if (empty($params['hide_controls']) && !isset($params['controls']['subtitles'])){
 				$params['controls']['subtitles'] = 1;
 			}

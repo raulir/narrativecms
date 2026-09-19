@@ -38,7 +38,7 @@ class cms_page_model extends \Model {
 
 	function _ensure_cms_page_schema(){
 
-		$flag = $GLOBALS['config']['base_path'].'cache/schema_cms_page.ok';
+		$flag = cms_path('tmp').'schema_cms_page.ok';
 
 		if (file_exists($flag)){
 			return;

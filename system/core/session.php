@@ -5,7 +5,7 @@
  * request needs the site session (front pages, admin). Module APIs should boot
  * only if a session cookie is already present (cms_session_has_cookie()).
  * Cookie/GC from Site setting session_length_days (default 30).
- * Host JSON session_path (e.g. cache/sessions) is ini_set before session_start
+ * dir.session (default tmp/sessions) is ini_set before session_start
  * and overrides php.ini session.save_path for this request.
  */
 
@@ -69,33 +69,9 @@ if (!function_exists('cms_session_boot')){
 
 	function cms_session_apply_save_path(){
 
-		$raw = trim(str_replace('\\', '/', (string)($GLOBALS['config']['session_path'] ?? '')));
-		if ($raw === '' || strpos($raw, '..') !== false){
+		$path = function_exists('cms_path') ? rtrim(cms_path('session'), '/') : '';
+		if ($path === ''){
 			return;
-		}
-
-		$base = rtrim(str_replace('\\', '/', (string)($GLOBALS['config']['base_path'] ?? '')), '/');
-		if ($base === ''){
-			return;
-		}
-
-		if (preg_match('#^([a-zA-Z]:)?/#', $raw)){
-			$path = $raw;
-			$base_slash = $base.'/';
-			if ($path !== $base && strpos($path.'/', $base_slash) !== 0 && strpos($path, $base_slash) !== 0){
-				error_log_user('cms_session: session_path outside base_path');
-				return;
-			}
-		} else {
-			$path = $base.'/'.ltrim($raw, '/');
-		}
-
-		if (!is_dir($path)){
-			if (!@mkdir($path, 0700, true) && !is_dir($path)){
-				error_log_user('cms_session: cannot create session_path');
-				return;
-			}
-			@file_put_contents($path.'/.htaccess', "Require all denied\n");
 		}
 
 		ini_set('session.save_path', $path);

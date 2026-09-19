@@ -14,7 +14,7 @@ class console_log extends \Controller {
 
         	$message = $this->input->post('message');
 
-        	$file = fopen($GLOBALS['config']['base_path'].'cache/console.log', 'a');
+        	$file = fopen(cms_path('log').'console.log', 'a');
 
        		fwrite($file, "\n" . date('Y-m-d H:i:s') . ' ' . $message);
        		

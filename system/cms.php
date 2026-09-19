@@ -159,7 +159,7 @@ if (!empty($GLOBALS['config']['landing_page']['_value']) && $request_uri === '')
 // check if cron needs to run
 if (!empty($GLOBALS['config']['cron_trigger']) && $GLOBALS['config']['cron_trigger'] == 'visits'){
 
-	$cron_data_filename = $GLOBALS['config']['base_path'].'cache/cron.json';
+	$cron_data_filename = cms_path('tmp').'cron.json';
 	if (!file_exists($cron_data_filename) || (time() - filemtime($cron_data_filename)) >= 240){
 		$GLOBALS['config']['js'][] = ['script' => 'modules/cms/js/cms_cron_run.js', 'sync' => 'defer', ];
 	}
@@ -178,7 +178,7 @@ if (!empty($GLOBALS['config']['targets_enabled'])){
 
 }
 
-if (is_file($GLOBALS['config']['base_path'].'cache/page_cache_registry.json')
+if (is_file(cms_path('tmp').'page_cache_registry.json')
 		&& $_SERVER['REQUEST_METHOD'] === 'GET'
 		&& empty($_POST)
 		&& empty($_REQUEST['_ajax'])

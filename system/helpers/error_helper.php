@@ -86,10 +86,14 @@ function set_status_header($code = 200, $text = ''){
 
 function cms_errors_log_init(){
 
-	if (empty($GLOBALS['config']['errors_log']) || empty($GLOBALS['config']['base_path'])){
+	$file = (string)($GLOBALS['config']['paths']['error_log'] ?? '');
+	if ($file === '' && function_exists('cms_path')){
+		$file = rtrim(cms_path('log'), '/').'/error.log';
+	}
+	if ($file === ''){
 		return;
 	}
-	ini_set('error_log', $GLOBALS['config']['base_path'].$GLOBALS['config']['errors_log']);
+	ini_set('error_log', $file);
 	ini_set('log_errors', '0');
 	ini_set('display_errors', '0');
 

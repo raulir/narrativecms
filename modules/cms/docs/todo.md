@@ -15,7 +15,6 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 ## System / frontend page render
 
 - [x] **Missing page `layout` → 500** — empty layout no longer includes `cms/layouts/.tpl.php`. HTTP 500, log to `errors_log`, render saved `internal-error` page if it has a layout, else red-frame HTML. Reserved list/system pages are not auto-inserted; admin shows grey **create** rows. First panel save creates the page from a session draft.
-- [x] **List item URL missing shell / wrong type → 404** — `{panel}={id}` 404s if the item is missing, the URL type does not match the row, or the list template page was never created (grey). No 500 “No panel template”; no automatic panel-on-main fallback. Malformed `=` targets 404 in the router before Index. Slug write no longer maps `_/` to the last module. See [`routing.md`](routing.md).
 - [x] **Session boot + reserved slug cost** — one `cms_session_boot()` (cookie/GC from `session_length_days`; APIs must not `session_start()` raw). CMS admin re-login after 24h (`cms_password_last_checked`). `is_reserved_slug()` does not scan all panel defs on 404.
 
 ## System / routing
@@ -72,7 +71,7 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 ## Updater — [`cms_update.md`](cms_update.md)
 
-- [x] **Config major.minor + Release snapshot** (#430) — `config.json` `"version"`, manual [Release], serve clients from `cache/master/{id}/`
+- [x] **Config major.minor + Release snapshot** (#430) — `config.json` `"version"`, manual [Release], serve clients from `tmp/master/{id}/`
 - [ ] **Admin UI to edit package major.minor** — today operators set `"version": "x.y"` in module `config.json`; ticket for CMS UI instead of hand-editing JSON
 
 ---
@@ -107,9 +106,11 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 Full checklist: **[`cms_dump.md`](cms_dump.md)**.
 
 - [x] **Rename admin page to “Data and backup”** (menu + toolbar; URL `admin/dump/`)
-- [x] Phase 1: generate section (options, multi backup under `cache/backup/`, metadata JSON, resize images); layout sections
+- [x] Phase 1: generate section (options, multi backup under `tmp/backup/`, metadata JSON, resize images); layout sections
 - [x] Phase 2: **Backups and restore** (collapsible list, upload to library, Restore/Download/Delete, `dump_<project>_date`, dump.json in zip, no `*_bu` on restore)
+- [x] **Dir split** — public `cache/` (packed CSS/JS), private `tmp/`, `log/error.log` ([#790](https://github.com/raulir/narrativecms/issues/790))
 - [ ] **Restore: select which tables to overwrite** in confirmation dialog (from dump meta / SQL)
+- [ ] Success message + restore summary + keep-smaller image on generate — leftovers from #266, see `cms_dump.md`
 - [ ] Preflight PHP limits, upload validation, checksum registry, help/warnings — see `cms_dump.md`
 - [x] Rebuild routes control on dump page
 - [x] Unused image purge on dump page

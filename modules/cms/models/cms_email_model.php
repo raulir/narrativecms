@@ -250,7 +250,7 @@ class cms_email_model extends \Model {
 
 	function _queue_dir(){
 
-		return $GLOBALS['config']['base_path'].'cache/email_queue';
+		return rtrim(cms_path('tmp'), '/').'/email_queue';
 
 	}
 
@@ -391,7 +391,7 @@ class cms_email_model extends \Model {
 			if (isset($GLOBALS['smtp_debug'])){
 				$debug_output = implode("\r\n", $GLOBALS['smtp_debug']);
 				file_put_contents(
-					$GLOBALS['config']['base_path'].'cache/smtp_debug_'.$GLOBALS['config']['smtp_server'].'_'.time().'.txt',
+					cms_path('tmp').'smtp_debug_'.$GLOBALS['config']['smtp_server'].'_'.time().'.txt',
 					$debug_output
 				);
 				unset($GLOBALS['smtp_debug']);

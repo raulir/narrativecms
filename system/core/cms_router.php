@@ -47,25 +47,6 @@ function cms_route_lookup_slug($slug) {
 }
 
 /**
- * List-item target `panel=id`. Empty type or non-integer id → not a route.
- */
-function cms_route_list_item_target_ok($target){
-
-	$target = trim((string)$target);
-	$eq = strpos($target, '=');
-	if ($eq === false){
-		return true;
-	}
-	$panel = trim(substr($target, 0, $eq));
-	$id = trim(substr($target, $eq + 1));
-	if ($panel === '' || $id === '' || !ctype_digit($id) || (int)$id < 1){
-		return false;
-	}
-	return true;
-
-}
-
-/**
  * Whether first URI segment is a known HTTP controller (system or module).
  */
 function cms_route_is_controller_segment($name) {
@@ -142,10 +123,6 @@ function cms_route_resolve($path) {
 				: '1';
 			$target = (string)$page_id;
 		}
-		if (!cms_route_list_item_target_ok($target)){
-			$empty['slug'] = $target;
-			return $empty;
-		}
 		$kind = (strpos($target, '=') !== false) ? 'list_item' : 'page';
 		return array(
 			'kind' => $kind,
@@ -196,10 +173,6 @@ function cms_route_resolve($path) {
 	if (count($segments) === 1) {
 		$target = cms_route_lookup_slug($first);
 		if ($target !== null && $target !== '') {
-			if (!cms_route_list_item_target_ok($target)){
-				$empty['slug'] = $first;
-				return $empty;
-			}
 			$kind = (strpos($target, '=') !== false) ? 'list_item' : 'page';
 			return array(
 				'kind' => $kind,

@@ -578,7 +578,7 @@ class Controller {
 		if ($page_id !== false && !empty($GLOBALS['config']['cache']['vcs_check'])){
 			
 			$page_id_clean = str_replace(['/', '='], '_', $page_id);
-			$page_css_filename = $GLOBALS['config']['base_path'].'cache/page_css_'.$page_id_clean.'.txt';
+			$page_css_filename = cms_path('tmp').'page_css_'.$page_id_clean.'.txt';
 		
 			$last_modification = 0;
 				
@@ -590,7 +590,7 @@ class Controller {
 				$last_modification = filemtime($GLOBALS['config']['base_path'].'.svn/wc.db');
 			}
 				
-			$vcs_check_filename = $GLOBALS['config']['base_path'].'cache/vcs_check.json';
+			$vcs_check_filename = cms_path('tmp').'vcs_check.json';
 			if (file_exists($vcs_check_filename)){
 				
 				if (!empty($last_modification)){
@@ -623,9 +623,9 @@ class Controller {
 		 
 		// get global css
 		$global_css = [];
-		if (file_exists($GLOBALS['config']['base_path'].'cache/cms_cssjs_settings.json')){
+		if (file_exists(cms_path('tmp').'cms_cssjs_settings.json')){
 	
-			$global_css = json_decode(file_get_contents($GLOBALS['config']['base_path'].'cache/cms_cssjs_settings.json'), true);
+			$global_css = json_decode(file_get_contents(cms_path('tmp').'cms_cssjs_settings.json'), true);
 			 
 		} else {
 			
@@ -636,7 +636,7 @@ class Controller {
 
 			if (!empty($cssjs_settings['css'])){
 				$global_css = array_reverse(array_values($cssjs_settings['css']));
-				file_put_contents($GLOBALS['config']['base_path'].'cache/cms_sccjs_settings.json', json_encode($global_css));
+				file_put_contents(cms_path('tmp').'cms_sccjs_settings.json', json_encode($global_css));
 			}
 			 
 		}
@@ -667,9 +667,9 @@ class Controller {
 		
 				// check for cache
 				$hash = substr(md5('inline_'.serialize($css_arr).'_'.(!empty($GLOBALS['config']['inline_limit']) ? $GLOBALS['config']['inline_limit'] : 0)), 0, 8);
-				$css_filename = $GLOBALS['config']['base_path'].'cache/'.$hash.'.css';
-				$css2_filename = $GLOBALS['config']['base_path'].'cache/'.$hash.'_2.css';
-				$css2_url = $GLOBALS['config']['base_url'].'cache/'.$hash.'_2.css';
+				$css_filename = cms_path('cache').$hash.'.css';
+				$css2_filename = cms_path('cache').$hash.'_2.css';
+				$css2_url = cms_path_url('cache').$hash.'_2.css';
 		
 				if (file_exists($css_filename) && file_exists($css2_filename)){
 		
@@ -914,7 +914,7 @@ class Controller {
 		if ($hash === ''){
 			return '';
 		}
-		return $GLOBALS['config']['base_path'].'cache/'.$module.'/'.$panel.'/'.$hash.'.html';
+		return cms_path('tmp').$module.'/'.$panel.'/'.$hash.'.html';
 
 	}
 
@@ -1127,7 +1127,7 @@ class Controller {
 				$params['module'] = !empty($panel_config['module']) ? $panel_config['module'] : '';
 		
 				// if cache file exists
-				$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.str_replace('/', '__', $panel_config['panel']).
+				$filename = cms_path('tmp').'_'.$params['cms_page_panel_id'].'_'.str_replace('/', '__', $panel_config['panel']).
 						'_'.substr(md5($panel_config['panel'].serialize($params).$_SESSION['config']['targets']['hash'].
 						$_SESSION['webp'].$access_cache_hash), 0, 6).'.txt';
 						
@@ -1172,7 +1172,7 @@ class Controller {
 						&& (!empty($GLOBALS['config']['panel_cache']) || (isset($params['_cache_time']) && $params['_cache_time'] > 0))
 						&& empty($GLOBALS['config']['cache']['force_download'])){
 	
-							$filename = $GLOBALS['config']['base_path'].'cache/_'.$params['cms_page_panel_id'].'_'.
+							$filename = cms_path('tmp').'_'.$params['cms_page_panel_id'].'_'.
 									str_replace('/', '__', $panel_config['panel']).'_'.substr(md5($panel_config['panel'].serialize($params).
 									$_SESSION['config']['targets']['hash'].$_SESSION['webp'].$access_cache_hash), 0, 6).'.txt';
 										
@@ -1323,7 +1323,7 @@ class Controller {
 					'script' => 'modules/'.$return['module'].'/css/'.$return['module'].'.scss',
 					'top' => 1,
 					'related' => array(),
-					'css' => 'cache/'.$return['module'].'__'.$return['module'].'.css',
+					'css' => cms_cache_rel($return['module'].'__'.$return['module'].'.css'),
 					'module_path' => 'modules/'.$return['module'].'/',
 			);
 		}
@@ -1334,7 +1334,7 @@ class Controller {
 					'script' => 'modules/'.$return['module'].'/css/'.$return['name'].'.scss',
 					'related' => file_exists($GLOBALS['config']['base_path'].'modules/'.$return['module'].'/css/'.$return['module'].'.scss') ?
 					array('modules/'.$return['module'].'/css/'.$return['module'].'.scss', ) : array(),
-					'css' => 'cache/'.$return['module'].'__'.$return['name'].'.css',
+					'css' => cms_cache_rel($return['module'].'__'.$return['name'].'.css'),
 			);
 		}
 		
@@ -1363,7 +1363,7 @@ class Controller {
 						'script' => 'modules/'.$ext_module.'/css/'.$ext_module.'.scss',
 						'top' => 1,
 						'related' => [],
-						'css' => 'cache/'.$ext_module.'__'.$ext_module.'.css',
+						'css' => cms_cache_rel($ext_module.'__'.$ext_module.'.css'),
 						'module_path' => 'modules/'.$ext_module.'/',
 				];
 			}
@@ -1373,7 +1373,7 @@ class Controller {
 						'script' => 'modules/'.$ext_module.'/css/'.$ext_panel.'.scss',
 						'related' => file_exists($GLOBALS['config']['base_path'].'modules/'.$ext_module.'/css/'.$ext_module.'.scss') ?
 						['modules/'.$ext_module.'/css/'.$ext_module.'.scss', ] : [],
-						'css' => 'cache/'.$ext_module.'__'.$ext_panel.'.css',
+						'css' => cms_cache_rel($ext_module.'__'.$ext_panel.'.css'),
 				];
 			}
 

@@ -73,7 +73,7 @@ class reminder extends \Controller {
 		$this->load->model('user/user_model');
 		$this->load->model('cms/cms_email_model');
 
-		$filename = $GLOBALS['config']['base_path'].'cache/user_reminders.json';
+		$filename = cms_path('tmp').'user_reminders.json';
 		// Save password window (seconds). Display of the form uses the same window so UI matches.
 		$ttl_seconds = 1800;
 

@@ -91,7 +91,7 @@ class Exceptions {
 			
 			$ip = '[' . $_SERVER['REMOTE_ADDR'] . (!empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? ' ' . $_SERVER['HTTP_X_FORWARDED_FOR'] : '') . ']';
 			
-			file_put_contents($GLOBALS['config']['base_path'].'cache/'.$GLOBALS['config']['not_found_log'],
+			file_put_contents(cms_path('log').($GLOBALS['config']['not_found_log'] ?? '404.log'),
 					date('Y-m-d H:i:s') . ' | ' . $page.' | '. 
 					(!empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '') . ' | ' . $ip . "\n", FILE_APPEND);
 			
