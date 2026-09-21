@@ -92,13 +92,6 @@
 			"default": "https://update.narrativecms.com/cms/updater/"
 		},
 		{
-			"type": "text",
-			"name": "not_found_log",
-			"label": "Not found log",
-			"default": "404.log",
-			"help": "File to log not found requests data. Under cache folder."
-		},
-		{
 			"type": "select",
 			"name": "allow_ajax_panels",
 			"label": "Ajax access to any panel",

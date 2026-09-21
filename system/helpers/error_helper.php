@@ -166,6 +166,244 @@ function cms_request_log_uri(){
 
 }
 
+function cms_404_is_probe($uri){
+
+	$u = strtolower((string)$uri);
+	$q = strpos($u, '?');
+	if ($q !== false){
+		$u = substr($u, 0, $q);
+	}
+	$h = strpos($u, '#');
+	if ($h !== false){
+		$u = substr($u, 0, $h);
+	}
+
+	// /.hidden except ACME / well-known
+	if ($u !== '' && preg_match('#/\.(?!well-known(?:/|$))#', $u)){
+		return true;
+	}
+
+	static $needles = [
+			'wp-admin',
+			'wp-login',
+			'wp-content',
+			'wp-includes',
+			'xmlrpc',
+			'wp-config',
+			'/administrator',
+			'com_jce',
+			'/media/system/js/',
+			'/media/jui/',
+			'/media/vendor/jquery',
+			'phpmyadmin',
+			'vendor/phpunit',
+			'eval-stdin',
+			'setup-config',
+			'/cgi-bin/',
+			'/actuator',
+			'actuators/',
+			'/telescope',
+			'/debug/default',
+			'phpinfo',
+			'_profiler',
+			'web-inf',
+			'_vti_bin',
+			'_layouts/',
+			'auth.json',
+			'credentials',
+			'authorized_keys',
+			'.env',
+			'docker-compose',
+			'dockerfile',
+			'dockerrun.aws',
+			'compose.yaml',
+			'compose.yml',
+			'cloud-config',
+			'terraform',
+			'kubeconfig',
+			'jolokia',
+			'elmah',
+			'nifi-api',
+			'bitrix/',
+			'redmine/',
+			'typo3/',
+			'opencart/',
+			'owncloud/',
+			'ghost/api',
+			'kanboard/',
+			'matomo/',
+			'/mamp/',
+			'magicinfo',
+			'bitkeeper',
+			'storage/logs',
+			'/vendor/',
+			'service-account',
+			'client_secret',
+			'secret_token',
+			'id_rsa',
+			'id_ed25519',
+			'id_dsa',
+			'id_ecdsa',
+			'private.pem',
+			'server.key',
+			'appsettings',
+			'launchsettings.json',
+			'gitlab-ci',
+			'azure-pipelines',
+			'azuredeploy',
+			'appveyor.yml',
+			'autoconfig',
+			'configprops',
+			'threaddump',
+			'loggingconfig',
+			'_netrc',
+			'__env.js',
+			'env-config.js',
+			'env.js',
+			'ovh-backups',
+			'oauth-private.key',
+			'oauth-public.key',
+			'google-api-private-key',
+			'google-credentials',
+			'gcloud-credentials',
+			'oauth-credentials',
+			'cpanel.config',
+			'nuget.config',
+			'packages.config',
+			'sftp-config',
+			'ws-config',
+			'ws_ftp',
+			'codekit',
+			'pre-commit-config',
+			'next.config.js',
+			'nuxt.config.js',
+			'vite.config.js',
+			'webpack.config.js',
+			'babel.config.js',
+			'karma.conf.js',
+			'rollup.config.js',
+			'protractor.conf.js',
+			'make-config.php',
+			'setupconfig.xml',
+			'parameters.yml',
+			'application.properties',
+			'application.yaml',
+			'application.yml',
+			'gunicorn.conf',
+			'ftpsync.settings',
+			'dumplibs',
+			'view-consumer-info',
+			'sqlnet.log',
+			'info_configuration',
+			'authenticate.aspx',
+			'authentication.asmx',
+			'webcapsconfig',
+			'jkmanager-auth',
+			'jkstatus-auth',
+			'wwtest',
+			'zipkin/config',
+			'password-page/ovf',
+			'engine-ui/',
+			'go/add-on/',
+			'lab/api/settings',
+			'api/v1/canal/',
+			'v2/auth/roles',
+			'v3/settings/first-login',
+			'auth/admin/',
+			'auth/setup',
+			'_config.yml',
+			'/_config',
+			'/ssi/',
+			'oa_html',
+			'/libs/granite',
+			'/libs/cq/',
+			'etc/replication',
+			'confluence/plugins',
+			'local_settings',
+			'environment.rb',
+			'configuration.php',
+			'configuration.yml',
+			'token.json',
+			'azure.json',
+			'_history',
+			'desktop.ini',
+			'access_tokens.db',
+			'connection.php',
+			'tcpconfig',
+			'/config/',
+			'config.json',
+			'config_default',
+			'team-provider-info',
+			'_ignition',
+			'phpstan',
+			'elasticsearch',
+			'vercel.json',
+			'php-info',
+			'php_info',
+			'infophp',
+			'/info.php',
+			'/infos.php',
+			'/php.php',
+			'/v2/keys',
+			'api/v1/status/config',
+	];
+	foreach ($needles as $n){
+		if (strpos($u, $n) !== false){
+			return true;
+		}
+	}
+
+	$base = basename($u);
+	if ($base === '' || $base === '/' || $base === '.'){
+		return false;
+	}
+	if ($base === 'env'){
+		return true;
+	}
+
+	if (preg_match('#\.(?:sql|log|bak|swp|pem|ppk|key|tfstate|tfvars|sqlite|war|jar|conf|ini|ya?ml|properties|db|config|dump|toml|neon|secret)(?:\.[a-z0-9]+)?$#', $base)){
+		return true;
+	}
+	if (preg_match('#^(?:backup|www|db|database|dump|config|env)[^/]*\.(?:zip|rar|7z|tgz|gz|tar)(?:\.[a-z0-9]+)?$#', $base)){
+		return true;
+	}
+	if (preg_match('#^(?:(?:wp-|web\.)?config|settings|credentials?|secrets?|phpinfo|backup|dump|database|mysqldump|mysql|db|env|appsettings|application|parameters|configuration|stripe|aws)#', $base)
+			&& preg_match('#\.(?:php|py|js|json|xml|inc|rb|ru|cgi|txt|dist|old|orig|save|sh|ts)$#', $base)){
+		return true;
+	}
+
+	return false;
+
+}
+
+function cms_404_fail2ban_log($uri){
+
+	$ip = preg_replace('/\s+/', '', (string)($_SERVER['REMOTE_ADDR'] ?? ''));
+	if ($ip === ''){
+		$ip = '-';
+	}
+	$uri = cms_error_one_line($uri);
+	if ($uri === ''){
+		$uri = '/';
+	}
+	$file = cms_404_is_probe($uri) ? 'cms_404_probe.log' : 'cms_404.log';
+	$line = date('Y-m-d H:i:s').' [client '.$ip.'] CMS 404 '.$uri."\n";
+	@file_put_contents(cms_path('log').$file, $line, FILE_APPEND | LOCK_EX);
+
+}
+
+function cms_404_probe_response(){
+
+	if (!headers_sent()){
+		set_status_header(404);
+		header('Content-Type: text/plain; charset=utf-8');
+		header('Cache-Control: no-store');
+	}
+	echo 'Not Found';
+	exit;
+
+}
+
 function cms_error_one_line($text){
 
 	$text = html_entity_decode(strip_tags(str_replace(['<br>', '<br/>', '<br />'], ' ', (string)$text)), ENT_QUOTES, 'UTF-8');

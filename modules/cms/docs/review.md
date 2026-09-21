@@ -25,8 +25,9 @@ Say what was reviewed (module + feature), not “the whole site”.
 1. **Map the feature** — what the visitor or editor actually does; which panels fire.
 2. **Horizontal** — which **module** owns data, UI, HTTP, cache (table).
 3. **Vertical** — which **layer** inside that module (table).
-4. **Contracts** — checklist below.
-5. **Output** — a short list of **improvements** (see below). Use keep / unused / wrong layer / contract as working notes, not the delivered result.
+4. **Hot path / page load** — checklist below. A change that is fine on one admin action can still be wrong if it runs on every front request.
+5. **Contracts** — checklist below.
+6. **Output** — a short list of **improvements** (see below). Use keep / unused / wrong layer / contract as working notes, not the delivered result.
 
 Do not restyle or “clean up” unrelated code during the review write-up.
 
@@ -62,6 +63,21 @@ Who owns **data**, who **extends**, who **provides**, who is a **soft** `in_arra
 | `docs/` | How it works + `docs/todo.md` | Duplicating CMS agents.md |
 
 Panel `panel_params` is **frontend-only** ([`cms_panel_params.md`](cms_panel_params.md)). Admin forms use definitions + stored params.
+
+---
+
+## Hot path / page load
+
+Review must include **impact on general page load time**, not only correctness of the new feature. Ask: does this run on every front request (`cms.php`, `cms_config_basic`, session boot, every panel render)?
+
+| Check | Fail if |
+|-------|---------|
+| Boot / `cms.php` / basic config | `mkdir`, `is_dir`/`file_exists`, extra helper/model load, or other I/O that only some requests need |
+| Rare callers | Work that belongs on 2–3 explicit paths is put on the public bootstrap “just in case” |
+
+Example: a missing `tmp/sessions` folder looked like a boot bug. The `mkdir`/`exists` check was only needed on **cms user login `do`**, **CMS Update**, and **install**. Putting it in `cms.php` or basic config made every page load pay for a case those three callers already handle.
+
+Prefer: trust install/update to create runtime dirs; do rare work on the rare path.
 
 ---
 

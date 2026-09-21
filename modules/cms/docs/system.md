@@ -51,14 +51,17 @@ Host JSON `dir.log` (default `log/`) plus file **`error.log`**. `ini_set` in [`c
 ```
 […] PHP Warning modules/…/article.php:34 Undefined array key "category_id"
 […] PHP User modules/shopify/api/webhook.php:93 CMS error [shopify/webhook]: hmac mismatch
-[…] CMS 404 Page Not Found /blue-print/?something=11
+[…] CMS 404 Page Not Found 203.0.113.10 /blue-print/?something=11
+[…] CMS 404 Page Not Found (probe) 45.138.12.16 /.Dockerfile
 […] CMS 500 system/core/controller_index.php:233 …
 […] CMS Timeout system/helpers/error_helper.php:159 500 Internal Server Error (timeout)
 ```
 
 App code uses `error_log_user($message)` (not raw `error_log()`). Call site is added automatically.
 
-Log file is `{dir.log}/error.log` (helpers `cms_path('log')`, `cms_error_log_path()`). 404 has no file (path + query only; `#fragment` is not sent to the server). Daily cron `cms/cms_log_rotate` splits on `] ` (timestamp prefix). The email keeps PHP/other CMS errors in the first table and lists `CMS 404` rows in a second section (**CMS 404 Page Not Found:**). 404 log lines include the visitor IP.
+Log file is `{dir.log}/error.log` (helpers `cms_path('log')`, `cms_error_log_path()`). 404 has no file (path + query only; `#fragment` is not sent to the server). Daily cron `cms/cms_log_rotate` splits on `] ` (timestamp prefix). The email keeps PHP/other CMS errors in the first table and lists `CMS 404` rows in a second section (**CMS 404 Page Not Found:**). 404 log lines include the visitor IP. Probe URIs insert `(probe)` between `Page Not Found` and the IP.
+
+Every CMS 404 also appends `{dir.log}/cms_404_probe.log` (scanner paths) or `{dir.log}/cms_404.log` (other 404s) for fail2ban — see [`fail2ban.md`](fail2ban.md). Probe URIs get a plain-text 404 (no CMS `/not-found/` page). 404 / system error pages are not analytics pageviews.
 
 ### Directories (`dir`)
 

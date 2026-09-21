@@ -86,21 +86,18 @@ class Exceptions {
 		$heading = "404 Page Not Found";
 		$message = "The page you requested was not found.";
 
-		// By default we log this, but allow a dev to skip it
-		if (!empty($GLOBALS['config']['not_found_log'])){
-			
-			$ip = '[' . $_SERVER['REMOTE_ADDR'] . (!empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? ' ' . $_SERVER['HTTP_X_FORWARDED_FOR'] : '') . ']';
-			
-			file_put_contents(cms_path('log').($GLOBALS['config']['not_found_log'] ?? '404.log'),
-					date('Y-m-d H:i:s') . ' | ' . $page.' | '. 
-					(!empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '') . ' | ' . $ip . "\n", FILE_APPEND);
-			
-		}
-
 		$uri = function_exists('cms_request_log_uri') ? cms_request_log_uri() : '';
+		$probe_uri = $uri !== '' ? $uri : (string)$page;
+		$is_probe = function_exists('cms_404_is_probe') && cms_404_is_probe($probe_uri);
+		if (function_exists('cms_404_fail2ban_log')){
+			cms_404_fail2ban_log($probe_uri);
+		}
 		if (function_exists('cms_log_cms')){
 			$ip = preg_replace('/\s+/', '', (string)($_SERVER['REMOTE_ADDR'] ?? ''));
 			$bits = ['Page Not Found'];
+			if ($is_probe){
+				$bits[] = '(probe)';
+			}
 			if ($ip !== ''){
 				$bits[] = $ip;
 			}
@@ -108,6 +105,11 @@ class Exceptions {
 				$bits[] = $uri;
 			}
 			cms_log_cms('404', implode(' ', $bits));
+		}
+
+		if ($is_probe && function_exists('cms_404_probe_response')){
+			cms_404_probe_response();
+			return;
 		}
 
 		// Redirect to public system page — single clean page build on next request

@@ -121,7 +121,7 @@ Do not put `user_id` in cacheable page HTML (`data-*`).
 
 - **`user_agent`** (VARCHAR 500) is stored on every **`cms_analytics_pageview`** row (JS beacon API and promoted PHP rows).
 - **`cms_analytics_session.user_agent`** is copied from the first non-bot pageview on session sync.
-- **`bot`** (TINYINT, default 0) on **`cms_analytics_pageview`**: set on JS `do=hit` when viewport is **0×0** or the user agent matches **`analytics_is_bot_user_agent()`** (empty UA, `curl`, `googlebot`, `go-http-client`, `scandash`, `pr-cy`, `cms-checker`, `forestengine`, etc.). JS hits are always stored; bot rows are excluded from sessions, charts, and totals.
+- **`bot`** (TINYINT, default 0) on **`cms_analytics_pageview`**: set on JS `do=hit` when viewport is **0×0** or the user agent matches **`analytics_is_bot_user_agent()`** (empty UA, `curl`, `googlebot`, `GoogleOther` and the other official Google crawler tokens that do not contain `bot`, `go-http-client`, `scandash`, `pr-cy`, `cms-checker`, `forestengine`, etc.). JS hits are always stored; bot rows are excluded from sessions, charts, and totals. PHP skips recording those user agents, so they are not clustered and not `/24`-banned.
 - **PHP tracking** still skips recording when **`analytics_is_bot()`** (server UA only — no viewport).
 - **Not a pageview:** HTTP **404 / 500 / 504**, or reserved system slugs **`not-found`**, **`internal-error`**, **`timeout`**. PHP (`record_php_pageview`) and JS (`analytics_insert_pageview` / `beacon.js`) skip those. Missing URLs stay in `error.log` and `cms_404*.log`.
 - **`analytics_process`** deletes bot pageviews older than **300 seconds** (last step each run). PHP dedup: if a matching main row exists (including a JS bot row), the php staging row is dropped only.

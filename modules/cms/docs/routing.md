@@ -95,7 +95,9 @@ Reserved main pages (`meta.page_class` = `system`), **non-numeric** slugs (numer
 | 500 - Internal error | `internal-error` | 500 |
 | 504 - Timeout | `timeout` | 504 |
 
-`show_404()` redirects to `/not-found/` when that slug is in the route cache (page saved). A reserved slug that is **not** saved stays on the **current URL** (no bounce to `/timeout/` or `/internal-error/`): red `_html_error` frame `500 Internal Server Error (timeout)` (slug in brackets), location = the caller (timeout: PHP file:line that hit max execution time). Reserved-slug checks on 404 are cheap (three system names, or one list-template definition) — they do not scan all panel JSON.
+`show_404()` logs first (`error.log` + `cms_404*.log`). Probe URIs (`cms_404_is_probe()`) get a **plain-text 404** and do **not** redirect (no CMS layout). Other 404s redirect to `/not-found/` when that slug is in the route cache (page saved). A reserved slug that is **not** saved stays on the **current URL** (no bounce to `/timeout/` or `/internal-error/`): red `_html_error` frame `500 Internal Server Error (timeout)` (slug in brackets), location = the caller (timeout: PHP file:line that hit max execution time). Reserved-slug checks on 404 are cheap (three system names, or one list-template definition) — they do not scan all panel JSON.
+
+`/not-found/` (and the other system error pages) are not analytics pageviews — [`analytics.md`](../../analytics/docs/analytics.md).
 
 Empty `meta.layout` on a real page is also HTTP 500 (do not include `cms/layouts/.tpl.php`).
 
