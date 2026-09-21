@@ -1,0 +1,48 @@
+{
+	"table": "cms_analytics_cluster",
+	"engine": "InnoDB",
+	"charset": "utf8mb4",
+	"collation": "utf8mb4_general_ci",
+	"columns": {
+		"cms_analytics_cluster_id": {
+			"type": "INT",
+			"constraint": 10,
+			"unsigned": true,
+			"null": false,
+			"auto_increment": true
+		},
+		"location_hash": {
+			"type": "VARCHAR",
+			"constraint": 40,
+			"null": false,
+			"default": ""
+		},
+		"session_id": {
+			"type": "VARCHAR",
+			"constraint": 36,
+			"null": false,
+			"default": ""
+		},
+		"created": {
+			"type": "DATETIME",
+			"null": false,
+			"default": "CURRENT_TIMESTAMP"
+		}
+	},
+	"indexes": {
+		"PRIMARY": {
+			"columns": ["cms_analytics_cluster_id"],
+			"type": "primary"
+		},
+		"session_id_idx": {
+			"columns": ["session_id"],
+			"type": "unique"
+		},
+		"location_hash_created_idx": {
+			"columns": ["location_hash", "created"]
+		},
+		"created_idx": {
+			"columns": ["created"]
+		}
+	}
+}

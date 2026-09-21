@@ -12,15 +12,15 @@ First-party, self-hosted pageview tracking for the CMS. Lightweight beacon API (
 ## Setup
 
 1. Enable module **analytics** in **Site settings → Modules**.
-2. Run **CMS → Schema** (fix module **analytics**). On a fresh install this creates pageview / session / php staging tables. After upgrading, re-run Schema so pageview `user_id` and session `user_id` / `username` / `meta` columns exist. When `cms_analytics_visit` still exists, the schema tool migrates it automatically (`migrate_from` in `cms_analytics_pageview.json` — renames table, columns, and indexes).
+2. Run **CMS → Schema** (fix module **analytics**). On a fresh install this creates pageview / session / php staging / cluster tables. After upgrading, re-run Schema so pageview `user_id`, session `user_id` / `username` / `meta`, and `cms_analytics_cluster` exist. When `cms_analytics_visit` still exists, the schema tool migrates it automatically (`migrate_from` in `cms_analytics_pageview.json` — renames table, columns, and indexes).
 3. Upload **GeoLite2-City.mmdb** in **Tools → Analytics settings → GeoIP database** (download from [MaxMind GeoLite2](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) — free account required). The file is stored under `img/`. Without it, geo reports on the dashboard show an error. The mmdb is per-installation data — not shipped with every CMS distribution.
 4. Embed panel **analytics/beacon** on the site layout (same way as gtag). JS loads automatically as panel JS (`beacon.js`).
-5. Add **analytics/analytics_process** under **Repeating tasks** for background session assignment, aggregation, and geo resolve (replaces the old `analytics_geo_resolve` task if present).
+5. Add **analytics/analytics_process** under **Repeating tasks** for background session assignment, aggregation, geo resolve, and PHP-only 1-page location clustering (replaces the old `analytics_geo_resolve` task if present).
 
 ## Admin
 
 - **Tools → Analytics** — dashboard (7-day dual-axis chart, last 50 sessions, last 50 pageviews, top pages, geo top 50). Opening the dashboard runs **analytics_process** first; all pageview stats and charts read **`cms_analytics_pageview` only** (php staging is not queried). Last-50 sessions show **User** (login email/username) when the user module is installed. **Details** on each session/pageview row opens a floating panel with the full database row (including **User agent**, session **user_id** / **meta**, pageview **user_id**).
-- **Tools → Analytics settings** — delay (ms), session minutes, collect engagement, GeoIP database file, GeoIP diagnostics (show debug block on dashboard, default No).
+- **Tools → Analytics settings** — delay (ms), session minutes, collect engagement, keep cluster info (days), max cluster bot visits (city), max cluster bot visits (country/region), GeoIP database file, GeoIP diagnostics (show debug block on dashboard, default No).
 - **analytics/beacon** panel (per instance on page or layout position) — **JS tracking** (default No), **PHP tracking** (default Yes). Edit on the embedded panel block (e.g. **Pages → footer → Beacon**), not under **Analytics settings**.
 
 ## Beacon session
@@ -64,6 +64,27 @@ For unassigned non-bot pageviews (grouped by `beacon_id`):
 
 Bot rows are excluded. Orphan clusters that share IP+UA can still false-merge (NAT + same browser); that only affects unassigned traffic.
 
+### PHP-only 1-page location cluster
+
+Cookie-less scanners often look like **PHP only** / **1 pageview** from the same city (e.g. Ashburn) on rotating `/24`s, so IP+UA does not merge them.
+
+After **session minutes** (default 60; if `0` this wait is still 60) with still one PHP-only pageview, process inserts `cms_analytics_cluster` (`session_id`, `created`, `location_hash`). Rows are kept for **Keep cluster info** days (default 7). Unknown/Localhost country is skipped.
+
+| Geo | Hash | Cap (default) |
+|-----|------|----------------|
+| Country + region + city | `country\|region\|city` | **Max cluster bot visits** (10) |
+| Country set, region and/or city empty | `country`, `country\|region`, or `country\|\|city` | **Max cluster bot visits (country/region)** (30) |
+
+City-filled sessions are **not** counted in the country/region cap. The two hashes never mix.
+
+If that hash is over its cap in the keep window:
+
+- Cluster row is kept (count stays high).
+- All still-1-page PHP sessions for that hash are **deleted**, along with their pageviews (dashboard totals read pageviews).
+- Each distinct anonymised IPv4 is appended to `{dir.log}/analytics_cluster.log` (same file for city and coarse). Fail2ban config does not change. Ban **C-class** `/24` for 24h. UA is on the line so it can be added to `analytics_is_bot_user_agent()`.
+
+A second PHP hit with the same `beacon` cookie before the wait ends (`pageviews >= 2`) is never clustered. See [`fail2ban.md`](../../cms/docs/fail2ban.md).
+
 ## Session table (`cms_analytics_session`)
 
 Cached aggregates per session: started, last activity, pageview count, total seconds, final language, first/last page, geo and **user agent** from the **first** pageview. Updated by **analytics_process** (cron and on each dashboard load). Beacon only writes pageviews.
@@ -102,6 +123,7 @@ Do not put `user_id` in cacheable page HTML (`data-*`).
 - **`cms_analytics_session.user_agent`** is copied from the first non-bot pageview on session sync.
 - **`bot`** (TINYINT, default 0) on **`cms_analytics_pageview`**: set on JS `do=hit` when viewport is **0×0** or the user agent matches **`analytics_is_bot_user_agent()`** (empty UA, `curl`, `googlebot`, `go-http-client`, `scandash`, `pr-cy`, `cms-checker`, `forestengine`, etc.). JS hits are always stored; bot rows are excluded from sessions, charts, and totals.
 - **PHP tracking** still skips recording when **`analytics_is_bot()`** (server UA only — no viewport).
+- **Not a pageview:** HTTP **404 / 500 / 504**, or reserved system slugs **`not-found`**, **`internal-error`**, **`timeout`**. PHP (`record_php_pageview`) and JS (`analytics_insert_pageview` / `beacon.js`) skip those. Missing URLs stay in `error.log` and `cms_404*.log`.
 - **`analytics_process`** deletes bot pageviews older than **300 seconds** (last step each run). PHP dedup: if a matching main row exists (including a JS bot row), the php staging row is dropped only.
 - Dashboard **Details** on pageviews shows **`bot`** (0/1). Bot rows may appear briefly in the last-50 list before purge.
 

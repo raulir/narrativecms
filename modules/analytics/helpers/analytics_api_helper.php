@@ -77,6 +77,29 @@ function analytics_is_pageview_bot($viewport_w, $viewport_h, $user_agent = '') {
 
 }
 
+function analytics_is_pageview_page($page) {
+
+	$page = analytics_normalise_page($page);
+
+	return $page !== '' && !preg_match('#/(?:not-found|internal-error|timeout)/$#', $page);
+
+}
+
+function analytics_is_pageview_request($page = '') {
+
+	$code = (int)http_response_code();
+	if ($code === 404 || $code === 500 || $code === 504) {
+		return false;
+	}
+
+	if ($page === '') {
+		$page = $GLOBALS['cms_request_uri'] ?? '';
+	}
+
+	return analytics_is_pageview_page($page);
+
+}
+
 /**
  * Logged-in frontend user id when the user module is installed; otherwise 0.
  * Does not start a PHP session unless one is already open or the session cookie
@@ -320,6 +343,9 @@ function analytics_get_beacon_settings() {
 		'delay' => 0,
 		'collect_engagement' => '1',
 		'session_minutes' => 60,
+		'cluster_keep_days' => 7,
+		'cluster_max_visits' => 10,
+		'cluster_max_coarse_visits' => 30,
 	);
 
 	$sql = 'SELECT b.name, b.value FROM cms_page_panel a JOIN cms_page_panel_param b ON a.cms_page_panel_id = b.cms_page_panel_id '.
@@ -353,8 +379,81 @@ function analytics_get_beacon_settings() {
 	if (!isset($settings['session_minutes']) || $settings['session_minutes'] === '') {
 		$settings['session_minutes'] = 60;
 	}
+	if (!isset($settings['cluster_keep_days']) || $settings['cluster_keep_days'] === '') {
+		$settings['cluster_keep_days'] = 7;
+	}
+	if (!isset($settings['cluster_max_visits']) || $settings['cluster_max_visits'] === '') {
+		$settings['cluster_max_visits'] = 10;
+	}
+	if (!isset($settings['cluster_max_coarse_visits']) || $settings['cluster_max_coarse_visits'] === '') {
+		$settings['cluster_max_coarse_visits'] = 30;
+	}
 
 	return $settings;
+
+}
+
+function analytics_location_hash($country, $region, $city) {
+
+	$country = strtolower(trim((string)$country));
+	$region = strtolower(trim((string)$region));
+	$city = strtolower(trim((string)$city));
+
+	if ($country === '' || $country === 'unknown' || $country === 'localhost') {
+		return '';
+	}
+	if ($region === '' || $city === '') {
+		return '';
+	}
+
+	return sha1($country.'|'.$region.'|'.$city);
+
+}
+
+function analytics_coarse_location_hash($country, $region, $city) {
+
+	$country = strtolower(trim((string)$country));
+	$region = strtolower(trim((string)$region));
+	$city = strtolower(trim((string)$city));
+
+	if ($country === '' || $country === 'unknown' || $country === 'localhost') {
+		return '';
+	}
+	if ($region !== '' && $city !== '') {
+		return '';
+	}
+	if ($region !== '') {
+		return sha1($country.'|'.$region.'|');
+	}
+	if ($city !== '') {
+		return sha1($country.'||'.$city);
+	}
+
+	return sha1($country.'||');
+
+}
+
+function analytics_cluster_fail2ban_log($ip_anonymised, $user_agent) {
+
+	$ip = trim((string)$ip_anonymised);
+	if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+		return;
+	}
+
+	$parts = explode('.', $ip);
+	if (count($parts) !== 4) {
+		return;
+	}
+	$parts[3] = '0';
+	$ip = implode('.', $parts);
+
+	$ua = function_exists('cms_error_one_line') ? cms_error_one_line($user_agent) : preg_replace('/\s+/', ' ', trim((string)$user_agent));
+	if ($ua === '') {
+		$ua = '-';
+	}
+
+	$line = date('Y-m-d H:i:s').' [client '.$ip.'] CMS analytics cluster '.$ua."\n";
+	@file_put_contents(cms_path('log').'analytics_cluster.log', $line, FILE_APPEND | LOCK_EX);
 
 }
 
@@ -479,6 +578,10 @@ function analytics_get_or_create_beacon_session($posted_beacon_id = '') {
 }
 
 function analytics_insert_pageview($page, $viewport_w, $viewport_h, $posted_beacon_id = '') {
+
+	if (!analytics_is_pageview_page($page)) {
+		return false;
+	}
 
 	$ip = $_SERVER['REMOTE_ADDR'] ?? '';
 	$ip_anonymised = analytics_store_ip($ip);

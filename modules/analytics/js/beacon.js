@@ -100,6 +100,13 @@ function analytics_beacon_reset_page_dedup() {
 
 }
 
+function analytics_beacon_is_pageview_page(page) {
+
+	var path = (page || '').split('?')[0].split('#')[0]
+	return !/(?:^|\/)(?:not-found|internal-error|timeout)\/?$/.test(path)
+
+}
+
 function analytics_beacon_record_pageview(page) {
 
 	if (!analytics_beacon_js_enabled()) {
@@ -107,6 +114,9 @@ function analytics_beacon_record_pageview(page) {
 	}
 
 	page = page || (window.location.pathname + window.location.hash)
+	if (!analytics_beacon_is_pageview_page(page)) {
+		return Promise.resolve()
+	}
 	var now = Date.now()
 
 	if (analytics_beacon_record_promise && analytics_beacon_record_promise_page === page) {

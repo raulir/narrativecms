@@ -51,7 +51,7 @@ class analytics_model extends \Model {
 
 		$this->load->helper('analytics/analytics_api_helper');
 
-		if (!analytics_beacon_enabled() || analytics_is_bot()) {
+		if (!analytics_beacon_enabled() || analytics_is_bot() || !analytics_is_pageview_request($page)) {
 			return '';
 		}
 
@@ -273,6 +273,8 @@ class analytics_model extends \Model {
 			}
 			$this->_write_geo_cache();
 		}
+
+		$processed += $this->_process_php_one_page_clusters($limit);
 
 		$purge_seconds = (int)$this->_bot_pageview_purge_seconds;
 		$this->db->query('DELETE FROM cms_analytics_pageview WHERE bot = 1 AND created < DATE_SUB(NOW(), INTERVAL '.$purge_seconds.' SECOND)');
@@ -663,6 +665,174 @@ class analytics_model extends \Model {
 
 		file_put_contents($this->_geo_cache_path(), json_encode($this->_geo_cache, JSON_PRETTY_PRINT));
 		$this->_geo_cache_dirty = false;
+
+	}
+
+	private function _cluster_table_ready() {
+
+		static $ready = null;
+
+		if ($ready !== null) {
+			return $ready;
+		}
+
+		$query = $this->db->query("SHOW TABLES LIKE 'cms_analytics_cluster'");
+		$ready = $query->num_rows() > 0;
+
+		return $ready;
+
+	}
+
+	private function _cluster_wait_minutes() {
+
+		$settings = analytics_get_beacon_settings();
+		$minutes = (int)($settings['session_minutes'] ?? 60);
+
+		if ($minutes <= 0) {
+			$minutes = 60;
+		}
+
+		return $minutes;
+
+	}
+
+	private function _process_php_one_page_clusters($limit) {
+
+		if (!$this->_cluster_table_ready()) {
+			return 0;
+		}
+
+		$settings = analytics_get_beacon_settings();
+		$keep_days = (int)($settings['cluster_keep_days'] ?? 7);
+		$max_visits = (int)($settings['cluster_max_visits'] ?? 10);
+		$max_coarse = (int)($settings['cluster_max_coarse_visits'] ?? 30);
+		if ($keep_days < 1) {
+			$keep_days = 7;
+		}
+		if ($max_visits < 1) {
+			$max_visits = 10;
+		}
+		if ($max_coarse < 1) {
+			$max_coarse = 30;
+		}
+
+		$this->db->query(
+				'DELETE FROM cms_analytics_cluster WHERE created < DATE_SUB(NOW(), INTERVAL ? DAY)',
+				array($keep_days)
+		);
+
+		$wait = $this->_cluster_wait_minutes();
+		$limit = max(1, (int)$limit);
+
+		return $this->_cluster_php_one_page_batch($wait, $limit, $keep_days, $max_visits, 'city')
+				+ $this->_cluster_php_one_page_batch($wait, $limit, $keep_days, $max_coarse, 'coarse');
+
+	}
+
+	private function _cluster_php_one_page_batch($wait, $limit, $keep_days, $max_visits, $mode) {
+
+		$geo_sql = ($mode === 'coarse')
+				? 'AND (s.region = "" OR s.city = "") '
+				: 'AND s.region != "" AND s.city != "" ';
+
+		$query = $this->db->query(
+				'SELECT s.session_id, s.country, s.region, s.city, s.ip_anonymised, s.user_agent '.
+				'FROM cms_analytics_session s '.
+				'LEFT JOIN cms_analytics_cluster c ON c.session_id = s.session_id '.
+				'WHERE c.cms_analytics_cluster_id IS NULL '.
+				'AND s.source = "php" AND s.pageviews = 1 '.
+				'AND s.country != "" AND s.country != "Unknown" AND s.country != "Localhost" '.
+				$geo_sql.
+				'AND s.last_activity <= DATE_SUB(NOW(), INTERVAL ? MINUTE) '.
+				'LIMIT '.$limit,
+				array($wait)
+		);
+
+		$processed = 0;
+		foreach ($query->result_array() as $row) {
+			$hash = ($mode === 'coarse')
+					? analytics_coarse_location_hash($row['country'] ?? '', $row['region'] ?? '', $row['city'] ?? '')
+					: analytics_location_hash($row['country'] ?? '', $row['region'] ?? '', $row['city'] ?? '');
+			if ($hash === '') {
+				continue;
+			}
+
+			$this->db->query(
+					'INSERT IGNORE INTO cms_analytics_cluster (location_hash, session_id, created) VALUES (?, ?, NOW())',
+					array($hash, $row['session_id'])
+			);
+			$processed++;
+
+			$count_row = $this->db->query(
+					'SELECT COUNT(*) AS cnt FROM cms_analytics_cluster '.
+					'WHERE location_hash = ? AND created >= DATE_SUB(NOW(), INTERVAL ? DAY)',
+					array($hash, $keep_days)
+			)->row_array();
+			$count = (int)($count_row['cnt'] ?? 0);
+
+			if ($count > $max_visits) {
+				$this->_purge_location_php_one_page_cluster($hash);
+			}
+		}
+
+		return $processed;
+
+	}
+
+	private function _purge_location_php_one_page_cluster($location_hash) {
+
+		$location_hash = trim((string)$location_hash);
+		if ($location_hash === '') {
+			return;
+		}
+
+		$rows = $this->db->query(
+				'SELECT s.session_id, s.ip_anonymised, s.user_agent '.
+				'FROM cms_analytics_cluster c '.
+				'INNER JOIN cms_analytics_session s ON s.session_id = c.session_id '.
+				'WHERE c.location_hash = ? AND s.source = "php" AND s.pageviews = 1',
+				array($location_hash)
+		)->result_array();
+
+		if (empty($rows)) {
+			return;
+		}
+
+		$logged = array();
+		$ids = array();
+		foreach ($rows as $row) {
+			$id = trim((string)($row['session_id'] ?? ''));
+			if ($id === '' || !analytics_is_valid_session_id($id)) {
+				continue;
+			}
+			$ids[] = $id;
+			$ip = trim((string)($row['ip_anonymised'] ?? ''));
+			if ($ip !== '' && empty($logged[$ip])) {
+				$logged[$ip] = 1;
+				analytics_cluster_fail2ban_log($ip, $row['user_agent'] ?? '');
+			}
+		}
+
+		$ids = array_values(array_unique($ids));
+		if (empty($ids)) {
+			return;
+		}
+
+		$placeholders = implode(',', array_fill(0, count($ids), '?'));
+		$this->db->query(
+				'DELETE FROM cms_analytics_pageview WHERE session_id IN ('.$placeholders.') OR beacon_id IN ('.$placeholders.')',
+				array_merge($ids, $ids)
+		);
+		if ($this->_php_pageview_table_ready()) {
+			$this->db->query(
+					'DELETE FROM cms_analytics_pageview_php WHERE beacon_id IN ('.$placeholders.')',
+					$ids
+			);
+		}
+		$this->db->query(
+				'DELETE FROM cms_analytics_session WHERE session_id IN ('.$placeholders.')',
+				$ids
+		);
 
 	}
 

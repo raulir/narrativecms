@@ -28,6 +28,27 @@
 			"help": "[Engagement]||When yes, send scroll and time-on-page heartbeats"
 		},
 		{
+			"type": "text",
+			"name": "cluster_keep_days",
+			"label": "Keep cluster info",
+			"default": "7",
+			"help": "[Days]||How long to keep PHP-only 1-page location cluster rows (used to count bot-like cities)"
+		},
+		{
+			"type": "text",
+			"name": "cluster_max_visits",
+			"label": "Max cluster bot visits",
+			"default": "10",
+			"help": "[Count]||If more than this many PHP-only 1-page sessions share a city in the keep window, drop those sessions and ban the C-class"
+		},
+		{
+			"type": "text",
+			"name": "cluster_max_coarse_visits",
+			"label": "Max cluster bot visits (country/region)",
+			"default": "30",
+			"help": "[Count]||If country is set but region and/or city is empty: cap PHP-only 1-page sessions for that country or region. Does not include city-filled clusters. Same fail2ban log."
+		},
+		{
 			"type": "select",
 			"name": "show_geoip_debug",
 			"label": "GeoIP diagnostics",

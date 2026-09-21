@@ -16,6 +16,8 @@ _feed
 !/tmp/.gitkeep
 /log/*
 !/log/.gitkeep
+/config/*
+!/config/.gitkeep
  
 /vendor
 !/vendor/.gitkeep
@@ -25,6 +27,4 @@ _feed
 /package-lock.json
 npm-debug.log*
 
-/agent-tools/
 /grok/
-/grok_cms/

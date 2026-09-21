@@ -33,7 +33,7 @@ class beacon extends \Controller {
 
 		$this->load->helper('analytics/analytics_api_helper');
 
-		if (!analytics_beacon_enabled()) {
+		if (!analytics_beacon_enabled() || !analytics_is_pageview_request()) {
 			$params['show'] = 0;
 			return $params;
 		}
