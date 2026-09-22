@@ -61,6 +61,12 @@ class cms_page_panel_model extends \Model {
 	
 	var $default_language;
 	var $_panel_table_cache = [];
+	var $_fk_extend_depth = 0;
+	var $_fk_extend_hold = 0;
+	var $_fk_extend_map = [];
+	var $_panel_slot_loading = [];
+	/** id|language => panel array, or false after that panel is saved or deleted. */
+	var $_panel_load_cache = [];
 	
 	function __construct(){
 		
@@ -1052,6 +1058,92 @@ class cms_page_panel_model extends \Model {
 
 	}
 
+	function _panel_load_slot($cms_page_panel_id, $language){
+
+		return (int)$cms_page_panel_id.'|'.$language;
+
+	}
+
+	/**
+	 * Save or delete: pointers to this panel become empty. The slot stays, so a later load updates them.
+	 */
+	function _invalidate_panel_load_slot($cms_page_panel_id){
+
+		$prefix = (int)$cms_page_panel_id.'|';
+
+		foreach ($this->_panel_load_cache as $slot => $panel){
+			if (strpos((string)$slot, $prefix) === 0){
+				$this->_panel_load_cache[$slot] = false;
+			}
+		}
+
+	}
+
+	function _load_panel_fresh($cms_page_panel_id, $language, $settings){
+
+		$sql = "select * from cms_page_panel where cms_page_panel_id = ? ";
+		$query = $this->db->query($sql, array($cms_page_panel_id));
+		$row = $query->row_array();
+
+		if (empty($row['cms_page_panel_id'])) {
+			return false;
+		}
+
+		$panel_params = $this->get_cms_page_panel_params($row['cms_page_panel_id'], $language);
+
+		if (is_array($panel_params)){
+			$return = array_merge($panel_params, $row);
+		} else {
+			$return = $row;
+		}
+
+		if ($settings){
+			$return = array_merge($this->get_cms_page_panel_settings($return['panel_name'], $language), $return);
+		}
+
+		return $return;
+
+	}
+
+	/**
+	 * Full panel (settings included) in the request cache. No _fk_ pointers on the cached array.
+	 * Returns the slot key, or null when the panel does not exist.
+	 */
+	function _ensure_panel_slot($cms_page_panel_id, $language){
+
+		$slot = $this->_panel_load_slot($cms_page_panel_id, $language);
+
+		if (array_key_exists($slot, $this->_panel_load_cache) && is_array($this->_panel_load_cache[$slot])){
+			return $slot;
+		}
+
+		if (!empty($this->_panel_slot_loading[$slot])){
+			return null;
+		}
+
+		$this->_panel_slot_loading[$slot] = true;
+		$this->_fk_extend_depth++;
+
+		try {
+			$loaded = $this->_load_panel_fresh($cms_page_panel_id, $language, true);
+		} finally {
+			$this->_fk_extend_depth--;
+			if ($this->_fk_extend_depth < 0){
+				$this->_fk_extend_depth = 0;
+			}
+			unset($this->_panel_slot_loading[$slot]);
+		}
+
+		if (!is_array($loaded)){
+			return null;
+		}
+
+		$this->_panel_load_cache[$slot] = $loaded;
+
+		return $slot;
+
+	}
+
 	function get_cms_page_panel($cms_page_panel_id, $language = false, $settings = true){
 		
 		// Admin UI → CMS language; public site → visitor language (never mix)
@@ -1059,32 +1151,224 @@ class cms_page_panel_model extends \Model {
 			$language = $this->get_content_language();
 		}
 
-		$sql = "select * from cms_page_panel where cms_page_panel_id = ? ";
-		$query = $this->db->query($sql, array($cms_page_panel_id));
-		$row = $query->row_array();
-		 
-		if (empty($row['cms_page_panel_id'])) {
+		// List loads hold pointers off until filters have seen the stored ids.
+		// A panel loaded into an fk pointer is not given pointers of its own.
+		$attach = ($this->_fk_extend_depth < 1 && $this->_fk_extend_hold < 1);
+
+		if ($settings && $attach){
+			$slot = $this->_ensure_panel_slot($cms_page_panel_id, $language);
+			if ($slot === null){
+				return false;
+			}
+			$return = $this->_panel_load_cache[$slot];
+			return $this->_extend_fk_panel($return, $language);
+		}
+
+		$return = $this->_load_panel_fresh($cms_page_panel_id, $language, $settings);
+
+		if (!is_array($return)){
 			return false;
 		}
 
-		$panel_params = $this->get_cms_page_panel_params($row['cms_page_panel_id'], $language);
-	    
-		if (is_array($panel_params)){
-			$return = array_merge($panel_params, $row);
-		} else {
-			$return = $row;
+		if (!$attach){
+			return $return;
 		}
 
-		// add settings if present
-		if ($settings){
-			$return = array_merge($this->get_cms_page_panel_settings($return['panel_name'], $language), $return);
-		}
-		
-		return $return;
+		return $this->_extend_fk_panel($return, $language);
 	
+	}
+
+	/**
+	 * fk fields with definition extend set. One request, one definition read per panel name.
+	 * Item fields overwrite settings fields of the same name.
+	 */
+	function _extend_fk_map($panel_name){
+
+		if (isset($this->_fk_extend_map[$panel_name])){
+			return $this->_fk_extend_map[$panel_name];
+		}
+
+		$empty = ['fields' => [], 'repeater' => []];
+
+		if ($panel_name === '' || !is_string($panel_name) || !stristr($panel_name, '/')){
+			$this->_fk_extend_map[$panel_name] = $empty;
+			return $empty;
+		}
+
+		$this->load->model('cms/cms_panel_model');
+		$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+		$map = $empty;
+		$this->_extend_fk_collect($config['settings'] ?? [], $map);
+		$this->_extend_fk_collect($config['item'] ?? [], $map);
+		$this->_fk_extend_map[$panel_name] = $map;
+
+		return $map;
+
+	}
+
+	function _extend_fk_collect($fields, &$map){
+
+		if (!is_array($fields)){
+			return;
+		}
+
+		foreach ($fields as $field){
+
+			if (!is_array($field)){
+				continue;
+			}
+
+			$name = $field['name'] ?? '';
+			if ($name === '' || $name === '_noname'){
+				continue;
+			}
+
+			$type = $field['type'] ?? '';
+
+			if ($type === 'fk'){
+				$map['fields'][$name] = !empty($field['extend']);
+				continue;
+			}
+
+			if ($type !== 'repeater'){
+				continue;
+			}
+
+			$subs = [];
+			foreach ($field['fields'] ?? [] as $sub){
+				if (!is_array($sub)){
+					continue;
+				}
+				$sub_name = $sub['name'] ?? '';
+				if ($sub_name === '' || ($sub['type'] ?? '') !== 'fk'){
+					continue;
+				}
+				$subs[$sub_name] = !empty($sub['extend']);
+			}
+
+			if ($subs){
+				$map['repeater'][$name] = $subs;
+			}
+
+		}
+
+	}
+
+	/**
+	 * Add _fk_{name} pointers for extend fk fields. Does not change the stored id. One level only.
+	 */
+	function _extend_fk_panel($data, $language){
+
+		if (!is_array($data)){
+			return $data;
+		}
+
+		$map = $this->_extend_fk_map($data['panel_name'] ?? '');
+		$fields = [];
+		foreach ($map['fields'] as $name => $on){
+			if ($on){
+				$fields[] = $name;
+			}
+		}
+
+		$repeaters = [];
+		foreach ($map['repeater'] as $name => $subs){
+			$active = [];
+			foreach ($subs as $sub => $on){
+				if ($on){
+					$active[] = $sub;
+				}
+			}
+			if ($active){
+				$repeaters[$name] = $active;
+			}
+		}
+
+		if (!$fields && !$repeaters){
+			return $data;
+		}
+
+		foreach ($fields as $name){
+			$this->_bind_fk_pointer($data, $name, $language);
+		}
+
+		foreach ($repeaters as $name => $subs){
+			if (!isset($data[$name]) || !is_array($data[$name])){
+				continue;
+			}
+			foreach ($data[$name] as $i => $row){
+				if (!is_array($row)){
+					continue;
+				}
+				foreach ($subs as $sub){
+					$this->_bind_fk_pointer($data[$name][$i], $sub, $language);
+				}
+			}
+		}
+
+		return $data;
+
+	}
+
+	function _bind_fk_pointer(&$holder, $field, $language){
+
+		if (!is_array($holder) || !array_key_exists($field, $holder)){
+			return;
+		}
+
+		$value = $holder[$field];
+
+		if ($value === '' || $value === null || $value === false || $value === 0 || $value === '0'){
+			return;
+		}
+
+		if (!is_numeric($value) || (int)$value < 1){
+			return;
+		}
+
+		$slot = $this->_ensure_panel_slot((int)$value, $language);
+
+		if ($slot === null){
+			return;
+		}
+
+		$holder['_fk_'.$field] = &$this->_panel_load_cache[$slot];
+
+	}
+
+	/**
+	 * _fk_* pointers are read-time only.
+	 */
+	function _strip_fk_pointers(&$params){
+
+		if (!is_array($params)){
+			return;
+		}
+
+		foreach ($params as $key => $value){
+			if (is_string($key) && strncmp($key, '_fk_', 4) === 0){
+				unset($params[$key]);
+				continue;
+			}
+			if (!is_array($value) || !$value){
+				continue;
+			}
+			$keys = array_keys($value);
+			if ($keys !== range(0, count($value) - 1)){
+				continue;
+			}
+			foreach ($keys as $i){
+				if (is_array($params[$key][$i])){
+					$this->_strip_fk_pointers($params[$key][$i]);
+				}
+			}
+		}
+
 	}
 	
 	function update_cms_page_panel($cms_page_panel_id, $data, $purge = false){
+
+		$this->_invalidate_panel_load_slot($cms_page_panel_id);
 
 		// Control flag: not stored — true force title, false skip, null auto (see _should_refresh_panel_title)
 		list($data, $update_title_flag) = $this->_extract_update_title_flag($data);
@@ -1146,6 +1430,10 @@ class cms_page_panel_model extends \Model {
 			if ($pquery->num_rows()) {
 				$panel_name = $pquery->row_array()['panel_name'];
 			}
+		}
+
+		if (!empty($params)){
+			$this->_strip_fk_pointers($params);
 		}
 
 		// Apply definition search weights when caller did not pass search_params
@@ -1273,6 +1561,8 @@ class cms_page_panel_model extends \Model {
 			$this->invalidate_html_cache($cms_page_panel_id);
 			$this->_invalidate_page_cache($cms_page_panel_id);
 		}
+
+		$this->_invalidate_panel_load_slot($cms_page_panel_id);
 		
 	}
 
@@ -1464,6 +1754,8 @@ class cms_page_panel_model extends \Model {
 			error_log_user('Deleting empty block '.serialize(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)));
 			return;
 		}
+
+		$this->_invalidate_panel_load_slot($cms_page_panel_id);
 		
 		$this->invalidate_html_cache($cms_page_panel_id);
 		$this->_invalidate_page_cache($cms_page_panel_id);
@@ -1521,6 +1813,8 @@ class cms_page_panel_model extends \Model {
 	    // delete slug pointing to this panel
 	    $this->load->model('cms/cms_slug_model');
 	    $this->cms_slug_model->delete_slug($cms_page_panel['panel_name'].'='.$cms_page_panel_id);
+
+	    $this->_invalidate_panel_load_slot($cms_page_panel_id);
 	    	
 	}
 	
@@ -1758,9 +2052,18 @@ class cms_page_panel_model extends \Model {
     	if (!$fields_only){
 
 	    	// replace with translated versions
-	    	foreach($return as $key => $page_panel){
-	    		$language = ($list_language === false) ? $this->get_content_language() : $list_language;
-	    		$return[$key] = $this->get_cms_page_panel($page_panel['cms_page_panel_id'], $language, false);
+	    	// Hold fk extend until after id filters and the settings merge.
+	    	$this->_fk_extend_hold++;
+	    	try {
+		    	foreach($return as $key => $page_panel){
+		    		$language = ($list_language === false) ? $this->get_content_language() : $list_language;
+		    		$return[$key] = $this->get_cms_page_panel($page_panel['cms_page_panel_id'], $language, false);
+		    	}
+	    	} finally {
+	    		$this->_fk_extend_hold--;
+	    		if ($this->_fk_extend_hold < 0){
+	    			$this->_fk_extend_hold = 0;
+	    		}
 	    	}
 	    	
 	    	// unpack params - not needed
@@ -1825,8 +2128,16 @@ class cms_page_panel_model extends \Model {
     		}
     	}
     	
-    	// check for page panel settings
-    	if (!$fields_only){
+    	// check for page panel settings, then one-level fk extend on the finished row
+    	if (!$fields_only && $this->_fk_extend_depth < 1){
+    		$extend_language = ($list_language === false) ? $this->get_content_language() : $list_language;
+	    	foreach($return as $key => $cms_page_panel){
+	    		if ($cms_page_panel['cms_page_id']){
+	    			$cms_page_panel = array_merge($this->get_cms_page_panel_settings($cms_page_panel['panel_name']), $cms_page_panel);
+	   			}
+	   			$return[$key] = $this->_extend_fk_panel($cms_page_panel, $extend_language);
+	    	}
+    	} else if (!$fields_only){
 	    	foreach($return as $key => $cms_page_panel){
 	    		if ($cms_page_panel['cms_page_id']){
 	    			$return[$key] = array_merge($this->get_cms_page_panel_settings($cms_page_panel['panel_name']), $cms_page_panel);

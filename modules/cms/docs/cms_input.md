@@ -180,6 +180,7 @@ Select one **list panel type** (definitions with a `"list"` block), e.g. `shop/p
 | `list` | List id (e.g. `mymodule/mylist`) |
 | `add_empty` | `"1"` — prepend `-- not specified --` option (value `''`) |
 | `mandatory` | `"1"` — requires a selection; implies `add_empty`. Empty values `''` and `0` fail validation |
+| `extend` | `"1"` — on load, keep the stored id and add `_fk_{name}` pointing at that panel in the request cache (id plus language). Empty, `0`, and a missing target add no pointer. One level only: the loaded panel does not get `_fk_` fields of its own. `_fk_*` is not saved. A save or delete sets that cache slot to empty, so existing pointers become empty until the next load. Use the pointer only when it is not empty. Top-level fk, or an fk one level inside a repeater (pointer on the row). Not `multifk`. |
 
 Deprecated alternative (block target):
 

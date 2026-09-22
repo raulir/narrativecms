@@ -107,8 +107,8 @@ Larger reviews (whole module, go-live) may go slightly over 5; still rank and st
 2. …
 ```
 
-Each item: what is wrong or missing, why it matters, and a concrete fix. Optional one-line “Fine as-is” if a risky area was checked and left.
+Write those suggestions into the session plan, up to 5, one numbered block each (what is wrong, why it matters, concrete fix). That plan is what gets commented on. Do not implement the suggestions in the review turn. If nothing should change, the plan says so in one line. Optional one-line “Fine as-is” if a risky area was checked and left.
 
-Then add those `[ ]` items to `modules/<owner>/docs/todo.md` (not root `AGENTS.md`) if they are not being implemented in the same turn.
+Then add accepted items to `modules/<owner>/docs/todo.md` (not root `AGENTS.md`) if they are not being implemented in the same turn.
 
 Optional: a short “Architecture” note in that module’s main doc if the map helps the next person.

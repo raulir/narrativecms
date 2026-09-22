@@ -31,6 +31,9 @@ if (!function_exists(__NAMESPACE__.'\\array_merge_recursive_ex')){
 }
 
 class cms_panel_model extends \Model {
+
+	/** Merged panel definitions for this request. */
+	var $_config_cache = [];
 	
 	/**
 	 *  load block type structure from json file
@@ -192,12 +195,17 @@ class cms_panel_model extends \Model {
 	 */
 	function get_cms_panel_config($cms_panel){
 
+		if (array_key_exists($cms_panel, $this->_config_cache)){
+			return $this->_config_cache[$cms_panel];
+		}
+
 		$return = [
 				'item' => [],
 		];
 		
 		if (!stristr($cms_panel, '/')){
 			_html_error('Panel name has to include module: '.$cms_panel, 0, ['backtrace' => 1]);
+			$this->_config_cache[$cms_panel] = $return;
 			return $return;
 		}
 		
@@ -242,6 +250,8 @@ class cms_panel_model extends \Model {
 		foreach ($sources as $source){
 			$return = $this->merge_structures($return, $this->get_cms_panel_config($source));
 		}
+
+		$this->_config_cache[$cms_panel] = $return;
 		
 		return $return;
 
