@@ -1,3 +1,36 @@
+function cms_page_panel_show_is_hidden($this){
+
+	if ($this.is('[data-show]')){
+		return String($this.attr('data-show')) !== '1'
+	}
+
+	var $label = $this.children('.cms_page_panel_show_label')
+	var text = $label.length ? $label.text() : $this.text()
+
+	return text.trim() == 'show'
+
+}
+
+function cms_page_panel_show_apply($this, show){
+
+	if (show == 1){
+		$this.closest('li').removeClass('cms_item_hidden')
+	} else {
+		$this.closest('li').addClass('cms_item_hidden')
+	}
+
+	if ($this.is('[data-show]')){
+		$this.attr('data-show', show == 1 ? '1' : '0')
+		$this.toggleClass('cms_list_list_eye_off', show != 1)
+		return
+	}
+
+	var $label = $this.children('.cms_page_panel_show_label')
+	var $text = $label.length ? $label : $this
+	$text.html(show == 1 ? 'hide' : 'show')
+
+}
+
 function cms_page_panel_button_show_activate(){
 	$('.cms_page_panel_show').off('click.cms').on('click.cms', function(){
 
@@ -13,20 +46,12 @@ function cms_page_panel_button_show_activate(){
 				if (data.result.message){
 					message = message + data.result.notification
 				}
-				
-				if ($this.children('.cms_page_panel_show_label').length){
-					var $o = $this.children('.cms_page_panel_show_label')
-				} else {
-					var $o = $this
-				}
+
+				cms_page_panel_show_apply($this, data.result.show)
 				
 				if (data.result.show == 1){
-					$this.closest('li').removeClass('cms_item_hidden');
-					$o.html('hide');
 					cms_notification('Page panel published' + message, 3)
 				} else {
-					$this.closest('li').addClass('cms_item_hidden');
-					$o.html('show');
 					cms_notification('Page panel unpublished' + message, 3)
 				}
 			});
@@ -34,14 +59,8 @@ function cms_page_panel_button_show_activate(){
 		}
 		
 		var $this = $(this);
-		
-		if ($this.children('.cms_page_panel_show_label').length){
-			var $o = $this.children('.cms_page_panel_show_label')
-		} else {
-			var $o = $this
-		}
 
-		if ($o.html().trim() == 'show'){
+		if (cms_page_panel_show_is_hidden($this)){
 
 			// check if all mandatory is filled in
 			if (typeof cms_page_panel_check_mandatory == 'function'){

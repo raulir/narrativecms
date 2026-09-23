@@ -5,7 +5,7 @@
 <?php else: ?>
 
 <?php
-	$heading = 'Export page panel';
+	$heading = !empty($export_heading) ? $export_heading : 'Export page panel';
 	$save_button = '';
 	include __DIR__.'/cms_popup_toolbar.tpl.php';
 ?>

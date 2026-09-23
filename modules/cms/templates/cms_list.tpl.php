@@ -1,11 +1,19 @@
 <div class="cms_toolbar">
 	
+	<div class="cms_list_list_tick cms_list_toolbar_tick">[ ]</div>
 	<div class="cms_tool_text"><?php print($title); ?></div>
 	
 	<?php if(empty($hide_new)): ?>
 	
 		<div class="cms_list_infinity cms_tool_button cms_right">
 			<div class="cms_tool_button_inner" <?php _ib('cms/cms_infinity.png', 34) ?>></div>
+		</div>
+
+		<div class="cms_tool_button cms_right cms_toolbar_buttons_hidden" <?php _ib('cms/cms_settings.png', 30) ?>>
+			<div class="cms_toolbar_buttons_hidden_arrow" <?php _ib('cms/cms_down.png', 12) ?>></div>
+			<div class="cms_toolbar_buttons_hidden_container">
+				<div class="cms_tool_button cms_list_export">Export</div>
+			</div>
 		</div>
 
 		<a class="cms_tool_button cms_right" href="<?php print($GLOBALS['config']['base_url'].$edit_base.str_replace('/', '__', $new_panel_name).'/'); ?>">New</a>

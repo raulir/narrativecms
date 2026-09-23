@@ -67,6 +67,7 @@ class cms_page_panel_export extends \Controller {
 
 		return [
 			'include_database' => $this->input->post('include_database') !== '0',
+			'include_fk' => $this->input->post('include_fk') !== '0',
 			'include_files' => $this->input->post('include_files') !== '0',
 			'optimised_images' => $this->input->post('optimised_images') !== '0',
 			'image_cutoff_px' => $image_cutoff_px,
@@ -277,6 +278,33 @@ class cms_page_panel_export extends \Controller {
 
 	}
 
+	function _image_export_meta($image_data, $hash, $export_filename, $resource_type, $optimised){
+
+		$meta = $image_data['meta'] ?? '';
+		if (is_string($meta)){
+			$decoded = json_decode($meta, true);
+			$meta = is_array($decoded) ? $decoded : ($meta === '' ? [] : $meta);
+		} else if (!is_array($meta)){
+			$meta = [];
+		}
+
+		return [
+			'resource_type' => $resource_type,
+			'cms_image_id' => (int)($image_data['cms_image_id'] ?? 0),
+			'filename' => (string)($image_data['filename'] ?? ''),
+			'export_filename' => $export_filename,
+			'hash' => $hash,
+			'name' => (string)($image_data['name'] ?? ''),
+			'title' => (string)($image_data['title'] ?? ''),
+			'description' => (string)($image_data['description'] ?? ''),
+			'category' => (string)($image_data['category'] ?? ''),
+			'type' => (string)($image_data['type'] ?? ''),
+			'meta' => $meta,
+			'optimised' => $optimised ? 1 : 0,
+		];
+
+	}
+
 	function _register_file_resource($source_key, $meta, $size, $preview = false){
 
 		if (empty($this->data['_files'][$source_key])){
@@ -341,23 +369,12 @@ class cms_page_panel_export extends \Controller {
 			}
 		}
 
-		if (empty($image_data['hash']) && !$preview){
-			$hash = sha1_file($export_path);
-			$this->cms_image_model->update_cms_image($image_data['filename'], ['hash' => $hash]);
-		} else {
-			$hash = !empty($image_data['hash']) ? $image_data['hash'] : sha1($filename);
-		}
+		$hash = (!$preview && is_file($export_path)) ? sha1_file($export_path) : '';
+		$export_filename = ($hash !== '' ? substr($hash, 0, 8) : 'preview').'_'.$image_data['name'].'.'.pathinfo($filename, PATHINFO_EXTENSION);
 
-		$export_filename = substr($hash, 0, 8).'_'.$image_data['name'].'.'.pathinfo($filename, PATHINFO_EXTENSION);
-
-		$this->_register_file_resource($image_data['filename'], [
-			'hash' => $hash,
-			'export_filename' => $export_filename,
-			'category' => $image_data['category'] ?? '',
-			'name' => $image_data['name'],
-			'resource_type' => 'image',
-			'optimised' => $optimised ? 1 : 0,
-		], $filesize, $preview);
+		$this->_register_file_resource($image_data['filename'], $this->_image_export_meta(
+			$image_data, $hash, $export_filename, 'image', $optimised
+		), $filesize, $preview);
 
 		if (!$preview){
 			copy($export_path, $folder.'/'.$export_filename);
@@ -381,24 +398,14 @@ class cms_page_panel_export extends \Controller {
 		$image_data = $this->cms_image_model->get_cms_image_by_filename($filename);
 		$name = !empty($image_data['name']) ? $image_data['name'] : pathinfo($filename, PATHINFO_FILENAME);
 
-		if (!$preview && empty($image_data['hash'])){
-			$hash = sha1_file($resolved['path']);
-			if (!empty($image_data['filename'])){
-				$this->cms_image_model->update_cms_image($image_data['filename'], ['hash' => $hash]);
-			}
-		} else {
-			$hash = !empty($image_data['hash']) ? $image_data['hash'] : sha1($filename);
-		}
+		$hash = (!$preview && is_file($resolved['path'])) ? sha1_file($resolved['path']) : '';
+		$export_filename = ($hash !== '' ? substr($hash, 0, 8) : 'preview').'_'.$name.'.mp4';
 
-		$export_filename = substr($hash, 0, 8).'_'.$name.'.mp4';
-
-		$this->_register_file_resource($filename, [
-			'hash' => $hash,
-			'export_filename' => $export_filename,
-			'name' => $name,
-			'resource_type' => 'video',
-			'optimised' => !empty($resolved['optimised']) ? 1 : 0,
-		], $resolved['size'], $preview);
+		$image_data['filename'] = $image_data['filename'] ?? $filename;
+		$image_data['name'] = $name;
+		$this->_register_file_resource($filename, $this->_image_export_meta(
+			$image_data, $hash, $export_filename, 'video', !empty($resolved['optimised'])
+		), $resolved['size'], $preview);
 
 		if (!$preview){
 			copy($resolved['path'], $folder.'/'.$export_filename);
@@ -426,20 +433,21 @@ class cms_page_panel_export extends \Controller {
 
 		$filesize = filesize($source_path);
 
-		if (empty($file_data['hash']) && !$preview){
-			$hash = sha1_file($source_path);
-			$this->cms_file_model->update_cms_file($file_data['filename'], ['hash' => $hash]);
-		} else {
-			$hash = !empty($file_data['hash']) ? $file_data['hash'] : sha1($filename);
-		}
-
-		$export_filename = substr($hash, 0, 8).'_'.$file_data['name'].'.'.pathinfo($filename, PATHINFO_EXTENSION);
+		$hash = (!$preview && is_file($source_path)) ? sha1_file($source_path) : '';
+		$export_filename = ($hash !== '' ? substr($hash, 0, 8) : 'preview').'_'.$file_data['name'].'.'.pathinfo($filename, PATHINFO_EXTENSION);
 
 		$this->_register_file_resource($file_data['filename'], [
-			'hash' => $hash,
-			'export_filename' => $export_filename,
-			'name' => $file_data['name'],
 			'resource_type' => 'file',
+			'cms_file_id' => (int)($file_data['cms_file_id'] ?? 0),
+			'cms_user_id' => (int)($file_data['cms_user_id'] ?? 0),
+			'sort' => (int)($file_data['sort'] ?? 0),
+			'date_posted' => (string)($file_data['date_posted'] ?? ''),
+			'filename' => $file_data['filename'],
+			'export_filename' => $export_filename,
+			'hash' => $hash,
+			'name' => $file_data['name'],
+			'title' => (string)($file_data['title'] ?? ''),
+			'icon' => (string)($file_data['icon'] ?? ''),
 			'optimised' => 0,
 		], $filesize, $preview);
 
@@ -451,35 +459,84 @@ class cms_page_panel_export extends \Controller {
 
 	}
 
-	function _traverse_structure_fields($data, $panel_structure, $folder, $options, $preview = false){
+	function _export_fields($data){
+
+		$config = $this->cms_panel_model->get_cms_panel_config($data['panel_name'] ?? '');
+		$is_settings = empty($data['cms_page_id']) && empty($data['parent_id']) && empty($data['sort']);
+
+		if ($is_settings){
+			return !empty($config['settings']) && is_array($config['settings']) ? $config['settings'] : [];
+		}
+
+		return !empty($config['item']) && is_array($config['item']) ? $config['item'] : [];
+
+	}
+
+	function _fk_target_id($value){
+
+		if ($value === '' || $value === null || $value === false || $value === 0 || $value === '0'){
+			return 0;
+		}
+
+		if (!is_numeric($value) || (int)$value < 1){
+			return 0;
+		}
+
+		return (int)$value;
+
+	}
+
+	function _traverse_structure_fields($data, $panel_structure, $folder, $options, $preview, $follow_fk){
 
 		foreach ($panel_structure as $struct){
 
-			if ($struct['type'] === 'image' && !empty($data[$struct['name']])){
+			if (!is_array($struct) || empty($struct['type'])){
+				continue;
+			}
+
+			$type = $struct['type'];
+			$name = $struct['name'] ?? '';
+
+			if ($type === 'image' && $name !== '' && !empty($data[$name])){
+				$this->_note_affected_media($data[$name], $options);
 				if (!empty($options['include_files'])){
-					$this->_add_image_resource($data[$struct['name']], $folder, $options, $preview);
+					$this->_add_image_resource($data[$name], $folder, $options, $preview);
 				}
-			} else if ($struct['type'] === 'file' && !empty($data[$struct['name']])){
-				if (!empty($options['include_files'])){
-					$this->_add_upload_file_resource($data[$struct['name']], $folder, $options, $preview);
+			} else if ($type === 'file' && $name !== '' && !empty($data[$name]) && !empty($options['include_files'])){
+				$this->_add_upload_file_resource($data[$name], $folder, $options, $preview);
+			} else if ($type === 'fk' && $follow_fk && $name !== ''){
+				$fk_id = $this->_fk_target_id($data[$name] ?? 0);
+				if ($fk_id > 0){
+					$this->traverse_page_panel($fk_id, $options, $preview, false);
 				}
-			} else if ($struct['type'] === 'repeater' && !empty($data[$struct['name']])){
-				foreach ($data[$struct['name']] as $rdata){
-					foreach ($struct['fields'] as $rstruct){
-						if ($rstruct['type'] === 'image' && !empty($rdata[$rstruct['name']])){
+			} else if ($type === 'repeater' && $name !== '' && !empty($data[$name]) && is_array($data[$name])){
+				foreach ($data[$name] as $rdata){
+					if (!is_array($rdata)){
+						continue;
+					}
+					foreach ($struct['fields'] ?? [] as $rstruct){
+						if (!is_array($rstruct) || empty($rstruct['type'])){
+							continue;
+						}
+						$rname = $rstruct['name'] ?? '';
+						if ($rstruct['type'] === 'image' && $rname !== '' && !empty($rdata[$rname])){
+							$this->_note_affected_media($rdata[$rname], $options);
 							if (!empty($options['include_files'])){
-								$this->_add_image_resource($rdata[$rstruct['name']], $folder, $options, $preview);
+								$this->_add_image_resource($rdata[$rname], $folder, $options, $preview);
 							}
-						} else if ($rstruct['type'] === 'file' && !empty($rdata[$rstruct['name']])){
-							if (!empty($options['include_files'])){
-								$this->_add_upload_file_resource($rdata[$rstruct['name']], $folder, $options, $preview);
+						} else if ($rstruct['type'] === 'file' && $rname !== '' && !empty($rdata[$rname]) && !empty($options['include_files'])){
+							$this->_add_upload_file_resource($rdata[$rname], $folder, $options, $preview);
+						} else if ($rstruct['type'] === 'fk' && $follow_fk && $rname !== ''){
+							$fk_id = $this->_fk_target_id($rdata[$rname] ?? 0);
+							if ($fk_id > 0){
+								$this->traverse_page_panel($fk_id, $options, $preview, false);
 							}
 						}
 					}
 				}
-			} else if (($struct['type'] === 'panels' || $struct['type'] === 'cms_page_panels') && !empty($data[$struct['name']])){
-				foreach ($data[$struct['name']] as $pp_id){
-					$this->traverse_page_panel($pp_id, $options, $preview);
+			} else if (($type === 'panels' || $type === 'cms_page_panels') && $name !== '' && !empty($data[$name]) && is_array($data[$name])){
+				foreach ($data[$name] as $pp_id){
+					$this->traverse_page_panel($pp_id, $options, $preview, $follow_fk);
 				}
 			}
 
@@ -487,43 +544,80 @@ class cms_page_panel_export extends \Controller {
 
 	}
 
-	function traverse_page_panel($cms_page_panel_id, $options, $preview = false){
+	function traverse_page_panel($cms_page_panel_id, $options, $preview = false, $follow_fk = true){
 
 		if (empty($options['include_database']) && empty($options['include_files']) && empty($options['include_panel_files'])){
 			return;
 		}
 
-		if (!empty($this->data['_panels'][$cms_page_panel_id])){
+		$cms_page_panel_id = (int)$cms_page_panel_id;
+		if ($cms_page_panel_id < 1){
 			return;
 		}
 
-		$data = $this->_get_panel_export_data($cms_page_panel_id);
-		if (empty($data)){
+		$follow_fk = $follow_fk && !empty($options['include_fk']);
+
+		if (empty($this->visited[$cms_page_panel_id])){
+
+			$data = $this->_get_panel_export_data($cms_page_panel_id);
+			if (empty($data)){
+				return;
+			}
+
+			$this->visited[$cms_page_panel_id] = $data;
+
+			if (!empty($options['include_database'])){
+				$this->data['_panels'][$cms_page_panel_id] = $data;
+				$this->stats['panels']['count'] += 1;
+				$this->stats['database']['size'] += strlen(json_encode($data, JSON_UNESCAPED_UNICODE));
+			}
+
+			if ($follow_fk){
+				$this->fk_followed[$cms_page_panel_id] = true;
+			}
+
+			$this->_traverse_structure_fields($data, $this->_export_fields($data), $this->folder, $options, $preview, $follow_fk);
+
+			if (!empty($options['include_panel_files']) && !empty($data['panel_name']) && empty($this->panel_files_collected[$data['panel_name']])){
+				$this->_collect_panel_source_files($data['panel_name'], $preview);
+			}
+
 			return;
+
 		}
 
-		if (!empty($options['include_database'])){
-			$this->data['_panels'][$cms_page_panel_id] = $data;
-			$this->stats['panels']['count'] += 1;
-			$this->stats['database']['size'] += strlen(json_encode($data, JSON_UNESCAPED_UNICODE));
+		// Already stored. If this visit is a main panel or a child, follow fk fields that were skipped
+		// when the same id was first reached only as someone else's fk target.
+		if ($follow_fk && empty($this->fk_followed[$cms_page_panel_id])){
+			$this->fk_followed[$cms_page_panel_id] = true;
+			$data = $this->visited[$cms_page_panel_id];
+			$this->_traverse_structure_fields($data, $this->_export_fields($data), $this->folder, $options, $preview, true);
 		}
 
-		$panel_structure = $this->cms_panel_model->get_cms_panel_definition($data['panel_name']);
+	}
 
-		if (!empty($options['include_files'])){
-			$this->_traverse_structure_fields($data, $panel_structure, $this->folder, $options, $preview);
-		} else {
-			foreach ($panel_structure as $struct){
-				if (($struct['type'] === 'panels' || $struct['type'] === 'cms_page_panels') && !empty($data[$struct['name']])){
-					foreach ($data[$struct['name']] as $pp_id){
-						$this->traverse_page_panel($pp_id, $options, $preview);
-					}
-				}
+	function _add_settings_panels($options, $preview){
+
+		$names = [];
+		foreach ($this->visited as $panel){
+			if (!empty($panel['panel_name'])){
+				$names[$panel['panel_name']] = true;
 			}
 		}
 
-		if (!empty($options['include_panel_files']) && !empty($data['panel_name']) && empty($this->panel_files_collected[$data['panel_name']])){
-			$this->_collect_panel_source_files($data['panel_name'], $preview);
+		foreach (array_keys($names) as $panel_name){
+			if (!stristr($panel_name, '/')){
+				continue;
+			}
+			$sql = 'select cms_page_panel_id from cms_page_panel where panel_name = ? and cms_page_id = 0 and parent_id = 0 and sort = 0 limit 1';
+			$query = $this->db->query($sql, [$panel_name]);
+			$row = $query->row_array();
+			if (empty($row['cms_page_panel_id'])){
+				continue;
+			}
+			$settings_id = (int)$row['cms_page_panel_id'];
+			$this->data['_settings'][$panel_name] = $settings_id;
+			$this->traverse_page_panel($settings_id, $options, $preview, false);
 		}
 
 	}
@@ -590,7 +684,7 @@ class cms_page_panel_export extends \Controller {
 			}
 		}
 
-		$this->stats['panel_files']['count'] = count($paths);
+		$this->stats['panel_files']['count'] += count($paths);
 
 	}
 
@@ -615,67 +709,35 @@ class cms_page_panel_export extends \Controller {
 
 	}
 
-	function _scan_affected_counts($cms_page_panel_id, $options){
+	function _note_affected_media($filename, $options){
 
-		$this->affected_counts = [
-			'oversized_images' => [],
-			'optimised_videos' => [],
-		];
+		if ($filename === '' || !is_string($filename)){
+			return;
+		}
 
-		$video_options = array_merge($options, ['optimised_videos' => true]);
-
-		$check_image_field = function($fn) use ($options, $video_options){
-
-			if ($this->_is_video_filename($fn)){
-				$resolved = $this->_resolve_video_export_path($fn, $video_options);
-				if (!empty($resolved['optimised'])){
-					$this->affected_counts['optimised_videos'][$fn] = true;
-				}
-				return;
+		if ($this->_is_video_filename($filename)){
+			$resolved = $this->_resolve_video_export_path($filename, array_merge($options, ['optimised_videos' => true]));
+			if (!empty($resolved['optimised'])){
+				$this->affected_counts['optimised_videos'][$filename] = true;
 			}
+			return;
+		}
 
-			if ($this->_count_oversized_image($fn, $options['image_cutoff_px'])){
-				$this->affected_counts['oversized_images'][$fn] = true;
-			}
-
-		};
-
-		$walker = function($panel_id) use (&$walker, $check_image_field){
-
-			$data = $this->_get_panel_export_data($panel_id);
-			if (empty($data)){
-				return;
-			}
-
-			$panel_structure = $this->cms_panel_model->get_cms_panel_definition($data['panel_name']);
-
-			foreach ($panel_structure as $struct){
-				if ($struct['type'] === 'image' && !empty($data[$struct['name']])){
-					$check_image_field($data[$struct['name']]);
-				} else if ($struct['type'] === 'repeater' && !empty($data[$struct['name']])){
-					foreach ($data[$struct['name']] as $rdata){
-						foreach ($struct['fields'] as $rstruct){
-							if ($rstruct['type'] === 'image' && !empty($rdata[$rstruct['name']])){
-								$check_image_field($rdata[$rstruct['name']]);
-							}
-						}
-					}
-				} else if (($struct['type'] === 'panels' || $struct['type'] === 'cms_page_panels') && !empty($data[$struct['name']])){
-					foreach ($data[$struct['name']] as $pp_id){
-						$walker($pp_id);
-					}
-				}
-			}
-
-		};
-
-		$walker($cms_page_panel_id);
+		if ($this->_count_oversized_image($filename, $options['image_cutoff_px'])){
+			$this->affected_counts['oversized_images'][$filename] = true;
+		}
 
 	}
 
 	function _init_run_state(){
 
-		$this->data = ['_panels' => [], '_files' => [], '_panel_files' => []];
+		$this->data = ['_main' => [], '_panels' => [], '_settings' => [], '_files' => [], '_panel_files' => []];
+		$this->visited = [];
+		$this->fk_followed = [];
+		$this->affected_counts = [
+			'oversized_images' => [],
+			'optimised_videos' => [],
+		];
 		$this->panel_files_collected = [];
 		$this->stats = [
 			'images' => ['count' => 0, 'size' => 0],
@@ -753,6 +815,50 @@ class cms_page_panel_export extends \Controller {
 
 	}
 
+	function _export_heading($count){
+
+		$count = (int)$count;
+
+		if ($count > 1){
+			return 'Export page panels ('.$count.')';
+		}
+
+		return 'Export page panel';
+
+	}
+
+	function _export_main_ids($single_id){
+
+		$raw = $this->input->post('export_ids');
+		$ids = [];
+
+		if (is_array($raw)){
+			$ids = $raw;
+		} else if (is_string($raw) && $raw !== ''){
+			$decoded = json_decode($raw, true);
+			if (is_array($decoded)){
+				$ids = $decoded;
+			} else {
+				$ids = preg_split('/\s*,\s*/', $raw);
+			}
+		}
+
+		$clean = [];
+		foreach ($ids as $id){
+			$id = (int)$id;
+			if ($id > 0){
+				$clean[$id] = $id;
+			}
+		}
+
+		if (!$clean && (int)$single_id > 0){
+			$clean[(int)$single_id] = (int)$single_id;
+		}
+
+		return array_values($clean);
+
+	}
+
 	function panel_action($params){
 
 		$this->load->model('cms/cms_page_panel_model');
@@ -762,11 +868,14 @@ class cms_page_panel_export extends \Controller {
 
 		$do = $this->input->post('do');
 		$cms_page_panel_id = (int)$this->input->post('export_id');
+		$export_ids = $this->_export_main_ids($cms_page_panel_id);
+		$params['export_heading'] = $this->_export_heading(count($export_ids));
+		$params['export_ids_json'] = json_encode(array_values($export_ids));
 
 		if ($do === 'cms_page_panel_export_settings'){
 
 			$params['export_view'] = 'settings';
-			$params['export_id'] = $cms_page_panel_id;
+			$params['export_id'] = !empty($export_ids[0]) ? $export_ids[0] : $cms_page_panel_id;
 			$params['image_cutoff_px'] = 1200;
 			$params['video_quality'] = 'hd';
 			$params['last_export'] = $this->_get_latest_panel_export($cms_page_panel_id);
@@ -781,8 +890,11 @@ class cms_page_panel_export extends \Controller {
 			$this->_init_run_state();
 			$this->folder = '';
 
-			$this->traverse_page_panel($cms_page_panel_id, $options, true);
-			$this->_scan_affected_counts($cms_page_panel_id, $options);
+			$this->data['_main'] = $export_ids;
+			foreach ($export_ids as $export_panel_id){
+				$this->traverse_page_panel($export_panel_id, $options, true, true);
+			}
+			$this->_add_settings_panels($options, true);
 
 			$files_bytes = $this->stats['files']['size'];
 			$total_bytes = $this->stats['database']['size'] + $files_bytes;
@@ -811,14 +923,20 @@ class cms_page_panel_export extends \Controller {
 
 			$start_time = microtime(true);
 
-			$this->data['_main'] = $cms_page_panel_id;
+			$this->data['_main'] = $export_ids;
 			$this->data['_export_options'] = $options;
 
-			$this->folder = $this->_build_export_folder_name($cms_page_panel_id);
+			$this->folder = $this->_build_export_folder_name($export_ids[0] ?? $cms_page_panel_id);
+			if (count($export_ids) > 1){
+				$this->folder .= '_x'.count($export_ids);
+			}
 			$this->rrmdir($this->folder);
 			mkdir($this->folder, 0777, true);
 
-			$this->traverse_page_panel($cms_page_panel_id, $options, false);
+			foreach ($export_ids as $export_panel_id){
+				$this->traverse_page_panel($export_panel_id, $options, false, true);
+			}
+			$this->_add_settings_panels($options, false);
 
 			$data_json = json_encode($this->data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 			file_put_contents($this->folder.'/data.json', $data_json);

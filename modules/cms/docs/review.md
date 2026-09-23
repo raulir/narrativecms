@@ -85,6 +85,7 @@ Prefer: trust install/update to create runtime dirs; do rare work on the rare pa
 
 - **No silent fail** — empty skip is fine; log or operator-visible reason (`_reason`, status line).
 - **Visitor copy** from CMS fields, not hard-coded UI sentences in templates/JS.
+- **Templates** use `div` unless the tag’s own behaviour is needed (`a` for a real URL, `input`, `textarea`, `select`, `form`, `label`, `img`, `video`). No `span` or `button` for layout or click targets. See [`agents.md`](agents.md) § Markup and CSS style.
 - **Public FE:** no new flex, no ARIA/`role`, no `cursor:` (site cursors).
 - **Frontend panel JS:** `<panel>_init`, `<panel>_resize`, `<panel>_scroll` (stubs OK) — [`cms_panel_js.md`](cms_panel_js.md).
 - **Module SCSS** (`css/<module>.scss`) only if several panels share tokens; otherwise variables live on the panel SCSS.

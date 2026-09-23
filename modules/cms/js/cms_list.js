@@ -1,4 +1,105 @@
+function cms_list_sync_master(){
+
+	var $rows = $('.cms_list_list_item')
+	var selected = $rows.filter('.cms_list_list_selected').length
+	var all = $rows.length > 0 && selected === $rows.length
+
+	$('.cms_list_toolbar_tick').text(all ? '[v]' : '[ ]')
+	$('.cms_list_export').toggleClass('cms_list_export_ready', selected > 0)
+
+}
+
+function cms_list_set_row_ticks(on){
+
+	$('.cms_list_list_item').each(function(){
+		$(this).toggleClass('cms_list_list_selected', on)
+		$(this).find('.cms_list_list_tick').text(on ? '[v]' : '[ ]')
+	})
+
+	cms_list_sync_master()
+
+}
+
+function cms_list_bind_rows(){
+
+	$('.cms_list_list_item .cms_list_list_tick').off('click.cms_list').on('click.cms_list', function(e){
+		e.preventDefault()
+		e.stopPropagation()
+		var $row = $(this).closest('.cms_list_list_item')
+		var on = !$row.hasClass('cms_list_list_selected')
+		$row.toggleClass('cms_list_list_selected', on)
+		$(this).text(on ? '[v]' : '[ ]')
+		cms_list_sync_master()
+	})
+
+	$('.cms_list_list_more').off('click.cms_list').on('click.cms_list', function(e){
+		e.preventDefault()
+		e.stopPropagation()
+		var $pop = $(this).siblings('.cms_list_list_menu_pop')
+		var open = $pop.hasClass('cms_list_list_menu_open')
+		$('.cms_list_list_menu_pop').removeClass('cms_list_list_menu_open')
+		if (!open){
+			$pop.addClass('cms_list_list_menu_open')
+		}
+	})
+
+	$('.cms_list_list_menu_pop').off('click.cms_list').on('click.cms_list', function(e){
+		e.stopPropagation()
+		$(this).removeClass('cms_list_list_menu_open')
+	})
+
+}
+
 function cms_list_init($root){
+
+	$(document).off('click.cms_list_menu').on('click.cms_list_menu', function(){
+		$('.cms_list_list_menu_pop').removeClass('cms_list_list_menu_open')
+	})
+
+	$('.cms_list_export').off('click.cms_list').on('click.cms_list', function(e){
+		e.preventDefault()
+		e.stopPropagation()
+
+		var ids = []
+		$('.cms_list_list_item.cms_list_list_selected').each(function(){
+			var id = parseInt($(this).data('block_id'), 10)
+			if (id > 0){
+				ids.push(id)
+			}
+		})
+
+		if (!ids.length){
+			return
+		}
+
+		cms_popup_open_ajax('export', function($popup){
+
+			$popup.find('.cms_popup_content').html('Loading...')
+
+			get_ajax_panel('cms/cms_page_panel_export', {
+				'export_id': ids[0],
+				'export_ids': JSON.stringify(ids),
+				'do': 'cms_page_panel_export_settings',
+			}, function(data){
+
+				$popup.find('.cms_popup_content').html(data.result._html)
+				cms_popup_bind_cancel($popup)
+				cms_page_panel_export_bind_settings($popup, ids[0])
+
+			})
+
+		})
+
+	})
+
+	$('.cms_list_toolbar_tick').off('click.cms_list_toolbar').on('click.cms_list_toolbar', function(e){
+		e.preventDefault()
+		e.stopPropagation()
+		var $rows = $('.cms_list_list_item')
+		var all = $rows.length > 0 && $rows.filter('.cms_list_list_selected').length === $rows.length
+		cms_list_set_row_ticks(!all)
+	})
+
 
 	var $scope = $root ? $root.find('.cms_list_container') : $('.cms_list_container');
 
@@ -367,6 +468,7 @@ function cms_list_load(start, limit, after){
 	}, function(data){
 		
 		$('.cms_list_container').html(data.result._html).data({start: start, limit: limit, total: data.result.total });
+		cms_list_sync_master()
 		
 		after();
 
@@ -392,9 +494,23 @@ function cms_list_load(start, limit, after){
 			$('.cms_paging_first,.cms_paging_previous').off('click.r').css({opacity:0.3});
 		}
 		
+		cms_list_bind_rows()
+
 		if($('.cms_list_container').data('no_sort') != 'no_sort'){
 			// activate sorting
 			$('.admin_list_sortable').sortable({
+
+				items: '.cms_list_list_item',
+				handle: '.cms_list_list_drag',
+				forcePlaceholderSize: true,
+				helper: function(event, item){
+					var $helper = item.clone()
+					$helper.css({
+						width: item.outerWidth(),
+						height: item.outerHeight()
+					})
+					return $helper
+				},
 	
 				'stop':function(event, ui){
 					if (!$('.admin_list_sortable').hasClass('admin_list_sortable_cancelled')){

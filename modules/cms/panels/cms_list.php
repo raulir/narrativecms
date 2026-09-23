@@ -19,6 +19,10 @@ class cms_list extends \Controller {
 		$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/jquery/jquery-ui.min.js', 'no_pack' => 1, );
 		$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/cms_cookie.js', );
 		$GLOBALS['_panel_js'][] = array('script' => 'modules/cms/js/cms_page_panel_button_show.js', );
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_popup.js';
+		$GLOBALS['_panel_js'][] = 'modules/cms/js/cms_page_panel_button_export.js';
+		add_css('modules/cms/css/cms_popup.scss');
+		add_css('modules/cms/css/cms_page_panel_button_export.scss');
 		
 	}
 

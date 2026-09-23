@@ -1,9 +1,9 @@
 <?php
-	$heading = 'Export page panel';
+	$heading = !empty($export_heading) ? $export_heading : 'Export page panel';
 	$save_button = '';
 	include __DIR__.'/cms_popup_toolbar.tpl.php';
 ?>
-<div class="cms_page_panel_export_settings_container" data-export_id="<?= (int)$export_id ?>">
+<div class="cms_page_panel_export_settings_container" data-export_id="<?= (int)$export_id ?>" data-export_ids="<?= htmlspecialchars(!empty($export_ids_json) ? $export_ids_json : '[]', ENT_QUOTES) ?>">
 
 	<div class="cms_page_panel_export_settings_content">
 
@@ -17,6 +17,16 @@
 			<div class="cms_page_panel_export_col_label cms_page_panel_export_settings_text">database data (incl. translations)</div>
 			<div class="cms_page_panel_export_col_opts"></div>
 			<div class="cms_page_panel_export_col_size cms_page_panel_export_database_size">—</div>
+		</div>
+
+		<div class="cms_page_panel_export_settings_row cms_page_panel_export_toggle_row">
+			<div class="cms_page_panel_export_col_check">
+				<span class="cms_page_panel_export_fake_check">[v]</span>
+				<input type="checkbox" class="cms_page_panel_export_opt cms_page_panel_export_opt_hidden" name="include_fk" value="1" checked>
+			</div>
+			<div class="cms_page_panel_export_col_label cms_page_panel_export_settings_text">include fk panels</div>
+			<div class="cms_page_panel_export_col_opts"></div>
+			<div class="cms_page_panel_export_col_size"></div>
 		</div>
 
 		<div class="cms_page_panel_export_settings_row cms_page_panel_export_toggle_row">

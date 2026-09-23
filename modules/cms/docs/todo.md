@@ -30,6 +30,10 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 ---
 
+## Panel export
+
+- [x] **List export** — gear **Export** posts the ticked row ids as `export_ids`. One ticked row keeps the heading **Export page panel**. More than one says **Export page panels (N)**. One zip, `_main` is that array. See [`cms_export.md`](cms_export.md).
+
 ## Page cache
 
 - [ ] **Panel actions on cache HIT** — when a full page is served from page cache (`cache::try_serve()`), CI does not boot and `panel_action` does not run. On cache **write**, store metadata listing which panels had `panel_action` on that page (panel name + instance params as needed). On cache **HIT**, lightweight bootstrap runs those actions only (e.g. `analytics/beacon` php pageview) before or alongside serving HTML. Ref: [`system/libraries/cache.php`](../../../system/libraries/cache.php), analytics php tracking skipped today on cache HIT.
