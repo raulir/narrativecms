@@ -10,42 +10,40 @@ class cms_page_panel_import extends \Controller {
 
 		parent::__construct();
 
-		// check if user
-		if(empty($_SESSION['cms_user']['cms_user_id'])){
+		if (empty($_SESSION['cms_user']['cms_user_id'])){
 			header('Location: '.$GLOBALS['config']['base_url'].'cms_login/', true, 302);
 			exit();
 		}
 
 	}
-	
+
 	function panel_action($params){
 
-		$this->load->model('cms/cms_page_panel_model');
-		$this->load->model('cms/cms_panel_model');
-		$this->load->model('cms/cms_image_model');
-		$this->load->model('cms/cms_file_model');
-		
 		$do = $this->input->post('do');
+		$params['view'] = 'upload';
+		$params['message'] = '';
+		$params['token'] = '';
+		$params['blocks'] = [];
+		$params['list_label'] = '';
 
-		if ($do == 'cms_page_panel_import'){
-			
-			// receive file
-			
-			
-			// stats
-			$params['time'] = 0;
-			$params['panels'] = 0;
-			$params['images'] = 0;
-			$params['files'] = 0;
-			$params['new_images_size'] = 0;
-			$params['new_images_count'] = 0;
-			
-			return $params;
-
+		if ($do === 'cms_page_panel_import_read' || $do === 'cms_page_panel_import_apply' || $do === 'cms_page_panel_import_discard'){
+			$this->load->model('cms/cms_page_panel_import_model');
 		}
-		
+
+		if ($do === 'cms_page_panel_import_read'){
+			return $this->cms_page_panel_import_model->read_upload($params);
+		}
+
+		if ($do === 'cms_page_panel_import_apply'){
+			return $this->cms_page_panel_import_model->apply();
+		}
+
+		if ($do === 'cms_page_panel_import_discard'){
+			return $this->cms_page_panel_import_model->discard();
+		}
+
 		return $params;
 
 	}
-	
+
 }

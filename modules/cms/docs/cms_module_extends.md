@@ -73,6 +73,8 @@ modules/music/
 | Definition merge | Yes | [`get_cms_panel_config($target)`](../../models/cms_panel_model.php) → [`merge_structures()`](../../models/cms_panel_model.php) for each source (see merge rules below) |
 | Settings **values** | Yes | [`get_cms_page_panel_settings()`](../../models/cms_page_panel_model.php) merges saved settings from each extend **source** into the target |
 | SCSS | Yes | [`controller::get_panel_filenames()`](../../../system/core/controller.php) |
+
+A shared look that already exists as a class in the site module is **not** copied onto the target template. The site class body is a mixin, and the extend SCSS includes that mixin on the target’s own class. See [`agents.md`](agents.md) § Markup and CSS style.
 | JS | Yes | Same — appended after target panel JS; [`pack_js()`](../../../system/helpers/packer_helper.php) concatenates in order |
 | Template | Yes | Same — if `modules/<ext>/templates/<source_panel>.tpl.php` exists, it **replaces** the target template entirely (no merge). Last extending module in `modules` order wins. |
 | PHP controller | Yes | `modules/<ext>/panels/<source>.php` if present. **`panel_params` / `panel_action`:** target first, then each extend in order (chain). **`panel_heading`:** reverse-walk extenders — only the **last** implementer runs (else target). |

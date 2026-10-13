@@ -89,6 +89,7 @@ Prefer: trust install/update to create runtime dirs; do rare work on the rare pa
 - **Public FE:** no new flex, no ARIA/`role`, no `cursor:` (site cursors).
 - **Frontend panel JS:** `<panel>_init`, `<panel>_resize`, `<panel>_scroll` (stubs OK) — [`cms_panel_js.md`](cms_panel_js.md).
 - **Module SCSS** (`css/<module>.scss`) only if several panels share tokens; otherwise variables live on the panel SCSS.
+- **Shared classes** stay inside one module: common class first, then the panel class (`music_heading login_heading`). Another module gets that look from the site extend SCSS via a mixin, not by borrowing the site class. See [`agents.md`](agents.md) § Markup and CSS style.
 - **HTTP:** streams, not curl; secrets never logged.
 - **`htmlspecialchars`** is not the default for CMS field output, or for hardcoded project parameters (a class name or flag passed from project code).
 - **`_ib()`** always has the second size argument. A call with only the image path fails review. That number is the pixel cap for the derivative.

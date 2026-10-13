@@ -56,6 +56,12 @@ function cms_list_init($root){
 		$('.cms_list_list_menu_pop').removeClass('cms_list_list_menu_open')
 	})
 
+	$('.cms_list_import').off('click.cms_list').on('click.cms_list', function(e){
+		e.preventDefault()
+		e.stopPropagation()
+		cms_page_panel_import_open()
+	})
+
 	$('.cms_list_export').off('click.cms_list').on('click.cms_list', function(e){
 		e.preventDefault()
 		e.stopPropagation()

@@ -125,7 +125,6 @@ class cms_page_panel_export extends \Controller {
 		}
 
 		$data = array_merge($params, $row);
-		$data['show'] = 0;
 
 		if ($data['cms_page_id'] == 999999){
 			$data['cms_page_id'] = 0;

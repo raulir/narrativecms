@@ -4,6 +4,10 @@ function cms_popup_close($popup){
 		return
 	}
 
+	if ($popup.hasClass('cms_popup_import') && typeof cms_page_panel_import_discard === 'function'){
+		cms_page_panel_import_discard($popup)
+	}
+
 	if (typeof _panels_popup_remove_fragment === 'function'){
 		_panels_popup_remove_fragment($popup)
 		return

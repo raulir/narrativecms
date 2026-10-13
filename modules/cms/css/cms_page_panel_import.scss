@@ -1,69 +1,54 @@
-.cms_page_panel_import_container {
-	height: 100%;
-}
-
-.cms_page_panel_import_content {
-	height: 100%;
-	position: relative;
-	font-size: 0;
-	line-height: 0;
-	letter-spacing: 0;
-	padding: 0 4.6rem;
-}
-
-.cms_page_panel_import_table {
-	
-}
-
-.cms_page_panel_import_first {
-	opacity: 1;
-	z-index: 20;
-	transition: opacity 0.3s;
-}
-
-.cms_page_panel_import_message {
-	font-size: 2.0rem;
-	line-height: 3.0rem;
-	margin-bottom: 1.8rem;
-    margin-top: 20.5rem;
-}
-
-.cms_page_panel_import_col1,.cms_page_panel_import_col2,.cms_page_panel_import_col3 {
-	display: inline-block;
-	font-size: 1.5rem;
+.cms_page_panel_import_body {
+	padding: 1.2rem 1.6rem 2.0rem 1.6rem;
+	font-size: 1.6rem;
 	line-height: 2.2rem;
-}
-
-.cms_page_panel_import_col1 {
-	width: 31%;
 	text-align: left;
 }
 
-.cms_page_panel_import_col2 {
-	width: 20%;
-	text-align: right;
+.cms_page_panel_import_message,
+.cms_page_panel_import_done {
+	margin: 0 0 1.2rem 0;
 }
 
-.cms_page_panel_import_col3 {
-	width: 24%;
-	text-align: right;
+.cms_page_panel_import_block {
+	margin: 0 0 1.6rem 0;
+	padding: 0 0 1.2rem 0;
+	border-bottom: 0.05rem solid #c0c0c0;
 }
 
-.cms_page_panel_import_buttons {
-	padding-top: 2.3rem;
+.cms_page_panel_import_line,
+.cms_page_panel_import_fk {
+	margin: 0 0 0.4rem 0;
 }
 
-.cms_page_panel_import_upload {
-	width: 11.0rem;
-	margin: 0 0.2rem;
+.cms_page_panel_import_tick {
+	display: inline-block;
+	margin-right: 0.6rem;
+	font-family: monospace;
+	cursor: pointer;
 }
 
-.cms_page_panel_import_close {
-	width: 11.0rem;
-	margin: 0 0.2rem;
+.cms_page_panel_import_actions {
+	margin-top: 0.8rem;
 }
 
-.cms_page_panel_import_hidden {
-	opacity: 0;
-	z-index: 10;
+.cms_page_panel_import_error {
+	margin-top: 0.8rem;
+}
+
+.cms_page_panel_import_block.cms_page_panel_import_busy .cms_page_panel_import_go {
+	opacity: 0.3;
+	pointer-events: none;
+}
+
+.cms_page_panel_import_go,
+.cms_page_panel_import_ok {
+	display: inline-block;
+	margin-right: 1.2rem;
+	cursor: pointer;
+}
+
+.cms_popup_import .cms_popup_content {
+	width: 75.0rem;
+	height: 55.0rem;
 }

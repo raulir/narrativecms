@@ -13,6 +13,7 @@
 			<div class="cms_toolbar_buttons_hidden_arrow" <?php _ib('cms/cms_down.png', 12) ?>></div>
 			<div class="cms_toolbar_buttons_hidden_container">
 				<div class="cms_tool_button cms_list_export">Export</div>
+				<div class="cms_tool_button cms_list_import">Import</div>
 			</div>
 		</div>
 
