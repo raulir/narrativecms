@@ -45,6 +45,22 @@ if (!function_exists('cms_session_boot')){
 
 	}
 
+	function cms_visitor_html_lang(){
+
+		$id = '';
+		if (!empty($_SESSION['language']) && is_string($_SESSION['language'])){
+			$id = $_SESSION['language'];
+		} else if (!empty($GLOBALS['language']['language_id'])){
+			$id = $GLOBALS['language']['language_id'];
+		}
+
+		$id = strtolower(str_replace('_', '-', trim($id)));
+		$id = preg_replace('/[^a-z0-9\-]/', '', $id);
+
+		return $id !== '' ? $id : 'en';
+
+	}
+
 	function cms_session_cookie_path(){
 
 		$base = (string)($GLOBALS['config']['base_url'] ?? '/');

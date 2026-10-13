@@ -18,9 +18,8 @@ function language_init(){
 		var $button = $this.closest('.language_button')
 
 		language_close_dropdown($button)
-		
-		cms_cookie_create('language', $this.data('language_id'), 365)
-		
+		language_clear_cookies()
+
 		get_ajax('basic/language', {
 			'do':'language_set',
 			'language_id': $this.data('language_id'),
@@ -30,6 +29,37 @@ function language_init(){
 		})
 
 	});
+
+}
+
+function language_clear_cookies(){
+
+	var paths = ['/']
+	var base = (typeof _cms_base === 'string') ? _cms_base : ''
+	var bits = location.pathname.split('/')
+	var acc = ''
+	var i
+
+	if (base && paths.indexOf(base) === -1){
+		paths.push(base)
+	}
+
+	for (i = 0; i < bits.length; i++){
+		if (bits[i] === ''){
+			continue
+		}
+		acc += '/' + bits[i]
+		if (paths.indexOf(acc) === -1){
+			paths.push(acc)
+		}
+		if (paths.indexOf(acc + '/') === -1){
+			paths.push(acc + '/')
+		}
+	}
+
+	for (i = 0; i < paths.length; i++){
+		document.cookie = 'language=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=' + paths[i] + '; SameSite=Lax'
+	}
 
 }
 

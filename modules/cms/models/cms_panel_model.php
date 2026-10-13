@@ -618,46 +618,43 @@ class cms_panel_model extends \Model {
 	}
 	
 	/**
-	 * 
-	 * get panels defined over all active modules
-	 * 
-	 * filter by flag
-	 * 
-	 * @param string $flag
-	 * if set, returns all panels with this flag
-	 * if empty, returns all non-hidden panels 
-	 * 
-	 * @return unknown[]
-	 * 
+	 * Panels listed in active modules' config.json `panels`.
+	 *
+	 * Empty $flag: every entry (cms_input_panel with no flag).
+	 * Non-empty $flag: entries whose `flags` include that value (e.g. cron).
 	 */
 	function get_cms_panels($flag = ''){
-		
-		// this is already present in config
-		
+
 		$return = [];
-		
+
 		foreach($GLOBALS['config']['module'] as $module => $data){
-			
-			foreach($data['panels'] as $panel){
-				
-				if (empty($flag)){
-					
-					if (empty($panel['flags']) || !in_array('hidden', $panel['flags'])){
-						$return[$module.'/'.$panel['id']] = $panel['name'];
-					}
-					
-				} elseif (!empty($panel['flags']) && in_array($flag, $panel['flags'])) {
-					
-					$return[$module.'/'.$panel['id']] = $panel['name'];
-					
-				}
-				
+
+			if (empty($data['panels']) || !is_array($data['panels'])){
+				continue;
 			}
-			
+
+			foreach($data['panels'] as $panel){
+
+				if (empty($panel['id'])){
+					continue;
+				}
+
+				if ($flag === '' || $flag === null){
+
+					$return[$module.'/'.$panel['id']] = $panel['name'];
+
+				} elseif (!empty($panel['flags']) && in_array($flag, $panel['flags'])) {
+
+					$return[$module.'/'.$panel['id']] = $panel['name'];
+
+				}
+
+			}
+
 		}
-		
+
 		return $return;
-		
+
 	}
 
 }

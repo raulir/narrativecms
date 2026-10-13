@@ -75,7 +75,7 @@ Manage-page Stripe sync (and webhooks):
 
 Checkout is blocked only for **paid** Stripe (`user_has_paid_subscription`); elevated users can buy again.
 
-Manage UI for elevated: banner (plan title + “administratively set”) then the Basic / purchase block.
+Manage UI for elevated: a card-sized banner (plan title + “administratively set”, 35.0rem, centred) then the Basic / purchase block.
 
 Stripe webhook and `meta.subscription` stay separate so sync cannot wipe an elevated grant.
 

@@ -104,6 +104,23 @@ function register_init(){
 	
 	$('.register_errors').on('click.cms', register_hide_error)
 
+	$('.register_help').off('click.register_help').on('click.register_help', function(){
+
+		if (!window.matchMedia('(max-width: 900px)').matches){
+			return
+		}
+
+		var $help = $(this)
+		var open = $help.hasClass('register_help_open')
+
+		$('.register_help_open').removeClass('register_help_open')
+
+		if (!open){
+			$help.addClass('register_help_open')
+		}
+
+	})
+
 }
 
 function register_show_error(error, fieldname = false){

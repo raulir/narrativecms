@@ -49,10 +49,11 @@ class page_translation extends \Controller {
 			$cms_page_panel_id = (int)$this->input->post('cms_page_panel_id');
 		}
 
-		// Always visitor language for FE translators (cms_user may pass explicit language)
-		$cms_language = $this->input->post('cms_language');
-		if ($cms_language === null || $cms_language === '' || empty($_SESSION['cms_user']['cms_user_id'])){
-			$cms_language = $this->cms_page_panel_model->get_current_language();
+		// Target language is the popup edit column (data-cms_language), not the cookie or CMS session.
+		$cms_language = trim((string)$this->input->post('cms_language'));
+		if ($cms_language === ''){
+			print(json_encode(['result' => ['error' => 'Missing target language']], JSON_PRETTY_PRINT));
+			die();
 		}
 
 		if ($do === 'page_translation_ai'){

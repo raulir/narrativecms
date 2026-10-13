@@ -1,5 +1,5 @@
 // Footer Translate control — hover dropup (same pattern as basic/language pseudo-select).
-// Button chrome (.music_button_dark) is applied by music footer/hfooter CSS.
+// Button chrome is .music_dark_button. The list chrome is .music_dark_panel.
 
 .page_translate_container {
 	display: none;
@@ -42,6 +42,28 @@
 	}
 }
 
+@media only screen and (max-width: 900px) {
+
+	.page_translate_button_label {
+		line-height: 2.76rem;
+
+		&::after,
+		&::before {
+			width: 0.85rem;
+			height: 0.24rem;
+		}
+
+		&::after {
+			right: 0.61rem;
+		}
+
+		&::before {
+			right: 1.12rem;
+		}
+	}
+
+}
+
 // Closed by default — no transition / animation (instant like native select)
 .page_translate_list {
 	position: absolute;
@@ -50,10 +72,6 @@
 	bottom: 100%;
 	top: auto;
 	box-sizing: border-box;
-	// Match dark chrome surface
-	background-color: #1a1a1a;
-	border: 0.15rem solid #ffffff;
-	border-radius: 0.5rem;
 	padding: 0.4rem 0 0.3rem 0;
 	opacity: 0;
 	height: 0;
@@ -134,4 +152,15 @@
 	&:hover {
 		color: #808080;
 	}
+}
+
+// Phone: same measurements as the logged-in user menu rows. Colours stay per option type.
+@media only screen and (max-width: 900px) {
+
+	.page_translate_option {
+		padding: 0.2rem 0.8rem;
+		font-size: 1.44rem;
+		line-height: 2.76rem;
+	}
+
 }

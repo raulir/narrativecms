@@ -5,7 +5,7 @@ $rem_px = (int)($GLOBALS['config']['rem_px'] ?? 0);
 $rem_m_px = (int)($GLOBALS['config']['rem_m_px'] ?? 0);
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="<?= cms_visitor_html_lang() ?>">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=<?= 
@@ -28,10 +28,20 @@ $rem_m_px = (int)($GLOBALS['config']['rem_m_px'] ?? 0);
 	var _cms_login_text = <?= json_encode(_user_login_text(false)) ?>;
 	var config_url = _cms_base;
 	<?= !empty($_SESSION['cms_user']['cms_user_id']) ? 'var admin_logged_in = 1;' : '' ?>
-	setInterval(() => {_cms_rem = parseFloat(getComputedStyle(document.documentElement).fontSize)}, 1000)
 	var _cms_rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
-	var _cms_mobile = ( window.innerWidth <= <?= $rem_m_px ?> ? true : false)
-	setInterval(() => {_cms_mobile = ( window.innerWidth <= <?= $rem_m_px ?> ? true : false)}, 1000)
+	var _cms_mobile_query = window.matchMedia('(max-width: <?= $rem_m_px ?>px)')
+	var _cms_mobile = _cms_mobile_query.matches
+	function cms_mobile_update(){
+		_cms_mobile = _cms_mobile_query.matches
+		_cms_rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
+	}
+	if (_cms_mobile_query.addEventListener){
+		_cms_mobile_query.addEventListener('change', cms_mobile_update)
+	} else if (_cms_mobile_query.addListener){
+		_cms_mobile_query.addListener(cms_mobile_update)
+	}
+	window.addEventListener('resize', cms_mobile_update)
+	window.addEventListener('orientationchange', cms_mobile_update)
 </script>
 </head>
 

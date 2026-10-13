@@ -79,16 +79,20 @@ class cms_language_model extends \Model {
 	}
 	
 	/**
-	 * Frontend / visitor language (cookie). Never use for CMS admin UI content.
+	 * Frontend / visitor language (session). Never use for CMS admin UI content.
 	 */
 	function get_current_language(){
-	
-		if (!empty($_COOKIE['language'])){
-			return $_COOKIE['language'];
+
+		if (!empty($_SESSION['language']) && is_string($_SESSION['language'])){
+			return $_SESSION['language'];
 		}
-	
+
+		if (!empty($GLOBALS['language']['language_id'])){
+			return $GLOBALS['language']['language_id'];
+		}
+
 		return $this->get_default();
-	
+
 	}
 	
 	/**
@@ -144,7 +148,7 @@ class cms_language_model extends \Model {
 	}
 
 	/**
-	 * Content language for this request: CMS session in admin UI, visitor cookie on site.
+	 * Content language for this request: CMS session in admin UI, visitor session on site.
 	 * Keeps admin and frontend language environments separate.
 	 */
 	function get_content_language(){

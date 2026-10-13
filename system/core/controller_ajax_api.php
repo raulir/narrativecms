@@ -32,8 +32,15 @@ class Ajax_api extends Controller {
 			$is_action = !empty($this->params['do']) || !empty($this->params['no_html']);
 			$is_cms_admin = !empty($_SESSION['cms_user']['cms_user_id']);
 			$allow_ajax_panels = !empty($GLOBALS['config']['allow_ajax_panels']) && $GLOBALS['config']['allow_ajax_panels'] !== '0';
+			// Frontend translate opens settings rows that are not placed on a page (show = 0).
+			$is_page_translation = ($this->params['panel_id'] === 'user/page_translation');
+			$can_translate = $is_cms_admin;
+			if (!$can_translate && $is_page_translation){
+				$this->load->model('cms/cms_access_model');
+				$can_translate = $this->cms_access_model->user_has_access('cms_translate');
+			}
 
-			if ($is_action || $is_cms_admin || !empty($panel_config['list']['ajax_target']) || $allow_ajax_panels){
+			if ($is_action || $is_cms_admin || !empty($panel_config['list']['ajax_target']) || $allow_ajax_panels || $can_translate){
 				$instance = $this->cms_page_panel_model->get_cms_page_panel($this->params['cms_page_panel_id']);
 				if (!is_array($instance)){
 					print(json_encode(array('result' => array(), 'error' => array('message' => 'Panel not found', ))));
@@ -45,7 +52,7 @@ class Ajax_api extends Controller {
 				die();
 			}
 
-			if (!$is_action && !$is_cms_admin && empty($this->params['show'])){
+			if (!$is_action && !$is_cms_admin && empty($this->params['show']) && !$can_translate){
 				print(json_encode(array('result' => array(), 'error' => array('message' => 'Can\'t show', ))));
 				die();
 			}

@@ -65,7 +65,8 @@ class page_translate extends \Controller {
 			$term_ids = $term_ids_raw;
 		}
 
-		$items = $this->_list_translatable_panels($cms_page_id, $unit_id, $types, $term_ids);
+		$training = trim((string)$this->input->post('training'));
+		$items = $this->_list_translatable_panels($cms_page_id, $unit_id, $types, $term_ids, $training);
 
 		print(json_encode(['result' => ['ok' => 1, 'items' => $items]], JSON_PRETTY_PRINT));
 		die();
@@ -150,7 +151,7 @@ class page_translate extends \Controller {
 
 	}
 
-	function _list_translatable_panels($cms_page_id, $unit_id = 0, $types = [], $term_ids = []){
+	function _list_translatable_panels($cms_page_id, $unit_id = 0, $types = [], $term_ids = [], $training = ''){
 
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_translation_model');
@@ -238,7 +239,7 @@ class page_translate extends \Controller {
 
 		$settings_panel_names = array_keys($panel_names_on_page);
 
-		$extra_names = $this->_get_extra_settings_panel_names($cms_page_id, $unit_id, $types, $panel_names_on_page, $term_ids);
+		$extra_names = $this->_get_extra_settings_panel_names($cms_page_id, $unit_id, $types, $panel_names_on_page, $term_ids, $training);
 		foreach ($extra_names as $extra_name){
 			if (!in_array($extra_name, $settings_panel_names, true)){
 				$settings_panel_names[] = $extra_name;
@@ -305,7 +306,7 @@ class page_translate extends \Controller {
 
 	}
 
-	function _get_extra_settings_panel_names($cms_page_id, $unit_id, $types, $panel_names_on_page, $term_ids = []){
+	function _get_extra_settings_panel_names($cms_page_id, $unit_id, $types, $panel_names_on_page, $term_ids = [], $training = ''){
 
 		$names = [];
 		$CI =& get_instance();
@@ -315,6 +316,7 @@ class page_translate extends \Controller {
 				'types' => $types,
 				'term_ids' => $term_ids,
 				'panel_names' => array_keys($panel_names_on_page),
+				'training' => $training,
 		];
 
 		foreach ($this->_translate_extra_modules() as $mod){

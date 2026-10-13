@@ -21,8 +21,9 @@ class language extends \Controller {
 				$GLOBALS['language']['label'] = $GLOBALS['language']['languages'][$resolved_language_id];
 				$GLOBALS['language']['language_id'] = $resolved_language_id;
 				
+				$_SESSION['language'] = $resolved_language_id;
 				$this->load->helper('cookie_helper');
-				cms_cookie_create('language', $resolved_language_id, 90);
+				cms_cookie_clear('language');
 
 				print(json_encode(['result' => 'ok'], JSON_PRETTY_PRINT));
 				

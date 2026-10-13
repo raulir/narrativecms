@@ -96,6 +96,12 @@ function page_translate_url_path(){
  * Current page for the translate list.
  * Prefer main position (updated on SPA nav); fall back to mount attribute.
  */
+function page_translate_training(){
+
+	return $('.engine_container[data-training="score"]').length ? 'score' : ''
+
+}
+
 function page_translate_page_context($mount){
 
 	var page_id = 0
@@ -118,7 +124,7 @@ function page_translate_list_cache_key($mount){
 
 	var page = page_translate_page_context($mount)
 	var ctx = page_translate_unit_context()
-	return String(page.cms_page_id) + '|' + page.path + '|' + ctx.unit_id + '|' + ctx.types.join(',') + '|' + ctx.term_ids.join(',')
+	return String(page.cms_page_id) + '|' + page.path + '|' + ctx.unit_id + '|' + ctx.types.join(',') + '|' + ctx.term_ids.join(',') + '|' + page_translate_training()
 
 }
 
@@ -229,6 +235,7 @@ function page_translate_load_list($mount, $button, force){
 		'unit_id': ctx.unit_id,
 		'types': JSON.stringify(ctx.types),
 		'term_ids': JSON.stringify(ctx.term_ids),
+		'training': page_translate_training(),
 		'success': function(data){
 			$button.data('page_translate_loading', 0)
 			// Drop response if user navigated away while loading
@@ -288,9 +295,9 @@ function page_translate_build_control($mount){
 	}
 
 	var $button = $(
-		'<div class="page_translate_button">' +
+		'<div class="music_dark_button page_translate_button">' +
 			'<div class="page_translate_button_label">Translate</div>' +
-			'<div class="page_translate_list"></div>' +
+			'<div class="music_dark_panel page_translate_list"></div>' +
 		'</div>'
 	)
 

@@ -328,10 +328,10 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 			$ug_labels = _targets_explode_pipe($group['labels']);
 			$ug_matches = _targets_explode_pipe($group['settings']);
 
-			// 1. if cookie language set and in allowed languages
-			if (!empty($_COOKIE['language'])){
-				
-				$key = _targets_language_key($_COOKIE['language'], $ug_matches);
+			// 1. visitor language already chosen this session
+			if (!empty($_SESSION['language']) && is_string($_SESSION['language'])){
+
+				$key = _targets_language_key($_SESSION['language'], $ug_matches);
 				if ($key !== false){
 					$GLOBALS['language'] = [
 							'label' => $ug_labels[$key],
@@ -341,10 +341,10 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 				}
 
 			}
-			
+
 			// 2. if mandatory language is set
 			if (empty($GLOBALS['language']) && !empty($GLOBALS['config']['language'])){
-				
+
 				$key = _targets_language_key($GLOBALS['config']['language'], $ug_matches);
 				if ($key !== false){
 					$GLOBALS['language'] = [
@@ -352,18 +352,15 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 							'language_id' => $ug_matches[$key],
 							'default' => $ug_matches[0],
 					];
-					
-					include_once($GLOBALS['config']['base_path'].'system/helpers/cookie_helper.php');
-					cms_cookie_create('language', $ug_matches[$key], 90);
 				}
 
 			}
 
 			// 3. if not mandatory language, select suitable from Accept-Language header
 			if (empty($GLOBALS['language']) && !empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])){
-			
+
 				$key = _targets_language_from_accept_header($_SERVER['HTTP_ACCEPT_LANGUAGE'], $ug_matches);
-				
+
 				if ($key !== false){
 
 					$GLOBALS['language'] = [
@@ -371,26 +368,22 @@ if(!empty($_SESSION['config']['targets']['groups'])){
 							'language_id' => $ug_matches[$key],
 							'default' => $ug_matches[0],
 					];
-					
-					include_once($GLOBALS['config']['base_path'].'system/helpers/cookie_helper.php');
-					cms_cookie_create('language', $ug_matches[$key], 90);
 
 				}
-			
+
 			}
 
 			if (empty($GLOBALS['language'])) {
-				
+
 				$GLOBALS['language'] = [
 						'label' => $ug_labels[0],
 						'language_id' => $ug_matches[0],
 						'default' => $ug_matches[0],
 				];
-				
-				include_once($GLOBALS['config']['base_path'].'system/helpers/cookie_helper.php');
-				cms_cookie_create('language', $GLOBALS['language']['language_id'], 90);
-				
+
 			}
+
+			$_SESSION['language'] = $GLOBALS['language']['language_id'];
 
 			$GLOBALS['language']['languages'] = [];
 			foreach($ug_matches as $key => $language_id){

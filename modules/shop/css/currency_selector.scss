@@ -90,6 +90,13 @@
 	pointer-events: auto;
 }
 
+.currency_selector_picked .currency_selector_list,
+.currency_selector_picked .currency_selector_button:hover .currency_selector_list {
+	height: 0;
+	opacity: 0;
+	pointer-events: none;
+}
+
 .currency_selector_option {
 	display: block;
 	box-sizing: border-box;

@@ -29,14 +29,19 @@ function currency_selector_init($root){
 
 		$container.find('.currency_selector_option').on('click.cms', function(){
 
-			var cid = $(this).attr('data-currency_id')
+			var cid = $(this).data('currency_id')
 			if (cid === undefined || cid === null){
 				cid = ''
 			}
 			cid = String(cid)
 			var label = String($(this).text() || '').trim()
 			currency_selector_set($container, cid, label)
+			$container.addClass('currency_selector_picked')
 
+		})
+
+		$container.on('mouseleave.cms', function(){
+			$container.removeClass('currency_selector_picked')
 		})
 
 	})

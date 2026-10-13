@@ -7,7 +7,7 @@
 
 			<div class="language_button_label"><?= $languages[$active_language]['label'] ?></div>
 
-			<div class="language_languages">
+			<div class="language_languages<?= !empty($list_class) ? ' '.$list_class : '' ?>">
 				<?php foreach($languages as $language_id => $language_data): ?>
 					<div class="language_language" data-language_id="<?= $language_id ?>">
 						<?= $language_data['label'] ?>

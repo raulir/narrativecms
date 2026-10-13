@@ -121,21 +121,31 @@
 	}
 
 	.manage_elevated_banner {
-		text-align: center;
-		padding: 0 0 3.0rem 0;
+		display: block;
 		box-sizing: border-box;
+		width: 35.0rem;
+		max-width: 100%;
+		margin: 0 auto 3.0rem auto;
+		padding: 2.0rem 1.8rem 1.8rem 1.8rem;
+		border-radius: 1.0rem;
+		border: 0.15rem solid #404040;
+		background-color: #ffffff;
+		box-shadow: none;
+		text-align: center;
 	}
 
 	.manage_elevated_plan {
 		font-size: 1.68rem;
 		line-height: 2.16rem;
 		font-weight: bold;
-		padding: 0 0 0.5rem 0;
+		padding: 0 0 1.0rem 0;
+		text-align: center;
 	}
 
 	.manage_elevated_note {
 		font-size: 1.4rem;
 		line-height: 1.6rem;
+		text-align: center;
 	}
 
 	.manage_status {

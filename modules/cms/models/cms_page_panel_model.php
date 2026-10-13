@@ -527,10 +527,15 @@ class cms_page_panel_model extends \Model {
 				}
 				
 			} else {
-				
-				$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = ? , value = ? , search = ? , language = ? ";
-				$this->db->query($sql, [$cms_page_panel_id, $name, $value, $search, '']);
-				
+
+				$foreign = $translate !== ''
+						&& $this->cms_language_model->normalise_language_id($translate) !== $this->cms_language_model->normalise_language_id($this->default_language);
+
+				if (!$foreign){
+					$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = ? , value = ? , search = ? , language = ? ";
+					$this->db->query($sql, [$cms_page_panel_id, $name, $value, $search, '']);
+				}
+
 			}
 			
 			// always add to translations too

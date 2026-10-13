@@ -344,6 +344,8 @@ class cms_translation_model extends \Model {
 		$this->load->model('cms/cms_page_panel_cms_model');
 		$this->load->model('cms/cms_language_model');
 
+		$wrote = 0;
+
 		foreach ($values as $language_id => $value){
 			$this->cms_page_panel_cms_model->set_translated_param(
 					$cms_page_panel_id,
@@ -351,9 +353,14 @@ class cms_translation_model extends \Model {
 					$value,
 					$language_id
 			);
+			$wrote++;
 		}
 
 		$this->cms_page_panel_cms_model->rebuild_panel_param_cache($cms_page_panel_id);
+
+		if ($wrote > 0){
+			$this->_fire_on_translate($cms_page_panel_id, $cms_language);
+		}
 
 		if ($cms_language === null || $cms_language === ''){
 			$cms_language = $this->cms_language_model->get_cms_language();
@@ -506,11 +513,22 @@ class cms_translation_model extends \Model {
 		}
 
 		$allowed = [];
+		$defaults = [];
 		foreach ($this->list_translatable_fields($cms_page_panel_id) as $field){
 			if (!empty($field['readonly'])){
 				continue;
 			}
 			$allowed[$field['field_name']] = 1;
+			$defaults[$field['field_name']] = (string)($field['definition_default'] ?? '');
+		}
+
+		$default_lang = $this->cms_language_model->normalise_language_id(
+				$this->cms_language_model->get_default()
+		);
+		$params = [];
+		if ($cms_language !== $default_lang){
+			$loaded = $this->cms_page_panel_model->get_cms_page_panel_params($cms_page_panel_id);
+			$params = is_array($loaded) ? $loaded : [];
 		}
 
 		$saved = 0;
@@ -525,6 +543,19 @@ class cms_translation_model extends \Model {
 				continue;
 			}
 
+			if ($cms_language !== $default_lang){
+				$base = trim((string)$this->_get_translation_value_for_path($params, $path, $default_lang, $default_lang));
+				$fallback = trim($defaults[$field_name] ?? '');
+				if ($base === '' && $fallback !== ''){
+					$this->cms_page_panel_cms_model->set_translated_param(
+							$cms_page_panel_id,
+							$path,
+							$fallback,
+							$default_lang
+					);
+				}
+			}
+
 			$this->cms_page_panel_cms_model->set_translated_param(
 					$cms_page_panel_id,
 					$path,
@@ -536,6 +567,7 @@ class cms_translation_model extends \Model {
 
 		if ($saved > 0){
 			$this->cms_page_panel_cms_model->rebuild_panel_param_cache($cms_page_panel_id);
+			$this->_fire_on_translate($cms_page_panel_id, $cms_language);
 		}
 
 		return [
@@ -543,6 +575,55 @@ class cms_translation_model extends \Model {
 				'saved' => $saved,
 				'cms_language' => $cms_language,
 		];
+
+	}
+
+	/** Missing on_translate methods are ignored. The save JSON is unchanged. */
+	function _fire_on_translate($cms_page_panel_id, $cms_language){
+
+		$cms_page_panel_id = (int)$cms_page_panel_id;
+
+		if ($cms_page_panel_id < 1){
+			return;
+		}
+
+		$this->load->model('cms/cms_page_panel_model');
+		$block = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id, false, false);
+		$panel_name = (string)($block['panel_name'] ?? '');
+
+		if ($panel_name === '' || strpos($panel_name, '/') === false){
+			return;
+		}
+
+		$payload = [
+				'cms_page_panel_id' => $cms_page_panel_id,
+				'panel_name' => $panel_name,
+				'cms_language' => (string)$cms_language,
+		];
+
+		$CI =& get_instance();
+
+		if (method_exists($CI, 'run_panel_method')){
+			$CI->run_panel_method($panel_name, 'on_translate', $payload);
+		}
+
+		$module = strstr($panel_name, '/', true);
+		if (!is_string($module) || !preg_match('/^[a-z0-9_]+$/', $module)){
+			return;
+		}
+
+		$model_name = $module.'_model';
+		$model_file = ($GLOBALS['config']['base_path'] ?? '').'modules/'.$module.'/models/'.$model_name.'.php';
+
+		if (!is_file($model_file)){
+			return;
+		}
+
+		$CI->load->model($module.'/'.$model_name);
+
+		if (!empty($CI->$model_name) && method_exists($CI->$model_name, 'on_translate')){
+			$CI->$model_name->on_translate($payload);
+		}
 
 	}
 

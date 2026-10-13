@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="<?= cms_visitor_html_lang() ?>">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=600,user-scalable=no">
