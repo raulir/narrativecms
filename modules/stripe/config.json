@@ -7,29 +7,26 @@
 		},
 		{
 			"id": "payment",
-			"name": "Payment"
+			"name": "Payment",
+			"placeable": 1
 		},
 		{
 			"id": "payment_hook_success",
-			"name": "Payment hook success"
+			"name": "Payment hook success",
+			"placeable": 1
 		},
 		{
 			"id": "payment_success",
-			"name": "Payment success"
+			"name": "Payment success",
+			"placeable": 1
 		},
 		{
 			"id": "subscription_checkout",
-			"name": "Stripe subscription checkout",
-			"flags": [
-				"hidden"
-			]
+			"name": "Stripe subscription checkout"
 		},
 		{
 			"id": "webhook",
-			"name": "Stripe webhook",
-			"flags": [
-				"hidden"
-			]
+			"name": "Stripe webhook"
 		}
 	],
 	"provides": [

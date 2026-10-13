@@ -18,46 +18,33 @@
 	"panels": [
 		{
 			"id": "subscription",
-			"name": "Subscription settings",
-			"flags": [
-				"hidden"
-			]
+			"name": "Subscription settings"
 		},
 		{
 			"id": "pricing",
-			"name": "Pricing"
+			"name": "Pricing",
+			"placeable": 1
 		},
 		{
 			"id": "manage",
-			"name": "My subscription"
+			"name": "My subscription",
+			"placeable": 1
 		},
 		{
 			"id": "checkout_start",
-			"name": "Subscription checkout start",
-			"flags": [
-				"hidden"
-			]
+			"name": "Subscription checkout start"
 		},
 		{
 			"id": "user_login",
-			"name": "Login extend",
-			"flags": [
-				"hidden"
-			]
+			"name": "Login extend"
 		},
 		{
 			"id": "user_register",
-			"name": "Register extend",
-			"flags": [
-				"hidden"
-			]
+			"name": "Register extend"
 		},
 		{
 			"id": "user_auth_google",
-			"name": "Google auth extend",
-			"flags": [
-				"hidden"
-			]
+			"name": "Google auth extend"
 		}
 	],
 	"extends": [

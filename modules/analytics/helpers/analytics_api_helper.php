@@ -560,11 +560,13 @@ function analytics_normalise_language_code($language) {
 }
 
 /**
- * Language for JS beacon API only: cookie language (no Accept-Language / CMS fallbacks).
+ * Language for JS beacon API only: visitor session language.
  */
 function analytics_get_beacon_language() {
 
-	return analytics_normalise_language_code($_COOKIE['language'] ?? '');
+	$language = (!empty($_SESSION['language']) && is_string($_SESSION['language'])) ? $_SESSION['language'] : '';
+
+	return analytics_normalise_language_code($language);
 
 }
 

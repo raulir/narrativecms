@@ -33,7 +33,7 @@ Host JSON `dir.cache` / `dir.tmp` / `dir.log` (defaults: project `cache/`, `tmp/
 | Logs | **`log/`** |
 | Real product code | `modules/`, `system/` |
 
-Document non-obvious `grok/` tools in `grok/README.md`. **Do not drop a .php in public `cache/`.**
+**Agent one-off files** (scripts, dumps, profiles, tool output) go under project-root `grok/` (gitignored). Prefer `grok/tmp/`, `grok/agent-tools/`, `grok/backup/`, `grok/mcps/`. Do not put them in the project root, `cache/`, `modules/`, `system/`, or a general OS temp folder such as `AppData\Local\Temp`. Do not put production CMS code in `grok/`. Document non-obvious `grok/` tools in `grok/README.md`. **Do not drop a .php in public `cache/`.**
 
 ---
 
@@ -60,7 +60,7 @@ Open that file when changing or debugging core loading, request lifecycle, or ro
 - **Why absolute is preferred:** content width is **fixed in rem** — standard **100rem** page content, or a fixed project width such as **120rem** when the design calls for it. With a known fixed band, absolute layout is predictable, easier to manage, and has fewer side effects than flex (wrapping, shrink/grow, nested flex, percentage height quirks).
 - Prefer simple structure: outer full-width container → inner fixed-width content (`100rem` / `120rem` / `max-width: 100%`) → positioned children inside that content box.
 - Do not set `cursor:` on public site panels when the custom cursors system is in use (it fights `elementsFromPoint`).
-- **SCSS numeric decimals:** use **at least one** and **at most two** digits after the decimal point for lengths and similar values (`8.0rem`, `1.25rem`, `100.0vh`, `0.0`). **Exception:** `letter-spacing` may use more precision when needed (e.g. `0.05em`).
+- **SCSS numeric decimals:** lengths in `rem` (and similar sizes) use **at most two** digits after the decimal point (`8.0rem`, `1.25rem`, `10.13rem`). After a scale such as 1.25×, round to two decimal places. Do not leave `10.125rem`. **Exception:** `letter-spacing` may use three decimal places (e.g. `0.005rem`).
 - **Module SCSS file** (`modules/<module>/css/<module>.scss`) is prepended when compiling each panel SCSS **and** emitted as its own top CSS (`cache/<module>__<module>.css`) on every page that renders a panel from that module. Create it only for shared tokens or base rules used by **several** panels. A variable used by one panel belongs at the top of that panel’s SCSS. Do **not** add an empty or vars-only module SCSS just so a panel can compile.
 
 ## HTTP from PHP
@@ -105,13 +105,13 @@ Open that file when changing or debugging core loading, request lifecycle, or ro
 
 `panels` is the set of types that have a **web representation**: a public or ajax/embed template, and/or CSS/JS, and/or a panel controller used on the site.
 
-The page panel picker (`cms_panel_selector`) lists **every** entry here, including `flags: ["hidden"]`. Hidden only hides a panel from unfiltered `get_cms_panels()` (e.g. `cms_input_panel` with no `flag`).
+The page panel picker (`cms_panel_selector`) lists only entries with **`"placeable": 1`**. Omit the key (default 0) for cron, settings, embeds, and auto-injects. A nested editor that passes `filter_panels` can still list a child that is not placeable. Unfiltered `get_cms_panels()` (admin field type `panel` with no `flag`) returns every `panels` entry. `get_cms_panels('cron')` still matches `flags` containing `cron`.
 
 | Put in `panels` | Do not put in `panels` |
 |-----------------|------------------------|
-| Placeable page panels (`offer/bar`, `shop/products`, `shop/cart`) | List-only items: definition JSON + `cms_list` / FKs, no front template (`offer/offer`, `shop/collection`, `shop/collection_type`, `shop/product_item`, …) |
-| Product/category **pages** (`shop/product`, `shop/category`, `shop/subcategory` — `link_target` 1, site may extend the template) | Admin-only lists (`shop/order`, currencies, delivery, …) |
-| Embed/ajax fragments that still render HTML (`shop/products_grid`, `shop/product_thumb`) — use `flags: ["hidden"]` so they are not the default add-to-page choice | |
+| Placeable page panels (`offer/bar`, `shop/products`, `shop/cart`) — add `"placeable": 1` | List-only items: definition JSON + `cms_list` / FKs, no front template (`offer/offer`, `shop/collection`, `shop/collection_type`, `shop/product_item`, …) |
+| Product/category **pages** (`shop/product`, `shop/category`, `shop/subcategory` — `link_target` 1, site may extend the template) — `"placeable": 1` | Admin-only lists (`shop/order`, currencies, delivery, …) |
+| Embed/ajax fragments that still render HTML (`shop/products_grid`, `shop/product_thumb`) — list them here so CSS/JS pack, omit `placeable` | |
 
 List-only types live as `modules/<module>/definitions/<name>.json` and a `cms_menu` URL to `admin/cms_list/{module}__{panel}/`. Discovery for lists is the definition files, not `config.json` `panels`.
 
@@ -131,6 +131,7 @@ List-only types live as `modules/<module>/definitions/<name>.json` and a `cms_me
 
 ## JavaScript / jQuery
 
+- Selectors, events, and element data go through **jQuery** (`$()`, `.on()`, `.data()`, `.find()`). Do not mix in `querySelector`, `addEventListener`, `getAttribute`, or `.attr('data-…')` for that work. This is the general method in this CMS and in projects built on it.
 - **`$.trim` is not a function** in the jQuery build used by this CMS — do not use it. Prefer native **`String.prototype.trim`**: `String(value || '').trim()`.
 - Prefer the same for other removed/legacy jQuery helpers when native APIs exist.
 
@@ -333,6 +334,16 @@ Print prepared values simply:
 
 Related: Encoding section — `htmlspecialchars` is for edge cases, not the default for every CMS field echo.
 
+### Hardcoded project parameters
+
+Strings written in project code are safe to print too. That includes a class name, a flag, or any other value passed from a template, a `_panel()` call, or a model constant. They are not visitor input.
+
+```php
+<?= !empty($list_class) ? ' '.$list_class : '' ?>
+```
+
+Do not wrap those in `htmlspecialchars`. The caller that passes `list_class` is project code (`'music_dark_panel'`), not a stored CMS string.
+
 ### Panel template partials
 
 When a panel needs reusable markup chunks (shared rows, embed fragments, popup bodies), prefer a **subfolder named after the panel**:
@@ -421,7 +432,7 @@ Architecture — single resource store: `cms_image` table + files under `img/` (
 - **Child** — `{basename}_vN.{ext}` with JSON `meta` (`parent_cms_image_id`, `parent_filename`, `crop`, brightness/contrast/overlay/rotation, zoom/pan for editor)
 - **Image child** — GD export to a physical file on save ([`save_cms_image_child()`](../models/cms_image_model.php))
 - **Video child** — meta-only `.mp4` row (no child mp4 file); optional `{child}.data/cover.jpg` when ffmpeg available
-- **Public embed** — [`_ib()`](../../../system/helpers/image_helper.php): lazy derivatives, mp4 branch, child view `data-*` attrs
+- **Public embed** — [`_ib()`](../../../system/helpers/image_helper.php): lazy derivatives, mp4 branch, child view `data-*` attrs. Always pass the second size argument. It is the pixel cap for the derivative. A path-only call is incomplete.
 
 Three UI layers (detail in module docs):
 

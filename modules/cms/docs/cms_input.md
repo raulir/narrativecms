@@ -158,10 +158,10 @@ Nested page panels editor.
 
 | Property | Description |
 |----------|-------------|
-| `flag` | Limit choices to panels with this flag in `config.json` (e.g. `cron`) |
+| `flag` | Limit choices to panels with this flag in `config.json` (e.g. `cron`). Omit to list every `panels` entry. |
 | `add_empty` | `"1"` — prepend empty option |
 
-Select panel type from installed modules.
+Select panel type from installed modules. Page placement uses `"placeable": 1` on `config.json` `panels` (`cms_panel_selector`), not this field.
 
 ### list
 

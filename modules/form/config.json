@@ -34,7 +34,8 @@
 	"panels":[
 		{
 			"id":"basic",
-			"name":"Basic form"
+			"name":"Basic form",
+			"placeable":1
 		}
 	],
 	"access":[

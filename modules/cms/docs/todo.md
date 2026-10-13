@@ -12,6 +12,10 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 - [x] **#762 one mysqli + slim cms_db** — `$GLOBALS['db']` single connection; [`cms_db.php`](../../../system/core/cms_db.php) replaces `system/database/` (no AR/forge/multi-driver). See [`system.md`](system.md) § Database.
 
+## System / page panel API
+
+- [ ] **Control what a panel serves publicly** — one system for the page panel API. Params, settings, and other panel data should not always be sent. Default mode is a whitelist: only named fields are public. A panel can instead use a blacklist of fields that must stay private. See page panel params and settings.
+
 ## System / frontend page render
 
 - [x] **Missing page `layout` → 500** — empty layout no longer includes `cms/layouts/.tpl.php`. HTTP 500, log to `errors_log`, render saved `internal-error` page if it has a layout, else red-frame HTML. Reserved list/system pages are not auto-inserted; admin shows grey **create** rows. First panel save creates the page from a session draft.
@@ -33,6 +37,9 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 ## Panel export
 
 - [x] **List export** — gear **Export** posts the ticked row ids as `export_ids`. One ticked row keeps the heading **Export page panel**. More than one says **Export page panels (N)**. One zip, `_main` is that array. See [`cms_export.md`](cms_export.md).
+- [ ] **Import definition differences** — list import does not write `_panel_files` or change definitions. Later: detect when the zip’s definition differs and allow overwriting definitions and other panel source files.
+- [ ] **Settings merge on import** — list import only adds settings values, including translations, that are not already stored. Later: a proper merge when the zip and the site both have a value.
+- [ ] **Import match by more than id** — list import matches an existing panel by `cms_page_panel_id` only.
 
 ## Page cache
 

@@ -4,59 +4,73 @@
 	"panels":[
 		{
 			"id":"gtm",
-			"name":"GTM"
+			"name":"GTM",
+			"placeable":1
 		},
 		{
 			"id":"pixel",
-			"name":"FB pixel"
+			"name":"FB pixel",
+			"placeable":1
 		},
 		{
 			"id":"console_log",
-			"name":"Console log"
+			"name":"Console log",
+			"placeable":1
 		},
 		{
 			"id":"spacer",
-			"name":"Spacer"
+			"name":"Spacer",
+			"placeable":1
 		},
 		{
 			"id":"parallax",
-			"name":"Parallax"
+			"name":"Parallax",
+			"placeable":1
 		},
 		{
 			"id":"sidefloat",
-			"name":"Side float"
+			"name":"Side float",
+			"placeable":1
 		},
 		{
 			"id":"language",
-			"name":"Language"
+			"name":"Language",
+			"placeable":1
 		},
 		{
 			"id":"gtag",
-			"name":"Analytics"
+			"name":"Analytics",
+			"placeable":1
 		},
 		{
 			"id":"debug",
-			"name":"Debug"
+			"name":"Debug",
+			"placeable":1
 		},
 		{
 			"id":"lightbox",
-			"name":"Lightbox"
+			"name":"Lightbox",
+			"placeable":1
 		},
 		{
 			"id":"mimage",
-			"name":"Mockup image"
+			"name":"Mockup image",
+			"placeable":1
 		},
 		{
 			"id":"lander",
-			"name":"Lander"
+			"name":"Lander",
+			"placeable":1
 		},
 		{
 			"id":"popup",
-			"name":"Popup"
+			"name":"Popup",
+			"placeable":1
 		},
 		{
 			"id":"iframe",
-			"name":"Iframe"
+			"name":"Iframe",
+			"placeable":1
 		}
 	],
 	"cms_menu":[

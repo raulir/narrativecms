@@ -6,11 +6,11 @@ Language IDs (e.g. `en`, `en-us`, `et`) identify locales. They are not separate 
 
 ## Two separate language environments
 
-CMS admin language and frontend visitor language are **fully separate**. Nothing that happens on the public site (cookie, Accept-Language, language switcher) may change what the admin UI loads or saves, and the admin toolbar language must not drive public content for visitors.
+CMS admin language and frontend visitor language are **fully separate**. Nothing that happens on the public site (session language, Accept-Language, language switcher) may change what the admin UI loads or saves, and the admin toolbar language must not drive public content for visitors.
 
 | Environment | Storage | Getter | Used for |
 |-------------|---------|--------|----------|
-| **Frontend / visitor** | Cookie `language` (+ targets resolution) | `get_current_language()` | Public pages, exercises, material cache keys, site panels |
+| **Frontend / visitor** | `$_SESSION['language']` (+ targets resolution) | `get_current_language()` | Public pages, exercises, material cache keys, site panels |
 | **CMS admin** | `$_SESSION['cms_language']` | `get_cms_language()` | Admin forms, save language, translation popup, admin lists |
 
 **Request-aware helper:** `get_content_language()` returns CMS language on admin requests, visitor language on the public site.
@@ -25,10 +25,11 @@ CMS admin language and frontend visitor language are **fully separate**. Nothing
 ### Rules for code
 
 1. **Admin panels** (toolbar language, panel edit/save, translation popup, CMS lists) use `get_cms_language()` or pass it into `get_cms_page_panel` / `get_cms_page_panel_params` / `get_cms_page_panel_settings`.
-2. **Frontend / music public** use `get_current_language()` (visitor cookie / targets).
+2. **Frontend / music public** use `get_current_language()` (visitor session / targets). Do not read the `language` cookie.
 3. **Shared model defaults** (`get_cms_page_panel` when language omitted, `get_cms_page_panels_by`, `get_cms_page_panel_settings` when language empty, `ajax_panel` settings merge) call `get_content_language()` so the same code path stays correct in both environments.
-4. **Logged-in admin browsing the public site** still sees the **visitor** language (cookie). CMS session language is ignored on the frontend.
-5. **Admin form fields** load the block with **CMS language** only (`get_cms_page_panel(..., get_cms_language())`). Do **not** run the page panel’s frontend `panel_params` on the admin edit form — see [`cms_panel_params.md`](cms_panel_params.md).
+4. **Logged-in admin browsing the public site** still sees the **visitor** language (`$_SESSION['language']`). CMS session language is ignored on the frontend.
+5. Public layouts set `<html lang="…">` from that visitor id in BCP 47 form (`en`, `es`, `en-us`). The language menu reloads the page, so scripts read the tag after the new response. If a future switch changes the session without a reload, that script must also set `document.documentElement.lang` to the same id.
+6. **Admin form fields** load the block with **CMS language** only (`get_cms_page_panel(..., get_cms_language())`). Do **not** run the page panel’s frontend `panel_params` on the admin edit form — see [`cms_panel_params.md`](cms_panel_params.md).
 
 Implementations: [`cms_language_model`](../models/cms_language_model.php), [`cms_page_panel_model`](../models/cms_page_panel_model.php). Admin flag set in [`admin` controller](../controllers/admin.php) (`$GLOBALS['cms_admin_request'] = true`).
 
@@ -104,6 +105,8 @@ Full-panel UI for all `translate:1` fields of one block:
 Storage is the same as the per-field popup (`cms/cms_translate_string`). Save writes only the active CMS language for each field path. Nested repeater fields appear as separate rows (`Items › #2 › Heading`).
 
 **Admin translation API** (grid + field popup) lives in [`cms_translation_model`](../models/cms_translation_model.php). Panel param load/merge and full form save stay on [`cms_page_panel_model`](../models/cms_page_panel_model.php); translation writers use `set_translated_param` / `rebuild_panel_param_cache` on that model.
+
+After a successful save, `save_panel_translations` and `save_translate_string` fire `on_translate`. That calls `run_panel_method($panel_name, 'on_translate', …)` when the panel defines it, and `{module}_model::on_translate` when that method exists (`music/e11` → `music_model`). A missing method does nothing. The save JSON is unchanged. AI suggestions do not save, so they do not fire the hook.
 
 ### AI suggestions (optional)
 

@@ -53,7 +53,8 @@
 	"panels":[
 		{
 			"id":"login",
-			"name":"Login"
+			"name":"Login",
+			"placeable":1
 		},
 		{
 			"id":"user_settings",
@@ -61,54 +62,57 @@
 		},
 		{
 			"id":"header",
-			"name":"Header",
-			"flags":[
-				"hidden"
-			]
+			"name":"Header"
 		},
 		{
 			"id":"register",
-			"name":"Register"
+			"name":"Register",
+			"placeable":1
 		},
 		{
 			"id":"reminder",
-			"name":"Reminder"
+			"name":"Reminder",
+			"placeable":1
 		},
 		{
 			"id":"password_change",
 			"name":"Password change",
-			"flags":[
-				"hidden"
-			]
+			"placeable":1
 		},
 		{
 			"id":"profile",
-			"name":"Profile"
+			"name":"Profile",
+			"placeable":1
 		},
 		{
 			"id":"userforward",
-			"name":"User forwarder"
+			"name":"User forwarder",
+			"placeable":1
 		},
 		{
 			"id":"login_google",
-			"name":"Login by Google"
+			"name":"Login by Google",
+			"placeable":1
 		},
 		{
 			"id":"auth_google",
-			"name":"Auth by Google"
+			"name":"Auth by Google",
+			"placeable":1
 		},
 		{
 			"id":"register_google",
-			"name":"Register by Google"
+			"name":"Register by Google",
+			"placeable":1
 		},
 		{
 			"id":"auth_gapp",
-			"name":"Google app auth"
+			"name":"Google app auth",
+			"placeable":1
 		},
 		{
 			"id":"verify_email",
-			"name":"Verify email"
+			"name":"Verify email",
+			"placeable":1
 		}
 	]
 }
-			

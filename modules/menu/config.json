@@ -4,7 +4,8 @@
 	"panels": [
 		{
 			"id": "menu",
-			"name": "Menu"
+			"name": "Menu",
+			"placeable": 1
 		}
 	]
 }

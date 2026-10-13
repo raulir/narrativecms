@@ -3,56 +3,55 @@
 	"panels": [
 		{
 			"id": "basketmini",
-			"name": "Basket (mini)"
+			"name": "Basket (mini)",
+			"placeable": 1
 		},
 		{
 			"id": "checkout",
-			"name": "Checkout"
+			"name": "Checkout",
+			"placeable": 1
 		},
 		{
 			"id": "basket",
-			"name": "Basket"
+			"name": "Basket",
+			"placeable": 1
 		},
 		{
 			"id": "cart",
-			"name": "Cart"
+			"name": "Cart",
+			"placeable": 1
 		},
 		{
 			"id": "products",
-			"name": "Products"
+			"name": "Products",
+			"placeable": 1
 		},
 		{
 			"id": "products_menu",
-			"name": "Products menu",
-			"flags": [
-				"hidden"
-			]
+			"name": "Products menu"
 		},
 		{
 			"id": "products_grid",
-			"name": "Products grid",
-			"flags": [
-				"hidden"
-			]
+			"name": "Products grid"
 		},
 		{
 			"id": "product_thumb",
-			"name": "Product thumbnail",
-			"flags": [
-				"hidden"
-			]
+			"name": "Product thumbnail"
 		},
 		{
 			"id": "product",
-			"name": "Product"
+			"name": "Product",
+			"placeable": 1
 		},
 		{
 			"id": "category",
-			"name": "Category"
+			"name": "Category",
+			"placeable": 1
 		},
 		{
 			"id": "subcategory",
-			"name": "Subcategory"
+			"name": "Subcategory",
+			"placeable": 1
 		},
 		{
 			"id": "producttext",
@@ -60,24 +59,15 @@
 		},
 		{
 			"id": "dim_value_select",
-			"name": "Dim value select",
-			"flags": [
-				"hidden"
-			]
+			"name": "Dim value select"
 		},
 		{
 			"id": "productdims",
-			"name": "Product dims",
-			"flags": [
-				"hidden"
-			]
+			"name": "Product dims"
 		},
 		{
 			"id": "fulfilment_email",
-			"name": "Email fulfilment",
-			"flags": [
-				"hidden"
-			]
+			"name": "Email fulfilment"
 		}
 	],
 	"provides": [

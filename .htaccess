@@ -58,9 +58,21 @@ AddOutputFilterByType DEFLATE font/otf
 AddOutputFilterByType DEFLATE font/opentype
 </IfModule>
 
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+</IfModule>
+
 RewriteEngine on
 
-RedirectMatch 404 \.git
+# Deny private dirs (no per-directory .htaccess)
+RewriteRule ^tmp(/|$) - [F,L]
+RewriteRule ^log(/|$) - [F,L]
+# Bot probes anywhere in the path. /.well-known stays open for certificates.
+RewriteRule (^|/)wp- - [F,NC,L]
+RewriteRule (^|/)\.git - [F,NC,L]
+RewriteRule (^|/)\.ssh - [F,NC,L]
+RewriteRule (^|/)\.env - [F,NC,L]
+RewriteRule ^\.(?!well-known(?:/|$)) - [F,NC,L]
 
 RewriteCond %{REQUEST_URI} /_install [NC]
 RewriteRule .* - [F,L]

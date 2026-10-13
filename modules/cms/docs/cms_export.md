@@ -86,7 +86,7 @@ Fk targets are one step only: their own fk fields are not followed. Children are
 
 ### Panel normalisation on export
 
-- `show` → `0` (import as hidden draft)
+- `show` is kept. Import creates a new row hidden, and overwrite keeps the show value already on the site.
 - `cms_page_id` `999999` → `0` (list placeholder)
 
 ### Video optimisation
@@ -104,34 +104,25 @@ When **optimised images** is on and `original_width` or `original_height` exceed
 
 ---
 
-## Import (not implemented — reference for future work)
+## Import
 
-### Existing stub code
+List gear **Import** opens the popup [`cms_page_panel_import`](../panels/cms_page_panel_import.php). The panel accepts the upload, stores the session token, and renders [`cms_page_panel_import.tpl.php`](../templates/cms_page_panel_import.tpl.php). The walk lives in [`cms_page_panel_import_model.php`](../models/cms_page_panel_import_model.php).
 
-| File | Status |
-|------|--------|
-| [`cms_page_panel_import.php`](../panels/cms_page_panel_import.php) | `panel_action` returns zero stats; no file handling |
-| [`cms_page_panel_import.tpl.php`](../templates/cms_page_panel_import.tpl.php) | Upload UI shell |
-| [`cms_list.js`](../js/cms_list.js) lines 131–190 | Import flow **commented out** |
-| [`cms_list.tpl.php`](../templates/cms_list.tpl.php) | Import button only when `environment == 'NOP'` |
+The zip is saved under `tmp/` as `import_{token}.zip`. The session stores that path and the list’s panel types. Only `data.json` is read. Mains whose `panel_name` is not this list type are ignored. If none remain, the popup says no panels of that type were found.
 
-### Intended import flow (from commented JS)
+Each remaining main is one block: zip id and title, and a CMS id and title only when that id already exists here with the same `panel_name`. Missing fk targets are ticks, off by default. **As new** is always offered. **Overwrite** is offered only when the CMS line is shown.
 
-1. Open list import popup
-2. User selects `.zip`
-3. `POST ajax_api/get_panel` — `panel_id=cms/cms_page_panel_import`, `do=cms_page_panel_import`, multipart file
-4. Show stats: time, panels, images, files, new_images_*
-5. Backend should: unzip → read `data.json` → remap panel IDs → dedup media by hash → `create_cms_page_panel()` / `update_cms_page_panel()`
+**As new** creates a hidden row (`show` 0), `cms_page_id` 0, sort at the end of that panel type, and new ids. Children are imported and remapped. **Overwrite** writes fields but keeps the live id, sort, page, show, create time, and create user. The update time and update user become the importing user at that moment. A child is overwritten only when the live parent already points at that id. Otherwise a new child is created and the field is pointed at it.
 
-### Suggested import implementation todos
+Ticked fk targets are created before the main tree, each as a new panel. A live row that only shares that id is not overwritten. The same parent pass used for children then sets `parent_id` on the target’s children. Fk fields on the main and on its children use the new ids. Apply accepts a ticked id only when it was on that main’s missing-target list. If that ticked panel’s definition file is not in this CMS, the whole main import is refused and nothing is written. An empty stored type list is refused the same way as a main that is not of this list.
 
-1. Parse `data.json`; honour `_export_options`
-2. Build `old_id → new_id` for every `_panels` id (`_main` is an array). Remap `cms_page_panels` and `fk` values. Find settings via `_settings[panel_name]`. Do not apply the source `cms_page_id` on another site.
-3. Import `_files`: match by hash in `cms_image` / `cms_file`; copy into `img/` if missing
-4. Restore `_translations` via raw `cms_page_panel_param` rows or cache rebuild (`_update_cached_params`)
-5. Remap `link.cms_page_id` fields (optional manual step or slug lookup table in zip)
-6. Panel source files — informational only unless doing code deploy (do not overwrite live code silently)
-7. Re-enable UI: per-panel import button and/or list import in `cms_list.js`
+A failed apply returns `ok: 0` and `message`. Panels created during that attempt are deleted. A row that was only overwritten is left as it was. The popup shows the message under the buttons and clears the busy state. The same line is shown when the request itself fails. Choosing a file uses that line when the request fails. An upload that is too large says so, instead of asking for a file again.
+
+The zip is removed when the import popup closes, and when every block in the popup has been imported.
+
+Settings only gain values, new fields, and translations that are not already stored. Existing settings values are not overwritten. `_panel_files` and definitions are not written.
+
+Images and files already on the panel are not deleted. On overwrite, a field that already has the same value is left alone. A different value reuses an image or file with the same filename, or an image with the same hash. If that record’s file is missing from disk, the zip bytes are written onto that filename and no second record is created. Otherwise a new record is created and the bytes are written there.
 
 ### Related (not panel import)
 

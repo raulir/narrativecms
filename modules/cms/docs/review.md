@@ -90,7 +90,9 @@ Prefer: trust install/update to create runtime dirs; do rare work on the rare pa
 - **Frontend panel JS:** `<panel>_init`, `<panel>_resize`, `<panel>_scroll` (stubs OK) — [`cms_panel_js.md`](cms_panel_js.md).
 - **Module SCSS** (`css/<module>.scss`) only if several panels share tokens; otherwise variables live on the panel SCSS.
 - **HTTP:** streams, not curl; secrets never logged.
-- **`htmlspecialchars`** is not the default for CMS field output.
+- **`htmlspecialchars`** is not the default for CMS field output, or for hardcoded project parameters (a class name or flag passed from project code).
+- **`_ib()`** always has the second size argument. A call with only the image path fails review. That number is the pixel cap for the derivative.
+- **`rem` sizes** use at most two decimal places (`10.13rem`, not `10.125rem`). A scaled size is rounded to two places. `letter-spacing` may use three (`0.005rem`). See [`agents.md`](agents.md) § Markup and CSS style.
 
 ---
 

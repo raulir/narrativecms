@@ -967,6 +967,12 @@ RewriteEngine on
 # Deny private dirs (no per-directory .htaccess)
 RewriteRule ^tmp(/|$) - [F,L]
 RewriteRule ^log(/|$) - [F,L]
+# Bot probes anywhere in the path. /.well-known stays open for certificates.
+RewriteRule (^|/)wp- - [F,NC,L]
+RewriteRule (^|/)\.git - [F,NC,L]
+RewriteRule (^|/)\.ssh - [F,NC,L]
+RewriteRule (^|/)\.env - [F,NC,L]
+RewriteRule ^\.(?!well-known(?:/|$)) - [F,NC,L]
 
 # Public cache: packed CSS/JS (and json/xml/txt used as client assets)
 RewriteCond %{REQUEST_URI} /cache/ [NC]

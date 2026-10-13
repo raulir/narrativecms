@@ -170,30 +170,20 @@
 	"panels":[
 		{
 			"id":"cms_cache",
-			"name":"Page cache",
-			"flags":[
-				"hidden"
-			]
+			"name":"Page cache"
 		},
 		{
 			"id":"cms_normalise",
-			"name":"CMS normalise css",
-			"flags":[
-				"hidden"
-			]
+			"name":"CMS normalise css"
 		},
 		{
 			"id":"cms_mini_normalise",
-			"name":"CMS mini normalise css",
-			"flags":[
-				"hidden"
-			]
+			"name":"CMS mini normalise css"
 		},
 		{
 			"id":"cms_log_rotate",
 			"name":"CMS log rotate",
 			"flags":[
-				"hidden",
 				"cron"
 			]
 		},
@@ -201,7 +191,6 @@
 			"id":"cms_video_encode",
 			"name":"CMS video encode",
 			"flags":[
-				"hidden",
 				"cron"
 			]
 		},
@@ -209,7 +198,6 @@
 			"id":"cms_email_queue",
 			"name":"CMS email queue",
 			"flags":[
-				"hidden",
 				"cron"
 			]
 		}

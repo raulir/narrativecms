@@ -5,9 +5,7 @@
 		{
 			"id":"beacon",
 			"name":"Analytics beacon",
-			"flags":[
-				"hidden"
-			]
+			"placeable":1
 		},
 		{
 			"id":"analytics_dashboard",
@@ -21,7 +19,6 @@
 			"id":"analytics_process",
 			"name":"Analytics process",
 			"flags":[
-				"hidden",
 				"cron"
 			]
 		}

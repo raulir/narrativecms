@@ -42,13 +42,11 @@ In `modules/{provider}/config.json`:
   "panels": [
     {
       "id": "myvendor",
-      "name": "My Vendor settings",
-      "flags": ["hidden"]
+      "name": "My Vendor settings"
     },
     {
       "id": "forecast",
-      "name": "My Vendor forecast",
-      "flags": ["hidden"]
+      "name": "My Vendor forecast"
     }
   ],
   "provides": [
@@ -249,7 +247,7 @@ class forecast extends \Controller {
 }
 ```
 
-**Flags:** provider panels that are not placed on public pages should use `"flags": ["hidden"]` so they are settings/action-only.
+**Placeable:** omit `"placeable"` on provider settings and capability panels so they stay out of **Select new panel**. Add `"placeable": 1` only for a panel an editor drops on a page.
 
 ---
 
@@ -316,7 +314,7 @@ Never put vendor secrets on the domain panel.
 ### A. Provider module `modules/myvendor/`
 
 1. **`config.json`**
-   - `panels`: settings panel + capability panel(s) (`flags: ["hidden"]` if not public UI).
+   - `panels`: settings panel + capability panel(s). Omit `"placeable"` unless the panel is dropped on a public page.
    - `provides`: `{ "service": "S", "panel": "//capability", "label": "…" }`.
    - Optional `cms_menu` under the domain’s admin group (redefine parent id if needed) — **only** if the settings definition has a **non-empty `settings`** array (see agents.md: no empty `panel_settings` menu links).
 2. **Settings** — `definitions/myvendor.json` with fields in **`settings`** (not only `item`), `panels/myvendor.php`, model getters for credentials.
@@ -412,7 +410,7 @@ modules/myvendor/
   config.json                 # panels + provides + cms_menu
   definitions/
     myvendor.json             # settings fields (api_key, cache_minutes, …)
-    forecast.json             # optional empty / hidden panel def
+    forecast.json             # optional empty panel def
   panels/
     myvendor.php              # settings panel_params if needed
     forecast.php              # panel_action → model

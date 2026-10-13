@@ -73,6 +73,8 @@ Host JSON `dir` (optional). Relative values are under the project, or under `dir
 | `tmp` | `tmp` | denied in root `.htaccess` — HTML cache, dumps, updater snapshots |
 | `log` | `log` | denied in root `.htaccess` — `error.log` and other logs |
 | `session` | `{tmp}/sessions` | denied with `tmp/` in root `.htaccess` |
+
+The same root `.htaccess` returns 403 before CMS routing when the path contains `wp-`, `.git` (including `.github`), `.ssh`, or `.env` (including `.environment`) at any depth, or when the path starts with a dot. `/.well-known` and everything under it stay open.
 | `upload` | `img/` | public |
 | `base` | (unset) | parent for relative dir values |
 
@@ -147,7 +149,7 @@ Rules:
 - Models resolved on main via Loader; panel `$this->model_name` works through **`Controller::__get`** when the property lives on the main instance
 - Prefer `namespace module;` + `class name extends \Controller`
 
-`run_panel_method()` uses a per-request method map (`$GLOBALS['_panel_controller_methods']`): `panel_heading` / `panel_params` / `panel_action` are prefilled; custom methods (`ensure_exercise`, `ds_*`, `on_show`, `on_update`, markdown filters, …) are resolved with `method_exists` on first use and then cached.
+`run_panel_method()` uses a per-request method map (`$GLOBALS['_panel_controller_methods']`): `panel_heading` / `panel_params` / `panel_action` are prefilled; custom methods (`ensure_exercise`, `ds_*`, `on_show`, `on_update`, `on_translate`, markdown filters, …) are resolved with `method_exists` on first use and then cached. `on_update` runs from a full admin panel save. `on_translate` runs from the translation writers after a successful language write (panel method, then the module model when it implements `on_translate`).
 
 Do **not** assign by reference (`=&`) into properties that go through `__get` — PHP raises *Indirect modification of overloaded property*. Use plain assignment or a declared property (e.g. `$panel_ci`).
 

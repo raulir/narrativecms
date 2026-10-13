@@ -42,6 +42,10 @@ class cms_panel_selector extends \Controller {
 		
 			if (!empty($config['panels'])){
 				foreach($config['panels'] as $panel){
+
+					if (empty($params['filter_panels']) && empty($panel['placeable'])){
+						continue;
+					}
 					
 					// get panel config
 					$panel_config = $this->cms_panel_model->get_cms_panel_config($module.'/'.$panel['id']);

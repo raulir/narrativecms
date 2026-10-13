@@ -15,6 +15,8 @@ Line format:
 
 Do **not** add these files to `apache-invaliduri` (that jail is AH00126 in httpd `error_log`).
 
+Root `.htaccess` returns 403, before PHP, when the path contains `wp-`, `.git`, `.ssh`, or `.env` at any depth, or starts with a dot. `/.well-known` stays open. Those 403s are not CMS 404s and are not written to `cms_404_probe.log`. Bots that miss this list still reach `cms_404_is_probe()`.
+
 `cms_404_is_probe()` (`system/helpers/error_helper.php`) ignores the query string. It flags hidden paths (`/.…` except `/.well-known/`), stack needles (WordPress, actuators, phpinfo, `auth.json`, Docker/CI, keys, …), and leaked dump/config basenames (`.sql`, `.env`, `settings.php`, `backup.zip`, …). Leave `ads.txt`, `index.php`, `/.well-known/`, and `/auth-google/` on `cms_404.log`. Do not add `composer` as a needle (music slugs).
 
 Probe 404s return plain `Not Found` (no 302 to `/not-found/`, no layout). Logging is unchanged.
@@ -30,6 +32,21 @@ ignoreregex =
 datepattern = ^%%Y-%%m-%%d %%H:%%M:%%S
 ```
 
+`/etc/fail2ban/action.d/firewallcmd-rich-allports.conf`:
+
+```
+[INCLUDES]
+before = firewallcmd-common.conf
+
+[Definition]
+actionban = firewall-cmd --add-rich-rule="rule family='<family>' source address='<ip>' <rich-blocktype>"
+actionunban = firewall-cmd --remove-rich-rule="rule family='<family>' source address='<ip>' <rich-blocktype>"
+```
+
+The rich rule names no port and no protocol, so firewalld rejects that source on every port. `<rich-blocktype>` is the usual `reject type='icmp-port-unreachable'`.
+
+Do **not** use `banaction = %(banaction_allports)s` on this host. That still runs `firewallcmd-rich-rules` with port `0:65535`. firewalld rejects the colon range (`INVALID_PORT: 0:65535`, exit 102). Fail2ban then lists the address as banned, but no rich rule exists. `0-65535` is not a substitute: the stock rule is TCP only, and that range has broken firewalld on some nftables builds.
+
 `/etc/fail2ban/jail.d/cms-404.conf`:
 
 ```
@@ -37,7 +54,7 @@ datepattern = ^%%Y-%%m-%%d %%H:%%M:%%S
 enabled   = true
 filter    = cms-404
 logpath   = /var/www/html/scoretutor.com/log/cms_404_probe.log
-banaction = %(banaction_allports)s
+banaction = firewallcmd-rich-allports
 maxretry  = 2
 findtime  = 4h
 bantime   = 24h
@@ -46,11 +63,13 @@ bantime   = 24h
 enabled   = true
 filter    = cms-404
 logpath   = /var/www/html/scoretutor.com/log/cms_404.log
-banaction = %(banaction_allports)s
+banaction = firewallcmd-rich-allports
 maxretry  = 10
 findtime  = 1h
 bantime   = 4h
 ```
+
+After a ban, `firewall-cmd --list-rich-rules` should show the address with `reject` and no `port port=`. `fail2ban-client status` alone does not prove the firewall took the ban.
 
 Change `logpath` if the site root is not `/var/www/html/scoretutor.com`. Create empty log files if fail2ban refuses a missing path:
 
