@@ -335,10 +335,52 @@ class analytics_model extends \Model {
 		}
 
 		if (!$this->_geoip_reader_available()) {
-			return 'GeoIP PHP library is missing. Run composer install in the project root on the server.';
+			return $this->_geoip_missing_library_message();
 		}
 
 		return '';
+
+	}
+
+	private function _geoip_missing_library_message() {
+
+		$package = 'geoip2/geoip2';
+		$constraint = '^3.2';
+		$install = 'Run composer install in the project root on the server.';
+		$manual = 'GeoIP PHP library is missing. composer.json does not require geoip2/geoip2 and could not be updated. '
+				.'Add "geoip2/geoip2": "^3.2" to the require section, then run composer install in the project root on the server.';
+
+		$path = $GLOBALS['config']['base_path'].'composer.json';
+		if (!is_file($path) || !is_readable($path)) {
+			return $manual;
+		}
+
+		$raw = file_get_contents($path);
+		$config = is_string($raw) ? json_decode($raw, true) : null;
+		if (!is_array($config)) {
+			return $manual;
+		}
+
+		$require = $config['require'] ?? null;
+		if (is_array($require) && array_key_exists($package, $require) && trim((string)$require[$package]) !== '') {
+			return 'GeoIP PHP library is missing. '.$install;
+		}
+
+		if (!is_writable($path)) {
+			return $manual;
+		}
+
+		if (!is_array($require)) {
+			$config['require'] = [];
+		}
+		$config['require'][$package] = $constraint;
+
+		$encoded = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+		if ($encoded === false || file_put_contents($path, $encoded."\n") === false) {
+			return $manual;
+		}
+
+		return 'GeoIP PHP library is missing. Added "geoip2/geoip2": "^3.2" to composer.json. '.$install;
 
 	}
 

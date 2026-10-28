@@ -147,7 +147,7 @@ class do_send extends \Controller {
 			// autoreply
 			if(!empty($params['autoreply'])){
 				
-				if ($params['confirm']){
+				if (!empty($params['confirm'])){
 					
 					$data['confirmation_code'] = md5('CMS'.mt_rand(1000, 9999).$data['email']);
 					
