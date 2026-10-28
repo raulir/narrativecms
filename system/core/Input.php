@@ -78,6 +78,10 @@ class Input {
 	 */
 	function _fetch_from_array(&$array, $index = '', $xss_clean = FALSE)
 	{
+		if ($index === null){
+			$index = '';
+		}
+
 		if ( ! isset($array[$index]))
 		{
 			return FALSE;

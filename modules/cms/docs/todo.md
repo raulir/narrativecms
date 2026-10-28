@@ -8,9 +8,19 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 ---
 
+## System / Composer
+
+- [ ] **Composer packages before SCSS** — a fresh install needs `vendor/` from `composer install` before stylesheets can compile. `scssphp/scssphp` 2.1 lives there, with `league/uri`, `scssphp/source-span`, and `symfony/filesystem`. Longer term, most of `system/vendor` should move into that same Composer directory.
+
+- [x] **SCSS compile in cms_css_model** — `pack_css()`, `pack_css_inline()`, and `pack_get_scss_path()` delegate to `modules/cms/models/cms_css_model.php`. Panel file lists and `add_css()` stay in the controller and the helper. Colour settings and `<link>` output stay for a later slice of [#576](https://github.com/raulir/narrativecms/issues/576).
+
 ## System / database
 
 - [x] **#762 one mysqli + slim cms_db** — `$GLOBALS['db']` single connection; [`cms_db.php`](../../../system/core/cms_db.php) replaces `system/database/` (no AR/forge/multi-driver). See [`system.md`](system.md) § Database.
+
+## System / panel ajax
+
+- [ ] **Panel localStorage eviction** — `get_ajax_panel` `_cache` keeps replies in localStorage. When storage is full, drop older panel cache entries. The `_cache`, `_cache_offline`, and `_cache_reload` flags do not do this.
 
 ## System / page panel API
 

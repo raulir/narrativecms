@@ -453,7 +453,7 @@ if ( !function_exists('_i')) {
 				}
 				
 				// webp
-				if ($_SESSION['webp'] && !empty($GLOBALS['config']['images_webp']) && in_array($params['output'], ['png', 'jpg'])){
+				if (!empty($_SESSION['webp']) && !empty($GLOBALS['config']['images_webp']) && in_array($params['output'], ['png', 'jpg'])){
 					$params['output'] = 'webp';
 				}
 				
@@ -474,7 +474,7 @@ if ( !function_exists('_i')) {
 				$fileurl_mobile = _image_url_with_version($fileurl_mobile, $image, $filename_mobile);
 				
 				// if mobile
-				if ($_SESSION['mobile']){
+				if (!empty($_SESSION['mobile'])){
 					
 					if (!file_exists($filename_mobile)){
 						$needs_lazy_loading = true;
@@ -537,7 +537,7 @@ if ( !function_exists('_i')) {
 					($lazy_v !== '' ? ' data-v="'.htmlspecialchars($lazy_v, ENT_QUOTES, 'UTF-8').'" ' : '').
 					' data-w1="'.$params['width_1'].'" '.(!empty($params['width_2']) ? ' data-w2="'.$params['width_2'].'" ' : '').$dataprops);
 		
-		} elseif ($_SESSION['mobile']){
+		} elseif (!empty($_SESSION['mobile'])){
 			
 			print(' style="background-image: url('.$fileurl_mobile.'); '.$params['css'].' " '.$dataprops);
 			

@@ -26,6 +26,7 @@
 		}, 0)
 
 		var _cms_base = '<?php print($GLOBALS['config']['base_url']); ?>';
+		var _cms_user_id = <?= (int)($_SESSION['user']['cms_page_panel_id'] ?? 0) ?>;
 		var _cms_login_url = <?= json_encode(_user_login_url(false)) ?>;
 		var _cms_login_text = <?= json_encode(_user_login_text(false)) ?>;
 		<?php if(!empty($_SESSION['cms_user']['cms_user_id'])): ?>var admin_logged_in = 1<?php endif ?>

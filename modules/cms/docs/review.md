@@ -27,7 +27,8 @@ Say what was reviewed (module + feature), not “the whole site”.
 3. **Vertical** — which **layer** inside that module (table).
 4. **Hot path / page load** — checklist below. A change that is fine on one admin action can still be wrong if it runs on every front request.
 5. **Contracts** — checklist below.
-6. **Output** — a short list of **improvements** (see below). Use keep / unused / wrong layer / contract as working notes, not the delivered result.
+6. **Dead code** — functions, files, branches, and settings that this slice left with no caller. A public entry point the CMS still calls by name (`<panel>_init`, a `do` value, a model method used by another module) is not dead.
+7. **Output** — a short list of **improvements** (see below). Use keep / unused / wrong layer / contract as working notes, not the delivered result.
 
 Do not restyle or “clean up” unrelated code during the review write-up.
 
@@ -88,12 +89,14 @@ Prefer: trust install/update to create runtime dirs; do rare work on the rare pa
 - **Templates** use `div` unless the tag’s own behaviour is needed (`a` for a real URL, `input`, `textarea`, `select`, `form`, `label`, `img`, `video`). No `span` or `button` for layout or click targets. See [`agents.md`](agents.md) § Markup and CSS style.
 - **Public FE:** no new flex, no ARIA/`role`, no `cursor:` (site cursors).
 - **Frontend panel JS:** `<panel>_init`, `<panel>_resize`, `<panel>_scroll` (stubs OK) — [`cms_panel_js.md`](cms_panel_js.md).
+- **Code names** match the owner. `cms_*` / `_cms_*` are CMS and system. `<module>_*` / `_<module>_*` are module-wide. One panel uses `<panel>_*` or, preferred, `<module>_<panel|library>_*`. Entry points stay `<panel>_init` (and resize, scroll, destroy, `*_ok`). Short template helpers such as `_ib()`, `_lh()`, and `_print_r()` keep that form. See [`agents.md`](agents.md) § Code names.
 - **Module SCSS** (`css/<module>.scss`) only if several panels share tokens; otherwise variables live on the panel SCSS.
 - **Shared classes** stay inside one module: common class first, then the panel class (`music_heading login_heading`). Another module gets that look from the site extend SCSS via a mixin, not by borrowing the site class. See [`agents.md`](agents.md) § Markup and CSS style.
 - **HTTP:** streams, not curl; secrets never logged.
 - **`htmlspecialchars`** is not the default for CMS field output, or for hardcoded project parameters (a class name or flag passed from project code).
 - **`_ib()`** always has the second size argument. A call with only the image path fails review. That number is the pixel cap for the derivative.
 - **`rem` sizes** use at most two decimal places (`10.13rem`, not `10.125rem`). A scaled size is rounded to two places. `letter-spacing` may use three (`0.005rem`). See [`agents.md`](agents.md) § Markup and CSS style.
+- **Dead code** left by the change fails review: an unused function, file, branch, or setting, or a caller that only reaches code which itself has no caller. Say what to remove. Do not remove it in the review turn. A name the CMS or another module still calls is live.
 
 ---
 

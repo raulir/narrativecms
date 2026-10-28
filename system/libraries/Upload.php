@@ -532,6 +532,7 @@ class CI_Upload {
 							'image/gif',
 							'image/jpeg',
 							'image/png',
+							'image/webp',
 						);
 
 		return (in_array($this->file_type, $img_mimes, TRUE)) ? TRUE : FALSE;

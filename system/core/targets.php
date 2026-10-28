@@ -28,6 +28,59 @@ if (!function_exists('_targets_normalise_language_id')){
 
 	}
 
+	function _targets_live_language_ids(){
+
+		static $live = null;
+
+		if ($live !== null){
+			return $live;
+		}
+
+		$live = [];
+
+		if (empty($GLOBALS['db']) || !($GLOBALS['db'] instanceof mysqli)){
+			return $live;
+		}
+
+		$sql = "select param.name, param.value from cms_page_panel_param param ".
+				"inner join cms_page_panel panel on panel.cms_page_panel_id = param.cms_page_panel_id ".
+				"where panel.panel_name = 'cms/cms_languages' and panel.cms_page_id = 0 ".
+				"and (param.name like 'languages.%.language_id' or param.name like 'languages.%.livestatus') ".
+				"and param.language = ''";
+
+		$result = mysqli_query($GLOBALS['db'], $sql);
+
+		if (!$result){
+			return $live;
+		}
+
+		$rows = [];
+
+		while ($row = mysqli_fetch_assoc($result)){
+			if (!preg_match('/^languages\.(\d+)\.(language_id|livestatus)$/', (string)$row['name'], $match)){
+				continue;
+			}
+			$rows[$match[1]][$match[2]] = (string)$row['value'];
+		}
+
+		foreach ($rows as $row){
+			if (($row['livestatus'] ?? '') === '1' && ($row['language_id'] ?? '') !== ''){
+				$live[_targets_normalise_language_id($row['language_id'])] = 1;
+			}
+		}
+
+		return $live;
+
+	}
+
+	function _targets_language_is_live($language_id){
+
+		$live = _targets_live_language_ids();
+
+		return !empty($live[_targets_normalise_language_id($language_id)]);
+
+	}
+
 	function _targets_language_from_accept_header($accept_header, $ug_matches){
 
 		$languages_accepted = explode(',', $accept_header);
@@ -58,13 +111,13 @@ if (!function_exists('_targets_normalise_language_id')){
 		foreach($language_a as $entry){
 
 			$key = _targets_language_key($entry['tag'], $ug_matches);
-			if ($key !== false){
+			if ($key !== false && _targets_language_is_live($ug_matches[$key])){
 				return $key;
 			}
 
 			$prefix = _targets_normalise_language_id(substr($entry['tag'], 0, 2));
 			foreach($ug_matches as $match_key => $match_id){
-				if (_targets_normalise_language_id($match_id) === $prefix){
+				if (_targets_normalise_language_id($match_id) === $prefix && _targets_language_is_live($match_id)){
 					return $match_key;
 				}
 			}

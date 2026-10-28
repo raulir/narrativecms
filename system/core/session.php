@@ -150,6 +150,60 @@ if (!function_exists('cms_session_boot')){
 
 	}
 
+	function cms_session_regenerate(){
+
+		if (session_status() !== PHP_SESSION_ACTIVE){
+			return;
+		}
+
+		session_regenerate_id(true);
+
+	}
+
+	function cms_session_adopt_posted(){
+
+		if (empty($GLOBALS['config']['inapp'])){
+			return;
+		}
+
+		$session_id = (string)($_POST['session_id'] ?? '');
+
+		if (!preg_match('/^[A-Za-z0-9,-]{20,128}$/', $session_id)){
+			return;
+		}
+
+		$path = (string)($_SERVER['REQUEST_URI'] ?? '');
+		$is_position = !empty($_POST['_ajax']);
+
+		if (!preg_match('#/ajax_api/#', $path) && !$is_position){
+			return;
+		}
+
+		if (session_id() === $session_id){
+			return;
+		}
+
+		if (!empty($_SESSION['user']) && is_array($_SESSION['user']) && cms_session_has_cookie()){
+			return;
+		}
+
+		if (session_status() === PHP_SESSION_ACTIVE){
+			session_write_close();
+		}
+
+		session_name(cms_session_name());
+		cms_session_apply_save_path();
+		ini_set('session.use_strict_mode', '1');
+		ini_set('session.use_cookies', '0');
+		session_id($session_id);
+		session_start();
+
+		if (session_id() !== $session_id){
+			$_SESSION = [];
+		}
+
+	}
+
 	function cms_session_boot(){
 
 		if (!session_id()){

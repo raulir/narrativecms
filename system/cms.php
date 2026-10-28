@@ -77,7 +77,7 @@ $working_directory = str_replace('\\', '/', trim(getcwd()).'/');
 require_once $working_directory.'system/core/cms_config_basic.php';
 require_once $GLOBALS['config']['base_path'].'system/core/cms_path.php';
 
-if (!empty($GLOBALS['config']['allow_api_anywhere'])){
+if (!empty($GLOBALS['config']['allow_api_anywhere']) || !empty($GLOBALS['config']['inapp'])){
 	header('Access-Control-Allow-Origin: *');
 }
 
@@ -169,6 +169,7 @@ if (!empty($GLOBALS['config']['cron_trigger']) && $GLOBALS['config']['cron_trigg
 // start session (front / admin / ajax — not module APIs, which die above)
 include($GLOBALS['config']['base_path'].'system/core/session.php');
 cms_session_boot();
+cms_session_adopt_posted();
 
 // Visitor targets (business: AB / language / mobile…) — after session; uses global $db from full config
 $_SESSION['config']['targets']['hash'] = '';

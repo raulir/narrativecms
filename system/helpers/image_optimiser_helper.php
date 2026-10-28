@@ -76,9 +76,7 @@ if ( !function_exists('_iw')) {
 
 	function _gd_image_destroy($img){
 
-		if (_gd_image_valid($img)){
-			imagedestroy($img);
-		}
+		// GdImage objects are freed by PHP 8. imagedestroy() is deprecated in 8.5.
 
 	}
 

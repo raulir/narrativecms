@@ -64,7 +64,46 @@ class Index extends Controller {
    		
    	}
    	
-   	function _enforce_main_page_access($page){
+   	/**
+	 * Position ajax does not re-render the footer, so the beacon panel does not record the new page.
+	 * Record it here, including when the position HTML comes from the page cache.
+	 */
+	function _record_position_pageview(){
+
+		if (empty($GLOBALS['config']['modules']) || !in_array('analytics', $GLOBALS['config']['modules'], true)){
+			return;
+		}
+
+		$this->load->helper('analytics/analytics_api_helper');
+
+		if (!analytics_beacon_enabled()){
+			return;
+		}
+
+		$panels = $this->cms_page_panel_model->get_cms_page_panels_by([
+			'panel_name' => 'analytics/beacon',
+			'show' => 1,
+		]);
+		$php_on = false;
+
+		foreach ($panels as $panel){
+			$flags = analytics_beacon_tracking_flags($panel);
+			if (!empty($flags['php_tracking'])){
+				$php_on = true;
+				break;
+			}
+		}
+
+		if (!$php_on){
+			return;
+		}
+
+		$this->load->model('analytics/analytics_model');
+		$this->analytics_model->record_php_pageview($GLOBALS['cms_request_uri'] ?? '');
+
+	}
+
+	function _enforce_main_page_access($page){
    		
    		if (empty($page['cms_page_id'])){
    			return;
@@ -457,6 +496,8 @@ class Index extends Controller {
 						
 					}
 				}
+
+				$this->_record_position_pageview();
 
 				print(json_encode(array(
 						'positions' => $return,
