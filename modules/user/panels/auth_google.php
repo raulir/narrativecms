@@ -15,7 +15,7 @@ class auth_google extends \Controller {
 		// Capture before clear so template can show journey-specific CTAs
 		$params['auth_intent'] = $this->user_google_model->get_web_auth_intent();
 		
-		$payload = $this->user_google_model->verify_web_credential($id_token, $params['google_client_id'] ?? '');
+		$payload = $this->user_google_model->verify_web_credential($id_token, $this->user_google_model->web_client_id());
 
 		if (empty($payload)) {
 			$params['error'] = 'google_error';
@@ -38,6 +38,7 @@ class auth_google extends \Controller {
 		
 		$this->load->model('cms/cms_access_model');
 		$this->cms_access_model->refresh_user_session($result['user']);
+		cms_session_regenerate();
 
 		return $params;
 		

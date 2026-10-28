@@ -107,6 +107,7 @@ class register extends \Controller {
 						if (!empty($session_user['cms_page_panel_id']) && $this->user_model->login_allowed($session_user)){
 							$this->load->model('cms/cms_access_model');
 							$this->cms_access_model->refresh_user_session($session_user);
+							cms_session_regenerate();
 						}
 						
 					}

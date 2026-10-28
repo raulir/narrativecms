@@ -18,11 +18,6 @@
 			"translate": "1"
 		},
 		{
-			"type": "text",
-			"name": "google_client_id",
-			"label": "Google Client ID"
-		},
-		{
 			"type": "link",
 			"name": "google_auth_page",
 			"label": "Google Auth Page",

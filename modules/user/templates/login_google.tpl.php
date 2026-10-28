@@ -1,9 +1,9 @@
 <?php
-	$login_uri = ($_SERVER['REQUEST_SCHEME'] ?? 'https').'://'.($_SERVER['HTTP_HOST'] ?? '')._l($google_auth_page, false);
+	$login_uri = rtrim((string)($GLOBALS['config']['base_site'] ?? $GLOBALS['config']['base_host'] ?? ''), '/')._l($google_auth_page, false);
 ?>
 <div class="login_google_container"
-		data-progress_message="<?= htmlspecialchars($progress_message ?? 'One moment...', ENT_QUOTES, 'UTF-8') ?>"
-		data-login_uri="<?= htmlspecialchars($login_uri, ENT_QUOTES, 'UTF-8') ?>">
+		data-progress_message="<?= $progress_message ?>"
+		data-login_uri="<?= $login_uri ?>">
 	<div class="login_google_content">
 
 		<div class="login_google_heading"><?= $heading ?></div>

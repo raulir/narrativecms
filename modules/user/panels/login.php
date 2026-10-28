@@ -52,7 +52,14 @@ class login extends \Controller{
 		
 			$this->load->model('cms/cms_access_model');
 			$this->cms_access_model->refresh_user_session($user);
-			
+			cms_session_regenerate();
+
+			if (!empty($GLOBALS['config']['inapp'])){
+				$params['login_success'] = 1;
+				$params['email'] = $user['email'] ?? $username;
+				$params['session_id'] = session_id();
+			}
+
 		}
 		
 		if ($do == 'resend_verification'){

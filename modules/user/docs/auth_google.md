@@ -43,7 +43,7 @@ Result UI reorders CTAs by intent (login vs register first).
 
 ### App
 
-`inapp` + `login_from_app_profile` — may create if missing (unchanged).
+The app posts the native ID token as `credential` to `user/auth_gapp`. The server verifies it with the `google_client_id` saved on `user/auth_google`, then `login_from_verified_app_payload` signs in or creates the account from that payload. A posted email without a valid token does not start a session.
 
 ## Operator setup
 

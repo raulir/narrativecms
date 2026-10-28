@@ -13,6 +13,7 @@ class login_google extends \Controller {
 		// Overwrite any prior register intent so login path cannot create
 		$this->user_google_model->set_web_auth_intent('login');
 
+		$params['google_client_id'] = $this->user_google_model->web_client_id();
 		$params['progress_message'] = $this->user_model->get_progress_message();
 		$this->user_model->enqueue_progress_overlay(true);
 

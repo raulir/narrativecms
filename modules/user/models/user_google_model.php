@@ -31,26 +31,51 @@ class user_google_model extends \Model {
 
 	}
 	
+	function web_client_id() {
+
+		$this->load->model('cms/cms_page_panel_model');
+		$settings = $this->cms_page_panel_model->get_cms_page_panel_settings('google/auth');
+
+		return trim((string)($settings['web_client_id'] ?? ''));
+
+	}
+
 	function verify_web_credential($credential, $google_client_id) {
-		
-		if (empty($credential) || empty($google_client_id)) {
+
+		$this->verify_error = '';
+
+		if ($credential === '' || $credential === null) {
+			$this->verify_error = 'no_credential';
 			return false;
 		}
-		
+
+		if ($google_client_id === '' || $google_client_id === null) {
+			$this->verify_error = 'no_client';
+			return false;
+		}
+
 		require_once($GLOBALS['config']['base_path'].'vendor/autoload.php');
-		
+
 		// Leading \ — this file is namespace user; bare Firebase\… would be user\Firebase\…
 		\Firebase\JWT\JWT::$leeway = 60;
-		
+
 		$client = new \Google\Client(['client_id' => $google_client_id]);
 		$payload = $client->verifyIdToken($credential);
-		
-		if (!($payload && !empty($payload['email_verified']))) {
+
+		if (!$payload) {
+			$this->verify_error = 'token';
 			return false;
 		}
-		
+
+		if (empty($payload['email_verified'])) {
+			$this->verify_error = 'email_verified';
+			return false;
+		}
+
+		error_log('GAPP verify ok email='.($payload['email'] ?? ''));
+
 		return $payload;
-		
+
 	}
 	
 	/**
@@ -85,6 +110,26 @@ class user_google_model extends \Model {
 		
 	}
 	
+	/**
+	 * Native app: verified ID-token payload. May create an account on first sign-in.
+	 */
+	function login_from_verified_app_payload($payload) {
+
+		if (empty($payload['email'])) {
+			return ['error' => 'missing_email'];
+		}
+
+		return $this->_resolve_web_user([
+				'email' => $payload['email'],
+				'google_id' => $payload['sub'] ?? '',
+				'given_name' => $payload['given_name'] ?? '',
+				'family_name' => $payload['family_name'] ?? '',
+				'name' => $payload['name'] ?? '',
+				'picture' => $payload['picture'] ?? '',
+		], 'app');
+
+	}
+
 	/**
 	 * Native app: may create account on first Google sign-in.
 	 */

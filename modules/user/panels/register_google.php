@@ -12,6 +12,7 @@ class register_google extends \Controller {
 		$this->load->model('user/user_model');
 		$this->user_google_model->set_web_auth_intent('register');
 
+		$params['google_client_id'] = $this->user_google_model->web_client_id();
 		$params['progress_message'] = $this->user_model->get_progress_message();
 		$this->user_model->enqueue_progress_overlay(true);
 

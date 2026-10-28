@@ -159,6 +159,7 @@ function page_translate_close_dropdown($button){
 
 	if ($button && $button.length){
 		$button.addClass('page_translate_closed')
+		$button.removeClass('page_translate_open')
 	}
 
 }
@@ -311,6 +312,20 @@ function page_translate_build_control($mount){
 	$button.on('mouseenter.page_translate', function(){
 		$button.removeClass('page_translate_closed')
 		page_translate_load_list($mount, $button, false)
+	})
+
+	$button.on('click.page_translate', function(e){
+		if ($(e.target).closest('.page_translate_option').length){
+			return
+		}
+		e.preventDefault()
+		e.stopPropagation()
+		var open = !$button.hasClass('page_translate_open')
+		$button.toggleClass('page_translate_open', open)
+		$button.toggleClass('page_translate_closed', !open)
+		if (open){
+			page_translate_load_list($mount, $button, false)
+		}
 	})
 
 	$button.on('click.page_translate', '.page_translate_option', function(e){
