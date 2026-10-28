@@ -32,7 +32,7 @@ class cms_languages extends \Controller {
 		} else if ($params['do'] == 'C'){
 
 			$languages = $this->_load_languages($cms_page_panel_id);
-			$languages[] = ['language_id' => '', 'label' => '', 'endonym' => ''];
+			$languages[] = ['language_id' => '', 'label' => '', 'endonym' => '', 'livestatus' => '0'];
 			$this->_save_languages($cms_page_panel_id, $languages);
 
 			return ['web' => 1];
@@ -101,6 +101,10 @@ class cms_languages extends \Controller {
 			} else if ($col == 'endonym'){
 
 				$languages[$row_id]['endonym'] = trim($params['value'] ?? '');
+
+			} else if ($col == 'livestatus'){
+
+				$languages[$row_id]['livestatus'] = ((string)($params['value'] ?? '') === '1') ? '1' : '0';
 
 			} else {
 
@@ -183,6 +187,7 @@ class cms_languages extends \Controller {
 					'language_id' => $this->_normalise_language_id($row['language_id'] ?? ''),
 					'label' => trim($row['label'] ?? ''),
 					'endonym' => trim($row['endonym'] ?? ''),
+					'livestatus' => ((string)($row['livestatus'] ?? '') === '1') ? '1' : '0',
 			];
 		}
 
@@ -214,6 +219,7 @@ class cms_languages extends \Controller {
 					'language_id' => $language_id,
 					'label' => $row['label'] ?? '',
 					'endonym' => $row['endonym'] ?? '',
+					'livestatus' => ((string)($row['livestatus'] ?? '') === '1') ? '1' : '0',
 					'local_label' => ($language_id !== '' && !empty($local_labels[$language_id])) ? $local_labels[$language_id] : '',
 			];
 

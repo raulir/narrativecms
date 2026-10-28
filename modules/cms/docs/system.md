@@ -216,7 +216,7 @@ Admin edit of a **page block** must **not** run that page panel’s `panel_param
 
 - `_panel('module/panel', $params)` — embed panel HTML  
 - `add_css()` / `add_js()` — page-level asset lists (prefer these over ad-hoc includes)  
-- `get_ajax('module/panel', data)` (JS) — hits ajax controller + `panel_action` / render as configured  
+- `get_ajax('module/panel', data)` (JS) — jQuery POST, promise. Prefer `.then()` / `.catch()`. `error` in `data` still runs on failure. Sends `no_html: 1`. `get_ajax_panel(name, data, callback)` is the HTML load: same promise, no `no_html`, optional success callback. It does not wrap `get_ajax`. On an in-app page (`_cms_inapp`) both send the saved `session_id`. An `inapp` host adopts that id for an `ajax_api` request and for a position click (`_ajax`), and does not replace the browser session cookie. In-app position links (`get_ajax_positions`) post to `_cms_base` plus the path and do not change the address bar. Static stylesheets, scripts, images, and fonts are requested from the shell (`http://localhost` in the WebView, `http://musicwrap.localhost` in the browser). Panel and position posts are the requests that go to the backend. Login regenerates the id. POST keys are sorted. `_cache`, `_cache_offline`, and `_cache_reload` are localStorage only. The cache key includes `_cms_user_id`, so each account has its own copy. A reply is stored only when it has `result` and no `error`. `_cache_offline` with nothing stored and `navigator.onLine === false` rejects immediately. A failed request still serves a stored copy when one exists. Access denied opens the popup and rejects. CMS admin does not use this cache. See [`agents.md`](agents.md) § Frontend panel calls.  
 
 ### Filename layout (panel)
 

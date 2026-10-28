@@ -93,7 +93,8 @@
 }
 
 // Simple hover open — height follows items, no max-height / scroll track
-.page_translate_button:hover .page_translate_list {
+.page_translate_button:hover .page_translate_list,
+.page_translate_button.page_translate_open .page_translate_list {
 	height: auto;
 	opacity: 1;
 	overflow: hidden;

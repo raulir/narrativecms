@@ -4,35 +4,69 @@ function _cms_get_base() {
 	return (typeof _cms_base !== 'undefined' ? _cms_base : '/')
 }
 
+function cms_ajax_app_session(params){
+
+	params = params || {}
+
+	if (!window._cms_inapp){
+		return params
+	}
+
+	var saved = {}
+
+	try {
+		saved = JSON.parse(localStorage.getItem('app_session') || '') || {}
+	} catch (e) {
+		saved = {}
+	}
+
+	if (saved.session_id && !params.session_id){
+		params.session_id = saved.session_id
+	}
+
+	return params
+
+}
+
 function get_ajax(name, params) {
-	return new Promise((resolve, reject) => {
-		var ext_params = Object.assign({
-			'no_html': '1',
-			'success': data => resolve(data)
-		}, params)
 
-		var action_on_success = ext_params.success
-		var action_on_error = ext_params.error
-		var ajax_timeout = ext_params.timeout
-		delete ext_params.success
-		delete ext_params.error
-		delete ext_params.timeout
+	var data = Object.assign({
+		'no_html': '1'
+	}, cms_ajax_app_session(params || {}))
+	var on_success = data.success
+	var on_error = data.error
+	delete data.success
+	delete data.error
 
-		// Preserve callbacks / timeout for get_ajax_panel (not POST body)
-		if (typeof action_on_error === 'function') {
-			ext_params._ajax_error = action_on_error
+	return cms_ajax_panel(name, data).then(function(result) {
+		if (typeof on_success === 'function') {
+			on_success(result)
 		}
-		if (ajax_timeout !== undefined && ajax_timeout !== null) {
-			ext_params._ajax_timeout = ajax_timeout
+		return result
+	}, function(err) {
+		if (typeof on_error === 'function') {
+			on_error(err)
 		}
-		if (!action_on_success) {
-			ext_params._ajax_error = function(err) {
-				reject(err)
-			}
-		}
-
-		get_ajax_panel(name, ext_params, action_on_success || (data => resolve(data)))
+		return Promise.reject(err)
 	})
+
+}
+
+function get_ajax_panel(name, args, callback) {
+
+	var promise = cms_ajax_panel(name, cms_ajax_app_session(args || {}))
+
+	if (typeof callback !== 'function') {
+		return promise
+	}
+
+	var chained = promise.then(function(result) {
+		callback(result)
+		return result
+	})
+	chained.catch(function(){})
+	return chained
+
 }
 
 function cms_access_denied_popup(error) {
@@ -48,7 +82,7 @@ function cms_access_denied_popup(error) {
 		text: 'System error: access denied',
 	}, function(data) {
 		$('body').append(data.result._html)
-	})
+	}).catch(function() {})
 }
 
 function cms_apply_panel_css(data, finish) {
@@ -68,14 +102,154 @@ function cms_apply_panel_css(data, finish) {
 
 }
 
-function get_ajax_panel(name, args, action_on_success) {
-	var params = Object.assign({}, args)
-	delete params._ajax_cache
+function cms_panel_cache_flag(value) {
 
-	var action_on_error = params._ajax_error
-	var ajax_timeout = params._ajax_timeout
-	delete params._ajax_error
+	return !(value === undefined || value === null || value === false || value === 0 || value === '0' || value === '')
+
+}
+
+function cms_panel_cache_on() {
+
+	if (typeof admin_logged_in !== 'undefined' && admin_logged_in) {
+		return false
+	}
+
+	try {
+		return typeof localStorage !== 'undefined' && localStorage !== null
+	} catch (e) {
+		return false
+	}
+
+}
+
+function cms_panel_cache_hash(text) {
+
+	var seeds = [5381, 52711, 2166136261, 16777619]
+	var parts = []
+	var s
+	var hash
+	var i
+
+	for (s = 0; s < seeds.length; s++) {
+		hash = seeds[s]
+		for (i = 0; i < text.length; i++) {
+			hash = ((hash << 5) + hash) ^ text.charCodeAt(i)
+			hash = hash | 0
+		}
+		parts.push((hash >>> 0).toString(16))
+	}
+
+	return parts.join('')
+
+}
+
+function cms_ajax_sort(value) {
+
+	var sorted
+	var keys
+	var i
+
+	if (!value || typeof value !== 'object') {
+		return value
+	}
+
+	if (Object.prototype.toString.call(value) !== '[object Object]') {
+		return value
+	}
+
+	sorted = {}
+	keys = Object.keys(value).sort()
+
+	for (i = 0; i < keys.length; i++) {
+		sorted[keys[i]] = cms_ajax_sort(value[keys[i]])
+	}
+
+	return sorted
+
+}
+
+function cms_panel_cache_storable(data) {
+
+	return !!(data && data.result && !data.error)
+
+}
+
+function cms_panel_cache_user(){
+
+	if (typeof _cms_user_id !== 'undefined' && _cms_user_id){
+		return String(_cms_user_id)
+	}
+
+	return '0'
+
+}
+
+function cms_panel_cache_key(name, params) {
+
+	return 'cms_panel_' + cms_panel_cache_hash(_cms_get_base() + '\n' + cms_panel_cache_user() + '\n' + name + '\n' + JSON.stringify(params))
+
+}
+
+function cms_panel_cache_read(key) {
+
+	if (!cms_panel_cache_on()) {
+		return null
+	}
+
+	try {
+		var raw = localStorage.getItem(key)
+		if (!raw) {
+			return null
+		}
+		var stored = JSON.parse(raw)
+		if (!stored || typeof stored !== 'object' || !stored.data) {
+			return null
+		}
+		return stored
+	} catch (e) {
+		return null
+	}
+
+}
+
+function cms_panel_cache_write(key, data) {
+
+	if (!cms_panel_cache_on()) {
+		return
+	}
+
+	try {
+		localStorage.setItem(key, JSON.stringify({
+			t: Math.floor(Date.now() / 1000),
+			data: data
+		}))
+	} catch (e) {}
+
+}
+
+function cms_ajax_panel(name, args) {
+	var params = cms_ajax_sort(Object.assign({}, args))
+
+	if (window._cms_inapp){
+		params._cms_inapp = 1
+	}
+
+	var cache_seconds = parseInt(params._cache, 10)
+	if (isNaN(cache_seconds) || cache_seconds < 0) {
+		cache_seconds = 0
+	}
+	var cache_offline = cms_panel_cache_flag(params._cache_offline)
+	var cache_reload = cms_panel_cache_flag(params._cache_reload)
+	delete params._cache
+	delete params._cache_offline
+	delete params._cache_reload
+
+	var ajax_timeout = params.timeout
+	if (params._ajax_timeout !== undefined && params._ajax_timeout !== null) {
+		ajax_timeout = params._ajax_timeout
+	}
 	delete params._ajax_timeout
+	delete params._ajax_error
 	// Never POST callback/timeout fields
 	delete params.success
 	delete params.error
@@ -83,8 +257,102 @@ function get_ajax_panel(name, args, action_on_success) {
 	delete params.complete
 
 	params.panel_id = name
+	params = cms_ajax_sort(params)
 
-	return new Promise((resolve) => {
+	var cache_key = cms_panel_cache_key(name, params)
+	var stored = cms_panel_cache_read(cache_key)
+	var stored_age = stored ? (Math.floor(Date.now() / 1000) - (parseInt(stored.t, 10) || 0)) : 0
+	var cache_fresh = !!(stored && cache_seconds > 0 && stored_age < cache_seconds)
+
+	return new Promise((resolve, reject) => {
+
+		var fail = function(err) {
+			reject(err)
+		}
+
+		var deliver = function(returned_data) {
+
+			if (returned_data && returned_data.error && returned_data.error.message === 'access_denied') {
+				if (name !== 'cms/cms_access_denied') {
+					cms_access_denied_popup(returned_data.error)
+				}
+				fail({
+					xhr: null,
+					status: 'error',
+					error: returned_data.error,
+					message: 'access_denied'
+				})
+				return
+			}
+
+			if (returned_data && typeof returned_data.result == 'object') {
+				var script_srcs = []
+				var prepare_field = function(value){
+					var prepared = cms_inapp_prepare_html(value)
+					script_srcs = script_srcs.concat(prepared.srcs || [])
+					return prepared.html
+				}
+				if (typeof returned_data.result._html == 'string') {
+					returned_data.result._html = prepare_field(returned_data.result._html)
+				}
+				if (typeof returned_data.result.html == 'string') {
+					returned_data.result.html = prepare_field(returned_data.result.html)
+				} else if (typeof returned_data.result._html == 'string') {
+					returned_data.result.html = returned_data.result._html
+				}
+				$.each(returned_data.result, (key, value) => {
+					if (key === '_html' || key === 'html') {
+						return
+					}
+					if (typeof value == 'string') {
+						value = prepare_field(value)
+						returned_data.result[key] = value
+						$('.__' + name.replace('/', '__') + '__' + key).html(value)
+					} else if (typeof value == 'number' || typeof value == 'bigint') {
+						$('.__' + name.replace('/', '__') + '__' + key).html(value)
+					}
+				})
+				var scripts_done = (typeof cms_inapp_load_scripts === 'function')
+					? cms_inapp_load_scripts(script_srcs)
+					: Promise.resolve()
+				scripts_done.then(function(){
+					if (typeof cms_position_link_init === 'function') {
+						cms_position_link_init()
+					}
+				})
+			}
+
+			var finish = function() {
+				resolve(returned_data)
+			}
+
+			cms_apply_panel_css(returned_data, finish)
+
+		}
+
+		if (typeof window.music_offline_take === 'function' && window.music_offline_take(name, params, stored, deliver, fail)){
+			return
+		}
+
+		// Reload wins over offline: jQuery POST first. A stored copy is only the failure path.
+		if (!cache_reload && (cache_fresh || (cache_offline && stored))) {
+			deliver(stored.data)
+			return
+		}
+
+		if (cache_offline && !cache_reload && !stored && typeof navigator !== 'undefined' && navigator.onLine === false) {
+			if (typeof music_offline_notice === 'function'){
+				music_offline_notice()
+			}
+			fail({
+				xhr: null,
+				status: 'offline',
+				error: 'offline',
+				message: 'Request failed: offline'
+			})
+			return
+		}
+
 		var ajax_opts = {
 			type: 'POST',
 			url: _cms_get_base() + 'ajax_api/get_panel/',
@@ -92,50 +360,28 @@ function get_ajax_panel(name, args, action_on_success) {
 			dataType: 'json',
 			success: function(returned_data) {
 
-				if (returned_data.error && returned_data.error.message === 'access_denied') {
-					if (name !== 'cms/cms_access_denied') {
-						cms_access_denied_popup(returned_data.error)
-					}
-					return
+				if (cache_seconds > 0 && cms_panel_cache_storable(returned_data)) {
+					cms_panel_cache_write(cache_key, returned_data)
 				}
 
-				if ((typeof returned_data.result != 'undefined') && (typeof returned_data.result._html != 'undefined') && !returned_data.result.html) {
-					returned_data.result.html = returned_data.result._html
-				}
-
-				if (typeof returned_data.result == 'object') {
-					$.each(returned_data.result, (key, value) => {
-						if (key === '_html' || key === 'html') {
-							return
-						}
-						if (typeof value == 'string' || typeof value == 'number' || typeof value == 'bigint') {
-							$('.__' + name.replace('/', '__') + '__' + key).html(value)
-						}
-					})
-				}
-
-				var finish = function() {
-					if (action_on_success) {
-						action_on_success(returned_data)
-					} else {
-						resolve(returned_data)
-					}
-				}
-
-				cms_apply_panel_css(returned_data, finish)
+				deliver(returned_data)
 
 			},
 			error: function(xhr, status, err) {
-				if (typeof action_on_error === 'function') {
-					action_on_error({
-						xhr: xhr,
-						status: status,
-						error: err,
-						message: status === 'timeout'
-							? 'Request timed out'
-							: ('Request failed' + (err ? (': ' + err) : ''))
-					})
+
+				if (stored) {
+					deliver(stored.data)
+					return
 				}
+
+				fail({
+					xhr: xhr,
+					status: status,
+					error: err,
+					message: status === 'timeout'
+						? 'Request timed out'
+						: ('Request failed' + (err ? (': ' + err) : ''))
+				})
 			}
 		}
 
@@ -339,6 +585,176 @@ function panels_display_popup(html, params) {
 
 }
 
+function cms_inapp_drop_v(query){
+
+	if (!query){
+		return ''
+	}
+
+	var parts = query.replace(/^\?/, '').split('&').filter(function(part){
+		return part && part.indexOf('v=') !== 0
+	})
+
+	return parts.length ? '?' + parts.join('&') : ''
+
+}
+
+function cms_inapp_asset_url(filename){
+
+	if (!window._cms_inapp || typeof _cms_base !== 'string' || _cms_base.indexOf('http') !== 0 || typeof filename !== 'string'){
+		return filename
+	}
+
+	var base = _cms_base.replace(/\/+$/, '')
+	var text = filename
+
+	if (text.indexOf(base) === 0){
+		text = text.slice(base.length)
+	}
+
+	var hash = ''
+	var query = ''
+	var hash_at = text.indexOf('#')
+
+	if (hash_at !== -1){
+		hash = text.slice(hash_at)
+		text = text.slice(0, hash_at)
+	}
+
+	var query_at = text.indexOf('?')
+
+	if (query_at !== -1){
+		query = text.slice(query_at)
+		text = text.slice(0, query_at)
+	}
+
+	var path = text.charAt(0) === '/' ? text : '/' + text.replace(/^\/+/, '')
+	var relative = path.replace(/^\//, '')
+
+	if (relative.indexOf('cache/') !== 0 && relative.indexOf('modules/') !== 0 && relative.indexOf('img/') !== 0){
+		return filename
+	}
+
+	return path + cms_inapp_drop_v(query) + hash
+
+}
+
+function cms_inapp_html(html){
+
+	if (!window._cms_inapp || typeof html !== 'string' || typeof _cms_base !== 'string' || _cms_base.indexOf('http') !== 0){
+		return html
+	}
+
+	return cms_inapp_rewrite_text(html, _cms_base)
+
+}
+
+function cms_inapp_script_path(src){
+
+	var value = String(src || '')
+
+	try {
+		if (value.indexOf('http') === 0){
+			value = new URL(value).pathname
+		}
+	} catch (e) {}
+
+	var cut = value.indexOf('?')
+	if (cut !== -1){
+		value = value.slice(0, cut)
+	}
+
+	return value
+
+}
+
+function cms_inapp_script_loaded(src){
+
+	var path = cms_inapp_script_path(src)
+	var nodes = document.getElementsByTagName('script')
+
+	for (var i = 0; i < nodes.length; i++){
+		if (cms_inapp_script_path(nodes[i].getAttribute('src')) === path){
+			return true
+		}
+	}
+
+	return false
+
+}
+
+function cms_inapp_prepare_html(html){
+
+	html = cms_inapp_html(html)
+
+	if (!window._cms_inapp || typeof html !== 'string'){
+		return {html: html, srcs: []}
+	}
+
+	var srcs = []
+	var cleaned = html.replace(/<script\b([^>]*)>[\s\S]*?<\/script>/gi, function(tag, attrs){
+
+		var match = String(attrs || '').match(/\bsrc\s*=\s*(['"])([^'"]+)\1/i)
+		if (!match){
+			return tag
+		}
+
+		srcs.push(match[2])
+		return ''
+
+	})
+
+	return {html: cleaned, srcs: srcs}
+
+}
+
+function cms_inapp_load_scripts(srcs){
+
+	var pending = []
+
+	;(srcs || []).forEach(function(src){
+		var url = cms_inapp_asset_url(src)
+		if (!url || cms_inapp_script_loaded(url)){
+			return
+		}
+		pending.push(url)
+	})
+
+	var chain = Promise.resolve()
+
+	pending.forEach(function(url){
+		chain = chain.then(function(){
+			return new Promise(function(resolve){
+				var script = document.createElement('script')
+				script.src = url
+				script.async = false
+				script.onload = function(){ resolve() }
+				script.onerror = function(){ resolve() }
+				document.body.appendChild(script)
+			})
+		})
+	})
+
+	return chain
+
+}
+
+function cms_inapp_rewrite_text(html, base){
+
+	function esc(text){
+		return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+	}
+
+	base = String(base || '').replace(/\/+$/, '')
+	html = String(html).replace(new RegExp(esc(base) + '(/(?:cache|modules|img)/)', 'g'), '$1')
+
+	var slashed = base.replace(/\//g, '\\/')
+	html = html.replace(new RegExp(esc(slashed) + '(\\\\/(?:cache|modules|img)\\\\/)', 'g'), '$1')
+
+	return html
+
+}
+
 function _cms_load_css(filename) {
 	return new Promise((resolve) => {
 
@@ -347,7 +763,7 @@ function _cms_load_css(filename) {
 		link.type = 'text/css'
 		link.rel = 'stylesheet'
 		link.addEventListener('load', resolve)
-		link.href = filename
+		link.href = cms_inapp_asset_url(filename)
 
 		document.head.appendChild(link)
 

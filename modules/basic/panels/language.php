@@ -16,7 +16,7 @@ class language extends \Controller {
 			$this->load->model('cms/cms_language_model');
 			$resolved_language_id = $this->cms_language_model->resolve_language_id($language_id, $GLOBALS['language']['languages'] ?? []);
 
-			if ($resolved_language_id !== false){
+			if ($resolved_language_id !== false && ($this->cms_language_model->language_is_live($resolved_language_id) || $this->cms_language_model->user_can_see_test_language())){
 				
 				$GLOBALS['language']['label'] = $GLOBALS['language']['languages'][$resolved_language_id];
 				$GLOBALS['language']['language_id'] = $resolved_language_id;
@@ -45,9 +45,17 @@ class language extends \Controller {
 		$endonyms = $this->cms_language_model->get_language_endonyms();
 
 		$params['languages'] = [];
+		$see_test = $this->cms_language_model->user_can_see_test_language();
 		foreach($GLOBALS['language']['languages'] as $language_id => $language_name){
+			if (!$see_test && !$this->cms_language_model->language_is_live($language_id)){
+				continue;
+			}
+			$label = $endonyms[$language_id] ?? $language_name;
+			if ($see_test && !$this->cms_language_model->language_is_live($language_id)){
+				$label = '*'.$label;
+			}
 			$params['languages'][$language_id] = [
-					'label' => $endonyms[$language_id] ?? $language_name,
+					'label' => $label,
 					'language_id' => $language_id,
 			];
 		}

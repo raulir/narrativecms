@@ -21,15 +21,23 @@
 					"type": "cms/cms_languages_id",
 					"name": "language_id",
 					"label": "Language ID",
-					"width": "22",
+					"width": "18",
 					"align": "left",
 					"order": "10"
+				},
+				{
+					"type": "cms/cms_languages_livestatus",
+					"name": "livestatus",
+					"label": "Status",
+					"width": "12",
+					"align": "left",
+					"order": "15"
 				},
 				{
 					"type": "cms/cms_grid_editable",
 					"name": "label",
 					"label": "Label",
-					"width": "22",
+					"width": "20",
 					"align": "left",
 					"order": "20"
 				},
@@ -37,7 +45,7 @@
 					"type": "cms/cms_grid_editable",
 					"name": "endonym",
 					"label": "Endonym",
-					"width": "22",
+					"width": "20",
 					"align": "left",
 					"order": "25",
 					"help": "Native language name for frontend switcher, e.g. Eesti"

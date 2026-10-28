@@ -161,6 +161,51 @@ class cms_language_model extends \Model {
 
 	}
 
+	function language_is_live($language_id){
+
+		$language_id = $this->resolve_language_id($language_id, $GLOBALS['language']['languages'] ?? []);
+
+		if ($language_id === false){
+			return false;
+		}
+
+		$CI =& get_instance();
+		$CI->load->model('cms/cms_page_panel_model');
+		$settings = $CI->cms_page_panel_model->get_cms_page_panel_settings('cms/cms_languages');
+		$rows = $settings['languages'] ?? [];
+
+		if (!is_array($rows)){
+			return false;
+		}
+
+		foreach ($rows as $row){
+			if (!is_array($row)){
+				continue;
+			}
+			$resolved = $this->resolve_language_id($row['language_id'] ?? '', $GLOBALS['language']['languages'] ?? []);
+			if ($resolved === $language_id){
+				return (string)($row['livestatus'] ?? '') === '1';
+			}
+		}
+
+		return false;
+
+	}
+
+	function user_can_see_test_language(){
+
+		if (!empty($_SESSION['cms_user']['cms_user_id'])){
+			return true;
+		}
+
+		$CI =& get_instance();
+		$CI->load->model('cms/cms_access_model');
+
+		return $CI->cms_access_model->user_has_access('music_debug')
+				|| $CI->cms_access_model->user_has_access('cms_translate');
+
+	}
+
 	function get_language_endonyms(){
 
 		$allowed = $GLOBALS['language']['languages'] ?? [];

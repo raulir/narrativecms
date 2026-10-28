@@ -65,6 +65,23 @@ Open that file when changing or debugging core loading, request lifecycle, or ro
 - **Shared look, same module:** put the common rules on one class. In HTML that class comes first, then the panel class. Example: `class="music_heading login_heading"`. The panel class is only for what differs.
 - **Shared look, other module:** do not put the site class on the other module’s template. Subscription must not use `music_heading`. Move the rules into a mixin, and make the site class only include that mixin. The site module’s extend SCSS includes the same mixin on the other panel’s own class. Example: `@mixin music_heading()` with `.music_heading { @include music_heading(); }`, and `music/css/subscription_pricing.scss` includes it on `.pricing_heading`. The subscription template stays `class="pricing_heading"`. Do not `@extend` the site class from an extend stylesheet: module SCSS is prepended and stripped at `CUT HERE`, so the extended selector would be discarded. Mixins expand into the extend file.
 
+## Frontend panel calls
+
+`get_ajax` and `get_ajax_panel` in `modules/cms/js/cms_site_main.js` are the browser calls into a panel. Both return a promise. Prefer `.then()` for the reply and `.catch()` for failure. An `error` function in the params object still runs on failure, then the promise rejects.
+
+```javascript
+get_ajax('module/panel', { do: 'save' }).then(function(data) {
+	// data.result
+}).catch(function(err) {
+	// err.message
+})
+```
+
+- `get_ajax(name, params)` sends `no_html: 1`. Use it for `panel_action` and JSON. A `success` function in `params` still runs, for older callers, and the promise resolves as well.
+- `get_ajax_panel(name, params)` does not send `no_html`. The reply includes panel HTML. A third-argument callback still runs on success, and the promise resolves too. It is not a wrapper around `get_ajax`, because that would force `no_html` and drop the HTML.
+- Both POST with jQuery. Param keys are sorted before the request. `_cache` (seconds), `_cache_offline`, and `_cache_reload` are removed before the POST and select the localStorage copy. The cache key includes `_cms_user_id`, so each account has its own copy. A stored reply is served on failure when one exists. CMS admin does not use this cache.
+- A site may set `window.music_offline_take(name, params, stored, deliver, fail)`. When that function returns true, `get_panel` does not call the server. The CMS does not ship a practice cache.
+
 ## HTTP from PHP
 
 - **Do not use curl** (`curl_init`, `curl_exec`, etc.) in modules or system code.
@@ -79,6 +96,12 @@ Open that file when changing or debugging core loading, request lifecycle, or ro
 - Avoid browser-direct provider SDKs/APIs that need secret keys, privileged webhooks, or business rules that must not be spoofed. Public publishable keys or pure client widgets are fine only when the provider’s model requires them (e.g. Stripe publishable key for Elements) — still keep charge/session creation on the server.
 - Same idea as module **providers** (`provides` + domain panel orchestrating `shopify/checkout`, `stripe/subscription_checkout`, AI, …): domain FE → our panel → third party.
 - **Full how-to (add a new provider without reverse-engineering):** [**provider_pattern.md**](provider_pattern.md).
+
+## Project keys stay in the main module
+
+Only the project’s main site module (here `modules/music/`) may contain project-specific values: client ids, API keys, package names, host names, and other half-secret or site-specific information.
+
+Do not put those values in `modules/cms/`, `system/`, or shared helper modules. Those trees are reused in other projects and most of them go to a public git repo. Defaults in their definitions and code stay empty. The site fills the real values in its own module, or in admin settings that are not committed. Never log the values.
 
 ## No silent fails (APIs, config, optional paths)
 
@@ -144,6 +167,20 @@ List-only types live as `modules/<module>/definitions/<name>.json` and a `cms_me
 $user_name
 cms_page_panel_create()
 ```
+
+### Code names
+
+The prefix says who owns the name. A review fails a variable, function, or other code name whose prefix does not match where it is used.
+
+- `cms_*` and `_cms_*` are CMS and system names (`cms_ajax_panel`, `_cms_inapp`, `_cms_offline`).
+- `<module>_*` and `_<module>_*` are names that module uses across more than one panel (`music_offline_take`).
+- A name used by one panel is `<panel>_*` or, preferred, `<module>_<panel>_*` (`music_footer_refresh_shell`). A shared file that is not a panel uses `<module>_<library>_*` (`music_offline_*` in `offline.js`).
+
+Panel entry points stay `<panel>_init`, `<panel>_destroy`, `<panel>_resize`, `<panel>_scroll`, and the `<panel>_ok` guard. The CMS calls those by panel name.
+
+A short global helper may keep a leading underscore and a short name. Templates use these often: `_ib()`, `_lh()`, `_print_r()`, `_panel()`. New helpers of that kind are rare. Do not use that form for module or panel logic.
+
+Template and CSS class prefixes are separate. See Template files and Markup and CSS style.
 
 Braces style – opening `{` always on the same line, with exactly one space before it:
 

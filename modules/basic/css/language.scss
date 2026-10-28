@@ -85,7 +85,8 @@
 		height: 0.5rem;
 	}
 
-	.language_button:hover & {
+	.language_button:hover &,
+	.language_button.language_dropdown_open & {
 		height: auto;
 		opacity: 1;
 		// open list: overflow visible so the bridge above can receive hover

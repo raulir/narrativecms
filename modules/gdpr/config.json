@@ -2,15 +2,18 @@
 	"panels":[
 		{
 			"id":"popup",
-			"name":"Popup"
+			"name":"Popup",
+			"placeable":1
 		},
 		{
 			"id":"copy",
-			"name":"Copy"
+			"name":"Copy",
+			"placeable":1
 		},
 		{
 			"id":"back",
-			"name":"Back"
+			"name":"Back",
+			"placeable":1
 		}
 	],
 	"cms_menu":[

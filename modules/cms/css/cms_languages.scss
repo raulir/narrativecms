@@ -1,4 +1,5 @@
 .cms_languages_id_container,
+.cms_languages_livestatus_container,
 .cms_languages_local_label_container {
 	width: 100%;
 	box-sizing: border-box;
@@ -11,6 +12,7 @@
 }
 
 .cms_languages_id_input,
+.cms_languages_livestatus_input,
 .cms_languages_local_label_input {
 	width: 100%;
 	box-sizing: border-box;

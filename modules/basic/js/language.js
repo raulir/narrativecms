@@ -2,6 +2,7 @@ function language_close_dropdown($button){
 
 	if ($button && $button.length){
 		$button.addClass('language_dropdown_closed')
+		$button.removeClass('language_dropdown_open')
 	}
 
 }
@@ -10,6 +11,18 @@ function language_init(){
 
 	$('.language_button').on('mouseenter.cms', function(){
 		$(this).removeClass('language_dropdown_closed')
+	})
+
+	$('.language_button').on('click.cms', function(event){
+		if ($(event.target).closest('.language_language').length){
+			return
+		}
+		event.preventDefault()
+		event.stopPropagation()
+		var $button = $(this)
+		var open = !$button.hasClass('language_dropdown_open')
+		$button.toggleClass('language_dropdown_open', open)
+		$button.toggleClass('language_dropdown_closed', !open)
 	})
 
 	$('.language_language').on('click.cms', function(){

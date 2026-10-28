@@ -1,10 +1,74 @@
 var cms_position_last_url = window.location.href
 var cms_position_nav_busy = false
 
+function cms_position_request_url(url){
+
+	if (!url){
+		return ''
+	}
+
+	var base = (typeof _cms_base === 'string' && _cms_base) ? _cms_base : '/'
+	var path = url
+
+	if (/^https?:\/\//i.test(url)){
+		var parsed
+		try {
+			parsed = new URL(url)
+		} catch (e) {
+			return ''
+		}
+		var allowed = {}
+		allowed[location.host] = 1
+		allowed['localhost'] = 1
+		allowed['musicwrap.localhost'] = 1
+		if (base.indexOf('http') === 0){
+			try {
+				allowed[new URL(base).host] = 1
+			} catch (e) {}
+		}
+		if (!allowed[parsed.host]){
+			return ''
+		}
+		path = parsed.pathname + parsed.search
+	}
+
+	if (!path || path.charAt(0) !== '/'){
+		return ''
+	}
+
+	if (base.indexOf('http') === 0){
+		return base.replace(/\/$/, '') + path
+	}
+
+	return path
+
+}
+
+function cms_position_history_url(url){
+
+	if (!url || !/^https?:\/\//i.test(url)){
+		return url
+	}
+
+	try {
+		var parsed = new URL(url)
+		return parsed.pathname + parsed.search
+	} catch (e) {
+		return url
+	}
+
+}
+
 function get_ajax_positions(url, params, action_on_success) {
 
 	params._url = url
 	params._ajax = 1
+	if (typeof cms_ajax_app_session === 'function'){
+		params = cms_ajax_app_session(params)
+	}
+	if (window._cms_inapp){
+		params._cms_inapp = 1
+	}
 
 	$.ajax({
 		type: 'POST',
@@ -88,7 +152,7 @@ function cms_position_apply_result(result, opts) {
 			var final_url = result._final_url || opts.url || window.location.href
 
 			if (opts.history === 'push') {
-				cms_position_push_url(final_url)
+				cms_position_push_url(cms_position_history_url(final_url))
 			} else {
 				cms_position_sync_url_tracking()
 			}
@@ -153,8 +217,14 @@ function cms_position_goto(url, opts) {
 		})
 	}
 
+	var request_url = cms_position_request_url(url)
+	if (!request_url){
+		cms_position_nav_busy = false
+		return Promise.resolve()
+	}
+
 	var download = new Promise(function(resolve) {
-		get_ajax_positions(url, {'cms_positions': cms_position_collect()}, function(result) {
+		get_ajax_positions(request_url, {'cms_positions': cms_position_collect()}, function(result) {
 			resolve(result)
 		})
 	})
@@ -193,9 +263,23 @@ function cms_position_link_init($root){
 
 		$link.addClass('cms_position_link_ok')
 
-		$link.on('click.cms', function(){
+		$link.on('click.cms', function(e){
 
 			var $this = $(this)
+			var request_url = cms_position_request_url($this.attr('href'))
+
+			if (window._cms_offline && typeof music_offline_block_url === 'function' && music_offline_block_url(request_url)){
+				e.preventDefault()
+				e.stopPropagation()
+				if (typeof music_offline_notice === 'function'){
+					music_offline_notice()
+				}
+				return false
+			}
+
+			if (!request_url){
+				return
+			}
 
 			// optional custom before/after on the link (override defaults)
 			// Handlers must resolve with $(this) — the element they fire on.
@@ -225,7 +309,7 @@ function cms_position_link_init($root){
 			}
 
 			var download_page = new Promise(function(resolve) {
-				get_ajax_positions($this.attr('href'), {'cms_positions': cms_position_collect()}, function(result) {
+				get_ajax_positions(request_url, {'cms_positions': cms_position_collect()}, function(result) {
 					resolve(result)
 				})
 			})

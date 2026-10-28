@@ -1,7 +1,8 @@
 {
     "version": "2",
     "label":"GDPR module settings",
-    "item": [
+    "item": [],
+    "settings": [
 		{
 			"type":"select",
 			"name":"notracking",
