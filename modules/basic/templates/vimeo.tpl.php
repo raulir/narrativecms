@@ -12,7 +12,7 @@
 			
 				<iframe class="basic_vimeo_iframe" src="https://player.vimeo.com/video/<?= $vimeo_id ?>?background=1" 
 						width="640" height="360" frameborder="0" 
-						allow="autoplay; fullscreen"></iframe>
+						allow="autoplay; fullscreen; unload"></iframe>
 				
 				<?php if(!empty($control_progress)): ?>
 					<div class="basic_vimeo_toolbar">

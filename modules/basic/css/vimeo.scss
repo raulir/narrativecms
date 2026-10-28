@@ -442,6 +442,21 @@
 		padding-bottom: 0!important;
 		height: 100%;
 	}
+
+	.basic_vimeo_iframe {
+		pointer-events: none;
+	}
+}
+
+.basic_vimeo_fullscreen.basic_vimeo_toolbar_idle {
+
+	cursor: none;
+
+	.basic_vimeo_toolbar,
+	.basic_vimeo_minitoolbar {
+		opacity: 0;
+		pointer-events: none;
+	}
 }
 
 @media screen and (max-width: $mobile_width) {

@@ -46,6 +46,9 @@ function basic_vimeo_init(){
 
 	$(document).on('fullscreenchange', function(){
 		if (document.fullscreenElement === null){
+			$('.basic_vimeo_fullscreen').each(function(){
+				basic_vimeo_toolbar_idle_clear($(this))
+			})
 			$('.basic_vimeo_fullscreen').removeClass('basic_vimeo_fullscreen')
 			if (typeof cms_scroll_unlock != 'undefined'){
 				cms_scroll_unlock()
@@ -161,9 +164,11 @@ function basic_vimeo_init(){
 				if ($vimeo.hasClass('basic_vimeo_fullscreen')){
 					cms_fullscreen_close()
 					$vimeo.removeClass('basic_vimeo_fullscreen')
+					basic_vimeo_toolbar_idle_clear($vimeo)
 				} else {
 					cms_fullscreen_open()
 					$vimeo.addClass('basic_vimeo_fullscreen')
+					basic_vimeo_toolbar_idle_arm($vimeo)
 				}
 			})
 
@@ -300,6 +305,30 @@ function basic_vimeo_stopall(){
 	
 }
 
+var basic_vimeo_toolbar_idle_ms = 15000
+
+function basic_vimeo_toolbar_idle_arm($vimeo){
+
+	clearTimeout($vimeo.data('toolbar_idle_timer'))
+	$vimeo.removeClass('basic_vimeo_toolbar_idle')
+
+	if (!$vimeo.hasClass('basic_vimeo_fullscreen')){
+		return
+	}
+
+	$vimeo.data('toolbar_idle_timer', setTimeout(function(){
+		$vimeo.addClass('basic_vimeo_toolbar_idle')
+	}, basic_vimeo_toolbar_idle_ms))
+
+}
+
+function basic_vimeo_toolbar_idle_clear($vimeo){
+
+	clearTimeout($vimeo.data('toolbar_idle_timer'))
+	$vimeo.removeClass('basic_vimeo_toolbar_idle')
+
+}
+
 function basic_vimeo_resize(){
 	
 //	$('.basic_vimeo_iframe').css({'height': $(window).innerWidth() * 360 / 640 + 'px'})
@@ -320,6 +349,12 @@ $(document).ready(function() {
 		basic_vimeo_scroll();
 	});
 	
+	$(document).on('mousemove.cms mousedown.cms mouseup.cms wheel.cms touchstart.cms keydown.cms', function(){
+		$('.basic_vimeo_fullscreen').each(function(){
+			basic_vimeo_toolbar_idle_arm($(this))
+		})
+	})
+
 	basic_vimeo_init();
 
 	basic_vimeo_resize();

@@ -81,11 +81,11 @@ class vimeo extends \Controller{
 					
 					list($h, $m, $s) = explode(':', $sub['start_time']);
 					list($ss, $ms) = explode(',', $s);
-					$subs[$key]['start_time'] = ($ms + $s * 1000 + $m * 60000 + $h * 3600000)/1000;
+					$subs[$key]['start_time'] = ($ms + $ss * 1000 + $m * 60000 + $h * 3600000)/1000;
 	
 					list($h, $m, $s) = explode(':', $sub['stop_time']);
 					list($ss, $ms) = explode(',', $s);
-					$subs[$key]['stop_time'] = ($ms + $s * 1000 + $m * 60000 + $h * 3600000)/1000;
+					$subs[$key]['stop_time'] = ($ms + $ss * 1000 + $m * 60000 + $h * 3600000)/1000;
 					
 					$subs[$key]['text'] = trim($sub['text']);
 				
