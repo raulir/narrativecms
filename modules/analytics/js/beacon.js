@@ -140,6 +140,10 @@ function analytics_beacon_record_pageview(page) {
 		viewport_h: window.innerHeight || 0,
 	}
 
+	if (window._cms_inapp){
+		params._cms_inapp = 1
+	}
+
 	var $beacon_container = analytics_beacon_get_container()
 	if ($beacon_container.length && $beacon_container.data('beacon_id')) {
 		params.beacon_id = $beacon_container.data('beacon_id')

@@ -49,6 +49,7 @@
 					<th>Total seconds</th>
 					<th>Language</th>
 					<th>Source</th>
+					<th>App</th>
 					<?php if (empty($geoip_error)): ?>
 					<th>Country</th>
 					<th>Area</th>
@@ -70,6 +71,7 @@
 					<td><?= (int)($session['total_seconds'] ?? 0) ?></td>
 					<td><?= htmlentities($session['language'] ?? '') ?></td>
 					<td><?= htmlentities(analytics_session_source_label($session['source'] ?? 'beacon')) ?></td>
+					<td><?= htmlentities($session['app_version'] ?? '') ?></td>
 					<?php if (empty($geoip_error)): ?>
 					<td><?= htmlentities($session['country'] ?? '') ?></td>
 					<td><?= htmlentities($session['region'] ?? '') ?></td>

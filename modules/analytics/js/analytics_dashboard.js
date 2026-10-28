@@ -9,6 +9,7 @@ var analytics_dashboard_session_fields = [
 	['total_seconds', 'Total seconds'],
 	['language', 'Language'],
 	['source', 'Source'],
+	['app_version', 'App'],
 	['user_id', 'User ID'],
 	['username', 'User'],
 	['meta', 'Meta'],

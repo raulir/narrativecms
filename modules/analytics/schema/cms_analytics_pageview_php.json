@@ -52,6 +52,13 @@
 			"null": false,
 			"default": 0
 		},
+		"inapp": {
+			"type": "TINYINT",
+			"constraint": 1,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
 		"created": {
 			"type": "DATETIME",
 			"null": false,

@@ -39,6 +39,7 @@ function analytics_is_bot_user_agent($user_agent) {
 			'go-http-client','httpclient','python-requests','curl','wget','okhttp','apache-httpclient','l9scan','leakix','sppb','rce-poc',
 			'palo alto','paloaltonetworks','xpanse','cortex-xpanse','visionheight','rootevidence','scandash','pr-cy','cms-checker',
 			'cms-detector','forestengine','google-read-aloud','censysinspect','censys',
+			'developers.cloudflare.com/security-center',
 			'googleother','google-inspectiontool','apis-google','google-safety','feedfetcher','googleproducer',
 			'google-site-verification','google-cws','google-gemininotebook','google-notebooklm','google-agent',
 			'googlemessages','google-pinpoint');
@@ -307,6 +308,98 @@ function analytics_beacon_cookie_name() {
 function analytics_is_valid_session_id($session_id) {
 
 	return (bool)preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $session_id);
+
+}
+
+function analytics_app_module_label() {
+
+	$modules = $GLOBALS['config']['modules'] ?? array();
+
+	if (!is_array($modules) || count($modules) < 1) {
+		return '';
+	}
+
+	$main = (string) end($modules);
+
+	if ($main === '') {
+		return '';
+	}
+
+	return ucfirst($main);
+
+}
+
+function analytics_app_version_from_user_agent($user_agent) {
+
+	$label = analytics_app_module_label();
+	$user_agent = (string) $user_agent;
+
+	if ($label === '' || $user_agent === '') {
+		return '';
+	}
+
+	$needle = ' '.$label.'/';
+	$pos = strpos($user_agent, $needle);
+
+	if ($pos === false) {
+		return '';
+	}
+
+	$rest = substr($user_agent, $pos + strlen($needle));
+
+	if (!preg_match('/^([A-Za-z0-9._-]{1,40})/', $rest, $match)) {
+		return '';
+	}
+
+	return $match[1];
+
+}
+
+function analytics_request_inapp() {
+
+	if (!isset($_POST['_cms_inapp'])) {
+		return 0;
+	}
+
+	$value = $_POST['_cms_inapp'];
+
+	if ($value === '' || $value === '0' || $value === 0 || $value === false) {
+		return 0;
+	}
+
+	return 1;
+
+}
+
+function analytics_signed_in_gap_seconds() {
+
+	return 7200;
+
+}
+
+function analytics_gap_session_id($beacon_id, $user_id, $pageview_id) {
+
+	if (!analytics_is_valid_session_id($beacon_id)) {
+		return $beacon_id;
+	}
+
+	$hash = md5($beacon_id.'|'.(int) $user_id.'|'.(int) $pageview_id);
+
+	return substr($hash, 0, 8).'-'.substr($hash, 8, 4).'-'.substr($hash, 12, 4).'-'.substr($hash, 16, 4).'-'.substr($hash, 20, 12);
+
+}
+
+function analytics_app_session_id($beacon_id, $version) {
+
+	$version = (string) $version;
+
+	if (!analytics_is_valid_session_id($beacon_id)) {
+		return $beacon_id;
+	}
+
+	$hash = md5($beacon_id.'|'.$version);
+
+	return substr($hash, 0, 8).'-'.substr($hash, 8, 4).'-'.substr($hash, 12, 4).'-'.substr($hash, 16, 4).'-'.substr($hash, 20, 12);
 
 }
 
@@ -600,15 +693,16 @@ function analytics_insert_pageview($page, $viewport_w, $viewport_h, $posted_beac
 	$viewport_h = (int)$viewport_h;
 	$bot = analytics_is_pageview_bot($viewport_w, $viewport_h, $user_agent) ? 1 : 0;
 	$user_id = analytics_current_user_id();
+	$inapp = analytics_request_inapp();
 
-	$sql = 'INSERT INTO cms_analytics_pageview (pageview_token, session_id, beacon_id, language, page, ip_anonymised, user_agent, viewport_w, viewport_h, bot, user_id, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
+	$sql = 'INSERT INTO cms_analytics_pageview (pageview_token, session_id, beacon_id, language, page, ip_anonymised, user_agent, viewport_w, viewport_h, bot, inapp, user_id, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())';
 
 	$stmt = mysqli_prepare($GLOBALS['db'], $sql);
 	if ($stmt === false) {
 		return false;
 	}
 
-	mysqli_stmt_bind_param($stmt, 'sssssssiiii', $pageview_token, $session_id, $beacon_id, $language, $page, $ip_anonymised, $user_agent, $viewport_w, $viewport_h, $bot, $user_id);
+	mysqli_stmt_bind_param($stmt, 'sssssssiiiii', $pageview_token, $session_id, $beacon_id, $language, $page, $ip_anonymised, $user_agent, $viewport_w, $viewport_h, $bot, $inapp, $user_id);
 
 	if (!mysqli_stmt_execute($stmt)) {
 		mysqli_stmt_close($stmt);

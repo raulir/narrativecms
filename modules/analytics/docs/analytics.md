@@ -51,6 +51,20 @@ Recomputed on each session sync:
 
 Priority when computing: **ip_ua > php > beacon**.
 
+### App visits
+
+The Android WebView user agent ends with a space, the main module name with a capital first letter, a slash, and the release name, for example ` Music/I261018b`. PHP does not hardcode that word. It uses the last entry of `$GLOBALS['config']['modules']`.
+
+The app posts `_cms_inapp` = 1 on the panel, position, shell, and beacon requests it already makes. That sets `inapp` on the pageview. A session is in-app when any of its pageviews is. `app_version` on the session is the release token, and only then. The sessions table shows it in the App column.
+
+An in-app position load and the app shell record the pageview language on that server request. The beacon does not open a session. Processing copies that language onto the matching beacon row.
+
+If a session `user_id` no longer matches a user, the User column shows that id with an `@`, for example `42@`.
+
+A different release starts a new session even inside the normal session time. The new session id is a stable UUID from the beacon id and the release, so aggregation does not create a third session. The session that already uses the beacon id keeps the release it already has.
+
+A new pageview more than two hours after the previous one in that analytics session starts a new session. This applies to signed-in and anonymous visits, and to beacon, PHP-only, and IP+UA sessions, on the site and in the app. A stretch with no two-hour gap stays one session. Pageviews already stored are left as they are. This does not change the website or app login session.
+
 ### How `session_id` is assigned (`analytics_process`)
 
 Only pageviews with **empty `session_id`** (and `bot = 0`) are assigned. Rows that already have a `session_id` from a working cookie/beacon path are **never** reassigned or merged by IP+UA.
@@ -121,7 +135,7 @@ Do not put `user_id` in cacheable page HTML (`data-*`).
 
 - **`user_agent`** (VARCHAR 500) is stored on every **`cms_analytics_pageview`** row (JS beacon API and promoted PHP rows).
 - **`cms_analytics_session.user_agent`** is copied from the first non-bot pageview on session sync.
-- **`bot`** (TINYINT, default 0) on **`cms_analytics_pageview`**: set on JS `do=hit` when viewport is **0×0** or the user agent matches **`analytics_is_bot_user_agent()`** (empty UA, `curl`, `googlebot`, `GoogleOther` and the other official Google crawler tokens that do not contain `bot`, `go-http-client`, `scandash`, `pr-cy`, `cms-checker`, `forestengine`, etc.). JS hits are always stored; bot rows are excluded from sessions, charts, and totals. PHP skips recording those user agents, so they are not clustered and not `/24`-banned.
+- **`bot`** (TINYINT, default 0) on **`cms_analytics_pageview`**: set on JS `do=hit` when viewport is **0×0** or the user agent matches **`analytics_is_bot_user_agent()`** (empty UA, `curl`, `googlebot`, `GoogleOther` and the other official Google crawler tokens that do not contain `bot`, `go-http-client`, `scandash`, `pr-cy`, `cms-checker`, `forestengine`, Cloudflare security-center, etc.). JS hits are always stored; bot rows are excluded from sessions, charts, and totals. PHP skips recording those user agents, so they are not clustered and not `/24`-banned.
 - **PHP tracking** still skips recording when **`analytics_is_bot()`** (server UA only — no viewport).
 - **Not a pageview:** HTTP **404 / 500 / 504**, or reserved system slugs **`not-found`**, **`internal-error`**, **`timeout`**. PHP (`record_php_pageview`) and JS (`analytics_insert_pageview` / `beacon.js`) skip those. Missing URLs stay in `error.log` and `cms_404*.log`.
 - **`analytics_process`** deletes bot pageviews older than **300 seconds** (last step each run). PHP dedup: if a matching main row exists (including a JS bot row), the php staging row is dropped only.

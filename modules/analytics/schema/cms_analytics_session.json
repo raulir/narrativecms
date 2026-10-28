@@ -67,6 +67,19 @@
 			"null": false,
 			"default": "beacon"
 		},
+		"inapp": {
+			"type": "TINYINT",
+			"constraint": 1,
+			"unsigned": true,
+			"null": false,
+			"default": 0
+		},
+		"app_version": {
+			"type": "VARCHAR",
+			"constraint": 40,
+			"null": false,
+			"default": ""
+		},
 		"user_id": {
 			"type": "INT",
 			"constraint": 10,
