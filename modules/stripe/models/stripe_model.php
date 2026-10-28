@@ -469,7 +469,7 @@ class stripe_model extends \Model {
 		$status = strtolower(trim((string)($facts['status'] ?? '')));
 		if (in_array($status, ['canceled', 'incomplete_expired'], true)){
 			$this->load->model('subscription/subscription_model');
-			$this->subscription_model->archive_current_subscription($user_id);
+			$this->subscription_model->end_stripe_subscription($user_id, (string)($facts['stripe_subscription_id'] ?? ''));
 		} else {
 			$this->_apply_entitlement($user_id, $facts);
 		}
@@ -536,7 +536,7 @@ class stripe_model extends \Model {
 
 		if ($user_id > 0){
 			$this->load->model('subscription/subscription_model');
-			$this->subscription_model->archive_current_subscription($user_id);
+			$this->subscription_model->end_stripe_subscription($user_id, (string)($facts['stripe_subscription_id'] ?? ''));
 		}
 
 		$this->_enrich_notify_facts($facts);

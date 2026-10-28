@@ -1298,6 +1298,7 @@ class shop_model extends \Model {
 					'formatted' => $this->format_amount(0),
 					'currency' => null,
 					'stripe_price_id' => '',
+					'play_product_id' => '',
 					'source' => 'none',
 			];
 		}
@@ -1317,6 +1318,7 @@ class shop_model extends \Model {
 		}
 
 		$stripe = '';
+		$play = '';
 		$source = 'rate';
 		$price = $main;
 
@@ -1332,6 +1334,7 @@ class shop_model extends \Model {
 						$source = 'override';
 					}
 					$stripe = trim((string)($row['stripe_price_id'] ?? ''));
+					$play = trim((string)($row['play_product_id'] ?? ''));
 					break;
 				}
 			}
@@ -1353,6 +1356,7 @@ class shop_model extends \Model {
 				'formatted' => $this->format_amount($price, $currency),
 				'currency' => $currency,
 				'stripe_price_id' => $stripe,
+				'play_product_id' => $play,
 				'source' => $source,
 		];
 

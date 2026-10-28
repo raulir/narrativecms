@@ -107,6 +107,8 @@ Mirrors **shop** cart’s `shop_checkout` pattern:
 
 Stripe Dashboard steps: [`../stripe/docs/stripe_checklist.md`](../stripe/docs/stripe_checklist.md).
 
+The Android app can also pay with Google Play. That path is the `google` module, called from the app. Shop settings still have one checkout provider, Stripe. See [`../../google/docs/google.md`](../../google/docs/google.md).
+
 Architecture follow-ups: [`stripe_vs_subscription_issues.md`](stripe_vs_subscription_issues.md).
 
 ### Storage after payment (webhook / manage)

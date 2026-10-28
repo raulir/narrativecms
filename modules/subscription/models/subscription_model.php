@@ -330,6 +330,168 @@ class subscription_model extends \Model {
 
 	}
 
+	/**
+	 * Update one provider's row. The other provider's row is left in place.
+	 * $make_current archives any other live row without changing its status.
+	 */
+	function save_stripe_subscription($user_id, $fields, $make_current){
+
+		$user_id = (int)$user_id;
+		$stripe_id = trim((string)($fields['stripe_subscription_id'] ?? ''));
+		if ($user_id < 1 || $stripe_id === '' || !$this->db->table_exists('subscription_subscription')){
+			return false;
+		}
+
+		$existing = $this->db->query(
+				'select * from subscription_subscription where user_id = ? and stripe_subscription_id = ? '.
+				'order by subscription_subscription_id desc limit 1',
+				[$user_id, $stripe_id]
+		)->row_array();
+
+		return $this->_save_identified_subscription($user_id, $existing, $fields, $make_current);
+
+	}
+
+	function get_play_subscription($user_id){
+
+		$user_id = (int)$user_id;
+		if ($user_id < 1 || !$this->db->table_exists('subscription_subscription')){
+			return [];
+		}
+
+		$existing = $this->db->query(
+				'select * from subscription_subscription where user_id = ? and stripe_subscription_id = ? '.
+				'order by archived asc, subscription_subscription_id desc limit 1',
+				[$user_id, '']
+		)->row_array();
+
+		return $this->_subscription_row_to_array($existing);
+
+	}
+
+	function save_play_subscription($user_id, $fields, $make_current){
+
+		$user_id = (int)$user_id;
+		if ($user_id < 1 || !$this->db->table_exists('subscription_subscription')){
+			return false;
+		}
+
+		$existing = $this->db->query(
+				'select * from subscription_subscription where user_id = ? and stripe_subscription_id = ? '.
+				'order by archived asc, subscription_subscription_id desc limit 1',
+				[$user_id, '']
+		)->row_array();
+
+		$fields['stripe_subscription_id'] = '';
+		$fields['stripe_customer_id'] = '';
+
+		return $this->_save_identified_subscription($user_id, $existing, $fields, $make_current);
+
+	}
+
+	function end_stripe_subscription($user_id, $stripe_id){
+
+		$user_id = (int)$user_id;
+		$stripe_id = trim((string)$stripe_id);
+		if ($user_id < 1 || $stripe_id === '' || !$this->db->table_exists('subscription_subscription')){
+			return false;
+		}
+
+		$existing = $this->db->query(
+				'select subscription_subscription_id from subscription_subscription '.
+				'where user_id = ? and stripe_subscription_id = ? '.
+				'order by subscription_subscription_id desc limit 1',
+				[$user_id, $stripe_id]
+		)->row_array();
+		if (empty($existing['subscription_subscription_id'])){
+			return false;
+		}
+
+		$this->db->query(
+				'update subscription_subscription set active = 0, status = ?, cancel_at_period_end = 0, updated = ? '.
+				'where subscription_subscription_id = ?',
+				['canceled', date('Y-m-d H:i:s'), (int)$existing['subscription_subscription_id']]
+		);
+
+		return true;
+
+	}
+
+	function _save_identified_subscription($user_id, $existing, $fields, $make_current){
+
+		if (!is_array($existing)){
+			$existing = [];
+		}
+
+		$now = date('Y-m-d H:i:s');
+		$active = $fields['active'] ?? '0';
+		$active_int = ($active === '1' || $active === 1 || $active === true) ? 1 : 0;
+		$cancel = $fields['cancel_at_period_end'] ?? '0';
+		$cancel_int = ($cancel === '1' || $cancel === 1 || $cancel === true) ? 1 : 0;
+		$archived = 1;
+		if ($make_current){
+			$archived = 0;
+		} else if (!empty($existing['subscription_subscription_id'])){
+			$archived = !empty($existing['archived']) ? 1 : 0;
+		}
+
+		$row = [
+				'status' => (string)($fields['status'] ?? ''),
+				'active' => $active_int,
+				'billing_interval' => (string)($fields['interval'] ?? ''),
+				'ends' => (string)($fields['ends'] ?? ''),
+				'price_id' => (string)($fields['price_id'] ?? ''),
+				'product_id' => (int)($fields['product_id'] ?? 0),
+				'plan' => (string)($fields['plan'] ?? ''),
+				'stripe_subscription_id' => (string)($fields['stripe_subscription_id'] ?? ''),
+				'stripe_customer_id' => (string)($fields['stripe_customer_id'] ?? ''),
+				'currency_id' => (int)($fields['currency_id'] ?? 0),
+				'cancel_at_period_end' => $cancel_int,
+		];
+
+		if (!empty($existing['subscription_subscription_id'])){
+			$this->db->query(
+					'update subscription_subscription set status = ?, active = ?, billing_interval = ?, ends = ?, '.
+					'price_id = ?, product_id = ?, plan = ?, stripe_subscription_id = ?, stripe_customer_id = ?, '.
+					'currency_id = ?, cancel_at_period_end = ?, archived = ?, updated = ? '.
+					'where subscription_subscription_id = ?',
+					[
+							$row['status'], $row['active'], $row['billing_interval'], $row['ends'],
+							$row['price_id'], $row['product_id'], $row['plan'],
+							$row['stripe_subscription_id'], $row['stripe_customer_id'],
+							$row['currency_id'], $row['cancel_at_period_end'], $archived, $now,
+							(int)$existing['subscription_subscription_id'],
+					]
+			);
+			$id = (int)$existing['subscription_subscription_id'];
+		} else {
+			$this->db->query(
+					'insert into subscription_subscription set user_id = ?, status = ?, active = ?, '.
+					'billing_interval = ?, ends = ?, price_id = ?, product_id = ?, plan = ?, '.
+					'stripe_subscription_id = ?, stripe_customer_id = ?, currency_id = ?, '.
+					'cancel_at_period_end = ?, archived = ?, created = ?, updated = ?',
+					[
+							$user_id, $row['status'], $row['active'], $row['billing_interval'], $row['ends'],
+							$row['price_id'], $row['product_id'], $row['plan'],
+							$row['stripe_subscription_id'], $row['stripe_customer_id'],
+							$row['currency_id'], $row['cancel_at_period_end'], $archived, $now, $now,
+					]
+			);
+			$id = (int)$this->db->insert_id();
+		}
+
+		if ($make_current && $id > 0){
+			$this->db->query(
+					'update subscription_subscription set archived = 1, updated = ? '.
+					'where user_id = ? and archived = 0 and subscription_subscription_id != ?',
+					[$now, $user_id, $id]
+			);
+		}
+
+		return $id > 0;
+
+	}
+
 	function set_elevated_plan($user_id, $product_id){
 
 		$user_id = $this->_resolve_user_id($user_id);
@@ -699,6 +861,106 @@ class subscription_model extends \Model {
 
 	}
 
+	function browser_enter_path($path){
+
+		$path = parse_url((string)$path, PHP_URL_PATH);
+		$path = '/'.trim((string)$path, '/');
+
+		if ($path === '/' || strpos($path, '..') !== false || preg_match('#[^a-zA-Z0-9/_-]#', $path)){
+			return '/subscription/';
+		}
+
+		return $path.'/';
+
+	}
+
+	function browser_enter_create($path){
+
+		$user_id = (int)($_SESSION['user']['cms_page_panel_id'] ?? $_SESSION['user']['user_id'] ?? 0);
+
+		if ($user_id < 1){
+			return '';
+		}
+
+		$path = $this->browser_enter_path($path);
+		$token = bin2hex(random_bytes(16));
+		$dir = cms_path('tmp').'app_enter/';
+
+		if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)){
+			return '';
+		}
+
+		$written = file_put_contents($dir.$token.'.json', json_encode([
+				'user_id' => $user_id,
+				'path' => $path,
+				'exp' => time() + 300,
+		]));
+
+		if ($written === false){
+			return '';
+		}
+
+		$base = rtrim((string)($GLOBALS['config']['base_site'] ?? ''), '/');
+
+		return $base.'/subscription/enter/?app_enter='.$token;
+
+	}
+
+	function browser_enter_discard($token){
+
+		if (!preg_match('/^[a-f0-9]{32}$/', (string)$token)){
+			return false;
+		}
+
+		$file = cms_path('tmp').'app_enter/'.$token.'.json';
+		if (is_file($file)){
+			@unlink($file);
+		}
+
+		return true;
+
+	}
+
+	function browser_enter_consume($token){
+
+		if (!preg_match('/^[a-f0-9]{32}$/', (string)$token)){
+			return '';
+		}
+
+		$file = cms_path('tmp').'app_enter/'.$token.'.json';
+
+		if (!is_file($file)){
+			return '';
+		}
+
+		$raw = file_get_contents($file);
+		@unlink($file);
+		$data = json_decode((string)$raw, true);
+
+		if (!is_array($data) || (int)($data['exp'] ?? 0) < time()){
+			return '';
+		}
+
+		$user_id = (int)($data['user_id'] ?? 0);
+
+		if ($user_id < 1){
+			return '';
+		}
+
+		$this->load->model('user/user_model');
+		$this->load->model('cms/cms_access_model');
+		$user = $this->user_model->get_user($user_id);
+
+		if (empty($user) || !is_array($user)){
+			return '';
+		}
+
+		$this->cms_access_model->refresh_user_session($user);
+
+		return $this->browser_enter_path($data['path'] ?? '');
+
+	}
+
 	/**
 	 * Build pricing / manage catalogue params.
 	 *
@@ -740,6 +1002,7 @@ class subscription_model extends \Model {
 		$params = $this->merge_subscription_pricing_settings($params);
 
 		$params['error'] = '';
+		$params['page_path'] = $this->browser_enter_path(parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH));
 		$params['cards'] = [];
 		$params['currency_options'] = [];
 		$params['currency_ids'] = [];
@@ -958,6 +1221,7 @@ class subscription_model extends \Model {
 							'cta_text' => $cta_label,
 							'cta_plan' => 'paid',
 							'cta_class' => 'pricing_cta_paid',
+							'play_product_id' => (string)($priced['play_product_id'] ?? ''),
 					];
 					$has_paid = 1;
 
@@ -1415,9 +1679,38 @@ class subscription_model extends \Model {
 	/**
 	 * Manage ajax: sync CMS meta from Stripe.
 	 */
+	function google_module_ready(){
+
+		return !empty($GLOBALS['config']['modules']) && in_array('google', $GLOBALS['config']['modules'], true);
+
+	}
+
+	function play_manages_subscription($user_id){
+
+		if (!$this->google_module_ready()){
+			return false;
+		}
+		$this->load->model('google/google_model');
+		return $this->google_model->provider_for_user($user_id) === 'google';
+
+	}
+
 	function action_sync_subscription($user_id){
 
 		$user_id = (int)$user_id;
+		if ($this->google_module_ready()){
+			$this->load->model('google/google_model');
+			if ($this->google_model->provider_for_user($user_id) === 'google'){
+				$result = $this->google_model->sync_user($user_id);
+				if (empty($result['ok'])){
+					return $result;
+				}
+				$sub = $this->get_user_subscription($user_id);
+				return array_merge($result, $this->build_auto_renew_copy($sub), [
+						'is_premium' => $this->user_has_active_subscription($user_id) ? 1 : 0,
+				]);
+			}
+		}
 		if (empty($GLOBALS['config']['modules']) || !in_array('stripe', $GLOBALS['config']['modules'], true)){
 			return ['ok' => 1, 'changed' => 0];
 		}
@@ -1452,6 +1745,21 @@ class subscription_model extends \Model {
 	function action_set_auto_renew($user_id, $auto_renew){
 
 		$user_id = (int)$user_id;
+		if ($this->play_manages_subscription($user_id)){
+			$this->load->model('google/google_model');
+			if (!empty($auto_renew)){
+				return [
+						'ok' => 1,
+						'redirect' => $this->google_model->subscription_manage_url($this->google_model->play_product_id_for_user($user_id)),
+						'auto_renew_on' => 0,
+				];
+			}
+			$result = $this->google_model->cancel_renewal_for_user($user_id);
+			if (empty($result['ok'])){
+				return $result;
+			}
+			return array_merge(['ok' => 1], $this->build_auto_renew_copy($this->get_user_subscription($user_id)));
+		}
 		if (empty($GLOBALS['config']['modules']) || !in_array('stripe', $GLOBALS['config']['modules'], true)){
 			return ['ok' => 0, 'error' => 'Stripe not available'];
 		}
@@ -1471,6 +1779,16 @@ class subscription_model extends \Model {
 	function action_update_payment_method($user_id, $return_url = ''){
 
 		$user_id = (int)$user_id;
+		if ($this->play_manages_subscription($user_id)){
+			if (!$this->user_has_paid_subscription($user_id)){
+				return ['ok' => 0, 'error' => 'No active subscription'];
+			}
+			$this->load->model('google/google_model');
+			return [
+					'ok' => 1,
+					'redirect' => $this->google_model->subscription_manage_url($this->google_model->play_product_id_for_user($user_id)),
+			];
+		}
 		if (empty($GLOBALS['config']['modules']) || !in_array('stripe', $GLOBALS['config']['modules'], true)){
 			return ['ok' => 0, 'error' => 'Stripe not available'];
 		}
@@ -1501,9 +1819,6 @@ class subscription_model extends \Model {
 		$product_id = (int)$product_id;
 		$currency_id = (int)$currency_id;
 
-		if (empty($GLOBALS['config']['modules']) || !in_array('stripe', $GLOBALS['config']['modules'], true)){
-			return ['ok' => 0, 'error' => 'Stripe not available'];
-		}
 		if (!$this->user_has_paid_subscription($user_id)){
 			return ['ok' => 0, 'error' => 'No active subscription'];
 		}
@@ -1537,6 +1852,18 @@ class subscription_model extends \Model {
 		if ($current_interval === 'year' && $target_interval === 'month'
 				&& !$this->subscription_within_last_month($sub)){
 			return ['ok' => 0, 'error' => 'Monthly plan is only available in the last month of your yearly subscription'];
+		}
+
+		if ($this->play_manages_subscription($user_id)){
+			$this->load->model('google/google_model');
+			return [
+					'ok' => 1,
+					'redirect' => $this->google_model->subscription_manage_url($this->google_model->play_product_id_for_user($user_id)),
+			];
+		}
+
+		if (empty($GLOBALS['config']['modules']) || !in_array('stripe', $GLOBALS['config']['modules'], true)){
+			return ['ok' => 0, 'error' => 'Stripe not available'];
 		}
 
 		$stripe_price_id = $this->get_stripe_price_id_for_product($product_id, $currency_id);
@@ -1719,7 +2046,31 @@ class subscription_model extends \Model {
 			$fields['currency_id'] = (int)$facts['currency_id'];
 		}
 
-		return $this->merge_user_subscription($user_id, $fields);
+		if (!empty($facts['stripe_subscription_id'])){
+			$make_current = true;
+			if ($this->google_module_ready()){
+				$this->load->model('google/google_model');
+				if ($this->google_model->provider_for_user($user_id) === 'google'){
+					$make_current = false;
+				}
+			}
+			$ok = $this->save_stripe_subscription($user_id, $fields, $make_current);
+			if ($ok && $this->google_module_ready()){
+				$this->load->model('google/google_model');
+				if ($make_current){
+					$this->google_model->set_provider($user_id, 'stripe');
+				}
+				try {
+					$this->google_model->report_stripe_sale($user_id, $facts);
+				} catch (\Exception $e) {
+					error_log('google: report failed for user '.$user_id);
+				}
+			}
+			return $ok;
+		}
+
+		$ok = $this->merge_user_subscription($user_id, $fields);
+		return $ok;
 
 	}
 

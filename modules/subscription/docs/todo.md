@@ -12,6 +12,10 @@
 - [ ] **Stock module**: add `stock` type via category extend
 - [ ] Current plan state on pricing cards (logged-in)
 - [ ] Auto-create Stripe Prices from CMS
+- [ ] **Play Console side is not finished** — products, price-row ids, and the service account are still to do. Internal functionality testing does not need them. See [`../../google/docs/todo.md`](../../google/docs/todo.md).
+- [ ] **Switch back to the other paid subscription** — Stripe and Play can both be paid at once. Only the live row provides Premium. The other is archived and is already kept up to date. When the live one ends, including a Play cancellation after its remaining period, switch Premium back to that archived subscription if it is still paid.
+- [ ] **Show the other paid subscription on My subscription** — edge case. When an archived subscription is still paid beside the live one, show it on the manage page the same way an administratively given plan is shown (plan name and a short note). It does not provide Premium while the live one does.
+- [ ] **Subscription providers** — My subscription should not name Stripe or Google. Ask each enabled module whether it manages this user, then call the same four endpoints: sync, automatic extension, change plan, and update payment method. Stripe and Google each implement those endpoints and write the subscription row. The subscription module only picks the provider and keeps the page, the month and year rules, and the table. Play already matches Stripe on the page, so leave the current branches until this list is built. The first step then is Google methods with the same names Stripe already has.
 
 ## User subscription management page
 

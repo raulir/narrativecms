@@ -14,6 +14,7 @@
 		data-checkout_missing="<?= $checkout_missing ? '1' : '0' ?>"
 		data-user_logged_in="<?= $user_logged_in ? '1' : '0' ?>"
 		data-login_url="<?= $login_url ?>"
+		data-page_path="<?= htmlspecialchars($page_path ?? '/subscription/', ENT_QUOTES, 'UTF-8') ?>"
 		data-manage_view="<?= $manage_view ?>"
 		data-auto_checkout="0"
 		data-auto_product_id="0"

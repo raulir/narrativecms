@@ -57,7 +57,50 @@ function pricing_checkout_body(result){
 
 }
 
-function pricing_start_checkout($container, product_id, currency_id){
+function pricing_open_browser($container){
+
+	var error_msg = $container.attr('data-checkout_error_message') || 'Checkout could not start. Try again.'
+
+	get_ajax('subscription/pricing', {
+		'do': 'browser_open',
+		'page_path': $container.attr('data-page_path') || '/subscription/',
+		'success': function(result){
+			var body = result && result.result ? result.result : result
+			var url = body && body.url ? body.url : ''
+			if (!url){
+				pricing_notify(error_msg, true)
+				return
+			}
+			if (window.AppSplash && AppSplash.openExternal){
+				AppSplash.openExternal(url)
+				return
+			}
+			window.open(url, '_blank')
+		},
+		'error': function(){
+			pricing_notify(error_msg, true)
+		},
+	})
+
+}
+
+function pricing_start_checkout($container, product_id, currency_id, play_product_id){
+
+	if (window._cms_inapp){
+		var play_id = String(play_product_id || '')
+		var play_ready = window.AppSplash && AppSplash.playReady && String(AppSplash.playReady()) === '1'
+		if (play_ready && play_id !== '' && typeof app_payment_choice === 'function'){
+			app_payment_choice({
+				product_id: product_id,
+				currency_id: currency_id,
+				play_product_id: play_product_id || '',
+				page_path: $container.attr('data-page_path') || '/subscription/',
+			})
+			return
+		}
+		pricing_open_browser($container)
+		return
+	}
 
 	// Domain entry only — provider is chosen server-side in subscription/checkout_start
 	var missing = String($container.attr('data-checkout_missing') || '') === '1'
@@ -119,7 +162,7 @@ function pricing_purchase_click($container, $cta){
 	var panel_id = parseInt($container.attr('data-cms_page_panel_id') || '0', 10) || 0
 
 	if (logged_in){
-		pricing_start_checkout($container, product_id, currency_id)
+		pricing_start_checkout($container, product_id, currency_id, $cta.attr('data-play_product_id') || '')
 		return
 	}
 

@@ -13,6 +13,29 @@ class pricing extends \Controller {
 
 		$do = $this->input->post('do');
 
+		if ($do === 'browser_discard'){
+
+			$this->load->model('subscription/subscription_model');
+			$this->subscription_model->browser_enter_discard((string)$this->input->post('token'));
+			print(json_encode(['ok' => 1]));
+			exit();
+
+		}
+
+		if ($do === 'browser_open'){
+
+			$this->load->model('subscription/subscription_model');
+
+			$url = $this->subscription_model->browser_enter_create($this->input->post('page_path'));
+
+			print(json_encode([
+					'ok' => $url !== '' ? 1 : 0,
+					'url' => $url,
+			], JSON_UNESCAPED_UNICODE));
+			exit();
+
+		}
+
 		if ($do === 'set_checkout_intent'){
 
 			$this->load->model('subscription/subscription_model');

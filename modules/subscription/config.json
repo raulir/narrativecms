@@ -47,6 +47,11 @@
 			"name": "Google auth extend"
 		}
 	],
+	"api": [
+		{
+			"id": "enter"
+		}
+	],
 	"extends": [
 		{
 			"target": "shop/category",

@@ -26,6 +26,16 @@ function manage_reload_page(){
 
 }
 
+function manage_open_redirect(url){
+
+	if (window._cms_inapp && window.AppSplash && AppSplash.openExternal){
+		AppSplash.openExternal(url)
+		return
+	}
+	window.location.href = url
+
+}
+
 function manage_sync($container){
 
 	var data = { 'do': 'sync_subscription' }
@@ -74,6 +84,12 @@ function manage_set_auto_renew($container, on){
 			return
 		}
 
+		if (body.redirect){
+			$period.text(prev)
+			manage_open_redirect(body.redirect)
+			return
+		}
+
 		var is_on = !!body.auto_renew_on
 		$container.find('.manage_auto_option').removeClass('manage_auto_option_active')
 		$container.find('.manage_auto_option[data-auto_renew="' + (is_on ? '1' : '0') + '"]').addClass('manage_auto_option_active')
@@ -117,6 +133,10 @@ function manage_change_plan($container, product_id, currency_id){
 		var body = result && result.result ? result.result : result
 		if (!body || !body.ok){
 			manage_notify((body && body.error) ? body.error : 'Could not change plan', true)
+			return
+		}
+		if (body.redirect){
+			manage_open_redirect(body.redirect)
 			return
 		}
 		manage_reload_page()
@@ -207,7 +227,7 @@ function manage_init($root){
 					manage_notify((body && body.error) ? body.error : 'Could not open payment settings', true)
 					return
 				}
-				window.location.href = body.redirect
+				manage_open_redirect(body.redirect)
 
 			}
 

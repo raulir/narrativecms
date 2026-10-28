@@ -32,7 +32,8 @@
 				data-plan="<?= $card['cta_plan'] ?>"
 				data-product_id="<?= $card['product_id'] ?>"
 				data-interval="<?= $card['interval'] ?>"
-				data-currency_id="<?= $card['currency_id'] ?>">
+				data-currency_id="<?= $card['currency_id'] ?>"
+				data-play_product_id="<?= htmlspecialchars((string)($card['play_product_id'] ?? ''), ENT_QUOTES) ?>">
 			<?= $card['cta_text'] ?>
 		</div>
 	<?php endif ?>
