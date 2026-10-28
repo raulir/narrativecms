@@ -33,6 +33,55 @@ class cms_css_model extends \Model {
 
 	}
 
+	// CMS needs scssphp from Composer. Write a minimal composer.json when the
+	// site has none, then tell the operator to install. Do not run Composer.
+	function composer_autoload(){
+
+		$base = $GLOBALS['config']['base_path'];
+		$composer_autoload = $base.'vendor/autoload.php';
+		if (is_file($composer_autoload)){
+			require_once($composer_autoload);
+			return;
+		}
+
+		$composer_dir = rtrim(str_replace('\\', '/', $base), '/');
+		$composer_json = $base.'composer.json';
+
+		if (!is_file($composer_json)){
+
+			if (PHP_VERSION_ID < 80100){
+				_html_error('Composer config is missing. scssphp 2.1 needs PHP 8.1 or newer. This host is '.PHP_VERSION.'.', 500);
+			}
+
+			$composer_config = [
+					'require' => [
+							'scssphp/scssphp' => '^2.1',
+					],
+					'config' => [
+							'platform' => [
+									'php' => PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION.'.'.PHP_RELEASE_VERSION,
+							],
+					],
+					'repositories' => [
+							'packagist' => [
+									'type' => 'composer',
+									'url' => 'https://repo.packagist.org',
+							],
+					],
+			];
+			$composer_json_text = json_encode($composer_config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+			if ($composer_json_text === false || file_put_contents($composer_json, $composer_json_text."\n") === false){
+				_html_error('Composer config is missing at composer.json and could not be created.<br>Create it in '.$composer_dir.' with scssphp/scssphp ^2.1, then run composer install in that folder.', 500);
+			}
+
+			_html_error('Composer config was created at composer.json (scssphp/scssphp ^2.1).<br>Run composer install in '.$composer_dir.'.', 500);
+
+		}
+
+		_html_error('Composer packages are missing.<br>Run composer install in '.$composer_dir.'.', 500);
+
+	}
+
 	function pack($scsss){
 
 		$csss = [];
@@ -98,11 +147,7 @@ class cms_css_model extends \Model {
 				$prelines_count = substr_count($scss_string, "\n");
 				$scss_string .= '/* CUT HERE */'.file_get_contents($GLOBALS['config']['base_path'].$scsss_item['script']);
 
-				$composer_autoload = $GLOBALS['config']['base_path'].'vendor/autoload.php';
-				if (!is_file($composer_autoload)){
-					_html_error('Composer packages are missing. Run composer install.', 500);
-				}
-				require_once($composer_autoload);
+				$this->composer_autoload();
 
 				$scss_compiler = new Compiler();
 

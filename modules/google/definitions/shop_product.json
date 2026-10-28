@@ -1,0 +1,19 @@
+{
+	"label": "Google Play price",
+	"description": "Play product id on each currency price row",
+	"item": [
+		{
+			"type": "repeater",
+			"name": "prices",
+			"fields": [
+				{
+					"type": "text",
+					"name": "play_product_id",
+					"label": "Google Play product ID",
+					"default": "",
+					"help": "Subscription id, or subscription id,base plan id. The same pair is used for every currency of that period. Play charges the country price on that base plan."
+				}
+			]
+		}
+	]
+}

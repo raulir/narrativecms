@@ -1,0 +1,7 @@
+# Google Play backlog
+
+- [ ] **Move Google sign-in into this module** — login, register, and the app token check still live in the user module. They should be provided by Google auth here, and the user module should only call that.
+- [x] **Cancel Play renewal when an account is deleted** — `google_model::cancel_renewal_for_user()` tells Play to stop renewal and leaves Google’s payment record in place. My subscription uses the same cancel.
+- [ ] **Play Console side is not finished** — the six subscription products, their ids on the shop price rows, the service-account file, and Billing Choice enrolment are still to do. That is fine for internal functionality testing: the app can be installed and used against `app.scoretutor.com` before any of that exists. The Google Play pay button and the Play sale report need those products before they can be tried.
+- [ ] **Device check** — after those products exist, install a Play-enabled build and exercise both choices. Do not treat an emulator run before the products exist as a test of this flow.
+- [ ] **Switch back, and show the other plan** — when the live Play or Stripe plan ends, Premium returns to the archived subscription if that one is still paid. While both exist, My subscription should also show the archived one, the same way an administratively given plan is shown. Edge case, not built yet. See [`../../subscription/docs/todo.md`](../../subscription/docs/todo.md).

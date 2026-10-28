@@ -1,0 +1,28 @@
+{
+	"label": "Google Play",
+	"description": "Play Billing for the Android app. The website checkout provider stays Stripe.",
+	"item": [],
+	"settings": [
+		{
+			"name": "package_name",
+			"type": "text",
+			"label": "Package name",
+			"default": "com.scoretutor.app",
+			"help": "Android application id. Purchases are confirmed against this package."
+		},
+		{
+			"name": "service_account_file",
+			"type": "text",
+			"label": "Service account file",
+			"default": "",
+			"help": "Absolute path to the Play Console service-account JSON. The file stays outside the site and is not committed."
+		},
+		{
+			"name": "notify_audience",
+			"type": "text",
+			"label": "Notification audience",
+			"default": "",
+			"help": "Exact https address configured as the Pub/Sub push audience for google/notify. Empty ignores every notification."
+		}
+	]
+}

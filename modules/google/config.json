@@ -1,0 +1,69 @@
+{
+	"name": "Google",
+	"version": "0.1",
+	"cms_menu": [
+		{
+			"id": "shop",
+			"name": "Shop",
+			"order": "50"
+		},
+		{
+			"id": "google_settings",
+			"name": "Google Play settings",
+			"parent": "shop",
+			"url": "admin/panel_settings/google__google/",
+			"access": "shop"
+		},
+		{
+			"id": "cms_tools",
+			"name": "Tools",
+			"order": 40
+		},
+		{
+			"id": "google",
+			"name": "Google",
+			"parent": "cms_tools",
+			"order": 40
+		},
+		{
+			"id": "google_auth",
+			"name": "Auth settings",
+			"parent": "google",
+			"url": "admin/panel_settings/google__auth/",
+			"order": 10
+		}
+	],
+	"panels": [
+		{
+			"id": "google",
+			"name": "Google Play settings"
+		},
+		{
+			"id": "auth",
+			"name": "Auth settings"
+		},
+		{
+			"id": "transaction",
+			"name": "Google transaction"
+		},
+		{
+			"id": "purchase",
+			"name": "Google purchase"
+		}
+	],
+	"extends": [
+		{
+			"target": "shop/product",
+			"source": "//shop_product"
+		},
+		{
+			"target": "shop/currency",
+			"source": "//shop_currency"
+		}
+	],
+	"api": [
+		{
+			"id": "notify"
+		}
+	]
+}

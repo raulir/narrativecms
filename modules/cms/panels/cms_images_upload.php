@@ -24,7 +24,7 @@ class cms_images_upload extends \Controller {
 	// common functionality of file uploading
 	function image_upload($input_name, $category){
 
-		$upload_config = array('allowed_types' => 'svg|gif|jpg|png|jpeg|mp4', 'upload_path' => $GLOBALS['config']['upload_path'], );
+		$upload_config = array('allowed_types' => 'svg|gif|jpg|png|jpeg|webp|mp4', 'upload_path' => $GLOBALS['config']['upload_path'], );
 		if (!isset($this->upload)) {
 			$this->load->library('upload', $upload_config);
 		} else {

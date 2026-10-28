@@ -166,7 +166,7 @@ class cms_image_model extends \Model {
 			$extension = 'jpg';
 		}
 
-		$name_data = str_replace(['.jpg','.jpeg','.png','.gif','.svg','.mp4'], '', trim($name_data));
+		$name_data = str_replace(['.jpg','.jpeg','.png','.gif','.svg','.webp','.mp4'], '', trim($name_data));
 
 		$name_data = str_replace(array(' ','-','.'), '_', $name_data);
 
@@ -464,11 +464,9 @@ class cms_image_model extends \Model {
 		imagesavealpha($src, true);
 
 		if (!imagepng($src, $png_path)){
-			imagedestroy($src);
 			return $filename;
 		}
 
-		imagedestroy($src);
 		unlink($gif_path);
 
 		$meta_extra = ['converted_from' => 'gif'];
@@ -1317,7 +1315,6 @@ class cms_image_model extends \Model {
 		imagecopy($padded, $src, $off_x, $off_y, 0, 0, $ow, $oh);
 
 		$rotated = imagerotate($padded, -(float)$rotation_deg, $bg);
-		imagedestroy($padded);
 
 		if (empty($rotated)){
 			return false;
@@ -1330,7 +1327,6 @@ class cms_image_model extends \Model {
 
 		imagealphablending($dst, true);
 		imagecopy($dst, $rotated, 0, 0, $crop_x, $crop_y, $cw, $ch);
-		imagedestroy($rotated);
 
 		return true;
 
@@ -1506,9 +1502,6 @@ class cms_image_model extends \Model {
 		} else {
 			imagejpeg($dst, $target_path, !empty($GLOBALS['config']['images_quality']) ? $GLOBALS['config']['images_quality'] : 85);
 		}
-
-		imagedestroy($src);
-		imagedestroy($dst);
 
 		return true;
 

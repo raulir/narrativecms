@@ -1,0 +1,13 @@
+{
+	"label": "Google Play currency",
+	"description": "Country for a Play external-transaction report",
+	"item": [
+		{
+			"type": "text",
+			"name": "region_code",
+			"label": "Country",
+			"default": "",
+			"help": "ISO country for this currency, such as GB. Leave empty until the country is known. A report is sent without a country rather than a guessed one."
+		}
+	]
+}

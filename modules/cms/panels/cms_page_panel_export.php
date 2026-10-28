@@ -270,9 +270,6 @@ class cms_page_panel_export extends \Controller {
 			imagepng($tmp, $target, 6);
 		}
 
-		imagedestroy($src);
-		imagedestroy($tmp);
-
 		return $target;
 
 	}

@@ -732,9 +732,6 @@ class cms_dump extends \Controller {
 			$ok = imagepng($tmp_img, $target, 6);
 		}
 
-		imagedestroy($src);
-		imagedestroy($tmp_img);
-
 		if (!$ok || !is_file($target)){
 			return $source_path;
 		}
