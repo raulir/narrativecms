@@ -37,6 +37,12 @@
 		},
 		{
 			"type": "text",
+			"name": "cancel_label",
+			"label": "Cancel label",
+			"default": "Cancel"
+		},
+		{
+			"type": "text",
 			"name": "empty_label",
 			"label": "Empty cart",
 			"default": "Please add items to cart"
@@ -61,20 +67,8 @@
 			"help": "Shown above the bottom line of the cart popup. Leave empty to hide."
 		},
 		{
-			"type": "text",
-			"name": "currency_prefix",
-			"label": "Currency prefix",
-			"default": ""
-		},
-		{
 			"type": "subtitle",
 			"label": "Errors"
-		},
-		{
-			"type": "text",
-			"name": "mixed_source_error",
-			"label": "Mixed source",
-			"default": "Cart can't contain mixed source items"
 		},
 		{
 			"type": "text",
@@ -87,6 +81,41 @@
 			"name": "missing_variant_error",
 			"label": "Missing variant",
 			"default": "Missing product variant"
+		},
+		{
+			"type": "text",
+			"name": "unavailable_item_warning",
+			"label": "Item not available",
+			"default": "Item {{item}} is not available anymore.",
+			"help": "Shown on a cart line when its stock is gone. {{item}} is the product with its options, e.g. Poster (A3, Black)."
+		},
+		{
+			"type": "text",
+			"name": "price_changed_notice",
+			"label": "Price changed",
+			"default": "Price changed from {{old}} to {{new}}.",
+			"help": "Shown on a cart line when its price was updated to the current price (cart opened or Checkout clicked)."
+		},
+		{
+			"type": "text",
+			"name": "add_error",
+			"label": "Add failed",
+			"default": "Could not add to cart",
+			"help": "Shown when adding to the cart fails without a more specific error."
+		},
+		{
+			"type": "text",
+			"name": "checkout_error",
+			"label": "Checkout failed",
+			"default": "Checkout is not available",
+			"help": "Shown when the checkout provider returns no redirect and no error."
+		},
+		{
+			"type": "text",
+			"name": "checkout_missing_error",
+			"label": "No checkout provider",
+			"default": "Select shop checkout provider!",
+			"help": "Shown under Checkout when Shop settings has no checkout provider."
 		}
 	]
 }

@@ -44,6 +44,10 @@
 			"placeable": 1
 		},
 		{
+			"id": "image_item_ids",
+			"name": "Image variants"
+		},
+		{
 			"id": "category",
 			"name": "Category",
 			"placeable": 1
@@ -60,6 +64,10 @@
 		{
 			"id": "dim_value_select",
 			"name": "Dim value select"
+		},
+		{
+			"id": "item_yes_no",
+			"name": "Yes or no"
 		},
 		{
 			"id": "productdims",

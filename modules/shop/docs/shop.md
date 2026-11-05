@@ -61,7 +61,7 @@ Stored rows use **`panel_name = shop/product`**. Config extends merge definition
 
 ### Local stock / dims
 
-CMS-only size/frame/colour options, product types, and master/clone stock: **[`dims.md`](dims.md)**.
+CMS-only size/frame/colour options, product types, and listed stock on product items: **[`dims.md`](dims.md)**.
 
 
 
@@ -72,7 +72,8 @@ CMS-only size/frame/colour options, product types, and master/clone stock: **[`d
 ### Durable identity
 
 - **Cookie** `shop_cart` (60 days): opaque `cart_key` on the draft `shop/order`  
-- **DB**: `shop/order` + `shop/order_line` hold lines, qty, attributes, price snapshots  
+- **DB**: `shop/order` + `shop/order_line` hold lines, qty, attributes, price snapshots. Each line stores `currency_id` for the unit `price`. Display uses that currency. Empty `currency_id` on old lines uses the shop currency at display time. A later currency change does not reprice the line.
+- **Shop currency** for a new price is `shop_model::get_shop_currency()`. Today that is the default currency. A later resolver (user preference, country, and similar) belongs there and is not built yet.
 - **Order ID** (`heading`) and Worldpay `number` are the CMS panel id as a decimal string. The same row is the cart until checkout (`status` empty) and the order after (`status` unfulfilled / in progress / fulfilled).  
 - Times: **Cart created** (`created`) when the draft row is created; **Order created** (`order_created`) when it leaves draft; **Paid** (`paid_time`).  
 - PHP session may cache `order_id` for the request; cookie is source of recovery after session dies  
@@ -90,9 +91,53 @@ One-off backfill of empty headings: `php grok/_migrate_shop_order_heading.php`
 
 Buy buttons call **`cart_add_items()`** from `shop/js/cart.js` (local only — no Storefront latency on add).
 
+### Cart contracts
+
+- **Settings:** all labels and visitor messages are `shop/cart` settings (stored row; no serve-time defaults in `cart.php`), including the JS messages `add_error`, `checkout_error`, `checkout_missing_error`, passed as `data-*` on `.cart_container` and read with `.data()`.
+- **Markup** lives in `cart.tpl.php`; `cart.php` passes data (`dims`, `attributes` list, `description`, `notice`, `warning`).
+- **Requests:** `cart_add_items(items, attributes)` posts `product_id`, `product_item_id`, `quantity`, `dims`, `attributes`. No price is posted; the server prices every line. Remove posts `line_id`.
+- **Notices (no `window.alert`):** `cart_add_items` resolves `{ ok: 1, quantity }` or `{ ok: 0, error }` (error from the server, or the cart setting `add_error`); the caller shows it — `product.js` toggles `.product_added_visible` / `.product_add_error_visible`. Checkout messages go to the cart popup's hidden `.cart_popup_message` via `cart_show_message(text)`.
+- **Line deletes** (`cart`, `basket`, `order_operations`) go through `shop_model::delete_order_line($order_id, $line_id)`, which only deletes a line of the visitor's current order.
+- **Naming:** a row of an order or cart is a **line** (`line_id`, `shop/order_line`), never an item. "Item" is the product item (`product_item_id`).
+- **Request values** are read from panel `$params` only (ajax params already contain the post), never `$this->input->post()`.
+- **Line fields:** `quantity` only (definition field and table column; `qty` is gone). `product_item_id` is the sold item (`order_line_item_id`); `ref_id` is read only for delivery lines (`order_line_ref_id`).
+
+### Header vs popup
+
+On a normal page the header cart reads only the quantity (`get_order_quantity`, one SQL `SUM`) and renders the badge shell. Lines, prices, dims and the popup are built only when details are wanted: `do=open` (cart opened), `do=remove`, or the popup left open in the session (`cart_visible`). Local and Shopify lines may be in the same cart; there is no mixed-cart check.
+
+### Line prices
+
+A line keeps the price it got when added, until one of these re-prices it from the current variant price (`get_item_price_in_currency`, in the line's own currency):
+- **Add** of an item that merges into an existing line (`_merge_into_order_line`): the line gets the new qty **and** the current price.
+- **Cart opened** (`do=open`) and **Checkout clicked** (`do=checkout_check`): `shop_model::refresh_line_prices` updates every item line whose price changed. The line shows the cart setting **Price changed** ("Price changed from {{old}} to {{new}}."); the total follows.
+
+`cart.js` `cart_checkout()` (the Checkout button) calls `do=checkout_check` first. The reply sets `.cart_container[data-checkout_ready]` to `1` only when no price changed and no line lost its stock; then the provider panel (`do=shop_checkout`) is called. Otherwise the updated popup is shown and checkout stops, so the visitor sees the new prices before paying; the next click goes through.
+
+### Cart hold (reserved stock)
+
+A draft cart reserves stock-counted items for **Shop settings → Cart hold (minutes)** (default 60) after the visitor's last cart activity (`shop/order.cart_active_time`). Older drafts reserve nothing (`shop_model::order_holds_stock`).
+
+Activity is cart `do=add`, `do=open` (sent by `cart_load_details()` when the cart is opened), and `do=remove`. Each runs `shop_dim_model::cart_refresh_hold`: the cart's local item lines are checked against stock held by **other** orders. If all fit, the hold is refreshed. If a line no longer fits (stock taken while the cart was stale, item hidden or not offered), the hold is **not** refreshed, so a stale cart never takes stock back from a cart that now holds it, and that line shows the cart setting **Item not available** ("Item {{item}} is not available anymore.", `{{item}}` = product item title, e.g. `Poster (A3, Black)`). Removing the line refreshes the hold for the rest. Shopify lines are skipped (Shopify is the stock of record).
+
+Cart add uses the same rule before the line is saved (`shop_dim_model::cart_add_fits`): listed stock minus other orders' holds must cover this cart's qty of the item **plus** the new qty. So a stale cart that already has the last unit cannot add another.
+
+### Line text
+
+A cart line shows the **product name** (the product `heading`, for example Flashy shoes), not the CMS list title of the product item.
+
+Under that, dims are **key/value pairs**: the dim name and the chosen value (`colour: red`, `size: XXL`). That text comes from `shop_dim_model->dims_description`. It is not the catalogue list title `Product (value, value)`.
+
 ### Line attributes
 
 Freeform key/value on lines for site customisation (Timmy fields) without shop knowing art details.
+
+**Visitor input is cleaned at write** (`shop_model::create_order_line`), so cart, checkout, admin and fulfilment emails can print stored line data as is:
+- `item` and `image` always come from the product (posted `item` / `image` are ignored).
+- `attributes` go through `clean_line_attributes`: stored as a list of `{ key, value }`, tags stripped, valid UTF-8, keys max 100 and values max 1000 characters (values keep line breaks), at most 20. The line `description` is built from those cleaned values.
+- A local add needs a storefront product item (`product_item_id`); otherwise the cart returns the missing-variant error. No line without a product.
+
+**Other installs:** order lines saved before this change may still hold posted `item` / `attributes` / `description`. Clean them once (re-run `clean_line_attributes` on stored attributes, rebuild `description`, set `item` from the product) when deploying.
 
 ### Checkout via module `provides` + shop setting
 
@@ -217,7 +262,7 @@ Enough for a working small shop without a site theme module:
 | `shop/cart` | Cart badge + popup (sites extend design) |
 | `shop/basket`, `shop/basketmini` | Full basket (legacy local) |
 | `shop/checkout` | Local checkout |
-| `shop/productbuy`, `shop/productdims` | Add-to-cart / dim pickers (local) |
+| `shop/productbuy`, `shop/productdims` | Legacy pickers. The storefront is `shop/product`. |
 
 ### Products grid filters
 
@@ -267,6 +312,24 @@ Timmy storefront PDP remains **`//shop_product` extends** of `shop/product`. Tim
 | product_item, product_dim, product_type, dim_value_select | **shop** |
 | treatments | **booking** |
 | brands, lines, menu* | removed (site-specific if needed later) |
+
+---
+
+## Panel tables (SQL filters)
+
+`get_list` filters on a param field in PHP after loading every row of that panel. Fields used in hot-path filters are panel-table columns (`"table": "1"`, indexed int), so the filter runs in SQL. See [`cms_schema.md`](../../cms/docs/cms_schema.md) § Panel tables.
+
+| Table | Column | Used by |
+|-------|--------|---------|
+| `shop_product` | `subcategory_id` | catalogue filters |
+| `shop_product_item` | `product_id` | `shop_dim_model::get_master_items` (product page, grid cards, cart add) |
+| `shop_order_line` | `order_id` | `shop_model::get_order_lines` and other order line lists (cart on every page) |
+| `shop_order_line` | `product_id` | `shop_dim_model::held_qty_map` (count-mode stock) |
+| `shop_order_line` | `quantity` | `shop_model::get_order_quantity`: one `SUM` for the header badge, no line loads |
+| `shop_order` | `cart_key` (varchar 64), `status` (varchar 32) | `shop_model::get_order_by_cart_key` (guest cart on every page) |
+| `shop_order` | `user_id`, `status` | account cart in `get_current_order` / `get_current_order_if_any` |
+
+After adding a table field: CMS → Schema → fix module `shop` (creates the column and copies params into it).
 
 ---
 

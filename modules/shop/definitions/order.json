@@ -23,13 +23,34 @@
 			"name": "user_id",
 			"list": "user/user",
 			"label": "User",
-			"add_empty": "1"
+			"add_empty": "1",
+			"table": "1",
+			"table_type": "int",
+			"table_index": "1"
+		},
+		{
+			"type": "text",
+			"name": "cart_key",
+			"label": "Cart key",
+			"readonly": "1",
+			"help": "Guest cart cookie key. Set by the cart, not edited here.",
+			"table": "1",
+			"table_type": "varchar:64",
+			"table_index": "1"
 		},
 		{
 			"type": "datetime",
 			"name": "created",
 			"label": "Cart created",
 			"format": "timestamp"
+		},
+		{
+			"type": "datetime",
+			"name": "cart_active_time",
+			"label": "Cart active",
+			"format": "timestamp",
+			"readonly": "1",
+			"help": "Last cart add or open by the visitor. A draft cart reserves stock for Cart hold (minutes) after this."
 		},
 		{
 			"type": "datetime",
@@ -58,7 +79,10 @@
 				"cancelled": "Cancelled",
 				"paid": "Paid (legacy)"
 			},
-			"help": "Line fulfilment rolled up. Finished is the final state (paid and lines resolved, or set by hand) and cannot be undone. Listed stock is posted then; those lines drop out of inventory."
+			"help": "Line fulfilment rolled up. Finished is the final state (paid and lines resolved, or set by hand) and cannot be undone. Listed stock is posted then; those lines drop out of inventory.",
+			"table": "1",
+			"table_type": "varchar:32",
+			"table_index": "1"
 		},
 		{
 			"type": "select",

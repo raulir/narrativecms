@@ -71,7 +71,7 @@ function basketmini_init(){
 			get_ajax_panel('shop/order_operations', {
 				'do':'delete_order_line',
 				'return_id':$(this).closest('.basketmini_container').data('cms_page_panel_id'),
-				'id': $(this).closest('.basketmini_modal').data('order_line_id')
+				'line_id': $(this).closest('.basketmini_modal').data('order_line_id')
 			}, function(data){
 				
 				$('.basketmini_container').replaceWith(data.result.html);

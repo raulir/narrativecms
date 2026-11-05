@@ -14,7 +14,10 @@
 			"type": "fk",
 			"name": "product_id",
 			"label": "Product",
-			"list": "shop/product"
+			"list": "shop/product",
+			"table": "1",
+			"table_type": "int",
+			"table_index": "1"
 		},
 		{
 			"type": "text",
@@ -35,22 +38,36 @@
 			"help": "Listed stock. Available = this minus qty on unfinished order lines that point here. Can go negative until those orders are Finished."
 		},
 		{
+			"type": "select",
+			"name": "availability",
+			"label": "Available",
+			"values": {
+				"1": "Yes",
+				"0": "No"
+			},
+			"default": "1",
+			"help": "No: this combination is not offered. The product page has no add button for it."
+		},
+		{
 			"type": "repeater",
 			"name": "dims",
 			"label": "Dims",
-			"help": "One row per dim. Value is the value id from the dim list (custom picker later).",
+			"readonly": "1",
+			"help": "Edited on the product page variant grid.",
 			"fields": [
 				{
 					"type": "fk",
 					"name": "product_dim_id",
 					"label": "Dim",
 					"list": "shop/product_dim",
-					"add_empty": "1"
+					"add_empty": "1",
+					"readonly": "1"
 				},
 				{
 					"type": "text",
 					"name": "value",
 					"label": "Value",
+					"readonly": "1",
 					"help": "Value id from the dim, e.g. {a4} or {black}"
 				}
 			]

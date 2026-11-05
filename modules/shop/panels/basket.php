@@ -6,28 +6,22 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class basket extends \Controller{
 
+	/**
+	 * Remove a line from the visitor's own order. basket.js posts cms_page_panel_id, so the ajax API
+	 * merges this panel's stored fields into $params.
+	 */
 	function panel_action($params){
-				
-		$this->load->model('cms/cms_page_panel_model');
-		$this->load->model('shop/shop_model');
-		
-		if (empty($params['cms_page_panel_id'])){
-			$params = array_merge_recursive_ex($params, $this->cms_page_panel_model->get_cms_page_panel($this->input->post('id')));
-		}
-		
-		$user = $this->shop_model->get_front_user();
-		
-		$do = $this->input->post('do');
 
-		if ($do == 'remove'){
-			
-			$order = $this->shop_model->get_current_order($user);
-			$this->shop_model->delete_order_line($order['cms_page_panel_id'], $params['item_id']);
-
+		if (($params['do'] ?? '') == 'remove'){
+			$this->load->model('shop/shop_model');
+			$order = $this->shop_model->get_current_order_if_any($this->shop_model->get_front_user());
+			if (!empty($order['cms_page_panel_id'])){
+				$this->shop_model->delete_order_line($order['cms_page_panel_id'], (int)($params['line_id'] ?? 0));
+			}
 		}
 
 		return $params;
-		
+
 	}
 
 	function panel_params($params){
@@ -94,7 +88,7 @@ class basket extends \Controller{
 				'description' => $product['text'] ?? '',
 				'price' => $line['price'],
 				'dims' => $dims_out,
-				'item_id' => $line['cms_page_panel_id'],
+				'line_id' => $line['cms_page_panel_id'],
 				'product_id' => $product['cms_page_panel_id'] ?? ($line['product_id'] ?? 0),
 			];
 

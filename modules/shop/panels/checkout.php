@@ -12,28 +12,34 @@ class checkout extends \Controller{
 		$this->load->model('shop/shop_model');
 		
 		$user = $this->shop_model->get_front_user();
-		
-		$do = $this->input->post('do');
-		
+
+		$do = $params['do'] ?? '';
+
 		if ($do == 'delivery_method'){
-			
-			$method_id = $this->input->post('method_id');
-				
+
+			// Visitor-chosen id: must be a delivery method, otherwise nothing changes.
+			$method_id = (int)($params['method_id'] ?? 0);
+			$method = $method_id > 0 ? $this->cms_page_panel_model->get_cms_page_panel($method_id) : [];
+			if (($method['panel_name'] ?? '') !== 'shop/delivery'){
+				error_log_user('shop checkout: '.$method_id.' is not a delivery method');
+				return $params;
+			}
+
 			$order = $this->shop_model->get_current_order($user);
 			$lines = $this->cms_page_panel_model->get_list('shop/order_line', ['order_id' => $order['cms_page_panel_id']]);
-			
+
+			// One delivery line per order: drop the old one(s), then add the chosen method once.
 			foreach($lines as $line){
-				
+
 				$rid = $this->shop_model->order_line_ref_id($line);
 				$line['ref'] = $rid ? $this->cms_page_panel_model->get_cms_page_panel($rid) : [];
-				
+
 				if (($line['ref']['panel_name'] ?? '') == 'shop/delivery'){
 					$this->cms_page_panel_model->delete_cms_page_panel($line['cms_page_panel_id']);
 				}
-				
-				$this->shop_model->create_order_line($order['cms_page_panel_id'], ['product_item_id' => $method_id, ]);
-				
+
 			}
+			$this->shop_model->create_order_line($order['cms_page_panel_id'], ['product_item_id' => $method_id, ]);
 
 		} elseif ($do == 'delivery_change'){
 			
@@ -53,29 +59,15 @@ class checkout extends \Controller{
 
 		} elseif ($do == 'delivery_address'){
 			
-			$address1 = $this->input->post('checkout_input_address1');
-			$address2 = $this->input->post('checkout_input_address2');
-			$address3 = $this->input->post('checkout_input_address3');
-			$postcode = $this->input->post('checkout_input_postcode');
-			$county = $this->input->post('checkout_input_county');
-			$country = $this->input->post('checkout_input_country');
-			$email = $this->input->post('checkout_input_email');
-			$name = $this->input->post('checkout_input_name');
-			$phone = $this->input->post('checkout_input_phone');
-				
-			$params['delivery_meta'] = [
-					'address1' => $address1,
-					'address2' => $address2,
-					'address3' => $address3,
-					'postcode' => $postcode,
-					'county' => $county,
-					'country' => $country,
-					'email' => $email,
-					'name' => $name,
-					'phone' => $phone,
-			];
-			
-			if (empty($address1) || empty($postcode) || empty($county) || empty($country) || empty($email)){
+			// Visitor input: cleaned on the way in (stored on the delivery line, shown in admin and emails).
+			$meta = [];
+			foreach (['address1', 'address2', 'address3', 'postcode', 'county', 'country', 'email', 'name', 'phone'] as $field){
+				$meta[$field] = $this->shop_model->clean_visitor_text($params['checkout_input_'.$field] ?? '', 200);
+			}
+			$params['delivery_meta'] = $meta;
+
+			if ($meta['address1'] === '' || $meta['postcode'] === '' || $meta['county'] === '' || $meta['country'] === ''
+					|| !filter_var($meta['email'], FILTER_VALIDATE_EMAIL)){
 				
 				$params['address_error'] = true;
 				

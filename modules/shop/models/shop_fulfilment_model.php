@@ -244,7 +244,7 @@ class shop_fulfilment_model extends \Model {
 
 		$print = $this->_print_file_url($product);
 
-		$qty = (int)($line['qty'] ?? $line['quantity'] ?? 1);
+		$qty = (int)$line['quantity'];
 		if ($qty < 1){
 			$qty = 1;
 		}

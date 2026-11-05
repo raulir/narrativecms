@@ -15,12 +15,6 @@
 		},
 		{
 			"type": "text",
-			"name": "mixed_source_error",
-			"label": "Mixed source",
-			"default": "Cart can't contain mixed source items"
-		},
-		{
-			"type": "text",
 			"name": "added_message",
 			"label": "Added message",
 			"default": "Item added to basket"

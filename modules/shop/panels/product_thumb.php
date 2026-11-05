@@ -5,7 +5,7 @@ namespace shop;
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
- * Basic product card for grids — local catalogue only.
+ * Basic product card for grids — local catalogue only. Settings labels come in via _panel / ajax_panel.
  */
 class product_thumb extends \Controller {
 
@@ -13,27 +13,14 @@ class product_thumb extends \Controller {
 
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('shop/shop_model');
+		$this->load->model('shop/shop_dim_model');
 
-		// Shared labels from product_thumb settings
-		$settings = $this->cms_page_panel_model->get_cms_page_panel_settings('shop/product_thumb');
-		if (!is_array($settings)){
-			$settings = [];
-		}
-		$params = array_merge($settings, $params);
+		$product = $this->cms_page_panel_model->get_cms_page_panel((int)$params['cms_page_panel_id']);
 
-		$product_id = (int)($params['cms_page_panel_id'] ?? $params['product_id'] ?? 0);
-		$product = [];
-		if ($product_id > 0){
-			$product = $this->cms_page_panel_model->get_cms_page_panel($product_id);
-			if (!is_array($product)){
-				$product = [];
-			}
-		}
-
-		if (empty($product['cms_page_panel_id'])){
+		if (($product['panel_name'] ?? '') !== 'shop/product'){
 			$params['product'] = [
 					'error' => 1,
-					'heading' => $params['unavailable_label'] ?? 'Unavailable',
+					'heading' => $params['unavailable_label'],
 					'show' => 0,
 			];
 			return $params;
@@ -42,7 +29,7 @@ class product_thumb extends \Controller {
 		if (!$this->shop_model->product_is_shown($product)){
 			$params['product'] = [
 					'error' => 0,
-					'heading' => $product['heading'] ?? '',
+					'heading' => $product['heading'],
 					'show' => 0,
 					'cms_page_panel_id' => (int)$product['cms_page_panel_id'],
 			];
@@ -61,33 +48,25 @@ class product_thumb extends \Controller {
 			}
 		}
 
-		// Price in default currency
-		$currency = $this->shop_model->get_default_currency();
-		$currency_id = $currency ? (int)$currency['cms_page_panel_id'] : 0;
-		$priced = $this->shop_model->get_product_price_in_currency($product, $currency_id);
-
-		// Available: only treat explicit 0 as sold out; empty/missing = available
-		$available = true;
-		if (array_key_exists('available', $product) && $product['available'] !== '' && $product['available'] !== null){
-			$available = ((float)str_replace(',', '.', (string)$product['available'])) > 0;
-		}
+		// Price and availability from the product page's default variant: available = offered and sellable.
+		$type = $this->shop_dim_model->resolve_product_type($product);
+		$held = $this->shop_dim_model->held_qty_map((int)$product['cms_page_panel_id'], $type);
+		$item = $this->shop_dim_model->default_master_item(
+				$this->shop_dim_model->storefront_masters($product, $type),
+				$type,
+				$held
+		);
+		$priced = $this->shop_model->get_item_price_in_currency($item, $product);
 
 		$params['product'] = [
 				'cms_page_panel_id' => (int)$product['cms_page_panel_id'],
-				'heading' => $product['heading'] ?? '',
+				'heading' => $product['heading'],
 				'image' => $image,
-				'price' => $priced['formatted'] ?? '',
-				'available' => $available ? 1 : 0,
+				'price' => $priced['formatted'],
+				'available' => ($item && $this->shop_dim_model->item_can_sell($item, $type, $held)) ? 1 : 0,
 				'show' => 1,
 				'error' => 0,
 		];
-
-		if (empty($params['sold_out_label'])){
-			$params['sold_out_label'] = 'sold out';
-		}
-		if (empty($params['unavailable_label'])){
-			$params['unavailable_label'] = 'unavailable';
-		}
 
 		return $params;
 

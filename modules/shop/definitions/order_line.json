@@ -18,7 +18,10 @@
 			"type": "fk",
 			"name": "order_id",
 			"list": "shop/order",
-			"label": "Order ID"
+			"label": "Order ID",
+			"table": "1",
+			"table_type": "int",
+			"table_index": "1"
 		},
 		{
 			"type": "datetime",
@@ -31,7 +34,10 @@
 			"list": "shop/product",
 			"label": "Product ID",
 			"add_empty": "1",
-			"help": "Linking the line to the product if present"
+			"help": "Linking the line to the product if present",
+			"table": "1",
+			"table_type": "int",
+			"table_index": "1"
 		},
 		{
 			"type": "fk",
@@ -70,13 +76,23 @@
 			"name": "quantity",
 			"label": "Quantity",
 			"help": "How many of these",
-			"default": "1"
+			"default": "1",
+			"table": "1",
+			"table_type": "int"
 		},
 		{
 			"type": "text",
 			"name": "price",
 			"label": "Price",
-			"help": "Total price for the line"
+			"help": "Unit price in currency_id. Not repriced if the shop currency changes later."
+		},
+		{
+			"type": "fk",
+			"name": "currency_id",
+			"label": "Currency",
+			"list": "shop/currency",
+			"add_empty": "1",
+			"help": "Currency this unit price was added in. Empty on old lines: shop default at display time."
 		},
 		{
 			"type": "text",

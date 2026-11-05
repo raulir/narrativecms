@@ -30,7 +30,7 @@
 				"count": "Amount available in stock"
 			},
 			"default": "none",
-			"help": "No limit: no item accounting.||Amount: master product items hold remaining stock; paid orders clone a slice onto the order."
+			"help": "No limit: no item accounting.||Amount: each product item's number is the listed stock. Unfinished orders hold their qty until the order is Finished."
 		},
 		{
 			"type": "select",
@@ -55,7 +55,7 @@
 			"type": "panel",
 			"name": "panel",
 			"label": "Custom buy panel",
-			"help": "Legacy. Not used. Storefront always uses shop/productdims. Kept for a possible future custom buy panel."
+			"help": "Legacy. Not used. The storefront is shop/product."
 		},
 		{
 			"type": "repeater",

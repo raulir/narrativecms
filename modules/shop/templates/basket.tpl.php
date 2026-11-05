@@ -28,7 +28,7 @@
 									</div>
 								<?php endforeach ?>
 							</div>
-							<div class="shop_basket_item_remove" data-item_id="<?= $item['item_id'] ?>"><?= $remove_label ?></div>
+							<div class="shop_basket_item_remove" data-line_id="<?= $item['line_id'] ?>"><?= $remove_label ?></div>
 						</div>
 		
 					</div>

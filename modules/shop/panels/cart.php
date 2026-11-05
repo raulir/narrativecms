@@ -5,15 +5,15 @@ namespace shop;
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
- * Basic cart: local order draft (cookie cart_key), badge + popup.
- * Checkout: if a module provides shop_checkout, hand off there; else shop/checkout.
+ * Basic cart: local order draft (cookie cart_key), badge + popup. Settings arrive via _panel / ajax_panel.
+ * Checkout: cart.js runs do=checkout_check, then the shop_checkout provider panel.
  */
 class cart extends \Controller{
 
 	function panel_action($params){
 
-		$do = $params['do'] ?? $this->input->post('do');
-		if (empty($do)){
+		$do = $params['do'] ?? '';
+		if ($do === ''){
 			return $params;
 		}
 
@@ -23,35 +23,39 @@ class cart extends \Controller{
 		$user = $this->shop_model->get_front_user();
 
 		if ($do == 'set_visible'){
-			$_SESSION['shop']['cart_visible'] = $params['value'] ?? $this->input->post('value');
+			$_SESSION['shop']['cart_visible'] = (($params['value'] ?? '') === '1') ? '1' : '0';
 			print(json_encode(['ok' => '1']));
 			exit();
+		}
+
+		// Cart opened, or Checkout clicked: current prices, stock and hold, then panel_params renders.
+		// checkout_check marks the reply ready only when nothing changed (cart.js then calls the provider).
+		if ($do == 'open' || $do == 'checkout_check'){
+			$params['price_changed_lines'] = [];
+			$params['lost_item_ids'] = [];
+			$order = $this->shop_model->get_current_order_if_any($user);
+			if (!empty($order['cms_page_panel_id'])){
+				$this->load->model('shop/shop_dim_model');
+				$params['price_changed_lines'] = $this->shop_model->refresh_line_prices($order['cms_page_panel_id']);
+				$params['lost_item_ids'] = $this->shop_dim_model->cart_refresh_hold($order['cms_page_panel_id']);
+			}
+			$params['checkout_ready'] = ($do == 'checkout_check' && !$params['price_changed_lines'] && !$params['lost_item_ids']) ? 1 : 0;
+			$params['cart_details'] = 1;
+			return $params;
 		}
 
 		if ($do == 'add'){
 
 			$order = $this->shop_model->get_current_order($user);
 
-			$attributes = $params['attributes'] ?? $this->input->post('attributes');
-			if (is_string($attributes) && $attributes !== ''){
-				$decoded = json_decode($attributes, true);
-				$attributes = is_array($decoded) ? $decoded : [];
-			}
-			if (!is_array($attributes)){
-				$attributes = [];
-			}
-
-			$product_id = (int)($params['product_id'] ?? $this->input->post('product_id') ?? 0);
-			$qty = max(1, (int)($params['quantity'] ?? $params['qty'] ?? $this->input->post('quantity') ?? 1));
-			$expected_price = $params['expected_price'] ?? $this->input->post('expected_price') ?? '';
-			$item = $params['item'] ?? $this->input->post('item') ?? '';
-			$image = $params['image'] ?? $this->input->post('image') ?? '';
-			$product_item_id = (int)($params['product_item_id'] ?? $this->input->post('product_item_id') ?? 0);
-
-			$dims = $params['dims'] ?? $this->input->post('dims') ?? [];
-			if (is_string($dims) && $dims !== ''){
-				$decoded = json_decode($dims, true);
-				$dims = is_array($decoded) ? $decoded : [];
+			// Request values (validated here); visitor attributes are cleaned by create_order_line.
+			$product_id = (int)($params['product_id'] ?? 0);
+			$product_item_id = (int)($params['product_item_id'] ?? 0);
+			$qty = max(1, (int)($params['quantity'] ?? 1));
+			$attributes = $params['attributes'] ?? [];
+			$dims = $params['dims'] ?? [];
+			if (is_string($dims)){
+				$dims = json_decode($dims, true);
 			}
 			if (!is_array($dims)){
 				$dims = [];
@@ -59,14 +63,9 @@ class cart extends \Controller{
 
 			$this->load->model('shop/shop_dim_model');
 			$item_row = $this->shop_dim_model->resolve_cart_item($product_id, $product_item_id, $dims);
-			if (!empty($item_row['cms_page_panel_id'])){
-				$product_item_id = (int)$item_row['cms_page_panel_id'];
-				if ($product_id <= 0){
-					$product_id = (int)($item_row['product_id'] ?? 0);
-				}
-			} else {
-				$item_row = [];
-				$product_item_id = 0;
+			$product_item_id = (int)($item_row['cms_page_panel_id'] ?? 0);
+			if ($product_item_id > 0 && $product_id < 1){
+				$product_id = (int)$item_row['product_id'];
 			}
 
 			$product_row = $product_id > 0 ? $this->cms_page_panel_model->get_cms_page_panel($product_id) : [];
@@ -74,85 +73,42 @@ class cart extends \Controller{
 			$shopify_product = !empty($product_row['shopify_id']);
 			$adding_local = !$shopify_product && $variant_id === '';
 
-			if ($expected_price === '' && !empty($item_row['price'])){
-				$expected_price = $item_row['price'];
-			}
-
 			if ($shopify_product && $variant_id !== ''
 					&& in_array('shopify', $GLOBALS['config']['modules'] ?? [], true)){
+				// Pull the current Shopify price onto the CMS item before create_order_line prices the line.
 				$this->load->model('shopify/shopify_product_model');
-				$refreshed = $this->shopify_product_model->refresh_product($product_id, 1, false);
-				$live_price = $this->shopify_product_model->variant_price_from_product(
-						is_array($refreshed) ? $refreshed : [],
-						$variant_id,
-						''
-				);
-				if ($live_price !== null && $live_price !== ''){
-					$expected_price = $live_price;
-				}
+				$this->shopify_product_model->refresh_product($product_id, 1, false);
 			}
 
-			if ($product_id && ($item === '' || $image === '')){
-				if ($item === ''){
-					$item = $product_row['heading'] ?? '';
-				}
-				if ($image === ''){
-					$image = $product_row['image'] ?? '';
-				}
-			}
-
-			$mixed_error = $params['mixed_source_error'] ?? 'Cart can\'t contain mixed source items';
-			$stock_error = $params['stock_error'] ?? 'Not enough in stock';
-			$missing_error = $params['missing_variant_error'] ?? 'Missing product variant';
-
-			if ($this->shop_dim_model->cart_source_conflict($order, $adding_local)){
-				print(json_encode(['ok' => 0, 'error' => $mixed_error]));
-				exit();
-			}
-
-			if ($shopify_product && ($product_item_id <= 0 || $variant_id === '')){
-				print(json_encode(['ok' => 0, 'error' => $missing_error]));
+			// Every line is a storefront product item; no item means no line.
+			if ($product_item_id <= 0 || ($shopify_product && $variant_id === '')){
+				print(json_encode(['ok' => 0, 'error' => $params['missing_variant_error']]));
 				exit();
 			}
 
 			if ($adding_local){
-				$product = is_array($product_row) ? $product_row : [];
-				$type = $this->shop_dim_model->resolve_product_type($product);
-				if (($type['stock_control'] ?? 'none') === 'count'){
-					if ($product_item_id <= 0){
-						print(json_encode(['ok' => 0, 'error' => $stock_error]));
-						exit();
-					}
-					if (!$this->shop_dim_model->type_allows_negative($type)){
-						$avail = $this->shop_dim_model->master_available($item_row, (int)$order['cms_page_panel_id']);
-						if ($avail < $qty){
-							print(json_encode(['ok' => 0, 'error' => $stock_error]));
-							exit();
-						}
-					}
+				// Same rule as cart_refresh_hold: other orders' holds vs this cart's qty plus the new qty.
+				if (!$this->shop_dim_model->cart_add_fits($item_row, $qty, (int)$order['cms_page_panel_id'])){
+					print(json_encode(['ok' => 0, 'error' => $params['stock_error']]));
+					exit();
 				}
 				$this->shop_model->create_order_line($order['cms_page_panel_id'], [
 						'product_item_id' => $product_item_id,
 						'product_id' => $product_id,
-						'qty' => $qty,
-						'item' => $item,
-						'image' => $image,
+						'quantity' => $qty,
 						'dims' => $dims,
 				]);
 			} else {
 				$this->shop_model->create_order_line($order['cms_page_panel_id'], [
 						'product_id' => $product_id,
 						'product_item_id' => $product_item_id,
-						'qty' => $qty,
-						'expected_price' => $expected_price,
-						'price' => $expected_price,
+						'quantity' => $qty,
 						'attributes' => $attributes,
-						'item' => $item,
-						'image' => $image,
 						'dims' => $dims,
 				]);
 			}
 
+			$this->shop_dim_model->cart_refresh_hold($order['cms_page_panel_id']);
 			$quantity = $this->shop_model->get_order_quantity($order['cms_page_panel_id']);
 			print(json_encode([
 					'ok' => 1,
@@ -165,9 +121,11 @@ class cart extends \Controller{
 		if ($do == 'remove'){
 
 			$order = $this->shop_model->get_current_order_if_any($user);
-			$line_id = (int)($params['item_id'] ?? $params['line_id'] ?? $this->input->post('item_id') ?? 0);
+			$line_id = (int)($params['line_id'] ?? 0);
 			if (!empty($order['cms_page_panel_id']) && $line_id){
 				$this->shop_model->delete_order_line($order['cms_page_panel_id'], $line_id);
+				$this->load->model('shop/shop_dim_model');
+				$params['lost_item_ids'] = $this->shop_dim_model->cart_refresh_hold($order['cms_page_panel_id']);
 			}
 			// Fall through to panel_params for full re-render when open
 			$params['cart_details'] = 1;
@@ -189,121 +147,99 @@ class cart extends \Controller{
 		$params['checkout_panel'] = $this->shop_model->get_checkout_panel();
 		$params['checkout_provider_missing'] = ($params['checkout_panel'] === '');
 
-		$want_details = !empty($params['cart_details'])
-				|| !empty($_SESSION['shop']['cart_visible']);
+		// cart_details: 1 from open / checkout_check / remove, 0 for an explicit shell request.
+		$want_details = isset($params['cart_details'])
+				? (string)$params['cart_details'] === '1'
+				: !empty($_SESSION['shop']['cart_visible']);
 
-		// Explicit shell request
-		if (isset($params['cart_details']) && (string)$params['cart_details'] === '0'){
-			$want_details = false;
-		}
-
+		// Header display needs only the quantity (one SUM). Lines load only for the popup details.
 		$order = $this->shop_model->get_current_order_if_any($user);
-		$quantity = 0;
-		$lines = [];
-		if (!empty($order['cms_page_panel_id'])){
-			$lines = $this->shop_model->get_order_lines($order['cms_page_panel_id']);
-			$quantity = $this->shop_model->get_order_quantity($order['cms_page_panel_id']);
-		}
+		$order_id = (int)($order['cms_page_panel_id'] ?? 0);
+		$quantity = $order_id > 0 ? $this->shop_model->get_order_quantity($order_id) : 0;
+		$lines = ($want_details && $order_id > 0) ? $this->shop_model->get_order_lines($order_id) : [];
 
-		$cart_source = '';
-		if ($lines){
-			$this->load->model('shop/shop_dim_model');
-			foreach ($lines as $line){
-				if ($this->shop_dim_model->cart_line_is_shopify($line)){
-					$cart_source = 'shopify';
-					break;
-				}
-				if ($this->shop_dim_model->cart_line_is_local($line)){
-					$cart_source = 'local';
-				}
-			}
-		}
-		$params['cart_source'] = $cart_source;
-
+		// Definition: empty mobile badge uses the desktop one.
+		$params['cart_label_mobile'] = $params['cart_label_mobile'] !== '' ? $params['cart_label_mobile'] : $params['cart_label'];
 		$params['cart'] = [
 				'number' => $quantity,
 				'items' => null,
 				'total' => '',
-				'checkout_url' => '',
 		];
-
-		$qty_html = '<div class="cart_quantity">'.$quantity.'</div>';
-		$params['cart']['number_text'] = str_replace('{{number}}', $qty_html, $params['cart_label']);
-		$mobile_label = trim((string)($params['cart_label_mobile'] ?? ''));
-		if ($mobile_label === ''){
-			$mobile_label = $params['cart_label'];
-		}
-		$params['cart']['number_text_mobile'] = str_replace('{{number}}', $qty_html, $mobile_label);
-
 		$params['cart_visible'] = !empty($_SESSION['shop']['cart_visible']);
-		$params['empty_label'] = $params['empty_label'] ?? 'Please add items to cart';
 
-		if ($want_details){
+		if (!$want_details){
+			$params['cart_details'] = 0;
+			return $params;
+		}
 
-			$this->load->model('shop/shop_dim_model');
-			$params['cart_details'] = 1;
-			$params['cart']['items'] = [];
-			$total = 0.0;
-			$prefix = $params['currency_prefix'] ?? '';
+		$this->load->model('shop/shop_dim_model');
+		$params['cart_details'] = 1;
+		$params['cart']['items'] = [];
+		$total = 0.0;
+		$total_currency = null;
+		$mixed_currency = false;
+		// Set by do=open / checkout_check / remove; absent on a plain render.
+		$lost_item_ids = $params['lost_item_ids'] ?? [];
+		$price_changed_lines = $params['price_changed_lines'] ?? [];
 
-			foreach($lines as $line){
+		foreach ($lines as $line){
 
-				$qty = (int)($line['qty'] ?? $line['quantity'] ?? 1);
-				$unit = (float)($line['price'] ?? $line['expected_price'] ?? 0);
-				$line_total = $unit * $qty;
+			$qty = (int)$line['quantity'];
+			$line_total = (float)$line['price'] * $qty;
+			$currency_id = (int)$line['currency_id'];
+			$currency = $currency_id > 0 ? $this->shop_model->get_currency($currency_id) : $this->shop_model->get_shop_currency();
+			$currency_key = is_array($currency) ? (int)$currency['cms_page_panel_id'] : 0;
+			if ($total_currency === null){
+				$total_currency = $currency;
+				$total = $line_total;
+			} else if ((int)($total_currency['cms_page_panel_id'] ?? 0) === $currency_key){
 				$total += $line_total;
-
-				$blocks = [];
-				$dim_text = '';
-				$item_id = $this->shop_model->order_line_item_id($line);
-				if ($item_id > 0){
-					$ref = $this->cms_page_panel_model->get_cms_page_panel($item_id);
-					if (($ref['panel_name'] ?? '') === 'shop/product_item'){
-						$dim_text = $this->shop_dim_model->dims_description($ref);
-					}
-				}
-				if ($dim_text !== ''){
-					$blocks[] = '<div class="cart_popup_item_dims">'.
-							htmlspecialchars($dim_text, ENT_QUOTES, 'UTF-8').'</div>';
-				}
-
-				if (!empty($line['attributes']) && is_array($line['attributes'])){
-					$bits = [];
-					foreach($line['attributes'] as $k => $v){
-						if (is_array($v) && isset($v['key'])){
-							$bits[] = ($v['key'] ?? '').': '.str_replace("\n", '|', trim($v['value'] ?? ''));
-						} else if (!is_array($v)){
-							$bits[] = $k.': '.str_replace("\n", '|', trim((string)$v));
-						}
-					}
-					if ($bits){
-						$blocks[] = '<div class="cart_popup_item_customisation">'.
-								($params['customisation_label'] ?? 'Customisation').'<br>'.
-								implode('<br>', $bits).'</div>';
-					}
-				} else if ($dim_text === '' && !empty($line['description'])){
-					$blocks[] = '<div class="cart_popup_item_customisation">'.
-							nl2br(htmlspecialchars((string)$line['description'], ENT_QUOTES, 'UTF-8')).'</div>';
-				}
-
-				$text = implode('', $blocks);
-
-				$params['cart']['items'][] = [
-						'heading' => $line['item'] ?? '',
-						'text' => $text,
-						'line_id' => $line['cms_page_panel_id'],
-						'amount' => trim($prefix.' '.number_format($line_total, 2)),
-						'image' => $line['image'] ?? '',
-						'number' => $qty,
-				];
-
+			} else {
+				$mixed_currency = true;
 			}
 
-			$params['cart']['total'] = trim($prefix.' '.number_format($total, 2));
+			$dims = '';
+			$warning = '';
+			$item_id = $this->shop_model->order_line_item_id($line);
+			if ($item_id > 0){
+				$item = $this->cms_page_panel_model->get_cms_page_panel($item_id);
+				$dims = $this->shop_dim_model->dims_description($item);
+				if (in_array($item_id, $lost_item_ids, true)){
+					$warning = str_replace('{{item}}', $this->shop_dim_model->item_list_title($item), $params['unavailable_item_warning']);
+				}
+			}
 
-		} else {
-			$params['cart_details'] = 0;
+			// Stored attributes are the cleaned { key, value } list (clean_line_attributes).
+			$attributes = [];
+			foreach (($line['attributes'] ?? []) as $attribute){
+				$attributes[] = [
+						'key' => $attribute['key'],
+						'value' => str_replace("\n", '|', $attribute['value']),
+				];
+			}
+
+			$notice = '';
+			$changed = $price_changed_lines[(int)$line['cms_page_panel_id']] ?? null;
+			if ($changed){
+				$notice = str_replace(['{{old}}', '{{new}}'], [$changed['old'], $changed['new']], $params['price_changed_notice']);
+			}
+
+			$params['cart']['items'][] = [
+					'line_id' => (int)$line['cms_page_panel_id'],
+					'heading' => $line['item'],
+					'image' => $line['image'],
+					'number' => $qty,
+					'amount' => $this->shop_model->format_amount($line_total, $currency),
+					'dims' => $dims,
+					'attributes' => $attributes,
+					'description' => ($dims === '' && !$attributes) ? (string)$line['description'] : '',
+					'notice' => $notice,
+					'warning' => $warning,
+			];
+
 		}
+
+		$params['cart']['total'] = $mixed_currency ? '' : $this->shop_model->format_amount($total, $total_currency);
 
 		return $params;
 

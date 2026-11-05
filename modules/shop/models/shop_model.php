@@ -141,8 +141,14 @@ class shop_model extends \Model {
 
 	/**
 	 * Unfinished claims against listed stock. Finished orders have already posted number.
+	 * A draft cart holds only for shop setting cart_hold_minutes after its last activity.
 	 */
 	function order_holds_stock($order){
+
+		if ($this->order_is_draft($order)){
+			$hold = (int)$this->get_shop_settings()['cart_hold_minutes'] * 60;
+			return (int)($order['cart_active_time'] ?? 0) >= time() - $hold;
+		}
 
 		$st = $this->order_physical_status($order);
 		if (in_array($st, ['abandoned', 'cancelled', 'finished'], true)){
@@ -156,32 +162,33 @@ class shop_model extends \Model {
 
 	}
 
-	function order_line_item_id($line){
+	/**
+	 * Visitor cart activity (add, open): the draft holds stock again from now.
+	 */
+	function touch_cart_order($order_id){
 
-		$id = (int)($line['product_item_id'] ?? 0);
-		if ($id > 0){
-			return $id;
-		}
-		$ref = (int)($line['ref_id'] ?? 0);
-		if ($ref <= 0){
-			return 0;
-		}
 		$this->load->model('cms/cms_page_panel_model');
-		$row = $this->cms_page_panel_model->get_cms_page_panel($ref);
-		if (($row['panel_name'] ?? '') === 'shop/product_item'){
-			return $ref;
+		if ((int)$order_id > 0){
+			$this->cms_page_panel_model->update_cms_page_panel((int)$order_id, ['cart_active_time' => time()]);
 		}
-		return 0;
 
 	}
 
+	/**
+	 * Product item the line sold, or 0 (delivery lines). ref_id is not read here.
+	 */
+	function order_line_item_id($line){
+
+		return (int)$line['product_item_id'];
+
+	}
+
+	/**
+	 * What the line points at: product item, or the delivery method on delivery lines.
+	 */
 	function order_line_ref_id($line){
 
-		$id = (int)($line['ref_id'] ?? 0);
-		if ($id > 0){
-			return $id;
-		}
-		return $this->order_line_item_id($line);
+		return (int)$line['ref_id'];
 
 	}
 
@@ -410,7 +417,7 @@ class shop_model extends \Model {
 			if ($this->shop_dim_model->item_stock_control($item) !== 'count'){
 				continue;
 			}
-			$qty = (int)($line['qty'] ?? $line['quantity'] ?? 1);
+			$qty = (int)$line['quantity'];
 			if ($qty < 1){
 				$qty = 1;
 			}
@@ -545,7 +552,7 @@ class shop_model extends \Model {
 				// Include local-only lines so fingerprint changes if they appear/disappear
 				$merchandise = 'local:'.($line['ref_id'] ?? $line['cms_page_panel_id'] ?? '');
 			}
-			$qty = (int)($line['qty'] ?? $line['quantity'] ?? 1);
+			$qty = (int)$line['quantity'];
 			$attrs = $line['attributes'] ?? [];
 			if (is_array($attrs)){
 				ksort($attrs);
@@ -718,6 +725,7 @@ class shop_model extends \Model {
 					'status' => '',
 					'payment_status' => 'unpaid',
 					'created' => time(),
+					'cart_active_time' => time(),
 					'order_created' => '',
 					'paid_time' => '',
 					'last_result' => '',
@@ -791,13 +799,16 @@ class shop_model extends \Model {
 
 	}
 
+	/**
+	 * Total quantity of the order's lines: one SUM on the shop_order_line panel table, no line loads.
+	 * Same rows as get_list (visible list items).
+	 */
 	function get_order_quantity($order_id){
 
-		$qty = 0;
-		foreach($this->get_order_lines($order_id) as $line){
-			$qty += (int)($line['qty'] ?? $line['quantity'] ?? 1);
-		}
-		return $qty;
+		$sql = "select coalesce(sum(t.quantity), 0) as quantity from shop_order_line t ".
+				"join cms_page_panel a on a.cms_page_panel_id = t.cms_page_panel_id ".
+				"where t.order_id = ? and a.cms_page_id = 0 and a.show = 1 and a.sort != 0 ";
+		return (int)$this->db->query($sql, [(int)$order_id])->row_array()['quantity'];
 
 	}
 
@@ -886,6 +897,125 @@ class shop_model extends \Model {
 
 	}
 	
+	/**
+	 * Visitor-posted text for an order line: valid UTF-8, no tags, capped length.
+	 * $multiline keeps line breaks (customisation values); otherwise all whitespace is one space.
+	 */
+	function clean_visitor_text($value, $max, $multiline = false){
+
+		$value = strip_tags(cms_utf8_string(is_scalar($value) ? (string)$value : ''));
+		$value = str_replace(["\r\n", "\r"], "\n", $value);
+		$value = $multiline ? preg_replace('/[^\S\n]+/u', ' ', $value) : preg_replace('/\s+/u', ' ', $value);
+		return mb_substr(trim((string)$value), 0, $max);
+
+	}
+
+	/**
+	 * Customisation attributes posted by the visitor (array or JSON), cleaned at write:
+	 * a list of { key, value }, at most 20, keys up to 100 and values up to 1000 characters.
+	 */
+	function clean_line_attributes($attributes){
+
+		if (is_string($attributes)){
+			$attributes = json_decode($attributes, true);
+		}
+		if (!is_array($attributes)){
+			return [];
+		}
+
+		$out = [];
+		foreach ($attributes as $k => $v){
+			$key = is_array($v) ? ($v['key'] ?? '') : $k;
+			$value = is_array($v) ? ($v['value'] ?? '') : $v;
+			if (is_array($key) || is_array($value)){
+				continue;
+			}
+			$key = $this->clean_visitor_text($key, 100);
+			if ($key === ''){
+				continue;
+			}
+			$out[] = ['key' => $key, 'value' => $this->clean_visitor_text($value, 1000, true)];
+			if (count($out) >= 20){
+				break;
+			}
+		}
+		return $out;
+
+	}
+
+	/**
+	 * Same product item with the same attributes already in the order: add $qty to that line and
+	 * set its price to the current $price, return its id. 0 when allow_multiline or nothing matches.
+	 */
+	function _merge_into_order_line($order_id, $product, $product_item_id, $attributes, $qty, $price){
+
+		// Products created outside the admin form (e.g. sync) may not have the field: missing is No.
+		if ($product_item_id < 1 || (string)($product['allow_multiline'] ?? '0') === '1'){
+			return 0;
+		}
+
+		foreach ($this->get_order_lines($order_id) as $line){
+			if ((int)($line['product_item_id'] ?? 0) !== $product_item_id || ($line['attributes'] ?? []) != $attributes){
+				continue;
+			}
+			$total = (int)$line['quantity'] + $qty;
+			$update = [
+					'quantity' => $total,
+					'price' => $price,
+			];
+			if (array_key_exists('expected_price', $line)){
+				$update['expected_price'] = $price;
+			}
+			$this->cms_page_panel_model->update_cms_page_panel((int)$line['cms_page_panel_id'], $update);
+			return (int)$line['cms_page_panel_id'];
+		}
+
+		return 0;
+
+	}
+
+	/**
+	 * Re-price item lines from the current variant price, in each line's own currency.
+	 * Returns changed lines: line_id => ['old' => formatted, 'new' => formatted]. Delivery lines are skipped.
+	 */
+	function refresh_line_prices($order_id){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$changed = [];
+		foreach ($this->get_order_lines($order_id) as $line){
+			$item_id = (int)($line['product_item_id'] ?? 0);
+			$item = $item_id > 0 ? $this->cms_page_panel_model->get_cms_page_panel($item_id) : [];
+			if (($item['panel_name'] ?? '') !== 'shop/product_item'){
+				continue;
+			}
+
+			$currency = $this->get_currency((int)$line['currency_id']);
+			$priced = $this->get_item_price_in_currency($item, (int)$item['product_id'], $currency);
+			$old = round((float)$line['price'], 2);
+			$new = round((float)$priced['price'], 2);
+			if ($old === $new){
+				continue;
+			}
+
+			$update = ['price' => $priced['price']];
+			if (array_key_exists('expected_price', $line)){
+				$update['expected_price'] = $priced['price'];
+			}
+			$this->cms_page_panel_model->update_cms_page_panel((int)$line['cms_page_panel_id'], $update);
+			$changed[(int)$line['cms_page_panel_id']] = [
+					'old' => $this->format_amount($old, $currency),
+					'new' => $priced['formatted'],
+			];
+		}
+		return $changed;
+
+	}
+
+	/**
+	 * Order line from a product item (or delivery ref). Item name and image always come from the
+	 * product, never from the request; visitor attributes are cleaned here (clean_line_attributes).
+	 */
 	function create_order_line($order_id, $params){
 
 		$this->load->model('cms/cms_page_panel_model');
@@ -946,31 +1076,24 @@ class shop_model extends \Model {
 				}
 			}
 
-			$qty = max(1, (int)($params['qty'] ?? $params['quantity'] ?? 1));
-			$price = $params['price'] ?? $params['expected_price'] ?? ($product['price'] ?? 0);
-			$attributes = $params['attributes'] ?? [];
-			if (is_string($attributes) && $attributes !== ''){
-				$decoded = json_decode($attributes, true);
-				if (is_array($decoded)){
-					$attributes = $decoded;
-				} else {
-					$attributes = [];
-				}
-			}
+			$qty = max(1, (int)($params['quantity'] ?? 1));
+			$priced = $this->get_item_price_in_currency($product_item, $product);
+			$price = $priced['price'];
+			$currency_id = is_array($priced['currency']) ? (int)($priced['currency']['cms_page_panel_id'] ?? 0) : 0;
+			$attributes = $this->clean_line_attributes($params['attributes'] ?? []);
 
 			$attr_bits = [];
-			if (is_array($attributes)){
-				foreach($attributes as $k => $v){
-					if (is_array($v) && isset($v['key'])){
-						$attr_bits[] = ($v['key'] ?? '').': '.($v['value'] ?? '');
-					} else if (!is_array($v)){
-						$attr_bits[] = $k.': '.$v;
-					}
-				}
+			foreach ($attributes as $attribute){
+				$attr_bits[] = $attribute['key'].': '.$attribute['value'];
 			}
 			if ($attr_bits){
 				$attr_s = implode("\n", $attr_bits);
 				$description = $description !== '' ? $description."\n".$attr_s : $attr_s;
+			}
+
+			$merged = $this->_merge_into_order_line($order_id, $product, $product_item_id, $attributes, $qty, $price);
+			if ($merged){
+				return $merged;
 			}
 
 			$order_line = [
@@ -983,14 +1106,14 @@ class shop_model extends \Model {
 					'shopify_variant_id' => (string)$variant_id,
 					'merchandise_id' => $merchandise_id,
 					'line_type' => 'shopify_variant',
-					'qty' => $qty,
 					'quantity' => $qty,
 					'price' => $price,
-					'expected_price' => $params['expected_price'] ?? $price,
+					'expected_price' => $price,
+					'currency_id' => $currency_id,
 					'description' => $description,
-					'item' => $params['item'] ?? ($product['heading'] ?? ''),
-					'image' => $params['image'] ?? ($product['image'] ?? ''),
-					'attributes' => is_array($attributes) ? $attributes : [],
+					'item' => $product['heading'] ?? '',
+					'image' => $product['image'] ?? '',
+					'attributes' => $attributes,
 					'order_id' => $order_id,
 			];
 
@@ -1002,7 +1125,13 @@ class shop_model extends \Model {
 			$product = $this->cms_page_panel_model->get_cms_page_panel($params['product_id']);
 		}
 
-		$qty = max(1, (int)($params['qty'] ?? $params['quantity'] ?? 1));
+		$qty = max(1, (int)($params['quantity'] ?? 1));
+		$priced = $this->get_item_price_in_currency($product_item, $product);
+		$merged = $this->_merge_into_order_line($order_id, $product, $product_item_id, [], $qty, $priced['price']);
+		if ($merged){
+			return $merged;
+		}
+		$currency_id = is_array($priced['currency']) ? (int)($priced['currency']['cms_page_panel_id'] ?? 0) : 0;
 		$order_line = [
 				'panel_name' => 'shop/order_line',
 				'show' => 1,
@@ -1011,12 +1140,12 @@ class shop_model extends \Model {
 				'product_item_id' => $product_item_id ? $product_item_id : '',
 				'product_id' => (int)($product['cms_page_panel_id'] ?? $params['product_id'] ?? 0),
 				'line_type' => 'local_item',
-				'qty' => $qty,
 				'quantity' => $qty,
-				'price' => !empty($product_item['price']) ? $product_item['price'] : (!empty($product['price']) ? $product['price'] : 0),
+				'price' => $priced['price'],
+				'currency_id' => $currency_id,
 				'description' => $description,
 				'item' => !empty($product['heading']) ? $product['heading'] : ($product_item['heading'] ?? ''),
-				'image' => $params['image'] ?? ($product['image'] ?? ''),
+				'image' => $product['image'] ?? '',
 				'order_id' => $order_id,
 		];
 		
@@ -1037,13 +1166,16 @@ class shop_model extends \Model {
 		
 	}
 	
+	/**
+	 * Delete a line of this order (ids from the request: anything else is ignored), then a lone delivery line.
+	 */
 	function delete_order_line($order_id, $order_line_id){
-		
+
 		$this->load->model('cms/cms_page_panel_model');
-		
-		$line = $this->cms_page_panel_model->get_cms_page_panel($order_line_id);
-		
-		if ($line['order_id'] == $order_id){
+
+		$line = $this->cms_page_panel_model->get_cms_page_panel((int)$order_line_id);
+
+		if (($line['panel_name'] ?? '') === 'shop/order_line' && (int)$order_id > 0 && (int)$line['order_id'] === (int)$order_id){
 			
 			$this->cms_page_panel_model->delete_cms_page_panel($order_line_id);
 			
@@ -1137,6 +1269,18 @@ class shop_model extends \Model {
 	
 		return $return;
 	
+	}
+
+	/**
+	 * Currency for a new price.
+	 * Today this is the shop default currency.
+	 * Later this is where user preference, country, and similar choices belong.
+	 * Do not build that resolver yet.
+	 */
+	function get_shop_currency(){
+
+		return $this->get_default_currency();
+
 	}
 
 	/**
@@ -1357,6 +1501,63 @@ class shop_model extends \Model {
 				'currency' => $currency,
 				'stripe_price_id' => $stripe,
 				'play_product_id' => $play,
+				'source' => $source,
+		];
+
+	}
+
+	/**
+	 * Price of a sellable item in a shop currency.
+	 * A set item price, including 0, wins. Otherwise the product price, then rate or prices[].
+	 * $currency null uses get_shop_currency().
+	 */
+	function get_item_price_in_currency($item, $product, $currency = null){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		if (!is_array($item) && (int)$item > 0){
+			$item = $this->cms_page_panel_model->get_cms_page_panel((int)$item);
+		}
+		if (!is_array($item)){
+			$item = [];
+		}
+		if (!is_array($product)){
+			$product = $this->cms_page_panel_model->get_cms_page_panel((int)$product);
+		}
+		if (!is_array($product)){
+			$product = [];
+		}
+
+		if ($currency === null){
+			$currency = $this->get_shop_currency();
+		} else if (!is_array($currency)){
+			$currency = $this->get_currency((int)$currency);
+		}
+
+		$item_set = array_key_exists('price', $item) && $item['price'] !== '' && $item['price'] !== null;
+		if (!$item_set){
+			$currency_id = is_array($currency) ? (int)($currency['cms_page_panel_id'] ?? 0) : 0;
+			return $this->get_product_price_in_currency($product, $currency_id);
+		}
+
+		$main = (float)str_replace(',', '.', (string)$item['price']);
+		$default = $this->get_default_currency();
+		$default_id = is_array($default) ? (int)($default['cms_page_panel_id'] ?? 0) : 0;
+		$currency_id = is_array($currency) ? (int)($currency['cms_page_panel_id'] ?? 0) : 0;
+		$source = 'item';
+		$price = $main;
+		if ($currency_id > 0 && $default_id > 0 && $currency_id !== $default_id){
+			$price = $this->convert_from_main($main, $currency);
+			$source = 'item_rate';
+		}
+		$price = round($price, 2);
+
+		return [
+				'price' => $price,
+				'formatted' => $this->format_amount($price, $currency),
+				'currency' => $currency,
+				'stripe_price_id' => '',
+				'play_product_id' => '',
 				'source' => $source,
 		];
 

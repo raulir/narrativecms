@@ -1,0 +1,137 @@
+// Desktop product page. Two columns. Square controls.
+
+.product_container {
+	position: relative;
+	width: 100%;
+	overflow: hidden;
+	box-sizing: border-box;
+	font-family: sans-serif;
+}
+
+.product_content {
+	position: relative;
+	width: 100.0rem;
+	max-width: 100%;
+	margin: 0 auto;
+	font-size: 0;
+	line-height: 0;
+	box-sizing: border-box;
+}
+
+.product_images,
+.product_copy {
+	display: inline-block;
+	width: 50.0rem;
+	max-width: 100%;
+	vertical-align: top;
+	box-sizing: border-box;
+	position: relative;
+}
+
+.product_image {
+	display: none;
+	position: relative;
+	width: 100%;
+}
+
+.product_image_variant_active {
+	display: block;
+}
+
+.product_image_image {
+	width: 48.0rem;
+	height: 32.0rem;
+	margin: 1.0rem;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.product_copy {
+	padding: 2.0rem 2.0rem 0 1.0rem;
+	font-size: 1.5rem;
+	line-height: 2.0rem;
+	color: $colour_black;
+}
+
+.product_heading {
+	font-size: 3.2rem;
+	line-height: 3.6rem;
+	margin-bottom: 1.0rem;
+}
+
+.product_price {
+	font-size: 2.0rem;
+	line-height: 2.4rem;
+	margin-bottom: 2.0rem;
+}
+
+.product_dim {
+	position: relative;
+	margin-bottom: 1.6rem;
+}
+
+.product_dim_heading {
+	font-size: 1.4rem;
+	line-height: 1.8rem;
+	margin-bottom: 0.6rem;
+}
+
+.product_dim_value {
+	display: inline-block;
+	height: 3.2rem;
+	margin: 0 0.6rem 0.6rem 0;
+	padding: 0 1.2rem;
+	box-sizing: border-box;
+	border: 0.1rem solid $colour_black;
+	background-color: $colour_white;
+	color: $colour_black;
+	font-size: 1.4rem;
+	line-height: 3.0rem;
+	vertical-align: top;
+}
+
+.product_dim_active {
+	background-color: $colour_black;
+	color: $colour_white;
+}
+
+// No available variant with this value (sold out, not offered, or no such combination).
+.product_dim_value_unavailable {
+	opacity: 0.5;
+}
+
+.product_buy {
+	display: inline-block;
+	height: 3.6rem;
+	margin-top: 1.0rem;
+	padding: 0 1.6rem;
+	box-sizing: border-box;
+	border: 0.1rem solid $colour_black;
+	background-color: $colour_white;
+	color: $colour_black;
+	font-size: 1.4rem;
+	line-height: 3.4rem;
+}
+
+.product_buy_disabled {
+	opacity: 0.5;
+}
+
+.product_buy_off {
+	display: none;
+}
+
+// Add result: product.js toggles the _visible class; the error text comes from the cart reply.
+.product_added,
+.product_add_error {
+	display: none;
+	margin-top: 1.0rem;
+	font-size: 1.4rem;
+	line-height: 1.8rem;
+}
+
+.product_added_visible,
+.product_add_error_visible {
+	display: block;
+}

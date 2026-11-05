@@ -4,6 +4,9 @@ namespace shop;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+/**
+ * Legacy. The shop storefront is shop/product. This panel stays for older pages only.
+ */
 class productdims extends \Controller{
 
 	function panel_action($params){

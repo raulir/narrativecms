@@ -1,13 +1,13 @@
 <?php if (!empty($product['error'])): ?>
 
 <div class="product_thumb_container product_thumb_error">
-	<div class="product_thumb_heading"><?= $product['heading'] ?? ($unavailable_label ?? 'unavailable') ?></div>
+	<div class="product_thumb_heading"><?= $product['heading'] ?></div>
 </div>
 
 <?php elseif (empty($product['show'])): ?>
 
 <div class="product_thumb_container product_thumb_unavailable">
-	<div class="product_thumb_heading"><?= $unavailable_label ?? 'unavailable' ?>: <?= $product['heading'] ?? '' ?></div>
+	<div class="product_thumb_heading"><?= $unavailable_label ?>: <?= $product['heading'] ?></div>
 </div>
 
 <?php else: ?>
@@ -23,11 +23,7 @@
 
 		<div class="product_thumb_copy">
 			<div class="product_thumb_heading"><?= $product['heading'] ?></div>
-			<div class="product_thumb_price"><?=
-				!empty($product['available'])
-					? ($product['price'] ?? '')
-					: ($sold_out_label ?? 'sold out')
-			?></div>
+			<div class="product_thumb_price"><?= $product['available'] ? $product['price'] : $sold_out_label ?></div>
 		</div>
 
 	</a>

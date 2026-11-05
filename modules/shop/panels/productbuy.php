@@ -4,6 +4,9 @@ namespace shop;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+/**
+ * Legacy. The shop storefront is shop/product. This panel stays for older pages only.
+ */
 class productbuy extends \Controller{
 
 	function panel_action($params){
@@ -22,12 +25,6 @@ class productbuy extends \Controller{
 			$order = $this->shop_model->get_current_order($user);
 			$product = $this->cms_page_panel_model->get_cms_page_panel($params['product_id']);
 			$type = $this->shop_dim_model->resolve_product_type($product);
-
-			if ($this->shop_dim_model->cart_source_conflict($order, true)){
-				$params['success'] = 0;
-				$params['errors'] = ['_cart' => $params['mixed_source_error'] ?? 'Cart can\'t contain mixed source items'];
-				return $params;
-			}
 
 			$dims_map = [];
 			foreach ($type['dims'] as $row){
@@ -64,13 +61,10 @@ class productbuy extends \Controller{
 					$params['errors']['_stock'] = $params['stock_error_heading'] ?? 'This product is sold out';
 					return $params;
 				}
-				if (!$this->shop_dim_model->type_allows_negative($type)){
-					$avail = $this->shop_dim_model->master_available($master, (int)$order['cms_page_panel_id']);
-					if ($avail < $qty){
-						$params['success'] = 0;
-						$params['errors']['_stock'] = $params['stock_error_heading'] ?? 'This product is sold out';
-						return $params;
-					}
+				if (!$this->shop_dim_model->cart_add_fits($master, $qty, (int)$order['cms_page_panel_id'])){
+					$params['success'] = 0;
+					$params['errors']['_stock'] = $params['stock_error_heading'] ?? 'This product is sold out';
+					return $params;
 				}
 				$item_id = (int)$master['cms_page_panel_id'];
 			}
@@ -78,7 +72,7 @@ class productbuy extends \Controller{
 			$this->shop_model->create_order_line($order['cms_page_panel_id'], [
 					'product_item_id' => $item_id,
 					'product_id' => $params['product_id'],
-					'qty' => $qty,
+					'quantity' => $qty,
 					'dims' => $dims_map,
 			]);
 			$params['success'] = 1;

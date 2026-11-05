@@ -28,6 +28,13 @@
 		},
 		{
 			"type": "text",
+			"name": "cart_hold_minutes",
+			"label": "Cart hold (minutes)",
+			"default": "60",
+			"help": "A draft cart reserves stock-counted items this long after the visitor last added to or opened the cart. Older carts do not reserve stock."
+		},
+		{
+			"type": "text",
 			"name": "dimension_prefix",
 			"label": "Dimension prefix"
 		},

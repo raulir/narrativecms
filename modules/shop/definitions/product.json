@@ -99,11 +99,6 @@
 			"label": "Max price"
 		},
 		{
-			"type": "text",
-			"name": "available",
-			"label": "Total available"
-		},
-		{
 			"type": "colour",
 			"name": "colour",
 			"label": "Accent colour",
@@ -129,6 +124,12 @@
 					"type": "text",
 					"name": "shopify_id",
 					"label": "External image id"
+				},
+				{
+					"type": "shop/image_item_ids",
+					"name": "ids",
+					"label": "Variants",
+					"help": "Variants of this product this image is for. Empty: shown for every variant."
 				}
 			]
 		},
@@ -153,6 +154,17 @@
 			"list": "shop/product_type",
 			"add_empty": "1",
 			"help": "Dims and stock control. Empty: use subcategory, then category. Empty at all levels: no limit, no dims."
+		},
+		{
+			"type": "select",
+			"name": "allow_multiline",
+			"label": "Allow multiple lines",
+			"values": {
+				"0": "No",
+				"1": "Yes"
+			},
+			"default": "0",
+			"help": "No: adding the same variant again adds to the quantity of its existing cart line. Yes: each add is a new line."
 		},
 		{
 			"type": "repeater",
@@ -195,7 +207,28 @@
 					"add_empty": "1"
 				}
 			]
+		},
+		{
+			"type": "grid",
+			"name": "variants",
+			"label": "Variants",
+			"ds": "variants",
+			"operations": "SCD",
+			"fields": []
 		}
 	],
-	"settings": []
+	"settings": [
+		{
+			"type": "text",
+			"name": "buy_label",
+			"label": "Add to cart label",
+			"default": "Add to cart"
+		},
+		{
+			"type": "text",
+			"name": "added_message",
+			"label": "Added message",
+			"default": "Added to cart"
+		}
+	]
 }

@@ -8,8 +8,8 @@ function shop_basket_init(){
 			'shop/basket', 
 			{
 				'do': 'remove',
-				'item_id': $this.data('item_id'),
-				'id': $('.shop_basket_container').data('cms_page_panel_id'),
+				'line_id': $this.data('line_id'),
+				'cms_page_panel_id': $('.shop_basket_container').data('cms_page_panel_id'),
 			}, 
 			result => {
 				
