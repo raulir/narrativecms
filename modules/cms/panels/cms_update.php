@@ -75,24 +75,22 @@ class cms_update extends \Controller {
 		if ($do == 'cms_update_list'){
 
 			if (!$this->cms_update_model->client_may_use_area($area)){
-				$params['result'] = [];
+				$params['result'] = ['error' => 'not_allowed'];
 				return $params;
 			}
 
-			$params['result'] = $this->cms_update_model->get_needed_files($area);
+			// protocol 2 (current script): plan object = files + local-edit warning.
+			// Older updater scripts still open in a browser expect get_needed_files() as is:
+			// the file array, or the error object (which they check first and stop on).
+			// Never turn an error into [] — that reads as "no files", reports success and,
+			// on Install, enables a module that was never downloaded.
+			$protocol = (int)$this->input->post('protocol');
+			if ($protocol >= 2){
+				$params['result'] = $this->cms_update_model->get_update_plan($area);
+			} else {
+				$params['result'] = $this->cms_update_model->get_needed_files($area);
+			}
 			 
-		} else if ($do == 'cms_update' && !empty($GLOBALS['config']['update']['allow'])){
-
-			$params['result'] = $this->cms_update_model->update();
-			$params['ajax'] = true;
-
-			$version_data = $this->cms_update_model->get_version('');
-			$params['local_version'] = $version_data['version'];
-
-			$version_data = $this->cms_update_model->get_master_version();
-			
-			$params['master_version'] = !empty($version_data['version']) ? $version_data['version'] : '';
-
 		} else if ($do == 'cms_update_file'){ // stage file(s) from master into cache/update/
 
 			if (!$this->cms_update_model->client_may_use_area($area)){
@@ -108,28 +106,16 @@ class cms_update extends \Controller {
 				}
 			}
 
-			if (is_array($filenames) && count($filenames)){
-
-				$staged = $this->cms_update_model->update_files($filenames, $area);
-				$params['result'] = [
-						'done' => $staged['done'] ?? [],
-						'letters' => $this->input->post('letters'),
-				];
-
-			} else {
-
-				// Legacy single-file
-				$filename = $this->input->post('filename');
-				$this->cms_update_model->update_file($filename, $area);
-				$params['result']['filename'] = $filename;
-				$params['result']['fn_hash'] = md5($filename);
-				$params['result']['letter'] = $this->input->post('letter');
-				$params['result']['done'] = [[
-						'filename' => $filename,
-						'fn_hash' => md5($filename),
-				]];
-
+			if (!is_array($filenames) || !count($filenames)){
+				$params['result'] = ['done' => [], 'errors' => [], 'error' => 'No files'];
+				return $params;
 			}
+
+			$staged = $this->cms_update_model->update_files($filenames, $area);
+			$params['result'] = [
+					'done' => $staged['done'] ?? [],
+					'errors' => $staged['errors'] ?? [],
+			];
 
 		} else if ($do == 'cms_update_copy'){
 
@@ -138,11 +124,16 @@ class cms_update extends \Controller {
 				return $params;
 			}
 
-			$this->cms_update_model->update_copy($area);
-			
+			// All-or-nothing: an incomplete download is discarded and the live tree is untouched
+			$copied = $this->cms_update_model->update_copy($area);
+			$params['result'] = $copied;
+			if (!empty($copied['error'])){
+				return $params;
+			}
+
 			// check and update version information
 			$master_data = $this->cms_update_model->get_master_version($area);
-			$this->cms_update_model->rebuild();
+			$this->cms_update_model->rebuild_area($area, $this->cms_update_model->_update_area_folders($area));
 			$local_data = $this->cms_update_model->get_version($area);
 			
 			$master_hash = !empty($master_data['version_hash']) ? $master_data['version_hash'] : 'error';
@@ -159,6 +150,16 @@ class cms_update extends \Controller {
 						'update_time' => time(),
 				]);
 			}
+
+		} else if ($do == 'cms_update_discard'){
+
+			if (!$this->cms_update_model->client_may_use_area($area)){
+				$params['result'] = ['error' => 'not_allowed'];
+				return $params;
+			}
+
+			$this->cms_update_model->discard_update($area);
+			$params['result'] = ['discarded' => 1];
 
 		} else if ($do == 'cms_update_cleanup'){
 
@@ -238,10 +239,6 @@ class cms_update extends \Controller {
 
 	function panel_params($params){
 		
-		if (!empty($params['ajax'])){
-			return $params;
-		}
-
 		$this->load->model('cms/cms_update_model');
 
 		$params['available'] = [];
@@ -262,9 +259,14 @@ class cms_update extends \Controller {
 		// Narrative CMS → masters → local-only → installed (from remote master)
 		$data = $this->cms_update_model->rebuild();
 
+		// One do=modules request for all module rows (core still asks do=version)
+		$master_index = !empty($GLOBALS['config']['cms_update_url'])
+				? $this->cms_update_model->get_master_index()
+				: null;
+
 		foreach ($data as $area){
 
-			$row = $this->cms_update_model->build_area_display_row($area);
+			$row = $this->cms_update_model->build_area_display_row($area, $master_index);
 			$area_id = $row['area'] ?? '';
 			$is_core = ($area_id === '');
 
@@ -289,7 +291,7 @@ class cms_update extends \Controller {
 		}
 
 		if (!empty($GLOBALS['config']['update']['allow']) && !empty($GLOBALS['config']['cms_update_url'])){
-			$params['available'] = $this->cms_update_model->get_installable_modules();
+			$params['available'] = $this->cms_update_model->get_installable_modules($master_index);
 		}
 
 		return $params;

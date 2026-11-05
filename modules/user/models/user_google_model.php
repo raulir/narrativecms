@@ -72,8 +72,6 @@ class user_google_model extends \Model {
 			return false;
 		}
 
-		error_log('GAPP verify ok email='.($payload['email'] ?? ''));
-
 		return $payload;
 
 	}
@@ -172,7 +170,11 @@ class user_google_model extends \Model {
 				return ['error' => 'emailexists'];
 			}
 			
-			return ['user' => $this->_ensure_user_image($user, $data['picture'] ?? '')];
+			$user = $this->_ensure_user_image($user, $data['picture'] ?? '');
+			if ($mode === 'app'){
+				$this->_note_gapp_verify($user);
+			}
+			return ['user' => $user];
 			
 		}
 		
@@ -186,7 +188,11 @@ class user_google_model extends \Model {
 		}
 		
 		// register or app: create
-		return $this->_create_user_from_google_data($data);
+		$created = $this->_create_user_from_google_data($data);
+		if ($mode === 'app' && !empty($created['user'])){
+			$this->_note_gapp_verify($created['user']);
+		}
+		return $created;
 		
 	}
 	
@@ -194,6 +200,23 @@ class user_google_model extends \Model {
 	 * Display name from Google given_name. Collisions are fine when email is login name.
 	 * If username is login name, create_user still enforces uniqueness/length.
 	 */
+	function _note_gapp_verify($user){
+
+		$user_id = (int)($user['user_id'] ?? $user['cms_page_panel_id'] ?? 0);
+		if ($user_id < 1){
+			return;
+		}
+
+		$log = $this->user_model->get_user_meta_value_for_id($user_id, 'log', []);
+		if (!is_array($log)){
+			$log = [];
+		}
+
+		$log['GAPP verify'] = gmdate('Y-m-d H:i:s');
+		$this->user_model->set_user_meta_for_id($user_id, 'log', $log);
+
+	}
+
 	function _username_from_google_data($data) {
 
 		$username = trim((string)($data['given_name'] ?? ''));

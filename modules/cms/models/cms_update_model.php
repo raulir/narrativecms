@@ -32,6 +32,47 @@ class cms_update_model extends \Model {
 	}
 
 	/**
+	 * Whether a package-relative path may be written for this area.
+	 * Master file lists and posted filenames are untrusted: relative, no traversal,
+	 * and inside the package (modules/{area}/, or core folders + index.php / LICENSE).
+	 */
+	function _update_path_allowed($area, $filename){
+
+		if (!is_string($filename) || $filename === ''){
+			return false;
+		}
+
+		if (strpos($filename, "\0") !== false || strpos($filename, '\\') !== false
+				|| strpos($filename, ':') !== false || $filename[0] === '/'){
+			return false;
+		}
+
+		foreach (explode('/', $filename) as $segment){
+			if ($segment === '' || $segment === '.' || $segment === '..'){
+				return false;
+			}
+		}
+
+		$area = $this->normalise_area_name($area === null ? '' : $area);
+		if ($area === false){
+			return false;
+		}
+
+		if ($area === '' && ($filename === 'index.php' || $filename === 'LICENSE')){
+			return true;
+		}
+
+		foreach ($this->_update_area_folders($area) as $folder){
+			if (strpos($filename, $folder) === 0){
+				return true;
+			}
+		}
+
+		return false;
+
+	}
+
+	/**
 	 * Release package id under cache/master/ — core (system + modules/cms) uses "cms".
 	 */
 	function _release_id($area){
@@ -472,6 +513,7 @@ class cms_update_model extends \Model {
 				'version_time' => $now,
 				'update_time' => $now,
 				'files' => $files,
+				'version_files' => $this->_files_hash_map($files),
 		], JSON_PRETTY_PRINT));
 
 		return [
@@ -525,6 +567,11 @@ class cms_update_model extends \Model {
 					'files' => $hashes,
 			];
 
+			// Per-file hashes of the stamped version survive rescans (local-edit detection)
+			if (!empty($old_data['version_files']) && is_array($old_data['version_files'])){
+				$new_data['version_files'] = $old_data['version_files'];
+			}
+
 			file_put_contents($filename, json_encode($new_data, JSON_PRETTY_PRINT));
 			$old_data = $new_data;
 
@@ -535,6 +582,7 @@ class cms_update_model extends \Model {
 		$return['local_version_time'] = !empty($old_data['version_time']) ? $old_data['version_time'] : '0';
 		$return['local_current_hash'] = $current_hash;
 		$return['local_version_hash'] = !empty($old_data['version_hash']) ? $old_data['version_hash'] : '[unknown]';
+		$return['local_has_baseline'] = !empty($old_data['version_files']) && is_array($old_data['version_files']);
 
 		return $return;
 
@@ -615,50 +663,145 @@ class cms_update_model extends \Model {
 	}
 	
 	function get_master_version($area = ''){
-		
-	    if (empty($GLOBALS['config']['cms_update_url'])){
-    		return false;
-    	}
-    	
+
+		if (empty($GLOBALS['config']['cms_update_url'])){
+			return false;
+		}
+
+		return $this->_master_post([
+				'do' => 'version',
+				'module' => $area,
+				'area' => $area,
+		], 10);
+
+	}
+
+	/**
+	 * One POST to the remote master updater API (cms_update_url).
+	 * Returns the decoded JSON array, or ['error' => …, 'transport_error' => true] when the
+	 * master could not be reached or did not answer with JSON. A master-side answer such as
+	 * "No release" is returned as decoded (its own 'error', no transport_error).
+	 */
+	function _master_post($data, $timeout = 15){
+
+		$url = (string)($GLOBALS['config']['cms_update_url'] ?? '');
+		if ($url === ''){
+			return ['error' => 'No update URL configured', 'transport_error' => true];
+		}
+
 		$header = [
 				'Content-type: application/x-www-form-urlencoded',
 		];
 
-		$postdata = http_build_query([
-				'do' => 'version',
-				'module' => $area,
-				'area' => $area,
-		]);
-    	
-    	// check url
-    	if (stristr($GLOBALS['config']['cms_update_url'], 'localhost')){
-    		$host = parse_url($GLOBALS['config']['cms_update_url'], PHP_URL_HOST);
-    		$url = str_replace($host, 'localhost', $GLOBALS['config']['cms_update_url']);
-    		$header[] = 'Host: '.$host;
-    	} else {
-    		$url = $GLOBALS['config']['cms_update_url'];
-    	}
-    	
-    	$context  = stream_context_create(array('http' => array(
-    			'method'  => 'POST',
-    			'header'  => $header,
-    			'content' => $postdata,
-    			'ignore_errors' => true,
-    	)));
-    	
-   		$master_data = file_get_contents($url, false, $context);
-   		if (stristr($master_data, 'was not found')){
-    		return [
-    				'error' => 'Bad update URL:<br>'.$url,
-    		];
-    	}
-
-    	if ($master_data === false){
-			return [];
+		// Local master: connect to localhost, keep the virtual host name
+		if (stristr($url, 'localhost')){
+			$host = parse_url($url, PHP_URL_HOST);
+			$header[] = 'Host: '.$host;
+			$url = str_replace($host, 'localhost', $url);
 		}
-		
-		return json_decode($master_data, true);
-		
+
+		$context = stream_context_create(['http' => [
+				'method' => 'POST',
+				'header' => $header,
+				'content' => http_build_query($data),
+				'ignore_errors' => true,
+				'timeout' => $timeout,
+		]]);
+
+		// Inline quiet handler (not _q): $http_response_header is filled in this scope
+		set_error_handler(function(){
+			return true;
+		});
+		try {
+			$raw = file_get_contents($url, false, $context);
+		} finally {
+			restore_error_handler();
+		}
+
+		$status = 0;
+		if (!empty($http_response_header[0]) && preg_match('/\s(\d{3})\s?/', $http_response_header[0], $m)){
+			$status = (int)$m[1];
+		}
+
+		if ($raw === false || $raw === ''){
+			$host = parse_url((string)$GLOBALS['config']['cms_update_url'], PHP_URL_HOST);
+			error_log('cms_update: master not reachable ('.$host.', do='.($data['do'] ?? '').')');
+			return ['error' => 'Master not reachable ('.$host.')', 'transport_error' => true];
+		}
+
+		if ($status === 404 || stristr($raw, 'was not found')){
+			return ['error' => 'Bad update URL: '.$GLOBALS['config']['cms_update_url'], 'transport_error' => true];
+		}
+
+		$decoded = json_decode($raw, true);
+		if (!is_array($decoded)){
+			error_log('cms_update: invalid master response (HTTP '.$status.', do='.($data['do'] ?? '').')');
+			return [
+					'error' => 'Invalid response from master'.($status ? ' (HTTP '.$status.')' : ''),
+					'transport_error' => true,
+			];
+		}
+
+		return $decoded;
+
+	}
+
+	/**
+	 * All packages the master publishes, in one request: ['modules' => [name => row]] or
+	 * ['error' => …]. Rows carry version, current_hash, version_time and history (newer masters).
+	 */
+	function get_master_index(){
+
+		if (empty($GLOBALS['config']['cms_update_url'])){
+			return ['error' => 'No update URL configured'];
+		}
+
+		$response = $this->_master_post(['do' => 'modules'], 10);
+		if (!empty($response['error'])){
+			return ['error' => $response['error']];
+		}
+
+		$modules = [];
+		foreach (($response['modules'] ?? []) as $row){
+			if (is_array($row) && !empty($row['name']) && is_string($row['name'])){
+				$modules[$row['name']] = $row;
+			}
+		}
+
+		return ['modules' => $modules];
+
+	}
+
+	/**
+	 * Master version data for one updater row: from the prefetched index when given
+	 * (one request for the whole table), else a do=version request (core, single row).
+	 */
+	function _master_version_for_row($area, $master_index = null){
+
+		if ($area === '' || $master_index === null){
+			return $this->get_master_version($area);
+		}
+
+		if (!empty($master_index['error'])){
+			return ['error' => $master_index['error'], 'transport_error' => true];
+		}
+
+		$row = $master_index['modules'][$area] ?? null;
+		if ($row === null){
+			// Not published (or not released) on master
+			return ['error' => 'Not published on master'];
+		}
+
+		$hash = !empty($row['current_hash']) ? $row['current_hash'] : ($row['version_hash'] ?? '');
+
+		return [
+				'version' => $row['version'] ?? '',
+				'version_hash' => $hash,
+				'current_hash' => $hash,
+				'version_time' => !empty($row['version_time']) ? (int)$row['version_time'] : 0,
+				'history' => (isset($row['history']) && is_array($row['history'])) ? $row['history'] : [],
+		];
+
 	}
 
 	/**
@@ -677,6 +820,21 @@ class cms_update_model extends \Model {
 
 		// Core package uses empty area string
 		return in_array($area, $allow, true) || in_array((string)$area, $allow, true);
+
+	}
+
+	/**
+	 * Whether the package is enabled on this site (cms_settings modules). Core is always active.
+	 */
+	function _area_active($area){
+
+		if ($area === '' || $area === null || $area === 'cms'){
+			return true;
+		}
+
+		$modules = $GLOBALS['config']['modules'] ?? [];
+
+		return is_array($modules) && in_array($area, $modules, true);
 
 	}
 
@@ -726,17 +884,20 @@ class cms_update_model extends \Model {
 				continue;
 			}
 
-			// Only packages that have been Released (cache/master/{name}/)
+			// Only packages that have been Released (tmp/master/{name}/)
 			$v = $this->get_release_version($name);
 			if (!empty($v['error']) || empty($v['version'])){
 				continue;
 			}
 
+			// Same fields as do=version so a client can build its whole table from one request
 			$out[] = [
 					'name' => $name,
 					'version' => $v['version'] ?? '',
 					'version_hash' => $v['current_hash'] ?? $v['version_hash'] ?? '',
+					'current_hash' => $v['current_hash'] ?? $v['version_hash'] ?? '',
 					'version_time' => !empty($v['version_time']) ? (int)$v['version_time'] : 0,
+					'history' => $v['history'] ?? [],
 			];
 
 		}
@@ -748,16 +909,19 @@ class cms_update_model extends \Model {
 	/**
 	 * Client: packages on master not present locally, filtered by update.allow.
 	 */
-	function get_installable_modules(){
+	function get_installable_modules($master_index = null){
 
 		if (empty($GLOBALS['config']['cms_update_url']) || empty($GLOBALS['config']['update']['allow'])){
 			return [];
 		}
 
-		$master_list = $this->get_master_modules();
-		if (empty($master_list) || !is_array($master_list)){
+		if ($master_index === null){
+			$master_index = $this->get_master_index();
+		}
+		if (!empty($master_index['error']) || empty($master_index['modules'])){
 			return [];
 		}
+		$master_list = array_values($master_index['modules']);
 
 		$local = [];
 		foreach (glob($GLOBALS['config']['base_path'].'modules/*', GLOB_ONLYDIR) as $dir){
@@ -788,44 +952,12 @@ class cms_update_model extends \Model {
 
 	function get_master_modules(){
 
-		if (empty($GLOBALS['config']['cms_update_url'])){
+		$index = $this->get_master_index();
+		if (!empty($index['error'])){
 			return [];
 		}
 
-		$header = [
-				'Content-type: application/x-www-form-urlencoded',
-		];
-
-		$postdata = http_build_query([
-				'do' => 'modules',
-		]);
-
-		if (stristr($GLOBALS['config']['cms_update_url'], 'localhost')){
-			$host = parse_url($GLOBALS['config']['cms_update_url'], PHP_URL_HOST);
-			$url = str_replace($host, 'localhost', $GLOBALS['config']['cms_update_url']);
-			$header[] = 'Host: '.$host;
-		} else {
-			$url = $GLOBALS['config']['cms_update_url'];
-		}
-
-		$context = stream_context_create(['http' => [
-				'method' => 'POST',
-				'header' => $header,
-				'content' => $postdata,
-				'ignore_errors' => true,
-		]]);
-
-		$master_data = file_get_contents($url, false, $context);
-		if ($master_data === false || stristr($master_data, 'was not found')){
-			return [];
-		}
-
-		$decoded = json_decode($master_data, true);
-		if (empty($decoded['modules']) || !is_array($decoded['modules'])){
-			return [];
-		}
-
-		return $decoded['modules'];
+		return array_values($index['modules']);
 
 	}
 
@@ -1009,7 +1141,7 @@ class cms_update_model extends \Model {
 
 		$version_file = $this->_local_version_path($name);
 		if (is_file($version_file)){
-			@unlink($version_file);
+			$this->_q('unlink', $version_file);
 		}
 
 		// Offer re-install only when master still has a released package
@@ -1086,44 +1218,17 @@ class cms_update_model extends \Model {
 	}
 	
 	function get_master_files($area){
-		
+
 		if (empty($GLOBALS['config']['cms_update_url'])){
 			return false;
 		}
-		
-		$header = [
-				'Content-type: application/x-www-form-urlencoded',
-		];
-		
-		$postdata = http_build_query([
+
+		return $this->_master_post([
 				'do' => 'files',
 				'module' => $area,
 				'area' => $area,
-		]);
-		 
-		// check url
-		if (stristr($GLOBALS['config']['cms_update_url'], 'localhost')){
-			$host = parse_url($GLOBALS['config']['cms_update_url'], PHP_URL_HOST);
-			$url = str_replace($host, 'localhost', $GLOBALS['config']['cms_update_url']);
-			$header[] = 'Host: '.$host;
-		} else {
-			$url = $GLOBALS['config']['cms_update_url'];
-		}
-		 
-		$context  = stream_context_create(array('http' => array(
-				'method'  => 'POST',
-				'header'  => $header,
-				'content' => $postdata
-		)));
-		
-		$master_data = file_get_contents($url, false, $context);
-		
-		if (empty($master_data)){
-			return false;
-		}
-		
-		return json_decode($master_data, true);
-		
+		], 30);
+
 	}
 
 	/**
@@ -1232,44 +1337,6 @@ class cms_update_model extends \Model {
 
 	}
 	
-	function get_master_file($needed_filename, $area){
-		
-		if (empty($GLOBALS['config']['cms_update_url'])){
-			return false;
-		}
-		
-		$header = [
-				'Content-type: application/x-www-form-urlencoded',
-		];
-		
-		$postdata = http_build_query([
-				'do' => 'file',
-				'area' => $area,
-				'module' => $area,
-				'filename' => $needed_filename,
-		]);
-			
-		// check url
-		if (stristr($GLOBALS['config']['cms_update_url'], 'localhost')){
-			$host = parse_url($GLOBALS['config']['cms_update_url'], PHP_URL_HOST);
-			$url = str_replace($host, 'localhost', $GLOBALS['config']['cms_update_url']);
-			$header[] = 'Host: '.$host;
-		} else {
-			$url = $GLOBALS['config']['cms_update_url'];
-		}
-			
-		$context  = stream_context_create(array('http' => array(
-				'method'  => 'POST',
-				'header'  => $header,
-				'content' => $postdata
-		)));
-		
-		$master_data = file_get_contents($url, false, $context);
-		
-		return json_decode($master_data, true);
-
-	}
-
 	/**
 	 * Fetch multiple files from master in one request (do=file + filenames[]).
 	 * @return array{files?:array<string,string>,errors?:array<string,string>,error?:string}|false
@@ -1287,76 +1354,48 @@ class cms_update_model extends \Model {
 			];
 		}
 
-		$header = [
-				'Content-type: application/x-www-form-urlencoded',
-		];
-
-		$postdata = http_build_query([
+		$decoded = $this->_master_post([
 				'do' => 'file',
 				'area' => $area,
 				'module' => $area,
 				'filenames' => array_values($filenames),
-		]);
+		], 60);
 
-		if (stristr($GLOBALS['config']['cms_update_url'], 'localhost')){
-			$host = parse_url($GLOBALS['config']['cms_update_url'], PHP_URL_HOST);
-			$url = str_replace($host, 'localhost', $GLOBALS['config']['cms_update_url']);
-			$header[] = 'Host: '.$host;
-		} else {
-			$url = $GLOBALS['config']['cms_update_url'];
-		}
-
-		$context = stream_context_create(['http' => [
-				'method' => 'POST',
-				'header' => $header,
-				'content' => $postdata,
-				'ignore_errors' => true,
-		]]);
-
-		$master_data = file_get_contents($url, false, $context);
-		if ($master_data === false || $master_data === ''){
-			return false;
-		}
-
-		$decoded = json_decode($master_data, true);
-		if (!is_array($decoded)){
-			return false;
-		}
-
-		// Legacy master only understands single filename — fall back one-by-one
-		if (!isset($decoded['files']) && (isset($decoded['file']) || isset($decoded['error']))){
-			$out = ['files' => [], 'errors' => []];
-			foreach ($filenames as $fn){
-				$one = $this->get_master_file($fn, $area);
-				if (!empty($one['file'])){
-					$out['files'][$fn] = $one['file'];
-				} else {
-					$out['errors'][$fn] = $one['error'] ?? 'empty';
-				}
-			}
-			return $out;
-		}
-
+		// Masters serve batches (do=file + filenames[]); anything else is an error for the caller
 		return $decoded;
 
 	}
 	
+	/**
+	 * Start an update: compare master Release list with the local tree, save it as this
+	 * area's update manifest (the only files later steps may stage, copy or delete) and
+	 * clear staging left by an earlier run. Returns the list, or ['error' => …].
+	 */
 	function get_needed_files($area){
 
 		$area_norm = $this->normalise_area_name($area);
 		if ($area_norm === false){
-			return [];
+			return ['error' => 'Invalid module'];
 		}
 		$area = $area_norm;
 
 		if (!$this->client_may_use_area($area)){
-			return [];
+			return ['error' => 'Updates are not allowed for this module'];
 		}
-		
+
+		// Fresh scan: compare against the tree as it is now, not the last page load
+		$installed = ($area === '' || is_dir($GLOBALS['config']['base_path'].'modules/'.$area.'/'));
+		if ($installed){
+			$this->rebuild_area($area, $this->_update_area_folders($area));
+		}
+
 		// get master list (remote Release snapshot)
 		$master_files = $this->get_master_files($area);
 		if (empty($master_files['files']) || !is_array($master_files['files'])){
-			return [];
+			$reason = (is_array($master_files) && !empty($master_files['error']))
+					? $master_files['error']
+					: 'Master did not return a file list';
+			return ['error' => $reason];
 		}
 
 		// get local working list (not this host's release cache)
@@ -1364,83 +1403,230 @@ class cms_update_model extends \Model {
 		if (empty($local_files['files']) || !is_array($local_files['files'])){
 			$local_files['files'] = [];
 		}
-		
-		$return = array();
+		$local = $this->_files_hash_map($local_files['files']);
 
-		// remove 
-		foreach($master_files['files'] as $master_key => $master_file){
-				
-			$needs_update = false;
-			$local_file_found = false;
-				
-			$master_hash = $master_file['hash'];
-				
-			// find the same local file
-			foreach($local_files['files'] as $local_key => $local_file){
-		
-				if ($local_file['filename'] == $master_file['filename']){
-					$local_file_found = true;
-					$local_key_to_delete = $local_key;
-					if ($local_file['hash'] != $master_file['hash']){
-						$needs_update = true;
-						$local_hash = $local_file['hash'];
-						$letter = 'U';
-					}
-				}
-		
+		// Hashes of the installed version: a U/D file that differs from it was edited (or added) here
+		$baseline = $installed ? $this->_load_version_files($area) : null;
+		$is_local_edit = function($filename) use ($baseline, $local){
+			if ($baseline === null || !isset($local[$filename])){
+				return false;
 			}
-				
-			if ($local_file_found){
-				$local_hash = $local_files['files'][$local_key_to_delete]['hash'];
-				unset($local_files['files'][$local_key_to_delete]);
-			} else {
-				$local_hash = 'no local file';
-				$needs_update = true;
+			return !isset($baseline[$filename]) || $baseline[$filename] !== $local[$filename];
+		};
+
+		$return = [];
+		$seen = [];
+
+		foreach ($master_files['files'] as $master_file){
+
+			// Untrusted master list: never transfer outside this package
+			if (!is_array($master_file) || !$this->_update_path_allowed($area, $master_file['filename'] ?? '')){
+				error_log('cms_update: skipped master file outside package "'.$area.'": '
+						.(is_array($master_file) ? json_encode($master_file['filename'] ?? '') : 'invalid entry'));
+				continue;
+			}
+
+			$fn = $master_file['filename'];
+			$seen[$fn] = true;
+
+			if (!isset($local[$fn])){
 				$letter = 'A';
+			} else if ($local[$fn] !== ($master_file['hash'] ?? '')){
+				$letter = 'U';
+			} else {
+				continue;
 			}
-				
-			if ($needs_update){
-				
-				$return[] = array(
-					'filename' => $master_file['filename'],
+
+			$hash = (string)($master_file['hash'] ?? '');
+			if ($hash === ''){
+				return ['error' => 'Master file has no hash: '.$fn];
+			}
+
+			$return[] = [
+					'filename' => $fn,
 					'letter' => $letter,
-					'fn_hash' => md5($master_file['filename']),
-				);
-		
-			}
-				
+					'hash' => $hash,
+					'fn_hash' => md5($fn),
+					'local_edit' => $letter === 'U' && $is_local_edit($fn),
+			];
+
 		}
-		
+
 		// delete local files not in master list
-		foreach($local_files['files'] as $local_file){
-				
-			$return[] = array(
-				'filename' => $local_file['filename'],
-				'letter' => 'D',
-				'fn_hash' => md5($local_file['filename']),
-			);
-				
+		foreach ($local as $fn => $hash){
+
+			if (isset($seen[$fn]) || !$this->_update_path_allowed($area, $fn)){
+				continue;
+			}
+
+			$return[] = [
+					'filename' => $fn,
+					'letter' => 'D',
+					'fn_hash' => md5($fn),
+					'local_edit' => $is_local_edit($fn),
+			];
+
 		}
-		
+
+		$this->_start_update_manifest($area, $return);
+
 		return $return;
-		
-	}
-	
-	// Stage one file from master into cache/update/ (or _DELETE_ marker)
-	function update_file($filename, $area){
-
-		$master_file_data = $this->get_master_file($filename, $area);
-		$b64 = !empty($master_file_data['file']) ? $master_file_data['file'] : '';
-		$this->_stage_update_cache_file($filename, $b64);
-
-		return $filename;
 
 	}
 
 	/**
-	 * Stage multiple files from master in one round-trip (batch do=file).
+	 * Update list for the popup: files (with local_edit flags) plus the overwrite warning.
+	 * local_edits — U/D files that differ from the installed version's per-file hashes.
+	 * local_changes_unknown — no per-file record, but the tree differs from the stamped version
+	 * (or was never stamped): the update may overwrite edits that cannot be named.
+	 */
+	function get_update_plan($area){
+
+		$files = $this->get_needed_files($area);
+		if (!empty($files['error'])){
+			return $files;
+		}
+
+		$edits = 0;
+		foreach ($files as $file){
+			if (!empty($file['local_edit'])){
+				$edits++;
+			}
+		}
+
+		$unknown = false;
+		$path = $this->_local_version_path($area);
+		if (count($files) && is_file($path) && $this->_load_version_files($area) === null){
+			$data = json_decode(file_get_contents($path), true);
+			$version_hash = is_array($data) ? (string)($data['version_hash'] ?? '') : '';
+			$current_hash = is_array($data) ? (string)($data['current_hash'] ?? '') : '';
+			$installed = ($area === '' || is_dir($GLOBALS['config']['base_path'].'modules/'.$area.'/'));
+			$unknown = $installed && ($version_hash === '' || $version_hash === '[unknown]' || $version_hash !== $current_hash);
+		}
+
+		return [
+				'files' => $files,
+				'local_edits' => $edits,
+				'local_changes_unknown' => $unknown,
+		];
+
+	}
+
+	function _update_manifest_path($area){
+
+		return cms_path('tmp').'update_'.$this->_release_id($area).'.json';
+
+	}
+
+	/**
+	 * Save the needed-file list for this area and drop staging left by an earlier run.
+	 */
+	function _start_update_manifest($area, $files){
+
+		$this->discard_update($area);
+
+		if (!count($files)){
+			return;
+		}
+
+		$manifest = [];
+		foreach ($files as $file){
+			$manifest[$file['filename']] = [
+					'letter' => $file['letter'],
+					'hash' => (string)($file['hash'] ?? ''),
+			];
+		}
+
+		file_put_contents($this->_update_manifest_path($area), json_encode([
+				'area' => $area,
+				'time' => time(),
+				'files' => $manifest,
+		], JSON_PRETTY_PRINT));
+
+	}
+
+	/**
+	 * filename => {letter, hash} for the update in progress, or null.
+	 * hash is the release md5 for U/A; D has none.
+	 */
+	function _load_update_manifest($area){
+
+		$path = $this->_update_manifest_path($area);
+		if (!is_file($path)){
+			return null;
+		}
+
+		$data = json_decode(file_get_contents($path), true);
+		if (!is_array($data) || ($data['area'] ?? null) !== $area || !is_array($data['files'] ?? null)){
+			return null;
+		}
+
+		return $data['files'];
+
+	}
+
+	function _update_manifest_letter($entry){
+
+		if (is_string($entry)){
+			return $entry;
+		}
+
+		if (is_array($entry)){
+			return (string)($entry['letter'] ?? '');
+		}
+
+		return '';
+
+	}
+
+	function _update_manifest_hash($entry){
+
+		if (!is_array($entry)){
+			return '';
+		}
+
+		return (string)($entry['hash'] ?? '');
+
+	}
+
+	/**
+	 * Throw away everything staged for this area (and its manifest). The live tree is untouched.
+	 */
+	function discard_update($area){
+
+		$this->_ensure_update_dirs();
+
+		$staging = cms_path('tmp').'update/';
+
+		foreach ($this->_update_area_folders($area) as $folder){
+			$this->_rrmdir($staging.rtrim($folder, '/'));
+		}
+
+		if ($area === '' || $area === null){
+			foreach (['index.php', 'LICENSE'] as $file){
+				if (is_file($staging.$file)){
+					unlink($staging.$file);
+				}
+			}
+		}
+
+		// Drop now-empty staging parents (keeps other areas' staging)
+		$this->_q('rmdir', $staging.'modules');
+		$this->_q('rmdir', $staging);
+
+		$manifest = $this->_update_manifest_path($area);
+		if (is_file($manifest)){
+			unlink($manifest);
+		}
+
+	}
+
+	/**
+	 * Stage files of the update in progress from master in one round-trip (batch do=file).
+	 * Only manifest files are accepted. D needs no download. U/A must arrive with a body
+	 * (an empty file is a valid body); anything else is an error for the client to retry.
 	 * @param array $filenames
-	 * @return array{done:array<int,array{filename:string,fn_hash:string}>}
+	 * @return array{done:array<int,array{filename:string,fn_hash:string}>,errors:array<string,string>}
 	 */
 	function update_files($filenames, $area){
 
@@ -1448,108 +1634,452 @@ class cms_update_model extends \Model {
 			$filenames = [];
 		}
 
-		$filenames = array_values(array_filter(array_map('strval', $filenames), function($f){
-			return $f !== '';
-		}));
-
 		$done = [];
-		if (!count($filenames)){
-			return ['done' => $done];
+		$errors = [];
+		$fetch = [];
+
+		$manifest = $this->_load_update_manifest($area);
+		if ($manifest === null){
+			foreach ($filenames as $filename){
+				if (is_string($filename) && $filename !== ''){
+					$errors[$filename] = 'No update in progress';
+				}
+			}
+			return ['done' => $done, 'errors' => $errors];
 		}
 
-		$batch = $this->get_master_files_content($filenames, $area);
-		$got = (is_array($batch) && !empty($batch['files']) && is_array($batch['files']))
-				? $batch['files']
-				: [];
-
+		// Posted filenames are untrusted: only this update's paths inside the package
 		foreach ($filenames as $filename){
+			if (!is_string($filename) || $filename === ''){
+				continue;
+			}
+			if (!$this->_update_path_allowed($area, $filename)){
+				$errors[$filename] = 'Path outside package';
+				error_log('cms_update: rejected file outside package "'.$area.'": '.json_encode($filename));
+				continue;
+			}
+			if (!isset($manifest[$filename])){
+				$errors[$filename] = 'Not in this update';
+				continue;
+			}
+			if ($this->_update_manifest_letter($manifest[$filename]) === 'D'){
+				$done[] = ['filename' => $filename, 'fn_hash' => md5($filename)];
+				continue;
+			}
+			$fetch[] = $filename;
+		}
 
-			$b64 = isset($got[$filename]) ? $got[$filename] : '';
-			$this->_stage_update_cache_file($filename, $b64);
-			$done[] = [
-					'filename' => $filename,
-					'fn_hash' => md5($filename),
-			];
+		if (!count($fetch)){
+			return ['done' => $done, 'errors' => $errors];
+		}
+
+		$batch = $this->get_master_files_content($fetch, $area);
+		$got = (is_array($batch) && isset($batch['files']) && is_array($batch['files'])) ? $batch['files'] : [];
+		$master_errors = (is_array($batch) && isset($batch['errors']) && is_array($batch['errors'])) ? $batch['errors'] : [];
+		$batch_error = !is_array($batch)
+				? 'No response from master'
+				: (!empty($batch['error']) ? $batch['error'] : 'Missing from master response');
+
+		foreach ($fetch as $filename){
+
+			if (!array_key_exists($filename, $got) || !is_string($got[$filename])){
+				$errors[$filename] = $master_errors[$filename] ?? $batch_error;
+				continue;
+			}
+
+			$content = base64_decode($got[$filename], true);
+			if ($content === false){
+				$errors[$filename] = 'Invalid file data from master';
+				continue;
+			}
+
+			if (!$this->_stage_update_cache_file($filename, $content)){
+				$errors[$filename] = 'Could not write staging file';
+				continue;
+			}
+
+			$expected = $this->_update_manifest_hash($manifest[$filename]);
+			$staged = cms_path('tmp').'update/'.$filename;
+			$actual = is_file($staged) ? md5_file($staged) : false;
+			if ($expected === '' || $actual === false || $actual !== $expected){
+				if (is_file($staged)){
+					$this->_q('unlink', $staged);
+				}
+				$errors[$filename] = ($expected === '') ? 'Release hash missing' : 'File does not match the release';
+				continue;
+			}
+
+			$done[] = ['filename' => $filename, 'fn_hash' => md5($filename)];
 
 		}
 
-		return ['done' => $done];
+		return ['done' => $done, 'errors' => $errors];
 
 	}
 
-	function _stage_update_cache_file($filename, $base64_content){
+	function _stage_update_cache_file($filename, $content){
 
 		$this->_ensure_update_dirs();
 
-		$pathinfo = pathinfo(cms_path('tmp').'update/'.$filename);
-		if (!file_exists($pathinfo['dirname'])){
-			mkdir($pathinfo['dirname'], 0777, true);
+		$path = cms_path('tmp').'update/'.$filename;
+		$dir = pathinfo($path, PATHINFO_DIRNAME);
+		if (!is_dir($dir) && !mkdir($dir, 0777, true) && !is_dir($dir)){
+			return false;
 		}
 
-		if ($base64_content !== '' && $base64_content !== null){
-			file_put_contents(
-					cms_path('tmp').'update/'.$filename,
-					base64_decode($base64_content)
-			);
-		} else {
-			// Delete marker (file not on master / empty body)
-			file_put_contents(
-					cms_path('tmp').'update/'.$filename,
-					'_DELETE_'
-			);
-		}
+		return file_put_contents($path, $content) !== false;
 
 	}
-	
+
+	/**
+	 * Apply the staged update to the live tree:
+	 * 1. every U/A file of the manifest must be staged — if not, the download is incomplete:
+	 *    staging is discarded and nothing changes;
+	 * 2. pre-flight: every target must be writable — if not, nothing changes;
+	 * 3. live files that are overwritten or deleted are backed up first — if that fails, nothing changes;
+	 * 4. on the first failed write/delete everything attempted is rolled back from the backup
+	 *    (added files and folders this update created are removed).
+	 * After 2–4 the staged download is kept, so the apply can be retried without downloading.
+	 * It is removed after success (or by the next update list). If the rollback itself fails,
+	 * the backup folder is kept and named, and further applies are refused until it is cleared.
+	 * Returns ['done' => n] or ['error' => …, 'missing'|'failed' => […], 'retry' => bool, 'backup'?].
+	 */
 	function update_copy($area){
 
 		$this->_ensure_update_dirs();
 
-		$folder = cms_path('tmp').'update/';
-		
-		if (!empty($area)){
-			$folder_area = $folder.'modules/'.$area.'/';
-		} else {
-			$folder_area = $folder;
+		$manifest = $this->_load_update_manifest($area);
+		if ($manifest === null){
+			return ['error' => 'No update in progress', 'retry' => false];
 		}
 
-		if (file_exists($folder_area)){
-			
-			$it = new \RecursiveDirectoryIterator($folder);
-			foreach (new \RecursiveIteratorIterator($it) as $filename => $file) {
-				
-				$from_filename = $folder . str_replace($folder, '', str_replace("\\", '/', $filename));
+		$staging = cms_path('tmp').'update/';
+		$base = $GLOBALS['config']['base_path'];
+		$backup = $this->_update_backup_dir($area);
 
-				if (!is_dir($from_filename)){
-						
-					$to_filename = $GLOBALS['config']['base_path'] . str_replace($folder, '', str_replace("\\", '/', $filename));
+		// A failed rollback left originals here — never overwrite them
+		if (is_dir($backup)){
+			return [
+					'error' => 'A previous failed update left original files in '.$backup
+							.' — restore or remove that folder first',
+					'retry' => false,
+					'backup' => $backup,
+			];
+		}
 
-					// ensure target parent exists
-					$to_dir = pathinfo($to_filename, PATHINFO_DIRNAME);
-					if (!file_exists($to_dir)){
-						mkdir($to_dir, 0777, true);
-					}
+		$missing = [];
+		$bad_hash = [];
+		foreach ($manifest as $filename => $entry){
+			$letter = $this->_update_manifest_letter($entry);
+			if (!$this->_update_path_allowed($area, $filename)){
+				$missing[] = $filename;
+				continue;
+			}
+			if ($letter === 'D'){
+				continue;
+			}
+			if (!is_file($staging.$filename)){
+				$missing[] = $filename;
+				continue;
+			}
+			$expected = $this->_update_manifest_hash($entry);
+			$actual = md5_file($staging.$filename);
+			if ($expected === '' || $actual === false || $actual !== $expected){
+				$bad_hash[$filename] = 'does not match the release';
+			}
+		}
 
-					// check whats inside
-					$contents = file_get_contents($from_filename);
+		if (count($missing)){
+			$this->discard_update($area);
+			error_log('cms_update: download incomplete for "'.$area.'", update discarded: '.json_encode($missing));
+			return [
+					'error' => 'Update download incomplete ('.count($missing).' file(s)) — no files were changed',
+					'missing' => $missing,
+					'retry' => false,
+			];
+		}
 
-					if ($contents == '_DELETE_'){
-						if (file_exists($to_filename)){
-							unlink($to_filename);
-						}
-					} else {
-						copy($from_filename, $to_filename);
-					}
-					
-					unlink($from_filename);
-				
+		if (count($bad_hash)){
+			error_log('cms_update: staged hash mismatch for "'.$area.'": '.json_encode($bad_hash));
+			return [
+					'error' => 'Update not applied: '.$this->_update_files_summary($bad_hash).' — no files were changed',
+					'failed' => $bad_hash,
+					'retry' => false,
+			];
+		}
+
+		// 1. Pre-flight: every target must be writable before anything in the live tree changes
+		$blocked = [];
+		foreach ($manifest as $filename => $entry){
+			$letter = $this->_update_manifest_letter($entry);
+			$reason = $this->_update_target_problem($base.$filename, $letter);
+			if ($reason !== ''){
+				$blocked[$filename] = $reason;
+			}
+		}
+
+		if (count($blocked)){
+			error_log('cms_update: not applied for "'.$area.'", targets not writable: '.json_encode($blocked));
+			return [
+					'error' => 'Update not applied: '.$this->_update_files_summary($blocked).' — no files were changed',
+					'failed' => $blocked,
+					'retry' => true,
+			];
+		}
+
+		// 2. Back up every live file the update overwrites or deletes
+		foreach ($manifest as $filename => $entry){
+			$to = $base.$filename;
+			if (!is_file($to)){
+				continue;
+			}
+			$backup_file = $backup.$filename;
+			$backup_dir = pathinfo($backup_file, PATHINFO_DIRNAME);
+			if ((!is_dir($backup_dir) && !$this->_q('mkdir', $backup_dir, 0777, true) && !is_dir($backup_dir))
+					|| !$this->_q('copy', $to, $backup_file)){
+				$this->_rrmdir(rtrim($backup, '/'));
+				error_log('cms_update: backup failed for "'.$area.'": '.$filename);
+				return [
+						'error' => 'Update not applied: could not back up '.$filename.' — no files were changed',
+						'failed' => [$filename => 'backup failed'],
+						'retry' => true,
+				];
+			}
+		}
+
+		// 3. Apply; on the first failure undo everything attempted so far
+		$attempted = [];
+		$created_dirs = [];
+		$failed = [];
+
+		$hash_mismatch = false;
+
+		foreach ($manifest as $filename => $entry){
+
+			$letter = $this->_update_manifest_letter($entry);
+			$to = $base.$filename;
+			$attempted[] = $filename;
+
+			if ($letter === 'D'){
+				if (is_file($to) && !$this->_update_apply_delete($to)){
+					$failed[$filename] = 'delete failed';
+					break;
 				}
-	
+				continue;
 			}
 
-			$this->_rrmdir($folder);
+			if (!$this->_update_make_dir(pathinfo($to, PATHINFO_DIRNAME), $created_dirs)
+					|| !$this->_update_apply_write($staging.$filename, $to)){
+				$failed[$filename] = 'write failed';
+				break;
+			}
 
 		}
+
+		if (!count($failed)){
+			$expected_tree = $this->_update_release_hash($area);
+			$scan = $this->scan_area_files($area, $this->_update_area_folders($area));
+			$actual_tree = (string)($scan['current_hash'] ?? '');
+			if ($expected_tree === '' || $actual_tree !== $expected_tree){
+				$hash_mismatch = true;
+				$failed['release'] = 'tree does not match the release';
+			}
+		}
+
+		if (!count($failed)){
+			$this->_rrmdir(rtrim($backup, '/'));
+			$this->discard_update($area);
+			return ['done' => count($manifest)];
+		}
+
+		// Roll back: restore originals from the backup, remove files the update added
+		$unrestored = [];
+		foreach (array_reverse($attempted) as $filename){
+			$to = $base.$filename;
+			$backup_file = $backup.$filename;
+			if (is_file($backup_file)){
+				// Untouched (e.g. the delete that failed) — nothing to restore. Unreadable = changed.
+				$live_md5 = is_file($to) ? md5_file($to) : false;
+				$backup_md5 = md5_file($backup_file);
+				if ($live_md5 !== false && $backup_md5 !== false && $live_md5 === $backup_md5){
+					continue;
+				}
+				$to_dir = pathinfo($to, PATHINFO_DIRNAME);
+				if ((!is_dir($to_dir) && !$this->_q('mkdir', $to_dir, 0777, true) && !is_dir($to_dir))
+						|| !$this->_q('copy', $backup_file, $to)){
+					$unrestored[$filename] = 'restore failed';
+				}
+			} else if (is_file($to) && !$this->_q('unlink', $to)){
+				$unrestored[$filename] = 'could not remove added file';
+			}
+		}
+
+		// Only folders this apply created, deepest first, and only if empty again
+		foreach (array_reverse($created_dirs) as $dir){
+			$this->_q('rmdir', $dir);
+		}
+
+		if (count($unrestored)){
+			// Keep the backup so the operator can restore by hand
+			error_log('cms_update: apply failed for "'.$area.'" and rollback incomplete: '
+					.json_encode(['failed' => $failed, 'unrestored' => $unrestored, 'backup' => $backup]));
+			return [
+					'error' => 'Update failed: '.$this->_update_files_summary($failed)
+							.'. Rollback incomplete: '.$this->_update_files_summary($unrestored)
+							.' — originals are kept in '.$backup,
+					'failed' => $failed + $unrestored,
+					'retry' => false,
+					'backup' => $backup,
+			];
+		}
+
+		$this->_rrmdir(rtrim($backup, '/'));
+		error_log('cms_update: apply failed for "'.$area.'", rolled back: '.json_encode($failed));
+
+		if ($hash_mismatch){
+			return [
+					'error' => 'Update failed: tree does not match the release — rolled back, no files were changed',
+					'failed' => $failed,
+					'retry' => false,
+			];
+		}
+
+		return [
+				'error' => 'Update failed: '.$this->_update_files_summary($failed).' — rolled back, no files were changed',
+				'failed' => $failed,
+				'retry' => true,
+		];
+
+	}
+
+	function _update_release_hash($area){
+
+		$master = $this->get_master_version($area);
+		if (!is_array($master) || !empty($master['error'])){
+			return '';
+		}
+
+		if (!empty($master['version_hash']) && $master['version_hash'] !== 'error'){
+			return (string)$master['version_hash'];
+		}
+
+		if (!empty($master['current_hash'])){
+			return (string)$master['current_hash'];
+		}
+
+		return '';
+
+	}
+
+	// Live-tree write / delete steps of update_copy() (separate so failures can be tested)
+	function _update_apply_write($from, $to){
+
+		return $this->_q('copy', $from, $to);
+
+	}
+
+	function _update_apply_delete($to){
+
+		return $this->_q('unlink', $to);
+
+	}
+
+	/**
+	 * mkdir -p that records each folder it creates (outermost first) for rollback.
+	 */
+	function _update_make_dir($dir, &$created){
+
+		if (is_dir($dir)){
+			return true;
+		}
+
+		$missing = [];
+		while (!is_dir($dir)){
+			$missing[] = $dir;
+			$parent = pathinfo($dir, PATHINFO_DIRNAME);
+			if ($parent === $dir){
+				return false;
+			}
+			$dir = $parent;
+		}
+
+		foreach (array_reverse($missing) as $path){
+			if (!$this->_q('mkdir', $path, 0777) && !is_dir($path)){
+				return false;
+			}
+			$created[] = $path;
+		}
+
+		return true;
+
+	}
+
+	function _update_backup_dir($area){
+
+		return cms_path('tmp').'update_backup_'.$this->_release_id($area).'/';
+
+	}
+
+	/**
+	 * Why a live target cannot take this update step ('' = fine). Checked before any change.
+	 */
+	function _update_target_problem($to, $letter){
+
+		if ($letter === 'D'){
+			if (!is_file($to)){
+				return '';
+			}
+			if (!is_writable(pathinfo($to, PATHINFO_DIRNAME))){
+				return 'cannot delete (folder not writable)';
+			}
+			// Windows: a read-only file cannot be unlinked even in a writable folder
+			if (DIRECTORY_SEPARATOR === '\\' && !is_writable($to)){
+				return 'cannot delete (file is read-only)';
+			}
+			return '';
+		}
+
+		if (is_dir($to)){
+			return 'cannot write (a folder has this name)';
+		}
+
+		if (is_file($to)){
+			return is_writable($to) ? '' : 'cannot overwrite (file not writable)';
+		}
+
+		// New file: nearest existing parent folder must be writable, and no file may block the path
+		$dir = pathinfo($to, PATHINFO_DIRNAME);
+		while (!is_dir($dir)){
+			if (file_exists($dir)){
+				return 'cannot create (a file has the folder name '.basename($dir).')';
+			}
+			$parent = pathinfo($dir, PATHINFO_DIRNAME);
+			if ($parent === $dir){
+				return 'cannot create (no parent folder)';
+			}
+			$dir = $parent;
+		}
+
+		return is_writable($dir) ? '' : 'cannot create (folder not writable)';
+
+	}
+
+	/**
+	 * "a.php (write failed), b.php (delete failed) and 3 more" — names files in operator messages.
+	 */
+	function _update_files_summary($reasons, $max = 5){
+
+		$parts = [];
+		foreach ($reasons as $filename => $reason){
+			if (count($parts) >= $max){
+				break;
+			}
+			$parts[] = $filename.' ('.$reason.')';
+		}
+
+		$more = count($reasons) - count($parts);
+
+		return implode(', ', $parts).($more > 0 ? ' and '.$more.' more' : '');
 
 	}
 
@@ -1574,6 +2104,25 @@ class cms_update_model extends \Model {
 		rmdir($dir);
 
 	}
+
+	/**
+	 * Call a filesystem/stream function without letting its warning reach the CMS error
+	 * handler (which also prints @-suppressed warnings, breaking JSON answers). Failure is
+	 * reported by the return value, like the @ form.
+	 */
+	function _q($fn, ...$args){
+
+		set_error_handler(function(){
+			return true;
+		});
+
+		try {
+			return $fn(...$args);
+		} finally {
+			restore_error_handler();
+		}
+
+	}
 	
 	function update_version_cache($area, $params){
 
@@ -1583,7 +2132,7 @@ class cms_update_model extends \Model {
 		} else {
 			$filename = cms_path('tmp').'version_'.$area.'.json';
 		}
-		
+
 		$data = is_file($filename) ? json_decode(file_get_contents($filename), true) : null;
 		if (!is_array($data)){
 			$data = [];
@@ -1594,9 +2143,52 @@ class cms_update_model extends \Model {
 		$data['version_hash'] = $params['version_hash'];
 		$data['version_time'] = $params['version_time'];
 		$data['update_time'] = $params['update_time'];
-		
+
+		// Callers stamp only when the scanned tree equals the release (hash match), so the
+		// current file list is that version's per-file baseline for local-edit detection
+		$data['version_files'] = $this->_files_hash_map($data['files'] ?? []);
+
 		// write cache file
 		file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
+
+	}
+
+	/**
+	 * filename => hash from a scan file list.
+	 */
+	function _files_hash_map($files){
+
+		$map = [];
+		if (!is_array($files)){
+			return $map;
+		}
+
+		foreach ($files as $file){
+			if (is_array($file) && isset($file['filename'], $file['hash'])){
+				$map[$file['filename']] = $file['hash'];
+			}
+		}
+
+		return $map;
+
+	}
+
+	/**
+	 * Per-file hashes of the stamped (installed) version, or null when never recorded.
+	 */
+	function _load_version_files($area){
+
+		$path = $this->_local_version_path($area);
+		if (!is_file($path)){
+			return null;
+		}
+
+		$data = json_decode(file_get_contents($path), true);
+		if (!is_array($data) || empty($data['version_files']) || !is_array($data['version_files'])){
+			return null;
+		}
+
+		return $data['version_files'];
 
 	}
 
@@ -1679,9 +2271,10 @@ class cms_update_model extends \Model {
 
 	/**
 	 * Build one updater table row (labels only — no hash fragments in UI fields).
-	 * $area_data is a rebuild_area() result.
+	 * $area_data is a rebuild_area() result. $master_index: get_master_index() result to build
+	 * module rows without a request each (null = one do=version request for this row).
 	 */
-	function build_area_display_row($area_data){
+	function build_area_display_row($area_data, $master_index = null){
 
 		if (empty($GLOBALS['config']['update']['master'])){
 			$GLOBALS['config']['update']['master'] = [];
@@ -1693,8 +2286,10 @@ class cms_update_model extends \Model {
 
 		$live_hash = $area_data['local_current_hash'] ?? '';
 
-		// Never remove core; master packages must leave update.master first
-		$can_remove = !$is_core && $area_id !== '' && $area_id !== 'cms' && !$is_local_master;
+		$may_use = $this->client_may_use_area($area_id);
+
+		// Never remove core; master packages must leave update.master first; remove needs update.allow
+		$can_remove = !$is_core && $area_id !== '' && $area_id !== 'cms' && !$is_local_master && $may_use;
 
 		$row = [
 				'area' => $area_id,
@@ -1713,7 +2308,11 @@ class cms_update_model extends \Model {
 				'can_update' => false,
 				'can_release' => false,
 				'can_remove' => $can_remove,
-				'may_use' => $this->client_may_use_area($area_id),
+				'may_use' => $may_use,
+				// #429: master packages (bold), locally inactive modules, update blocked by update.allow
+				'is_master' => $is_local_master,
+				'active' => $this->_area_active($area_id),
+				'not_allowed' => false,
 				'error' => '',
 				'local_only' => false,
 				'status' => '',
@@ -1754,11 +2353,12 @@ class cms_update_model extends \Model {
 
 		}
 
-		$version_data = $this->get_master_version($area_id);
+		$version_data = $this->_master_version_for_row($area_id, $master_index);
 
 		if (!empty($version_data['error'])){
 
-			if ($is_core){
+			// Master unreachable / bad answer: say so on the row (not "Local only")
+			if ($is_core || !empty($version_data['transport_error'])){
 				$row['error'] = $version_data['error'];
 				$row['local_label'] = $this->format_local_version_label($row);
 			} else {
@@ -1837,6 +2437,8 @@ class cms_update_model extends \Model {
 			$row['local_label'] = $this->format_local_version_label($row);
 			$row['master_label'] = $this->format_master_version_label($master_version, $master_time);
 			$row['can_update'] = $row['may_use'] && $master_hash !== '';
+			// Master has something newer, but update.allow does not include this package
+			$row['not_allowed'] = !$row['may_use'] && $master_hash !== '';
 		}
 
 		return $row;
@@ -1871,7 +2473,9 @@ class cms_update_model extends \Model {
 		$cached_version = $area_data['local_version'] ?? '';
 		$cached_hash = $area_data['local_version_hash'] ?? '';
 
-		if ($cached_version === $release['version'] && $cached_hash === $release['current_hash']){
+		// Also stamp once when the per-file baseline is missing (installs stamped before it existed)
+		if ($cached_version === $release['version'] && $cached_hash === $release['current_hash']
+				&& !empty($area_data['local_has_baseline'])){
 			return;
 		}
 
@@ -1896,46 +2500,6 @@ class cms_update_model extends \Model {
 
 	}
 
-	function run_sql($sql){
-		
-		try {
-			$query = $this->db->query($sql);
-		} catch (\Exception $e) {
-			_html_error($e->getMessage(), 0, ['backtrace' => 1]);
-		}
-
-		if ($query === false || $query === true){
-			return [$query];
-		}
-
-		$result = $query->result_array();
-		
-		return $result;
-		
-	}
-	
-	function up(){
-		
-		// check if table block exists and update
-		
-		$sql = "select 1 from block limit 1";
-		$query = $this->db->query($sql);
-		
-		if ($query && $query->num_rows()){
-			
-			$sql = "rename table `block` to `cms_page_panel`";
-			$this->run_sql($sql);
-			
-			$sql = "ALTER TABLE `cms_page_panel` CHANGE `block_id` `cms_page_panel_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT";
-			$this->run_sql($sql);
-			
-			$sql = "ALTER TABLE `cms_page_panel` CHANGE `page_id` `cms_page_id` INT(10) UNSIGNED NOT NULL";
-			$this->run_sql($sql);
-				
-		}
-		
-	}
-	
 	/**
 	 * Remove empty directories left after file deletes (updater step).
 	 * Deepest-first until stable. $area: '' = core (system + modules/cms), else modules/<area>/.
@@ -1983,7 +2547,7 @@ class cms_update_model extends \Model {
 
 					$fi = new \FilesystemIterator($dir, \FilesystemIterator::SKIP_DOTS);
 					if (!iterator_count($fi)){
-						if (@rmdir($dir)){
+						if ($this->_q('rmdir', $dir)){
 							$removed++;
 						}
 					}

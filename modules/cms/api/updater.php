@@ -36,6 +36,15 @@ if ($module === null) {
 
 header('Content-Type: application/json; charset=utf-8');
 
+// Public endpoint: module becomes a tmp/master/{id}/ path — package names only
+$module = is_array($module) ? false : $ci->cms_update_model->normalise_area_name($module);
+if ($module === false) {
+	print(json_encode([
+			'error' => 'Invalid module',
+	]));
+	exit();
+}
+
 if ($do === 'version') {
 
 	print(json_encode($ci->cms_update_model->get_release_version($module)));

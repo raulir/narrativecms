@@ -9,7 +9,7 @@
 			<br><?= $GLOBALS['config']['email'] ?>
 		<?php endif ?>
 	</div>
-<?php elseif(empty($ajax)): ?>
+<?php else: ?>
 	<div class="cms_toolbar">
 	
 		<div class="cms_tool_text">System modules update</div>
@@ -73,7 +73,5 @@
 		<?php endif ?>
 	
 	</div>
-	
-<?php else: ?>
-	<pre><?php print_r($result); ?></pre>
+
 <?php endif ?>

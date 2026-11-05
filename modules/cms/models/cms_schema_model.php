@@ -969,6 +969,27 @@ class cms_schema_model extends \Model {
 	}
 
 	/**
+	 * Run one raw SQL statement (dump import). Returns result rows, or [true|false] for non-select.
+	 */
+	function run_sql($sql){
+		
+		try {
+			$query = $this->db->query($sql);
+		} catch (\Exception $e) {
+			_html_error($e->getMessage(), 0, ['backtrace' => 1]);
+		}
+
+		if ($query === false || $query === true){
+			return [$query];
+		}
+
+		$result = $query->result_array();
+		
+		return $result;
+		
+	}
+
+	/**
 	 * Orphan panel table: restore demoted item fields to params, drop table.
 	 */
 	private function _fix_orphan_panel_table($module, $table, $panel_name) {

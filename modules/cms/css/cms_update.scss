@@ -45,6 +45,30 @@
 	color: $colour_red;
 }
 
+// #429: packages this host publishes
+.cms_update_row_master .cms_update_cell_label {
+	font-weight: bold;
+}
+
+// #429: on disk but not enabled in site settings
+.cms_update_row_inactive .cms_update_cell_label {
+	opacity: 0.6;
+}
+
+.cms_update_inactive {
+	display: inline-block;
+	margin-left: 0.5rem;
+	font-size: 1.2rem;
+	font-style: italic;
+}
+
+// #429: master has a newer release but update.allow excludes this package
+.cms_update_not_allowed {
+	display: inline-block;
+	font-style: italic;
+	opacity: 0.6;
+}
+
 .cms_update_section_label {
 	margin: 2.0rem 1.0rem 0.5rem 1.0rem;
 	padding-top: 1.0rem;
@@ -100,6 +124,41 @@
 
 .cms_update_result_file {
 	padding: 0.1rem 0;
+}
+
+.cms_update_popup_failed {
+	margin-top: 1.0rem;
+	color: $colour_red;
+	font-weight: bold;
+}
+
+.cms_update_popup_failed_file {
+	color: $colour_red;
+}
+
+.cms_update_result_file_local_edit {
+	color: $colour_red;
+}
+
+.cms_update_popup_ask {
+	margin-bottom: 1.0rem;
+	padding: 1.0rem;
+	border: 0.1rem solid $colour_red;
+
+	.cms_tool_button {
+		display: inline-block;
+		margin: 1.0rem 1.0rem 0 0;
+	}
+}
+
+.cms_update_popup_ask_text {
+	color: $colour_red;
+	font-weight: bold;
+}
+
+.cms_update_popup_retry {
+	display: inline-block;
+	margin-top: 1.0rem;
 }
 
 .cms_update_popup_schema {

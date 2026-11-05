@@ -386,10 +386,10 @@ class cms_dump extends \Controller {
 	 */
 	function _import_sql_file($sqlfile){
 
-		$this->load->model('cms/cms_update_model');
+		$this->load->model('cms/cms_schema_model');
 
 		foreach ($this->_tables_from_sql_file($sqlfile) as $table){
-			$this->cms_update_model->run_sql('DROP TABLE IF EXISTS `'.$table.'`');
+			$this->cms_schema_model->run_sql('DROP TABLE IF EXISTS `'.$table.'`');
 		}
 
 		$templine = '';
@@ -403,7 +403,7 @@ class cms_dump extends \Controller {
 			}
 			$templine .= $line;
 			if (substr(trim($line), -1, 1) == ';') {
-				$this->cms_update_model->run_sql($templine);
+				$this->cms_schema_model->run_sql($templine);
 				$templine = '';
 			}
 		}
@@ -759,8 +759,6 @@ class cms_dump extends \Controller {
 	}
 
 	function panel_action($params){
-
-		$this->load->model('cms/cms_update_model');
 
 		$do = $params['do'] ?? ($_POST['do'] ?? '');
 

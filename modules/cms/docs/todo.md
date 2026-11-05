@@ -94,6 +94,13 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 - [x] **Config major.minor + Release snapshot** (#430) — `config.json` `"version"`, manual [Release], serve clients from `tmp/master/{id}/`
 - [ ] **Admin UI to edit package major.minor** — today operators set `"version": "x.y"` in module `config.json`; ticket for CMS UI instead of hand-editing JSON
+- [x] **Untrusted paths** (review 2026-11-05) — `api/updater.php` validates `module`; `_update_path_allowed()` keeps master file lists / posted filenames inside the package (list, stage, copy); popup renders filenames as text
+- [x] **Failed download no longer deletes files** — update manifest per area; D only from the manifest; a missing U/A body is an error; 2 retries in the popup; any file still failing discards the whole package update (live tree untouched); `update_copy` refuses an incomplete download. See [`cms_update.md`](cms_update.md) § Download is all-or-nothing
+- [x] **Warn before overwriting local edits** — `version_files` per-file baseline on every stamp; `cms_update_list` rescans and returns a plan with `local_edit` flags / unknown-changes warning; popup asks Continue / Cancel. See [`cms_update.md`](cms_update.md) § Local edits warning
+- [x] **One master HTTP helper** — `_master_post()` with timeouts and transport errors; one `do=modules` index for all rows (`current_hash` + `history` added); row shows master errors; `cms_update_copy` rescans only its area. See [`cms_update.md`](cms_update.md) § Master requests
+- [x] **Dead code** — removed panel `do=cms_update` branch (+ `ajax` flag / template `print_r`), legacy single-file staging + `update_file()`, `up()`, `get_master_file()` + legacy batch fallback; `run_sql()` moved to `cms_schema_model` (used by `cms_dump`)
+- [x] **Interface improvements** (#429) — bold master rows, *inactive* marker, *Not allowed* instead of Update (Remove hidden too). See [`cms_update.md`](cms_update.md) § Row markers
+- [ ] **Source per module** (#429, last item) — every package comes from the one `cms_update_url`. Options: show the host per row (read-only), or `update.source.{module}` overrides that every master call uses
 
 ---
 

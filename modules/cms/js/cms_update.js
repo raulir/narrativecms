@@ -235,6 +235,76 @@ function cms_update_confirm_area(area, $popup, state, options){
 
 }
 
+/**
+ * Failure line plus one line per file (details: filename => reason). Text only.
+ */
+function cms_update_show_failure($popup, message, details){
+
+	var $files = cms_update_popup_files($popup)
+	$files.append($('<div class="cms_update_popup_failed"></div>').text(message))
+
+	if (details && typeof details === 'object'){
+		$.each(details, function(filename, reason){
+			$files.append($('<div class="cms_update_popup_failed_file"></div>').text(filename + ' — ' + reason))
+		})
+	}
+
+}
+
+/**
+ * Before the apply step (file list or download failed): the live tree was not touched by
+ * this run. Discard the staged download and show why.
+ */
+function cms_update_fail($popup, state, area, message, details){
+
+	cms_update_show_failure($popup, message, details)
+
+	var finish = function(){
+		cms_update_popup_finish($popup, state)
+		cms_notification(message, 8)
+	}
+
+	get_ajax('cms/cms_update', {
+		'do': 'cms_update_discard',
+		'area': area,
+		'success': finish,
+		'error': finish
+	}).catch(function(){})
+
+}
+
+/**
+ * Update would overwrite or delete local edits: show the warning with Continue / Cancel.
+ * Cancel discards the (empty) update; nothing was downloaded or changed yet.
+ */
+function cms_update_ask_overwrite($popup, state, area, local_edits, on_continue){
+
+	var text = local_edits
+			? local_edits + ' file(s) listed below have local edits that this update will overwrite or delete.'
+			: 'This package has local changes, but there is no per-file record of the installed version, '
+				+ 'so the edited files cannot be named. The update may overwrite them.'
+
+	var $ask = $('<div class="cms_update_popup_ask"></div>')
+	$ask.append($('<div class="cms_update_popup_ask_text"></div>').text(text + ' Continue?'))
+
+	var $continue = $('<div class="cms_tool_button cms_update_popup_ask_continue">Continue update</div>')
+	var $cancel = $('<div class="cms_tool_button cms_update_popup_ask_cancel">Cancel</div>')
+	$ask.append($continue, $cancel)
+
+	cms_update_popup_files($popup).prepend($ask)
+
+	$continue.on('click', function(){
+		$ask.remove()
+		on_continue()
+	})
+
+	$cancel.on('click', function(){
+		$ask.remove()
+		cms_update_fail($popup, state, area, 'Update cancelled — no files were changed')
+	})
+
+}
+
 function cms_update_run_pipeline(area, options){
 
 	options = options || {}
@@ -253,6 +323,10 @@ function cms_update_run_pipeline(area, options){
 			'cancel': function(after){
 				if (state.allow_dismiss){
 					after()
+					// Core update replaced this updater's own PHP/JS: load the matching script
+					if (state.reload_on_close){
+						window.location.reload()
+					}
 				}
 			}
 		})
@@ -265,9 +339,25 @@ function cms_update_run_pipeline(area, options){
 		get_ajax('cms/cms_update', {
 			'do': 'cms_update_list',
 			'area': area,
+			'protocol': 2,
+			'error': function(){
+				$files.html('')
+				cms_update_fail($popup, state, area, 'Could not get the list of files — no files were changed')
+			},
 			'success': function(data){
 
-				var files = (data.result && data.result.result) ? data.result.result : []
+				var plan = (data.result && data.result.result) ? data.result.result : null
+
+				// Empty success is only a real file list. [] or a missing plan must not confirm or enable.
+				if (!plan || typeof plan !== 'object' || plan.error || !$.isArray(plan.files)){
+					var reason = (plan && plan.error) ? plan.error : 'unexpected response'
+					$files.html('')
+					cms_update_fail($popup, state, area, 'Could not get the list of files: ' + reason + ' — no files were changed')
+					return
+				}
+
+				var files = plan.files
+
 				if (!files.length){
 					$files.html('No files to transfer.')
 					if (after_cleanup){
@@ -281,44 +371,83 @@ function cms_update_run_pipeline(area, options){
 
 				$files.html('')
 				$.each(files, function(index, value){
-					$files.append(
-						'<div class="cms_update_result_file cms_update_result_file_' + value.fn_hash + '">' +
-							'<span class="cms_update_tick">(<span style="font-weight: bold; color: #d0d0d0; ">' + value.letter + '</span>)</span>&nbsp;' +
-							value.filename +
-						'</div>'
-					)
-					files[index].updated = 0
+					// Filenames come from the master list: text only, never HTML
+					var fn_hash = String(value.fn_hash || '').replace(/[^a-f0-9]/g, '')
+					var $tick = $('<span class="cms_update_tick"></span>')
+					$tick.append('(', $('<span style="font-weight: bold; color: #d0d0d0; "></span>').text(value.letter), ')')
+					var $file_row = $('<div class="cms_update_result_file cms_update_result_file_' + fn_hash + '"></div>')
+							.append($tick, ' ', document.createTextNode(String(value.filename)))
+					if (value.local_edit){
+						$file_row.addClass('cms_update_result_file_local_edit')
+								.append($('<span class="cms_update_result_local_edit"></span>')
+										.text(value.letter === 'D' ? ' — local edit, will be deleted' : ' — local edit, will be overwritten'))
+					}
+					$files.append($file_row)
+					files[index].fn_hash = fn_hash
+					files[index].state = 'pending'
+					files[index].attempts = 0
 				})
 
+				// Files of one package belong together: one file failing after retries fails the whole update
 				var batch_size = 20
 				var max_batches = 2
+				var max_attempts = 3 // first try + 2 retries
 				var batches_active = 0
 				var transfer_done = false
 
-				function cms_update_mark_file(fn_hash, letter, colour){
-					$files.find('.cms_update_result_file_' + fn_hash).children('.cms_update_tick')
-							.html('(<span style="color: ' + colour + '; font-weight: bold; ">' + letter + '</span>)')
+				function cms_update_mark_file(value, colour, note){
+					var $row = $files.find('.cms_update_result_file_' + value.fn_hash)
+					var $letter = $('<span style="font-weight: bold; "></span>').css('color', colour).text(value.letter)
+					$row.children('.cms_update_tick').empty().append('(', $letter, ')')
+					$row.children('.cms_update_result_note').remove()
+					if (note){
+						$row.append($('<span class="cms_update_result_note"></span>').text(' — ' + note))
+					}
 				}
 
 				function cms_update_take_batch(){
 					var batch = []
 					$.each(files, function(key, value){
-						if (value.updated == 0 && batch.length < batch_size){
-							files[key].updated = 1
+						if (value.state === 'pending' && batch.length < batch_size){
+							value.state = 'active'
+							value.attempts = value.attempts + 1
 							batch.push(value)
 						}
 					})
 					return batch
 				}
 
-				function cms_update_pending_left(){
-					var pending = false
+				function cms_update_unsettled(){
+					var unsettled = false
 					$.each(files, function(key, value){
-						if (value.updated == 0){
-							pending = true
+						if (value.state === 'pending' || value.state === 'active' || value.state === 'waiting'){
+							unsettled = true
 						}
 					})
-					return pending
+					return unsettled
+				}
+
+				function cms_update_settle(value, ok, reason){
+
+					if (ok){
+						value.state = 'done'
+						cms_update_mark_file(value, 'green')
+						return
+					}
+
+					if (value.attempts < max_attempts){
+						value.state = 'waiting'
+						cms_update_mark_file(value, 'orange', 'retrying (' + (reason || 'download failed') + ')')
+						setTimeout(function(){
+							value.state = 'pending'
+							cms_update_pump_batches()
+						}, 1000 * value.attempts)
+						return
+					}
+
+					value.state = 'failed'
+					cms_update_mark_file(value, 'red', reason || 'download failed')
+
 				}
 
 				function cms_update_finish_transfer(){
@@ -327,10 +456,73 @@ function cms_update_run_pipeline(area, options){
 					}
 					transfer_done = true
 
+					var failed = $.grep(files, function(value){
+						return value.state === 'failed'
+					})
+
+					if (failed.length){
+						cms_update_fail($popup, state, area,
+								'Update download failed for ' + failed.length + ' file(s) after ' + (max_attempts - 1) + ' retries — no files were changed')
+						return
+					}
+
+					cms_update_apply()
+				}
+
+				/**
+				 * Copy the staged download into the live tree. On failure the server keeps the
+				 * staged download (unless it was incomplete), so the apply can be retried here.
+				 */
+				function cms_update_apply_failed(message, details, can_retry){
+
+					cms_update_show_failure($popup, message, details)
+					cms_notification(message, 8)
+
+					if (can_retry){
+						var $retry = $('<div class="cms_tool_button cms_update_popup_retry">Retry apply</div>')
+						$retry.on('click', function(){
+							$retry.remove()
+							state.allow_dismiss = false
+							$popup.find('.cms_update_popup_close').hide()
+							cms_update_apply()
+						})
+						cms_update_popup_files($popup).append($retry)
+					}
+
+					cms_update_popup_finish($popup, state)
+
+				}
+
+				function cms_update_apply(){
+
 					get_ajax('cms/cms_update', {
 						'do': 'cms_update_copy',
 						'area': area,
-						'success': function(){
+						'error': function(){
+							cms_update_apply_failed('Update could not be applied (request failed) — the downloaded files are kept', {}, true)
+						},
+						'success': function(data){
+
+							var copied = (data.result && data.result.result) ? data.result.result : {}
+							if (copied.error){
+								var details = copied.failed || {}
+								if (copied.missing && copied.missing.length){
+									$.each(copied.missing, function(_, filename){
+										details[filename] = 'not downloaded'
+									})
+								}
+								cms_update_apply_failed(copied.error, details, !!copied.retry)
+								return
+							}
+
+							// Core files changed (incl. this updater): reload when the popup closes
+							if (area === ''){
+								state.reload_on_close = true
+								cms_update_popup_files($popup).append(
+									$('<div class="cms_update_popup_reload_note"></div>')
+										.text('Narrative CMS was updated — the page reloads when you close this window.')
+								)
+							}
 
 							get_ajax('cms/cms_update', {
 								'do': 'cms_update_cleanup',
@@ -345,10 +537,29 @@ function cms_update_run_pipeline(area, options){
 									}
 
 								}
-							})
+							}).catch(function(){})
 
 						}
+					}).catch(function(){})
+				}
+
+				function cms_update_batch_done(batch, result, request_error){
+
+					var done = {}
+					$.each((result && result.done) || [], function(_, row){
+						if (row && row.fn_hash){
+							done[row.fn_hash] = true
+						}
 					})
+					var errors = (result && result.errors) || {}
+
+					$.each(batch, function(_, value){
+						cms_update_settle(value, !!done[value.fn_hash], request_error || errors[value.filename])
+					})
+
+					batches_active = batches_active - 1
+					cms_update_pump_batches()
+
 				}
 
 				function cms_update_pump_batches(){
@@ -363,60 +574,44 @@ function cms_update_run_pipeline(area, options){
 						batches_active = batches_active + 1
 
 						var filenames = []
-						var letter_by_hash = {}
 						$.each(batch, function(_, value){
 							filenames.push(value.filename)
-							letter_by_hash[value.fn_hash] = value.letter
-							cms_update_mark_file(value.fn_hash, value.letter, 'orange')
+							cms_update_mark_file(value, 'orange')
 						})
 
-						get_ajax('cms/cms_update', {
-							'do': 'cms_update_file',
-							'area': area,
-							'filenames': filenames,
-							'success': function(data){
-
-								var done = data.result && data.result.result && data.result.result.done
-										? data.result.result.done
-										: []
-
-								if (done.length){
-									$.each(done, function(_, row){
-										var h = row.fn_hash
-										var letter = letter_by_hash[h] || 'U'
-										if (h){
-											cms_update_mark_file(h, letter, 'green')
-										}
-									})
-								} else {
-									$.each(batch, function(_, value){
-										cms_update_mark_file(value.fn_hash, value.letter, 'green')
-									})
+						;(function(batch){
+							get_ajax('cms/cms_update', {
+								'do': 'cms_update_file',
+								'area': area,
+								'filenames': filenames,
+								'success': function(data){
+									var result = (data.result && data.result.result) ? data.result.result : {}
+									cms_update_batch_done(batch, result, '')
+								},
+								'error': function(){
+									cms_update_batch_done(batch, {}, 'request failed')
 								}
-
-								batches_active = batches_active - 1
-
-								if (batches_active == 0 && !cms_update_pending_left()){
-									cms_update_finish_transfer()
-								} else {
-									cms_update_pump_batches()
-								}
-
-							}
-						})
+							}).catch(function(){})
+						})(batch)
 
 					}
 
-					if (batches_active == 0 && !cms_update_pending_left()){
+					if (batches_active == 0 && !cms_update_unsettled()){
 						cms_update_finish_transfer()
 					}
 
 				}
 
-				cms_update_pump_batches()
+				// Local edits would be lost: ask first (in the popup, not window.confirm)
+				var local_edits = parseInt(plan.local_edits, 10) || 0
+				if (local_edits || plan.local_changes_unknown){
+					cms_update_ask_overwrite($popup, state, area, local_edits, cms_update_pump_batches)
+				} else {
+					cms_update_pump_batches()
+				}
 
 			}
-		})
+		}).catch(function(){})
 
 	})
 
@@ -480,7 +675,7 @@ function cms_update_init($root){
 			return
 		}
 
-		var label = $(this).closest('.cms_update_row').find('.cms_update_cell').first().text() || area
+		var label = $(this).closest('.cms_update_row').attr('data-label') || area
 
 		get_ajax_panel('cms/cms_popup_yes_no', {
 			'text': 'Remove module <b>' + label + '</b>?<br><br>' +
@@ -527,7 +722,7 @@ function cms_update_init($root){
 			area = ''
 		}
 
-		var label = $(this).closest('.cms_update_row').find('.cms_update_cell').first().text() || 'module'
+		var label = $(this).closest('.cms_update_row').attr('data-label') || 'module'
 
 		get_ajax_panel('cms/cms_popup_yes_no', {
 			'text': 'Release ' + label + ' from the live tree into tmp/master?<br>Clients will receive this snapshot only.',
