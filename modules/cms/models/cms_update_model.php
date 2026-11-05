@@ -324,7 +324,61 @@ class cms_update_model extends \Model {
 				'version_time' => !empty($meta['version_time']) ? (int)$meta['version_time'] : 0,
 				'update_time' => !empty($meta['update_time']) ? (int)$meta['update_time'] : 0,
 				'version' => $meta['version'] ?? '',
+				'history' => $this->_release_history_list($meta['history'] ?? []),
 		];
+
+	}
+
+	/**
+	 * One release history entry: version + tree hash + release time (no file list).
+	 */
+	function _release_history_entry($meta){
+
+		if (!is_array($meta)){
+			return null;
+		}
+
+		$hash = !empty($meta['current_hash']) ? $meta['current_hash'] : ($meta['version_hash'] ?? '');
+		if ($hash === '' || $hash === '[unknown]'){
+			return null;
+		}
+
+		return [
+				'version' => (string)($meta['version'] ?? ''),
+				'current_hash' => $hash,
+				'version_time' => !empty($meta['version_time']) ? (int)$meta['version_time'] : 0,
+		];
+
+	}
+
+	/**
+	 * Normalise a history list: valid entries only, one per hash (first wins), capped.
+	 */
+	function _release_history_list($history, $exclude_hash = '', $limit = 40){
+
+		$return = [];
+		$seen = [];
+		if ($exclude_hash !== ''){
+			$seen[$exclude_hash] = true;
+		}
+
+		if (!is_array($history)){
+			return $return;
+		}
+
+		foreach ($history as $item){
+			$entry = $this->_release_history_entry($item);
+			if ($entry === null || isset($seen[$entry['current_hash']])){
+				continue;
+			}
+			$seen[$entry['current_hash']] = true;
+			$return[] = $entry;
+			if (count($return) >= $limit){
+				break;
+			}
+		}
+
+		return $return;
 
 	}
 
@@ -350,6 +404,19 @@ class cms_update_model extends \Model {
 		$prev = $this->get_release_meta($area);
 		$last_version = is_array($prev) ? ($prev['version'] ?? '') : '';
 		$version = $this->compute_next_release_version($area, $last_version);
+
+		// Older releases (newest first) survive the snapshot wipe below via the new version.json
+		$history = [];
+		if (is_array($prev)){
+			$prev_entry = $this->_release_history_entry($prev);
+			if ($prev_entry !== null){
+				$history[] = $prev_entry;
+			}
+			if (!empty($prev['history']) && is_array($prev['history'])){
+				$history = array_merge($history, $prev['history']);
+			}
+		}
+		$history = $this->_release_history_list($history, $current_hash);
 
 		$release_dir = $this->_release_dir($area);
 		if (is_dir($release_dir)){
@@ -388,6 +455,7 @@ class cms_update_model extends \Model {
 				'version_time' => $now,
 				'update_time' => $now,
 				'files' => $files,
+				'history' => $history,
 		];
 
 		file_put_contents(
@@ -1516,8 +1584,11 @@ class cms_update_model extends \Model {
 			$filename = cms_path('tmp').'version_'.$area.'.json';
 		}
 		
-		$data = json_decode(file_get_contents($filename), true);
-		
+		$data = is_file($filename) ? json_decode(file_get_contents($filename), true) : null;
+		if (!is_array($data)){
+			$data = [];
+		}
+
 		// change values
 		$data['version'] = $params['version'];
 		$data['version_hash'] = $params['version_hash'];
@@ -1738,20 +1809,78 @@ class cms_update_model extends \Model {
 			if ($master_version !== ''){
 				$row['local_version'] = $master_version;
 			}
-			// Date on Local like Master (use master time if local cache has no version_time)
-			if (empty($row['local_version_time']) && $master_time){
+			// Date on Local like Master (master time when the cache has no time or a different version)
+			if ($master_time && (empty($row['local_version_time'])
+					|| ($area_data['local_version'] ?? '') !== $master_version)){
 				$row['local_version_time'] = $master_time;
+			}
+			if ($master_version !== ''){
+				$this->_stamp_matched_release($area_data, $row, [
+						'version' => $master_version,
+						'current_hash' => $master_hash,
+						'version_time' => $master_time,
+				]);
 			}
 			$row['local_label'] = $this->format_local_version_label($row);
 			$row['master_label'] = $this->format_master_version_label($master_version, $master_time);
 			$row['can_update'] = false;
 		} else {
+			// Behind but identical to an older release → show that release, no local changes
+			$matched = $this->_match_release_history($row['local_current_hash'], $version_data['history'] ?? []);
+			if ($matched !== null){
+				$row['local_version'] = $matched['version'];
+				$row['local_version_hash'] = $matched['current_hash'];
+				$row['local_version_time'] = $matched['version_time'];
+				$row['local_changes'] = false;
+				$this->_stamp_matched_release($area_data, $row, $matched);
+			}
 			$row['local_label'] = $this->format_local_version_label($row);
 			$row['master_label'] = $this->format_master_version_label($master_version, $master_time);
 			$row['can_update'] = $row['may_use'] && $master_hash !== '';
 		}
 
 		return $row;
+
+	}
+
+	/**
+	 * Find the master release history entry whose tree hash equals the local live hash.
+	 */
+	function _match_release_history($live_hash, $history){
+
+		if ($live_hash === '' || $live_hash === null){
+			return null;
+		}
+
+		foreach ($this->_release_history_list($history) as $entry){
+			if ($entry['version'] !== '' && $entry['current_hash'] === $live_hash){
+				return $entry;
+			}
+		}
+
+		return null;
+
+	}
+
+	/**
+	 * Persist a hash-matched release into tmp/version_{area}.json so later rebuilds keep it.
+	 * Writes only when the cached version / hash differ; update_time is left as it was.
+	 */
+	function _stamp_matched_release($area_data, $row, $release){
+
+		$cached_version = $area_data['local_version'] ?? '';
+		$cached_hash = $area_data['local_version_hash'] ?? '';
+
+		if ($cached_version === $release['version'] && $cached_hash === $release['current_hash']){
+			return;
+		}
+
+		$this->update_version_cache($row['area'], [
+				'version' => $release['version'],
+				'version_hash' => $release['current_hash'],
+				'version_time' => !empty($release['version_time']) ? (int)$release['version_time'] : 0,
+				'update_time' => !empty($row['local_updated']) ? (int)$row['local_updated'] : 0,
+		]);
 
 	}
 

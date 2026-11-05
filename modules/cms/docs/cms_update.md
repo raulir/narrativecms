@@ -89,6 +89,33 @@ Unreleased live edits are invisible to clients until Release.
 
 Release button presence already means “can publish”; no “(not released)” suffix. Version `0.0.0` is shown as-is (never rewritten to “unknown”).
 
+### Client host table labels (Local column)
+
+The live tree hash is compared with the master’s current release **and** its `history` (from `do=version`):
+
+| Local tree | Local label | Update |
+|------------|-------------|--------|
+| Hash = current release | Master version + date (`0.0.13 - 5 Nov 2026`) | Hidden |
+| Hash = older release in `history` | That release + its date (`0.0.12 - 28 Oct 2026`) | Shown |
+| No match, version stamped earlier | Stamped version + date + ` (local changes)` | Shown |
+| No match, never stamped | `0.0.0 (local changes)` | Shown |
+
+On a hash match the version, hash and release time are written to `tmp/version.json` / `tmp/version_{module}.json` (only when they differ; `update_time` is kept), so later rebuilds keep the real version. A later local edit then shows e.g. `0.9.11 - 28 Oct 2026 (local changes)`. Never guess a version from a near-match: a tree that differs from every release by one file stays unmatched.
+
+### Release history (master)
+
+Release writes `history` into the new `tmp/master/{id}/version.json`: the previous release plus its carried-forward history, newest first, entries `{version, current_hash, version_time}` only (no file lists), one per hash, the new release’s own hash excluded, capped at 40. `do=version` returns it as `history`; older clients ignore the key.
+
+Packages released before this existed have no history until their next Release, which records only the release on disk at that moment. Older releases that clients still match must be seeded by hand on the master, e.g. in `tmp/master/shop/version.json`:
+
+```json
+"history": [
+	{"version": "0.0.12", "current_hash": "fa0fc9c0d2d378d1b4c3ac7436934436", "version_time": 1793199249}
+]
+```
+
+The next Release carries seeded entries forward.
+
 ## Layout on master
 
 ```
