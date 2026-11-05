@@ -3,7 +3,7 @@ function reminder_init(){
 $('.reminder_submit').on('click.cms', function(){
 		
 		var data = {
-				'do': 'remind',
+				'cms_do': 'remind',
 				'username': $('.reminder_input_username').val(),
 				'url': window.location.href
 		}
@@ -30,7 +30,7 @@ $('.reminder_submit').on('click.cms', function(){
 	$('.reminder_save').on('click.cms', function(){
 		
 		var data = {
-				'do': 'save',
+				'cms_do': 'save',
 				'username': $('.reminder_input_username').val(),
 				'password': $('.reminder_input_password').val(),
 				'password2': $('.reminder_input_password2').val(),

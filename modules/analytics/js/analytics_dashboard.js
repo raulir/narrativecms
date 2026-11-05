@@ -171,13 +171,13 @@ function analytics_dashboard_delete_visitor(type, row_id) {
 	get_ajax_panel('cms/cms_popup_yes_no', {
 		text: 'Delete this visitor session and all related pageviews?',
 	}, function(data) {
-		panels_display_popup(data.result._html, {
+		panels_display_popup(data.result.cms_html, {
 			yes: function() {
 				get_ajax_panel('analytics/analytics_dashboard', {
 					do: 'delete_visitor',
 					row_type: type,
 					row_id: row_id,
-					no_html: 1,
+					cms_no_html: 1,
 				}, function(delete_data) {
 					if (delete_data.result && delete_data.result.deleted) {
 						window.location.reload()

@@ -12,7 +12,7 @@ function cms_languages_livestatus_init($root){
 
 			var $this = $(this)
 			var data = {
-				'do': 'update_field',
+				'cms_do': 'update_field',
 				'item_id': $this.data('item_id'),
 				'name': 'livestatus',
 				'value': $this.val()

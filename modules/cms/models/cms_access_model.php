@@ -429,16 +429,18 @@ class cms_access_model extends \Model {
 		
 		$login_redirect = $this->_get_login_redirect();
 		
-		if (!empty($params['no_html']) && _single_page_mode() && _is_position_ajax()){
+		$ajax_reply = !empty($params['no_html']) || !empty($params['cms_no_html']);
+
+		if ($ajax_reply && _single_page_mode() && _is_position_ajax()){
 			_position_link_redirect($login_redirect['url']);
 		}
 		
-		if (!empty($params['no_html'])){
+		if ($ajax_reply){
 			
 			header('Content-Type: application/json');
 			print(json_encode([
 				'result' => [],
-				'error' => [
+				'cms_error' => [
 					'message' => 'access_denied',
 					'login_url' => $login_redirect['url'],
 					'login_text' => $login_redirect['text'],

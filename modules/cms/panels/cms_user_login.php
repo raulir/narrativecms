@@ -8,7 +8,7 @@ class cms_user_login extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 		if ($do == 'cms_user_login'){
 
 			$this->_ensure_session_dir_for_login();

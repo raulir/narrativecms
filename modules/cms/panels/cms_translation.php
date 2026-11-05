@@ -31,7 +31,7 @@ class cms_translation extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 
 		if ($do !== 'cms_translation_save' && $do !== 'cms_translation_ai'){
 			return $params;

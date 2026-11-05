@@ -23,9 +23,9 @@ class cms_input_grid extends \Controller {
 	
 	function panel_action($params){
 		
-		if(!empty($params['do'])){
+		if(!empty($params['cms_do'])){
 			
-			if ($params['do'] == 'create_row'){
+			if ($params['cms_do'] == 'create_row'){
 				
 				$this->load->model('cms/cms_page_panel_model');
 				
@@ -39,7 +39,7 @@ class cms_input_grid extends \Controller {
 				
 				die();
 				
-			} else if ($params['do'] == 'delete_row'){
+			} else if ($params['cms_do'] == 'delete_row'){
 				
 				$this->load->model('cms/cms_page_panel_model');
 

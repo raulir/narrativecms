@@ -85,10 +85,10 @@ function cms_list_init($root){
 			get_ajax_panel('cms/cms_page_panel_export', {
 				'export_id': ids[0],
 				'export_ids': JSON.stringify(ids),
-				'do': 'cms_page_panel_export_settings',
+				'cms_do': 'cms_page_panel_export_settings',
 			}, function(data){
 
-				$popup.find('.cms_popup_content').html(data.result._html)
+				$popup.find('.cms_popup_content').html(data.result.cms_html)
 				cms_popup_bind_cancel($popup)
 				cms_page_panel_export_bind_settings($popup, ids[0])
 
@@ -138,7 +138,7 @@ function cms_list_init($root){
 	    	drop: function( event, ui ) {
 	    		$('.admin_list_sortable').addClass('admin_list_sortable_cancelled');
 				get_ajax('cms/cms_list', {
-					'do': 'cms_list_move', 
+					'cms_do': 'cms_list_move', 
 					target: 'first',
 					block_id: $(ui.draggable).data('block_id'), 
 					success: function(){
@@ -165,7 +165,7 @@ function cms_list_init($root){
 					list_order[index] = $(this).data('block_id');
 				});
 				get_ajax('cms/cms_list', {
-					'do': 'cms_list_move', 
+					'cms_do': 'cms_list_move', 
 					target: 'previous',
 					block_id: $(ui.draggable).data('block_id'),
 					start: $('.cms_list_container').data('start'), 
@@ -196,7 +196,7 @@ function cms_list_init($root){
 					list_order[index] = $(this).data('block_id');
 				});
 				get_ajax('cms/cms_list', {
-					'do': 'cms_list_move', 
+					'cms_do': 'cms_list_move', 
 					target: 'next',
 					block_id: $(ui.draggable).data('block_id'),
 					start: $('.cms_list_container').data('start'), 
@@ -217,7 +217,7 @@ function cms_list_init($root){
 	    	drop: function( event, ui ) {
 	    		$('.admin_list_sortable').addClass('admin_list_sortable_cancelled');
 				get_ajax('cms/cms_list', {
-					'do': 'cms_list_move', 
+					'cms_do': 'cms_list_move', 
 					target: 'last',
 					block_id: $(ui.draggable).data('block_id'),
 					success: function(){
@@ -249,7 +249,7 @@ function cms_list_init($root){
 		// create import popup for this list type
 		get_ajax_panel('cms/cms_page_panel_import', {}, function(data){
 			
-			$('.cms_popup_area', '.cms_popup_import').html(data.result._html);
+			$('.cms_popup_area', '.cms_popup_import').html(data.result.cms_html);
 			
 			cms_popup_run('import', function(){
 				
@@ -313,7 +313,7 @@ function cms_list_init($root){
 			
 			get_ajax_panel('cms_page_panel_export', {
 				'export_id': cms_page_panel_id,
-				'do': 'cms_page_panel_export'
+				'cms_do': 'cms_page_panel_export'
 			}, function(data){
 				
 				$('.cms_popup_area', '.cms_popup_export').html(data.result.html);
@@ -441,7 +441,7 @@ function activate_cms_page_panel_copy(params){
 		var cms_page_panel_id = $this.data('cms_page_panel_id');
 		get_ajax_panel('cms/cms_page_panel', {
 			'cms_page_panel_id': cms_page_panel_id,
-			'do': 'cms_page_panel_copy' 
+			'cms_do': 'cms_page_panel_copy' 
 		}, function(data){
 			params.after();
 		})
@@ -470,10 +470,10 @@ function cms_list_load(start, limit, after){
 		filters: filters,
 		id_field: $('.cms_list_container').data('id_field'),
 		no_sort: $('.cms_list_container').data('no_sort') //,
-		// _no_css: true
+		// cms_no_css: true
 	}, function(data){
 		
-		$('.cms_list_container').html(data.result._html).data({start: start, limit: limit, total: data.result.total });
+		$('.cms_list_container').html(data.result.cms_html).data({start: start, limit: limit, total: data.result.total });
 		cms_list_sync_master()
 		
 		after();
@@ -525,7 +525,7 @@ function cms_list_load(start, limit, after){
 						$('.cms_list_sortable_item').each(function(index, value){
 							list_order[index] = $(this).data('block_id');
 						});
-						get_ajax('cms/cms_list', {'do': 'cms_list_save_order', list_order: list_order});
+						get_ajax('cms/cms_list', {'cms_do': 'cms_list_save_order', list_order: list_order});
 					}
 				}
 	
@@ -535,7 +535,7 @@ function cms_list_load(start, limit, after){
 		// any set buttons
 		$('.cms_list_set').on('click.cms', function(){
 			get_ajax('cms/cms_list', {
-				'do': 'cms_list_set', 
+				'cms_do': 'cms_list_set', 
 				'id': $(this).data('id'), 
 				'field': $(this).data('field'), 
 				'value': $(this).data('value'), 

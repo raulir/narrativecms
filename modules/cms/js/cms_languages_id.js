@@ -21,7 +21,7 @@ function cms_languages_id_init($root){
 			}
 
 			var data = {
-					'do': 'update_field',
+					'cms_do': 'update_field',
 					'item_id': $this.data('item_id'),
 					'name': 'language_id',
 					'value': $this.val()
@@ -37,7 +37,7 @@ function cms_languages_id_init($root){
 
 			get_ajax_panel('cms/cms_languages_id', data, function(result){
 
-				$this.closest('.cms_grid_field_inner').html(result.result._html)
+				$this.closest('.cms_grid_field_inner').html(result.result.cms_html)
 				cms_notification('Language ID updated', 2)
 
 			})

@@ -19,7 +19,7 @@ class cms_translate_string_operations extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 
 		if ($do !== 'cms_translate_string_save'){
 			return $params;

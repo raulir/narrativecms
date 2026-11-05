@@ -78,7 +78,7 @@ function cms_translation_save($container){
 	$container.addClass('cms_translation_busy')
 
 	get_ajax('cms/cms_translation', {
-		'do': 'cms_translation_save',
+		'cms_do': 'cms_translation_save',
 		// Avoid ajax_api merging the target panel instance into the request
 		'translation_cms_page_panel_id': cms_page_panel_id,
 		'cms_language': cms_language,
@@ -179,7 +179,7 @@ function cms_translation_ai($container){
 	cms_translation_show_message($container, 'AI working… can take up to a minute', false, 0)
 
 	get_ajax('cms/cms_translation', {
-		'do': 'cms_translation_ai',
+		'cms_do': 'cms_translation_ai',
 		// Do not use cms_page_panel_id — ajax_api would load that panel into params
 		'translation_cms_page_panel_id': cms_page_panel_id,
 		'cms_language': cms_language,

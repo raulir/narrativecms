@@ -15,7 +15,7 @@ class fulfilment_email extends \Controller {
 			$params = [];
 		}
 
-		$do = $params['do'] ?? '';
+		$do = $params['cms_do'] ?? '';
 		if ($do !== 'fulfil'){
 			return $params;
 		}

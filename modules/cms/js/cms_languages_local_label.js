@@ -21,7 +21,7 @@ function cms_languages_local_label_init($root){
 			}
 
 			var data = {
-					'do': 'update_field',
+					'cms_do': 'update_field',
 					'item_id': $this.data('item_id'),
 					'name': 'local_label',
 					'value': $this.val()
@@ -41,7 +41,7 @@ function cms_languages_local_label_init($root){
 
 			get_ajax_panel('cms/cms_languages_local_label', data, function(result){
 
-				$this.closest('.cms_grid_field_inner').html(result.result._html)
+				$this.closest('.cms_grid_field_inner').html(result.result.cms_html)
 				cms_notification('Name updated', 2)
 
 			})

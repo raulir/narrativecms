@@ -146,14 +146,14 @@ function products_reload($el){
 	var $grid_area = $el.find('.products_grid_area')
 
 	get_ajax_panel('shop/products_menu', params, function(result){
-		var html = result && result.result && (result.result.html || result.result._html)
+		var html = result && result.result && (result.result.html || result.result.cms_html)
 		if (html && $menu_area.length){
 			$menu_area.html(html)
 		}
 	})
 
 	get_ajax_panel('shop/products_grid', params, function(result){
-		var html = result && result.result && (result.result.html || result.result._html)
+		var html = result && result.result && (result.result.html || result.result.cms_html)
 		if (html && $grid_area.length){
 			$grid_area.html(html)
 		}

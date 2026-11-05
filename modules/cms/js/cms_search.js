@@ -16,7 +16,7 @@ function cms_search_init($root){
 			if (term.length >= 3){
 
 				get_ajax('cms/cms_search_operations', {
-					'do':'cms_search',
+					'cms_do':'cms_search',
 					'term': term,
 					'success': function(data){
 

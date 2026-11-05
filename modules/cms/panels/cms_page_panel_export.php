@@ -862,7 +862,7 @@ class cms_page_panel_export extends \Controller {
 		$this->load->model('cms/cms_image_model');
 		$this->load->model('cms/cms_file_model');
 
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 		$cms_page_panel_id = (int)$this->input->post('export_id');
 		$export_ids = $this->_export_main_ids($cms_page_panel_id);
 		$params['export_heading'] = $this->_export_heading(count($export_ids));

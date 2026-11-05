@@ -67,7 +67,7 @@ function cms_input_mask_picker($input){
 
 	}, function(data){
 
-		panels_display_popup(data.result._html, {
+		panels_display_popup(data.result.cms_html, {
 			'select': function(data){
 
 				$('body').off('mousedown.mask')

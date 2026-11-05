@@ -689,6 +689,17 @@ class cms_update_model extends \Model {
 			return ['error' => 'No update URL configured', 'transport_error' => true];
 		}
 
+		// Send both names. An old master reads do. A new master reads cms_do or do.
+		if (!is_array($data)){
+			$data = [];
+		}
+		if (($data['do'] ?? '') !== '' && ($data['cms_do'] ?? '') === ''){
+			$data['cms_do'] = $data['do'];
+		}
+		if (($data['cms_do'] ?? '') !== '' && ($data['do'] ?? '') === ''){
+			$data['do'] = $data['cms_do'];
+		}
+
 		$header = [
 				'Content-type: application/x-www-form-urlencoded',
 		];

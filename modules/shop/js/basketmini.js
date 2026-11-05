@@ -69,7 +69,7 @@ function basketmini_init(){
 		if ($('.basketmini_modal_active').length){
 
 			get_ajax_panel('shop/order_operations', {
-				'do':'delete_order_line',
+				'cms_do':'delete_order_line',
 				'return_id':$(this).closest('.basketmini_container').data('cms_page_panel_id'),
 				'line_id': $(this).closest('.basketmini_modal').data('order_line_id')
 			}, function(data){

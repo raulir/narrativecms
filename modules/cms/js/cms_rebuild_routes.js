@@ -19,8 +19,8 @@ function cms_rebuild_routes_run($root){
 	cms_rebuild_routes_set_status($root, 'Rebuilding…')
 
 	get_ajax_panel('cms/cms_rebuild_routes', {
-		'do': 'rebuild_routes',
-		'no_html': '1'
+		'cms_do': 'rebuild_routes',
+		'cms_no_html': '1'
 	}, function(data){
 
 		$root.data('cms_rebuild_routes_busy', 0)

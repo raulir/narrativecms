@@ -69,8 +69,9 @@ function cms_update_load_schema(area, $popup, state, options){
 
 		var res = result && result.result ? result.result : {}
 
-		if (res._html){
-			$body.html(res._html)
+		var schema_html = res.cms_html || res._html || res.html || ''
+		if (schema_html){
+			$body.html(schema_html)
 			if (typeof cms_schema_init === 'function'){
 				cms_schema_init($body)
 			}
@@ -208,7 +209,7 @@ function cms_update_confirm_area(area, $popup, state, options){
 	cms_update_popup_overlay_show($popup, 'Confirming module...')
 
 	get_ajax('cms/cms_update', {
-		'do': 'cms_update_confirm',
+		'cms_do': 'cms_update_confirm',
 		'area': area,
 		'success': function(data){
 
@@ -265,7 +266,7 @@ function cms_update_fail($popup, state, area, message, details){
 	}
 
 	get_ajax('cms/cms_update', {
-		'do': 'cms_update_discard',
+		'cms_do': 'cms_update_discard',
 		'area': area,
 		'success': finish,
 		'error': finish
@@ -316,10 +317,10 @@ function cms_update_run_pipeline(area, options){
 	}
 
 	get_ajax_panel('cms/cms_update_popup', {
-		'_no_js': '1'
+		'cms_no_js': '1'
 	}, function(data){
 
-		panels_display_popup(data.result._html, {
+		panels_display_popup(data.result.cms_html || data.result._html || data.result.html, {
 			'cancel': function(after){
 				if (state.allow_dismiss){
 					after()
@@ -337,7 +338,7 @@ function cms_update_run_pipeline(area, options){
 		$files.html('Getting list of files ...')
 
 		get_ajax('cms/cms_update', {
-			'do': 'cms_update_list',
+			'cms_do': 'cms_update_list',
 			'area': area,
 			'protocol': 2,
 			'error': function(){
@@ -496,7 +497,7 @@ function cms_update_run_pipeline(area, options){
 				function cms_update_apply(){
 
 					get_ajax('cms/cms_update', {
-						'do': 'cms_update_copy',
+						'cms_do': 'cms_update_copy',
 						'area': area,
 						'error': function(){
 							cms_update_apply_failed('Update could not be applied (request failed) — the downloaded files are kept', {}, true)
@@ -525,7 +526,7 @@ function cms_update_run_pipeline(area, options){
 							}
 
 							get_ajax('cms/cms_update', {
-								'do': 'cms_update_cleanup',
+								'cms_do': 'cms_update_cleanup',
 								'area': area,
 								'success': function(){
 
@@ -581,7 +582,7 @@ function cms_update_run_pipeline(area, options){
 
 						;(function(batch){
 							get_ajax('cms/cms_update', {
-								'do': 'cms_update_file',
+								'cms_do': 'cms_update_file',
 								'area': area,
 								'filenames': filenames,
 								'success': function(data){
@@ -646,7 +647,7 @@ function cms_update_init($root){
 			after_cleanup: function($popup, state){
 
 				get_ajax('cms/cms_update', {
-					'do': 'cms_update_enable',
+					'cms_do': 'cms_update_enable',
 					'area': area,
 					'success': function(data){
 
@@ -682,11 +683,11 @@ function cms_update_init($root){
 				'Deletes the module files and unregisters it from site settings.<br>' +
 				'<b>Database tables are kept</b> (data is not dropped).'
 		}, function(data){
-			panels_display_popup(data.result._html, {
+			panels_display_popup(data.result.cms_html || data.result._html || data.result.html, {
 				'yes': function(){
 
 					get_ajax('cms/cms_update', {
-						'do': 'cms_update_remove',
+						'cms_do': 'cms_update_remove',
 						'area': area,
 						'success': function(resp){
 
@@ -727,11 +728,11 @@ function cms_update_init($root){
 		get_ajax_panel('cms/cms_popup_yes_no', {
 			'text': 'Release ' + label + ' from the live tree into tmp/master?<br>Clients will receive this snapshot only.',
 		}, function(data){
-			panels_display_popup(data.result._html, {
+			panels_display_popup(data.result.cms_html || data.result._html || data.result.html, {
 				'yes': function(){
 
 					get_ajax('cms/cms_update', {
-						'do': 'cms_update_release',
+						'cms_do': 'cms_update_release',
 						'area': area,
 						'success': function(resp){
 

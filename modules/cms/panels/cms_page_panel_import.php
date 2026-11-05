@@ -19,7 +19,7 @@ class cms_page_panel_import extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 		$params['view'] = 'upload';
 		$params['message'] = '';
 		$params['token'] = '';

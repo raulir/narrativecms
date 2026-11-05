@@ -978,7 +978,7 @@ function cms_image_init($root){
 
 		get_ajax('cms/cms_images', {
 			'filename': $(this).data('filename'),
-			'do': 'cms_images_save',
+			'cms_do': 'cms_images_save',
 			'source_cms_image_id': $('.cms_image_container').data('source_cms_image_id'),
 			'author': $('.cms_image_author').val(),
 			'copyright': $('.cms_image_copyright').val(),

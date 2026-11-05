@@ -63,7 +63,7 @@ class cms_edit_slug extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 		$cms_page_panel_id = (int)$this->input->post('cms_page_panel_id');
 		$context = $this->_resolve_list_item_slug_context($cms_page_panel_id);
 

@@ -13,7 +13,7 @@ function cms_page_panel_button_targets_bind_save($popup, cms_page_panel_id){
 
 		get_ajax('cms/cms_page_panel_targets', {
 			'targets_id': cms_page_panel_id,
-			'do': 'cms_page_panel_targets',
+			'cms_do': 'cms_page_panel_targets',
 			'data': data,
 			'success': function(response){
 				if (response.result && response.result._title){
@@ -51,10 +51,10 @@ function cms_page_panel_button_targets_init($root){
 
 			get_ajax_panel('cms/cms_page_panel_targets', {
 				'targets_id': cms_page_panel_id,
-				'do': 'cms_page_panel_targets'
+				'cms_do': 'cms_page_panel_targets'
 			}, function(data){
 
-				$popup.find('.cms_popup_content').html(data.result._html)
+				$popup.find('.cms_popup_content').html(data.result.cms_html)
 				cms_popup_bind_cancel($popup)
 				cms_page_panel_button_targets_bind_save($popup, cms_page_panel_id)
 

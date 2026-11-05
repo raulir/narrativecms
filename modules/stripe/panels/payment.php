@@ -57,7 +57,7 @@ class payment extends \Controller {
 		
 		/*
 		
-		if (!empty($params['do']) && $params['do'] == 'check'){
+		if (!empty($params['cms_do']) && $params['cms_do'] == 'check'){
 	
 			$subscription = \Stripe\Subscription::retrieve($params['stripe_subscription_id']);
 				
@@ -79,7 +79,7 @@ class payment extends \Controller {
 		$user = $this->user_model->get_user($params['cp_user_id']);
 		$time = time();
 		
-		if (!empty($params['do']) && $params['do'] == 'payment'){
+		if (!empty($params['cms_do']) && $params['cms_do'] == 'payment'){
 
 			// if new user, create subscription
 			if (empty($params['stripe_subscription_id'])){

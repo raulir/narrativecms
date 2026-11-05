@@ -35,10 +35,10 @@ function cms_popup_open_ajax(name, after){
 
 	get_ajax_panel('cms/cms_popup_shell', {
 		'name': name,
-		'_no_css': '1',
+		'cms_no_css': '1',
 	}, function(data){
 
-		var $appended = $($.parseHTML(data.result._html || '', document, true))
+		var $appended = $($.parseHTML(data.result.cms_html || '', document, true))
 		$('body').append($appended)
 
 		var $popup = $appended.filter('.cms_popup_container').add($appended.find('.cms_popup_container')).first()

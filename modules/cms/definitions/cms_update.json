@@ -1,0 +1,6 @@
+{
+	"label": "CMS update",
+	"ajax": {
+		"output": ["cms","result","row_html","available_html","message","local_version","master_version","ajax"]
+	}
+}

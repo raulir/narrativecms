@@ -11,7 +11,7 @@ class manage extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('do') ?? ($params['do'] ?? '');
+		$do = $this->input->post('cms_do') ?? ($params['cms_do'] ?? '');
 		$actions = ['sync_subscription', 'set_auto_renew', 'change_plan', 'update_payment_method'];
 		if (!in_array($do, $actions, true)){
 			return $params;

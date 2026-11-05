@@ -39,7 +39,7 @@ class form_upload extends \Controller {
 //		_print_r($params);
 //		_print_r($_FILES);
 		
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 		if ($do == 'form_upload'){
 
 			$input_name = 'file';

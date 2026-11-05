@@ -192,7 +192,7 @@ function cms_translate_string_show_save_first(){
 	get_ajax_panel('cms/cms_popup_yes_no', {
 		'text': 'Save the panel first to edit translations.',
 	}, function(data){
-		panels_display_popup(data.result._html, {})
+		panels_display_popup(data.result.cms_html, {})
 	})
 
 }
@@ -358,7 +358,7 @@ function cms_translate_string_init($root){
 			var values = cms_translate_string_collect_values($container)
 
 			get_ajax_panel('cms/cms_translate_string_operations', {
-				'do': 'cms_translate_string_save',
+				'cms_do': 'cms_translate_string_save',
 				'cms_page_panel_id': $container.data('cms_page_panel_id'),
 				'field_name': $container.data('field_name'),
 				'cms_language': cms_translate_string_get_cms_language(),
@@ -392,13 +392,13 @@ function cms_translate_string_open(context){
 		'field_type': context.field_type,
 	}, function(data){
 
-		if (!data.result || !data.result._html){
+		if (!data.result || !data.result.cms_html){
 			return
 		}
 
 		cms_translate_string_remove_popup()
 
-		var $container = cms_translate_string_append_html(data.result._html)
+		var $container = cms_translate_string_append_html(data.result.cms_html)
 
 		if (typeof cms_translate_string_init === 'function'){
 			cms_translate_string_init($container)

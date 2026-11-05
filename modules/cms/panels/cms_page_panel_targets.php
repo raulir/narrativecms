@@ -20,7 +20,7 @@ class cms_page_panel_targets extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 
 		if ($do == 'cms_page_panel_targets'){
 			

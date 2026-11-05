@@ -17,7 +17,7 @@ class product extends \Controller {
 
 		$this->load->model('shop/shop_dim_model');
 
-		$do = $params['do'] ?? '';
+		$do = $params['cms_do'] ?? '';
 		$product_id = (int)($params['id'] ?? 0);
 
 		if ($do === 'S'){

@@ -25,10 +25,10 @@ class cms_images_unused_purge extends \Controller {
 
 		$do = '';
 		if (is_object($this->input) && method_exists($this->input, 'post')){
-			$do = $this->input->post('do');
+			$do = $this->input->post('cms_do');
 		}
 		if ($do === null || $do === false || $do === ''){
-			$do = $params['do'] ?? ($_POST['do'] ?? '');
+			$do = $params['cms_do'] ?? ($_POST['do'] ?? '');
 		}
 
 		$min_months = $params['min_months'] ?? ($_POST['min_months'] ?? 3);

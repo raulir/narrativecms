@@ -11,7 +11,7 @@ class order_operations extends \Controller{
 
 	function panel_action($params){
 
-		if (($params['do'] ?? '') == 'delete_order_line'){
+		if (($params['cms_do'] ?? '') == 'delete_order_line'){
 
 			$this->load->model('shop/shop_model');
 			$this->load->model('cms/cms_page_panel_model');

@@ -14,7 +14,7 @@ class productdims extends \Controller{
 		$this->load->model('shop/shop_model');
 		$this->load->model('cms/cms_page_panel_model');
 
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 
 		if ($do == 'availability'){
 

@@ -30,7 +30,7 @@ function cart_set_badge(quantity){
 function cart_close(){
 
 	$('.cart_container').removeClass('cart_visible')
-	get_ajax_panel(cart_panel_name(), {'do': 'set_visible', 'value': '0'})
+	get_ajax_panel(cart_panel_name(), {'cms_do': 'set_visible', 'value': '0'})
 
 }
 
@@ -72,10 +72,10 @@ function cart_load_details(){
 	return new Promise(function(resolve){
 		// do=open: counts as visitor activity, so the draft cart holds its stock again
 		get_ajax_panel(cart_panel_name(), {
-			'do': 'open',
+			'cms_do': 'open',
 		}, function(result){
 			cart_details_loading = false
-			var html = result && result.result && (result.result._html || result.result.html)
+			var html = result && result.result && (result.result.cms_html || result.result.html)
 			if (html){
 				var was_visible = cart_is_open()
 				cart_replace_html(html, was_visible)
@@ -102,7 +102,7 @@ function cart_add_items(items, attributes){
 
 	var item = items[0]
 	var data = {
-		'do': 'add',
+		'cms_do': 'add',
 		'product_id': item.product_id || 0,
 		'product_item_id': item.product_item_id || 0,
 		'quantity': item.quantity || 1,
@@ -143,11 +143,11 @@ function cart_remove_line(line_id){
 
 	return new Promise(function(resolve){
 		get_ajax_panel(cart_panel_name(), {
-			'do': 'remove',
+			'cms_do': 'remove',
 			'line_id': line_id,
 			'cart_details': 1,
 		}, function(result){
-			var html = result && result.result && (result.result._html || result.result.html)
+			var html = result && result.result && (result.result.cms_html || result.result.html)
 			if (html){
 				cart_replace_html(html, true)
 				var q = parseInt($('.cart_container').data('cart_quantity'), 10) || 0
@@ -181,7 +181,7 @@ function cart_reconcile(){
 	}
 
 	get_ajax_panel(panel, {
-		'do': 'reconcile',
+		'cms_do': 'reconcile',
 	}, function(result){
 		var body = result
 		if (result && result.result && (result.result.changed !== undefined || result.result.ok !== undefined)){
@@ -196,7 +196,7 @@ function cart_reconcile(){
 				get_ajax_panel(cart_panel_name(), {
 					'cart_details': 0,
 				}, function(r2){
-					var html = r2 && r2.result && (r2.result._html || r2.result.html)
+					var html = r2 && r2.result && (r2.result.cms_html || r2.result.html)
 					if (html){
 						cart_replace_html(html, false)
 						cart_set_badge(0)
@@ -233,9 +233,9 @@ function cart_checkout(){
 
 	// Server re-checks prices and stock first. Changed: show the updated cart and stop; next click goes on.
 	get_ajax_panel(cart_panel_name(), {
-		'do': 'checkout_check',
+		'cms_do': 'checkout_check',
 	}, function(result){
-		var html = result && result.result && (result.result._html || result.result.html)
+		var html = result && result.result && (result.result.cms_html || result.result.html)
 		var ready = $('<div>').html(html || '').find('.cart_container').data('checkout_ready')
 		if (String(ready) === '1'){
 			cart_checkout_provider(panel)
@@ -255,7 +255,7 @@ function cart_checkout_provider(panel){
 	var $c = $('.cart_container')
 
 	get_ajax_panel(panel, {
-		'do': 'shop_checkout',
+		'cms_do': 'shop_checkout',
 	}, function(result){
 		$c.removeClass('cart_checkout_loading')
 		var body = result
@@ -305,7 +305,7 @@ function cart_init($root){
 			cart_close()
 		} else {
 			$('.cart_container').addClass('cart_visible')
-			get_ajax_panel(cart_panel_name(), {'do': 'set_visible', 'value': '1'})
+			get_ajax_panel(cart_panel_name(), {'cms_do': 'set_visible', 'value': '1'})
 			cart_load_details()
 			cart_reconcile()
 		}

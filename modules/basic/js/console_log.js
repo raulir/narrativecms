@@ -5,7 +5,7 @@ function console_log_send(message){
 	get_ajax_panel(
 			'basic/console_log',
 			{
-				'do': 'console_log_write',
+				'cms_do': 'console_log_write',
 				'message': message
 			},
 			function(){}

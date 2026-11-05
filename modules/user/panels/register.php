@@ -10,7 +10,7 @@ class register extends \Controller {
 		
 		$this->load->model('user/user_model');
 		
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 
 		if ($do == 'register'){
 			

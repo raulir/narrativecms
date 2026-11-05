@@ -38,7 +38,7 @@ function manage_open_redirect(url){
 
 function manage_sync($container){
 
-	var data = { 'do': 'sync_subscription' }
+	var data = { 'cms_do': 'sync_subscription' }
 	var pid = manage_panel_id($container)
 	if (pid){
 		data.cms_page_panel_id = pid
@@ -66,7 +66,7 @@ function manage_set_auto_renew($container, on){
 	$container.find('.manage_auto_option').addClass('manage_auto_busy')
 
 	var data = {
-		'do': 'set_auto_renew',
+		'cms_do': 'set_auto_renew',
 		'auto_renew': on ? '1' : '0',
 	}
 	var pid = manage_panel_id($container)
@@ -116,7 +116,7 @@ function manage_set_auto_renew($container, on){
 function manage_change_plan($container, product_id, currency_id){
 
 	var data = {
-		'do': 'change_plan',
+		'cms_do': 'change_plan',
 		'product_id': product_id,
 		'currency_id': currency_id,
 	}
@@ -212,7 +212,7 @@ function manage_init($root){
 		$container.find('.manage_payment_cta').on('click.cms', function(){
 
 			var data = {
-				'do': 'update_payment_method',
+				'cms_do': 'update_payment_method',
 				'return_url': window.location.pathname + window.location.search,
 			}
 			var pid = manage_panel_id($container)

@@ -73,7 +73,7 @@ function pageshare_init(){
 			if (typeof $this.data('url_key') !== 'undefined'){
 				
 				get_ajax('basic/pageshare', {
-					'do':'shorten', 
+					'cms_do':'shorten', 
 					'url_key':$this.data('url_key'), 
 					'url': short_url,
 					'long_url': url,

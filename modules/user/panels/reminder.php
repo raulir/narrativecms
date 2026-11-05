@@ -77,7 +77,7 @@ class reminder extends \Controller {
 		// Save password window (seconds). Display of the form uses the same window so UI matches.
 		$ttl_seconds = 1800;
 
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 
 		if ($do == 'remind'){
 

@@ -5,7 +5,7 @@ function loginlink_init(){
 		var $input = $(this).closest('.user_input_loginlink')
 		
 		var data = {
-				'do': 'create',
+				'cms_do': 'create',
 				'user_id': $('.cms_page_panel_id').val(),
 				'url': location.protocol + '//' + location.hostname
 		}

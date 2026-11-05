@@ -38,7 +38,7 @@ function cms_page_panel_button_show_activate(){
 			var cms_page_panel_id = $this.data('cms_page_panel_id');
 			get_ajax_panel('cms/cms_page_panel', {
 				'cms_page_panel_id': cms_page_panel_id,
-				'do': 'cms_page_panel_show'
+				'cms_do': 'cms_page_panel_show'
 			}, function(data){
 				
 				var message = ''
@@ -78,7 +78,7 @@ function cms_page_panel_button_show_activate(){
 
 				// ask are you sure
 				get_ajax_panel('cms/cms_popup_yes_no', {}, function(data){
-					panels_display_popup(data.result._html, {
+					panels_display_popup(data.result.cms_html, {
 						'yes': function(){
 							
 							// if save button, save 

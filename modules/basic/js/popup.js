@@ -57,9 +57,9 @@ function basic_popup_run(popup_id, wrapper_class = false){
 		get_ajax_panel('basic/popup', {'popup_id': popup_id}).then((data) => {
 			
 			if (wrapper_class){
-				$(document.body).append('<span class="basic_popup_wrapper ' + wrapper_class + '">' + data.result._html + '</div>')
+				$(document.body).append('<span class="basic_popup_wrapper ' + wrapper_class + '">' + data.result.cms_html + '</div>')
 			} else {
-				$(document.body).append(data.result._html)
+				$(document.body).append(data.result.cms_html)
 			}
 			
 			var $container = $('.basic_popup_' + popup_id);

@@ -24,11 +24,11 @@ function cms_page_panel_import_bind($popup){
 			contentType: false,
 			dataType: 'json',
 			success: function(data){
-				if (!data || !data.result || !data.result._html){
+				if (!data || !data.result || !data.result.cms_html){
 					cms_page_panel_import_show_upload_error($popup, data && data.result && data.result.message)
 					return
 				}
-				$popup.find('.cms_popup_content').html(data.result._html)
+				$popup.find('.cms_popup_content').html(data.result.cms_html)
 				cms_page_panel_import_bind($popup)
 			},
 			error: function(){
@@ -66,12 +66,12 @@ function cms_page_panel_import_bind($popup){
 		})
 
 		get_ajax('cms/cms_page_panel_import', {
-			'do': 'cms_page_panel_import_apply',
+			'cms_do': 'cms_page_panel_import_apply',
 			'token': $popup.find('.cms_page_panel_import_body').attr('data-token'),
 			'zip_id': $block.data('zip_id'),
 			'mode': $(this).data('mode'),
 			'fk_ids': JSON.stringify(fk_ids),
-			'no_html': '1',
+			'cms_no_html': '1',
 			'error': function(){
 				cms_page_panel_import_show_error($block, '')
 			},
@@ -115,9 +115,9 @@ function cms_page_panel_import_discard($popup){
 
 	$popup.find('.cms_page_panel_import_body').attr('data-token', '')
 	get_ajax('cms/cms_page_panel_import', {
-		'do': 'cms_page_panel_import_discard',
+		'cms_do': 'cms_page_panel_import_discard',
 		'token': token,
-		'no_html': '1',
+		'cms_no_html': '1',
 	})
 
 }
@@ -154,10 +154,10 @@ function cms_page_panel_import_open(){
 		$popup.find('.cms_popup_content').html('Loading...')
 
 		get_ajax_panel('cms/cms_page_panel_import', {
-			'do': 'cms_page_panel_import_settings',
+			'cms_do': 'cms_page_panel_import_settings',
 		}, function(data){
 
-			$popup.find('.cms_popup_content').html(data.result._html)
+			$popup.find('.cms_popup_content').html(data.result.cms_html)
 			cms_page_panel_import_bind($popup)
 
 		})

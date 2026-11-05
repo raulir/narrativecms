@@ -11,11 +11,11 @@ function cms_page_panel_button_delete_init($root){
 		$button.on('click.cms', function(event){
 		// ask are you sure
 		get_ajax_panel('cms/cms_popup_yes_no', {}, function(data){
-			panels_display_popup(data.result._html, {
+			panels_display_popup(data.result.cms_html, {
 				'yes': function(){
 					get_ajax_panel('cms/cms_page_panel', {
 						'cms_page_panel_id': $('[name="cms_page_panel_id"]').val(), 
-						'do': 'cms_page_panel_delete' 
+						'cms_do': 'cms_page_panel_delete' 
 					}, function(data){
 						
 						$('a.cms_page_panel_toolbar_text').last()[0].click();

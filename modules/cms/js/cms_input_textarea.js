@@ -39,7 +39,7 @@ function cms_input_textarea_md_preview($wrap){
 	var cms_page_panel_id = ($scope.find('input.cms_page_panel_id').val() || '').trim();
 	var md_filter = ($textarea.attr('data-md_filter') || '').trim();
 	var ajax_params = {
-		'no_html': '1',
+		'cms_no_html': '1',
 		'md_preview': '1',
 		'text': $textarea.val(),
 		'md_filter': md_filter,
@@ -324,7 +324,7 @@ function cms_input_textarea_media_browser(field_name, url, type, win){
 			
 			// resize image
 			get_api('cms/image_resize', {
-				'do':'resize',
+				'cms_do':'resize',
 				'name': params.name,
 				'success': function(data){
 					

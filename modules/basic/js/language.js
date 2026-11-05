@@ -34,7 +34,7 @@ function language_init(){
 		language_clear_cookies()
 
 		get_ajax('basic/language', {
-			'do':'language_set',
+			'cms_do':'language_set',
 			'language_id': $this.data('language_id'),
 			'success': function(){
 				location.reload();

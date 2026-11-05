@@ -59,7 +59,7 @@ function cms_page_panel_caching_save(after){
 	var caching = $('.cms_page_panel_caching_select').val();
 	
 	get_ajax_panel('cms/cms_page_panel', {
-		'do': 'cms_page_panel_caching',
+		'cms_do': 'cms_page_panel_caching',
 		'lists': lists,
 		'caching': caching,
 		'target_id': $('.cms_page_panel_caching_target_id').val()

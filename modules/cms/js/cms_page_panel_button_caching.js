@@ -12,7 +12,7 @@ function cms_page_panel_button_caching_init($root){
 
 		get_ajax_panel('cms/cms_page_panel_caching', {'target_id':$(this).data('cms_page_panel_id')}, function(data){
 
-			panels_display_popup(data.result._html, {
+			panels_display_popup(data.result.cms_html, {
 				'yes': function(after){
 
 					// defined in panel js file

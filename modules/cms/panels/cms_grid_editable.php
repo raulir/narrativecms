@@ -19,7 +19,7 @@ class cms_grid_editable extends \Controller {
 
 	function panel_action($params){
 
-		if (!empty($params['do']) && $params['do'] == 'update_field'){
+		if (!empty($params['cms_do']) && $params['cms_do'] == 'update_field'){
 
 			if (!empty($params['ds']) && !empty($params['base_id'])){
 

@@ -166,7 +166,7 @@ if (!function_exists('cms_session_boot')){
 			return;
 		}
 
-		$session_id = (string)($_POST['session_id'] ?? '');
+		$session_id = (string)($_POST['cms_session_id'] ?? $_POST['session_id'] ?? '');
 
 		if (!preg_match('/^[A-Za-z0-9,-]{20,128}$/', $session_id)){
 			return;

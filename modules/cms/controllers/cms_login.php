@@ -17,7 +17,7 @@ class cms_login extends \Controller {
    	function index(){
    		
    		// if no doing here and already logged in, go to admin
-   		$do = $this->input->post('do');
+   		$do = $this->input->post('cms_do');
    		if (empty($do) && !empty($_SESSION['cms_user']['cms_user_id'])){
    			header('Location: '.$GLOBALS['config']['base_url'].'admin/', true, 302);
 			exit();

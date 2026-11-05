@@ -19,17 +19,17 @@ class cms_languages extends \Controller {
 
 		$cms_page_panel_id = (int)($params['id'] ?? 0);
 
-		if ($params['do'] == 'S'){
+		if ($params['cms_do'] == 'S'){
 
 			return $params['fields'] ?? [];
 
-		} else if ($params['do'] == 'L'){
+		} else if ($params['cms_do'] == 'L'){
 
 			$languages = $this->_load_languages($cms_page_panel_id);
 
 			return $this->_languages_to_lines($languages, $cms_page_panel_id);
 
-		} else if ($params['do'] == 'C'){
+		} else if ($params['cms_do'] == 'C'){
 
 			$languages = $this->_load_languages($cms_page_panel_id);
 			$languages[] = ['language_id' => '', 'label' => '', 'endonym' => '', 'livestatus' => '0'];
@@ -37,7 +37,7 @@ class cms_languages extends \Controller {
 
 			return ['web' => 1];
 
-		} else if ($params['do'] == 'D'){
+		} else if ($params['cms_do'] == 'D'){
 
 			$languages = $this->_load_languages($cms_page_panel_id);
 			$row_id = (int)($params['row_id'] ?? $params['id'] ?? -1);
@@ -56,7 +56,7 @@ class cms_languages extends \Controller {
 
 			return ['web' => 1];
 
-		} else if ($params['do'] == 'U'){
+		} else if ($params['cms_do'] == 'U'){
 
 			$languages = $this->_load_languages($cms_page_panel_id);
 			$row_id = (int)($params['row_id'] ?? -1);

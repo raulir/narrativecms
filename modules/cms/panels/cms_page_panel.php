@@ -31,7 +31,7 @@ class cms_page_panel extends \Controller {
 	 */
 	function panel_action($params){
 
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 		if (empty($do)){
 			return $params;
 		}

@@ -12,7 +12,7 @@ class basket extends \Controller{
 	 */
 	function panel_action($params){
 
-		if (($params['do'] ?? '') == 'remove'){
+		if (($params['cms_do'] ?? '') == 'remove'){
 			$this->load->model('shop/shop_model');
 			$order = $this->shop_model->get_current_order_if_any($this->shop_model->get_front_user());
 			if (!empty($order['cms_page_panel_id'])){

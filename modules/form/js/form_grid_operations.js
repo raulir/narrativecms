@@ -5,10 +5,10 @@ function form_grid_operations_init(){
 		var $this = $(this)
 
 		get_ajax_panel('cms/cms_popup_yes_no', {'text':'Are you sure?'}, function(data){
-			panels_display_popup(data.result._html, {
+			panels_display_popup(data.result.cms_html, {
 				'yes': function(){
 					get_ajax('form/form_grid_operations', {
-						'do':'delete_item',
+						'cms_do':'delete_item',
 						'item_id': $this.data('item_id'),
 						'success': function(data){
 							$this.closest('.cms_grid_row').remove()

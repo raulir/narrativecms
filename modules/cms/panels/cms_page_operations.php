@@ -25,7 +25,7 @@ class cms_page_operations extends \Controller {
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_page_panel_cms_model');
 		
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 		if ($do == 'reserved_page_draft_put'){
 
 			$layout = trim((string)$this->input->post('layout'));

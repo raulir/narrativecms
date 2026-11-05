@@ -21,6 +21,7 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 ## System / panel ajax
 
 - [ ] **Panel localStorage eviction** — `get_ajax_panel` `_cache` keeps replies in localStorage. When storage is full, drop older panel cache entries. The `_cache`, `_cache_offline`, and `_cache_reload` flags do not do this.
+- [ ] **Deprecate `$this->input->post()` / `$_POST` in panels** — the ajax entry already puts the request into `$params`, and a page render puts the query there too. A second read of the raw body skips the ajax allowlist and the settings swap. Panel actions should use `$params` only. `input->post()` stays on the ajax entry, session boot, and non-panel APIs. See [`agents.md`](agents.md) § Panel controllers.
 
 ## System / page panel API
 
@@ -101,6 +102,7 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 - [x] **Dead code** — removed panel `do=cms_update` branch (+ `ajax` flag / template `print_r`), legacy single-file staging + `update_file()`, `up()`, `get_master_file()` + legacy batch fallback; `run_sql()` moved to `cms_schema_model` (used by `cms_dump`)
 - [x] **Interface improvements** (#429) — bold master rows, *inactive* marker, *Not allowed* instead of Update (Remove hidden too). See [`cms_update.md`](cms_update.md) § Row markers
 - [ ] **Source per module** (#429, last item) — every package comes from the one `cms_update_url`. Options: show the host per row (read-only), or `update.source.{module}` overrides that every master call uses
+- [ ] **Drop updater legacy ajax keys** — older installs still post `do`, `no_html`, and `session_id`, and the update, popup, and schema replies still include `_html`, `html`, `js`, `css`, `_panel_css`, `_panel_css_force`, and `_panel_js` beside the `cms_*` names. The master endpoint still accepts `do` as well as `cms_do`. Remove those aliases once installed updaters post and read only the `cms_*` keys.
 
 ---
 

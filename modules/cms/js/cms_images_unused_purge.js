@@ -120,10 +120,10 @@ function cms_images_unused_purge_test($root){
 	var p = cms_images_unused_purge_params($root)
 
 	get_ajax_panel('cms/cms_images_unused_purge', {
-		'do': 'unused_purge_test',
+		'cms_do': 'unused_purge_test',
 		'min_months': p.min_months,
 		'category': p.category,
-		'no_html': '1'
+		'cms_no_html': '1'
 	}, function(data){
 
 		$root.find('.cms_images_unused_purge_test_button').removeClass('cms_images_unused_purge_busy')
@@ -162,10 +162,10 @@ function cms_images_unused_purge_start($root){
 	var p = cms_images_unused_purge_params($root)
 
 	get_ajax_panel('cms/cms_images_unused_purge', {
-		'do': 'unused_purge_start',
+		'cms_do': 'unused_purge_start',
 		'min_months': p.min_months,
 		'category': p.category,
-		'no_html': '1'
+		'cms_no_html': '1'
 	}, function(data){
 
 		var result = (data && data.result) ? data.result : {}

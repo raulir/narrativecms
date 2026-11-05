@@ -230,7 +230,7 @@ function page_translate_load_list($mount, $button, force){
 	$list_hint.empty().append($('<div class="page_translate_option page_translate_empty"></div>').text('Loading…'))
 
 	get_ajax('user/page_translate', {
-		'do': 'page_translate_list',
+		'cms_do': 'page_translate_list',
 		'cms_page_id': page.cms_page_id,
 		'path': page.path,
 		'unit_id': ctx.unit_id,

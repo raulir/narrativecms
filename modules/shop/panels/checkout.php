@@ -13,7 +13,7 @@ class checkout extends \Controller{
 		
 		$user = $this->shop_model->get_front_user();
 
-		$do = $params['do'] ?? '';
+		$do = $params['cms_do'] ?? '';
 
 		if ($do == 'delivery_method'){
 

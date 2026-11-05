@@ -166,7 +166,7 @@ function cms_input_image_apply_selection(params, filename, path, callback){
 
 	get_ajax('cms/cms_images', {
 		'filename': filename,
-		'do': 'cms_images_check_by_filename',
+		'cms_do': 'cms_images_check_by_filename',
 		'success': function(data){
 
 			$(params.input_selector).val(path + data.result.filename);
@@ -175,7 +175,7 @@ function cms_input_image_apply_selection(params, filename, path, callback){
 				if (data.result.filename == ''){
 					$(params.container_selector).html('-- no image --');
 				} else {
-					$(params.container_selector).html(data.result._html);
+					$(params.container_selector).html(data.result.cms_html);
 				}
 				if (typeof cms_video_init_when_ready === 'function'){
 					cms_video_init_when_ready($(params.container_selector))
@@ -243,9 +243,9 @@ function cms_input_image_load_images(params){
 	get_ajax_panel('cms/cms_images', {
 		'filename': original_filename,
 		'category': params.category,
-		'_no_js': '1',
+		'cms_no_js': '1',
 	}, function(data){
-		panels_display_popup(data.result._html, {
+		panels_display_popup(data.result.cms_html, {
 			'select': function(after){
 				$(document).off('keyup.cms');
 				cms_input_image_apply_selection(params, $('.popup_select').data('value'), path, function(data){
@@ -278,7 +278,7 @@ function cms_input_image_load_images(params){
 
 				get_ajax('cms/cms_images', {
 					'filename': original_filename,
-					'do': 'cms_images_check_by_filename',
+					'cms_do': 'cms_images_check_by_filename',
 					'success': function(data){
 						if (data.result.filename == ''){
 							$(params.input_selector).val('');

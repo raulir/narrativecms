@@ -67,7 +67,7 @@ function shop_checkout_init(){
 		get_ajax_panel(
 			'shop/checkout', 
 			{
-				'do':'delivery_method',
+				'cms_do':'delivery_method',
 				'method_id':method_id
 			}, 
 			result => {				
@@ -83,7 +83,7 @@ function shop_checkout_init(){
 		get_ajax_panel(
 			'shop/checkout', 
 			{
-				'do':'delivery_change'
+				'cms_do':'delivery_change'
 			}, 
 			result => {				
 				$('.shop_basket_area').html(result.result.html)
@@ -97,7 +97,7 @@ function shop_checkout_init(){
 		get_ajax_panel(
 			'shop/checkout', 
 			{
-				'do':'delivery_address',
+				'cms_do':'delivery_address',
 				'checkout_input_address1':$('.shop_checkout_input_address1').val(),
 				'checkout_input_address2':$('.shop_checkout_input_address2').val(),
 				'checkout_input_address3':$('.shop_checkout_input_address3').val(),
@@ -138,7 +138,7 @@ function shop_checkout_payment_check(){
 	get_ajax_panel(
 		'shop/worldpay_check', 
 		{
-			'do':'check',
+			'cms_do':'check',
 			'number':$('.shop_checkout_container').data('number')
 		}, 
 		result => {

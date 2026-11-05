@@ -1,4 +1,5 @@
 {
+	"ajax": {"output": ["cms", "key", "row"]},
 	"label": "Reminder",
 	"image": "",
 	"item": [

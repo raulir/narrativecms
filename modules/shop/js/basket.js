@@ -7,7 +7,7 @@ function shop_basket_init(){
 		get_ajax_panel(
 			'shop/basket', 
 			{
-				'do': 'remove',
+				'cms_do': 'remove',
 				'line_id': $this.data('line_id'),
 				'cms_page_panel_id': $('.shop_basket_container').data('cms_page_panel_id'),
 			}, 

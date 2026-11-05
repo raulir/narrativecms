@@ -13,7 +13,7 @@ function cms_language_select_init($root){
 			var $this = $(this);
 
 			get_ajax('cms/cms_language_select', {
-				'do': 'cms_language_set',
+				'cms_do': 'cms_language_set',
 				'language': $this.data('language'),
 				'success': function(){
 					location.reload()

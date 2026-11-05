@@ -25,7 +25,7 @@ function cms_input_file_rename(input_name){
 	$('.cms_input_file_rename_ok', $content).on('click.cms', function(){
 		
 		get_ajax('cms/cms_input_file', {
-			'do': 'cms_file_rename', 
+			'cms_do': 'cms_file_rename', 
 			'old_name': $('.cms_file_input_' + input_name).val(),
 			'new_name': $('.cms_input_file_rename_input', $content).val(),
 			success: function(data){

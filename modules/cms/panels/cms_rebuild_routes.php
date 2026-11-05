@@ -28,10 +28,10 @@ class cms_rebuild_routes extends \Controller {
 
 		$do = '';
 		if (is_object($this->input) && method_exists($this->input, 'post')){
-			$do = $this->input->post('do');
+			$do = $this->input->post('cms_do');
 		}
 		if ($do === null || $do === false || $do === ''){
-			$do = $params['do'] ?? ($_POST['do'] ?? '');
+			$do = $params['cms_do'] ?? ($_POST['do'] ?? '');
 		}
 
 		if ($do === 'rebuild_routes'){

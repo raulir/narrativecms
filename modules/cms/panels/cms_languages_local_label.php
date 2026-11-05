@@ -21,7 +21,7 @@ class cms_languages_local_label extends \Controller {
 
 	function panel_action($params){
 
-		if (!empty($params['do']) && $params['do'] == 'update_field' && !empty($params['base_id'])){
+		if (!empty($params['cms_do']) && $params['cms_do'] == 'update_field' && !empty($params['base_id'])){
 
 			$this->load->model('cms/cms_page_panel_model');
 			$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);

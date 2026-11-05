@@ -22,7 +22,7 @@ class cms_input_file extends \Controller {
 	
 	function panel_action($params){
 		
-		if (!empty($params['do']) && $params['do'] == 'cms_file_rename'){
+		if (!empty($params['cms_do']) && $params['cms_do'] == 'cms_file_rename'){
 			
 			$this->load->model('cms/cms_file_model');
 			

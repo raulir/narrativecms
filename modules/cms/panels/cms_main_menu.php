@@ -20,7 +20,7 @@ class cms_main_menu extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 		if ($do == 'admin_main_menu_save'){
 
 			$this->load->model('cms/cms_menu_model');

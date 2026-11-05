@@ -8,7 +8,7 @@ function cms_image_open(filename){
 
 	get_ajax_panel('cms/cms_image', {'filename': filename}, function(data){
 		$('body').append('<div class="cms_image_overlay"></div>')
-		$('body').append(data.result._html)
+		$('body').append(data.result.cms_html)
 		if (typeof cms_image_init === 'function'){
 			cms_image_init($('.cms_image_container').last())
 		}
@@ -86,12 +86,12 @@ function cms_images_activate() {
 				}
 				
 				get_ajax_panel('cms/cms_popup_yes_no', {'text':text}, function(data){
-					panels_display_popup(data.result._html, {
+					panels_display_popup(data.result.cms_html, {
 						'yes': function(){
 							$('.cms_images_image_cell', $that).animate({'opacity':'0'}, 100);
 							get_ajax('cms/cms_images', {
 								'filename': $that.data('filename'),
-								'do': 'cms_images_delete_by_filename',
+								'cms_do': 'cms_images_delete_by_filename',
 								'success': function(){
 									var page = $('.cms_images_area').data('page');
 									if ($('.cms_images_image').length == 1 && page > 0){
@@ -207,7 +207,7 @@ function cms_images_transfer(data, success){
 
 /**
  * Start optimise queue for grid thumbs.
- * cms_images_page is loaded with _no_js (since ~Jul 2026) so _ib cannot inject
+ * cms_images_page is loaded with cms_no_js so _ib cannot inject
  * cms_images_lazy.js on that request — load it with the popup shell and re-init here.
  * Classic behaviour: B/W original → image_resize → colour optimised (10+ years).
  */
@@ -278,11 +278,11 @@ function cms_images_load_images(page, limit, filename){
 	}
 	
 	get_ajax_panel('cms/cms_images_page', $.extend({}, cms_images_load_parameters, {
-		'_no_js': '1',
-		'_no_css': '1',
+		'cms_no_js': '1',
+		'cms_no_css': '1',
 	}), function(data){
 		
-		$('.cms_images_area').html(data.result._html).data('page', page).data('filename', filename);
+		$('.cms_images_area').html(data.result.cms_html).data('page', page).data('filename', filename);
 		
 		// update buttons etc - first
 		if (parseInt(data.result.cms_images_max_page) >= 1 && parseInt(data.result.cms_images_current) > 0){

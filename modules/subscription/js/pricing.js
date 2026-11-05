@@ -62,7 +62,7 @@ function pricing_open_browser($container){
 	var error_msg = $container.attr('data-checkout_error_message') || 'Checkout could not start. Try again.'
 
 	get_ajax('subscription/pricing', {
-		'do': 'browser_open',
+		'cms_do': 'browser_open',
 		'page_path': $container.attr('data-page_path') || '/subscription/',
 		'success': function(result){
 			var body = result && result.result ? result.result : result
@@ -122,7 +122,7 @@ function pricing_start_checkout($container, product_id, currency_id, play_produc
 	$container.addClass('pricing_checkout_loading')
 
 	get_ajax_panel('subscription/checkout_start', {
-		'do': 'subscription_checkout',
+		'cms_do': 'subscription_checkout',
 		'product_id': product_id,
 		'currency_id': currency_id,
 	}, function(result){
@@ -168,7 +168,7 @@ function pricing_purchase_click($container, $cta){
 
 	// Guest: store intent then go to login (path-only resume — safe same-site after auth)
 	var data = {
-		'do': 'set_checkout_intent',
+		'cms_do': 'set_checkout_intent',
 		'product_id': product_id,
 		'currency_id': currency_id,
 		'resume_url': window.location.pathname + window.location.search,

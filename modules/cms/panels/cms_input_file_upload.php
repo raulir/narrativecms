@@ -22,7 +22,7 @@ class cms_input_file_upload extends \Controller {
 
 		$return = array();
 
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 		if ($do == 'cms_input_file_upload'){
 			 
 			// collect data

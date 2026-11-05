@@ -1,4 +1,5 @@
 {
+	"ajax": {"output": ["cms", "success", "redirect_url", "errors"]},
 	"label": "Register",
 	"image": "user/panel_register.png",
 	"item": [

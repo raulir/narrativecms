@@ -67,11 +67,11 @@ class cms_schema extends \Controller {
 		$fragment = $this->_wants_fragment($params);
 		$filter_module = $this->_schema_filter_from_params($params);
 
-		if (!empty($params['do']) && $params['do'] === 'dump_cms_structure'){
+		if (!empty($params['cms_do']) && $params['cms_do'] === 'dump_cms_structure'){
 
 			$dump = $this->cms_schema_model->dump_cms_table_structures();
 
-			unset($params['do']);
+			unset($params['cms_do']);
 
 			return array_merge($params, [
 					'structure_dump' => $dump,
@@ -84,7 +84,7 @@ class cms_schema extends \Controller {
 
 		}
 
-		if (empty($params['do']) || $params['do'] !== 'fix_schema') {
+		if (empty($params['cms_do']) || $params['cms_do'] !== 'fix_schema') {
 			if ($fragment || $filter_module !== '') {
 				return array_merge($params, [
 					'fragment' => $fragment ? 1 : 0,

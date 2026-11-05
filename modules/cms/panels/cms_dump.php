@@ -760,7 +760,7 @@ class cms_dump extends \Controller {
 
 	function panel_action($params){
 
-		$do = $params['do'] ?? ($_POST['do'] ?? '');
+		$do = $params['cms_do'] ?? ($_POST['do'] ?? '');
 
 		if (empty($do)){
 			return $params;

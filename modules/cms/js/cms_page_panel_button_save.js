@@ -13,7 +13,7 @@ function cms_page_panel_save_submit(params){
 	var data_to_submit = cms_page_panel_save_serialize_form('.admin_form')
 	
 	// add do and language
-	data_to_submit['do'] = 'cms_page_panel_save';
+	data_to_submit['cms_do'] = 'cms_page_panel_save';
 	data_to_submit['language'] = $('.cms_language_select_current').data('language');
 	
 	if (params && params.success){

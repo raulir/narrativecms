@@ -11,7 +11,7 @@ function register_init(){
 		register_hide_error()
 		
 		var data = {
-				'do': 'register',
+				'cms_do': 'register',
 				'fields': [],
 		}
 

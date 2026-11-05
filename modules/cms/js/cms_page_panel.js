@@ -145,7 +145,7 @@ function cms_page_panel_fetch_title_preview(){
 	var request_id = ++cms_page_panel_title_preview_request_id
 	var data_to_submit = cms_page_panel_save_serialize_form('.admin_form')
 
-	data_to_submit['do'] = 'cms_page_panel_preview_title'
+	data_to_submit['cms_do'] = 'cms_page_panel_preview_title'
 	data_to_submit['language'] = $('.cms_language_select_current').data('language')
 
 	get_ajax('cms/cms_page_panel', $.extend({}, data_to_submit, {

@@ -17,7 +17,7 @@ class user_login extends \Controller {
 			return $params;
 		}
 
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 		if ($do !== 'login'){
 			return $params;
 		}

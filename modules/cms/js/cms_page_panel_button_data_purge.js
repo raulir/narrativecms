@@ -69,7 +69,7 @@ function cms_page_panel_data_purge_bind($popup, cms_page_panel_id){
 
 		// Flatten for PHP: panel_fields[0], etc. (reliable array POST)
 		var data = {
-			'do': 'cms_page_panel_data_purge',
+			'cms_do': 'cms_page_panel_data_purge',
 			'cms_page_panel_id': cms_page_panel_id
 		}
 		for (var i = 0; i < panel_fields.length; i++){
@@ -85,10 +85,10 @@ function cms_page_panel_data_purge_bind($popup, cms_page_panel_id){
 		get_ajax_panel('cms/cms_page_panel_data_purge', data, function(result){
 
 			var html = ''
-			if (result && result.result && result.result._html){
-				html = result.result._html
-			} else if (result && result._html){
-				html = result._html
+			if (result && result.result && result.result.cms_html){
+				html = result.result.cms_html
+			} else if (result && result.cms_html){
+				html = result.cms_html
 			} else if (result && result.result && result.result.html){
 				html = result.result.html
 			}
@@ -135,8 +135,8 @@ function cms_page_panel_button_data_purge_init($root){
 				}, function(data){
 
 					var html = ''
-					if (data && data.result && data.result._html){
-						html = data.result._html
+					if (data && data.result && data.result.cms_html){
+						html = data.result.cms_html
 					} else if (data && data._html){
 						html = data._html
 					} else if (data && data.result && data.result.html){

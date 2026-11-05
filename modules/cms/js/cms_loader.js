@@ -15,7 +15,7 @@ function _cms_loader(panel_name, panel_params, target, _cms_base){
 			  	dataType: 'json',
 			  	context: this,
 			  	success: function( returned_data ) {
-			  		$(target).append(returned_data.result._html)
+			  		$(target).append(returned_data.result.cms_html)
 			  		session_form_init()
 				}
 			})

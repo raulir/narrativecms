@@ -22,7 +22,7 @@ class cms_page_panel_data_purge extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('do') ?? ($params['do'] ?? '');
+		$do = $this->input->post('cms_do') ?? ($params['cms_do'] ?? '');
 		if ($do !== 'cms_page_panel_data_purge'){
 			return $params;
 		}

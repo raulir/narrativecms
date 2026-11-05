@@ -8,7 +8,7 @@ class password_change extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 
 		if ($do == 'save'){
 

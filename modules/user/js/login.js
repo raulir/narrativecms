@@ -3,7 +3,7 @@ function login_init(){
 	$('.login_submit').on('click.cms', function(){
 		
 		var data = {
-				'do': 'login',
+				'cms_do': 'login',
 				'username': $('.login_input_username').val(),
 				'password': $('.login_input_password').val()
 		}
@@ -45,7 +45,7 @@ function login_init(){
 	$('.login_resend_verification').on('click.cms', function(){
 		
 		var data = {
-				'do': 'resend_verification',
+				'cms_do': 'resend_verification',
 				'username': $('.login_input_username').val(),
 		}
 		

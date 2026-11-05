@@ -37,7 +37,7 @@ function cms_edit_slug_check($container){
 	var request_id = ++cms_edit_slug_check_request_id
 
 	get_ajax('cms/cms_edit_slug', {
-		'do': 'check_slug',
+		'cms_do': 'check_slug',
 		'cms_page_panel_id': cms_page_panel_id,
 		'new_slug': new_slug,
 	}).then(function(data){
@@ -88,7 +88,7 @@ function cms_edit_slug_bind($popup){
 		var new_slug = $container.find('.cms_edit_slug_input').val()
 
 		get_ajax('cms/cms_edit_slug', {
-			'do': 'update_slug',
+			'cms_do': 'update_slug',
 			'cms_page_panel_id': cms_page_panel_id,
 			'new_slug': new_slug,
 		}).then(function(data){
@@ -139,10 +139,10 @@ function cms_page_panel_button_edit_slug_init($root){
 
 			get_ajax_panel('cms/cms_edit_slug', {
 				'cms_page_panel_id': cms_page_panel_id,
-				'do': 'form',
+				'cms_do': 'form',
 			}, function(data){
 
-				$popup.find('.cms_popup_content').html(data.result._html)
+				$popup.find('.cms_popup_content').html(data.result.cms_html)
 				cms_popup_bind_cancel($popup)
 				cms_edit_slug_bind($popup)
 

@@ -1,4 +1,5 @@
 {
+	"ajax": {"output": ["cms","deleted"]},
 	"label": "Analytics dashboard",
 	"item": [],
 	"settings": []

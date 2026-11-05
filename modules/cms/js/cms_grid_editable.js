@@ -29,7 +29,7 @@ function cms_grid_editable_init($root){
 				}
 
 				var data = {
-						'do': 'update_field',
+						'cms_do': 'update_field',
 						'item_id': $this.data('item_id'),
 						'name': $this.data('name'),
 						'value': $this.val()
@@ -47,7 +47,7 @@ function cms_grid_editable_init($root){
 
 					var html = ''
 					if (result && result.result){
-						html = result.result.html || result.result._html || ''
+						html = result.result.html || result.result.cms_html || ''
 					}
 					var $parsed = $('<div>').html(html)
 					var err = $parsed.find('.cms_grid_editable_container').attr('data-save_error') || ''

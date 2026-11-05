@@ -10,7 +10,7 @@ class analytics_dashboard extends \Controller {
 
 		$this->load->model('analytics/analytics_model');
 
-		if (!empty($params['do']) && $params['do'] === 'delete_visitor') {
+		if (!empty($params['cms_do']) && $params['cms_do'] === 'delete_visitor') {
 			$deleted = $this->analytics_model->delete_visitor_from_dashboard(
 					$params['row_type'] ?? '',
 					$params['row_id'] ?? ''

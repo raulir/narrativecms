@@ -22,7 +22,13 @@ require_once BASEPATH.'core/controller.php';
 $ci = new Controller();
 $ci->load->model('cms/cms_update_model');
 
-$do = isset($_POST['do']) ? (string)$_POST['do'] : '';
+// Older clients post do. Newer clients may post cms_do.
+$do = '';
+if (isset($_POST['cms_do']) && (string)$_POST['cms_do'] !== ''){
+	$do = (string)$_POST['cms_do'];
+} else if (isset($_POST['do'])){
+	$do = (string)$_POST['do'];
+}
 $module = '';
 if (isset($_POST['module'])) {
 	$module = $_POST['module'];

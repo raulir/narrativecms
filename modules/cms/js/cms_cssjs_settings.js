@@ -46,7 +46,7 @@ function cms_cssjs_settings_init($root){
 		
 		// send to server
 		get_ajax('cms/cms_cssjs_settings', {
-			'do': 'cms_cssjs_save',
+			'cms_do': 'cms_cssjs_save',
 			'panels': panels,
 			'success': function(){
 				cms_notification('Css settings saved!', 3);
@@ -134,7 +134,7 @@ function cms_user_settings_user_save($this, after){
 	}
 	
 	get_ajax_panel('cms_user_operations', {
-		'do': 'cms_user_save',
+		'cms_do': 'cms_user_save',
 		'rights': rights,
 		'cms_user_id': cms_user_id,
 		'username': username,
@@ -163,7 +163,7 @@ function cms_user_settings_user_delete($this, after){
 		panels_display_popup(data.result.html, {
 			'yes': function(){
 				get_ajax_panel('cms_user_operations', {
-					'do': 'cms_user_delete',
+					'cms_do': 'cms_user_delete',
 					'cms_user_id': cms_user_id
 				}, function(data){
 					after();

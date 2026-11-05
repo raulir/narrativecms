@@ -12,7 +12,7 @@ class cart extends \Controller{
 
 	function panel_action($params){
 
-		$do = $params['do'] ?? '';
+		$do = $params['cms_do'] ?? '';
 		if ($do === ''){
 			return $params;
 		}

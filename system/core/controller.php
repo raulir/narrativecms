@@ -748,8 +748,29 @@ class Controller {
 			$params = array('data' => $params, );
 		}
 		 
-		// get page panel settings (admin request → CMS language; site → visitor language)
-		$params = array_merge($this->cms_page_panel_model->get_cms_page_panel_settings($name, $this->cms_page_panel_model->get_content_language()), $params);
+		// Settings are trusted CMS copy. On ajax the request is already in $params,
+		// so settings must win. Page and embed callers have no _from_ajax, and their
+		// saved block fields still override settings.
+		$settings = $this->cms_page_panel_model->get_cms_page_panel_settings($name, $this->cms_page_panel_model->get_content_language());
+		if (!is_array($settings)){
+			$settings = [];
+		}
+		$from_ajax = !empty($params['_from_ajax']);
+		unset($params['_from_ajax']);
+		if ($from_ajax){
+			// Posted fields, then settings (labels beat the request), then the saved block.
+			$params = array_merge($params, $settings);
+			$block_id = (int)($params['cms_page_panel_id'] ?? 0);
+			if ($block_id > 0){
+				$instance = $this->cms_page_panel_model->get_cms_page_panel($block_id);
+				if (is_array($instance)){
+					$params = array_merge($params, $instance);
+				}
+			}
+			$_POST = $params;
+		} else {
+			$params = array_merge($settings, $params);
+		}
 
 		$this->load->model('cms/cms_access_model');
 		if (!$this->cms_access_model->enforce_panel_access($name, $params)){
@@ -832,7 +853,7 @@ class Controller {
 				$js = array_merge($js, $return['js']);
 			}
 	
-			if (empty($params['_no_css'])){
+			if (empty($params['cms_no_css'])){
 				
 				$scss = array_merge($return['scss'] ?? [], $return['css'] ?? []);
 				
@@ -855,7 +876,7 @@ class Controller {
 			
 			}
 
-			if (empty($params['_no_js'])){
+			if (empty($params['cms_no_js'])){
 				$js_str = pack_js($js);
 			}
 	

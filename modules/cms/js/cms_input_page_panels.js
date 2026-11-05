@@ -36,7 +36,7 @@ function cms_input_page_panels_ensure_list($field){
 						block_orders[$(this).val()] = index + 1
 					})
 					get_ajax('cms/cms_page_operations', {
-						'do': 'cms_page_panel_order',
+						'cms_do': 'cms_page_panel_order',
 						'orders': block_orders,
 						'cms_page_id': $('.cms_page_id').val()
 					})
@@ -150,11 +150,11 @@ function cms_input_page_panels_bind_delete($panel){
 			get_ajax_panel('cms/cms_popup_yes_no', {
 				'text': 'Delete block shortcut?'
 			}, function(data){
-				panels_display_popup(data.result._html, {
+				panels_display_popup(data.result.cms_html, {
 					'yes': function(){
 						get_ajax('cms/cms_page_panel', {
 							'cms_page_panel_id': cms_page_panel_id,
-							'do': 'cms_page_panel_delete',
+							'cms_do': 'cms_page_panel_delete',
 							'success': function(){
 								cms_input_page_panels_after_remove($this.closest('li'))
 								cms_notification('Shortcut removed', 3)
@@ -204,7 +204,7 @@ function cms_input_page_panels_init($root){
 				}
 
 				get_ajax('cms/cms_page_operations', $.extend({}, cms_page_save_fields(), {
-					'do': 'reserved_page_draft_put',
+					'cms_do': 'reserved_page_draft_put',
 					'success': function(data){
 						var result = (data && data.result) ? data.result : {}
 						if (result.ok === 0){
@@ -223,7 +223,7 @@ function cms_input_page_panels_init($root){
 			get_ajax_panel('cms/cms_popup_yes_no', {
 				'text': 'The page is not saved.<br>Save this page?'
 			}, function(data){
-				panels_display_popup(data.result._html, {
+				panels_display_popup(data.result.cms_html, {
 					'yes': function(){
 						
 						cms_page_save({
@@ -252,7 +252,7 @@ function cms_input_page_panels_init($root){
 				get_ajax_panel('cms/cms_popup_yes_no', {
 					'text': 'Page panel is not saved. Save the panel?'
 				}, function(data){
-					panels_display_popup(data.result._html, {
+					panels_display_popup(data.result.cms_html, {
 						'yes': function(){
 							
 							cms_page_panel_save({
@@ -302,7 +302,7 @@ function cms_input_page_panel_selector(target_type, target_id, target_name, filt
 	
 	}, function(data){
 
-		panels_display_popup(data.result._html, {
+		panels_display_popup(data.result.cms_html, {
 			'select': function(after){
 
 				// Select stays opacity-disabled until a choice is made; ignore accidental clicks
@@ -316,7 +316,7 @@ function cms_input_page_panel_selector(target_type, target_id, target_name, filt
 					var shortcut_target_id = $('.cms_panel_selector_shortcut_select').val()
 					
 					get_ajax('cms/cms_page_panel', {
-						'do': 'cms_page_panel_shortcut',
+						'cms_do': 'cms_page_panel_shortcut',
 						'cms_page_id': target_id,
 						'cms_page_panel_id': shortcut_target_id,
 						'success': function(resp){

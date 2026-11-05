@@ -104,8 +104,8 @@ function cms_page_panel_export_update_preview($popup, export_id){
 	var opts = cms_page_panel_export_collect_options($popup)
 
 	get_ajax('cms/cms_page_panel_export', Object.assign({
-		'do': 'cms_page_panel_export_preview',
-		'no_html': '1',
+		'cms_do': 'cms_page_panel_export_preview',
+		'cms_no_html': '1',
 	}, cms_page_panel_export_post_ids($popup, export_id), opts)).then(function(data){
 
 		if (!data.result || data.result.result !== 'ok'){
@@ -184,11 +184,11 @@ function cms_page_panel_export_bind_settings($popup, export_id){
 		cms_page_panel_export_overlay_show($settings)
 
 		get_ajax_panel('cms/cms_page_panel_export', Object.assign({
-			'do': 'cms_page_panel_export',
+			'cms_do': 'cms_page_panel_export',
 		}, cms_page_panel_export_post_ids($popup, export_id), opts), function(data){
 
 			cms_page_panel_export_overlay_hide($settings)
-			$popup.find('.cms_popup_content').html(data.result._html)
+			$popup.find('.cms_popup_content').html(data.result.cms_html)
 
 			cms_popup_bind_cancel($popup)
 
@@ -229,10 +229,10 @@ function cms_page_panel_button_export_init($root){
 
 			get_ajax_panel('cms/cms_page_panel_export', {
 				'export_id': cms_page_panel_id,
-				'do': 'cms_page_panel_export_settings',
+				'cms_do': 'cms_page_panel_export_settings',
 			}, function(data){
 
-				$popup.find('.cms_popup_content').html(data.result._html)
+				$popup.find('.cms_popup_content').html(data.result.cms_html)
 				cms_popup_bind_cancel($popup)
 				cms_page_panel_export_bind_settings($popup, cms_page_panel_id)
 

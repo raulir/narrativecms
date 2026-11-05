@@ -20,8 +20,8 @@ function cms_ajax_app_session(params){
 		saved = {}
 	}
 
-	if (saved.session_id && !params.session_id){
-		params.session_id = saved.session_id
+	if (saved.session_id && !params.cms_session_id && !params.session_id){
+		params.cms_session_id = saved.session_id
 	}
 
 	return params
@@ -31,7 +31,7 @@ function cms_ajax_app_session(params){
 function get_ajax(name, params) {
 
 	var data = Object.assign({
-		'no_html': '1'
+		'cms_no_html': '1'
 	}, cms_ajax_app_session(params || {}))
 	var on_success = data.success
 	var on_error = data.error
@@ -81,20 +81,20 @@ function cms_access_denied_popup(error) {
 		login_text: error.login_text || (typeof _cms_login_text !== 'undefined' ? _cms_login_text : 'Login'),
 		text: 'System error: access denied',
 	}, function(data) {
-		$('body').append(data.result._html)
+		$('body').append(data.result.cms_html)
 	}).catch(function() {})
 }
 
 function cms_apply_panel_css(data, finish) {
 
-	var panel_css = data && data._panel_css
+	var panel_css = data && (data.cms_panel_css || data._panel_css)
 
 	if (!panel_css && data && data.result) {
-		panel_css = data.result._panel_css
+		panel_css = data.result.cms_panel_css || data.result._panel_css
 	}
 
 	if (panel_css && panel_css.length) {
-		var force_css = !!(data._panel_css_force || (data.result && data.result._panel_css_force))
+		var force_css = !!(data.cms_panel_css_force || data._panel_css_force || (data.result && (data.result.cms_panel_css_force || data.result._panel_css_force)))
 		cms_load_css(panel_css, force_css).then(finish)
 	} else {
 		finish()
@@ -272,9 +272,10 @@ function cms_ajax_panel(name, args) {
 
 		var deliver = function(returned_data) {
 
-			if (returned_data && returned_data.error && returned_data.error.message === 'access_denied') {
+			var access_error = returned_data && (returned_data.cms_error || returned_data.error)
+			if (access_error && access_error.message === 'access_denied') {
 				if (name !== 'cms/cms_access_denied') {
-					cms_access_denied_popup(returned_data.error)
+					cms_access_denied_popup(access_error)
 				}
 				fail({
 					xhr: null,
@@ -292,16 +293,17 @@ function cms_ajax_panel(name, args) {
 					script_srcs = script_srcs.concat(prepared.srcs || [])
 					return prepared.html
 				}
-				if (typeof returned_data.result._html == 'string') {
-					returned_data.result._html = prepare_field(returned_data.result._html)
+				if (typeof returned_data.result.cms_html == 'string') {
+					returned_data.result.cms_html = prepare_field(returned_data.result.cms_html)
+					if (returned_data.result.html == null) {
+						returned_data.result.html = returned_data.result.cms_html
+					}
 				}
-				if (typeof returned_data.result.html == 'string') {
-					returned_data.result.html = prepare_field(returned_data.result.html)
-				} else if (typeof returned_data.result._html == 'string') {
-					returned_data.result.html = returned_data.result._html
+				if (returned_data.result.cms_error !== undefined && returned_data.result.error === undefined) {
+					returned_data.result.error = returned_data.result.cms_error
 				}
 				$.each(returned_data.result, (key, value) => {
-					if (key === '_html' || key === 'html') {
+					if (key === 'cms_html') {
 						return
 					}
 					if (typeof value == 'string') {

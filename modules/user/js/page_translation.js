@@ -95,7 +95,7 @@ function page_translation_save($container){
 	$container.addClass('page_translation_busy')
 
 	get_ajax('user/page_translation', {
-		'do': 'page_translation_save',
+		'cms_do': 'page_translation_save',
 		'translation_cms_page_panel_id': cms_page_panel_id,
 		'cms_language': cms_language,
 		'values': JSON.stringify(values),
@@ -192,7 +192,7 @@ function page_translation_ai($container){
 	page_translation_notify($container, 'AI working… can take up to a minute', false, 0)
 
 	get_ajax('user/page_translation', {
-		'do': 'page_translation_ai',
+		'cms_do': 'page_translation_ai',
 		'translation_cms_page_panel_id': cms_page_panel_id,
 		'cms_language': cms_language,
 		'values': JSON.stringify(values),
@@ -329,8 +329,8 @@ function page_translation_open(panel_id, visitor_language){
 	}, function(data){
 
 		var html = ''
-		if (data && data.result && data.result._html){
-			html = data.result._html
+		if (data && data.result && data.result.cms_html){
+			html = data.result.cms_html
 		} else if (data && data._html){
 			html = data._html
 		}

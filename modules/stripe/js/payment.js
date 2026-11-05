@@ -5,7 +5,7 @@ function payment_init(){
 		var $payment = $('.payment_container')
 		
 		var data = {
-			'do': 'payment',
+			'cms_do': 'payment',
 			'stripe_price_id': $payment.data('stripe_price_id'),
 			'stripe_subscription_id': $payment.data('stripe_subscription_id'),
 			'timestamp': $payment.data('timestamp'),
@@ -31,7 +31,7 @@ function payment_init(){
   				
   			}
   				
-  			if (result['do'] == 'card_form'){
+  			if (result['cms_do'] == 'card_form'){
   			
   				$('.payment_popup_container').addClass('payment_popup_active')
   				
@@ -115,7 +115,7 @@ function on3DSComplete() {
     
     // TODO: add check if payment was successful
     var data = {
-			'do': 'check',
+			'cms_do': 'check',
 			'stripe_subscription_id': $payment.data('stripe_subscription_id'),
 	}
 

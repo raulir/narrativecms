@@ -45,7 +45,7 @@ function cms_page_save(params){
 	params = params || {'success':function(){}};
 
 	get_ajax('cms/cms_page_operations', $.extend({}, cms_page_save_fields(), {
-		'do': 'cms_page_save',
+		'cms_do': 'cms_page_save',
 		'success': function(data){
 
 			var result = (data && data.result) ? data.result : {}
@@ -95,7 +95,7 @@ function cms_page_delete(){
 	}
 
 	get_ajax_panel('cms/cms_popup_yes_no', {}, function(data){
-		panels_display_popup(data.result._html, {
+		panels_display_popup(data.result.cms_html, {
 			'yes': function(){
 				
 				var page_id = $('.cms_page_id').val();
@@ -104,7 +104,7 @@ function cms_page_delete(){
 				if (page_id > 0){ 
 					get_ajax('cms/cms_page_operations', {
 						'page_id': page_id,
-						'do': 'cms_page_delete',
+						'cms_do': 'cms_page_delete',
 						'success': function(data){
 							var res = (data && data.result) ? data.result : {}
 							if (res.ok){
@@ -140,7 +140,7 @@ function cms_page_hide_toggle(){
 	var next = cur ? 0 : 1
 
 	get_ajax('cms/cms_page_operations', {
-		'do': 'cms_page_set_status',
+		'cms_do': 'cms_page_set_status',
 		'page_id': page_id,
 		'status': next,
 		'success': function(data){
@@ -212,7 +212,7 @@ function cms_page_init($root){
 				block_orders[$(this).val()] = index + 1;
 			});
 			get_ajax('cms/cms_page_operations', {
-				'do': 'cms_page_panel_order',
+				'cms_do': 'cms_page_panel_order',
 				'orders': block_orders,
 				'cms_page_id': $('.cms_page_id').val()
 			});

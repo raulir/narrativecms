@@ -192,7 +192,7 @@ function cms_input_grid_init($root){
 			var $this = $(this)
 
 			get_ajax_panel('cms/cms_popup_yes_no', {'text':'Are you sure?'}, function(data){
-				panels_display_popup(data.result._html, {
+				panels_display_popup(data.result.cms_html, {
 					'yes': function(){
 						var $row = $this.closest('.cms_grid_row')
 						var id = cms_input_grid_row_id($row)

@@ -8,7 +8,7 @@ function productbuy_init(){
 			data[$(el).attr('name')] = $(el).val()
 		})
 		
-		data['do'] = 'add'
+		data['cms_do'] = 'add'
 
 		get_ajax_panel('shop/productbuy', data, function(data){
 			

@@ -9,7 +9,7 @@ function cms_input_list_link_init($root){
 		$container.addClass('cms_input_list_link_ok');
 
 		get_ajax('cms/cms_input_list_link', {
-			'do':'get',
+			'cms_do':'get',
 			'item_id': $('.cms_page_panel_id').val(),
 			'success': function(data){
 				var target = location.protocol + '//' + location.hostname + data.result.link

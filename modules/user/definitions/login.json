@@ -1,4 +1,5 @@
 {
+	"ajax": {"output": ["cms", "success_url", "login_success", "email", "session_id", "resent"]},
 	"label": "Login",
 	"image": "user/panel_login.png",
 	"item": [

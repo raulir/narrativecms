@@ -11,7 +11,7 @@ function productdims_init(){
 			
 			var data = {}
 			
-			data['do'] = 'availability'
+			data['cms_do'] = 'availability'
 			data['product_id'] = $('.shop_productdims_container').data('product_id')
 			data['name'] = $(this).data('name')
 			data['value'] = $(this).data('value')

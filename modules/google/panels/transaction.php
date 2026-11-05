@@ -11,7 +11,7 @@ class transaction extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('do') ?? ($params['do'] ?? '');
+		$do = $this->input->post('cms_do') ?? ($params['cms_do'] ?? '');
 		if ($do !== 'save'){
 			return $params;
 		}

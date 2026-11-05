@@ -13,7 +13,7 @@ class checkout_start extends \Controller {
 
 	function panel_action($params){
 
-		$do = $params['do'] ?? $this->input->post('do');
+		$do = $params['cms_do'] ?? $this->input->post('cms_do');
 
 		if ($do !== 'subscription_checkout' && $do !== 'checkout' && $do !== 'start'){
 			return $params;

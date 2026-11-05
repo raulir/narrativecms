@@ -22,11 +22,11 @@ class cms_update extends \Controller {
 
 		$this->load->model('cms/cms_update_model');
 
-		$do = $this->input->post('do');
+		$do = (string)($params['cms_do'] ?? $params['do'] ?? '');
 		
-		$area = $this->input->post('area');
+		$area = $params['area'] ?? null;
 		if (empty($area) && $area !== ''){
-			$area = $this->input->post('module');
+			$area = $params['module'] ?? '';
 		}
 
 		$area_norm = $this->cms_update_model->normalise_area_name($area === null ? '' : $area);
@@ -84,7 +84,7 @@ class cms_update extends \Controller {
 			// the file array, or the error object (which they check first and stop on).
 			// Never turn an error into [] — that reads as "no files", reports success and,
 			// on Install, enables a module that was never downloaded.
-			$protocol = (int)$this->input->post('protocol');
+			$protocol = (int)($params['protocol'] ?? 0);
 			if ($protocol >= 2){
 				$params['result'] = $this->cms_update_model->get_update_plan($area);
 			} else {
@@ -98,7 +98,7 @@ class cms_update extends \Controller {
 				return $params;
 			}
 
-			$filenames = $this->input->post('filenames');
+			$filenames = $params['filenames'] ?? null;
 			if (is_string($filenames) && $filenames !== ''){
 				$decoded = json_decode($filenames, true);
 				if (is_array($decoded)){

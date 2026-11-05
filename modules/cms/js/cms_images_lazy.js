@@ -87,7 +87,7 @@ function cms_images_lazy_stop($this){
 function cms_images_lazy_next($this){
 
 	get_api('cms/image_resize', {
-		'do': 'resize',
+		'cms_do': 'resize',
 		'width': $this.data('w1'),
 		'output': $this.data('output'),
 		'name': $this.data('cms_images_lazy'),
@@ -125,7 +125,7 @@ function cms_images_lazy_next($this){
 				setTimeout(function(){
 
 					get_api('cms/image_resize', {
-						'do': 'resize',
+						'cms_do': 'resize',
 						'width': $this.data('w2'),
 						'output': $this.data('output'),
 						'name': $this.data('cms_images_lazy'),

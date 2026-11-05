@@ -19,7 +19,7 @@ class basic extends \Controller{
 		}
 		
 		// schema
-		if ($params['do'] == 'S'){
+		if ($params['cms_do'] == 'S'){
 
 			$return = $params['fields'];
 
@@ -57,7 +57,7 @@ class basic extends \Controller{
 			
 			}
 
-		} else if ($params['do'] == 'L'){
+		} else if ($params['cms_do'] == 'L'){
 			
 			$return = [];
 		

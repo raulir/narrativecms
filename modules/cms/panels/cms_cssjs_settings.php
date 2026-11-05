@@ -20,7 +20,7 @@ class cms_cssjs_settings extends \Controller {
 		
 	function panel_action($params){
 
-		$do = $this->input->post('do');
+		$do = $this->input->post('cms_do');
 
 		if ($do === 'cms_cssjs_save'){
 
