@@ -26,13 +26,17 @@ class cms_grid_editable extends \Controller {
 				$this->load->model('cms/cms_page_panel_model');
 				$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
 
-				$this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [
+				$updated = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [
 						'do' => 'U',
 						'id' => $params['base_id'],
 						'row_id' => $params['item_id'],
 						'col' => $params['name'],
 						'value' => $params['value'],
 				]);
+				if (is_array($updated) && !empty($updated['_reason'])){
+					$params['_reason'] = $updated['_reason'];
+					$params['_reload_value'] = 1;
+				}
 
 			} else {
 
@@ -49,7 +53,7 @@ class cms_grid_editable extends \Controller {
 
 	function panel_params($params){
 
-		if (isset($params['value'])){
+		if (isset($params['value']) && empty($params['_reload_value'])){
 			return $params;
 		}
 

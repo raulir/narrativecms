@@ -84,7 +84,9 @@ Prefer: trust install/update to create runtime dirs; do rare work on the rare pa
 
 ## Contracts (short)
 
+- **Untrusted input** — anything from the request (visitor post, cookie, query, webhook, third-party payload) is validated or cleaned **on the way in**, before it is stored or used: names, labels, images and prices come from CMS data, not from the post; free text is stripped and capped (`cms_utf8_string()`, `strip_tags`). Stored data is then trusted at render (AGENTS.md § CMS field output). Fail if posted values reach the DB, HTML, admin views or emails unchecked.
 - **No silent fail** — empty skip is fine; log or operator-visible reason (`_reason`, status line).
+- **Minor:** `window.alert` / `confirm` / `prompt` for public notices (use an HTML popup or a hidden element the JS shows, copy from settings), and `$this->input->post()` / `$_POST` in panels (read `$params`). See AGENTS.md § JavaScript and § Panel controllers. List them only when there is room in the top 5, or group several into one item. Do not let them push out a serious finding.
 - **Visitor copy** from CMS fields, not hard-coded UI sentences in templates/JS.
 - **Templates** use `div` unless the tag’s own behaviour is needed (`a` for a real URL, `input`, `textarea`, `select`, `form`, `label`, `img`, `video`). No `span` or `button` for layout or click targets. See [`agents.md`](agents.md) § Markup and CSS style.
 - **Public FE:** no new flex, no ARIA/`role`, no `cursor:` (site cursors).
@@ -105,6 +107,8 @@ Prefer: trust install/update to create runtime dirs; do rare work on the rare pa
 The **result** is a list of suggestions to improve the code or system — **only if something should change**.
 
 For **small and medium** review rounds, cap at about **5** items: the most important issues, most severe or highest leverage first. Skip nits, style, and “nice someday” unless they are in that top set. If nothing needs fixing, say so in one line (no empty Keep/Wrong-layer tables).
+
+**User input trust issues are serious.** When the review finds one (request data stored or rendered without being checked, see Contracts § Untrusted input), it must be in the delivered list. It does not have to be item 1, but it may not be cut to keep the list at 5. Several such findings can be one item.
 
 Larger reviews (whole module, go-live) may go slightly over 5; still rank and stop when extra items would dilute the list.
 

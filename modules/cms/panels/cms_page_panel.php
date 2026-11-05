@@ -190,6 +190,25 @@ class cms_page_panel extends \Controller {
 				$data_merged['title'] = $compiled_title;
 			}
 
+			$grid_applied = $this->run_panel_method('cms/cms_input_grid', 'apply_logs', [
+					'panel_name' => $data_merged['panel_name'] ?? '',
+					'base_id' => (int)$block_id,
+					'data' => $data_merged,
+					'structure' => $panel_structure,
+			]);
+			if (!empty($grid_applied['_reason'])){
+				$params['ok'] = 0;
+				$params['error'] = $grid_applied['_reason'];
+				$params['grid_ids'] = $grid_applied['grid_ids'] ?? [];
+				$params['grid_log'] = $grid_applied['grid_log'] ?? [];
+				return $params;
+			}
+			if (is_array($grid_applied) && isset($grid_applied['data']) && is_array($grid_applied['data'])){
+				$data_merged = $grid_applied['data'];
+			}
+			$params['grid_ids'] = $grid_applied['grid_ids'] ?? [];
+			$params['grid_log'] = $grid_applied['grid_log'] ?? [];
+
 			$data_merged = $this->run_panel_method($data_merged['panel_name'], 'on_update', $data_merged);
 
 			try {

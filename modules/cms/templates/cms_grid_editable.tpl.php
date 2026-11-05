@@ -1,4 +1,4 @@
-<div class="cms_grid_editable_container">
+<div class="cms_grid_editable_container"<?php if (!empty($_reason)): ?> data-save_error="<?= $_reason ?>"<?php endif ?>>
 	<input class="cms_grid_editable_input" value="<?= $value ?>"
 			data-item_id="<?= $item_id ?>"
 			data-name="<?= $name ?>"

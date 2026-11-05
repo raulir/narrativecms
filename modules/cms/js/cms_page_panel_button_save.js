@@ -21,6 +21,9 @@ function cms_page_panel_save_submit(params){
 		$.extend(data_to_submit, {
 			'success': function(data){
 				var result = (data && data.result) ? data.result : {}
+				if (typeof cms_input_grid_after_save === 'function'){
+					cms_input_grid_after_save(result)
+				}
 				if (result.ok === 0){
 					cms_notification(result.error || 'Cannot save panel', 3, 'error')
 					return
@@ -36,6 +39,9 @@ function cms_page_panel_save_submit(params){
 			'success': function(data){
 
 				var result = (data && data.result) ? data.result : {}
+				if (typeof cms_input_grid_after_save === 'function'){
+					cms_input_grid_after_save(result)
+				}
 				if (result.ok === 0){
 					cms_notification(result.error || 'Cannot save panel', 3, 'error')
 					return

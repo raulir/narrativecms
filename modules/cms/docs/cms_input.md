@@ -289,12 +289,19 @@ Table grid tied to panel model `ds_*` data-source methods. Can be embedded in a 
 | Op | Meaning |
 |----|---------|
 | `S` | Return column `fields` (may merge dynamic columns — see `form/basic` `ds_subscribers`) |
-| `L` | Return row arrays; each row needs `id` |
-| `C` | Create row; `id` = parent `base_id` |
+| `L` | Return row arrays. Each row needs `id`. That id is stable: it stays on that row when another row is deleted. Do not use the array index. |
+| `C` | Create row. `id` in the call is the parent panel. **Must return `id`**: the new row’s stable id. The grid log uses that to replace `tmp_<n>`. |
 | `D` | Delete row; with `base_id`, `id` = parent and `row_id` = line to remove |
-| `U` | Update cell (ajax via `cms/cms_grid_editable` when `ds` + `base_id` set) |
+| `U` | Update one cell. `col` is the field name. `dim_{id}` is a dim value on shop variants. |
+| `C` / `U` / `D` from the browser | Not called while editing. The grid posts `panel_params[{name}_log]`, a JSON list applied in order on panel Save. |
 
-**Editable cells:** `cms/cms_grid_editable` — blur-save. With `ds` + `base_id`, calls `U` on the data source; otherwise updates a `cms_page_panel` list item.
+**Row id.** Each rendered row has a hidden `.cms_grid_row_id`. Existing rows get the `id` from `L`. A row added in the browser gets `tmp_<n>` and keeps it until Save. These ids do not change when another row is removed.
+
+**`C` returns `id`.** This is the grid contract. `apply_logs` stops with “Grid add did not return a row id” when `C` does not return one. The returned `id` replaces that row’s `tmp_<n>` on the page. `grid_ids` in the Save result is per grid name, and only that grid’s rows are rewritten.
+
+**Change log.** Add, set, and delete are recorded in the hidden textarea and sent with Save. Deleting a row drops every earlier line for that same id. A `tmp_` row then leaves no lines at all, not even a delete. Setting the same cell again keeps only the latest value. Save calls `cms/cms_input_grid` `apply_logs`, which runs the lines in order (`C`, then `U`, then `D`). A refused line stops the log. If that line belongs to a row created earlier in the same Save, that new row is deleted and its `add` is put back in the log under the original `tmp_` id. Save returns `ok: 0` and the reason. The textarea keeps the lines that still need to run. The log is not stored.
+
+**Editable cells:** `cms/cms_grid_editable` updates the log inside a grid. Outside a grid it still blur-saves.
 
 **Reference:** [`form/basic.php`](../../form/panels/basic.php) `ds_subscribers` (read-only grid, `form_data` table). [`music/note_system.php`](../../music/panels/note_system.php) `ds_rows` (editable grid, `headers` + `rows` in panel settings JSON).
 

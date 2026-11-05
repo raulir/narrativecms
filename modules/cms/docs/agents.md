@@ -158,6 +158,7 @@ List-only types live as `modules/<module>/definitions/<name>.json` and a `cms_me
 
 - Selectors, events, and element data go through **jQuery** (`$()`, `.on()`, `.data()`, `.find()`). Do not mix in `querySelector`, `addEventListener`, `getAttribute`, or `.attr('data-…')` for that work. This is the general method in this CMS and in projects built on it.
 - **`$.trim` is not a function** in the jQuery build used by this CMS — do not use it. Prefer native **`String.prototype.trim`**: `String(value || '').trim()`.
+- **No `window.alert` / `confirm` / `prompt`** for notices on the public site. Show an HTML popup or an inline message in the panel, with the copy from CMS settings: passed as `data-*`, or rendered by the template as a hidden element that JS makes visible (a class toggle) when the notice or warning applies. Yes/no questions: `cms/cms_popup_yes_no`. CMS admin status messages: `cms_notification`.
 - Prefer the same for other removed/legacy jQuery helpers when native APIs exist.
 
 ## General programming style
@@ -181,6 +182,12 @@ Panel entry points stay `<panel>_init`, `<panel>_destroy`, `<panel>_resize`, `<p
 A short global helper may keep a leading underscore and a short name. Templates use these often: `_ib()`, `_lh()`, `_print_r()`, `_panel()`. New helpers of that kind are rare. Do not use that form for module or panel logic.
 
 Template and CSS class prefixes are separate. See Template files and Markup and CSS style.
+
+### Comments
+
+- **Before a function:** at most 3 lines. Say briefly what it does. Leave out long explanations, history, and examples (those go in the module docs).
+- **Inside a function:** comment only before a special case or a complex part, one short comment right above it. Plain code needs no comment.
+- **Ratio:** at most about 3 comment lines per 10 lines of code in a function. If a function needs more, simplify the code or move the explanation to `docs/`.
 
 Braces style – opening `{` always on the same line, with exactly one space before it:
 
@@ -438,6 +445,8 @@ Example: `cms_language_select.php`
 If no `$params` modification is needed (e.g. they come directly from db or ajax), no `panel_params` function is needed — and if the controller would only pass params through, **omit the panel PHP file entirely** (see “Avoid stub panel controllers” above).
 
 If the panel needs to update system state, use `panel_action($params)`, which works similarly to `panel_params()`, but all `panel_action` calls run before any `panel_params()` on the page.
+
+**Request values come from `$params` only.** Do not read `$this->input->post()` or `$_POST` in panels. `get_ajax` / `get_ajax_panel` (ajax API) put the POST into `$params`; a page render puts the GET query values in. So an action that needs posted data goes through `get_ajax` / `get_ajax_panel`, not a full-page form post. Validate those values on the way in (see review.md § Untrusted input).
 
 Load models as `$this->load->model('cms/cms_schema_model')`.
 
