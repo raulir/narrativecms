@@ -61,6 +61,8 @@ class cms_page_panel_model extends \Model {
 	
 	var $default_language;
 	var $_panel_table_cache = [];
+	/** panel_name => true once its panel table is found (positive results only). */
+	var $_panel_table_found = [];
 	var $_fk_extend_depth = 0;
 	var $_fk_extend_hold = 0;
 	var $_fk_extend_map = [];
@@ -125,12 +127,20 @@ class cms_page_panel_model extends \Model {
 		return $fields;
 	}
 
+	/**
+	 * Cached per request, positive results only: a table created later in the same request
+	 * (schema fix, then data sync) is still found. Saves a SHOW TABLES per list query and panel load.
+	 */
 	function panel_table_exists($panel_name) {
+		if (!empty($this->_panel_table_found[$panel_name])) {
+			return true;
+		}
 		$table = $this->get_panel_table_name($panel_name);
-		if (!$table) {
+		if (!$table || !$this->db->table_exists($table)) {
 			return false;
 		}
-		return $this->db->table_exists($table);
+		$this->_panel_table_found[$panel_name] = true;
+		return true;
 	}
 
 	function _read_panel_table_row($cms_page_panel_id, $panel_name) {
@@ -664,7 +674,11 @@ class cms_page_panel_model extends \Model {
 
 	}
 	
-	function get_cms_page_panel_params($cms_page_panel_id, $language = '', $retry = true){
+	/**
+	 * Panel params (cached JSON, translation merged, panel-table columns overlaid).
+	 * Pass $panel_name when the caller already has the cms_page_panel row: saves one query per load.
+	 */
+	function get_cms_page_panel_params($cms_page_panel_id, $language = '', $panel_name = null, $retry = true){
 
 		$return = [];
 
@@ -686,17 +700,22 @@ class cms_page_panel_model extends \Model {
     			}
     		}
 
-			$sql = "select panel_name from cms_page_panel where cms_page_panel_id = ? limit 1 ";
-			$pquery = $this->db->query($sql, [$cms_page_panel_id]);
-			if ($pquery->num_rows() && is_array($return)) {
-				$this->_overlay_panel_table_fields($return, $cms_page_panel_id, $pquery->row_array()['panel_name']);
+			if ($panel_name === null){
+				$sql = "select panel_name from cms_page_panel where cms_page_panel_id = ? limit 1 ";
+				$pquery = $this->db->query($sql, [$cms_page_panel_id]);
+				if ($pquery->num_rows()) {
+					$panel_name = $pquery->row_array()['panel_name'];
+				}
+			}
+			if ($panel_name !== null && is_array($return)) {
+				$this->_overlay_panel_table_fields($return, $cms_page_panel_id, $panel_name);
 			}
 
 		} else if($retry){
-    		
+
     		// if empty result, try to update cache
    			$this->_update_cached_params($cms_page_panel_id);
-   			return $this->get_cms_page_panel_params($cms_page_panel_id, $language, false);
+   			return $this->get_cms_page_panel_params($cms_page_panel_id, $language, $panel_name, false);
     		
     	}
 
@@ -1094,7 +1113,7 @@ class cms_page_panel_model extends \Model {
 			return false;
 		}
 
-		$panel_params = $this->get_cms_page_panel_params($row['cms_page_panel_id'], $language);
+		$panel_params = $this->get_cms_page_panel_params($row['cms_page_panel_id'], $language, $row['panel_name']);
 
 		if (is_array($panel_params)){
 			$return = array_merge($panel_params, $row);
@@ -1545,8 +1564,8 @@ class cms_page_panel_model extends \Model {
 
 		// Ensure panel-table row exists even when this write has no table field keys
 		// (e.g. Shopify create without subcategory_id — list uses INNER JOIN)
-		if ($panel_name && $this->panel_table_exists($panel_name)
-				&& !empty($this->get_panel_table_fields($panel_name))) {
+		if ($panel_name && !empty($this->get_panel_table_fields($panel_name))
+				&& $this->panel_table_exists($panel_name)) {
 			$this->_write_panel_table_row($cms_page_panel_id, $panel_name, $table_data);
 			$this->_update_cached_params($cms_page_panel_id);
 		}
@@ -1726,8 +1745,8 @@ class cms_page_panel_model extends \Model {
 		}
 
 		// Always ensure panel-table row when the panel has table:1 fields (list INNER JOIN)
-		if (!empty($data['panel_name']) && $this->panel_table_exists($data['panel_name'])
-				&& !empty($this->get_panel_table_fields($data['panel_name']))) {
+		if (!empty($data['panel_name']) && !empty($this->get_panel_table_fields($data['panel_name']))
+				&& $this->panel_table_exists($data['panel_name'])) {
 			$this->_write_panel_table_row($insert_id, $data['panel_name'], $table_data);
 			$this->_update_cached_params($insert_id);
 		}
@@ -2182,7 +2201,7 @@ class cms_page_panel_model extends \Model {
 		$settings_a = $this->get_cms_page_panels_by(['panel_name' => $cms_panel_name, 'cms_page_id' => 0, 'parent_id' => 0, 'sort' => 0, ]);
 
 		if (!empty($settings_a[0]['cms_page_panel_id'])){
-			$params = $this->get_cms_page_panel_params($settings_a[0]['cms_page_panel_id'], $language);
+			$params = $this->get_cms_page_panel_params($settings_a[0]['cms_page_panel_id'], $language, $settings_a[0]['panel_name']);
 			if (is_array($params)){
 				$return = $params;
 			}
@@ -2209,7 +2228,7 @@ class cms_page_panel_model extends \Model {
 				if (empty($source_settings_a[0]['cms_page_panel_id'])){
 					continue;
 				}
-				$p = $this->get_cms_page_panel_params($source_settings_a[0]['cms_page_panel_id'], $language);
+				$p = $this->get_cms_page_panel_params($source_settings_a[0]['cms_page_panel_id'], $language, $source_settings_a[0]['panel_name']);
 				if (is_array($p) && $p){
 					$source_params = $p;
 					// Auto-migrate legacy settings panel_name once
