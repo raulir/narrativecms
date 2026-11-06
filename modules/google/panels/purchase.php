@@ -11,7 +11,7 @@ class purchase extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do') ?? ($params['cms_do'] ?? '');
+		$do = $params['cms_do'] ?? '';
 		if ($do !== 'confirm'){
 			return $params;
 		}
@@ -27,10 +27,10 @@ class purchase extends \Controller {
 		$this->load->model('google/google_model');
 		$result = $this->google_model->confirm_purchase(
 				$user_id,
-				(int)$this->input->post('product_id'),
-				(int)$this->input->post('currency'),
-				(string)$this->input->post('purchase_token'),
-				(string)$this->input->post('google_package_id')
+				(int)($params['product_id'] ?? 0),
+				(int)($params['currency'] ?? 0),
+				(string)($params['purchase_token'] ?? ''),
+				(string)($params['google_package_id'] ?? '')
 		);
 
 		print(json_encode($result));

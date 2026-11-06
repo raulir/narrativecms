@@ -430,7 +430,7 @@ class user_model extends \Model {
 			$tempusers = [];
 		}
 			
-		$token = $this->input->get('token');
+		$token = $_GET['token'] ?? false;
 			
 		foreach($tempusers as $key => $row){
 				

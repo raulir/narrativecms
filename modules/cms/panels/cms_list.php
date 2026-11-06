@@ -29,13 +29,13 @@ class cms_list extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do === 'cms_list_set'){
 
-			$cms_page_panel_id = $this->input->post('id');
-			$field = $this->input->post('field');
-			$value = $this->input->post('value');
+			$cms_page_panel_id = $params['id'] ?? false;
+			$field = $params['field'] ?? false;
+			$value = $params['value'] ?? false;
 
 			$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_page_panel_list_model');
@@ -45,7 +45,7 @@ class cms_list extends \Controller {
 
 		} else if ($do === 'cms_list_save_order'){
 
-			$list_order = $this->input->post('list_order');
+			$list_order = $params['list_order'] ?? false;
 
 			$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_page_panel_list_model');
@@ -66,10 +66,10 @@ class cms_list extends \Controller {
 
 		} else if ($do === 'cms_list_move'){
 
-			$block_id = $this->input->post('block_id');
-			$target = $this->input->post('target');
-			$start = $this->input->post('start');
-			$limit = $this->input->post('limit');
+			$block_id = $params['block_id'] ?? false;
+			$target = $params['target'] ?? false;
+			$start = $params['start'] ?? false;
+			$limit = $params['limit'] ?? false;
 
 			$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_page_panel_list_model');
@@ -84,8 +84,8 @@ class cms_list extends \Controller {
 
 				if ($start >= $limit){
 
-					$filters = $this->input->post('filters');
-					$list_order = $this->input->post('list_order');
+					$filters = $params['filters'] ?? false;
+					$list_order = $params['list_order'] ?? false;
 
 					$filter = [
 							'panel_name' => $block['panel_name'],
@@ -126,8 +126,8 @@ class cms_list extends \Controller {
 
 			} else if ($target == 'next'){
 
-				$filters = $this->input->post('filters');
-				$list_order = $this->input->post('list_order');
+				$filters = $params['filters'] ?? false;
+				$list_order = $params['list_order'] ?? false;
 
 				$filter = [
 						'panel_name' => $block['panel_name'],

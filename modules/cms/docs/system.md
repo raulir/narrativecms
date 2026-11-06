@@ -40,7 +40,7 @@ Rough order:
 4. **[`cms_config_load_full()`](../../../system/core/cms_config.php)** — one mysqli connect → **`$GLOBALS['db']`** (global `$db`), cms_settings, all modules, extends/provides.
 5. **`cms_route_resolve()`** ([`cms_router.php`](../../../system/core/cms_router.php)) → `$GLOBALS['cms_route']` (includes legacy **module controller first-segment** discovery — to be phased out for new public endpoints; see [`todo.md`](todo.md) § System / routing)
 6. Timeout shutdown, landing redirects, **session** ([`session.php`](../../../system/core/session.php) `cms_session_boot()`), targets (uses global `$db`), page HTML cache try-serve
-7. [`CodeIgniter.php`](../../../system/core/CodeIgniter.php) — dispatch Controller + method (loads [`cms_bootstrap.php`](../../../system/core/cms_bootstrap.php): `load_class` / `get_instance` / `show_404`; app loading stays in `Loader`). Loader attaches **`cms_db`** as `$this->db`.
+7. [`CodeIgniter.php`](../../../system/core/CodeIgniter.php) — dispatch Controller + method (loads [`cms_bootstrap.php`](../../../system/core/cms_bootstrap.php): `load_class` / `get_instance` / `show_404`; app loading stays in `Loader`). Before dispatch it calls **`cms_clean_request()`**: `$_GET` / `$_POST` values lose control characters (tab and newlines kept) and `\r\n` / `\r` become `\n`. Module APIs (step 3) skip this. Loader attaches **`cms_db`** as `$this->db`. There is no `Input` class: panels read `$params`, system code reads `$_POST` / `$_GET` (see [`agents.md`](agents.md) § Panel controllers).
 
 **Config access:** `$GLOBALS['config']` — host files: `config/<host>.json`. Full load: `cms_config_load_full()` / [`cms_config.php`](../../../system/core/cms_config.php).
 

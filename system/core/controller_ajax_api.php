@@ -5,30 +5,8 @@ class Ajax_api extends Controller {
     public function __construct() {
     	
         parent::__construct();
-        $this->params = $this->_ajax_drop_internal_keys($this->input->post());
-        // Set after the strip so a posted _from_ajax cannot survive.
-        $this->params['_from_ajax'] = 1;
+        $this->params = $this->_request_drop_internal_keys($_POST);
    	}
-
-	/**
-	 * Leading-underscore keys are internal (set by PHP after this) or belong to
-	 * another request protocol. Panel ajax must not accept them from the client.
-	 */
-	function _ajax_drop_internal_keys($params){
-
-		if (!is_array($params)){
-			return [];
-		}
-
-		foreach (array_keys($params) as $key){
-			if (is_string($key) && $key !== '' && $key[0] === '_'){
-				unset($params[$key]);
-			}
-		}
-
-		return $params;
-
-	}
 
 	function _ajax_output_keys(){
 
@@ -44,58 +22,24 @@ class Ajax_api extends Controller {
 
 	}
 
-	function _ajax_input_keys(){
-
-		return [
-				'cms_do',
-				'cms_no_html',
-				'cms_no_js',
-				'cms_no_css',
-				'cms_session_id',
-				'cms_page_panel_id',
-				'cms_page_id',
-		];
-
-	}
-
 	/**
-	 * "cms" in the list means the fixed set. Any other name, including one cms_* key, is literal.
+	 * The posted cms_page_panel_id is untrusted. Its saved block is merged into the request
+	 * only when it is a block of the requested panel and the caller may see it (shown, or a
+	 * CMS user / translator). Anything else returns null: the id stays a plain request value
+	 * the panel may use itself (e.g. the admin editor's target block), but its stored fields
+	 * never reach this panel's params or output.
 	 */
-	function _ajax_allow_map($list, $fixed){
+	function _ajax_vet_block($instance, $panel_name, $privileged){
 
-		$allow = [];
-
-		if (!is_array($list)){
-			return $allow;
+		if (!is_array($instance) || ($instance['panel_name'] ?? null) !== $panel_name){
+			return null;
 		}
 
-		foreach ($list as $name){
-			if (!is_string($name) || $name === ''){
-				continue;
-			}
-			if ($name === 'cms'){
-				foreach ($fixed as $key){
-					$allow[$key] = 1;
-				}
-				continue;
-			}
-			$allow[$name] = 1;
+		if (!$privileged && empty($instance['show'])){
+			return null;
 		}
 
-		return $allow;
-
-	}
-
-	function _ajax_panel_config($panel_name){
-
-		if (!is_string($panel_name) || !str_contains($panel_name, '/')){
-			return [];
-		}
-
-		$this->load->model('cms/cms_panel_model');
-		$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
-
-		return is_array($config) ? $config : [];
+		return $instance;
 
 	}
 
@@ -110,36 +54,6 @@ class Ajax_api extends Controller {
 		foreach ($pairs as $old => $new){
 			if (array_key_exists($old, $params) && !array_key_exists($new, $params)){
 				$params[$new] = $params[$old];
-			}
-		}
-
-		return $params;
-
-	}
-
-	function _ajax_filter_input($panel_name, $params){
-
-		$config = $this->_ajax_panel_config($panel_name);
-		$list = $config['ajax']['input'] ?? null;
-
-		if (!is_array($list)){
-			return $params;
-		}
-
-		$allow = $this->_ajax_allow_map($list, $this->_ajax_input_keys());
-		$allow['_from_ajax'] = 1;
-
-		// An older updater posts do, no_html, and session_id. Keep them on this panel
-		// even when ajax.input lists only the cms set.
-		if ($panel_name === 'cms/cms_update'){
-			foreach (['do', 'no_html', 'session_id', 'area', 'module', 'protocol', 'filenames', 'filename'] as $key){
-				$allow[$key] = 1;
-			}
-		}
-
-		foreach (array_keys($params) as $key){
-			if (!isset($allow[$key])){
-				unset($params[$key]);
 			}
 		}
 
@@ -184,16 +98,18 @@ class Ajax_api extends Controller {
 	function _ajax_filter_output($panel_name, $data){
 
 		$data = $this->_ajax_rename_output($data);
-		$config = $this->_ajax_panel_config($panel_name);
+		$config = $this->_request_panel_config($panel_name);
 		$list = $config['ajax']['output'] ?? null;
 
 		if (!is_array($list)){
+			// No ajax.output: cms_* only. A panel lists every other key it returns in its
+			// definition (ajax.output) — explicit, so nothing is echoed by accident.
 			$allow = [];
 			foreach ($this->_ajax_output_keys() as $key){
 				$allow[$key] = 1;
 			}
 		} else {
-			$allow = $this->_ajax_allow_map($list, $this->_ajax_output_keys());
+			$allow = $this->_request_allow_map($list, $this->_ajax_output_keys());
 		}
 
 		$filtered = [];
@@ -274,6 +190,9 @@ class Ajax_api extends Controller {
 			$this->params['no_html'] = $this->params['cms_no_html'];
 		}
 
+		// Saved block to merge into this request (vetted below), or null
+		$block = null;
+
 		if (!empty($this->params['cms_page_panel_id'])){
 
 			$this->load->model('cms/cms_panel_model');
@@ -298,20 +217,20 @@ class Ajax_api extends Controller {
 					print(json_encode(array('result' => array(), 'error' => array('message' => 'Panel not found', ))));
 					die();
 				}
-				// Show comes from the saved block. ajax_panel merges that block last.
 				if (!$is_action && !$is_cms_admin && empty($instance['show']) && !$can_translate){
 					print(json_encode(array('result' => array(), 'error' => array('message' => 'Can\'t show', ))));
 					die();
 				}
+				$block = $this->_ajax_vet_block($instance, (string)$this->params['panel_id'], $is_cms_admin || $can_translate);
 			} else {
 				print(json_encode(array('result' => array(), 'error' => array('message' => 'List ajax blocked', ))));
 				die();
 			}
 
 		}
-   		
+
 		$panel_name = (string)$this->params['panel_id'];
-		$this->params = $this->_ajax_filter_input($panel_name, $this->params);
+		$this->params = $this->_request_filter_input($panel_name, $this->params);
 		if (!empty($this->params['cms_do'])){
 			$this->params['do'] = $this->params['cms_do'];
 		}
@@ -319,6 +238,10 @@ class Ajax_api extends Controller {
 			$this->params['no_html'] = $this->params['cms_no_html'];
 		}
 		unset($this->params['panel_id']);
+		// Internal key, set after the _* strip and the input filter: the client cannot supply it
+		if ($block !== null){
+			$this->params['_cms_block'] = $block;
+		}
 
 		$data = $this->ajax_panel($panel_name, $this->params);
 
@@ -333,19 +256,27 @@ class Ajax_api extends Controller {
 		if (count($cms_page_panels)){
 	   		
    			$cms_page_panel = reset($cms_page_panels);
-   			
-   			$posted = $this->_ajax_drop_internal_keys($this->input->post());
-   			$posted['_from_ajax'] = 1;
-   			$posted = $this->_ajax_normalise_names($posted);
    			$panel_name = (string)$cms_page_panel['panel_name'];
-   			$posted = $this->_ajax_filter_input($panel_name, $posted);
+
+   			// Same rule as get_panel: hidden blocks only for CMS users
+   			$block = $this->_ajax_vet_block($cms_page_panel, $panel_name, !empty($_SESSION['cms_user']['cms_user_id']));
+   			if ($block === null){
+   				print(json_encode(array('result' => [], 'error' => ['message' => 'Can\'t show', ])));
+   				die();
+   			}
+
+   			$posted = $this->_request_drop_internal_keys($_POST);
+   			$posted = $this->_ajax_normalise_names($posted);
+   			$posted = $this->_request_filter_input($panel_name, $posted);
    			if (!empty($posted['cms_do'])){
    				$posted['do'] = $posted['cms_do'];
    			}
    			if (!empty($posted['cms_no_html'])){
    				$posted['no_html'] = $posted['cms_no_html'];
    			}
-   			$data = $this->_ajax_filter_output($panel_name, $this->ajax_panel($panel_name, array_merge($posted, $cms_page_panel)));
+   			// Block merged last in ajax_panel (after settings), as on get_panel
+   			$posted['_cms_block'] = $block;
+   			$data = $this->_ajax_filter_output($panel_name, $this->ajax_panel($panel_name, $posted));
    			
    			print(json_encode(['result' => ['cms_html' => $data['cms_html'] ?? '']], JSON_PRETTY_PRINT));
    			die();

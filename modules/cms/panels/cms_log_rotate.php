@@ -37,7 +37,7 @@ class cms_log_rotate extends \Controller {
 		@file_put_contents($this->_last_email_marker_path(), (string)(int)$time);
 	}
 
-	function panel_action(){
+	function panel_action($params){
 		
 		$filename = (string)($GLOBALS['config']['paths']['error_log'] ?? '');
 		if ($filename === '' && function_exists('cms_path')){

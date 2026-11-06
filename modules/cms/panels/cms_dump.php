@@ -740,11 +740,11 @@ class cms_dump extends \Controller {
 
 	}
 
-	function _post_array($key){
-		if (!isset($_POST[$key])){
+	function _post_array($params, $key){
+		if (!isset($params[$key])){
 			return [];
 		}
-		$val = $_POST[$key];
+		$val = $params[$key];
 		if (!is_array($val)){
 			return $val === '' || $val === null ? [] : [(string)$val];
 		}
@@ -760,7 +760,7 @@ class cms_dump extends \Controller {
 
 	function panel_action($params){
 
-		$do = $params['cms_do'] ?? ($_POST['do'] ?? '');
+		$do = $params['cms_do'] ?? ($params['do'] ?? '');
 
 		if (empty($do)){
 			return $params;
@@ -774,7 +774,7 @@ class cms_dump extends \Controller {
 			$tables_by_module = $this->_get_tables_by_module();
 			$all_tables = $this->_get_all_schema_tables();
 
-			$selected_tables = $this->_post_array('tables');
+			$selected_tables = $this->_post_array($params, 'tables');
 			if ($do === 'generate_backup'){
 				// Whitelist against schema inventory (empty = no tables by design)
 				$allowed = array_fill_keys($all_tables, true);
@@ -786,17 +786,17 @@ class cms_dump extends \Controller {
 				$selected_tables = $all_tables;
 			}
 
-			$selected_resources = $this->_post_array('resources');
+			$selected_resources = $this->_post_array($params, 'resources');
 			if ($do !== 'generate_backup' && empty($selected_resources)){
 				$selected_resources = $this->_default_resource_months();
 			}
 
-			$resize_images = !empty($_POST['resize_images']) || !empty($_POST['compress_images']);
+			$resize_images = !empty($params['resize_images']) || !empty($params['compress_images']);
 			$resize_max_px = self::COMPRESS_MAX_PX;
-			if (isset($_POST['resize_max_px']) && (int)$_POST['resize_max_px'] > 0){
-				$resize_max_px = (int)$_POST['resize_max_px'];
-			} else if (isset($_POST['compress_max_px']) && (int)$_POST['compress_max_px'] > 0){
-				$resize_max_px = (int)$_POST['compress_max_px'];
+			if (isset($params['resize_max_px']) && (int)$params['resize_max_px'] > 0){
+				$resize_max_px = (int)$params['resize_max_px'];
+			} else if (isset($params['compress_max_px']) && (int)$params['compress_max_px'] > 0){
+				$resize_max_px = (int)$params['compress_max_px'];
 			}
 			// Keep size sane for path safety
 			if ($resize_max_px < 1){
@@ -922,7 +922,7 @@ class cms_dump extends \Controller {
 		// Restore from server-side backup zip
 		if ($do === 'restore_backup'){
 
-			$basename = $this->_safe_backup_basename($_POST['basename'] ?? $params['basename'] ?? '');
+			$basename = $this->_safe_backup_basename($params['basename'] ?? '');
 			if ($basename === ''){
 				_html_error('Invalid backup file', 400);
 			}
@@ -939,7 +939,7 @@ class cms_dump extends \Controller {
 		// Download backup zip
 		if ($do === 'download_backup'){
 
-			$basename = $this->_safe_backup_basename($_POST['basename'] ?? $params['basename'] ?? $_GET['basename'] ?? '');
+			$basename = $this->_safe_backup_basename($params['basename'] ?? '');
 			if ($basename === ''){
 				_html_error('Invalid backup file', 400);
 			}
@@ -960,7 +960,7 @@ class cms_dump extends \Controller {
 		// Delete backup zip + sidecar
 		if ($do === 'delete_backup'){
 
-			$basename = $this->_safe_backup_basename($_POST['basename'] ?? $params['basename'] ?? '');
+			$basename = $this->_safe_backup_basename($params['basename'] ?? '');
 			if ($basename === ''){
 				_html_error('Invalid backup file', 400);
 			}

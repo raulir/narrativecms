@@ -13,7 +13,7 @@ class checkout_start extends \Controller {
 
 	function panel_action($params){
 
-		$do = $params['cms_do'] ?? $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do !== 'subscription_checkout' && $do !== 'checkout' && $do !== 'start'){
 			return $params;
@@ -54,8 +54,8 @@ class checkout_start extends \Controller {
 			exit();
 		}
 
-		$product_id = (int)($this->input->post('product_id') ?? ($params['product_id'] ?? 0));
-		$currency_id = (int)($this->input->post('currency_id') ?? ($params['currency_id'] ?? 0));
+		$product_id = (int)($params['product_id'] ?? 0);
+		$currency_id = (int)($params['currency_id'] ?? 0);
 
 		if ($product_id < 1){
 			$intent = $this->subscription_model->get_checkout_intent();
@@ -87,7 +87,9 @@ class checkout_start extends \Controller {
 
 		$urls = $this->subscription_model->get_checkout_return_urls();
 
+		// Provider panels read cms_do; do kept for providers in modules not yet converted
 		$provider_params = [
+				'cms_do' => 'subscription_checkout',
 				'do' => 'subscription_checkout',
 				'product_id' => $product_id,
 				'currency_id' => $currency_id,

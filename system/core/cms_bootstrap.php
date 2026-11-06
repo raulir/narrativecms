@@ -10,7 +10,41 @@ $_cms_bp = $GLOBALS['config']['base_path'] ?? '';
 require_once $_cms_bp.'system/helpers/string_helper.php';
 
 /**
- * Singleton system class from system/{directory}/{Class}.php (Input, Output, Loader, …).
+ * Clean request input in place once per full request (CodeIgniter.php, before routing to a
+ * controller): strip control characters (keeps tab and newlines) and turn \r\n / \r into \n,
+ * in $_GET and $_POST values at any depth. This is not validation: panels still sanitise
+ * every value they use (review.md § Untrusted input).
+ */
+function cms_clean_request(){
+
+	$clean = function($value) use (&$clean){
+		if (is_array($value)){
+			foreach ($value as $key => $item){
+				$value[$key] = $clean($item);
+			}
+			return $value;
+		}
+		if (!is_string($value)){
+			return $value;
+		}
+		$value = remove_invisible_characters($value);
+		if (strpos($value, "\r") !== false){
+			$value = str_replace(["\r\n", "\r"], "\n", $value);
+		}
+		return $value;
+	};
+
+	$_GET = $clean(is_array($_GET) ? $_GET : []);
+	$_POST = $clean(is_array($_POST) ? $_POST : []);
+
+	if (isset($_SERVER['PHP_SELF'])){
+		$_SERVER['PHP_SELF'] = strip_tags($_SERVER['PHP_SELF']);
+	}
+
+}
+
+/**
+ * Singleton system class from system/{directory}/{Class}.php (Output, Loader, …).
  */
 function &load_class($class, $directory = 'core', $prefix = ''){
 

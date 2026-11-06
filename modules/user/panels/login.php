@@ -11,12 +11,12 @@ class login extends \Controller{
 		$this->load->model('user/user_model');
 		$this->load->model('cms/cms_page_panel_model');
 		
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do == 'login'){
 			 
-			$username = $this->input->post('username');
-			$password = $this->input->post('password');
+			$username = $params['username'] ?? false;
+			$password = $params['password'] ?? false;
 			
 			if (empty($username) || empty($password)){
 				$return['error'] = 'missing_credential';
@@ -64,7 +64,7 @@ class login extends \Controller{
 		
 		if ($do == 'resend_verification'){
 			
-			$username = $this->input->post('username');
+			$username = $params['username'] ?? false;
 			$config = $this->cms_page_panel_model->get_cms_page_panel_settings('user/user_settings');
 			
 			if (empty($config['show_username'])){

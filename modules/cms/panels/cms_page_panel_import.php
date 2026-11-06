@@ -19,7 +19,15 @@ class cms_page_panel_import extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? '';
+		// Request values, taken before the reply keys below are reset
+		$request = [
+			'list_panel' => (string)($params['list_panel'] ?? ''),
+			'token' => (string)($params['token'] ?? ''),
+			'zip_id' => $params['zip_id'] ?? '',
+			'mode' => (string)($params['mode'] ?? ''),
+			'fk_ids' => $params['fk_ids'] ?? [],
+		];
 		$params['view'] = 'upload';
 		$params['message'] = '';
 		$params['token'] = '';
@@ -31,15 +39,16 @@ class cms_page_panel_import extends \Controller {
 		}
 
 		if ($do === 'cms_page_panel_import_read'){
+			$params['list_label'] = trim($request['list_panel']);
 			return $this->cms_page_panel_import_model->read_upload($params);
 		}
 
 		if ($do === 'cms_page_panel_import_apply'){
-			return $this->cms_page_panel_import_model->apply();
+			return $this->cms_page_panel_import_model->apply($request);
 		}
 
 		if ($do === 'cms_page_panel_import_discard'){
-			return $this->cms_page_panel_import_model->discard();
+			return $this->cms_page_panel_import_model->discard($request);
 		}
 
 		return $params;

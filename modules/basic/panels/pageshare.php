@@ -8,14 +8,14 @@ class pageshare extends \Controller{
 	
 	function panel_action($params){
 		
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
         
         if ($do == 'shorten'){
         	
-        	$url_key = $this->input->post('url_key');
-        	$url = $this->input->post('url');
-        	$long_url = $this->input->post('long_url');
-        	$title = $this->input->post('title');
+        	$url_key = $params['url_key'] ?? false;
+        	$url = $params['url'] ?? false;
+        	$long_url = $params['long_url'] ?? false;
+        	$title = $params['title'] ?? false;
         	 
         	$filename = cms_path('tmp').'bitly_'.$url_key.'.json';
 

@@ -1,4 +1,5 @@
 {
+	"ajax": {"output": ["cms","confirm","email","login_success","needs_agreement","session_id"]},
 	"label": "Google app auth",
 	"description": "AJAX endpoint for native app WebView Google login",
 	"image": "",

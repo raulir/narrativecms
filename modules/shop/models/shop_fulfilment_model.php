@@ -57,7 +57,9 @@ class shop_fulfilment_model extends \Model {
 
 		foreach ($by_provider as $panel => $rows){
 
+			// Provider panels read cms_do; do kept for providers in modules not yet converted
 			$result = $this->_call_provider($panel, [
+					'cms_do' => 'fulfil',
 					'do' => 'fulfil',
 					'order' => $order,
 					'lines' => $rows,

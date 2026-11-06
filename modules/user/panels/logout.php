@@ -8,7 +8,7 @@ class logout extends \Controller{
 	
 	function panel_action($params){
 		
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do == 'logout' && isset($_SESSION['user'])){
 			unset($_SESSION['user']);

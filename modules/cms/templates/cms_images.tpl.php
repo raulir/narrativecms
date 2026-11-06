@@ -12,12 +12,12 @@
 			<a class="cms_images_upload cms_tool_button cms_right">Upload</a>
 			
 			<form id="new_image_form" class="cms_images_new_image_form" method="post" enctype="multipart/form-data" style="display: inline; ">
-				<input type="hidden" name="do" value="cms_images_upload">
+				<input type="hidden" name="cms_do" value="cms_images_upload">
 				<input type="file" name="new_image[]" class="cms_images_new_image" multiple>
 			</form>
 			
 			<form id="replace_image_form" class="cms_images_replace_image_form" method="post" enctype="multipart/form-data" style="display: inline; ">
-				<input type="hidden" name="do" value="cms_images_replace">
+				<input type="hidden" name="cms_do" value="cms_images_replace">
 				<input type="file" name="replace_image" class="cms_images_replace_image" style="display: none; ">
 			</form>
 			

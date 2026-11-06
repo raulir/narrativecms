@@ -8,7 +8,7 @@
 		<?php /* —— Generate backup —— */ ?>
 		<form class="cms_dump_generate_form" method="post" action="">
 
-			<input type="hidden" name="do" value="generate_backup">
+			<input type="hidden" name="cms_do" value="generate_backup">
 
 			<div class="cms_dump_section cms_dump_section_generate">
 
@@ -119,7 +119,7 @@
 				<div class="cms_dump_section_title">Backups and restore</div>
 				<div class="cms_dump_section_actions cms_dump_restore_actions">
 					<form class="cms_dump_upload_form" method="post" enctype="multipart/form-data">
-						<input type="hidden" name="do" value="upload_backup">
+						<input type="hidden" name="cms_do" value="upload_backup">
 						<span class="cms_dump_upload_label">Upload</span>
 						<input type="file" name="file" class="cms_dump_upload_file" accept=".zip,application/zip">
 						<div class="cms_tool_button cms_dump_upload_btn">Upload</div>
@@ -163,17 +163,17 @@
 								</div>
 								<div class="cms_dump_backup_actions">
 									<form method="post" class="cms_dump_row_form cms_dump_restore_form">
-										<input type="hidden" name="do" value="restore_backup">
+										<input type="hidden" name="cms_do" value="restore_backup">
 										<input type="hidden" name="basename" value="<?= htmlspecialchars($backup['basename'] ?? '') ?>">
 										<div class="cms_small_button cms_dump_restore_btn">Restore</div>
 									</form>
 									<form method="post" class="cms_dump_row_form">
-										<input type="hidden" name="do" value="download_backup">
+										<input type="hidden" name="cms_do" value="download_backup">
 										<input type="hidden" name="basename" value="<?= htmlspecialchars($backup['basename'] ?? '') ?>">
 										<div class="cms_small_button cms_dump_download_btn">Download</div>
 									</form>
 									<form method="post" class="cms_dump_row_form cms_dump_delete_form">
-										<input type="hidden" name="do" value="delete_backup">
+										<input type="hidden" name="cms_do" value="delete_backup">
 										<input type="hidden" name="basename" value="<?= htmlspecialchars($backup['basename'] ?? '') ?>">
 										<div class="cms_small_button cms_dump_delete_btn">Delete</div>
 									</form>

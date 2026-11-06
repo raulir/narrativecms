@@ -77,12 +77,12 @@ class reminder extends \Controller {
 		// Save password window (seconds). Display of the form uses the same window so UI matches.
 		$ttl_seconds = 1800;
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do == 'remind'){
 
-			$username = trim((string)$this->input->post('username'));
-			$url = $this->input->post('url');
+			$username = trim((string)($params['username'] ?? ''));
+			$url = $params['url'] ?? false;
 
 			if ($username === ''){
 				$return['error'] = 'bad_username';
@@ -140,10 +140,10 @@ class reminder extends \Controller {
 
 		if ($do == 'save'){
 
-			$username = trim((string)$this->input->post('username'));
-			$token = trim((string)$this->input->post('token'));
-			$password = $this->input->post('password');
-			$password2 = $this->input->post('password2');
+			$username = trim((string)($params['username'] ?? ''));
+			$token = trim((string)($params['token'] ?? ''));
+			$password = $params['password'] ?? false;
+			$password2 = $params['password2'] ?? false;
 
 			$validation_error = $this->user_model->validate_new_password($password, $password2);
 			if ($validation_error !== ''){
@@ -226,7 +226,7 @@ class reminder extends \Controller {
 		}
 
 		// GET token in url — show new password form
-		$token = $this->input->get('token');
+		$token = $params['token'] ?? false;
 
 		$params['success'] = 0;
 		$params['autofill'] = '';

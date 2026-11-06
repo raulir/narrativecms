@@ -63,8 +63,8 @@ class cms_edit_slug extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
-		$cms_page_panel_id = (int)$this->input->post('cms_page_panel_id');
+		$do = $params['cms_do'] ?? false;
+		$cms_page_panel_id = (int)($params['cms_page_panel_id'] ?? 0);
 		$context = $this->_resolve_list_item_slug_context($cms_page_panel_id);
 
 		if (!empty($context['error'])){
@@ -76,7 +76,7 @@ class cms_edit_slug extends \Controller {
 			$this->load->model('cms/cms_slug_model');
 
 			$check = $this->cms_slug_model->check_slug_for_edit(
-				$this->input->post('new_slug'),
+				($params['new_slug'] ?? false),
 				$context['current_slug'],
 				$context['target']
 			);
@@ -95,7 +95,7 @@ class cms_edit_slug extends \Controller {
 
 			$result = $this->cms_slug_model->rename_target_slug(
 				$context['target'],
-				$this->input->post('new_slug')
+				($params['new_slug'] ?? false)
 			);
 
 			if (empty($result['ok'])){

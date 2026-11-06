@@ -11,12 +11,12 @@ class pricing extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do === 'browser_discard'){
 
 			$this->load->model('subscription/subscription_model');
-			$this->subscription_model->browser_enter_discard((string)$this->input->post('token'));
+			$this->subscription_model->browser_enter_discard((string)($params['token'] ?? ''));
 			print(json_encode(['ok' => 1]));
 			exit();
 
@@ -26,7 +26,7 @@ class pricing extends \Controller {
 
 			$this->load->model('subscription/subscription_model');
 
-			$url = $this->subscription_model->browser_enter_create($this->input->post('page_path'));
+			$url = $this->subscription_model->browser_enter_create(($params['page_path'] ?? false));
 
 			print(json_encode([
 					'ok' => $url !== '' ? 1 : 0,
@@ -40,9 +40,9 @@ class pricing extends \Controller {
 
 			$this->load->model('subscription/subscription_model');
 
-			$product_id = (int)$this->input->post('product_id');
-			$currency_id = (int)$this->input->post('currency_id');
-			$resume_url = trim((string)$this->input->post('resume_url'));
+			$product_id = (int)($params['product_id'] ?? 0);
+			$currency_id = (int)($params['currency_id'] ?? 0);
+			$resume_url = trim((string)($params['resume_url'] ?? ''));
 
 			$ok = $this->subscription_model->set_checkout_intent($product_id, $currency_id, $resume_url);
 			$login_url = $this->subscription_model->get_login_url();

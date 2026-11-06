@@ -49,7 +49,8 @@ function form_basic_submit($this){
 		        fo[v.name] = v.value;
 		    });
 		
-		fo['_page'] = document.title
+		// _* keys are dropped by the ajax entry; do_send maps this to _page
+		fo['cms_page_title'] = document.title
 		
 		get_ajax('form/do_send', $.extend({ 'success': function(data){
 			

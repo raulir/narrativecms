@@ -22,17 +22,17 @@ class cms_images extends \Controller {
 
 		$this->load->model('cms/cms_image_model');
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 		$return = [];
 
 		if ($do == 'cms_images_delete_by_filename'){
 
-			$filename = $this->input->post('filename');
+			$filename = $params['filename'] ?? false;
 			$this->cms_image_model->delete_cms_image_by_filename($filename);
 
 		} else if ($do == 'cms_images_check_by_filename'){
 
-			$filename = $this->input->post('filename');
+			$filename = $params['filename'] ?? false;
 			$image = $this->cms_image_model->get_cms_image_by_filename($filename);
 
 			$return['filename'] = !empty($image['filename']) ? $image['filename'] : '';
@@ -56,8 +56,8 @@ class cms_images extends \Controller {
 
 		} else if ($do == 'cms_images_save'){
 
-			$filename = $this->input->post('filename');
-			$category = $this->input->post('category');
+			$filename = $params['filename'] ?? false;
+			$category = $params['category'] ?? false;
 
 			$existing = $this->cms_image_model->get_cms_image_by_filename($filename);
 			$existing_meta = [];
@@ -66,9 +66,9 @@ class cms_images extends \Controller {
 			}
 
 			$meta = array_merge($existing_meta, [
-					'author' => $this->input->post('author'),
-					'copyright' => $this->input->post('copyright'),
-					'description' => $this->input->post('description'),
+					'author' => ($params['author'] ?? false),
+					'copyright' => ($params['copyright'] ?? false),
+					'description' => ($params['description'] ?? false),
 			]);
 
 			if (empty($existing_meta['parent_cms_image_id'])){
@@ -80,27 +80,27 @@ class cms_images extends \Controller {
 					'meta' => json_encode($meta),
 			]);
 
-			$source_cms_image_id = (int)$this->input->post('source_cms_image_id');
+			$source_cms_image_id = (int)($params['source_cms_image_id'] ?? 0);
 			if ($source_cms_image_id){
 				$child_filename = $this->cms_image_model->save_cms_image_child($source_cms_image_id, [
-					'x1' => $this->input->post('crop_x1'),
-					'y1' => $this->input->post('crop_y1'),
-					'x2' => $this->input->post('crop_x2'),
-					'y2' => $this->input->post('crop_y2'),
+					'x1' => ($params['crop_x1'] ?? false),
+					'y1' => ($params['crop_y1'] ?? false),
+					'x2' => ($params['crop_x2'] ?? false),
+					'y2' => ($params['crop_y2'] ?? false),
 				], $filename, [
-					'author' => $this->input->post('author'),
-					'copyright' => $this->input->post('copyright'),
-					'description' => $this->input->post('description'),
+					'author' => ($params['author'] ?? false),
+					'copyright' => ($params['copyright'] ?? false),
+					'description' => ($params['description'] ?? false),
 				], [
-					'zoom' => $this->input->post('zoom'),
-					'pan_x' => $this->input->post('pan_x'),
-					'pan_y' => $this->input->post('pan_y'),
-					'brightness' => $this->input->post('brightness'),
-					'contrast' => $this->input->post('contrast'),
-					'overlay_colour' => $this->input->post('overlay_colour'),
-					'overlay_opacity' => $this->input->post('overlay_opacity'),
-					'rotation' => $this->input->post('rotation'),
-					'rotation_fixed' => $this->input->post('rotation_fixed'),
+					'zoom' => ($params['zoom'] ?? false),
+					'pan_x' => ($params['pan_x'] ?? false),
+					'pan_y' => ($params['pan_y'] ?? false),
+					'brightness' => ($params['brightness'] ?? false),
+					'contrast' => ($params['contrast'] ?? false),
+					'overlay_colour' => ($params['overlay_colour'] ?? false),
+					'overlay_opacity' => ($params['overlay_opacity'] ?? false),
+					'rotation' => ($params['rotation'] ?? false),
+					'rotation_fixed' => ($params['rotation_fixed'] ?? false),
 				]);
 				if (!empty($child_filename)){
 					$return['child_filename'] = $child_filename;

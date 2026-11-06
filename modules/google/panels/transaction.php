@@ -11,7 +11,7 @@ class transaction extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do') ?? ($params['cms_do'] ?? '');
+		$do = $params['cms_do'] ?? '';
 		if ($do !== 'save'){
 			return $params;
 		}
@@ -27,10 +27,10 @@ class transaction extends \Controller {
 		$this->load->model('google/google_model');
 		$ok = $this->google_model->save_transaction(
 				$user_id,
-				(string)$this->input->post('token'),
-				(string)$this->input->post('google_package_id'),
-				(int)$this->input->post('product_id'),
-				(int)$this->input->post('currency')
+				(string)($params['token'] ?? ''),
+				(string)($params['google_package_id'] ?? ''),
+				(int)($params['product_id'] ?? 0),
+				(int)($params['currency'] ?? 0)
 		);
 
 		print(json_encode(['ok' => $ok ? 1 : 0]));

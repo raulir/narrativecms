@@ -22,7 +22,7 @@ class loginlink extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do == 'create'){
 
@@ -30,10 +30,10 @@ class loginlink extends \Controller {
 			$this->load->model('cms/cms_page_panel_model');
 			$filename = cms_path('tmp').'user_reminders.json';
 
-			$user_id = $this->input->post('user_id');
+			$user_id = $params['user_id'] ?? false;
 			$user = $this->user_model->get_user($user_id);
 
-			$url = $this->input->post('url');
+			$url = $params['url'] ?? false;
 
 			$token = sha1(mt_rand(0, mt_getrandmax()).$user_id.time());
 

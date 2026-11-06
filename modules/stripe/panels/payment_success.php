@@ -29,7 +29,7 @@ class payment_success extends \Controller {
 		
 		// get 
 		
-		$payment_intent_id = $_GET['payment_intent'];
+		$payment_intent_id = (string)($params['payment_intent'] ?? '');
 		
 		$payment_intent = \Stripe\PaymentIntent::retrieve($payment_intent_id);
 		

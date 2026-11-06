@@ -8,7 +8,7 @@ class password_change extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do == 'save'){
 
@@ -20,8 +20,8 @@ class password_change extends \Controller {
 				return $return;
 			}
 
-			$password = $this->input->post('password');
-			$password2 = $this->input->post('password2');
+			$password = $params['password'] ?? false;
+			$password2 = $params['password2'] ?? false;
 
 			$validation_error = $this->user_model->validate_new_password($password, $password2);
 			if ($validation_error !== ''){

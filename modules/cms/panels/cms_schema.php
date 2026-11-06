@@ -25,38 +25,20 @@ class cms_schema extends \Controller {
 	 */
 	function _schema_filter_from_params($params){
 
-		// Prefer dedicated keys; fall back to POST
-		$filter = $params['schema_module'] ?? $params['filter_module'] ?? null;
-		if ($filter === null || $filter === '' || $filter === false){
-			$filter = $this->input->post('schema_module');
-		}
-		if ($filter === null || $filter === '' || $filter === false){
-			$filter = $this->input->post('filter_module');
-		}
-		// Legacy: only trust POST "module" (request), not $params['module'] (overwritten by panel())
-		if (($filter === null || $filter === '' || $filter === false) && $this->input->post('module') !== false && $this->input->post('module') !== null){
-			$post_module = $this->input->post('module');
-			// Ignore if it is only the panel package name with no intent — still allow cms/music/etc from client
-			if ($post_module !== '' && $post_module !== false){
-				$filter = $post_module;
-			}
+		// Only the dedicated keys: $params['module'] is the panel package (set by panel()),
+		// never a filter. cms_schema.js posts both schema_module and filter_module.
+		$filter = $params['schema_module'] ?? '';
+		if (!is_string($filter) || $filter === ''){
+			$filter = $params['filter_module'] ?? '';
 		}
 
-		if ($filter === null || $filter === false){
-			return '';
-		}
-
-		return trim((string)$filter);
+		return is_string($filter) ? trim($filter) : '';
 
 	}
 
 	function _wants_fragment($params){
 
-		if (!empty($params['fragment'])){
-			return true;
-		}
-		$post = $this->input->post('fragment');
-		return !empty($post);
+		return !empty($params['fragment']);
 
 	}
 	
@@ -95,7 +77,7 @@ class cms_schema extends \Controller {
 			return [];
 		}
 		
-		$key = trim($params['key'] ?? $this->input->post('key') ?? '');
+		$key = trim($params['key'] ?? '');
 		if (!$key) {
 			return [
 				'success' => false,
@@ -178,16 +160,8 @@ class cms_schema extends \Controller {
 		$action_stats = $params['stats'] ?? null;
 		$structure_dump = $params['structure_dump'] ?? null;
 
-		// Re-read after panel() may have set params['module'] = 'cms' (panel package)
 		$filter_module = $this->_schema_filter_from_params($params);
-		if ($filter_module === '' && !empty($params['filter_module'])){
-			$filter_module = trim((string)$params['filter_module']);
-		}
-		if ($filter_module === '' && !empty($params['schema_module'])){
-			$filter_module = trim((string)$params['schema_module']);
-		}
-
-		$fragment = $this->_wants_fragment($params) || !empty($params['fragment']);
+		$fragment = $this->_wants_fragment($params);
 	
 	    $data = $this->cms_schema_model->get_schema_errors_with_status(
 	    		$filter_module !== '' ? $filter_module : null);

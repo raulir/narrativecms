@@ -8,13 +8,13 @@ class cms_user_login extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 		if ($do == 'cms_user_login'){
 
 			$this->_ensure_session_dir_for_login();
 
-			$username = $this->input->post('username');
-			$password = $this->input->post('password');
+			$username = $params['username'] ?? false;
+			$password = $params['password'] ?? false;
 
 			$this->load->model('cms/cms_user_model');
 

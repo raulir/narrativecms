@@ -8,12 +8,12 @@ class form_grid_operations extends \Controller {
 	
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
         if ($do == 'delete_item'){
 
        		$this->load->model('form/form_model');
         	
-        	$item_id = $this->input->post('item_id');
+        	$item_id = $params['item_id'] ?? false;
         	
         	$this->form_model->delete_form_data($item_id);
         	

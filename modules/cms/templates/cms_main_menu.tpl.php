@@ -15,7 +15,7 @@
 
 	<form class="admin_main_menu_form" method="post" style="display: inline; ">
 	
-		<input type="hidden" name="do" value="admin_main_menu_save">
+		<input type="hidden" name="cms_do" value="admin_main_menu_save">
 		<input type="hidden" name="menu_id" value="<?php print(!empty($menu['menu_item_id']) ? $menu['menu_item_id'] : '0') ?>">
 
 		<script type="text/javascript">

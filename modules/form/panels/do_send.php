@@ -37,17 +37,18 @@ class do_send extends \Controller {
 	
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
         if ($do == 'send_form'){
 
 			$this->load->model('cms/cms_page_panel_model');
 			$this->load->model('cms/cms_page_model');
         	$this->load->model('form/form_model');
         	
-        	$cms_page_panel_id = $this->input->post('id');
+        	$cms_page_panel_id = $params['id'] ?? false;
         	
         	// collect data
-        	$data = $this->input->post();
+        	$data = $params;
+        	$data_page_title = is_string($params['cms_page_title'] ?? null) ? $params['cms_page_title'] : '';
         	
         	if (!empty($cms_page_panel_id)){
 				$params = array_merge($params, $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id));
@@ -59,6 +60,18 @@ class do_send extends \Controller {
        		$params = array_merge($default_params, $params);
         	
         	unset($data['do']);
+        	// Not form fields: request keys (cms_do, cms_no_html, cms_session_id, …) and
+        	// system-set _* keys (_access_ok, …; a client cannot post _* through ajax)
+        	foreach (array_keys($data) as $key){
+        		if (is_string($key) && (strpos($key, 'cms_') === 0 || strpos($key, '_') === 0)){
+        			unset($data[$key]);
+        		}
+        	}
+        	// Page title for the notification (form_model reads _page)
+        	$page_title = trim((string)($data_page_title ?? ''));
+        	if ($page_title !== ''){
+        		$data['_page'] = $page_title;
+        	}
             if (isset($data['panel_id'])){
 	        	unset($data['panel_id']);
         	}

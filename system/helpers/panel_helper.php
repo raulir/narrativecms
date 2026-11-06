@@ -606,12 +606,6 @@ if ( !function_exists('_user_login_text')) {
 	
 	function _is_position_ajax(){
 		
-		$ci =& get_instance();
-		
-		if (!empty($ci)){
-			return !empty($ci->input->post('_ajax')) && !empty($ci->input->post('cms_positions'));
-		}
-		
 		return !empty($_POST['_ajax']) && !empty($_POST['cms_positions']);
 		
 	}

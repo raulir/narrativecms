@@ -20,13 +20,13 @@ class cms_cssjs_settings extends \Controller {
 		
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do === 'cms_cssjs_save'){
 
 			$this->load->model('cms/cms_page_panel_model');
 
-			$panels = $this->input->post('panels');
+			$panels = $params['panels'] ?? false;
 
 			$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by([
 					'panel_name' => 'cms/cms_cssjs_settings',

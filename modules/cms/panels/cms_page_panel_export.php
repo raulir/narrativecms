@@ -50,9 +50,9 @@ class cms_page_panel_export extends \Controller {
 
 	}
 
-	function _parse_options(){
+	function _parse_options($params){
 
-		$image_cutoff_px = (int)$this->input->post('image_cutoff_px');
+		$image_cutoff_px = (int)($params['image_cutoff_px'] ?? 0);
 		if ($image_cutoff_px < 200){
 			$image_cutoff_px = 200;
 		}
@@ -60,20 +60,20 @@ class cms_page_panel_export extends \Controller {
 			$image_cutoff_px = 8000;
 		}
 
-		$video_quality = $this->input->post('video_quality');
+		$video_quality = $params['video_quality'] ?? false;
 		if (!in_array($video_quality, ['hd', 'ld'], true)){
 			$video_quality = 'hd';
 		}
 
 		return [
-			'include_database' => $this->input->post('include_database') !== '0',
-			'include_fk' => $this->input->post('include_fk') !== '0',
-			'include_files' => $this->input->post('include_files') !== '0',
-			'optimised_images' => $this->input->post('optimised_images') !== '0',
+			'include_database' => ($params['include_database'] ?? false) !== '0',
+			'include_fk' => ($params['include_fk'] ?? false) !== '0',
+			'include_files' => ($params['include_files'] ?? false) !== '0',
+			'optimised_images' => ($params['optimised_images'] ?? false) !== '0',
 			'image_cutoff_px' => $image_cutoff_px,
-			'optimised_videos' => $this->input->post('optimised_videos') !== '0',
+			'optimised_videos' => ($params['optimised_videos'] ?? false) !== '0',
 			'video_quality' => $video_quality,
-			'include_panel_files' => $this->input->post('include_panel_files') === '1',
+			'include_panel_files' => ($params['include_panel_files'] ?? false) === '1',
 		];
 
 	}
@@ -823,9 +823,9 @@ class cms_page_panel_export extends \Controller {
 
 	}
 
-	function _export_main_ids($single_id){
+	function _export_main_ids($single_id, $params){
 
-		$raw = $this->input->post('export_ids');
+		$raw = $params['export_ids'] ?? false;
 		$ids = [];
 
 		if (is_array($raw)){
@@ -862,9 +862,9 @@ class cms_page_panel_export extends \Controller {
 		$this->load->model('cms/cms_image_model');
 		$this->load->model('cms/cms_file_model');
 
-		$do = $this->input->post('cms_do');
-		$cms_page_panel_id = (int)$this->input->post('export_id');
-		$export_ids = $this->_export_main_ids($cms_page_panel_id);
+		$do = $params['cms_do'] ?? false;
+		$cms_page_panel_id = (int)($params['export_id'] ?? 0);
+		$export_ids = $this->_export_main_ids($cms_page_panel_id, $params);
 		$params['export_heading'] = $this->_export_heading(count($export_ids));
 		$params['export_ids_json'] = json_encode(array_values($export_ids));
 
@@ -882,7 +882,7 @@ class cms_page_panel_export extends \Controller {
 
 		if ($do === 'cms_page_panel_export_preview'){
 
-			$options = $this->_parse_options();
+			$options = $this->_parse_options($params);
 			$this->_init_run_state();
 			$this->folder = '';
 
@@ -914,7 +914,7 @@ class cms_page_panel_export extends \Controller {
 
 		if ($do === 'cms_page_panel_export'){
 
-			$options = $this->_parse_options();
+			$options = $this->_parse_options($params);
 			$this->_init_run_state();
 
 			$start_time = microtime(true);

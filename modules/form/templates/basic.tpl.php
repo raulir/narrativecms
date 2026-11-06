@@ -34,7 +34,7 @@
 		<div class="form_basic_form">
 			<form style="display: inline; " method="post">
 			
-				<input type="hidden" name="do" value="send_form">
+				<input type="hidden" name="cms_do" value="send_form">
 				<input type="hidden" name="id" value="<?= $cms_page_panel_id ?>">
 
 				<?php foreach($elements as $element): ?>

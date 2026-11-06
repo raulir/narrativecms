@@ -26,7 +26,8 @@ class cms_page_panel_import_model extends \Model {
 
 	function read_upload($params){
 
-		$params['list_label'] = trim((string)($params['list_label'] ?? $this->input->post('list_panel')));
+		// The panel sets list_label from the posted list_panel
+		$params['list_label'] = trim((string)($params['list_label'] ?? ''));
 		$params['view'] = 'upload';
 		$params['message'] = '';
 		$params['token'] = '';
@@ -95,12 +96,10 @@ class cms_page_panel_import_model extends \Model {
 	/**
 	 * Delete the zip stored for this upload and drop the session entry.
 	 */
-	function discard($request = null){
+	function discard($request = []){
 
 		if (!is_array($request)){
-			$request = [
-				'token' => $this->input->post('token'),
-			];
+			$request = [];
 		}
 
 		$this->_discard_token((string)($request['token'] ?? ''));
@@ -110,18 +109,13 @@ class cms_page_panel_import_model extends \Model {
 	}
 
 	/**
-	 * Import one main panel. $request may supply token, zip_id, mode, and fk_ids
-	 * (array or JSON). Otherwise those values are read from the request.
+	 * Import one main panel. $request supplies token, zip_id, mode, and fk_ids
+	 * (array or JSON); the panel passes them from its params.
 	 */
-	function apply($request = null){
+	function apply($request = []){
 
 		if (!is_array($request)){
-			$request = [
-				'token' => $this->input->post('token'),
-				'zip_id' => $this->input->post('zip_id'),
-				'mode' => $this->input->post('mode'),
-				'fk_ids' => $this->input->post('fk_ids'),
-			];
+			$request = [];
 		}
 
 		$token = (string)($request['token'] ?? '');

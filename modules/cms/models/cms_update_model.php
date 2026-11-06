@@ -34,7 +34,7 @@ class cms_update_model extends \Model {
 	/**
 	 * Whether a package-relative path may be written for this area.
 	 * Master file lists and posted filenames are untrusted: relative, no traversal,
-	 * and inside the package (modules/{area}/, or core folders + index.php / LICENSE).
+	 * and inside the package (modules/{area}/, or core folders + the core root files).
 	 */
 	function _update_path_allowed($area, $filename){
 
@@ -58,7 +58,7 @@ class cms_update_model extends \Model {
 			return false;
 		}
 
-		if ($area === '' && ($filename === 'index.php' || $filename === 'LICENSE')){
+		if ($area === '' && (in_array($filename, $this->_update_core_root_files(), true) || in_array($filename, $this->_update_core_keep_files(), true))){
 			return true;
 		}
 
@@ -125,6 +125,45 @@ class cms_update_model extends \Model {
 
 	}
 
+	function _update_core_root_files(){
+
+		return [
+				'index.php',
+				'LICENSE',
+				'AGENTS.md',
+				'README.md',
+		];
+
+	}
+
+	function _update_core_keep_files(){
+
+		return [
+				'cache/.gitkeep',
+				'tmp/.gitkeep',
+				'tmp/sessions/.gitkeep',
+				'log/.gitkeep',
+				'img/.gitkeep',
+		];
+
+	}
+
+	function _update_ensure_keep_file($base, $rel){
+
+		$path = $base.$rel;
+		$dir = dirname($path);
+		$mode = ($rel === 'tmp/sessions/.gitkeep') ? 0700 : 0755;
+		if (!is_dir($dir) && !@mkdir($dir, $mode, true) && !is_dir($dir)){
+			return false;
+		}
+		if (!is_file($path) && @file_put_contents($path, '') === false){
+			return false;
+		}
+
+		return $path;
+
+	}
+
 	function _update_extensions(){
 
 		return [
@@ -134,6 +173,7 @@ class cms_update_model extends \Model {
 				'dist',
 				'eot',
 				'gif',
+				'gitkeep',
 				'htaccess',
 				'htc',
 				'html',
@@ -207,24 +247,30 @@ class cms_update_model extends \Model {
 
 		if (empty($area)){
 
-			$index = $base.'index.php';
-			if (is_file($index)){
-				$cms_md5 = md5_file($index);
+			foreach ($this->_update_core_root_files() as $root_name){
+				$root_file = $base.$root_name;
+				if (!is_file($root_file)){
+					continue;
+				}
+				$cms_md5 = md5_file($root_file);
 				$hashes[] = [
-						'filename' => 'index.php',
+						'filename' => $root_name,
 						'hash' => $cms_md5,
-						'size' => filesize($index),
+						'size' => filesize($root_file),
 				];
 				$version_hashes[] = $cms_md5;
 			}
 
-			$license = $base.'LICENSE';
-			if (is_file($license)){
-				$cms_md5 = md5_file($license);
+			foreach ($this->_update_core_keep_files() as $keep_name){
+				$keep_file = $this->_update_ensure_keep_file($base, $keep_name);
+				if ($keep_file === false){
+					continue;
+				}
+				$cms_md5 = md5_file($keep_file);
 				$hashes[] = [
-						'filename' => 'LICENSE',
+						'filename' => $keep_name,
 						'hash' => $cms_md5,
-						'size' => filesize($license),
+						'size' => filesize($keep_file),
 				];
 				$version_hashes[] = $cms_md5;
 			}

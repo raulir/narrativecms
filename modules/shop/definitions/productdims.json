@@ -1,4 +1,5 @@
 {
+	"ajax": {"output": ["cms","product_id","name","value","variations"]},
 	"label": "Product dims widget",
 	"settings": [
 		{

@@ -8,7 +8,7 @@ class cms_user extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do == 'admin_logout'){
 			cms_session_clear_cms_admin();

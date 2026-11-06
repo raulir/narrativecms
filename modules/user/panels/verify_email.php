@@ -8,7 +8,7 @@ class verify_email extends \Controller{
 	
 	function panel_action($params){
 		
-		$token = $this->input->get('token');
+		$token = $params['token'] ?? false;
 		
 		if (empty($token)){
 			$params['error'] = 'missing_token';

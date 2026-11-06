@@ -8,7 +8,7 @@ class auth_google extends \Controller {
 	
 	function panel_action($params){
 		
-		$id_token = $this->input->post('credential');
+		$id_token = $params['credential'] ?? false;
 		
 		$this->load->model('user/user_google_model');
 		

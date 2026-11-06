@@ -1,4 +1,4 @@
 {
 	"item": [],
-	"ajax": {"output": ["cms","filename","original_height","original_width"]}
+	"ajax": {"output": ["cms","filename","child_filename","original_height","original_width"]}
 }

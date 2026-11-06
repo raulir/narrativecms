@@ -20,17 +20,17 @@ class cms_user_operations extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do == 'cms_user_save'){
 			 
-			$cms_user_id = $this->input->post('cms_user_id');
-			$rights = $this->input->post('rights');
-			$username = $this->input->post('username');
-			$password = $this->input->post('password');
-			$name = $this->input->post('name');
-			$email = $this->input->post('email');
-			$sort = $this->input->post('sort');
+			$cms_user_id = $params['cms_user_id'] ?? false;
+			$rights = $params['rights'] ?? false;
+			$username = $params['username'] ?? false;
+			$password = $params['password'] ?? false;
+			$name = $params['name'] ?? false;
+			$email = $params['email'] ?? false;
+			$sort = $params['sort'] ?? false;
 
 			$this->load->model('cms/cms_user_model');
 			 
@@ -70,7 +70,7 @@ class cms_user_operations extends \Controller {
 			 
 		} elseif ($do == 'cms_user_delete'){
 			 
-			$cms_user_id = $this->input->post('cms_user_id');
+			$cms_user_id = $params['cms_user_id'] ?? false;
 
 			$this->load->model('cms/cms_user_model');
 			 

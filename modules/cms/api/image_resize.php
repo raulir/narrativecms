@@ -10,11 +10,14 @@ require_once BASEPATH.'core/cms_config.php';
 // optimise images in non-session way
 // Do not use FILTER_SANITIZE_STRING (deprecated / can corrupt paths on PHP 8+)
 
-	if (!is_array($_POST) || empty($_POST['do'])){
+	if (!is_array($_POST) || (empty($_POST['cms_do']) && empty($_POST['do']))){
 		$_POST = array_merge(is_array($_POST) ? $_POST : [], $_REQUEST);
 	}
 
-	if (!empty($_POST['do']) && $_POST['do'] == 'resize'){
+	// Current script posts cms_do; older cached pages still post do
+	$do = (string)($_POST['cms_do'] ?? $_POST['do'] ?? '');
+
+	if ($do === 'resize'){
 		
 		$name = isset($_POST['name']) ? (string)$_POST['name'] : '';
 

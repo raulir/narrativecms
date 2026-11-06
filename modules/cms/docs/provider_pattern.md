@@ -147,7 +147,7 @@ Implementation: [`modules/cms/panels/cms_input_provides.php`](../panels/cms_inpu
 $CI = get_instance(); // or $this inside a Controller
 
 $result = $CI->run_action('metoffice/forecast', [
-  'do'             => 'forecast',   // or service name; provider panel checks this
+  'cms_do'         => 'forecast',   // or service name; provider panel checks this
   'latitude'       => 51.89,
   'longitude'      => -2.12,
   'force_refresh'  => 0,            // optional; provider TTL decides network if 0
@@ -186,7 +186,7 @@ function _call_provider($provider, array $params){
 // Usage
 $raw = $this->_call_provider(
   $this->get_provider('weather_provider', 'openmeteo/forecast'),
-  ['do' => 'forecast', 'latitude' => $lat, 'longitude' => $lon, 'force_refresh' => $force ? 1 : 0]
+  ['cms_do' => 'forecast', 'latitude' => $lat, 'longitude' => $lon, 'force_refresh' => $force ? 1 : 0]
 );
 ```
 
@@ -213,24 +213,18 @@ class forecast extends \Controller {
 
   function panel_action($params){
 
-    $post = function($key){
-      if (!empty($this->input) && is_object($this->input) && method_exists($this->input, 'post')){
-        return $this->input->post($key);
-      }
-      return null;
-    };
-
-    $do = $params['do'] ?? $post('do');
+    // Request values come from $params only (no input->post / $_POST in panels)
+    $do = $params['cms_do'] ?? '';
     if ($do !== 'forecast' && $do !== 'weather_forecast'){
       return $params; // not our action
     }
 
     $this->load->model('myvendor/myvendor_model');
 
-    $return_result = !empty($params['return_result']) || !empty($post('return_result'));
-    $lat = $params['latitude'] ?? $post('latitude');
-    $lon = $params['longitude'] ?? $post('longitude');
-    $force = !empty($params['force_refresh']) || !empty($post('force_refresh'));
+    $return_result = !empty($params['return_result']);
+    $lat = (float)($params['latitude'] ?? 0);
+    $lon = (float)($params['longitude'] ?? 0);
+    $force = !empty($params['force_refresh']);
 
     $result = $this->myvendor_model->get_forecast_payload($lat, $lon, $force);
 

@@ -31,7 +31,7 @@ class page_translation extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do !== 'page_translation_save' && $do !== 'page_translation_ai'){
 			return $params;
@@ -44,13 +44,13 @@ class page_translation extends \Controller {
 		$this->load->model('cms/cms_translation_model');
 		$this->load->model('cms/cms_page_panel_model');
 
-		$cms_page_panel_id = (int)$this->input->post('translation_cms_page_panel_id');
+		$cms_page_panel_id = (int)($params['translation_cms_page_panel_id'] ?? 0);
 		if ($cms_page_panel_id < 1){
-			$cms_page_panel_id = (int)$this->input->post('cms_page_panel_id');
+			$cms_page_panel_id = (int)($params['cms_page_panel_id'] ?? 0);
 		}
 
 		// Target language is the popup edit column (data-cms_language), not the cookie or CMS session.
-		$cms_language = trim((string)$this->input->post('cms_language'));
+		$cms_language = trim((string)($params['cms_language'] ?? ''));
 		if ($cms_language === ''){
 			print(json_encode(['result' => ['error' => 'Missing target language']], JSON_PRETTY_PRINT));
 			die();
@@ -59,7 +59,7 @@ class page_translation extends \Controller {
 		if ($do === 'page_translation_ai'){
 			@set_time_limit(180);
 			// Current editor values (may be emptied without save) for missing detection
-			$ui_values = $this->input->post('values');
+			$ui_values = $params['values'] ?? false;
 			if (is_string($ui_values)){
 				$ui_values = cms_json_decode($ui_values, 'page_translation_ai_values');
 			}
@@ -75,7 +75,7 @@ class page_translation extends \Controller {
 			die();
 		}
 
-		$values = $this->input->post('values');
+		$values = $params['values'] ?? false;
 		if (is_string($values)){
 			$values = cms_json_decode($values, 'page_translation_values');
 		}
@@ -108,15 +108,9 @@ class page_translation extends \Controller {
 		$this->load->model('cms/cms_panel_model');
 
 		$cms_page_panel_id = (int)($params['cms_page_panel_id'] ?? 0);
-		if ($cms_page_panel_id < 1){
-			$cms_page_panel_id = (int)$this->input->post('cms_page_panel_id');
-		}
 
 		// Visitor language
 		$cms_language = $params['cms_language'] ?? null;
-		if ($cms_language === null || $cms_language === ''){
-			$cms_language = $this->input->post('cms_language');
-		}
 		if ($cms_language === null || $cms_language === ''){
 			$cms_language = $this->cms_page_panel_model->get_current_language();
 		}

@@ -8,19 +8,22 @@
 
 _feed
 
-/img/*
-!/img/.gitkeep
-/cache/*
-!/cache/.gitkeep
-/tmp/*
-!/tmp/.gitkeep
-/log/*
-!/log/.gitkeep
-/config/*
-!/config/.gitkeep
- 
-/vendor
-!/vendor/.gitkeep
+/img/**
+!/img/**/
+!/img/**/.gitkeep
+/cache/**
+!/cache/**/
+!/cache/**/.gitkeep
+/tmp/**
+!/tmp/**/
+!/tmp/**/.gitkeep
+/log/**
+!/log/**/
+!/log/**/.gitkeep
+/config/**
+!/config/**/
+!/config/**/.gitkeep
+/vendor/
 
 /node_modules/
 /package.json

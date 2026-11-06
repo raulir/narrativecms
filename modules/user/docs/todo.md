@@ -8,6 +8,10 @@ Sources: [`auth_email.md`](auth_email.md), [`auth_google.md`](auth_google.md), [
 
 ---
 
+## Urgent
+
+- [ ] **`user/register` creates a user from an empty post** — field rules (`show_email`, `show_password`, `show_username`, …) come only from the register block. An ajax post `panel_id=user/register&cms_do=register` without `cms_page_panel_id` merges no block, so nothing is required and `create_user()` stores a user with no email, username or password. Two such rows were created by a local test on 2026-11-06 (deleted). Fix: require a shown `user/register` block (or fall back to its settings with safe defaults) and refuse when email / username and password are empty; add `ajax.input`
+
 ## MVP — setup / ops
 
 - [ ] **user/user_settings → Links** — `login_link` `/login/`, `user_link` `/start/`, `logout_link` post-logout destination (re-save after label moves)

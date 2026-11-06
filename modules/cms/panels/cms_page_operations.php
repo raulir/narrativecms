@@ -18,23 +18,23 @@ class cms_page_operations extends \Controller {
 
 	}
 
-	function panel_action(){
+	function panel_action($params){
 		
 		$this->load->model('cms/cms_page_model');
 		$this->load->model('cms/cms_slug_model');
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_page_panel_cms_model');
 		
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 		if ($do == 'reserved_page_draft_put'){
 
-			$layout = trim((string)$this->input->post('layout'));
+			$layout = trim((string)($params['layout'] ?? ''));
 			if ($layout === ''){
 				return ['ok' => 0, 'error' => 'Set a layout before adding a panel'];
 			}
 
-			$page_class = trim((string)$this->input->post('page_class'));
-			$slug = trim((string)$this->input->post('slug'));
+			$page_class = trim((string)($params['page_class'] ?? ''));
+			$slug = trim((string)($params['slug'] ?? ''));
 			if (!in_array($page_class, ['list', 'system'], true) || $slug === ''){
 				return ['ok' => 0, 'error' => 'Invalid reserved page'];
 			}
@@ -42,25 +42,25 @@ class cms_page_operations extends \Controller {
 			$this->cms_page_model->put_reserved_page_draft([
 					'page_class' => $page_class,
 					'slug' => $slug,
-					'list_panel' => trim((string)$this->input->post('list_panel')),
-					'title' => (string)$this->input->post('title'),
+					'list_panel' => trim((string)($params['list_panel'] ?? '')),
+					'title' => (string)($params['title'] ?? ''),
 					'layout' => $layout,
-					'access' => trim((string)$this->input->post('access')),
-					'cache' => trim((string)$this->input->post('cache')),
-					'status' => (int)$this->input->post('status'),
-					'seo_title' => (string)$this->input->post('seo_title'),
-					'description' => (string)$this->input->post('description'),
-					'image' => (string)$this->input->post('image'),
-					'video' => (string)$this->input->post('video'),
-					'video_id' => (string)$this->input->post('video_id'),
-					'positions' => $this->input->post('positions'),
+					'access' => trim((string)($params['access'] ?? '')),
+					'cache' => trim((string)($params['cache'] ?? '')),
+					'status' => (int)($params['status'] ?? 0),
+					'seo_title' => (string)($params['seo_title'] ?? ''),
+					'description' => (string)($params['description'] ?? ''),
+					'image' => (string)($params['image'] ?? ''),
+					'video' => (string)($params['video'] ?? ''),
+					'video_id' => (string)($params['video_id'] ?? ''),
+					'positions' => ($params['positions'] ?? false),
 			]);
 
 			return ['ok' => 1];
 
 		} else if ($do == 'cms_page_delete'){
 
-			$page_id = (int)$this->input->post('page_id');
+			$page_id = (int)($params['page_id'] ?? 0);
 			if ($page_id < 1){
 				return ['ok' => 0];
 			}
@@ -78,8 +78,8 @@ class cms_page_operations extends \Controller {
 
 		} else if ($do == 'cms_page_set_status'){
 
-			$page_id = (int)$this->input->post('page_id');
-			$status = !empty($this->input->post('status')) ? 1 : 0;
+			$page_id = (int)($params['page_id'] ?? 0);
+			$status = !empty($params['status']) ? 1 : 0;
 
 			if ($page_id < 1){
 				return ['ok' => 0];
@@ -116,33 +116,33 @@ class cms_page_operations extends \Controller {
 		} else if ($do == 'cms_page_save'){
 
 			// collect data
-			$page_id = $this->input->post('cms_page_id');
-			$language = $this->input->post('language');
+			$page_id = $params['cms_page_id'] ?? false;
+			$language = $params['language'] ?? false;
 			$this->load->model('cms/cms_language_model');
 			$resolved_language = $this->cms_language_model->resolve_language_id($language, $GLOBALS['language']['languages'] ?? []);
 			$language = $resolved_language !== false ? $resolved_language : false;
 			
-			$data['sort'] = $this->input->post('sort');
-			$data['title'] = $this->input->post('title');
-			$data['slug'] = $this->input->post('slug');
-			$data['access'] = trim($this->input->post('access'));
-			$data['cache'] = trim($this->input->post('cache'));
+			$data['sort'] = $params['sort'] ?? false;
+			$data['title'] = $params['title'] ?? false;
+			$data['slug'] = $params['slug'] ?? false;
+			$data['access'] = trim((string)($params['access'] ?? ''));
+			$data['cache'] = trim((string)($params['cache'] ?? ''));
 			
-			$data['position'] = $this->input->post('position');
+			$data['position'] = $params['position'] ?? false;
 			if (empty($data['position'])) {
 				$data['position'] = 'main';
 			}
 			
 			// not valid for non-main
 			if ($data['position'] == 'main'){
-				$data['status'] = $this->input->post('status');
-				$data['seo_title'] = $this->input->post('seo_title');
-				$data['description'] = $this->input->post('description');
-				$data['image'] = $this->input->post('image');
-				$data['video'] = $this->input->post('video');
-				$data['video_id'] = $this->input->post('video_id');
-				$data['layout'] = $this->input->post('layout');
-				$data['positions'] = $this->input->post('positions');
+				$data['status'] = $params['status'] ?? false;
+				$data['seo_title'] = $params['seo_title'] ?? false;
+				$data['description'] = $params['description'] ?? false;
+				$data['image'] = $params['image'] ?? false;
+				$data['video'] = $params['video'] ?? false;
+				$data['video_id'] = $params['video_id'] ?? false;
+				$data['layout'] = $params['layout'] ?? false;
+				$data['positions'] = $params['positions'] ?? false;
 			}
 			 
 			$old_slug = '';
@@ -168,13 +168,13 @@ class cms_page_operations extends \Controller {
 					$data['slug'] = $existing['slug'];
 				}
 			} else {
-				$page_class_post = trim((string)$this->input->post('page_class'));
-				$list_panel_post = trim((string)$this->input->post('list_panel'));
-				$reserved_new = (int)$this->input->post('reserved_new');
+				$page_class_post = trim((string)($params['page_class'] ?? ''));
+				$list_panel_post = trim((string)($params['list_panel'] ?? ''));
+				$reserved_new = (int)($params['reserved_new'] ?? 0);
 				if ($reserved_new && in_array($page_class_post, ['list', 'system'], true)){
 					$data['page_class'] = $page_class_post;
 					$data['list_panel'] = $list_panel_post;
-					$data['slug'] = trim((string)$this->input->post('slug'));
+					$data['slug'] = trim((string)($params['slug'] ?? ''));
 					return [
 							'ok' => 0,
 							'error' => 'Add a panel before saving a reserved page',
@@ -210,7 +210,7 @@ class cms_page_operations extends \Controller {
 
 		} else if ($do == 'cms_page_panel_order'){
 
-			$block_orders = $this->input->post('orders');
+			$block_orders = $params['orders'] ?? false;
 
 			$this->cms_page_panel_cms_model->save_orders($block_orders);
 

@@ -10,7 +10,7 @@ class register extends \Controller {
 		
 		$this->load->model('user/user_model');
 		
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do == 'register'){
 			
@@ -22,7 +22,7 @@ class register extends \Controller {
 			
 			$errors = [];
 			
-			$fields = $this->input->post('fields');
+			$fields = $params['fields'] ?? false;
 			
 			$data = [
 				'email' => '',

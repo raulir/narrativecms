@@ -28,7 +28,7 @@ class cms_languages_livestatus extends \Controller {
 			$value = ((string)($params['value'] ?? '') === '1') ? '1' : '0';
 
 			$this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [
-					'do' => 'U',
+					'cms_do' => 'U',
 					'id' => $params['base_id'],
 					'row_id' => $params['item_id'],
 					'col' => 'livestatus',

@@ -79,10 +79,10 @@ class basic extends \Controller{
 		
 		$this->load->model('form/form_model');
 	
-		if (!empty($_GET['confirmation_code'])){
+		if (!empty($params['confirmation_code'])){
 			
 			// find code
-			$confirm_result = $this->form_model->confirm_code($_GET['confirmation_code']);
+			$confirm_result = $this->form_model->confirm_code((string)$params['confirmation_code']);
 			
 			if ($confirm_result){
 				$params['confirm_result'] = 1;

@@ -85,10 +85,10 @@
 
 /*
  * ------------------------------------------------------
- *  Load the Input class and sanitize globals
+ *  Clean $_GET / $_POST in place (cms_bootstrap.php)
  * ------------------------------------------------------
  */
-	$IN	=& load_class('Input');
+	cms_clean_request();
 
 /*
  * ------------------------------------------------------

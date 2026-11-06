@@ -1,4 +1,5 @@
 {
+	"ajax": {"output": ["cms","result"]},
 	"label": "Purge unused images",
 	"description": "Admin control on Data dumps to soft-move unused dated library images to cache/tmp/img/"
 }

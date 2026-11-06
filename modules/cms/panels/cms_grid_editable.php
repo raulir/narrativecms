@@ -27,7 +27,7 @@ class cms_grid_editable extends \Controller {
 				$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
 
 				$updated = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [
-						'do' => 'U',
+						'cms_do' => 'U',
 						'id' => $params['base_id'],
 						'row_id' => $params['item_id'],
 						'col' => $params['name'],
@@ -62,7 +62,7 @@ class cms_grid_editable extends \Controller {
 			$this->load->model('cms/cms_page_panel_model');
 			$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
 			$rows = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [
-					'do' => 'L',
+					'cms_do' => 'L',
 					'id' => $params['base_id'],
 			]);
 

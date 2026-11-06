@@ -27,7 +27,7 @@ class auth_gapp extends \Controller{
 		$this->load->model('user/user_google_model');
 		$this->load->model('cms/cms_page_panel_model');
 
-		$credential = (string)$this->input->post('credential');
+		$credential = (string)($params['credential'] ?? '');
 		$clientId = $this->user_google_model->web_client_id();
 		error_log('GAPP credential_len='.strlen($credential).' client_len='.strlen($clientId));
 		$payload = $this->user_google_model->verify_web_credential($credential, $clientId);
@@ -44,7 +44,7 @@ class auth_gapp extends \Controller{
 
 		$this->load->model('user/user_model');
 		$existing = $this->user_model->get_user_by_email($payload['email']);
-		$agree = (string)$this->input->post('agree');
+		$agree = (string)($params['agree'] ?? '');
 
 		if (empty($existing) && $agree !== '1'){
 			$params['needs_agreement'] = 1;

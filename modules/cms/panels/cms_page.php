@@ -47,9 +47,9 @@ class cms_page extends \Controller {
 			$return['page']['position'] = !empty($params['position']) ? $params['position'] : 'main';
 			$return['page']['title'] = 'New '.(!empty($params['position']) ? $params['position'] : 'page');
 
-			$page_class_in = trim((string)$this->input->get('page_class'));
-			$slug_in = trim((string)$this->input->get('slug'));
-			$list_panel_in = trim((string)$this->input->get('list_panel'));
+			$page_class_in = trim((string)($params['page_class'] ?? ''));
+			$slug_in = trim((string)($params['slug'] ?? ''));
+			$list_panel_in = trim((string)($params['list_panel'] ?? ''));
 			if (in_array($page_class_in, ['list', 'system'], true) && $slug_in !== ''){
 				$return['page']['page_class'] = $page_class_in;
 				$return['page']['slug'] = $slug_in;

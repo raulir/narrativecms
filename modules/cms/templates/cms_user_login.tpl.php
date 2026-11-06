@@ -9,7 +9,7 @@
 					<?= trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), ' '.$GLOBALS['config']['site_title_delimiter']) ?>
 				</div>
 
-				<input type="hidden" name="do" value="cms_user_login">
+				<input type="hidden" name="cms_do" value="cms_user_login">
 				<div class="cms_user_login_label">Username</div>
 				<input class="cms_user_login_input" type="text" name="username">
 				<div class="cms_user_login_label">Password</div>

@@ -1,5 +1,5 @@
 {
-	"ajax": {"output": ["cms", "key", "row"]},
+	"ajax": {"output": ["cms"]},
 	"label": "Reminder",
 	"image": "",
 	"item": [

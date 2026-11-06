@@ -13,7 +13,7 @@ class subscription_checkout extends \Controller {
 
 	function panel_action($params){
 
-		$do = $params['cms_do'] ?? $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do !== 'subscription_checkout' && $do !== 'checkout'){
 			return $params;
@@ -24,7 +24,7 @@ class subscription_checkout extends \Controller {
 		$this->load->model('stripe/stripe_model');
 		$this->load->model('cms/cms_page_panel_model');
 
-		$return_result = !empty($params['return_result']) || !empty($this->input->post('return_result'));
+		$return_result = !empty($params['return_result']) || !empty($params['return_result']);
 
 		$user = $this->user_model->get_current();
 		if (empty($user['user_id']) && empty($user['cms_page_panel_id'])){
@@ -37,8 +37,8 @@ class subscription_checkout extends \Controller {
 			return $this->_respond($result, $return_result, $params);
 		}
 
-		$product_id = (int)($this->input->post('product_id') ?? ($params['product_id'] ?? 0));
-		$currency_id = (int)($this->input->post('currency_id') ?? ($params['currency_id'] ?? 0));
+		$product_id = (int)($params['product_id'] ?? 0);
+		$currency_id = (int)($params['currency_id'] ?? 0);
 
 		if ($product_id < 1){
 			return $this->_respond(['ok' => 0, 'error' => 'Missing product'], $return_result, $params);
@@ -64,8 +64,8 @@ class subscription_checkout extends \Controller {
 		}
 
 		$base = rtrim((string)($GLOBALS['config']['base_url'] ?? '/'), '/') . '/';
-		$success_url = trim((string)($this->input->post('success_url') ?? ($params['success_url'] ?? '')));
-		$cancel_url = trim((string)($this->input->post('cancel_url') ?? ($params['cancel_url'] ?? '')));
+		$success_url = trim((string)($params['success_url'] ?? ''));
+		$cancel_url = trim((string)($params['cancel_url'] ?? ''));
 
 		// Stripe settings link fields when caller did not pass URLs
 		if ($success_url === '' || $cancel_url === ''){

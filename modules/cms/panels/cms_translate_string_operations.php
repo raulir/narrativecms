@@ -19,7 +19,7 @@ class cms_translate_string_operations extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do !== 'cms_translate_string_save'){
 			return $params;
@@ -27,10 +27,10 @@ class cms_translate_string_operations extends \Controller {
 
 		$this->load->model('cms/cms_translation_model');
 
-		$cms_page_panel_id = (int)$this->input->post('cms_page_panel_id');
-		$field_name = $this->input->post('field_name');
-		$values = $this->input->post('values');
-		$cms_language = $this->input->post('cms_language');
+		$cms_page_panel_id = (int)($params['cms_page_panel_id'] ?? 0);
+		$field_name = $params['field_name'] ?? false;
+		$values = $params['values'] ?? false;
+		$cms_language = $params['cms_language'] ?? false;
 
 		if (is_string($values)){
 			$values = cms_json_decode($values, 'translate_string_values');

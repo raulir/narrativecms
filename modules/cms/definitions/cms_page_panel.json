@@ -1,4 +1,4 @@
 {
 	"item": [],
-	"ajax": {"output": ["cms","_caching","_title","message","notification","show"]}
+	"ajax": {"output": ["cms","ok","cms_page_id","cms_page_panel_id","parent_id","panel_name","shortcut","grid_ids","grid_log","_caching","_title","message","notification","show"]}
 }

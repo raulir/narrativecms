@@ -129,7 +129,7 @@ The next Release carries seeded entries forward.
 ## Layout on master
 
 ```
-tmp/master/cms/           # core: system/ + modules/cms/ (+ index.php, LICENSE)
+tmp/master/cms/           # core: system/ + modules/cms/ (+ index.php, LICENSE, AGENTS.md, README.md, cache|tmp|log|img/.gitkeep, tmp/sessions/.gitkeep)
   version.json
   system/...
   modules/cms/...
@@ -189,7 +189,7 @@ A package’s files belong together, so an Update or Install is applied only whe
 
    Before anything is written, `cms_update_copy` also checks each staged U/A file against the release md5. A mismatch does not touch the live tree. After a copy that wrote every file, the tree hash is compared with the master release. A mismatch is rolled back and is not reported as success. Staging, manifest and backup are removed only after that check passes. `update_cleanup` (empty folders), version stamp, confirm and schema run only after a successful copy.
 
-All file paths (master list, posted names, staging) must stay inside the package: `modules/{area}/`, or for core `system/`, `modules/cms/`, `index.php`, `LICENSE` (`_update_path_allowed()`).
+All file paths (master list, posted names, staging) must stay inside the package: `modules/{area}/`, or for core `system/`, `modules/cms/`, `index.php`, `LICENSE`, `AGENTS.md`, and `README.md` (`_update_path_allowed()`). A `.gitkeep` under `system/` or `modules/cms/` is included. The core package also carries exactly `cache/.gitkeep`, `tmp/.gitkeep`, `tmp/sessions/.gitkeep`, `log/.gitkeep`, and `img/.gitkeep`. If one is missing when the core file list is built, that folder is created and an empty `.gitkeep` is written, then hashed. No other file under those folders is accepted. A client applying the core update copies the file and creates the folder when it is missing.
 
 - No DB drift: **“No schema updates available for this module”**
 - Drift: same fix/sync controls as the full schema page for that one module

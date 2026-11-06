@@ -10,5 +10,5 @@
 </div>
 
 <form class="cms_user_form" method="post" style="display: hidden; ">
-	<input type="hidden" name="do" value="admin_logout">
+	<input type="hidden" name="cms_do" value="admin_logout">
 </form>

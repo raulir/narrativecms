@@ -15,11 +15,11 @@ class productbuy extends \Controller{
 		$this->load->model('shop/shop_dim_model');
 		$this->load->model('cms/cms_page_panel_model');
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do == 'add'){
 
-			$params['product_id'] = $this->input->post('product_id');
+			$params['product_id'] = $params['product_id'] ?? false;
 
 			$user = $this->shop_model->get_front_user();
 			$order = $this->shop_model->get_current_order($user);
@@ -34,9 +34,9 @@ class productbuy extends \Controller{
 				}
 				$dim = $this->cms_page_panel_model->get_cms_page_panel($did);
 				$slug = (string)($dim['id'] ?? '');
-				$posted = $this->input->post($slug);
+				$posted = $slug !== '' ? ($params[$slug] ?? null) : null;
 				if ($posted === null || $posted === ''){
-					$posted = $this->input->post((string)$did);
+					$posted = $params[(string)$did] ?? null;
 				}
 				if ($posted === null || $posted === ''){
 					$params['errors'][$slug !== '' ? $slug : $did] = ($params['select_error'] ?? 'Please select').' '.
@@ -51,7 +51,7 @@ class productbuy extends \Controller{
 				return $params;
 			}
 
-			$qty = max(1, (int)$this->input->post('quantity') ?: 1);
+			$qty = max(1, (int)($params['quantity'] ?? 0) ?: 1);
 			$item_id = 0;
 
 			if (($type['stock_control'] ?? 'none') === 'count'){

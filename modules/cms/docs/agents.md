@@ -446,7 +446,27 @@ If no `$params` modification is needed (e.g. they come directly from db or ajax)
 
 If the panel needs to update system state, use `panel_action($params)`, which works similarly to `panel_params()`, but all `panel_action` calls run before any `panel_params()` on the page.
 
-**Request values come from `$params` only.** Do not read `$this->input->post()` or `$_POST` in panels. `get_ajax` / `get_ajax_panel` (ajax API) put the POST into `$params`; a page render puts the GET query values in. So an action that needs posted data goes through `get_ajax` / `get_ajax_panel`, not a full-page form post. Validate those values on the way in (see review.md § Untrusted input).
+**Ajax reply keys are allowlisted.** A panel reply through `ajax_api/get_panel` contains only the `cms_*` keys (`cms_html`, `cms_js`, `cms_css`, `cms_panel_*`, `cms_error`). Every other key an action returns (`ok`, `result`, `message`, ids, …) must be listed in the panel definition: `"ajax": {"output": ["cms", "ok", "result"]}`. `"cms"` stands for the fixed `cms_*` set. `error` / `html` / `_html` are renamed to `cms_error` / `cms_html`, so they need no entry. If the panel has no definition yet, create one with just the `ajax` entry. A key that is not listed is silently dropped. That is on purpose: nothing is echoed back by accident, such as posted values, settings, block fields or secrets. When you add a returned key, add it to the list in the same change. Keys of an extend source's action belong to the target panel's list. Panels that `print` JSON and `exit` bypass the filter, so prefer returning an array. Calls that `fetch` the endpoint directly (not `get_ajax`) read the `cms_*` names themselves.
+
+**Request values come from `$params` only.** Panels never read `$_POST` or `$_GET`. There is no `$this->input` (the old CI `Input` class is gone). Where request values reach `$params`:
+
+- **Ajax** (`get_ajax` / `get_ajax_panel`): the POST, without `_*` keys, filtered by `ajax.input`.
+- **Page and admin render** (`render()`): the query string, plus a full-page form POST filtered the same way (`_request_render_params()`). The block or admin page config sits on top.
+
+`cms_do` / `do` never come from the query string, so a link cannot start an action. Full-page form posts are legacy: new actions post with `get_ajax`.
+
+System code outside panels (ajax entry, index controller, helpers, controllers, models) reads native `$_POST` / `$_GET`. `cms_clean_request()` (`cms_bootstrap.php`) cleans both in place at boot: it removes control characters (except tab and newlines) and turns `\r\n` / `\r` into `\n`. That is not validation. A model takes request values as arguments from its panel, never from the request.
+
+**Ajax params precedence.** For a request through `ajax_api/get_panel`, `$params` is built in this order. Each later step overwrites the keys it shares with the earlier ones:
+
+1. The panel settings from the CMS (lowest priority).
+2. The posted values that pass the input filter.
+3. The saved block's values, when the request names a block (`cms_page_panel_id`) of this panel that the caller may see.
+
+So a posted key does overwrite a settings value with the same name, but it can never change a value stored on the block. The developer of a panel that takes ajax input has two duties:
+
+1. **Let through only the keys the action expects.** List them in the definition: `"ajax": {"input": ["cms", "email", "product_id"]}`. `"cms"` stands for the fixed `cms_*` request set (`cms_do`, `cms_no_html`, `cms_page_panel_id`, …). Without `ajax.input` every posted key passes, including ones named like settings fields. That is still allowed but deprecated: add `ajax.input` to every panel that takes ajax input.
+2. **Sanitise every value that comes from ajax**, the same as any other client-side or user input: cast ids, check against CMS data, strip and cap free text. See review.md § Untrusted input.
 
 Load models as `$this->load->model('cms/cms_schema_model')`.
 

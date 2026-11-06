@@ -15,7 +15,6 @@ class Controller {
 	var $uri;
 	var $router;
 	var $output;
-	var $input;
 	var $load;
 	var $db;
 	var $panel_name;
@@ -73,7 +72,6 @@ class Controller {
 			$main = self::$instance;
 			if (is_object($main)) {
 				$this->load = $main->load;
-				$this->input = $main->input;
 				$this->db = $main->db;
 				$this->uri = $main->uri;
 				$this->router = $main->router;
@@ -87,7 +85,7 @@ class Controller {
 	}
 
 	/**
-	 * Panel libraries: resolve load, input, models, etc. from the main request controller.
+	 * Panel libraries: resolve load, models, etc. from the main request controller.
 	 * Do not assign by reference into these names on panel instances.
 	 */
 	public function __get($key) {
@@ -108,11 +106,11 @@ class Controller {
 	}
 	
 	function run_action($name, $params){
-		 
+
 		return $this->run_panel_method($name, 'panel_action', $params);
-		 
+
 	}
-	
+
 	/**
 	 * Whether a panel controller file implements $method.
 	 * Uses require_once + method_exists (no CI library / init_panel).
@@ -748,28 +746,22 @@ class Controller {
 			$params = array('data' => $params, );
 		}
 		 
-		// Settings are trusted CMS copy. On ajax the request is already in $params,
-		// so settings must win. Page and embed callers have no _from_ajax, and their
-		// saved block fields still override settings.
+		// Settings are the lowest layer on every path: the caller's params (page / embed
+		// fields, or the filtered ajax post) override them. On ajax the saved block comes
+		// last, so a posted key can never change a stored block value.
 		$settings = $this->cms_page_panel_model->get_cms_page_panel_settings($name, $this->cms_page_panel_model->get_content_language());
 		if (!is_array($settings)){
 			$settings = [];
 		}
-		$from_ajax = !empty($params['_from_ajax']);
-		unset($params['_from_ajax']);
-		if ($from_ajax){
-			// Posted fields, then settings (labels beat the request), then the saved block.
-			$params = array_merge($params, $settings);
-			$block_id = (int)($params['cms_page_panel_id'] ?? 0);
-			if ($block_id > 0){
-				$instance = $this->cms_page_panel_model->get_cms_page_panel($block_id);
-				if (is_array($instance)){
-					$params = array_merge($params, $instance);
-				}
-			}
-			$_POST = $params;
-		} else {
-			$params = array_merge($settings, $params);
+		// Ajax: settings, then the posted fields that passed ajax.input, then the saved block.
+		// The block is only the one Ajax_api vetted (same panel, caller may see it) —
+		// never loaded here from a posted cms_page_panel_id. $_POST stays the raw (boot-cleaned)
+		// request for system code; panels read $params only.
+		$block = $params['_cms_block'] ?? null;
+		unset($params['_cms_block']);
+		$params = array_merge($settings, $params);
+		if (is_array($block)){
+			$params = array_merge($params, $block);
 		}
 
 		$this->load->model('cms/cms_access_model');
@@ -998,6 +990,140 @@ class Controller {
 	
 	}
 	
+	// ---- Request filter (shared by Ajax_api and render) ----
+
+	/**
+	 * Request values for one panel on a page or admin render: the query string, plus a
+	 * full-page form POST filtered by the panel's ajax.input. The caller merges the block /
+	 * page config over this. Ajax requests build their params in Ajax_api instead.
+	 */
+	function _request_render_params($panel_name){
+
+		if (get_instance() instanceof Ajax_api){
+			return [];
+		}
+
+		$get = is_array($_GET) ? $_GET : [];
+		// Same list as controller_index; cms_do / do: an action starts only from a POST
+		foreach (['module', 'cms_page_panel_id', 'show', 'panel_name', 'cms_do', 'do'] as $bad){
+			unset($get[$bad]);
+		}
+
+		$post = $this->_request_drop_internal_keys($_POST);
+		// Position-click protocol, not panel input
+		unset($post['cms_positions']);
+		if ($post){
+			$post = $this->_request_filter_input($panel_name, $post);
+		}
+
+		return array_merge($get, $post);
+
+	}
+
+	/**
+	 * Leading-underscore keys are internal (set by PHP after this) or belong to
+	 * another request protocol. Panel ajax must not accept them from the client.
+	 */
+	function _request_drop_internal_keys($params){
+
+		if (!is_array($params)){
+			return [];
+		}
+
+		foreach (array_keys($params) as $key){
+			if (is_string($key) && $key !== '' && $key[0] === '_'){
+				unset($params[$key]);
+			}
+		}
+
+		return $params;
+
+	}
+
+	function _request_input_keys(){
+
+		return [
+				'cms_do',
+				'cms_no_html',
+				'cms_no_js',
+				'cms_no_css',
+				'cms_session_id',
+				'cms_page_panel_id',
+				'cms_page_id',
+		];
+
+	}
+
+	/**
+	 * "cms" in the list means the fixed set. Any other name, including one cms_* key, is literal.
+	 */
+	function _request_allow_map($list, $fixed){
+
+		$allow = [];
+
+		if (!is_array($list)){
+			return $allow;
+		}
+
+		foreach ($list as $name){
+			if (!is_string($name) || $name === ''){
+				continue;
+			}
+			if ($name === 'cms'){
+				foreach ($fixed as $key){
+					$allow[$key] = 1;
+				}
+				continue;
+			}
+			$allow[$name] = 1;
+		}
+
+		return $allow;
+
+	}
+
+	function _request_panel_config($panel_name){
+
+		if (!is_string($panel_name) || !str_contains($panel_name, '/')){
+			return [];
+		}
+
+		$this->load->model('cms/cms_panel_model');
+		$config = $this->cms_panel_model->get_cms_panel_config($panel_name);
+
+		return is_array($config) ? $config : [];
+
+	}
+
+	function _request_filter_input($panel_name, $params){
+
+		$config = $this->_request_panel_config($panel_name);
+		$list = $config['ajax']['input'] ?? null;
+
+		if (!is_array($list)){
+			return $params;
+		}
+
+		$allow = $this->_request_allow_map($list, $this->_request_input_keys());
+
+		// An older updater posts do, no_html, and session_id. Keep them on this panel
+		// even when ajax.input lists only the cms set.
+		if ($panel_name === 'cms/cms_update'){
+			foreach (['do', 'no_html', 'session_id', 'area', 'module', 'protocol', 'filenames', 'filename'] as $key){
+				$allow[$key] = 1;
+			}
+		}
+
+		foreach (array_keys($params) as $key){
+			if (!isset($allow[$key])){
+				unset($params[$key]);
+			}
+		}
+
+		return $params;
+
+	}
+
 	/*
 	 * for main controller to generate panels output as texts
 	 */
@@ -1081,6 +1207,10 @@ class Controller {
 			if (empty($panel_config['panel'])){
 				continue;
 			}
+
+			// Request values sit under the block / page config, as on ajax
+			$panel_config['params'] = array_merge($this->_request_render_params($panel_config['panel']), $panel_config['params']);
+			$page_config[$key]['params'] = $panel_config['params'];
 
 			if (!$this->cms_access_model->enforce_panel_access($panel_config['panel'], $panel_config['params'])){
 				$page_config[$key]['_access_skipped'] = 1;

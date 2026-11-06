@@ -411,7 +411,9 @@ class shop_image_model extends \Model {
 			return '';
 		}
 
+		// Provider panels read cms_do; do kept for providers in modules not yet converted
 		$result = $CI->run_action($provider, [
+				'cms_do' => 'compose',
 				'do' => 'compose',
 				'overlay' => $original_artwork,
 				'base' => $print_background,

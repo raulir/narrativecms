@@ -24,7 +24,7 @@ class page_translate extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do !== 'page_translate_list'){
 			return $params;
@@ -35,15 +35,15 @@ class page_translate extends \Controller {
 			die();
 		}
 
-		$cms_page_id = (int)$this->input->post('cms_page_id');
+		$cms_page_id = (int)($params['cms_page_id'] ?? 0);
 		// SPA: footer mount may still have old id; client prefers main position.
 		// If id missing, resolve from current path slug (e.g. /login/ → login).
 		if ($cms_page_id < 1){
-			$path = (string)$this->input->post('path');
+			$path = (string)($params['path'] ?? '');
 			$cms_page_id = $this->_page_id_from_path($path);
 		}
-		$unit_id = (int)$this->input->post('unit_id');
-		$types_raw = $this->input->post('types');
+		$unit_id = (int)($params['unit_id'] ?? 0);
+		$types_raw = $params['types'] ?? false;
 		$types = [];
 		if (is_string($types_raw) && $types_raw !== ''){
 			$decoded = cms_json_decode($types_raw, 'page_translate_types');
@@ -54,7 +54,7 @@ class page_translate extends \Controller {
 			$types = $types_raw;
 		}
 
-		$term_ids_raw = $this->input->post('term_ids');
+		$term_ids_raw = $params['term_ids'] ?? false;
 		$term_ids = [];
 		if (is_string($term_ids_raw) && $term_ids_raw !== ''){
 			$decoded_ids = cms_json_decode($term_ids_raw, 'page_translate_term_ids');
@@ -65,7 +65,7 @@ class page_translate extends \Controller {
 			$term_ids = $term_ids_raw;
 		}
 
-		$training = trim((string)$this->input->post('training'));
+		$training = trim((string)($params['training'] ?? ''));
 		$items = $this->_list_translatable_panels($cms_page_id, $unit_id, $types, $term_ids, $training);
 
 		print(json_encode(['result' => ['ok' => 1, 'items' => $items]], JSON_PRETTY_PRINT));

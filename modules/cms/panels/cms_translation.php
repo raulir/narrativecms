@@ -31,7 +31,7 @@ class cms_translation extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do !== 'cms_translation_save' && $do !== 'cms_translation_ai'){
 			return $params;
@@ -40,11 +40,11 @@ class cms_translation extends \Controller {
 		$this->load->model('cms/cms_translation_model');
 
 		// Prefer dedicated key so ajax_api does not merge the target panel into params
-		$cms_page_panel_id = (int)$this->input->post('translation_cms_page_panel_id');
+		$cms_page_panel_id = (int)($params['translation_cms_page_panel_id'] ?? 0);
 		if ($cms_page_panel_id < 1){
-			$cms_page_panel_id = (int)$this->input->post('cms_page_panel_id');
+			$cms_page_panel_id = (int)($params['cms_page_panel_id'] ?? 0);
 		}
-		$cms_language = $this->input->post('cms_language');
+		$cms_language = $params['cms_language'] ?? false;
 
 		if ($do === 'cms_translation_ai'){
 			// Long-running external API
@@ -57,7 +57,7 @@ class cms_translation extends \Controller {
 			die();
 		}
 
-		$values = $this->input->post('values');
+		$values = $params['values'] ?? false;
 
 		if (is_string($values)){
 			$values = cms_json_decode($values, 'cms_translation_values');

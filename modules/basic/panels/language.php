@@ -8,11 +8,11 @@ class language extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do == 'language_set'){
 			 
-			$language_id = $this->input->post('language_id');
+			$language_id = $params['language_id'] ?? false;
 			$this->load->model('cms/cms_language_model');
 			$resolved_language_id = $this->cms_language_model->resolve_language_id($language_id, $GLOBALS['language']['languages'] ?? []);
 

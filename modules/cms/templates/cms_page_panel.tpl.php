@@ -62,7 +62,7 @@
 				<div class="cms_page_panel_template">
 					
 					<?php _panel('cms/cms_input_select', [
-							'name' => '_template_page_id',
+							'name' => 'cms_template_page_id',
 							'name_clean' => '_template_page_id',
 							'values' => $list_templates,
 							'label' => 'Template',

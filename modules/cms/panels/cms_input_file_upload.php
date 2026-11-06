@@ -18,11 +18,11 @@ class cms_input_file_upload extends \Controller {
 
 	}
 
-	function panel_action(){
+	function panel_action($params){
 
 		$return = array();
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 		if ($do == 'cms_input_file_upload'){
 			 
 			// collect data

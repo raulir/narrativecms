@@ -20,12 +20,12 @@ class cms_page_panel_targets extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do == 'cms_page_panel_targets'){
 			
-			$cms_page_panel_id = (int)$this->input->post('targets_id');
-			$data = $this->input->post('data');
+			$cms_page_panel_id = (int)($params['targets_id'] ?? 0);
+			$data = $params['data'] ?? false;
 
 			if (!is_array($data)){
 				$data = [];
@@ -82,7 +82,7 @@ class cms_page_panel_targets extends \Controller {
 	
 	function panel_params($params){
 		
-		$cms_page_panel_id = $this->input->post('targets_id');
+		$cms_page_panel_id = $params['targets_id'] ?? false;
 		
 		$this->load->model('cms/cms_page_panel_model');
 		

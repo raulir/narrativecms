@@ -11,7 +11,7 @@ class manage extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do') ?? ($params['cms_do'] ?? '');
+		$do = $params['cms_do'] ?? '';
 		$actions = ['sync_subscription', 'set_auto_renew', 'change_plan', 'update_payment_method'];
 		if (!in_array($do, $actions, true)){
 			return $params;
@@ -31,19 +31,19 @@ class manage extends \Controller {
 		if ($do === 'sync_subscription'){
 			$result = $this->subscription_model->action_sync_subscription($user_id);
 		} else if ($do === 'set_auto_renew'){
-			$raw = $this->input->post('auto_renew');
+			$raw = $params['auto_renew'] ?? false;
 			$auto_renew = ($raw === '1' || $raw === 1 || $raw === 'on' || $raw === true);
 			$result = $this->subscription_model->action_set_auto_renew($user_id, $auto_renew);
 		} else if ($do === 'update_payment_method'){
 			$result = $this->subscription_model->action_update_payment_method(
 					$user_id,
-					(string)$this->input->post('return_url')
+					(string)($params['return_url'] ?? '')
 			);
 		} else {
 			$result = $this->subscription_model->action_change_plan(
 					$user_id,
-					(int)$this->input->post('product_id'),
-					(int)$this->input->post('currency_id')
+					(int)($params['product_id'] ?? 0),
+					(int)($params['currency_id'] ?? 0)
 			);
 		}
 
@@ -55,7 +55,7 @@ class manage extends \Controller {
 	function panel_params($params){
 
 		$this->load->model('subscription/subscription_model');
-		$cid = (int)$this->input->get('currency_id');
+		$cid = (int)($params['currency_id'] ?? 0);
 		if ($cid > 0){
 			$params['active_currency_override'] = $cid;
 		}

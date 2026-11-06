@@ -301,7 +301,10 @@ class admin extends \Controller {
 	
 	function dump($param = ''){
 		
-		if (isset($_POST['do'])){
+		// Form posts cms_do (older pages: do); URL form admin/dump/<action>/ passes it as $param
+		if (isset($_POST['cms_do'])){
+			$param = $_POST['cms_do'];
+		} else if (isset($_POST['do'])){
 			$param = $_POST['do'];
 		}
 		
@@ -314,7 +317,7 @@ class admin extends \Controller {
 		$page_config = array(
 				array('position' => 'header', 'panel' => 'cms/cms_user', 'module' => 'cms', ),
 				array('position' => 'header', 'panel' => 'cms/cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms/cms_dump', 'params' => ['do' => $param, 'what' => $what, ]),
+				array('position' => 'main', 'panel' => 'cms/cms_dump', 'params' => ['cms_do' => $param, 'what' => $what, ]),
 		);
 		
 		// render panels

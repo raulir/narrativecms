@@ -1,4 +1,4 @@
 {
 	"item": [],
-	"ajax": {"output": ["cms","result"]}
+	"ajax": {"output": ["cms","result","filename","export_id","export_ids_json","export_heading","export_view","last_export","stats","database_size","files_count","files_size","panel_files_count","panel_files_size","total_size","image_cutoff_px","video_quality","optimised_videos_count","oversized_images_count"]}
 }

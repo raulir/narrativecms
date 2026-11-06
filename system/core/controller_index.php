@@ -14,7 +14,7 @@ class Index extends Controller {
     	
         parent::__construct();
              
-        $this->params = $this->input->post();
+        $this->params = is_array($_POST) ? $_POST : [];
                  
    	}
    	
@@ -110,7 +110,7 @@ class Index extends Controller {
    		}
    		
    		$this->load->model('cms/cms_access_model');
-   		$is_ajax = !empty($this->input->post('_ajax'));
+   		$is_ajax = !empty($_POST['_ajax']);
    		$this->cms_access_model->enforce_page_access($page, ['no_html' => $is_ajax ? 1 : 0]);
    		
    	}
@@ -127,8 +127,9 @@ class Index extends Controller {
     	
     	$page_config = [];
     	
-    	$get_params = $this->input->get();
-    	$bad_params = ['module', 'cms_page_panel_id', 'show', 'panel_name', ];
+    	$get_params = is_array($_GET) ? $_GET : [];
+    	// cms_do / do: an action starts only from a POST, never from a link
+    	$bad_params = ['module', 'cms_page_panel_id', 'show', 'panel_name', 'cms_do', 'do', ];
     	foreach($bad_params as $bad_param){
 	    	if (isset($get_params[$bad_param])){
 	    		unset($get_params[$bad_param]);
@@ -342,7 +343,7 @@ class Index extends Controller {
 			];
 		}
 
-		$_ajax = $this->input->post('_ajax');
+		$_ajax = $_POST['_ajax'] ?? null;
 		if (empty($_ajax)){
 
 			$page_cache_ttl = 0;
@@ -417,7 +418,7 @@ class Index extends Controller {
 //			header('Access-Control-Allow-Origin: *');
 
 			// existing positions
-			$positions = $this->input->post('cms_positions');
+			$positions = $_POST['cms_positions'] ?? null;
 			if (!empty($positions)){
 				
 				// single page mode — ajax position payloads
@@ -510,7 +511,10 @@ class Index extends Controller {
 		
 				$return = '';
 	
-				$_positions = $this->input->post('_positions');
+				$_positions = $_POST['_positions'] ?? [];
+				if (!is_array($_positions)){
+					$_positions = [];
+				}
 				$this->load->model('cms/cms_access_model');
 				
 				foreach($page_config as $key => $panel_config){

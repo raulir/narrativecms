@@ -26,13 +26,7 @@ class cms_rebuild_routes extends \Controller {
 			$params = [];
 		}
 
-		$do = '';
-		if (is_object($this->input) && method_exists($this->input, 'post')){
-			$do = $this->input->post('cms_do');
-		}
-		if ($do === null || $do === false || $do === ''){
-			$do = $params['cms_do'] ?? ($_POST['do'] ?? '');
-		}
+		$do = $params['cms_do'] ?? ($params['do'] ?? '');
 
 		if ($do === 'rebuild_routes'){
 

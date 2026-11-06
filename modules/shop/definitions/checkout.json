@@ -1,4 +1,5 @@
 {
+	"ajax": {"output": ["cms","address_error","delivery_meta"]},
 	"label": "Checkout",
 	"item": [],
 	"settings": [

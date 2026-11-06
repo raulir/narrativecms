@@ -1,5 +1,5 @@
 {
-	"ajax": {"output": ["cms", "success", "redirect_url", "errors"]},
+	"ajax": {"output": ["cms","success","redirect_url","success_url","errors"]},
 	"label": "Register",
 	"image": "user/panel_register.png",
 	"item": [

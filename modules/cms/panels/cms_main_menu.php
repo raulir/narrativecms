@@ -20,18 +20,18 @@ class cms_main_menu extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 		if ($do == 'admin_main_menu_save'){
 
 			$this->load->model('cms/cms_menu_model');
 
-			$menu_id = $this->input->post('menu_id');
-			$menu_item_ids = $this->input->post('menu_item_id');
-			$modes = $this->input->post('mode');
-			$texts = $this->input->post('text');
-			$links = $this->input->post('link');
-			$new_window = $this->input->post('new_window');
-			$hide_from_menu = $this->input->post('hide_from_menu');
+			$menu_id = $params['menu_id'] ?? false;
+			$menu_item_ids = $params['menu_item_id'] ?? false;
+			$modes = $params['mode'] ?? false;
+			$texts = $params['text'] ?? false;
+			$links = $params['link'] ?? false;
+			$new_window = $params['new_window'] ?? false;
+			$hide_from_menu = $params['hide_from_menu'] ?? false;
 				
 			if (!is_array($menu_item_ids)){
 				$menu_item_ids = array();

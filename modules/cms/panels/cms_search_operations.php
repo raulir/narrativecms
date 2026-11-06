@@ -18,13 +18,13 @@ class cms_search_operations extends \Controller {
 
 	}
 
-	function panel_action(){
+	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do == 'cms_search'){
 			
-			$term = $this->input->post('term');
+			$term = $params['term'] ?? false;
 			 
 			$this->load->model('cms/cms_search_model');
 			$this->load->model('cms/cms_page_model');

@@ -8,11 +8,11 @@ class console_log extends \Controller {
 	
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 		
         if ($do == 'console_log_write'){
 
-        	$message = $this->input->post('message');
+        	$message = $params['message'] ?? false;
 
         	$file = fopen(cms_path('log').'console.log', 'a');
 

@@ -72,9 +72,9 @@ class cms_images_upload extends \Controller {
 		
 	}
 
-	function panel_action(){
+	function panel_action($params){
 					
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 		if ($do == 'cms_images_upload'){
 
 			$return = ['filenames' => [], ];
@@ -91,7 +91,7 @@ class cms_images_upload extends \Controller {
 			}
 			unset($_FILES[$input_name]);
 
-			$category = $this->input->post('category');
+			$category = $params['category'] ?? false;
 
 			foreach ($keys as $key){
 
@@ -108,8 +108,8 @@ class cms_images_upload extends \Controller {
 			$this->load->model('cms/cms_page_model');
 				
 			// collect data
-			$filename = $this->input->post('filename');
-			$category = $this->input->post('category');
+			$filename = $params['filename'] ?? false;
+			$category = $params['category'] ?? false;
 			
 			$new_image = $this->image_upload('replace_image', $category);
 				

@@ -1,4 +1,5 @@
 {
+	"ajax": {"output": ["cms","ok","quantity","changed","closed","redirect","cart_details","checkout_ready","lost_item_ids","price_changed_lines"]},
 	"label": "Cart",
 	"description": "Basic shop cart (badge + popup). Site modules extend for design.",
 	"item": [],

@@ -31,7 +31,7 @@ class cms_input_grid extends \Controller {
 				
 				$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
 				$params['data'] = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [
-						'do' => 'C',
+						'cms_do' => 'C',
 						'id' => $params['base_id'],
 				]);
 				
@@ -47,14 +47,14 @@ class cms_input_grid extends \Controller {
 					$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
 					$base_name = $base['panel_name'];
 					$ds_params = [
-							'do' => 'D',
+							'cms_do' => 'D',
 							'id' => $params['base_id'],
 							'row_id' => $params['id'],
 					];
 				} else {
 					$base_name = $params['base_name'];
 					$ds_params = [
-							'do' => 'D',
+							'cms_do' => 'D',
 							'id' => $params['id'],
 					];
 				}
@@ -94,7 +94,7 @@ class cms_input_grid extends \Controller {
 			if (!empty($params['operations']) && stristr($params['operations'], 'S')){
 
 				$ds_params = [
-					'do' => 'S',
+					'cms_do' => 'S',
 					'id' => $params['base_id'] ?? 0,
 					'fields' => $params['fields'],
 				];
@@ -129,7 +129,7 @@ class cms_input_grid extends \Controller {
 			});
 			
 			$ds_params = [
-					'do' => 'L',
+					'cms_do' => 'L',
 					'id' => $params['base_id'] ?? 0,
 			];
 			
@@ -285,14 +285,14 @@ class cms_input_grid extends \Controller {
 
 		if ($kind === 'add'){
 			return $this->run_panel_method($panel_name, 'ds_'.$ds, [
-					'do' => 'C',
+					'cms_do' => 'C',
 					'id' => $base_id,
 			]);
 		}
 
 		if ($kind === 'set'){
 			return $this->run_panel_method($panel_name, 'ds_'.$ds, [
-					'do' => 'U',
+					'cms_do' => 'U',
 					'id' => $base_id,
 					'row_id' => $id,
 					'col' => (string)($op['field'] ?? ''),
@@ -305,7 +305,7 @@ class cms_input_grid extends \Controller {
 				return ['web' => 1];
 			}
 			return $this->run_panel_method($panel_name, 'ds_'.$ds, [
-					'do' => 'D',
+					'cms_do' => 'D',
 					'id' => $base_id,
 					'row_id' => $id,
 			]);

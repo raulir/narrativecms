@@ -31,7 +31,7 @@ class cms_page_panel extends \Controller {
 	 */
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 		if (empty($do)){
 			return $params;
 		}
@@ -45,8 +45,8 @@ class cms_page_panel extends \Controller {
 
 		if ($do == 'cms_page_panel_shortcut'){
 
-			$cms_page_id = $this->input->post('cms_page_id');
-			$target_panel_id = $this->input->post('cms_page_panel_id');
+			$cms_page_id = $params['cms_page_id'] ?? false;
+			$target_panel_id = $params['cms_page_panel_id'] ?? false;
 
 			$new_id = $this->cms_page_panel_model->create_cms_page_panel([
 					'sort' => 'last',
@@ -80,9 +80,9 @@ class cms_page_panel extends \Controller {
 
 		} elseif ($do == 'cms_page_panel_caching'){
 
-			$target_id = $this->input->post('target_id');
-			$lists = $this->input->post('lists');
-			$caching = $this->input->post('caching');
+			$target_id = $params['target_id'] ?? false;
+			$lists = $params['lists'] ?? false;
+			$caching = $params['caching'] ?? false;
 
 			$params['_caching'] = 0;
 
@@ -100,7 +100,7 @@ class cms_page_panel extends \Controller {
 
 		} elseif ($do == 'cms_page_panel_show'){
 
-			$cms_page_panel_id = $this->input->post('cms_page_panel_id');
+			$cms_page_panel_id = $params['cms_page_panel_id'] ?? false;
 			$block = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id);
 
 			if (!empty($block['show'])){
@@ -114,12 +114,12 @@ class cms_page_panel extends \Controller {
 
 		} elseif ($do == 'cms_page_panel_copy'){
 
-			$this->cms_page_panel_cms_model->copy_cms_page_panel($this->input->post('cms_page_panel_id'));
+			$this->cms_page_panel_cms_model->copy_cms_page_panel(($params['cms_page_panel_id'] ?? false));
 
 		} elseif ($do == 'cms_page_panel_preview_title'){
 
-			$block_id = $this->input->post('cms_page_panel_id');
-			$language = $this->_resolve_cms_language($this->input->post('language'));
+			$block_id = $params['cms_page_panel_id'] ?? false;
+			$language = $this->_resolve_cms_language(($params['language'] ?? false));
 
 			if (!$this->cms_page_panel_model->_is_default_language($language)){
 				if (!empty($block_id)){
@@ -131,7 +131,7 @@ class cms_page_panel extends \Controller {
 				}
 			} else {
 				$built = $this->cms_page_panel_cms_model->build_panel_data_for_save(
-						$this->_post_panel_form_input($block_id), $language);
+						$this->_post_panel_form_input($block_id, $params), $language);
 				$compiled_title = $this->cms_page_panel_cms_model->compile_list_item_title(
 						$built['data_merged'], $built['panel_config'], $block_id, $language);
 
@@ -143,14 +143,14 @@ class cms_page_panel extends \Controller {
 
 		} elseif ($do == 'cms_page_panel_save'){
 
-			$block_id = $this->input->post('cms_page_panel_id');
-			$language = $this->_resolve_cms_language($this->input->post('language'));
+			$block_id = $params['cms_page_panel_id'] ?? false;
+			$language = $this->_resolve_cms_language(($params['language'] ?? false));
 
 			$old_data = $this->cms_page_panel_model->get_cms_page_panel($block_id, $language);
 
 			$created_page_id = 0;
-			if ((int)$this->input->post('reserved_page_draft') === 1
-					&& (int)$this->input->post('cms_page_id') === 0
+			if ((int)($params['reserved_page_draft'] ?? 0) === 1
+					&& (int)($params['cms_page_id'] ?? 0) === 0
 					&& (int)$block_id === 0){
 
 				$this->load->model('cms/cms_page_model');
@@ -163,11 +163,11 @@ class cms_page_panel extends \Controller {
 					];
 				}
 
-				$_POST['cms_page_id'] = $created_page_id;
+				$params['cms_page_id'] = $created_page_id;
 			}
 
 			$built = $this->cms_page_panel_cms_model->build_panel_data_for_save(
-					$this->_post_panel_form_input($block_id), $language);
+					$this->_post_panel_form_input($block_id, $params), $language);
 			$data_merged = $built['data_merged'];
 			$panel_config = $built['panel_config'];
 			$panel_structure = $built['panel_structure'];
@@ -214,7 +214,7 @@ class cms_page_panel extends \Controller {
 			try {
 				$saved = $this->cms_page_panel_cms_model->save_cms_page_panel_admin($block_id, $data_merged, [
 						'panel_config' => $panel_config,
-						'parent_name' => $this->input->post('parent_name'),
+						'parent_name' => ($params['parent_name'] ?? false),
 						'old_data' => is_array($old_data) ? $old_data : [],
 				]);
 				$block_id = $saved['cms_page_panel_id'];
@@ -245,7 +245,7 @@ class cms_page_panel extends \Controller {
 
 		} elseif ($do == 'cms_page_panel_delete'){
 
-			$block_id = $this->input->post('cms_page_panel_id');
+			$block_id = $params['cms_page_panel_id'] ?? false;
 
 			$data = $this->cms_page_panel_model->get_cms_page_panel($block_id);
 			$panel_config = $this->cms_panel_model->get_cms_panel_config($data['panel_name']);
@@ -274,18 +274,22 @@ class cms_page_panel extends \Controller {
 
 	}
 
-	function _post_panel_form_input($block_id){
+	/**
+	 * Editor form values for build_panel_data_for_save(). The template select posts
+	 * cms_template_page_id: _* keys never reach panel params from a request.
+	 */
+	function _post_panel_form_input($block_id, $params){
 
 		return [
 			'cms_page_panel_id' => $block_id,
-			'cms_page_id' => $this->input->post('cms_page_id'),
-			'parent_id' => $this->input->post('parent_id'),
-			'sort' => $this->input->post('sort'),
-			'title' => $this->input->post('title'),
-			'submenu_anchor' => $this->input->post('submenu_anchor'),
-			'panel_name' => $this->input->post('panel_name'),
-			'panel_params' => $this->input->post('panel_params'),
-			'_template_page_id' => $this->input->post('_template_page_id'),
+			'cms_page_id' => $params['cms_page_id'] ?? false,
+			'parent_id' => $params['parent_id'] ?? false,
+			'sort' => $params['sort'] ?? false,
+			'title' => $params['title'] ?? false,
+			'submenu_anchor' => $params['submenu_anchor'] ?? false,
+			'panel_name' => $params['panel_name'] ?? false,
+			'panel_params' => $params['panel_params'] ?? false,
+			'_template_page_id' => $params['cms_template_page_id'] ?? false,
 		];
 
 	}
@@ -301,11 +305,11 @@ class cms_page_panel extends \Controller {
 		$this->load->model('cms/cms_language_model');
 		
 		$return = [];
-		$return['reserved_page_draft'] = (int)$this->input->post('reserved_page_draft') === 1 ? 1 : 0;
+		$return['reserved_page_draft'] = (int)($params['reserved_page_draft'] ?? 0) === 1 ? 1 : 0;
 
 		// set up new page panel
-		$params['target_type'] = $this->input->post('target_type');
-		$params['panel_name'] = $this->input->post('panel_name');
+		$params['target_type'] = $params['target_type'] ?? false;
+		$params['panel_name'] = $params['panel_name'] ?? false;
 		if (is_string($params['panel_name'])){
 			$params['panel_name'] = str_replace('__', '/', trim($params['panel_name']));
 		}
@@ -313,7 +317,7 @@ class cms_page_panel extends \Controller {
 		// if page
 		if (empty($params['cms_page_panel_id']) && empty($params['cms_page_id']) && $params['target_type'] == 'page'){
 			
-			$params['cms_page_id'] = $this->input->post('target_id');
+			$params['cms_page_id'] = $params['target_id'] ?? false;
 			$params['cms_page_panel_id'] = 0;
 
 			if (!empty($params['panel_name']) && stristr($params['panel_name'], '/')){
@@ -322,8 +326,8 @@ class cms_page_panel extends \Controller {
 			
 		} else if (empty($params['cms_page_panel_id']) && empty($params['cms_page_id']) && $params['target_type'] == 'panel'){
 
-			$params['parent_id'] = $this->input->post('target_id');
-			$params['parent_input_name'] = $this->input->post('target_input_name');
+			$params['parent_id'] = $params['target_id'] ?? false;
+			$params['parent_input_name'] = $params['target_input_name'] ?? false;
 			
 			$return['parent_name'] = $params['parent_input_name'];
 			

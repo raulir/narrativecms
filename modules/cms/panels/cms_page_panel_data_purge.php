@@ -22,7 +22,7 @@ class cms_page_panel_data_purge extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do') ?? ($params['cms_do'] ?? '');
+		$do = $params['cms_do'] ?? '';
 		if ($do !== 'cms_page_panel_data_purge'){
 			return $params;
 		}
@@ -30,22 +30,19 @@ class cms_page_panel_data_purge extends \Controller {
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_page_panel_cms_model');
 
-		$cms_page_panel_id = (int)$this->input->post('cms_page_panel_id');
-		if ($cms_page_panel_id < 1){
-			$cms_page_panel_id = (int)($params['cms_page_panel_id'] ?? 0);
-		}
+		$cms_page_panel_id = (int)($params['cms_page_panel_id'] ?? 0);
 
 		$scan = $this->scan_orphan_panel_data($cms_page_panel_id);
 
-		$panel_fields = $this->input->post('panel_fields');
+		$panel_fields = $params['panel_fields'] ?? false;
 		if (!is_array($panel_fields)){
 			$panel_fields = [];
 		}
-		$settings_fields = $this->input->post('settings_fields');
+		$settings_fields = $params['settings_fields'] ?? false;
 		if (!is_array($settings_fields)){
 			$settings_fields = [];
 		}
-		$languages = $this->input->post('languages');
+		$languages = $params['languages'] ?? false;
 		if (!is_array($languages)){
 			$languages = [];
 		}
@@ -128,9 +125,6 @@ class cms_page_panel_data_purge extends \Controller {
 	function panel_params($params){
 
 		$cms_page_panel_id = (int)($params['cms_page_panel_id'] ?? 0);
-		if ($cms_page_panel_id < 1){
-			$cms_page_panel_id = (int)$this->input->post('cms_page_panel_id');
-		}
 		if ($cms_page_panel_id < 1){
 			$cms_page_panel_id = (int)($params['export_id'] ?? 0);
 		}

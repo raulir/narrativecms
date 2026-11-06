@@ -20,13 +20,13 @@ class cms_table extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do == 'cms_table_save'){
 			 
 			// collect data
-			$table = $this->input->post('table');
-			$data = $this->input->post('data');
+			$table = $params['table'] ?? false;
+			$data = $params['data'] ?? false;
 			 
 			// transpose panel params arrays
 			if (!is_array($data)){

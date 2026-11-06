@@ -1,4 +1,5 @@
 {
+	"ajax": {"output": ["cms","product_id","success"]},
 	"label": "Product buy widget",
 	"settings": [
 		{

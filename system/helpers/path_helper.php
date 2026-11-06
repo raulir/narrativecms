@@ -7,10 +7,13 @@
 
 function cms_ensure_runtime_dirs(){
 
-	foreach (['cache', 'tmp', 'log', 'session'] as $key){
+	foreach (['cache', 'tmp', 'log', 'session', 'upload'] as $key){
 		$p = rtrim(cms_path($key), '/');
 		if ($p !== '' && !is_dir($p)){
 			@mkdir($p, ($key === 'session') ? 0700 : 0755, true);
+		}
+		if ($p !== '' && is_dir($p) && !is_file($p.'/.gitkeep')){
+			@file_put_contents($p.'/.gitkeep', '');
 		}
 	}
 

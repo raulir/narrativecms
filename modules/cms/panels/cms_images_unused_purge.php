@@ -23,20 +23,11 @@ class cms_images_unused_purge extends \Controller {
 			$params = [];
 		}
 
-		$do = '';
-		if (is_object($this->input) && method_exists($this->input, 'post')){
-			$do = $this->input->post('cms_do');
-		}
-		if ($do === null || $do === false || $do === ''){
-			$do = $params['cms_do'] ?? ($_POST['do'] ?? '');
-		}
+		$do = $params['cms_do'] ?? ($params['do'] ?? '');
 
-		$min_months = $params['min_months'] ?? ($_POST['min_months'] ?? 3);
-		if (is_object($this->input) && method_exists($this->input, 'post')){
-			$posted = $this->input->post('min_months');
-			if ($posted !== null && $posted !== false && $posted !== ''){
-				$min_months = $posted;
-			}
+		$min_months = $params['min_months'] ?? '';
+		if ($min_months === null || $min_months === false || $min_months === ''){
+			$min_months = 3;
 		}
 		$min_months = (int)$min_months;
 		if ($min_months < 0){
@@ -48,15 +39,6 @@ class cms_images_unused_purge extends \Controller {
 		$raw_cat = null;
 		if (array_key_exists('category', $params)){
 			$raw_cat = $params['category'];
-		}
-		if (array_key_exists('category', $_POST)){
-			$raw_cat = $_POST['category'];
-		}
-		if (is_object($this->input) && method_exists($this->input, 'post')){
-			$posted_cat = $this->input->post('category');
-			if ($posted_cat !== null && $posted_cat !== false){
-				$raw_cat = $posted_cat;
-			}
 		}
 		if ($raw_cat !== null && $raw_cat !== false && $raw_cat !== ''){
 			if ((string)$raw_cat === '0'){

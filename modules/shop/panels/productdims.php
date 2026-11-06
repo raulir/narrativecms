@@ -14,13 +14,13 @@ class productdims extends \Controller{
 		$this->load->model('shop/shop_model');
 		$this->load->model('cms/cms_page_panel_model');
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do == 'availability'){
 
-			$params['product_id'] = $this->input->post('product_id');
-			$params['name'] = $this->input->post('name');
-			$params['value'] = $this->input->post('value');
+			$params['product_id'] = $params['product_id'] ?? false;
+			$params['name'] = $params['name'] ?? false;
+			$params['value'] = $params['value'] ?? false;
 
 			$params['variations'] = $this->shop_model->get_product_variations($params['product_id'], [
 					'dims' => [$params['name'] => $params['value']],

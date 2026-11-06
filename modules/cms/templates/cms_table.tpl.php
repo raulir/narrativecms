@@ -9,7 +9,7 @@
 
 	<form method="post" class="admin_form" style="display: inline; ">
 	
-		<input type="hidden" name="do" value="cms_table_save">
+		<input type="hidden" name="cms_do" value="cms_table_save">
 		<input type="hidden" name="table" value="<?php print($table); ?>">
 
 		<?php 

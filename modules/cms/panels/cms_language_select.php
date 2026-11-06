@@ -23,11 +23,11 @@ class cms_language_select extends \Controller {
 
 	function panel_action($params){
 
-		$do = $this->input->post('cms_do');
+		$do = $params['cms_do'] ?? false;
 
 		if ($do === 'cms_language_set'){
 
-			$cms_language = $this->input->post('language');
+			$cms_language = $params['language'] ?? false;
 			$this->load->model('cms/cms_language_model');
 			$resolved_language = $this->cms_language_model->resolve_language_id(
 					$cms_language,
