@@ -268,11 +268,13 @@ function cms_position_link_init($root){
 			var $this = $(this)
 			var request_url = cms_position_request_url($this.attr('href'))
 
-			if (window._cms_offline && typeof music_offline_block_url === 'function' && music_offline_block_url(request_url)){
+			var block_url = cms_hook('offline_block_url')
+			if (window._cms_offline && block_url && block_url(request_url)){
 				e.preventDefault()
 				e.stopPropagation()
-				if (typeof music_offline_notice === 'function'){
-					music_offline_notice()
+				var offline_notice = cms_hook('offline_notice')
+				if (offline_notice){
+					offline_notice()
 				}
 				return false
 			}
@@ -375,8 +377,9 @@ function cms_position_on_popstate() {
 		return
 	}
 
-	// Music unit set history (unit public slug) — see modules/music/js/units.js
-	if (typeof music_set_on_popstate === 'function' && music_set_on_popstate()) {
+	// A module may handle the history step itself (cms_hooks.popstate)
+	var popstate = cms_hook('popstate')
+	if (popstate && popstate()) {
 		return
 	}
 

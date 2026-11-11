@@ -82,6 +82,54 @@ class cms_css_model extends \Model {
 
 	}
 
+	/**
+	 * Build a missing cache/<module>__<file>.css from modules/<module>/css/<file>.scss
+	 * (or modules/<module>/<file>.scss), as a page render would. A page served from the
+	 * HTML cache, or an exercise fetched by the app, lists its css without building it,
+	 * so a cleared cache folder answers 404 until some page renders it. Called by the
+	 * cms/cms_panel_css panel and the app checksum check (music/app_shell), never on page requests.
+	 * Returns the file path, or false when the name is not of that form or has no source.
+	 */
+	function rebuild_cache_css($name){
+
+		$name = (string)$name;
+		if (!preg_match('/^[a-z0-9_]+\.css$/', $name) || !($split = strpos($name, '__'))){
+			return false;
+		}
+
+		$module = substr($name, 0, $split);
+		$file = substr($name, $split + 2, -4);
+		if ($file === '' || !is_dir($GLOBALS['config']['base_path'].'modules/'.$module)){
+			return false;
+		}
+
+		$source = '';
+		foreach (['modules/'.$module.'/css/'.$file.'.scss', 'modules/'.$module.'/'.$file.'.scss'] as $candidate){
+			if (is_file($GLOBALS['config']['base_path'].$candidate)){
+				$source = $candidate;
+				break;
+			}
+		}
+		if ($source === ''){
+			return false;
+		}
+
+		$target = $GLOBALS['config']['base_path'].cms_cache_rel($name);
+
+		// Only this file: no packed bundle as a side effect
+		$pack_css = $GLOBALS['config']['cache']['pack_css'] ?? 0;
+		$GLOBALS['config']['cache']['pack_css'] = 0;
+		try {
+			$this->pack([$source]);
+		} finally {
+			$GLOBALS['config']['cache']['pack_css'] = $pack_css;
+		}
+
+		clearstatcache(true, $target);
+		return is_file($target) ? $target : false;
+
+	}
+
 	function pack($scsss){
 
 		$csss = [];

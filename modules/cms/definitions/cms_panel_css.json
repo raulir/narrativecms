@@ -1,0 +1,5 @@
+{
+	"label": "Panel css rebuild",
+	"description": "Builds a missing cache/<module>__<file>.css from its scss (ajax only)",
+	"ajax": {"input": ["cms", "name"], "output": ["cms", "ok"]}
+}

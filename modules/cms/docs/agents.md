@@ -80,7 +80,12 @@ get_ajax('module/panel', { do: 'save' }).then(function(data) {
 - `get_ajax(name, params)` sends `no_html: 1`. Use it for `panel_action` and JSON. A `success` function in `params` still runs, for older callers, and the promise resolves as well.
 - `get_ajax_panel(name, params)` does not send `no_html`. The reply includes panel HTML. A third-argument callback still runs on success, and the promise resolves too. It is not a wrapper around `get_ajax`, because that would force `no_html` and drop the HTML.
 - Both POST with jQuery. Param keys are sorted before the request. `_cache` (seconds), `_cache_offline`, and `_cache_reload` are removed before the POST and select the localStorage copy. The cache key includes `_cms_user_id`, so each account has its own copy. A stored reply is served on failure when one exists. CMS admin does not use this cache.
-- A site may set `window.music_offline_take(name, params, stored, deliver, fail)`. When that function returns true, `get_panel` does not call the server. The CMS does not ship a practice cache.
+- `_store` (store-only, also removed before the POST) is for a caller that keeps the reply to show later: the reply's panel css, scripts and field targets are not put on the page. In the app the html's script tags are taken out either way, and the reply lists them as `cms_html_srcs`.
+- **Module hooks:** CMS scripts never call a module function by name. A module sets `window.cms_hooks.<name>`, and the CMS calls it through `cms_hook(name)` when it is set (`cms_site_main.js`):
+  - `panel_take(name, params, stored, deliver, fail)`: returns true when it answers a `get_panel` request itself, so the server is not called. The CMS does not ship a practice cache; music's `offline.js` sets this.
+  - `offline_notice()`: a request or link cannot run offline.
+  - `offline_block_url(url)`: true keeps an in-app position link from opening while `_cms_offline`.
+  - `popstate()`: true when the module handled a history step (`cms_position_link.js`).
 
 ## HTTP from PHP
 
@@ -168,6 +173,10 @@ List-only types live as `modules/<module>/definitions/<name>.json` and a `cms_me
 $user_name
 cms_page_panel_create()
 ```
+
+### Underscores, not hyphens
+
+Names use underscores between words: code names, `data-*` attributes, definition keys, cache and storage keys (Cache API names and paths, `localStorage` keys), and generated folders and files (`unit_sets`, `music_offline`, `musicapp_meta`). Hyphens are kept only where an outside format requires them (CSS properties, HTTP headers, URL slugs and content languages such as `en-us`).
 
 ### Code names
 

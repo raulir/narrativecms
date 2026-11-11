@@ -1,5 +1,14 @@
 'use strict'
 
+// Module hooks: a module sets window.cms_hooks.<name> to a function, and the CMS calls it when set.
+// panel_take(name, params, stored, deliver, fail) answers a panel request itself (true: no server call);
+// offline_notice(); offline_block_url(url) (true: an offline position link stays); popstate() (true: handled).
+window.cms_hooks = window.cms_hooks || {}
+
+function cms_hook(name) {
+	return (window.cms_hooks && typeof window.cms_hooks[name] === 'function') ? window.cms_hooks[name] : null
+}
+
 function _cms_get_base() {
 	return (typeof _cms_base !== 'undefined' ? _cms_base : '/')
 }
@@ -240,9 +249,12 @@ function cms_ajax_panel(name, args) {
 	}
 	var cache_offline = cms_panel_cache_flag(params._cache_offline)
 	var cache_reload = cms_panel_cache_flag(params._cache_reload)
+	// Store-only: the caller keeps the css/js/img list and fetches it. Do not put those files on this page.
+	var store_only = cms_panel_cache_flag(params._store)
 	delete params._cache
 	delete params._cache_offline
 	delete params._cache_reload
+	delete params._store
 
 	var ajax_timeout = params.timeout
 	if (params._ajax_timeout !== undefined && params._ajax_timeout !== null) {
@@ -309,30 +321,42 @@ function cms_ajax_panel(name, args) {
 					if (typeof value == 'string') {
 						value = prepare_field(value)
 						returned_data.result[key] = value
-						$('.__' + name.replace('/', '__') + '__' + key).html(value)
-					} else if (typeof value == 'number' || typeof value == 'bigint') {
+					}
+					// Store-only puts nothing on the page, field targets included
+					if (!store_only && (typeof value == 'string' || typeof value == 'number' || typeof value == 'bigint')) {
 						$('.__' + name.replace('/', '__') + '__' + key).html(value)
 					}
 				})
-				var scripts_done = (typeof cms_inapp_load_scripts === 'function')
-					? cms_inapp_load_scripts(script_srcs)
-					: Promise.resolve()
-				scripts_done.then(function(){
-					if (typeof cms_position_link_init === 'function') {
-						cms_position_link_init()
-					}
-				})
+				// In the app the html's script tags are taken out and loaded here. A store-only caller
+				// loads nothing now, so it gets them as a list to keep with its copy.
+				returned_data.cms_html_srcs = script_srcs
+				if (!store_only) {
+					var scripts_done = (typeof cms_inapp_load_scripts === 'function')
+						? cms_inapp_load_scripts(script_srcs)
+						: Promise.resolve()
+					scripts_done.then(function(){
+						if (typeof cms_position_link_init === 'function') {
+							cms_position_link_init()
+						}
+					})
+				}
 			}
 
 			var finish = function() {
 				resolve(returned_data)
 			}
 
+			if (store_only){
+				finish()
+				return
+			}
+
 			cms_apply_panel_css(returned_data, finish)
 
 		}
 
-		if (typeof window.music_offline_take === 'function' && window.music_offline_take(name, params, stored, deliver, fail)){
+		var panel_take = cms_hook('panel_take')
+		if (panel_take && panel_take(name, params, stored, deliver, fail)){
 			return
 		}
 
@@ -343,8 +367,9 @@ function cms_ajax_panel(name, args) {
 		}
 
 		if (cache_offline && !cache_reload && !stored && typeof navigator !== 'undefined' && navigator.onLine === false) {
-			if (typeof music_offline_notice === 'function'){
-				music_offline_notice()
+			var offline_notice = cms_hook('offline_notice')
+			if (offline_notice){
+				offline_notice()
 			}
 			fail({
 				xhr: null,
@@ -765,10 +790,51 @@ function _cms_load_css(filename) {
 		link.type = 'text/css'
 		link.rel = 'stylesheet'
 		link.addEventListener('load', resolve)
+		// A failed load does not hold the caller; the document listener below marks the link
+		link.addEventListener('error', resolve)
 		link.href = cms_inapp_asset_url(filename)
 
 		document.head.appendChild(link)
 
+	})
+}
+
+/**
+ * Load again every stylesheet whose load failed (data-cms_css_failed), as a fresh stylesheet link.
+ * Runs when the browser is back online (a failed link still has an empty sheet in Chromium, so the mark tells).
+ */
+function cms_css_retry() {
+
+	// A failed style preload (inline_css pages) never became a stylesheet: it comes back as one
+	$('link[data-cms_css_failed="1"]').each(function() {
+
+		if (!this.href) {
+			return
+		}
+
+		let fresh = document.createElement('link')
+		fresh.type = 'text/css'
+		fresh.rel = 'stylesheet'
+		fresh.href = this.href
+		this.parentNode.insertBefore(fresh, this.nextSibling)
+		$(this).remove()
+
+	})
+
+}
+
+if (!window.cms_css_retry_bound) {
+	window.cms_css_retry_bound = 1
+	// Every stylesheet or style preload that fails is marked, also links from the page HTML
+	// (error does not bubble: capture)
+	document.addEventListener('error', function(e) {
+		var el = e.target
+		if (el && el.tagName === 'LINK' && (/stylesheet/i.test(el.rel || '') || (/preload/i.test(el.rel || '') && el.getAttribute('as') === 'style'))) {
+			el.setAttribute('data-cms_css_failed', '1')
+		}
+	}, true)
+	window.addEventListener('online', function() {
+		cms_css_retry()
 	})
 }
 
@@ -791,6 +857,11 @@ function cms_load_css(filenames, force_download, class_to_remove) {
 
 			$('link[type="text/css"]').each(function() {
 				if (this.href.indexOf(clean_filename) !== -1) {
+					// A link whose load failed does not count: it is replaced by a new one
+					if (this.getAttribute('data-cms_css_failed') === '1') {
+						$(this).remove()
+						return
+					}
 					found = true
 				}
 			})

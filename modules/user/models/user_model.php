@@ -315,7 +315,27 @@ class user_model extends \Model {
 			return false;
 		}
 
+		// Meta is one JSON blob: two requests writing at once would each drop the other's key. Write under
+		// a lock, on a fresh read (this request may hold an older copy of the user from before).
+		$lock = 'user_meta_'.$user_id;
+		$query = $this->db->query('SELECT GET_LOCK(?, 10) AS l', [$lock]);
+		$row = (is_object($query)) ? $query->row_array() : [];
+		$got = (is_array($row) && $row) ? (int)reset($row) : 0;
+		if ($got !== 1){
+			return false;
+		}
+		try {
+			return $this->_update_user_meta_locked($user_id, $set, $unset);
+		} finally {
+			$this->db->query('SELECT RELEASE_LOCK(?) AS l', [$lock]);
+		}
+
+	}
+
+	function _update_user_meta_locked($user_id, $set, $unset){
+
 		$this->load->model('cms/cms_page_panel_model');
+		$this->cms_page_panel_model->_invalidate_panel_load_slot($user_id);
 		$user = $this->cms_page_panel_model->get_cms_page_panel($user_id);
 		if (empty($user) || !is_array($user)){
 			return false;
