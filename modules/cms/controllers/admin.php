@@ -325,24 +325,7 @@ class admin extends \Controller {
 		
 		// output to layout
 		$this->output('cms/admin', 'admin/dump', $panel_data);
-		
-	}
-	
-	// deprecated
-	function table($table){
-	
-		// set page config
-		$page_config = array(
-				array('position' => 'header', 'panel' => 'cms/cms_user', 'module' => 'cms', ),
-				array('position' => 'header', 'panel' => 'cms/cms_menu', 'module' => 'cms', ),
-				array('position' => 'main', 'panel' => 'cms/cms_table', 'module' => 'cms', 'params' => array('table' => $table, ), ),
-		);
-	
-		// render panels
-		$panel_data = $this->render($page_config);
-	
-		$this->output('cms/admin', 'admin/table', $panel_data);
-	
+
 	}
 
 }

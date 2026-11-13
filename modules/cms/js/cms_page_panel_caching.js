@@ -13,7 +13,10 @@ function cms_page_panel_caching_init($root){
 		if (value != null){
 			$('.cms_page_panel_caching_values').append('<div class="cms_page_panel_caching_item" data-value="' + value + '">' + 
 					value + '<div class="cms_page_panel_caching_item_close">x</div></div>');
-			$('.cms_page_panel_caching_lists_option_' + value).remove();
+			// By value: a list name has a "/", so it cannot be part of a class selector
+			$('.cms_page_panel_caching_lists_select option').filter(function(){
+				return this.value === value;
+			}).remove();
 			cms_page_panel_caching_item_init($panel);
 		}
 		});
@@ -37,7 +40,7 @@ function cms_page_panel_caching_item_init($root){
 		$item.on('click.cms', function(){
 			var value = $item.data('value');
 			$item.remove();
-			$('.cms_page_panel_caching_lists_select').append('<option class="cms_page_panel_caching_lists_option_' + value + '" value="' + value + '">' + value + '</option>');
+			$('.cms_page_panel_caching_lists_select').append('<option value="' + value + '">' + value + '</option>');
 		});
 
 	});
@@ -64,7 +67,12 @@ function cms_page_panel_caching_save(after){
 		'caching': caching,
 		'target_id': $('.cms_page_panel_caching_target_id').val()
 	}, function(data){
-		
+
+		if (data.result.ok === 0){
+			cms_notification(data.result.cms_error || 'Cannot save caching settings', 3, 'error');
+			return;
+		}
+
 		// make button bold accordingly
 		if(data.result._caching == 1){
 			$('.cms_page_panel_caching').addClass('cms_tool_button_active');

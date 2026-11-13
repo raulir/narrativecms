@@ -76,18 +76,3 @@ function remove_invisible_characters($str, $url_encoded = true){
 	return $str;
 
 }
-
-/**
- * HTML-escape a string or array of strings.
- */
-function html_escape($var){
-
-	if (is_array($var)){
-		return array_map('html_escape', $var);
-	}
-
-	$charset = $GLOBALS['config']['system']['charset'] ?? 'UTF-8';
-
-	return htmlspecialchars($var, ENT_QUOTES, $charset);
-
-}

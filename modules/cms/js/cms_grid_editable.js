@@ -51,16 +51,18 @@ function cms_grid_editable_init($root){
 					}
 					var $parsed = $('<div>').html(html)
 					var err = $parsed.find('.cms_grid_editable_container').attr('data-save_error') || ''
-					var $cell = $this.closest('.cms_grid_field_inner')
 
+					// Refused: keep the cell and put back the value it had before the edit
+					if (err || !$parsed.find('.cms_grid_editable_container').length){
+						$this.val($this.data('old_value'))
+						cms_notification(err || 'Cannot update field', 4, 'error')
+						return
+					}
+
+					var $cell = $this.closest('.cms_grid_field_inner')
 					$cell.html(html)
 					cms_grid_editable_init($cell)
-
-					if (err){
-						cms_notification(err, 4)
-					} else {
-						cms_notification('Field ' + $this.data('name') + ' updated', 2)
-					}
+					cms_notification('Field ' + $this.data('name') + ' updated', 2)
 
 				})
 

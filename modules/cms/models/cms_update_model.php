@@ -4,7 +4,7 @@ namespace cms;
 
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-require_once BASEPATH.'helpers/path_helper.php';
+require_once $GLOBALS['config']['base_path'].'modules/cms/helpers/cms_path_helper.php';
 
 class cms_update_model extends \Model {
 
@@ -144,7 +144,6 @@ class cms_update_model extends \Model {
 
 		return [
 				'cache/.gitkeep',
-				'tmp/.gitkeep',
 				'tmp/sessions/.gitkeep',
 				'log/.gitkeep',
 				'img/.gitkeep',

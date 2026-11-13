@@ -46,7 +46,7 @@ Without the **user** module, session keys may still come from legacy `$_SESSION[
 - Denied **with user module**: soft redirect to **Link to login** (`user/user_settings` → `login_link`) via `_reject_access`
 - Denied **without user module**: no login redirect (gate returns; page is not forced to a fake login URL)
 
-Guest redirect URL helper: `user_model::get_login_redirect_url()` / `_get_login_redirect()`.
+Guest redirect URL helper: `user_model::get_login_redirect_url()` / `cms_access_model::get_login_redirect()` (`['url', 'text']`, also when the user module is off). The access-denied popup (`cms/cms_access_denied`) takes its login link from it on the server.
 
 ---
 

@@ -25,7 +25,7 @@ function cms_page_panel_save_submit(params){
 					cms_input_grid_after_save(result)
 				}
 				if (result.ok === 0){
-					cms_notification(result.error || 'Cannot save panel', 3, 'error')
+					cms_notification(result.cms_error || 'Cannot save panel', 3, 'error')
 					return
 				}
 				cms_page_panel_title_preview_on_save(data)
@@ -43,7 +43,7 @@ function cms_page_panel_save_submit(params){
 					cms_input_grid_after_save(result)
 				}
 				if (result.ok === 0){
-					cms_notification(result.error || 'Cannot save panel', 3, 'error')
+					cms_notification(result.cms_error || 'Cannot save panel', 3, 'error')
 					return
 				}
 

@@ -43,6 +43,8 @@ Development is for a custom CMS written in PHP and JavaScript. CSS uses SCSS.
 
 Answers should be in context of creating new panels (or other functionality) for this CMS.
 
+**"Block" and "page panel" mean the same thing:** one `cms_page_panel` row. That is a panel placed on a page, a list item, or a panel's settings row. Code and docs use both words (`admin/cms_page_panel/<id>/` is the block editor).
+
 There were some example panels historically; as this file ships with the project, those aren’t needed — there should be enough examples in the project.
 
 ## System runtime
@@ -174,6 +176,10 @@ $user_name
 cms_page_panel_create()
 ```
 
+### Legacy PHP syntax
+
+`array()` is legacy. Use `[]` in new code, and in code you rework or review. Do not sweep untouched files only to change it. Templates have the same rule for `<?php print(…) ?>` (§ Template files).
+
 ### Underscores, not hyphens
 
 Names use underscores between words: code names, `data-*` attributes, definition keys, cache and storage keys (Cache API names and paths, `localStorage` keys), and generated folders and files (`unit_sets`, `music_offline`, `musicapp_meta`). Hyphens are kept only where an outside format requires them (CSS properties, HTTP headers, URL slugs and content languages such as `en-us`).
@@ -189,6 +195,10 @@ The prefix says who owns the name. A review fails a variable, function, or other
 Panel entry points stay `<panel>_init`, `<panel>_destroy`, `<panel>_resize`, `<panel>_scroll`, and the `<panel>_ok` guard. The CMS calls those by panel name.
 
 A short global helper may keep a leading underscore and a short name. Templates use these often: `_ib()`, `_lh()`, `_print_r()`, `_panel()`. New helpers of that kind are rare. Do not use that form for module or panel logic.
+
+**Where a helper file lives:**
+- **`system/helpers/`:** only framework helpers that system code uses, or that every module's templates use (`_panel()`, `_lh()`, `_ib()`, JSON, errors).
+- **A module's own `helpers/`:** a helper that serves one module's domain, even if other modules call it. Name it with the module prefix and load it with the module, for example `modules/cms/helpers/cms_markdown_helper.php`, loaded as `cms/cms_markdown_helper`, and `cms_path_helper.php` (CMS Update and install).
 
 Template and CSS class prefixes are separate. See Template files and Markup and CSS style.
 
@@ -363,6 +373,8 @@ CMS field `"label"` values — do not repeat the word “label” in the label t
 All styles on the template have to start with `<panel name>_` prefix.
 
 All panels must have `<panel name>_container` and `<panel name>_content` elements around the rest of the content.
+
+Print values with `<?= $value ?>`. `<?php print($value); ?>` (and `<?php echo … ?>`) is legacy. Use `<?= ?>` in new templates, and in templates you rework or review. Do not sweep untouched templates only to change it.
 
 HTML `data-*` attributes with multi-word names use underscores after the prefix: `data-unit_id`, `data-label_correct`. Do not use hyphens between words (`data-unit-id`, `data-label-correct`).
 

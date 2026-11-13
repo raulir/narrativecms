@@ -30,7 +30,7 @@ class cms_input_image extends \Controller {
 
 	function panel_params($params){
 
-		$this->load->helper('markdown_helper');
+		$this->load->helper('cms/cms_markdown_helper');
 
 		if (!empty($params['value'])){
 			$params['value'] = markdown_image_field_filename($params['value']);

@@ -460,13 +460,12 @@ class cms_schema_model extends \Model {
 			return $out;
 		}
 
-		$field_names = array_keys($table_fields);
-		$in_list = "'".implode("','", $field_names)."'";
+		$field_names = array_map('strval', array_keys($table_fields));
 
 		$sql = "select count(*) as c from cms_page_panel_param p ".
 			"join cms_page_panel a on a.cms_page_panel_id = p.cms_page_panel_id ".
-			"where a.panel_name = ? and p.name in (".$in_list.") and p.language = '' ";
-		$query = $this->db->query($sql, [$panel_name]);
+			"where a.panel_name = ? and p.name in (".implode(', ', array_fill(0, count($field_names), '?')).") and p.language = '' ";
+		$query = $this->db->query($sql, array_merge([$panel_name], $field_names));
 		if ((int)$query->row_array()['c'] > 0) {
 			$out['reasons'][] = 'legacy_params';
 			$out['reason_labels'][] = 'Legacy params still present';

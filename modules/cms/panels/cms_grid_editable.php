@@ -21,17 +21,25 @@ class cms_grid_editable extends \Controller {
 
 		if (!empty($params['cms_do']) && $params['cms_do'] == 'update_field'){
 
-			if (!empty($params['ds']) && !empty($params['base_id'])){
+			$this->load->model('cms/cms_page_panel_cms_model');
 
-				$this->load->model('cms/cms_page_panel_model');
-				$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
+			// Only a grid of the block's definition, or a field of the item's definition
+			$target = $this->cms_page_panel_cms_model->get_grid_cell_target(
+					$params['item_id'] ?? 0, $params['name'] ?? '', $params['base_id'] ?? 0, $params['ds'] ?? '');
+			$value = $params['value'] ?? '';
 
-				$updated = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [
+			if (!empty($target['error']) || !is_scalar($value)){
+				return $this->_refused($target['error'] ?? 'Unknown value');
+			}
+
+			if ($target['ds'] !== ''){
+
+				$updated = $this->run_panel_method($target['panel_name'], 'ds_'.$target['ds'], [
 						'cms_do' => 'U',
-						'id' => $params['base_id'],
-						'row_id' => $params['item_id'],
-						'col' => $params['name'],
-						'value' => $params['value'],
+						'id' => $target['block_id'],
+						'row_id' => $params['item_id'] ?? '',
+						'col' => $target['name'],
+						'value' => $value,
 				]);
 				if (is_array($updated) && !empty($updated['_reason'])){
 					$params['_reason'] = $updated['_reason'];
@@ -41,7 +49,7 @@ class cms_grid_editable extends \Controller {
 			} else {
 
 				$this->load->model('cms/cms_page_panel_model');
-				$this->cms_page_panel_model->update_cms_page_panel($params['item_id'], [$params['name'] => $params['value']]);
+				$this->cms_page_panel_model->update_cms_page_panel($target['block_id'], [$target['name'] => $value]);
 
 			}
 
@@ -51,40 +59,62 @@ class cms_grid_editable extends \Controller {
 
 	}
 
+	/**
+	 * A refused cell, merged over the params: the reply carries only the reason (the JS keeps the cell and
+	 * restores its old value). The posted item, name, ds and value are not printed back.
+	 */
+	function _refused($reason){
+
+		return ['_reason' => $reason, '_reload_value' => 0, 'item_id' => '', 'name' => '', 'value' => '', 'base_id' => 0, 'ds' => ''];
+
+	}
+
 	function panel_params($params){
 
-		if (isset($params['value']) && empty($params['_reload_value'])){
+		if (!empty($params['_reason']) && empty($params['_reload_value'])){
 			return $params;
 		}
 
-		if (!empty($params['ds']) && !empty($params['base_id'])){
+		if (isset($params['value']) && is_scalar($params['value']) && empty($params['_reload_value'])){
+			return $params;
+		}
 
-			$this->load->model('cms/cms_page_panel_model');
-			$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
-			$rows = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [
+		// The reload reads only what the cell write may write
+		$this->load->model('cms/cms_page_panel_cms_model');
+		$target = $this->cms_page_panel_cms_model->get_grid_cell_target(
+				$params['item_id'] ?? 0, $params['name'] ?? '', $params['base_id'] ?? 0, $params['ds'] ?? '');
+
+		if (!empty($target['error'])){
+			return array_merge($params, $this->_refused($target['error']));
+		}
+
+		$params['value'] = '';
+
+		if ($target['ds'] !== ''){
+
+			$rows = $this->run_panel_method($target['panel_name'], 'ds_'.$target['ds'], [
 					'cms_do' => 'L',
-					'id' => $params['base_id'],
+					'id' => $target['block_id'],
 			]);
 
-			$params['value'] = '';
-
-			if (is_array($rows)){
-				foreach ($rows as $row){
-					if (isset($row['id']) && (string)$row['id'] === (string)$params['item_id'] && array_key_exists($params['name'], $row)){
-						$params['value'] = $row[$params['name']];
-						break;
-					}
+			foreach (is_array($rows) ? $rows : [] as $row){
+				if (is_array($row) && isset($row['id']) && (string)$row['id'] === (string)($params['item_id'] ?? '')){
+					$params['value'] = $row[$target['name']] ?? '';
+					break;
 				}
 			}
 
-			return $params;
+		} else {
+
+			$this->load->model('cms/cms_page_panel_model');
+			$item = $this->cms_page_panel_model->get_cms_page_panel($target['block_id']);
+			$params['value'] = $item[$target['name']] ?? '';
 
 		}
 
-		$this->load->model('cms/cms_page_panel_model');
-		$item = $this->cms_page_panel_model->get_cms_page_panel($params['item_id']);
-
-		$params['value'] = $item[$params['name']] ?? '';
+		if (!is_scalar($params['value'])){
+			$params['value'] = '';
+		}
 
 		return $params;
 

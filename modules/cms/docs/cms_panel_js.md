@@ -80,7 +80,7 @@ When a repeater adds a row, [`cms_input_repeater.js`](../js/cms_input_repeater.j
 
 ## jQuery plugins
 
-Some panels delegate to `$.fn.*` plugins (`cms_images_lazy`, `cms_images_hq`, `cms_window_height`). The plugin applies element-level `*_ok` on each target; the panel `*_init` still follows the scope/guard pattern at the entry point.
+Some panels delegate to `$.fn.*` plugins (`cms_images_lazy`, `cms_images_hq`). The plugin applies element-level `*_ok` on each target; the panel `*_init` still follows the scope/guard pattern at the entry point.
 
 ## What not to use
 

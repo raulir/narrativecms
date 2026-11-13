@@ -1561,8 +1561,11 @@ class cms_page_panel_model extends \Model {
 
 // 				_print _r($recursive_keys);
 
-				$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name not in ('".implode("','", $recursive_keys)."') ";
-				$this->db->query($sql, [(int)$cms_page_panel_id]);
+				// Key names come from the saved data (posted sub-keys too): bound, never in the SQL text
+				$recursive_keys = array_values(array_map('strval', $recursive_keys));
+				$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name not in ("
+						.implode(',', array_fill(0, count($recursive_keys), '?')).") ";
+				$this->db->query($sql, array_merge([(int)$cms_page_panel_id], $recursive_keys));
 			}
 			
 			$this->_insert_or_update_param($cms_page_panel_id, '', $params, $search_params, $translate_params);
@@ -1887,7 +1890,8 @@ class cms_page_panel_model extends \Model {
 		}
 
 		if (isset($filter['_order'])){
-			$context['order'] = $filter['_order'];
+			// Put into the SQL text: only asc or desc
+			$context['order'] = (is_string($filter['_order']) && strtolower(trim($filter['_order'])) === 'desc') ? 'desc' : 'asc';
 			unset($filter['_order']);
 		}
 
@@ -1908,6 +1912,8 @@ class cms_page_panel_model extends \Model {
 		$params_filter = [];
 		$sql_arrays = [];
 		$table_arrays = [];
+		$sql_arrays_bind = [];
+		$table_arrays_bind = [];
 
 		$panel_name = $filter['panel_name'] ?? '';
 		if (is_array($panel_name)){
@@ -1933,22 +1939,16 @@ class cms_page_panel_model extends \Model {
 				if (!is_array($value)){
 					$sql_filter[$key] = $value;
 				} else if (!empty($value) && is_array($value)){
-					$new_array = [];
-					foreach ($value as $el){
-						$new_array[] = str_replace(["'", '"'], ["\\\'", '\\\"'], $el);
-					}
-					$sql_arrays[] = ' a.`'.$tkey.'` '.($tkey != $key ? ' not ' : '')." in ('".implode("','", $new_array)."') ";
+					$sql_arrays[] = ' a.`'.$tkey.'` '.($tkey != $key ? ' not ' : '').' in ('.implode(', ', array_fill(0, count($value), '?')).') ';
+					$sql_arrays_bind = array_merge($sql_arrays_bind, $this->sql_in_values($value));
 				}
 
 			} else if ($use_panel_table && isset($table_fields[$tkey])){
 				if (!is_array($value)){
 					$table_filter[$key] = $value;
 				} else if (!empty($value) && is_array($value)){
-					$new_array = [];
-					foreach ($value as $el){
-						$new_array[] = str_replace(["'", '"'], ["\\\'", '\\\"'], $el);
-					}
-					$table_arrays[] = ' t.`'.$tkey.'` '.($tkey != $key ? ' not ' : '')." in ('".implode("','", $new_array)."') ";
+					$table_arrays[] = ' t.`'.$tkey.'` '.($tkey != $key ? ' not ' : '').' in ('.implode(', ', array_fill(0, count($value), '?')).') ';
+					$table_arrays_bind = array_merge($table_arrays_bind, $this->sql_in_values($value));
 				}
 			} else {
 				$params_filter[$key] = $value;
@@ -1974,7 +1974,8 @@ class cms_page_panel_model extends \Model {
 
 		$where_parts = array_filter([$sql_filter_str, $sql_arrays_str, $table_filter_str, $table_arrays_str]);
 		$context['where_str'] = implode(' and ', $where_parts);
-		$context['bind'] = array_merge(array_values($sql_filter), array_values($table_filter));
+		// Same order as the where parts
+		$context['bind'] = array_merge(array_values($sql_filter), $sql_arrays_bind, array_values($table_filter), $table_arrays_bind);
 		$context['params_filter'] = $params_filter;
 
 		// LEFT JOIN: panel table rows optional until a table field is first saved
@@ -1983,6 +1984,20 @@ class cms_page_panel_model extends \Model {
 		}
 
 		return $context;
+
+	}
+
+	/**
+	 * The values of a filter list, for a bound in (?, …): scalars as strings, anything else as ''.
+	 */
+	function sql_in_values($values){
+
+		$return = [];
+		foreach ((array)$values as $value){
+			$return[] = is_scalar($value) ? (string)$value : '';
+		}
+
+		return $return;
 
 	}
 

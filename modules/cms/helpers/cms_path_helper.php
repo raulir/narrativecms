@@ -12,7 +12,8 @@ function cms_ensure_runtime_dirs(){
 		if ($p !== '' && !is_dir($p)){
 			@mkdir($p, ($key === 'session') ? 0700 : 0755, true);
 		}
-		if ($p !== '' && is_dir($p) && !is_file($p.'/.gitkeep')){
+		// tmp/ needs none: tmp/sessions/.gitkeep keeps it
+		if ($key !== 'tmp' && $p !== '' && is_dir($p) && !is_file($p.'/.gitkeep')){
 			@file_put_contents($p.'/.gitkeep', '');
 		}
 		// CMS files are reached only through the cms/file API. The root .htaccess denies data/ too, but a site's

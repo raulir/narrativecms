@@ -29,6 +29,8 @@ class cms_page_panel_list_model extends \Model {
 			'params_filter' => [],
 			'sql_arrays' => [],
 			'table_arrays' => [],
+			'sql_arrays_bind' => [],
+			'table_arrays_bind' => [],
 			'sql_filter_str' => '',
 			'table_filter_str' => '',
 			'sql_arrays_str' => '',
@@ -53,7 +55,8 @@ class cms_page_panel_list_model extends \Model {
 		}
 
 		if (isset($filter['_order'])){
-			$context['order'] = $filter['_order'];
+			// Put into the SQL text: only asc or desc
+			$context['order'] = (is_string($filter['_order']) && strtolower(trim($filter['_order'])) === 'desc') ? 'desc' : 'asc';
 			unset($filter['_order']);
 		}
 
@@ -88,26 +91,16 @@ class cms_page_panel_list_model extends \Model {
 				if (!is_array($value)){
 					$context['sql_filter'][$key] = $value;
 				} else if (!empty($value) && is_array($value)){
-
-					$new_array = [];
-					foreach($value as $el){
-						$new_array[] = str_replace(['\'', '"'], ['\\\'', '\\\"'], $el);
-					}
-
-					$context['sql_arrays'][] = ' a.`'.$tkey.'` '.($tkey != $key ? ' not ' : '')." in ('".implode("','", $new_array)."') ";
+					$context['sql_arrays'][] = ' a.`'.$tkey.'` '.($tkey != $key ? ' not ' : '').' in ('.implode(', ', array_fill(0, count($value), '?')).') ';
+					$context['sql_arrays_bind'] = array_merge($context['sql_arrays_bind'], $this->cms_page_panel_model->sql_in_values($value));
 				}
 
 			} else if ($context['use_panel_table'] && isset($context['table_fields'][$tkey])) {
 				if (!is_array($value)){
 					$context['table_filter'][$key] = $value;
 				} else if (!empty($value) && is_array($value)){
-
-					$new_array = [];
-					foreach($value as $el){
-						$new_array[] = str_replace(['\'', '"'], ['\\\'', '\\\"'], $el);
-					}
-
-					$context['table_arrays'][] = ' t.`'.$tkey.'` '.($tkey != $key ? ' not ' : '')." in ('".implode("','", $new_array)."') ";
+					$context['table_arrays'][] = ' t.`'.$tkey.'` '.($tkey != $key ? ' not ' : '').' in ('.implode(', ', array_fill(0, count($value), '?')).') ';
+					$context['table_arrays_bind'] = array_merge($context['table_arrays_bind'], $this->cms_page_panel_model->sql_in_values($value));
 				}
 			} else {
 				$context['params_filter'][$key] = $value;
@@ -137,7 +130,9 @@ class cms_page_panel_list_model extends \Model {
 
 		$where_parts = array_filter([$context['sql_filter_str'], $context['sql_arrays_str'], $context['table_filter_str'], $context['table_arrays_str']]);
 		$context['where_str'] = implode(' and ', $where_parts);
-		$context['bind'] = array_merge(array_values($context['sql_filter']), array_values($context['table_filter']));
+		// Same order as the where parts
+		$context['bind'] = array_merge(array_values($context['sql_filter']), $context['sql_arrays_bind'],
+				array_values($context['table_filter']), $context['table_arrays_bind']);
 
 		return $context;
 

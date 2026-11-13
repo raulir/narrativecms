@@ -91,7 +91,7 @@ The same root `.htaccess` returns 403 before CMS routing when the path contains 
 - **Not retried:** a stylesheet that fails while the browser stays online (a server error, a file missing during a deploy) stays as it is in that page view, until a reload or another `cms_load_css()` of the same file. In the app the service worker rebuilds a missing module css first.
 - **Why a mark:** in Chromium a failed link still has an empty `sheet`, so the mark is what tells it failed.
 
-`cms_path()`, `cms_path_url()`, and `cms_cache_rel()` are globals in [`cms_config_basic.php`](../../../system/core/cms_config_basic.php) (`cms_path()` fills `config['paths']` on first use). `cms_ensure_runtime_dirs()` and updater migrate live in [`path_helper.php`](../../../system/helpers/path_helper.php) — **install and CMS Update only**.
+`cms_path()`, `cms_path_url()`, and `cms_cache_rel()` are globals in [`cms_config_basic.php`](../../../system/core/cms_config_basic.php) (`cms_path()` fills `config['paths']` on first use). `cms_ensure_runtime_dirs()` and updater migrate live in the CMS module, [`cms_path_helper.php`](../helpers/cms_path_helper.php) — **install and CMS Update only**.
 
 `errors_visible` only controls the red on-page frame, not whether the line is written.
 
@@ -266,6 +266,10 @@ Public API modules: URI `module/api_id` short-circuits in `cms.php` before sessi
 - Do not add **serve-time** workarounds for outdated on-disk cache formats  
 - When format changes: purge/rebuild on save; on hit, serve as-is  
 - Full-page cache HIT may skip CI boot and thus skip `panel_action` (known limitation — see [`todo.md`](todo.md) § Page cache)
+- **A block's own cache settings** (the block toolbar's caching popup, `cms/cms_page_panel_caching`):
+  - `_cache_time` is seconds, where 0 is the site's `panel_cache` and -1 is no caching;
+  - `_cache_lists` holds the list panel names whose saved items clear this block's cache.
+  - The save (`cms/cms_page_panel` `cms_page_panel_caching`) accepts only the popup's times (`cms_page_panel_cms_model::get_caching_options()`), list names from `get_lists()`, and a stored block (`check_caching()`).
 
 ---
 

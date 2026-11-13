@@ -51,6 +51,17 @@ The block edit form (`.cms_page_panel_fields`, `cms_page_panel.scss`) is a CSS g
 - **Growing inputs:** a repeater is a full row as tall as its content. The grid input spans its rows (`style` and `data-cms_input_height`, updated when a row is added or deleted).
 - **Repeater rows:** one column of 3.5 rem rows below the toolbar, in field order. The fields of a `groups` tab are moved right after the `groups` input (`cms_input_repeater.php`), and only the open tab's fields are shown, so a row is as tall as its open tab.
 
+### What a save stores
+
+Save (`cms/cms_page_panel` `cms_page_panel_save`, `cms_page_panel_cms_model::build_panel_data_for_save()`) takes from the posted `panel_params` only what the block's edit structure has fields for (`filter_posted_panel_params()`):
+- each field's `name`, and each repeater's row field names;
+- each grid's `{name}_log`;
+- never a name starting with `_`, or a block column (`show`, `sort`, `panel_name`, …). The server adds `_template_page_id`, `_js`, `_css` and `_images` itself.
+
+Below a field, the value is the input's own: for example, a link posts `[target]`, `[cms_page_id]` and `[_value]`. So an input that posts more than one name must post them under its field name.
+
+A stored block keeps its stored `panel_name`, `cms_page_id`, `parent_id` and `sort`; the hidden inputs are read only for a new block. A new block's page and parent must exist, and the parent field it is added to (`parent_name`, from the panel picker's `target_input_name`) must be a `cms_page_panels` field of the parent's edit structure (`cms_page_panel_cms_model::check_block_place()`). The editor checks the picker's target the same way before it prints the form. An editable grid cell (`cms/cms_grid_editable`) outside a grid log writes only a field of the item's definition, and with `ds` only the `ds` of a grid field in the block's definition.
+
 **Admin vs frontend:** preparing values for these **field** panels may use that field’s own `panel_params`. Do **not** run the **page panel’s** frontend `panel_params` when building the admin form — see [`cms_panel_params.md`](cms_panel_params.md).
 
 Client behaviour follows [`cms_panel_js.md`](cms_panel_js.md): each input panel has `cms_input_<type>_init($root)` and a `cms_input_<type>_ok` guard class on its root element. Repeater fields preload the panel JS and call the matching init hook when a row is added.
@@ -363,7 +374,11 @@ Table grid tied to panel model `ds_*` data-source methods. Can be embedded in a 
 
 **Change log.** Add, set, and delete are recorded in the hidden textarea and sent with Save. Deleting a row drops every earlier line for that same id. A `tmp_` row then leaves no lines at all, not even a delete. Setting the same cell again keeps only the latest value. Save calls `cms/cms_input_grid` `apply_logs`, which runs the lines in order (`C`, then `U`, then `D`). A refused line stops the log. If that line belongs to a row created earlier in the same Save, that new row is deleted and its `add` is put back in the log under the original `tmp_` id. Save returns `ok: 0` and the reason. The textarea keeps the lines that still need to run. The log is not stored.
 
-**Editable cells:** `cms/cms_grid_editable` updates the log inside a grid. Outside a grid it still blur-saves.
+**Editable cells:** `cms/cms_grid_editable` updates the log inside a grid. Outside a grid it still blur-saves (`update_field`), and an ajax call without `value` reads the cell's stored value. Both the write and the read go through `cms_page_panel_cms_model::get_grid_cell_target()`:
+- with `ds`: the base block is stored, and its definition has a grid with that `ds` (the `ds` handler checks the column);
+- without: the item is a stored block, and `name` is a plain field of its definition (not a grid, a `{name}_log`, a repeater, a block column or a `_` key).
+
+A refused cell replies with `data-save_error` (the reason) and none of the posted names; the JS keeps the cell, puts its old value back and shows the reason as an error.
 
 **Reference:** [`form/basic.php`](../../form/panels/basic.php) `ds_subscribers` (read-only grid, `form_data` table). [`music/note_system.php`](../../music/panels/note_system.php) `ds_rows` (editable grid, `headers` + `rows` in panel settings JSON).
 

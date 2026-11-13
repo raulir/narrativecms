@@ -22,7 +22,7 @@ class cms_edit_slug extends \Controller {
 		$cms_page_panel_id = (int)$cms_page_panel_id;
 
 		if ($cms_page_panel_id < 1){
-			return array('error' => 'Invalid panel');
+			return ['error' => 'Invalid panel'];
 		}
 
 		$this->load->model('cms/cms_page_panel_model');
@@ -32,32 +32,32 @@ class cms_edit_slug extends \Controller {
 		$row = $this->cms_page_panel_model->get_cms_page_panel($cms_page_panel_id, '', false);
 
 		if (empty($row['cms_page_panel_id'])){
-			return array('error' => 'Panel not found');
+			return ['error' => 'Panel not found'];
 		}
 
 		if (!empty($row['cms_page_id']) || empty($row['sort'])){
-			return array('error' => 'Not a list item');
+			return ['error' => 'Not a list item'];
 		}
 
 		$panel_config = $this->cms_panel_model->get_cms_panel_config($row['panel_name']);
 
 		if (empty($panel_config['list']['link_target'])){
-			return array('error' => 'List item has no URL');
+			return ['error' => 'List item has no URL'];
 		}
 
 		$target = $row['panel_name'].'='.$cms_page_panel_id;
 		$slug_row = $this->cms_slug_model->get_slug_row_by_target($target);
 
 		if ($slug_row === false){
-			return array('error' => 'Slug not found');
+			return ['error' => 'Slug not found'];
 		}
 
-		return array(
+		return [
 			'cms_page_panel_id' => $cms_page_panel_id,
 			'panel_name' => $row['panel_name'],
 			'target' => $target,
 			'current_slug' => $slug_row['cms_slug_id'] ?? '',
-		);
+		];
 
 	}
 
@@ -68,7 +68,8 @@ class cms_edit_slug extends \Controller {
 		$context = $this->_resolve_list_item_slug_context($cms_page_panel_id);
 
 		if (!empty($context['error'])){
-			return $context;
+			// The form still opens (empty slug); its first check shows the reason
+			return $do === 'form' ? $context + ['cms_page_panel_id' => $cms_page_panel_id, 'current_slug' => ''] : $context;
 		}
 
 		if ($do === 'check_slug'){
@@ -81,10 +82,10 @@ class cms_edit_slug extends \Controller {
 				$context['target']
 			);
 
-			return array(
+			return [
 				'check_status' => $check['check_status'],
 				'check_message' => $check['check_message'],
-			);
+			];
 
 		}
 
@@ -99,7 +100,7 @@ class cms_edit_slug extends \Controller {
 			);
 
 			if (empty($result['ok'])){
-				return array('error' => !empty($result['error']) ? $result['error'] : 'Update failed');
+				return ['error' => !empty($result['error']) ? $result['error'] : 'Update failed'];
 			}
 
 			if (!empty($result['changed'])){
@@ -108,7 +109,7 @@ class cms_edit_slug extends \Controller {
 				$this->cms_page_cache_model->invalidate_list_item($context['panel_name'], $cms_page_panel_id);
 			}
 
-			return array('ok' => 1, 'slug' => $result['slug']);
+			return ['ok' => 1, 'slug' => $result['slug']];
 
 		}
 

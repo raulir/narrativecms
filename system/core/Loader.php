@@ -1003,19 +1003,14 @@ class Loader {
 				$filename = $GLOBALS['config']['base_path'].'system/helpers/'.$helper.'.php';
 			}
 				
-			if (file_exists($filename)){
-	
-				include_once($filename);
-					
-				$this->_ci_helpers[$helper] = TRUE;
-
-				break;
-			}
-	
-			// unable to load the helper
-			if ( ! isset($this->_ci_helpers[$helper])) {
+			if (!file_exists($filename)){
 				_html_error('Unable to load the requested file: helpers/'.$helper.'.php', 500, ['backtrace' => 1, ]);
+				continue;
 			}
+
+			include_once($filename);
+			$this->_ci_helpers[$helper] = true;
+
 		}
 	}
 	

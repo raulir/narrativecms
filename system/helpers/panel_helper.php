@@ -398,27 +398,8 @@ if ( !function_exists('get_position')) {
     	print(' src="' . cms_file_url($filename) . '" ');
     }
     
-    /**
-     * double linebreaks to spacer
-     */
-    function _dbs($text, $classname){
-    	print(str_replace('<br>', ' ', str_replace('<br><br>', '<div class="'.$classname.'"></div>', 
-							str_replace(array("\n", "\r", ), array('<br>', '', ), $text))));
-    }
-    
     function _p($text){
     	print($text);
-    }
-    
-    function _vh($height, $minwidth = 0){
-    	
-    	print(' data-cms_window_height="'.$height.'" data-cms_window_height_minwidth="'.$minwidth.'"');
-    	
-    	$GLOBALS['_panel_js'][] = [
-    			'script' => 'modules/cms/js/cms_window_height.js',
-    			'sync' => 'defer',
-    	];
-
     }
     
     function _print_r($item){
@@ -456,124 +437,6 @@ if ( !function_exists('get_position')) {
     	
     }
     
-    function makesize($size){
-    
-    	if ($size < 512){
-    
-    		return $size.' B';
-    
-    	}
-    		
-    	$size = $size / 1024;
-    
-    	if ($size < 100){
-    		return round($size, 1).' kB';
-    	} else if ($size < 512){
-    		return round($size).' kB';
-    	}
-    
-    	$size = $size / 1024;
-    
-    	if ($size < 100){
-    		return round($size, 1).' MB';
-    	} else if ($size < 512){
-    		return round($size).' MB';
-    	}
-    
-    	$size = $size / 1024;
-    
-    	return round($size, 1).' GB';
-    
-    }
-    
-}
-
-if ( !function_exists('_user_login_url')) {
-	
-	function _user_login_url($print = true){
-		
-		if (!in_array('user', $GLOBALS['config']['modules'])){
-			$url = $GLOBALS['config']['base_url'];
-		} else {
-			$ci =& get_instance();
-			$ci->load->model('user/user_model');
-			$url = $ci->user_model->get_login_redirect_url();
-		}
-		
-		if ($print){
-			print($url);
-		} else {
-			return $url;
-		}
-		
-	}
-	
-}
-
-if ( !function_exists('_user_dashboard_url')) {
-	
-	function _user_dashboard_url($print = true){
-		
-		if (!in_array('user', $GLOBALS['config']['modules'])){
-			$url = $GLOBALS['config']['base_url'];
-		} else {
-			$ci =& get_instance();
-			$ci->load->model('user/user_model');
-			$url = $ci->user_model->get_user_redirect_url();
-		}
-		
-		if ($print){
-			print($url);
-		} else {
-			return $url;
-		}
-		
-	}
-	
-}
-
-if ( !function_exists('_user_logout_url')) {
-	
-	function _user_logout_url($print = true){
-		
-		if (!in_array('user', $GLOBALS['config']['modules'])){
-			$url = $GLOBALS['config']['base_url'];
-		} else {
-			$ci =& get_instance();
-			$ci->load->model('user/user_model');
-			$url = $ci->user_model->get_logout_redirect_url();
-		}
-		
-		if ($print){
-			print($url);
-		} else {
-			return $url;
-		}
-		
-	}
-	
-}
-
-if ( !function_exists('_user_login_text')) {
-	
-	function _user_login_text($print = true){
-		
-		if (!in_array('user', $GLOBALS['config']['modules'])){
-			$text = 'Login';
-		} else {
-			$ci =& get_instance();
-			$ci->load->model('user/user_model');
-			$text = $ci->user_model->get_login_redirect_text();
-		}
-		
-		if ($print){
-			print($text);
-		} else {
-			return $text;
-		}
-		
-	}
-	
 	function _merge_panel_css_urls(&$css_urls, &$css_force, $source){
 
 		if (empty($source) || !is_array($source)){

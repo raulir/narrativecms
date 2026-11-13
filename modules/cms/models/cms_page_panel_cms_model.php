@@ -236,32 +236,295 @@ class cms_page_panel_cms_model extends \Model {
 	}
 
 	/**
+	 * Type and place of a stored block (panel_name, cms_page_id, parent_id, sort); [] when there is none.
+	 */
+
+	function get_block_place($block_id){
+
+		$sql = 'select panel_name, cms_page_id, parent_id, sort from cms_page_panel where cms_page_panel_id = ? limit 1 ';
+		$query = $this->db->query($sql, [(int)$block_id]);
+
+		return $query->num_rows() ? $query->row_array() : [];
+
+	}
+
+	/**
+	 * A block's place from the request: the page and the parent must be stored, and the parent field (the
+	 * parent's list the new block is added to) must be a cms_page_panels field of the parent's edit structure.
+	 * Returns '' when the place is fine, otherwise the reason.
+	 */
+
+	function check_block_place($cms_page_id, $parent_id, $parent_name = ''){
+
+		if ((int)$cms_page_id > 0){
+			$query = $this->db->query('select cms_page_id from cms_page where cms_page_id = ? limit 1 ', [(int)$cms_page_id]);
+			if (!$query->num_rows()){
+				return 'Page not found';
+			}
+		}
+
+		$parent = (int)$parent_id > 0 ? $this->get_block_place($parent_id) : [];
+		if ((int)$parent_id > 0 && !$parent){
+			return 'Parent block not found';
+		}
+
+		$parent_name = (string)$parent_name;
+		if ($parent_name === ''){
+			return '';
+		}
+
+		if (!$parent){
+			return 'Unknown parent field';
+		}
+
+		$this->load->model('cms/cms_panel_model');
+		$this->load->helper('cms/cms_fields_helper');
+		$structure = $this->cms_panel_model->get_cms_panel_edit_structure(
+				$this->cms_panel_model->get_cms_panel_config($parent['panel_name']),
+				$parent['cms_page_id'], $parent['parent_id'], $parent['sort']);
+
+		foreach ($structure as $struct){
+			if (is_array($struct) && (string)($struct['name'] ?? '') === $parent_name
+					&& cms_input_type_alias((string)($struct['type'] ?? '')) === 'cms_page_panels'){
+				return '';
+			}
+		}
+
+		return 'Unknown parent field';
+
+	}
+
+	/**
+	 * A block's panel cache times for the caching popup and action: seconds => label.
+	 * 0 is the site default (config panel_cache), -1 is no caching.
+	 */
+
+	function get_caching_options(){
+
+		$panel_cache = (int)($GLOBALS['config']['panel_cache'] ?? 0);
+
+		if ($panel_cache == 0){
+			$global_cache = 'no caching';
+		} elseif ($panel_cache < 10000){
+			$global_cache = round($panel_cache / 60).' minutes';
+		} elseif ($panel_cache > 1000000){
+			$global_cache = '3 months';
+		} else {
+			$global_cache = round($panel_cache / 3600).' hours';
+		}
+
+		return [
+			'0' => 'Default ('.$global_cache.')',
+			'-1' => 'No caching',
+			'180' => '3 minutes',
+			'900' => '15 minutes',
+			'7200' => '2 hours',
+			'86400' => '24 hours',
+		];
+
+	}
+
+	/**
+	 * Posted caching settings for a block: a stored block, one of get_caching_options(), and list panel names
+	 * from get_lists(). Returns '' when they are fine, otherwise the reason.
+	 */
+
+	function check_caching($target_id, $caching, $lists){
+
+		if (!$this->get_block_place($target_id)){
+			return 'Block not found';
+		}
+
+		if (!is_scalar($caching) || !array_key_exists((string)$caching, $this->get_caching_options())){
+			return 'Unknown cache time';
+		}
+
+		if (!is_array($lists)){
+			return 'Unknown list';
+		}
+
+		$this->load->model('cms/cms_page_panel_model');
+		$known = $this->cms_page_panel_model->get_lists();
+		foreach ($lists as $list){
+			if (!is_string($list) || !isset($known[$list])){
+				return 'Unknown list';
+			}
+		}
+
+		return '';
+
+	}
+
+	/**
+	 * The target of a grid cell (cms/cms_grid_editable), for both the cell write and the cell read.
+	 * With $ds: the base block must be stored and have a grid field with that ds (the ds handler checks the
+	 * column itself). Without: the item must be a stored block, and $name a plain field of its edit structure
+	 * (not a grid, its log, a repeater, a block column or a _ key).
+	 * Returns ['block_id', 'panel_name', 'ds', 'name'], or ['error' => reason].
+	 */
+
+	function get_grid_cell_target($item_id, $name, $base_id = 0, $ds = ''){
+
+		if (!is_scalar($name) || !is_scalar($ds) || (string)$name === ''){
+			return ['error' => 'Unknown field'];
+		}
+		$name = (string)$name;
+		$ds = (string)$ds;
+
+		$block_id = $ds !== '' ? (int)$base_id : (int)$item_id;
+		$place = $block_id > 0 ? $this->get_block_place($block_id) : [];
+		if (!$place){
+			return ['error' => 'Block not found'];
+		}
+
+		$this->load->model('cms/cms_panel_model');
+		$structure = $this->cms_panel_model->get_cms_panel_edit_structure(
+				$this->cms_panel_model->get_cms_panel_config($place['panel_name']),
+				$place['cms_page_id'], $place['parent_id'], $place['sort']);
+
+		$target = ['block_id' => $block_id, 'panel_name' => $place['panel_name'], 'ds' => $ds, 'name' => $name];
+
+		if ($ds !== ''){
+			foreach ($structure as $struct){
+				if (is_array($struct) && ($struct['type'] ?? '') === 'grid' && (string)($struct['ds'] ?? '') === $ds){
+					return $target;
+				}
+			}
+			return ['error' => 'Unknown grid'];
+		}
+
+		if (!array_key_exists($name, $this->filter_posted_panel_params([$name => ''], $structure))){
+			return ['error' => 'Unknown field'];
+		}
+		foreach ($structure as $struct){
+			if (is_array($struct) && (string)($struct['name'] ?? '') === $name){
+				return in_array($struct['type'] ?? '', ['grid', 'repeater'], true) ? ['error' => 'Unknown field'] : $target;
+			}
+		}
+
+		// A grid's {name}_log
+		return ['error' => 'Unknown field'];
+
+	}
+
+	/**
+	 * The posted panel_params that the edit structure has fields for: each field's name, each repeater's
+	 * row field names, and each grid's {name}_log. Field names starting with _ and block column names are
+	 * never taken (the server adds _template_page_id, _js, _css and _images itself). Below a field, its value
+	 * is the input's own (a link posts [_value]).
+	 */
+
+	function filter_posted_panel_params($posted, $structure){
+
+		if (!is_array($posted) || !is_array($structure)){
+			return [];
+		}
+
+		$columns = ['cms_page_panel_id', 'cms_page_id', 'parent_id', 'sort', 'show', 'title', 'panel_name',
+				'submenu_anchor', 'submenu_title', 'panel_params', 'search_params', 'translate_params',
+				'create_cms_user_id', 'create_time', 'update_cms_user_id', 'update_time'];
+
+		$allowed = [];
+
+		foreach ($structure as $struct){
+
+			$name = is_array($struct) ? (string)($struct['name'] ?? '') : '';
+
+			if ($name === '' || $name[0] === '_' || in_array($name, $columns, true)){
+				continue;
+			}
+
+			$allowed[$name] = $struct;
+
+			if (($struct['type'] ?? '') === 'grid'){
+				$allowed[$name.'_log'] = ['type' => 'grid_log'];
+			}
+
+		}
+
+		$return = [];
+
+		foreach ($posted as $key => $value){
+
+			$key = (string)$key;
+
+			if (!isset($allowed[$key])){
+				continue;
+			}
+
+			// Repeater rows are posted per field: [field][row]
+			if (($allowed[$key]['type'] ?? '') === 'repeater' && is_array($value)){
+
+				$row_fields = [];
+				foreach (($allowed[$key]['fields'] ?? []) as $r_struct){
+					$r_name = is_array($r_struct) ? (string)($r_struct['name'] ?? '') : '';
+					if ($r_name !== '' && $r_name[0] !== '_'){
+						$row_fields[$r_name] = 1;
+					}
+				}
+
+				foreach (array_keys($value) as $r_key){
+					if (!isset($row_fields[(string)$r_key])){
+						unset($value[$r_key]);
+					}
+				}
+
+			}
+
+			$return[$key] = $value;
+
+		}
+
+		return $return;
+
+	}
+
+	/**
 	 * Build admin form payload for save / title preview.
-	 * $input is a plain array (panel maps POST); not request-bound.
+	 * $input is a plain array (panel maps POST); not request-bound. Only the edit structure's fields are
+	 * taken from panel_params (filter_posted_panel_params). A stored block keeps its stored type and place;
+	 * a new block takes them from $input.
 	 *
-	 * @return array{data: array, data_merged: array, panel_config: array, panel_structure: array}
+	 * @return array{data: array, data_merged: array, panel_config: array, panel_structure: array, error?: string}
 	 */
 
 	function build_panel_data_for_save($input, $language){
 
 		$this->load->model('cms/cms_panel_model');
 
-		$block_id = !empty($input['cms_page_panel_id']) ? $input['cms_page_panel_id'] : 0;
+		$block_id = !empty($input['cms_page_panel_id']) ? (int)$input['cms_page_panel_id'] : 0;
 
-		$data = [];
-		$data['cms_page_id'] = $input['cms_page_id'] ?? null;
-		$data['parent_id'] = $input['parent_id'] ?? null;
-		$data['sort'] = $input['sort'] ?? null;
-		$data['title'] = $input['title'] ?? null;
-		$data['submenu_anchor'] = $input['submenu_anchor'] ?? null;
-		$data['panel_name'] = $input['panel_name'] ?? null;
-		$data['panel_params'] = $input['panel_params'] ?? [];
-
-		if (!is_array($data['panel_params'])){
-			$data['panel_params'] = [];
+		if ($block_id){
+			$place = $this->get_block_place($block_id);
+			if (!$place){
+				return ['error' => 'Block not found'];
+			}
+		} else {
+			$place = [
+				'panel_name' => (string)($input['panel_name'] ?? ''),
+				'cms_page_id' => (int)($input['cms_page_id'] ?? 0),
+				'parent_id' => (int)($input['parent_id'] ?? 0),
+				'sort' => (int)($input['sort'] ?? 0),
+			];
+			if (!preg_match('#^[a-z0-9_]+/[a-z0-9_]+$#', $place['panel_name'])){
+				return ['error' => 'Unknown panel type'];
+			}
 		}
 
+		$data = [];
+		$data['cms_page_id'] = $place['cms_page_id'];
+		$data['parent_id'] = $place['parent_id'];
+		$data['sort'] = $place['sort'];
+		$data['title'] = $input['title'] ?? null;
+		$data['submenu_anchor'] = $input['submenu_anchor'] ?? null;
+		$data['panel_name'] = $place['panel_name'];
+
 		$panel_config = $this->cms_panel_model->get_cms_panel_config($data['panel_name']);
+
+		$panel_structure = $this->cms_panel_model->get_cms_panel_edit_structure(
+				$panel_config, $data['cms_page_id'], $data['parent_id'], $data['sort']);
+
+		$data['panel_params'] = $this->filter_posted_panel_params($input['panel_params'] ?? [], $panel_structure);
 
 		if (!empty($panel_config['list']['templates'])){
 			$data['panel_params']['_template_page_id'] = $input['_template_page_id'] ?? null;
@@ -288,9 +551,6 @@ class cms_page_panel_cms_model extends \Model {
 
 		$data['search_params'] = [];
 		$data['translate_params'] = [];
-
-		$panel_structure = $this->cms_panel_model->get_cms_panel_edit_structure(
-				$panel_config, $data['cms_page_id'], $data['parent_id'], $data['sort']);
 
 		foreach($panel_structure as $struct){
 			if (!empty($struct['search'])){

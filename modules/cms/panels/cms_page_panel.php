@@ -80,23 +80,23 @@ class cms_page_panel extends \Controller {
 
 		} elseif ($do == 'cms_page_panel_caching'){
 
-			$target_id = $params['target_id'] ?? false;
-			$lists = $params['lists'] ?? false;
-			$caching = $params['caching'] ?? false;
+			// No lists posts no lists key
+			$target_id = (int)($params['target_id'] ?? 0);
+			$lists = $params['lists'] ?? [];
+			$caching = $params['caching'] ?? '0';
 
-			$params['_caching'] = 0;
-
-			if (!empty($lists) && is_array($lists)){
-				$this->cms_page_panel_model->update_cms_page_panel($target_id, ['_cache_lists' => implode(',', $lists), ]);
-				$params['_caching'] = 1;
-			} else {
-				$this->cms_page_panel_model->update_cms_page_panel($target_id, ['_cache_lists' => '', ]);
+			$reason = $this->cms_page_panel_cms_model->check_caching($target_id, $caching, $lists);
+			if ($reason !== ''){
+				return $this->_refused($reason);
 			}
 
-			$this->cms_page_panel_model->update_cms_page_panel($target_id, ['_cache_time' => $caching, ]);
-			if (!empty($caching)){
-				$params['_caching'] = 1;
-			}
+			$lists = array_values(array_unique($lists));
+			$this->cms_page_panel_model->update_cms_page_panel($target_id, [
+					'_cache_lists' => implode(',', $lists),
+					'_cache_time' => (string)$caching,
+			]);
+
+			$params['_caching'] = ($lists || (string)$caching !== '0') ? 1 : 0;
 
 		} elseif ($do == 'cms_page_panel_show'){
 
@@ -132,6 +132,9 @@ class cms_page_panel extends \Controller {
 			} else {
 				$built = $this->cms_page_panel_cms_model->build_panel_data_for_save(
 						$this->_post_panel_form_input($block_id, $params), $language);
+				if (!empty($built['error'])){
+					return $this->_refused($built['error'], (int)$block_id);
+				}
 				$compiled_title = $this->cms_page_panel_cms_model->compile_list_item_title(
 						$built['data_merged'], $built['panel_config'], $block_id, $language);
 
@@ -143,10 +146,11 @@ class cms_page_panel extends \Controller {
 
 		} elseif ($do == 'cms_page_panel_save'){
 
-			$block_id = $params['cms_page_panel_id'] ?? false;
+			$block_id = (int)($params['cms_page_panel_id'] ?? 0);
 			$language = $this->_resolve_cms_language(($params['language'] ?? false));
 
-			$old_data = $this->cms_page_panel_model->get_cms_page_panel($block_id, $language);
+			// Type and place of a stored block come from its row (build_panel_data_for_save answers "Block not found")
+			$input = $this->_post_panel_form_input($block_id, $params);
 
 			$created_page_id = 0;
 			if ((int)($params['reserved_page_draft'] ?? 0) === 1
@@ -156,21 +160,34 @@ class cms_page_panel extends \Controller {
 				$this->load->model('cms/cms_page_model');
 				$created_page_id = (int)$this->cms_page_model->create_page_from_reserved_draft();
 				if ($created_page_id < 1){
-					return [
-							'ok' => 0,
-							'error' => 'Cannot create page. Set a layout on the page first.',
-							'cms_page_panel_id' => 0,
-					];
+					return $this->_refused('Cannot create page. Set a layout on the page first.');
 				}
 
 				$params['cms_page_id'] = $created_page_id;
+				$input['cms_page_id'] = $created_page_id;
 			}
 
-			$built = $this->cms_page_panel_cms_model->build_panel_data_for_save(
-					$this->_post_panel_form_input($block_id, $params), $language);
+			$built = $this->cms_page_panel_cms_model->build_panel_data_for_save($input, $language);
+
+			// A new block's page and parent, and the parent field it is added to (a stored block keeps its place)
+			$parent_name = (string)($params['parent_name'] ?? '');
+			if (empty($built['error']) && (!$block_id || $parent_name !== '')){
+				$built['error'] = $this->cms_page_panel_cms_model->check_block_place(
+						$block_id ? 0 : $built['data_merged']['cms_page_id'], $built['data_merged']['parent_id'], $parent_name);
+			}
+
+			if (!empty($built['error'])){
+				if ($created_page_id > 0){
+					$this->load->model('cms/cms_page_model');
+					$this->cms_page_model->delete_page($created_page_id);
+				}
+				return $this->_refused($built['error'], $block_id);
+			}
 			$data_merged = $built['data_merged'];
 			$panel_config = $built['panel_config'];
 			$panel_structure = $built['panel_structure'];
+
+			$old_data = $block_id ? $this->cms_page_panel_model->get_cms_page_panel($block_id, $language) : [];
 
 			if ($created_page_id > 0){
 				$data_merged['cms_page_id'] = $created_page_id;
@@ -214,7 +231,7 @@ class cms_page_panel extends \Controller {
 			try {
 				$saved = $this->cms_page_panel_cms_model->save_cms_page_panel_admin($block_id, $data_merged, [
 						'panel_config' => $panel_config,
-						'parent_name' => ($params['parent_name'] ?? false),
+						'parent_name' => $parent_name,
 						'old_data' => is_array($old_data) ? $old_data : [],
 				]);
 				$block_id = $saved['cms_page_panel_id'];
@@ -237,6 +254,10 @@ class cms_page_panel extends \Controller {
 					$panel_structure, is_array($old_data) ? $old_data : [], $data_merged);
 
 			$params['cms_page_panel_id'] = $block_id;
+			// The reply reports what was saved, not what was posted
+			$params['panel_name'] = $data_merged['panel_name'];
+			$params['cms_page_id'] = $data_merged['cms_page_id'];
+			$params['parent_id'] = $data_merged['parent_id'];
 
 			$saved_panel = $this->cms_page_panel_model->get_cms_page_panel($block_id, $language);
 			if (is_array($saved_panel)){
@@ -265,6 +286,16 @@ class cms_page_panel extends \Controller {
 
 	}
 
+	/**
+	 * A refused action: ok 0 and the reason (cms_error in the reply). no_html, because the action's own
+	 * $params (where panel_action sets it) are not returned.
+	 */
+	function _refused($reason, $block_id = 0){
+
+		return ['ok' => 0, 'error' => $reason, 'cms_page_panel_id' => (int)$block_id, 'no_html' => 1];
+
+	}
+
 	function _resolve_cms_language($language){
 
 		$this->load->model('cms/cms_language_model');
@@ -276,7 +307,8 @@ class cms_page_panel extends \Controller {
 
 	/**
 	 * Editor form values for build_panel_data_for_save(). The template select posts
-	 * cms_template_page_id: _* keys never reach panel params from a request.
+	 * cms_template_page_id: _* keys never reach panel params from a request. For a stored block,
+	 * panel_name, cms_page_id, parent_id and sort here are ignored (the stored row is used).
 	 */
 	function _post_panel_form_input($block_id, $params){
 
@@ -334,6 +366,15 @@ class cms_page_panel extends \Controller {
 			$params['cms_page_panel_id'] = 0;
 			$params['cms_page_id'] = 0;
 
+		}
+
+		// The picker's target (page, or parent block and its field) is posted: check it before it is printed
+		if (empty($params['cms_page_panel_id']) && in_array($params['target_type'], ['page', 'panel'], true)){
+			$place_error = $this->cms_page_panel_cms_model->check_block_place($params['cms_page_id'] ?? 0,
+					$params['parent_id'] ?? 0, $params['target_type'] == 'panel' ? (string)$params['parent_input_name'] : '');
+			if ($place_error !== ''){
+				_html_error($place_error, 400, ['force' => 1]);
+			}
 		}
 
 		// URL segment can be a panel type with __ (e.g. admin/cms_page_panel/timmy__menu/)

@@ -15,11 +15,14 @@ _feed
 !/cache/**/
 !/cache/**/.gitkeep
 /tmp/**
-!/tmp/**/
-!/tmp/**/.gitkeep
+!/tmp/sessions/
+!/tmp/sessions/.gitkeep
 /log/**
 !/log/**/
 !/log/**/.gitkeep
+/data/**
+!/data/**/
+!/data/**/.gitkeep
 /config/**
 !/config/**/
 !/config/**/.gitkeep

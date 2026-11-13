@@ -1,0 +1,3 @@
+{
+	"ajax": {"input": ["cms", "target_id"], "output": ["cms"]}
+}

@@ -73,7 +73,6 @@ Sets `data-w` / `data-h` on `.cms_input_image` for downstream tools. Mp4 preview
 
 - `cms_input_image_init()` — bind once per container (`data('cms_initiated')`)
 - Params: `input_selector`, `container_selector`, `category`, `path_type` (`img` or `root`), `after` callback
-- `cms_input_image_rename(old_name)` — when duplicating page panels, renames class suffixes
 
 ## Related panels
 

@@ -100,7 +100,7 @@ class cms_input_textarea extends \Controller {
 		$cms_page_panel_id = (int)($params['cms_page_panel_id'] ?? 0);
 		$md_filter = trim((string)($params['md_filter'] ?? ''));
 
-		$this->load->helper('markdown_helper');
+		$this->load->helper('cms/cms_markdown_helper');
 
 		// The filter is named by the field definition; only module/panel/md_filter_* methods may run
 		if ($md_filter !== '' && !markdown_md_filter_valid($md_filter)){

@@ -78,16 +78,13 @@ function get_ajax_panel(name, args, callback) {
 
 }
 
-function cms_access_denied_popup(error) {
+function cms_access_denied_popup() {
 	if ($('.cms_access_denied_container').length) {
 		return
 	}
 
-	error = error || {}
-
+	// The panel takes the login link from the server (cms_access_model::get_login_redirect)
 	get_ajax_panel('cms/cms_access_denied', {
-		login_url: error.login_url || (typeof _cms_login_url !== 'undefined' ? _cms_login_url : _cms_get_base()),
-		login_text: error.login_text || (typeof _cms_login_text !== 'undefined' ? _cms_login_text : 'Login'),
 		text: 'System error: access denied',
 	}, function(data) {
 		$('body').append(data.result.cms_html)

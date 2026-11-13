@@ -48,8 +48,13 @@ function cms_edit_slug_check($container){
 
 		var result = data.result || {}
 
-		cms_edit_slug_set_status($container, result.check_status, result.check_message)
-		$container.data('cms_edit_slug_ok', result.check_status === 'success' ? 1 : 0)
+		// A refused block (not a list item, no slug, …) answers cms_error instead of a check
+		if (result.cms_error){
+			cms_edit_slug_set_status($container, 'error', result.cms_error)
+		} else {
+			cms_edit_slug_set_status($container, result.check_status, result.check_message)
+		}
+		$container.data('cms_edit_slug_ok', !result.cms_error && result.check_status === 'success' ? 1 : 0)
 		$container.data('cms_edit_slug_has_checked', 1)
 
 	})
@@ -95,8 +100,9 @@ function cms_edit_slug_bind($popup){
 
 			var result = data.result || {}
 
-			if (result.error){
-				cms_edit_slug_set_status($container, 'error', result.error)
+			// The ajax layer renames a reply's error to cms_error
+			if (result.cms_error || !result.slug){
+				cms_edit_slug_set_status($container, 'error', result.cms_error || 'Update failed')
 				return
 			}
 

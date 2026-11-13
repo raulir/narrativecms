@@ -47,6 +47,7 @@ Who owns **data**, who **extends**, who **provides**, who is a **soft** `in_arra
 | `config.json` `panels` | List-only types (`cms_list`, no public/ajax template) listed so they appear in the page picker. Hidden is not a substitute. See [`agents.md`](agents.md) § `panels`. |
 | Soft dependency | `load->model('other/…')` with no module-enabled guard when the other package is optional. |
 | Dual keys | Serve-time “old or new field/panel name”. One-off migrate scripts are fine. |
+| Helper home | A `system/helpers/` file whose functions serve one module (only that module, or its domain such as CMS content or CMS Update). It belongs in `modules/<module>/helpers/<module>_…_helper.php` ([`agents.md`](agents.md) § Where a helper file lives). |
 
 ---
 
@@ -90,6 +91,7 @@ Prefer: trust install/update to create runtime dirs; do rare work on the rare pa
 - **Actions** — a state change (save, delete, send, charge) runs only on `cms_do`, which never comes from the query string. On render the other query keys do reach `$params`, so fail if a `panel_action` changes state on any other key: a plain link could trigger it.
 - **No silent fail** — empty skip is fine; log or operator-visible reason (`_reason`, status line).
 - **Minor:** `window.alert` / `confirm` / `prompt` for public notices (use an HTML popup or a hidden element the JS shows, copy from settings), a panel that takes ajax input with no `ajax.input` in its definition (deprecated: every posted key passes), a new full-page form post where `get_ajax` would do, `$_POST` / `$_GET` read in a panel (panels read `$params`, system code reads `$_POST` / `$_GET`), and function comments over 3 lines or more than about 3 comment lines per 10 lines of code (AGENTS.md § Comments). The raw request skips `_*` stripping, the `ajax.input` allowlist and the params precedence. See AGENTS.md § JavaScript and § Panel controllers. List them only when there is room in the top 5, or group several into one item. Do not let them push out a serious finding.
+- **Legacy syntax** in the reviewed code: `array()` becomes `[]`, and `<?php print(…) ?>` becomes `<?= ?>`. See [`agents.md`](agents.md) § Legacy PHP syntax. Fix it in the code under review, not across the module.
 - **Visitor copy** from CMS fields, not hard-coded UI sentences in templates/JS.
 - **Templates** use `div` unless the tag’s own behaviour is needed (`a` for a real URL, `input`, `textarea`, `select`, `form`, `label`, `img`, `video`). No `span` or `button` for layout or click targets. See [`agents.md`](agents.md) § Markup and CSS style.
 - **Public FE:** no new flex, no ARIA/`role`, no `cursor:` (site cursors).

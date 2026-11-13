@@ -359,8 +359,11 @@ class cms_access_model extends \Model {
 		
 	}
 	
-	function _get_login_redirect(){
-		
+	/**
+	 * Where a guest goes to log in: ['url', 'text']. From the user module's settings when it is enabled.
+	 */
+	function get_login_redirect(){
+
 		if (!in_array('user', $GLOBALS['config']['modules'])){
 			return [
 				'url' => $GLOBALS['config']['base_url'],
@@ -427,7 +430,7 @@ class cms_access_model extends \Model {
 			$this->_clear_user_session();
 		}
 		
-		$login_redirect = $this->_get_login_redirect();
+		$login_redirect = $this->get_login_redirect();
 		
 		$ajax_reply = !empty($params['no_html']) || !empty($params['cms_no_html']);
 

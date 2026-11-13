@@ -1,4 +1,9 @@
 {
 	"item": [],
-	"ajax": {"output": ["cms","ok","cms_page_id","cms_page_panel_id","parent_id","panel_name","shortcut","grid_ids","grid_log","_caching","_title","message","notification","show"]}
+	"ajax": {
+		"input": ["cms", "language", "panel_name", "title", "submenu_anchor", "parent_id", "sort", "panel_params",
+				"cms_template_page_id", "reserved_page_draft", "parent_name", "target_id", "lists", "caching",
+				"target_type", "target_input_name"],
+		"output": ["cms","ok","cms_page_id","cms_page_panel_id","parent_id","panel_name","shortcut","grid_ids","grid_log","_caching","_title","message","notification","show"]
+	}
 }

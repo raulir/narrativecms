@@ -21,7 +21,7 @@
 						<label class="cms_page_panel_caching_label">Time</label>
 						<select class="cms_page_panel_caching_select">
 							<?php foreach($caching_options as $option_value => $option_name): ?>
-								<option value="<?php print($option_value); ?>" <?php print($option_value == $cache ? 'selected="selected"' : ''); ?>><?php print($option_name); ?></option>
+								<option value="<?= $option_value ?>" <?= $option_value == $cache ? 'selected="selected"' : '' ?>><?= $option_name ?></option>
 							<?php endforeach ?>
 						</select>
 					</div>
@@ -31,8 +31,8 @@
 						<div class="cms_page_panel_caching_values">
 							<?php foreach($lists as $list): ?>
 								<?php if(in_array($list, $no_cache_lists)): ?>
-									<div class="cms_page_panel_caching_item" data-value="<?php print($list); ?>">
-										<?php print($list); ?>
+									<div class="cms_page_panel_caching_item" data-value="<?= $list ?>">
+										<?= $list ?>
 										<div class="cms_page_panel_caching_item_close">x</div>
 									</div>
 								<?php endif ?>
@@ -42,15 +42,14 @@
 						<select class="cms_page_panel_caching_lists_select">
 							<?php foreach($lists as $list): ?>
 								<?php if(!in_array($list, $no_cache_lists)): ?>
-									<option class="cms_page_panel_caching_lists_option_<?php print($list); ?>" value="<?php print($list); ?>"><?php print($list); ?></option>
+									<option value="<?= $list ?>"><?= $list ?></option>
 								<?php endif ?>
 							<?php endforeach ?>
 						</select>
 					</div>
 					
-					<input type="hidden" class="cms_page_panel_caching_target_id" value="<?php print($target_id); ?>">
+					<input type="hidden" class="cms_page_panel_caching_target_id" value="<?= $target_id ?>">
 				
-					<!-- div style="text-align: center; font-size: 0.8rem; "><pre><?php print_r($params); ?></pre></div -->
 					
 				</div>
 			

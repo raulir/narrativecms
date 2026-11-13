@@ -42,22 +42,6 @@ function cms_input_image_destroy($root){
 
 }
 
-function cms_input_image_rename(old_name){
-	
-	// TODO: check if such name exists on page
-	
-	var new_name = ('0000'+Math.random().toString(36).replace('.', '')).substr(-5);
-	
-	$('.cms_input_image_area_' + old_name + ' label').attr({'for':'cms_input_image_' + new_name});
-	$('.cms_input_image_area_' + old_name + ' .cms_input_image_content')
-			.removeClass('cms_input_image_content_' + old_name).addClass('cms_input_image_content_' + new_name);
-	$('.cms_input_image_area_' + old_name + ' .cms_input_button').data('name', new_name);
-	$('.cms_input_image_area_' + old_name + ' input').removeClass('cms_image_input_' + old_name).addClass('cms_image_input_' + new_name);
-	
-	$('.cms_input_image_area_' + old_name).removeClass('cms_input_image_area_' + old_name).addClass('cms_input_image_area_' + new_name);
-	
-}
-
 function cms_input_image_popup($element){
 
 	var input_name = $element.data('name');

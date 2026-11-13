@@ -570,8 +570,7 @@ class cms_panel_model extends \Model {
 		
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_page_panel_cms_model');
-		$this->load->model('cms/cms_table_model');
-		
+
 		$return = [];
 		
 		if (!empty($block_structure) && is_array($block_structure)){
@@ -593,12 +592,6 @@ class cms_panel_model extends \Model {
 							$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] =
 									$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] +
 									$this->cms_page_panel_cms_model->get_fk_data($struct_table, $struct['filter'], (!empty($struct['label_field']) ? $struct['label_field'] : 'title'));
-								
-						} else if ($struct['target'] == 'table') {
-								
-							$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] =
-									$return[(!empty($struct['field']) ? $struct['field'] : $struct['name'])] +
-									$this->cms_table_model->get_fk_data($struct_table);
 								
 						} else {
 							
