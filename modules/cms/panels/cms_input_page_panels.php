@@ -78,10 +78,10 @@ class cms_input_page_panels extends \Controller {
 		if (!isset($params['cms_page_id']) && isset($params['page_id'])){
 			$params['cms_page_id'] = $params['page_id'];
 		}
-		if (!isset($params['cms_page_panel_id']) && isset($params['block_id'])){
-			$params['cms_page_panel_id'] = $params['block_id'];
-		}
-		
+
+		// Rows shown before the list scrolls
+		$params['size'] = !empty($params['size']) ? $params['size'] : '4';
+
 		return $params;
 
 	}

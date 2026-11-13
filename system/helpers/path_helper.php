@@ -7,13 +7,18 @@
 
 function cms_ensure_runtime_dirs(){
 
-	foreach (['cache', 'tmp', 'log', 'session', 'upload'] as $key){
+	foreach (['cache', 'tmp', 'log', 'session', 'upload', 'data'] as $key){
 		$p = rtrim(cms_path($key), '/');
 		if ($p !== '' && !is_dir($p)){
 			@mkdir($p, ($key === 'session') ? 0700 : 0755, true);
 		}
 		if ($p !== '' && is_dir($p) && !is_file($p.'/.gitkeep')){
 			@file_put_contents($p.'/.gitkeep', '');
+		}
+		// CMS files are reached only through the cms/file API. The root .htaccess denies data/ too, but a site's
+		// root .htaccess is not updated by CMS Update, so the folder carries its own.
+		if ($key === 'data' && $p !== '' && is_dir($p) && !is_file($p.'/.htaccess')){
+			@file_put_contents($p.'/.htaccess', "Require all denied\n");
 		}
 	}
 

@@ -11,11 +11,8 @@ function cms_input_grid_resize_height($grid){
 		grid_height += 1
 	}
 
-	$grid.data('cms_input_height', grid_height)
-
-	if (typeof cms_page_panel_fields_init === 'function'){
-		cms_page_panel_fields_init()
-	}
+	// The form lays the grid out by these rows (cms_page_panel.scss)
+	$grid.attr('data-cms_input_height', grid_height).css('grid-row', 'span ' + grid_height)
 
 }
 

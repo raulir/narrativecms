@@ -17,6 +17,10 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 ## System / database
 
 - [x] **#762 one mysqli + slim cms_db** — `$GLOBALS['db']` single connection; [`cms_db.php`](../../../system/core/cms_db.php) replaces `system/database/` (no AR/forge/multi-driver). See [`system.md`](system.md) § Database.
+- [x] **Panel settings lookup** (2026-11-11). Every `_panel()` looked up its settings with a full scan of `cms_page_panel` (no `panel_name` index): about 8 ms per call.
+  - **Fix:** index `panel_name_idx` in `schema/cms_page_panel.json`, applied by CMS Update; `get_cms_page_panel_settings()` keeps results for the request. See [`system.md`](system.md) § Performance note.
+  - **Local result:** edit forms 572–1184 ms → 86–287 ms; the front page about 610 ms → 50 ms.
+  - **Live:** run CMS Update (schema) once to create the index.
 
 ## System / panel ajax
 
@@ -112,6 +116,19 @@ Ajax input / output filter review (2026-11-05), items in priority order:
 - [x] **Dead code** — removed panel `do=cms_update` branch (+ `ajax` flag / template `print_r`), legacy single-file staging + `update_file()`, `up()`, `get_master_file()` + legacy batch fallback; `run_sql()` moved to `cms_schema_model` (used by `cms_dump`)
 - [x] **Interface improvements** (#429) — bold master rows, *inactive* marker, *Not allowed* instead of Update (Remove hidden too). See [`cms_update.md`](cms_update.md) § Row markers
 - [ ] **Source per module** (#429, last item) — every package comes from the one `cms_update_url`. Options: show the host per row (read-only), or `update.source.{module}` overrides that every master call uses
+- [ ] **Installation hardening check** (found 2026-11-13; too big for review round 2).
+  - **Why:**
+    - private folders were reachable on the web: `config/<host>.json` (database and admin passwords) answered 200, also as `…/../config/…`;
+    - CMS Update never changes a site's root `.htaccess`, so a protection rule added later (now `config` and `data`, next to `tmp` and `log`) never reaches existing installs.
+  - **Want:** a check, run by CMS Update (or as its own admin tool), that fortifies the installation and reports what it could not fix.
+  - **Rules in the root `.htaccess`:** `tmp`, `log`, `data`, `config`, the dot-file and probe rules; add the missing ones in the install template's form, or show the exact lines to add.
+  - **Live requests:** a self-request to a sample in each private folder (`config/<host>.json`, `tmp/`, `log/`, `data/`, `.git/`) must give 403. Report every 200, never the content.
+  - **Per-folder `.htaccess`:** `Require all denied` where a folder is inside the web root and the root rules are missing (as `data/.htaccess` already is).
+  - **Elsewhere:** no PHP runs in `img/` or `cache/`; folders outside the web root (`dir.*` absolute) need nothing.
+  - **Notes:**
+    - say which folders were reachable, and suggest changing the passwords when `config/` was;
+    - the check makes no change without the operator's OK;
+    - see the CMS inputs section, "Host config was served by Apache".
 - [ ] **Drop updater legacy ajax keys** — older installs still post `do`, `no_html`, and `session_id`, and the update, popup, and schema replies still include `_html`, `html`, `js`, `css`, `_panel_css`, `_panel_css_force`, and `_panel_js` beside the `cms_*` names. The master endpoint still accepts `do` as well as `cms_do`. Remove those aliases once installed updaters post and read only the `cms_*` keys.
 
 ---
@@ -168,7 +185,16 @@ Full checklist: **[`cms_dump.md`](cms_dump.md)**.
 
 ## Panel editor — field position calculations
 
-- [ ] Investigate `cms_page_panel_fields_init` absolute positioning (e.g. site `landing` “CTAs” subtitle section overlapping fields above) — not a subtitle container height fix
+- [x] **CSS grid layout instead of JS positions** (review 2026-11-11, item 4; done 2026-11-12). See [`cms_input.md`](cms_input.md) § Form layout.
+  - **CSS:** `.cms_page_panel_fields` is a two-column grid of 3.5 rem rows (`cms_page_panel.scss`). Spans come from `data-cms_input_height` / `data-cms_input_width`. A repeater is a full auto-height row; the grid input spans its rows.
+  - **Removed:**
+    - `cms_page_panel_fields_init` (JS layout);
+    - the form hidden until scripts ran;
+    - the re-layout calls (repeater add/delete/sort, grid rows);
+    - the `container: "full"` input flag.
+  - **Groups:** a tab's fields are moved right after the `groups` input (`cms_input_repeater.php`), and a field in several tabs now works (the JS gave it `top: NaN`). A row is as tall as its open tab, so switching tabs can move the fields below.
+  - **Check:** `grok/tmp/cms_inputs_check.js after layout`: every input box on the 21 forms is within 3 px of the JS layout, also after adding a row. Screenshots of 8 forms are the same apart from a 1 px shift of the grid's Add button.
+  - **Old item closed:** "Investigate `cms_page_panel_fields_init` absolute positioning (landing CTAs subtitle overlap)". The function is gone, and the landing form shows no overlap.
 
 ---
 
@@ -184,6 +210,53 @@ Source: [`cms_panel_js.md`](cms_panel_js.md). Per-module remaining work also tra
 ---
 
 ## CMS inputs — [`cms_input.md`](cms_input.md)
+
+- [x] **#87 one path for every input** (2026-11-11):
+  - `print_fields()` builds the same params for every field and always renders `cms/cms_input`;
+  - repeater, cms_page_panels, select, grid and repeater_select lost their helper branches, and their params are made in their own controllers (`cms_input_repeater.php` is new);
+  - the wrapper and value escaping come from the input's definition (`input`: `container`, `value_raw`);
+  - one type→panel resolver (`cms_input_panel_name()`);
+  - inner `.cms_input_container` wrappers removed (text, colour, fk, select, page_panels);
+  - admin templates render their fields through the dispatcher;
+  - aliases `panels`/`color` normalised when definitions load.
+
+  See [`cms_input.md`](cms_input.md) § How an input is rendered.
+- [x] **Repeater row from the definition** (review 2026-11-11, item 2, input trust; done 2026-11-12). "Add element" posted the whole `fields` structure (`data-fields`), and `cms/cms_input_repeater_item` rendered it, so the browser chose which panels ran.
+  - **Fix:** the request now sends `block_panel`, `section`, `name`, `repeater_key` and `base_id` (`ajax.input` lists only these), and the fields come from the definition (`cms_repeater_definition()`). An unknown panel, section or repeater gives an error.
+  - **Kept:** `_access_ok` is still passed to the input panel. Panel `access` keys are visitor keys, and a refused input would clear the site-user session and redirect the admin form to the site login. Input types come from definitions only. See the comment in `cms_input.php`.
+  - **Check:** `grok/tmp/cms_repeater_rows_check.js`.
+- [x] **Repeater row keys** (review 2026-11-11, item 3; done 2026-11-12). A row added after a delete took an existing row's key (key = row count), so classes such as `.cms_image_input_<name_clean>` matched two rows and a chosen image was set in both.
+  - **Fix:** the next key comes from `data-next_key` on the rows area. The repeater's call to `cms_input_image_rename()` (it never matched) and its 1 s timeout are removed; the function stays for the legacy `cms_table.js`.
+  - **Check:** `grok/tmp/cms_repeater_rows_check.js` adds three rows, deletes one and adds one: all ids and image classes are unique.
+- [x] **CMS files in a private data folder** (review 2026-11-13, item 1, input trust).
+  - **The old problem:** file-input uploads of any type went to the web-served `img/` (`.php` ran there), and `cms_file_rename` followed `../`.
+  - **Now:** every `cms_file` file is in `dir.data` (default `data/<year>/<month>/`), denied by the root `.htaccess` and by `data/.htaccess`, and reached only through the `cms/file` API, `cms/file/<year>/<month>/<name>` (`modules/cms/api/file.php`, `cms_file_url()`; the old `files/get` route and `controller_files.php` are removed) (see [`system.md`](system.md) § Directories, [`cms_input.md`](cms_input.md) § file). Rename stays inside the data folder.
+  - **Live:** CMS Update creates `data/` and moves the existing files from `img/` (`cms_file_model::move_files_to_data()`). Adding `RewriteRule ^data(/|$) - [F,L]` to the site's root `.htaccess` is recommended; `data/.htaccess` already denies it.
+  - **Check:** `grok/tmp/cms_data_files_check.php`.
+- [ ] **Host config was served by Apache** (found 2026-11-13). `config/<host>.json` (database and admin passwords) answered 200, also as `…/../config/…`. `RewriteRule ^config(/|$) - [F,L]` is now in the root `.htaccess` and in the install template.
+  - **Live:** CMS Update does not change a site's root `.htaccess`. Add the `config` and `data` rules to live by hand, then check that `config/<host>.json` gives 403. Change the passwords if it was reachable.
+  - **Lasting fix:** the installation hardening check (§ Updater).
+- [x] **Textarea preview ran any panel method** (review 2026-11-13, item 2, input trust; done 2026-11-13). The posted `md_filter` went to `run_panel_method()`.
+  - **Fix:** `markdown_apply_md_filter()` now runs only `module/panel/md_filter_*` (`markdown_md_filter_valid()`, `system/helpers/markdown_helper.php`), so every caller is covered. The preview answers `cms_error` for any other value, and the JS shows it.
+  - **`ajax.input`:** `cms_input_textarea` has one (`cms`, `md_preview`, `text`, `md_filter`).
+  - **Check:** `grok/tmp/cms_md_filter_check.php`, and the material form preview.
+- [ ] **Save takes field names from the request** (review 2026-11-13, item 3).
+  - **Save:** `build_panel_data_for_save()` stores every posted `panel_params` key (nested `_*` keys and `show` included), and takes an existing block's `panel_name`, page, parent and sort from the post. Keep only the definition's fields and grid logs; take the stored row's values.
+  - **Grid cells:** `cms_grid_editable` `update_field` writes any `name` on any `item_id`.
+  - **`ajax.input`:** add one for `cms/cms_page_panel` and `cms/cms_grid_editable`.
+- [ ] **Link input targets once per request** (review 2026-11-13, item 4). `cms_input_link` rebuilds every list, with one slug query per item, for each link input: 61–63 ms each, 130 ms for three. Build once in the model, with one slug query per list.
+- [ ] **Edit page leftovers** (review 2026-11-13, item 5):
+  - the repeater `meta: image` collection throws its `array_merge` result away (`cms_page_panel_cms_model.php:326`);
+  - the dead `$('#block_id')` branch in `cms_page_panel_button_save.js`;
+  - `admin/panel_settings/<panel>/` creates a settings block on GET for any panel name.
+- [ ] **Groups tabs from the server** (review 2026-11-12). Until `cms_input_groups_init()` runs, every tab's fields show. `cms_input_repeater_item` knows the row's tab value (or the `groups` default): mark the other tabs' fields, and have `cms_input.tpl.php` print `cms_input_groups_hidden` on their wrapper.
+- [ ] **Field layout CSS tidy** (review 2026-11-12). In `cms_page_panel.scss`:
+  - one selector list per row span instead of two rule sets (27 KB compiled);
+  - document the 100-row cap (`$cms_field_height_max`) in `cms_input.md`;
+  - comment the four spacing values that reproduce the old JS spacing.
+- [ ] **Fewer panels per field** (review 2026-11-11, item 5). The dispatcher as a helper function instead of a panel; help text without a `cms/cms_help` panel; grid cells printed by the grid template; label, help and translate icon printed once by the wrapper (with the CSS grid item).
+- [ ] **Configurable input types** (#87 "later") — which input types are available, e.g. per site or per module. The `input` definition flags are where a type would declare itself.
+- [ ] **Legacy table editor** — `cms_table.tpl.php` (admin table editor, `admin.php` → `cms/cms_table`) defines its own `print_fields()` with old markup (`admin_input_select`). Move it to the shared path or remove the editor if unused.
 
 - [ ] **xy / mask / transform targets JS** — target-image refresh (when the linked image field changes) for `cms_input_xy`, `cms_input_mask`, and imagemaker `cms_input_transform` should live in each input’s own JS (`cms_input_xy.js`, `cms_input_mask.js`, `cms_input_transform.js`), not only in `cms_input_image` or ad-hoc hooks. See `target` on those field types in [`cms_input.md`](cms_input.md).
 

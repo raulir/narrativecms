@@ -307,7 +307,7 @@ class analytics_model extends \Model {
 			return '';
 		}
 
-		$path = $GLOBALS['config']['upload_path'].$filename;
+		$path = $GLOBALS['config']['data_path'].$filename;
 		if (!is_file($path)) {
 			return '';
 		}
@@ -394,11 +394,11 @@ class analytics_model extends \Model {
 		$this->load->model('cms/cms_page_panel_model');
 		$settings = $this->cms_page_panel_model->get_cms_page_panel_settings('analytics/analytics_settings');
 		$settings_filename = trim((string)($settings['geoip_database'] ?? ''));
-		$resolved_path = $settings_filename !== '' ? $GLOBALS['config']['upload_path'].$settings_filename : '';
+		$resolved_path = $settings_filename !== '' ? $GLOBALS['config']['data_path'].$settings_filename : '';
 		$configured_path = $this->get_geoip_database_path();
 
 		$lines[] = '[config]';
-		$lines[] = 'upload_path: '.$GLOBALS['config']['upload_path'];
+		$lines[] = 'data_path: '.$GLOBALS['config']['data_path'];
 		$lines[] = 'settings filename: '.($settings_filename !== '' ? $settings_filename : '(empty)');
 		$lines[] = 'resolved path: '.($resolved_path !== '' ? $resolved_path : '(empty)');
 		$lines[] = 'file exists: '.($resolved_path !== '' && is_file($resolved_path) ? 'yes' : 'no');

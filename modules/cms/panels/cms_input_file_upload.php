@@ -25,18 +25,18 @@ class cms_input_file_upload extends \Controller {
 		$do = $params['cms_do'] ?? false;
 		if ($do == 'cms_input_file_upload'){
 			 
-			// collect data
-			$this->load->library('upload', array('allowed_types' => '*', 'upload_path' => $GLOBALS['config']['upload_path'], ));
-			 
+			// Any type: CMS files are kept in the data folder, which is never served (cms/file API only)
+			$this->load->library('upload', array('allowed_types' => '*', 'upload_path' => $GLOBALS['config']['data_path'], ));
+
 			if (!empty($_FILES['new_file'])){
 				$new_file = $this->upload->upload_image('new_file');
 
 				if (!empty($new_file)){
-						
+
 					$this->load->model('cms/cms_file_model');
-					$return = $this->cms_file_model->create_cms_file('', $new_file);
-						
-					rename($GLOBALS['config']['upload_path'].$new_file, $GLOBALS['config']['upload_path'].$return['filename']);
+					$return = $this->cms_file_model->create_cms_file($new_file);
+
+					rename($GLOBALS['config']['data_path'].$new_file, $this->cms_file_model->file_path($return['filename']));
 
 				}
 			}

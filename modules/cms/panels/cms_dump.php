@@ -448,7 +448,12 @@ class cms_dump extends \Controller {
 			if ($rel === '' || $rel === 'db.sql' || $rel === 'dump.json'){
 				continue;
 			}
-			$dest = $upload.$rel;
+			// CMS files were packed under data/, images at the top
+			if ($rel === 'data'){
+				continue;
+			}
+			$dest = (strpos($rel, 'data/') === 0)
+					? $this->_data_path_abs().substr($rel, 5) : $upload.$rel;
 			if ($item->isDir()){
 				if (!is_dir($dest)){
 					mkdir($dest, 0755, true);
@@ -595,6 +600,10 @@ class cms_dump extends \Controller {
 
 	}
 
+	function _data_path_abs(){
+		return rtrim(str_replace('\\', '/', $GLOBALS['config']['data_path']), '/').'/';
+	}
+
 	function _upload_path_abs(){
 		$path = $GLOBALS['config']['upload_path'];
 		if ($path === '' || $path === false){
@@ -630,9 +639,16 @@ class cms_dump extends \Controller {
 
 	}
 
-	function add_month_to_zip($zip, $month_string, $resize_images = false, $resize_max_px = 0){
+	/**
+	 * Files of one month into the zip: images from the image folder, and with $data the CMS files from the data
+	 * folder (dir.data), packed under data/ and never resized.
+	 */
+	function add_month_to_zip($zip, $month_string, $resize_images = false, $resize_max_px = 0, $data = false){
 
-		$imagesdir = $this->_upload_path_abs().$month_string;
+		$imagesdir = ($data ? $this->_data_path_abs() : $this->_upload_path_abs()).$month_string;
+		if ($data){
+			$resize_images = false;
+		}
 
 		if (!is_dir($imagesdir)){
 			return;
@@ -646,7 +662,7 @@ class cms_dump extends \Controller {
 				continue;
 			}
 
-			$new_name = $month_string.'/'.str_replace('\\', '/', trim(str_replace(trim($imagesdir, '/\\'), '', $file), '/\\'));
+			$new_name = ($data ? 'data/' : '').$month_string.'/'.str_replace('\\', '/', trim(str_replace(trim($imagesdir, '/\\'), '', $file), '/\\'));
 
 			$source = $file;
 			if ($resize_images && $resize_max_px > 0){
@@ -825,6 +841,7 @@ class cms_dump extends \Controller {
 			$months = $this->_expand_resource_months($selected_resources);
 			foreach ($months as $month_string){
 				$this->add_month_to_zip($zip, $month_string, $resize_images, $resize_max_px);
+				$this->add_month_to_zip($zip, $month_string, false, 0, true);
 			}
 
 			if (!empty($selected_tables)){

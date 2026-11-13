@@ -21,63 +21,26 @@ class cms_input_grid extends \Controller {
 
 	}
 	
-	function panel_action($params){
-		
-		if(!empty($params['cms_do'])){
-			
-			if ($params['cms_do'] == 'create_row'){
-				
-				$this->load->model('cms/cms_page_panel_model');
-				
-				$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
-				$params['data'] = $this->run_panel_method($base['panel_name'], 'ds_'.$params['ds'], [
-						'cms_do' => 'C',
-						'id' => $params['base_id'],
-				]);
-				
-				print(json_encode(['result' => $params['data']], JSON_PRETTY_PRINT));
-				
-				die();
-				
-			} else if ($params['cms_do'] == 'delete_row'){
-				
-				$this->load->model('cms/cms_page_panel_model');
-
-				if(!empty($params['base_id'])){
-					$base = $this->cms_page_panel_model->get_cms_page_panel($params['base_id']);
-					$base_name = $base['panel_name'];
-					$ds_params = [
-							'cms_do' => 'D',
-							'id' => $params['base_id'],
-							'row_id' => $params['id'],
-					];
-				} else {
-					$base_name = $params['base_name'];
-					$ds_params = [
-							'cms_do' => 'D',
-							'id' => $params['id'],
-					];
-				}
-				
-				$params['data'] = $this->run_panel_method($base_name, 'ds_'.$params['ds'], $ds_params);
-				
-				print(json_encode(['result' => $params['data']], JSON_PRETTY_PRINT));
-				
-				die();
-				
-			}
-				
-		}
-		
-		return $params;
-		
-	}
-
+	/**
+	 * Rows from the block's data source ds_<ds> (S: columns, L: rows); changes are saved with the block
+	 * (apply_logs). One level only: a grid inside a repeater row is not rendered.
+	 */
 	function panel_params($params){
-		
+
 		$params['data'] = [];
 
-		if(!empty($params['base_id']) || !empty($params['base_name'])){
+		if (!empty($params['prefix'])){
+			$params['nested'] = 1;
+			return $params;
+		}
+		$params['nested'] = 0;
+
+		// The change log field and the area class use the field's own name
+		$params['name'] = $params['field_name'] ?? $params['name'];
+		$params['operations'] = !empty($params['operations']) ? $params['operations'] : 'SL';
+		$params['ds'] = (string)($params['ds'] ?? '');
+
+		if ($params['ds'] !== '' && (!empty($params['base_id']) || !empty($params['base_name']))){
 		
 			$this->load->model('cms/cms_page_panel_model');
 			$this->load->model('cms/cms_panel_model');

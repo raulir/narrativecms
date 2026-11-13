@@ -71,7 +71,7 @@ If something was “needed for the form”, it belonged on a **custom field pane
 
 ### Custom CMS field panels (allowed on admin)
 
-Field types such as `music/exercise_params`, `cms/cms_input_image`, `music/note_system_key` are **input widgets**. When [`print_fields()`](../helpers/cms_fields_helper.php) renders them via `_panel()`, those field panels run **their own** `panel_params` to prepare the control (`value`, labels, etc.). That is correct: the field panel owns its admin UI.
+Field types such as `music/exercise_params`, `cms/cms_input_image`, `music/note_system_key` are **input widgets**. When [`print_fields()`](../helpers/cms_fields_helper.php) renders them through the input dispatcher `cms/cms_input` ([`cms_input.md`](cms_input.md) § How an input is rendered), those field panels run **their own** `panel_params` to prepare the control (`value`, labels, etc.). That is correct: the field panel owns its admin UI.
 
 | Panel kind | Admin edit form | Frontend page render |
 |------------|-----------------|----------------------|
@@ -132,7 +132,7 @@ Logged-in CMS user browsing the **public** site still gets the **visitor** path 
 ### 4. Practical checklist
 
 - New redirect / session / “prepare visitor page” code → frontend `panel_params` only; guard admin.  
-- New admin form control → custom field panel (+ definition `type`), not page `panel_params`.  
+- New admin form control → custom field panel (+ definition `type`, optional `input` flags; see [`cms_input.md`](cms_input.md)), not page `panel_params`.  
 - New shared data → model method.  
 - Do not call `run_panel_method(..., 'panel_params')` from admin form builders for the **page** panel being edited.
 

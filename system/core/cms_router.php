@@ -6,7 +6,7 @@
  * Path normalize: system/core/cms_path.php (cms_request_path).
  *
  * Public pages: one PK lookup on cms_route (slug, target, status).
- * Reserved controllers: ajax_api, files, module controllers — no slug table.
+ * Reserved controllers: ajax_api, module controllers — no slug table. CMS files: the cms/file module API.
  */
 
 // cms_request_path() lives in cms_path.php (loaded before API branch)
@@ -142,17 +142,6 @@ function cms_route_resolve($path) {
 			'target' => '',
 			'controller' => 'ajax_api',
 			'method' => isset($segments[1]) ? $segments[1] : 'get_panel',
-			'args' => array_slice($segments, 2),
-		);
-	}
-
-	if ($first === 'files') {
-		return array(
-			'kind' => 'files',
-			'slug' => '',
-			'target' => '',
-			'controller' => 'files',
-			'method' => isset($segments[1]) ? $segments[1] : 'get',
 			'args' => array_slice($segments, 2),
 		);
 	}

@@ -281,6 +281,9 @@ if (!empty($_POST['do'])){
 		if (!file_exists($root.'img/')){
 			mkdir($root.'img/', 0777, true);
 		}
+		if (!file_exists($root.'data/')){
+			mkdir($root.'data/', 0777, true);
+		}
 
 		$progress_file = $root.'cache/install.txt';
 		$stall_file = $root.'tmp/install_stall.json';
@@ -967,6 +970,8 @@ RewriteEngine on
 # Deny private dirs (no per-directory .htaccess)
 RewriteRule ^tmp(/|$) - [F,L]
 RewriteRule ^log(/|$) - [F,L]
+RewriteRule ^data(/|$) - [F,L]
+RewriteRule ^config(/|$) - [F,L]
 # Bot probes anywhere in the path. /.well-known stays open for certificates.
 RewriteRule (^|/)wp- - [F,NC,L]
 RewriteRule (^|/)\.git - [F,NC,L]

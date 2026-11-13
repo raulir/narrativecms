@@ -422,7 +422,7 @@ class cms_page_panel_export extends \Controller {
 			return 0;
 		}
 
-		$source_path = $GLOBALS['config']['upload_path'].$filename;
+		$source_path = $this->cms_file_model->file_path($filename);
 		if (!file_exists($source_path) || is_dir($source_path)){
 			return 0;
 		}

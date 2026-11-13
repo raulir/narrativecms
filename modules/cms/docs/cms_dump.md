@@ -77,6 +77,7 @@ Dump inventory uses `cms_schema_model::get_schema_tables_by_module()` (JSON sche
 - [x] Inventory from sidecar, else `dump.json` inside zip
 - [x] Per row: **Restore** / **Download** / **Delete** (confirm on Restore + Delete)
 - [x] Restore: extract resources + import `db.sql` with `DROP TABLE IF EXISTS` (no `*_bu`)
+- [x] CMS files (data folder, `dir.data`): each selected month of `data/` is packed under `data/<year>/<month>/` in the zip (never resized), and restore puts those entries back in the data folder (2026-11-13)
 
 ### Open / later
 

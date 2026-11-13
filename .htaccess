@@ -59,7 +59,9 @@ AddOutputFilterByType DEFLATE font/opentype
 </IfModule>
 
 <IfModule mod_headers.c>
-    Header set Access-Control-Allow-Origin "*"
+	<FilesMatch "\.(css|js|png|jpe?g|gif|webp|svg|ico|ttf)$">
+		Header always set Access-Control-Allow-Origin "*" "expr=%{HTTP_HOST} =~ m#^(app\\.scoretutor\\.com|app_music\\.localhost|10\\.0\\.2\\.2)$#"
+	</FilesMatch>
 </IfModule>
 
 RewriteEngine on
@@ -67,6 +69,8 @@ RewriteEngine on
 # Deny private dirs (no per-directory .htaccess)
 RewriteRule ^tmp(/|$) - [F,L]
 RewriteRule ^log(/|$) - [F,L]
+RewriteRule ^data(/|$) - [F,L]
+RewriteRule ^config(/|$) - [F,L]
 # Bot probes anywhere in the path. /.well-known stays open for certificates.
 RewriteRule (^|/)wp- - [F,NC,L]
 RewriteRule (^|/)\.git - [F,NC,L]

@@ -25,7 +25,7 @@ class cms_input_provides extends \Controller {
 
 	function panel_params($params){
 
-		$service = $params['service'] ?? ($params['params']['service'] ?? '');
+		$service = $params['service'] ?? '';
 
 		$values = ['' => '-- none --'];
 
@@ -54,21 +54,8 @@ class cms_input_provides extends \Controller {
 		$params['values'] = $values;
 		$params['service'] = $service;
 
-		if (!empty($params['params']['add_empty'])){
-			$params['add_empty'] = $params['params']['add_empty'];
-		}
-		if (!empty($params['params']['mandatory'])){
-			$params['mandatory'] = $params['params']['mandatory'];
-			if (empty($params['mandatory_class'])){
-				$params['mandatory_class'] = ' cms_input_mandatory ';
-			}
-		}
-
-		if (!empty($params['params']['groups'])){
-			$params['groups'] = $params['params']['groups'];
-			if (!is_array($params['groups'])){
-				$params['groups'] = [$params['groups']];
-			}
+		if (!empty($params['mandatory']) && empty($params['mandatory_class'])){
+			$params['mandatory_class'] = ' cms_input_mandatory ';
 		}
 
 		return $params;

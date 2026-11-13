@@ -64,46 +64,81 @@
 	display: inline;
 }
 
-// Field grid layout (was cms_page_panel_fields.scss)
+// Field layout: a CSS grid of two columns and 3.5rem rows (no JS). Each input spans the rows in its
+// data-cms_input_height, and both columns when data-cms_input_width is 2. The grid's default placement fills
+// the shorter column first and puts a two-column input below both. A repeater or grid takes a full row that
+// grows with its content. Inputs keep their declared height (contain: size), as before.
+$cms_field_row: 3.5rem;
+$cms_field_height_max: 100;
+
+@mixin cms_field_spans {
+	@for $i from 2 through $cms_field_height_max {
+		&[data-cms_input_height="#{$i}"] {
+			grid-row: span $i;
+		}
+	}
+}
+
 .cms_page_panel_fields {
 
-	padding: 2.0rem 0 0 0;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	grid-auto-rows: minmax($cms_field_row, auto);
+	padding: 0 0 2.0rem 0;
 	font-size: 0;
 	letter-spacing: 0;
 	line-height: 0;
 	position: relative;
-	opacity: 1;
-	transition: opacity 0.2s;
 
 	&:first-of-type {
 		padding: 0;
 	}
 
-	&.cms_page_panel_fields_hidden {
-		opacity: 0;
+	> .cms_input_container {
+		display: contents;
 	}
 
-	.cms_input {
-		position: absolute;
-	}
-
-	.cms_input_container_full {
-		display: block;
-		position: relative;
-		width: 100%;
-		box-sizing: border-box;
-
-		.cms_input {
-			position: relative;
-			top: auto;
-			left: auto;
-			width: 100%;
+	// Height from the rows it spans (an input's own CSS height no longer applies here)
+	> .cms_input_container > .cms_input {
+		width: auto;
+		height: auto;
+		contain: size;
+		@include cms_field_spans;
+		&[data-cms_input_width="2"] {
+			grid-column: 1 / -1;
 		}
 	}
 
-	.cms_repeater_container {
-		position: absolute;
-		width: 100%;
+	> .cms_repeater_container {
+		grid-column: 1 / -1;
+		margin-bottom: 1.2rem;
+	}
+
+	// Repeater row: one column of 3.5rem rows below the toolbar row
+	.cms_repeater_block_content {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		grid-auto-rows: $cms_field_row;
+		padding-top: 0;
+		padding-bottom: 0.8rem;
+	}
+
+	.cms_repeater_block_toolbar {
+		align-self: start;
+		margin-top: 0.5rem;
+	}
+
+	// A field of another groups tab stays hidden (cms_input_groups.scss)
+	.cms_repeater_block_content > .cms_input_container:not(.cms_input_groups_hidden) {
+		display: contents;
+	}
+
+	.cms_repeater_block_content > .cms_input_container > .cms_input {
+		width: calc(100% - 0.2rem);
+		height: auto;
+		justify-self: start;
+		contain: size;
+		@include cms_field_spans;
 	}
 
 }

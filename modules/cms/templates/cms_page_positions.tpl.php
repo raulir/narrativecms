@@ -1,7 +1,7 @@
 <?php foreach($positions as $position): ?>
 	<div class="cms_page_positions">
 	
-		<?php _panel('cms/cms_input_select', array(
+		<?php _panel('cms/cms_input', array('type' => 'select', 
 			'label' => $position['name'], 
 			'value' => $position['value'], 
 			'values' => $position['values'],

@@ -251,9 +251,36 @@ class cms_panel_model extends \Model {
 			$return = $this->merge_structures($return, $this->get_cms_panel_config($source));
 		}
 
+		// One name per field type (panels → cms_page_panels, color → colour), so save code checks one name
+		foreach (['item', 'settings'] as $part){
+			if (!empty($return[$part]) && is_array($return[$part])){
+				$return[$part] = $this->_field_type_aliases($return[$part]);
+			}
+		}
+
 		$this->_config_cache[$cms_panel] = $return;
 		
 		return $return;
+
+	}
+
+	function _field_type_aliases($fields){
+
+		foreach ($fields as $key => $field){
+			if (!is_array($field)){
+				continue;
+			}
+			if (($field['type'] ?? '') === 'panels'){
+				$fields[$key]['type'] = 'cms_page_panels';
+			} else if (($field['type'] ?? '') === 'color'){
+				$fields[$key]['type'] = 'colour';
+			}
+			if (!empty($field['fields']) && is_array($field['fields'])){
+				$fields[$key]['fields'] = $this->_field_type_aliases($field['fields']);
+			}
+		}
+
+		return $fields;
 
 	}
 

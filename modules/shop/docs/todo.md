@@ -14,7 +14,7 @@ Do not re-implement subscription checkout inside shop cart; keep `shop_checkout`
 
 Email fulfilment (`provides.shop_fulfilment` → `shop/fulfilment_email`) is on `shop/category` (provider + recipient repeater). Other providers (printer API) can register the same service later.
 
-- [ ] Attach print files to SMTP (today: CMS `/files/get/` URL in the body when `print_file` exists)
+- [ ] Attach print files to SMTP (today: CMS `/cms/file/` URL in the body when `print_file` exists)
 - [x] **Empty fulfilment provider** — skip, no log. CMS does not fulfil those lines until the category has a provider.
 - [x] **Two-axis order status** — physical `status` (draft / abandoned / unfulfilled / in_progress / fulfilled / **finished** / cancelled) and `payment_status`. Line is the sale atom (`product_item_id`). CMS emails only when paid + unfulfilled. Finished posts listed stock. Mapping: [`shop.md`](shop.md) Order status.
 - [x] **Finished sticky** — admin save cannot leave `finished` (or a row with `stock_posted_time`). Shopify apply/rollup already stay finished.
@@ -23,6 +23,10 @@ Email fulfilment (`provides.shop_fulfilment` → `shop/fulfilment_email`) is on 
 - [ ] **`shop/payment` rows** — one record per capture / refund instead of only `payment_status` on the order.
 
 ## Shop-local
+
+- [ ] **`shop/image_item_ids` input root** (review 2026-11-12). The admin field in the product `images` repeater has `.image_item_ids_container` as its root, not `.cms_input` with `data-cms_input_height` (the CMS input contract, `cms/docs/cms_input.md` § Form layout).
+  - **Effect:** the form grid gives it one 3.5 rem row, so a product with several variants would have its checkbox list cover the fields below.
+  - **Fix:** root `cms_input image_item_ids_container`, with `data-cms_input_height` from the number of choices, computed in `image_item_ids.php`.
 
 Second dims + cart review (2026-11-04):
 - [ ] **Split checkout for mixed carts** (later) — the mixed-cart check was removed (2026-11-04): one cart may hold local items and Shopify (or other provider) lines. Checkout must then split by source: one checkout per provider (e.g. Shopify lines to `shopify/checkout`, local lines to the local flow), with one order per part or child orders (see Fulfilment "Child / sub-orders"). Until then a mixed cart goes to the single `shop_checkout` provider as today.

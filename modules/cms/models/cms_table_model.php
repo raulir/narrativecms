@@ -42,8 +42,8 @@ class cms_table_model extends \Model {
    			$query = $this->db->query($sql);
     		$result = $query->result_array();
  			foreach($result as $row){
- 				if (file_exists($GLOBALS['config']['upload_path'].$row[$field]) && is_file($GLOBALS['config']['upload_path'].$row[$field])){
- 					unlink($GLOBALS['config']['upload_path'].$row[$field]);
+ 				if (file_exists($GLOBALS['config']['data_path'].$row[$field]) && is_file($GLOBALS['config']['data_path'].$row[$field])){
+ 					unlink($GLOBALS['config']['data_path'].$row[$field]);
  				}
  			}
 		}

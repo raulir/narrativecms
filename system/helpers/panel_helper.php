@@ -373,21 +373,29 @@ if ( !function_exists('get_position')) {
     }
     
     /**
+     * URL of a CMS file (file input, form upload): the cms/file API, the only way to the data folder.
+     */
+    function cms_file_url($filename){
+    	$parts = array_map('rawurlencode', explode('/', ltrim((string)$filename, '/')));
+    	return $GLOBALS['config']['base_url'].'cms/file/'.implode('/', $parts);
+    }
+
+    /**
      * prints link to file from cms file input
      */
     function _lf($filename){
     	if (empty($filename)) return;
-		print(' href="' . _l('files/get/'.str_replace('/', '__', $filename), false) . '" ');
+		print(' href="' . cms_file_url($filename) . '" ');
     }
-    
+
     function _lfd($filename){
     	if (empty($filename)) return;
-    	print(_l('files/get/'.str_replace('/', '__', $filename), false));
+    	print(cms_file_url($filename));
     }
-    
+
     function _lfs($filename){
     	if (empty($filename)) return;
-    	print(' src="' . _l('files/get/'.str_replace('/', '__', $filename), false) . '" ');
+    	print(' src="' . cms_file_url($filename) . '" ');
     }
     
     /**

@@ -1,6 +1,55 @@
 # CMS panel inputs
 
-Panel definition fields live in `modules/<module>/definitions/<panel>.json` under `item` (per-instance panel params) or `settings` (global panel settings). The admin UI renders them via [`print_fields()`](../helpers/cms_fields_helper.php), which routes each field to a `cms/cms_input_*` panel (or a custom module field panel such as `music/exercise_params`).
+Panel definition fields live in `modules/<module>/definitions/<panel>.json` under `item` (per-instance panel params) or `settings` (global panel settings). The admin UI renders them via [`print_fields()`](../helpers/cms_fields_helper.php). Every field, built-in or a module's own type (such as `music/exercise_params`), goes through the input dispatcher `cms/cms_input`, which renders the `cms/cms_input_*` panel for its type (see [How an input is rendered](#how-an-input-is-rendered)).
+
+## How an input is rendered
+
+One path for every input (narrativecms #87):
+
+1. **`print_fields($structure, $data, $prefix, $key)`** builds the same params for each field:
+   - the definition keys;
+   - `value` (the stored value, or `default` when there is none; `:date:` and `:rnd:` defaults are made here);
+   - `name` (`panel_params[<field>]`, or `panel_params[<prefix>][<field>][]` in a repeater row), `name_clean` and `field_name` (the definition `name`);
+   - `prefix` and `key` (the repeater and row);
+   - `panel_structure`;
+   - `base_id` (the block id) and `base_name` (the block's panel).
+
+   It then calls `_panel('cms/cms_input', $field)`. It has no branch per type.
+2. **`cms/cms_input` ([`cms_input.php`](../panels/cms_input.php))** prepares what every input shares:
+   - the input panel for the `type` (`cms_input_panel_name()`: `module/panel` as is, a built-in type as `cms/cms_input_<type>` when its template exists; aliases `color` → `colour`, `panels` → `cms_page_panels`);
+   - `mandatory_class` and `*` on the label; `[no label]` when the field has no `label` key; `help`; `readonly` (`'0'`); `groups` as an array;
+   - `"` → `&quot;` in a string `value` and in `default`, unless the input declares `value_raw` or the type is a module's.
+3. **The input panel's own controller** prepares everything else for its type, for example:
+   - select: empty option, mandatory;
+   - repeater: `data`, sub-field `base_id`, JS preload;
+   - grid: columns and rows from `ds_<ds>`.
+
+   Its template's root is the `.cms_input` element (or `.cms_repeater_container` / `.cms_grid_container`), without its own `.cms_input_container`.
+4. **The wrapper** comes from `cms_input.tpl.php`: one `.cms_input_container` (with `cms_input_container_groups` and `data-groups`), unless the input declares otherwise.
+
+**Input flags,** in the input panel's definition (`modules/cms/definitions/cms_input_<type>.json`):
+
+```json
+{ "input": { "value_raw": "1" } }
+```
+
+| Flag | Values | Used by |
+|------|--------|---------|
+| `container` | `""` (default) one `.cms_input_container`; `"none"`, no wrapper (the input is its own row in the form) | `repeater` none |
+| `value_raw` | `"1"`: the value is passed as it is (an array, or compared with option keys) | select, cms_page_panels, repeater, grid, repeater_select |
+
+**Admin templates** use the same path for their own fields: `_panel('cms/cms_input', ['type' => 'text', 'name' => …, 'value' => …, 'label' => …])`, as in `cms_page.tpl.php` and `cms_page_panel.tpl.php`. Pass `'label' => ''` for an input without a label. Only an input that contains another input renders it directly: `layout` and `repeater_select` render `cms/cms_input_select`; `modules` and `multifk` render `cms/cms_input_multi`. The outer input gets the wrapper.
+
+**A module's own input type** is a panel `module/panel` used as the field `type`. It gets the params above (value as it is), runs its own `panel_params`, and can declare `input` flags in its definition. Its root element is `.cms_input` with `data-cms_input_height` (rows) and, for the full width, `data-cms_input_width="2"`, so the form lays it out (see [Form layout](#form-layout)).
+
+### Form layout
+
+The block edit form (`.cms_page_panel_fields`, `cms_page_panel.scss`) is a CSS grid of two columns and 3.5 rem rows; no JS places the fields.
+
+- **Size:** each `.cms_input` spans the rows in its `data-cms_input_height` (1 when missing) and both columns when `data-cms_input_width` is `2`. Its height comes from those rows; the input's own CSS height does not apply there.
+- **Order:** fields are placed in definition order, each in the shorter column; a two-column field goes below both.
+- **Growing inputs:** a repeater is a full row as tall as its content. The grid input spans its rows (`style` and `data-cms_input_height`, updated when a row is added or deleted).
+- **Repeater rows:** one column of 3.5 rem rows below the toolbar, in field order. The fields of a `groups` tab are moved right after the `groups` input (`cms_input_repeater.php`), and only the open tab's fields are shown, so a row is as tall as its open tab.
 
 **Admin vs frontend:** preparing values for these **field** panels may use that field’s own `panel_params`. Do **not** run the **page panel’s** frontend `panel_params` when building the admin form — see [`cms_panel_params.md`](cms_panel_params.md).
 
@@ -81,7 +130,7 @@ Example (Site settings modules — also hard-coded as default on `cms/cms_input_
 | `lines` * | Height in CMS line-heights |
 | `width` | `"wide"` — double-column width |
 | `md` | `"1"` — plain textarea with **Preview** / **Edit** toggle; markdown rendered server-side via `cms/cms_input_textarea`. No TinyMCE. Works with `translate`. |
-| `md_filter` | `"module/panel/function"` — optional pre-markdown filter; receives live `text` and caller `cms_page_panel_id`, returns filtered `text` and optionally `images` for `![alt](id)` resolution. Example: `"music/material/md_filter_preview_text"`. |
+| `md_filter` | `"module/panel/md_filter_<name>"` — optional pre-markdown filter; the method name must start with `md_filter_` (anything else is refused, `markdown_md_filter_valid()`); receives live `text` and caller `cms_page_panel_id`, returns filtered `text` and optionally `images` for `![alt](id)` resolution. Example: `"music/material/md_filter_preview_text"`. |
 | `html` | Enables WYSIWYG editor. String of feature letters: `H` header, `L` list, `A` link, `B` bold, `I` italic, `U` underline, `C` colour, `Q` quote, `P` line breaks as `<p>` (default is `<br>`), `M` media (image upload). Ignored when `md` is set. |
 | `html_class` | CSS class on TinyMCE body |
 | `html_css` | Stylesheet URL for TinyMCE content |
@@ -143,7 +192,9 @@ Checkbox list; stores selected keys as an array.
 
 | Property | Description |
 |----------|-------------|
-| `accept` | Allowed extensions, e.g. `.mp4` |
+| `accept` | Extensions offered in the browser's file picker, e.g. `.mp4` |
+
+The file is a CMS file (`cms_file`), stored in the data folder (`dir.data`, default `data/`) in `<year>/<month>/` by upload time. That folder is never served: the file is reached through the `cms/file` API, `cms/file/<year>/<month>/<name>` (`cms_file_url()`, `_lf()`, `_lfd()`), which sends it as a download. A file with a `cms_user_id` is sent only to that logged-in site user. Any type may be uploaded. Rename keeps the file in its folder and keeps its extension.
 
 ### cms_page_panels / panels
 
@@ -197,7 +248,18 @@ Deprecated alternative (block target):
 | `fields` * | Array of input definitions |
 | `height` | Minimum block height in rems |
 
-Only one nesting level is supported in `print_fields()`.
+Only one nesting level: a `repeater` or `grid` inside a repeater row is not rendered; it shows an error naming the field instead.
+
+**Adding a row:** "Add element" asks `cms/cms_input_repeater_item` (ajax) for one row, sending:
+- `block_panel`: the block's panel;
+- `section`: `item` or `settings`, the definition section the repeater is in;
+- `name`: the repeater's name;
+- `repeater_key`;
+- `base_id`: the block id.
+
+The row's fields come from that definition (`cms_repeater_definition()`, `cms_fields_helper.php`), never from the request. An unknown panel, section or repeater gives an error, not a row.
+
+**Row keys:** a key only makes a row's ids and classes unique, because field names end in `[]`. The rows area holds the next free key (`data-next_key`), so a row added after a delete never takes an existing row's key.
 
 ### repeater_select
 
@@ -218,7 +280,7 @@ Shows a list item URL on the site. No `name` required.
 
 ### groups
 
-Repeater-only tab control. Same shape as `select` (`values`, etc.). Other fields in the same repeater block use `"groups": ["tab_id"]` (or array) to show only when that tab is active.
+Repeater-only tab control. Same shape as `select` (`values`, etc.). Other fields in the same repeater block use `"groups": ["tab_id"]` (or array) to show only when that tab is active. They are shown right after the `groups` input, whatever their place in the definition; a field may be in several tabs.
 
 ### xy
 

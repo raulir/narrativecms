@@ -44,7 +44,7 @@ function cms_input_repeater_run_init_hooks($container){
 }
 
 /**
- * Sortable for repeater blocks — sized helper/placeholder so absolute field layout keeps shape.
+ * Sortable for repeater blocks — sized helper/placeholder so two blocks still fit on a line while dragging.
  * Drag handle: upper toolbar only (four-way arrow cursor via CSS).
  */
 function cms_input_repeater_sortable_init($root){
@@ -130,13 +130,6 @@ function cms_input_repeater_sortable_init($root){
 					'width': '100%'
 				})
 
-			},
-			stop: function(){
-
-				if (typeof cms_page_panel_fields_init === 'function'){
-					cms_page_panel_fields_init()
-				}
-
 			}
 		})
 
@@ -152,18 +145,23 @@ function init_cms_input_repeater(){
 	$('.cms_repeater_button').off('click.r').on('click.r', function(){
 		
 		var $this = $(this);
+		var $repeater = $this.closest('.cms_repeater_container')
+		var $area = $repeater.find('.cms_repeater_area');
 
+		// Each row needs its own key (its ids and classes); a deleted row's key is not used again
+		var key = parseInt($area.attr('data-next_key'), 10) || 0
+		$area.attr('data-next_key', key + 1)
+
+		// The server takes the row's fields from the panel definition
 		get_ajax_panel('cms/cms_input_repeater_item', {
-			
-			'fields': JSON.parse(atob(String($this.data('fields')))),
-			'repeater_data': '',
+
+			'block_panel': $this.data('block_panel'),
+			'section': $this.data('section'),
 			'name': $this.data('name'),
-			'repeater_key': $this.closest('.cms_repeater_container').find('.cms_repeater_block').length
-			
+			'repeater_key': key,
+			'base_id': $this.data('base_id')
+
 		}, function(data){
-			
-			var $repeater = $this.closest('.cms_repeater_container')
-			var $area = $repeater.find('.cms_repeater_area');
 
 			var $span = $('<span></span>').html(data.result.cms_html)
 			var scripts = [];
@@ -187,32 +185,20 @@ function init_cms_input_repeater(){
 
 			cms_input_repeater_append_scripts(scripts, function(){
 
-				if (typeof cms_page_panel_fields_init === 'function') {
-					cms_page_panel_fields_init()
-				}
-
 				// Refresh sortable so freshly added item keeps shape when dragged
 				cms_input_repeater_sortable_init($area)
 
 				cms_input_repeater_run_init_hooks($repeater)
 
+				// if repeater is target for repeater selects, repopulate repeater selects
+				if ($this.closest('.cms_repeater_target').length && typeof cms_input_repeater_select_reinit === 'function'){
+					cms_input_repeater_select_reinit();
+				}
+
 				$('body').height('auto');
 
 			})
 
-			setTimeout(() => {
-			
-				if (typeof cms_input_image_rename == 'function'){
-					cms_input_image_rename($this.data('name') + '_image_');
-				}
-
-				// if repeater is target for repeater selects, repopulate repeater selects
-				if ($this.closest('.cms_repeater_target').length){
-					cms_input_repeater_select_reinit();
-				}
-			
-			}, 1000)
-			
 		});
 				
 	})

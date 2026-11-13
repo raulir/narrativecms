@@ -76,7 +76,7 @@ Panels with destroy in CMS module: `cms_input_image`, `cms_image`, `cms_video`, 
 
 ## Repeater integration
 
-When a repeater adds a row, [`cms_input_repeater.js`](../js/cms_input_repeater.js) preloads field panel JS and calls hooks from `data-init_hooks` on the Add button (derived from field types in PHP). Each hook is a global `<panel>_init` function.
+When a repeater adds a row, [`cms_input_repeater.js`](../js/cms_input_repeater.js) preloads field panel JS and calls hooks from `data-init_hooks` on the Add button. PHP derives them from the field types with the same type→panel resolver as the input dispatcher (`cms_input_panel_name()`, `cms_fields_helper.php`). Each hook is a global `<panel>_init` function. The row itself is `cms/cms_input_repeater_item` (ajax), which renders its fields with `print_fields()`. The request names the panel, definition section and repeater, the row key (from the area's `data-next_key`) and the block id; the server takes the fields from the definition ([`cms_input.md`](cms_input.md) § repeater).
 
 ## jQuery plugins
 
@@ -105,7 +105,6 @@ Admin / CMS input field panels (`cms_input_*`) do not need these. Do not skip th
 
 ## Exceptions
 
-- **`cms_page_panel_fields_init($root)`** (in `cms_page_panel.js`) — field-grid layout only; intentionally has no `*_ok` guard so repeaters/grid can re-run it after DOM changes.
 - **`cms_cron_run_init($root)`** — no panel DOM; guard `cms_cron_run_ok` on `body`.
 - **Feature state on `.data()`** — e.g. `cms_edit_slug_ok` validation result is not an init guard.
 - **Sub-state classes** — e.g. `cms_tinymce_formatted`, `cms_video_ready`, `cms_input_date_hidden` (pre-flatpickr setup).

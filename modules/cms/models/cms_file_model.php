@@ -72,63 +72,130 @@ class cms_file_model extends \Model {
 		
 	}
 	
-	function create_cms_file($dir, $name_data, $overwrite = false){
-		
+	/**
+	 * Absolute path of a CMS file in the data folder (dir.data). '' when the stored filename would leave it.
+	 * CMS files are never served directly: visitors get them through the cms/file API.
+	 */
+	function file_path($filename){
+
+		$filename = str_replace('\\', '/', (string)$filename);
+
+		if ($filename === '' || $filename[0] === '/' || preg_match('#(^|/)\.\.(/|$)#', $filename) || strpos($filename, ':') !== false){
+			return '';
+		}
+
+		return $GLOBALS['config']['data_path'].$filename;
+
+	}
+
+	/**
+	 * Real path of a stored file that exists inside the data folder, '' otherwise (cms/file API).
+	 */
+	function stored_file_path($filename){
+
+		$path = $this->file_path($filename);
+		$real = $path !== '' ? realpath($path) : false;
+		$data = realpath($GLOBALS['config']['data_path']);
+
+		if ($real === false || $data === false || !is_file($real)){
+			return '';
+		}
+
+		$real = str_replace('\\', '/', $real);
+		$data = rtrim(str_replace('\\', '/', $data), '/').'/';
+
+		return strpos($real, $data) === 0 ? $real : '';
+
+	}
+
+	/**
+	 * New CMS file record, in data/<year>/<month>/ by upload time. The file itself is written by the caller
+	 * to file_path() of the returned filename.
+	 */
+	function create_cms_file($name_data, $overwrite = false){
+
 		if (!$overwrite){
 			$name_data = $this->sanitize_filename($name_data);
 		}
-		
-		// make dir
-		$year = date('Y');
-		$month = date('m');
-		
-		if (!is_dir($GLOBALS['config']['upload_path'].$dir)){
-			mkdir($GLOBALS['config']['upload_path'].$dir);
+
+		$dir = date('Y').'/'.date('m').'/';
+		if (!is_dir($GLOBALS['config']['data_path'].$dir)){
+			mkdir($GLOBALS['config']['data_path'].$dir, 0755, true);
 		}
-		
-		if (!is_dir($GLOBALS['config']['upload_path'].$dir.$year)){
-			mkdir($GLOBALS['config']['upload_path'].$dir.$year);
-		}
-		
-		if (!is_dir($GLOBALS['config']['upload_path'].$dir.$year.'/'.$month)){
-			mkdir($GLOBALS['config']['upload_path'].$dir.$year.'/'.$month);
-		}
-		
-		$filename = $dir.$year.'/'.$month.'/'.$name_data;
-		
+
+		$filename = $dir.$name_data;
+
 		$extension = pathinfo($filename, PATHINFO_EXTENSION);
 		$filename_wo = substr($filename, 0, -(strlen($extension) + 1));
-		
 		$name_data_wo = substr($name_data, 0, -(strlen($extension) + 1));
-		
+
 		if ($overwrite){
 			$this->delete_cms_file_by_filename($filename);
 		}
-		
+
 		$i = 1;
-		while (file_exists($GLOBALS['config']['upload_path'].$filename)){
+		while (file_exists($this->file_path($filename))){
 			$filename = $filename_wo.'_'.$i.'.'.$extension;
-			$i += 1;
 			$name_data = $name_data_wo.'_'.$i.'.'.$extension;
+			$i += 1;
 		}
-				
+
 		$sql = "insert into cms_file set name = ? , filename = ? , date_posted = ? , cms_user_id = ? , sort = ? , icon = ? , title = ? ";
 		$this->db->query($sql, array($name_data, $filename, date('Y-m-d H:i:s'), 0, 0, '', ''));
- 
- 		return array(
+
+		return array(
 				'filename' => $filename,
 				'name' => $name_data,
- 				'name_original' => $name_data_wo.'.'.$extension,
+				'name_original' => $name_data_wo.'.'.$extension,
 				'cms_file_id' => $this->db->insert_id(),
 				'date_posted' => date('Y-m-d H:i:s'),
- 				'cms_user_id' => 0,
- 				'sort' => 0,
- 				'icon' => '',
- 				'title' => '',
- 		);
- 
+				'cms_user_id' => 0,
+				'sort' => 0,
+				'icon' => '',
+				'title' => '',
+		);
+
 	}
-	
+
+	/**
+	 * CMS Update: CMS files used to be in the image folder (dir.upload). Move each one to the data folder,
+	 * at the same relative path, once. Returns ['moved' => n, 'failed' => [filenames]].
+	 */
+	function move_files_to_data(){
+
+		$return = ['moved' => 0, 'failed' => []];
+
+		$upload = $GLOBALS['config']['upload_path'];
+		if ($upload === '' || rtrim($upload, '/') === rtrim($GLOBALS['config']['data_path'], '/')){
+			return $return;
+		}
+
+		foreach ($this->get_cms_files() as $file){
+
+			$filename = (string)($file['filename'] ?? '');
+			$target = $this->file_path($filename);
+			$source = $upload.$filename;
+
+			if ($target === '' || !is_file($source) || is_file($target)){
+				continue;
+			}
+
+			if (!is_dir(dirname($target))){
+				mkdir(dirname($target), 0755, true);
+			}
+
+			if (@rename($source, $target)){
+				$return['moved']++;
+			} else {
+				$return['failed'][] = $filename;
+			}
+
+		}
+
+		return $return;
+
+	}
+
 	function delete_cms_file_by_filename($filename){
 		$sql = "delete from cms_file where filename = ? ";
 		$this->db->query($sql, array($filename, ));
@@ -209,41 +276,31 @@ class cms_file_model extends \Model {
 	}
 	
 	function scrape_file($source, $filename = ''){
-	
+
 		if (empty($filename)){
 			if (stristr($source, '?')){
 				list($fn, $pr) = explode('?', $source, 2);
-				$ext = pathinfo($fn, PATHINFO_EXTENSION);
 				$filename = pathinfo($fn, PATHINFO_BASENAME);
 			} else {
-				$ext = pathinfo($source, PATHINFO_EXTENSION);
 				$filename = pathinfo($source, PATHINFO_BASENAME);
 			}
 		}
-	
+
 		$content = @file_get_contents($source);
 		if ($content === false || $content === ''){
 			return '';
 		}
 
-		if (!file_exists($GLOBALS['config']['upload_path'].date('Y'))){
-			mkdir($GLOBALS['config']['upload_path'].date('Y'));
-		}
-
-		if (!file_exists($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'))){
-			mkdir($GLOBALS['config']['upload_path'].date('Y').'/'.date('m'));
-		}
-
-		$created = $this->create_cms_file('/', $filename, true);
+		$created = $this->create_cms_file($filename, true);
 		$saved = is_array($created) ? (string)($created['filename'] ?? '') : '';
 		if ($saved === ''){
 			return '';
 		}
 
-		file_put_contents($GLOBALS['config']['upload_path'].$saved, $content);
+		file_put_contents($this->file_path($saved), $content);
 
 		return $saved;
-	
+
 	}
-	
+
 }

@@ -142,7 +142,7 @@
 					<div class="cms_image_overlay_colour_row cms_image_overlay_grid_row">
 						<span class="cms_image_overlay_sub_label">Colour</span>
 						<div class="cms_image_overlay_colour_field">
-							<?php _panel('cms/cms_input_colour', [
+							<?php _panel('cms/cms_input', ['type' => 'colour', 
 								'name' => 'overlay_colour',
 								'name_clean' => 'cms_image_overlay_colour',
 								'label' => 'Colour',

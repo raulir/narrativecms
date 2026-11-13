@@ -102,6 +102,11 @@ class cms_input_textarea extends \Controller {
 
 		$this->load->helper('markdown_helper');
 
+		// The filter is named by the field definition; only module/panel/md_filter_* methods may run
+		if ($md_filter !== '' && !markdown_md_filter_valid($md_filter)){
+			return ['error' => 'Unknown markdown filter'];
+		}
+
 		$filter_params = [
 			'text' => $text,
 			'cms_page_panel_id' => $cms_page_panel_id,

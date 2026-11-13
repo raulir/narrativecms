@@ -69,7 +69,9 @@ class cms_page_panel_model extends \Model {
 	var $_panel_slot_loading = [];
 	/** id|language => panel array, or false after that panel is saved or deleted. */
 	var $_panel_load_cache = [];
-	
+	/** panel_name|language => settings, for this request; emptied by any save or delete. */
+	var $_settings_cache = [];
+
 	function __construct(){
 		
 		$this->_ensure_language_model();
@@ -567,7 +569,10 @@ class cms_page_panel_model extends \Model {
 	}
 	
 	function _update_cached_params($cms_page_panel_id){
-		
+
+		// Settings are read from this cached row
+		$this->_settings_cache = [];
+
 		$this->load->model('cms/cms_panel_model');
 		
 		// update cached params
@@ -1092,6 +1097,9 @@ class cms_page_panel_model extends \Model {
 	 * Save or delete: pointers to this panel become empty. The slot stays, so a later load updates them.
 	 */
 	function _invalidate_panel_load_slot($cms_page_panel_id){
+
+		// Any block can be a settings block
+		$this->_settings_cache = [];
 
 		$prefix = (int)$cms_page_panel_id.'|';
 
@@ -2193,7 +2201,13 @@ class cms_page_panel_model extends \Model {
 			_html_error('Can\'t load cms panel settings, module not specified. Panel name: '.$cms_panel_name);
 			return [];
 		}
-		
+
+		// Every _panel() call asks for its panel's settings; one lookup per panel and language per request
+		$cache_key = $cms_panel_name.'|'.$language;
+		if (array_key_exists($cache_key, $this->_settings_cache)){
+			return $this->_settings_cache[$cache_key];
+		}
+
 		$this->load->model('cms/cms_panel_model');
 
 		$return = [];
@@ -2246,7 +2260,9 @@ class cms_page_panel_model extends \Model {
 				$return = array_merge_recursive_ex($source_params, $return);
 			}
 		}
-		
+
+		$this->_settings_cache[$cache_key] = $return;
+
 		return $return;
 		
 	}

@@ -23,41 +23,37 @@ class cms_input_file extends \Controller {
 	function panel_action($params){
 		
 		if (!empty($params['cms_do']) && $params['cms_do'] == 'cms_file_rename'){
-			
+
 			$this->load->model('cms/cms_file_model');
-			
-			$temp = explode('/', $params['old_name']); 
-			
-			$full_filename = array_pop($temp);
-			
-			$_extension = explode('.', $full_filename);
-			$extension = array_pop($_extension);
-			$filename = mb_substr($full_filename, 0, -(strlen('.'.$extension)));
-			
-			$new_short_name = $params['new_name'].'.'.$extension;
-			$new_short_name = $this->cms_file_model->sanitize_filename($new_short_name);
-			
-			$new_filename = str_replace($filename.'.'.$extension, $new_short_name, $params['old_name']);
-			
-			// update database
-			$this->cms_file_model->rename_file($params['old_name'], $new_filename, $new_short_name);
-			
-			$params['new_filename'] = $new_filename;
-			$params['new_short_name'] = $new_short_name;
-				
-			// rename real file
-			rename($GLOBALS['config']['upload_path'].$params['old_name'], $GLOBALS['config']['upload_path'].$new_filename);
-			
-			// update all references
-			// select from params
-			
-			// check if file input
-			
-			
-			// invalidate caches
-			
+
+			// Only a stored CMS file, in its own folder of the data folder; the extension stays
+			$file = $this->cms_file_model->get_cms_file_by_filename((string)($params['old_name'] ?? ''));
+			$old_path = !empty($file['filename']) ? $this->cms_file_model->file_path($file['filename']) : '';
+			$new_name = trim((string)($params['new_name'] ?? ''));
+
+			if ($old_path === '' || !is_file($old_path) || $new_name === ''){
+				return ['error' => 'This file cannot be renamed'];
+			}
+
+			$extension = pathinfo($file['filename'], PATHINFO_EXTENSION);
+			$new_short_name = $this->cms_file_model->sanitize_filename($new_name.'.'.$extension);
+			$new_filename = dirname($file['filename']).'/'.$new_short_name;
+			$new_path = $this->cms_file_model->file_path($new_filename);
+
+			if ($new_path === '' || file_exists($new_path) || !rename($old_path, $new_path)){
+				return ['error' => 'This file cannot be renamed'];
+			}
+
+			// The record and every block param that names the file
+			$this->cms_file_model->rename_file($file['filename'], $new_filename, $new_short_name);
+
+			return [
+					'new_filename' => $new_filename,
+					'new_short_name' => $new_short_name,
+			];
+
 		}
-		
+
 		return $params;
 		
 	}
@@ -65,7 +61,7 @@ class cms_input_file extends \Controller {
 	function panel_params($params){
 
 		if (empty($params['name_clean'])) {
-			$params['name_clean'] = $params['name'];
+			$params['name_clean'] = $params['name'] ?? '';
 		}
 
 		return $params;

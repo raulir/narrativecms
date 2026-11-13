@@ -225,7 +225,7 @@ Shop **provides** `shop/fulfilment_email`. Each `shop/category` picks a fulfilme
 
 CMS emails run only when **payment is paid** and **status is unfulfilled** (Shopify webhook/cron, or `set_order_paid` for Stripe/CMS later). If Shopify is **in progress** or **fulfilled**, CMS does not send and cron does not keep checking those lines. Group unsent lines by provider → `run_action`. Email provider sends **one queued mail per recipient**, containing only that recipient’s lines. `fulfilment_sent_time` is stored on each line and the line `status` becomes `in_progress`. Empty category fulfilment = CMS does not fulfil that line (no log, no stamp); set Email fulfilment on categories that should mail. Order status rolls up from lines; paid + all fulfilable lines fulfilled/cancelled → **Finished**.
 
-Print file: if `shop/product.print_file` exists, the email includes the CMS download URL (`/files/get/…`, same as admin file download). Missing file: omit, still send.
+Print file: if `shop/product.print_file` exists, the email includes the CMS download URL (`/cms/file/…`, same as admin file download). Missing file: omit, still send.
 
 Need **CMS email queue** on repeating tasks. Subject/intro: Shop settings → Email fulfilment.
 

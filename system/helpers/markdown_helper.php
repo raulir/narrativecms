@@ -169,21 +169,30 @@ if ( ! function_exists('markdown_normalise_images')){
 
 }
 
+if ( ! function_exists('markdown_md_filter_valid')){
+
+	/**
+	 * A textarea md_filter names "module/panel/md_filter_<name>": only panel methods named md_filter_* can be run.
+	 */
+	function markdown_md_filter_valid($md_filter){
+
+		return (bool)preg_match('#^[a-z0-9_]+/[a-z0-9_]+/md_filter_[a-z0-9_]+$#', (string)$md_filter);
+
+	}
+
+}
+
 if ( ! function_exists('markdown_apply_md_filter')){
 
 	function markdown_apply_md_filter($md_filter, $params){
 
 		$md_filter = trim((string)$md_filter);
 
-		if ($md_filter === '' || !is_array($params)){
+		if (!markdown_md_filter_valid($md_filter) || !is_array($params)){
 			return $params;
 		}
 
 		$parts = explode('/', $md_filter, 3);
-
-		if (count($parts) !== 3){
-			return $params;
-		}
 
 		$panel = $parts[0].'/'.$parts[1];
 		$method = $parts[2];

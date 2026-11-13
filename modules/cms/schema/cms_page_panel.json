@@ -16,6 +16,7 @@
   },
   "indexes": {
     "PRIMARY": { "columns": ["cms_page_panel_id"], "type": "primary" },
-    "page_idx": { "columns": ["cms_page_id"] }
+    "page_idx": { "columns": ["cms_page_id"] },
+    "panel_name_idx": { "columns": ["panel_name", "cms_page_id", "parent_id", "sort"] }
   }
 }

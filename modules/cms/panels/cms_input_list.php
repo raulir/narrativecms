@@ -30,23 +30,13 @@ class cms_input_list extends \Controller {
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('cms/cms_panel_model');
 
-		if (!empty($params['params']['add_empty'])){
-			$params['add_empty'] = $params['params']['add_empty'];
-		}
-		if (!empty($params['params']['mandatory'])){
-			$params['mandatory'] = $params['params']['mandatory'];
-			if (empty($params['mandatory_class'])){
-				$params['mandatory_class'] = ' cms_input_mandatory ';
-			}
+		if (!empty($params['mandatory']) && empty($params['mandatory_class'])){
+			$params['mandatory_class'] = ' cms_input_mandatory ';
 		}
 
 		// link_target: 1 = only lists with list.link_target; 0 = all lists
 		$link_target_only = false;
-		if (isset($params['params']['link_target'])){
-			$link_target_only = (string)$params['params']['link_target'] === '1'
-					|| $params['params']['link_target'] === 1
-					|| $params['params']['link_target'] === true;
-		} else if (isset($params['link_target'])){
+		if (isset($params['link_target'])){
 			$link_target_only = (string)$params['link_target'] === '1'
 					|| $params['link_target'] === 1
 					|| $params['link_target'] === true;

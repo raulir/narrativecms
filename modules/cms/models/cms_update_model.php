@@ -99,6 +99,10 @@ class cms_update_model extends \Model {
 			cms_migrate_update_master_dirs();
 		}
 
+		// CMS files moved from the image folder to the data folder (once; nothing left to move afterwards)
+		$this->load->model('cms/cms_file_model');
+		$this->cms_file_model->move_files_to_data();
+
 	}
 
 	function _release_dir($area){
@@ -144,6 +148,7 @@ class cms_update_model extends \Model {
 				'tmp/sessions/.gitkeep',
 				'log/.gitkeep',
 				'img/.gitkeep',
+				'data/.gitkeep',
 		];
 
 	}

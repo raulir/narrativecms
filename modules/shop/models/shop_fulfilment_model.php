@@ -333,14 +333,13 @@ class shop_fulfilment_model extends \Model {
 			return ['url' => '', 'name' => ''];
 		}
 
-		$abs = rtrim((string)($GLOBALS['config']['upload_path'] ?? ''), '/\\').DIRECTORY_SEPARATOR.
+		$abs = rtrim((string)($GLOBALS['config']['data_path'] ?? ''), '/\\').DIRECTORY_SEPARATOR.
 				str_replace(['\\', '/'], DIRECTORY_SEPARATOR, ltrim($rel, '/\\'));
 		if (!is_file($abs)){
 			return ['url' => '', 'name' => ''];
 		}
 
-		$path = 'files/get/'.str_replace('/', '__', $rel);
-		$url = function_exists('_l') ? _l($path, false) : (($GLOBALS['config']['base_url'] ?? '/').$path);
+		$url = cms_file_url($rel);
 		if (!preg_match('#^https?://#i', (string)$url)){
 			$host = trim((string)($GLOBALS['config']['base_site'] ?? ''));
 			if ($host === ''){

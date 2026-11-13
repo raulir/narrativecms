@@ -708,7 +708,7 @@ class cms_page_panel_import_model extends \Model {
 		if ($type === 'file'){
 			$found = $this->cms_file_model->get_cms_file_by_filename($filename);
 			if (!empty($found['filename'])){
-				$this->_restore_if_missing($found['filename'], $meta);
+				$this->_restore_if_missing($found['filename'], $meta, $GLOBALS['config']['data_path']);
 				return $found['filename'];
 			}
 			return $this->_create_file_from_zip($filename, $meta);
@@ -732,9 +732,20 @@ class cms_page_panel_import_model extends \Model {
 
 	}
 
-	function _restore_if_missing($filename, $meta){
+	/**
+	 * Writes the zip copy of a file that is in the database but not on disk. $base: the image folder
+	 * (dir.upload) by default, the data folder for CMS files.
+	 */
+	function _restore_if_missing($filename, $meta, $base = null){
 
-		$path = $GLOBALS['config']['upload_path'].$filename;
+		if ($base === null){
+			$base = $GLOBALS['config']['upload_path'];
+		}
+		if ($filename === '' || strpos($filename, '..') !== false){
+			return;
+		}
+
+		$path = $base.$filename;
 		if ($filename === '' || is_file($path)){
 			return;
 		}
@@ -812,8 +823,8 @@ class cms_page_panel_import_model extends \Model {
 			return $filename;
 		}
 
-		$created = $this->cms_file_model->create_cms_file('', basename($filename));
-		$dest = $GLOBALS['config']['upload_path'].$created['filename'];
+		$created = $this->cms_file_model->create_cms_file(basename($filename));
+		$dest = $this->cms_file_model->file_path($created['filename']);
 		$dir = dirname($dest);
 		if (!is_dir($dir)){
 			mkdir($dir, 0777, true);

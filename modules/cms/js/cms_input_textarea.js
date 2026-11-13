@@ -53,6 +53,12 @@ function cms_input_textarea_md_preview($wrap){
 
 	get_ajax_panel('cms/cms_input_textarea', ajax_params, function(result){
 
+		if (result.result.cms_error){
+			$button.prop('disabled', false).text('Preview');
+			cms_notification(result.result.cms_error, 3, 'error');
+			return;
+		}
+
 		$preview.html(result.result.html || '');
 		$preview.show();
 		$textarea.hide();

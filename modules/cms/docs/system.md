@@ -73,7 +73,8 @@ Host JSON `dir` (optional). Relative values are under the project, or under `dir
 | `tmp` | `tmp` | denied in root `.htaccess` — HTML cache, dumps, updater snapshots |
 | `log` | `log` | denied in root `.htaccess` — `error.log` and other logs |
 | `session` | `{tmp}/sessions` | denied with `tmp/` in root `.htaccess` |
-| `upload` | `img/` | public |
+| `upload` | `img/` | public — image library (images, videos) |
+| `data` | `data/` | denied: root `.htaccess` and its own `data/.htaccess` (written by `cms_ensure_runtime_dirs()`) — CMS files (`cms_file`: file inputs, form uploads) in `<year>/<month>/` by upload time, reached only through the `cms/file` API (`cms/file/<year>/<month>/<name>`, `cms_file_url()`) |
 | `base` | (unset) | parent for relative dir values |
 
 The same root `.htaccess` returns 403 before CMS routing when the path contains `wp-`, `.git` (including `.github`), `.ssh`, or `.env` (including `.environment`) at any depth, or when the path starts with a dot. `/.well-known` and everything under it stay open.
@@ -286,6 +287,8 @@ JSON: use `cms_json_decode($data, $filename = '')` for files/data (better errors
 ## Performance note
 
 Full page loads construct many panel libraries. Keeping a **single** Loader init and **shared** models removes a large amount of repeated bootstrap work; multi-panel pages can feel substantially faster server-side after these rules.
+
+**Panel settings per `_panel()` call.** `ajax_panel()` merges the panel's settings on every call (`get_cms_page_panel_settings()`). The lookup uses the `cms_page_panel` index `panel_name_idx` (`panel_name`, `cms_page_id`, `parent_id`, `sort`). The result is kept for the request per panel and language, and emptied when any block is saved or deleted (`_update_cached_params()`, `_invalidate_panel_load_slot()`). Without the index, each call scanned the whole table (about 8 ms on 23k rows).
 
 ---
 

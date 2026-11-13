@@ -224,9 +224,12 @@ class cms_page_panel_cms_model extends \Model {
 			$filenames_diff = array_diff($old_filenames, $new_filenames);
 		}
 
+		// File inputs: CMS files in the data folder
+		$this->load->model('cms/cms_file_model');
 		foreach($filenames_diff as $filename){
-			if (file_exists($GLOBALS['config']['upload_path'].$filename)){
-				unlink($GLOBALS['config']['upload_path'].$filename);
+			$path = $this->cms_file_model->file_path($filename);
+			if ($path !== '' && is_file($path)){
+				unlink($path);
 			}
 		}
 

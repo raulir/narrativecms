@@ -38,6 +38,8 @@ if (!function_exists('cms_path')){
 			$cache = $resolve($dir['cache'] ?? '', 'cache');
 			$tmp = $resolve($dir['tmp'] ?? '', 'tmp');
 			$log = $resolve($dir['log'] ?? '', 'log');
+			// CMS files (file inputs, form uploads): never served directly, only through the cms/file API
+			$data = $resolve($dir['data'] ?? '', 'data');
 			$session_raw = trim(str_replace('\\', '/', (string)($dir['session'] ?? '')));
 			if ($session_raw === ''){
 				$session = $tmp.'sessions/';
@@ -62,6 +64,7 @@ if (!function_exists('cms_path')){
 					'log' => $log,
 					'session' => $session,
 					'upload' => $upload,
+					'data' => $data,
 					'error_log' => $log.'error.log',
 			];
 			$c['paths_url'] = ['cache' => $cache_url];
@@ -145,6 +148,7 @@ if (file_exists($config['config_file'])){
 
 	$GLOBALS['config'] = $config;
 	$config['upload_path'] = cms_path('upload');
+	$config['data_path'] = cms_path('data');
 	$config['session_path'] = rtrim(cms_path('session'), '/');
 	$config['paths'] = $GLOBALS['config']['paths'] ?? [];
 	$config['paths_url'] = $GLOBALS['config']['paths_url'] ?? ['cache' => 'cache/'];
@@ -189,6 +193,7 @@ $config['protocol'] = (empty($_SERVER['HTTPS']) OR strtolower($_SERVER['HTTPS'])
 $GLOBALS['config'] = $config;
 if (empty($config['paths']['cache'])){
 	$config['upload_path'] = cms_path('upload');
+	$config['data_path'] = cms_path('data');
 	$config['session_path'] = rtrim(cms_path('session'), '/');
 	$config['paths'] = $GLOBALS['config']['paths'] ?? [];
 	$config['paths_url'] = $GLOBALS['config']['paths_url'] ?? ['cache' => 'cache/'];

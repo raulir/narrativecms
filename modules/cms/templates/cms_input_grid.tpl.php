@@ -1,3 +1,6 @@
+<?php if ($nested): ?>
+	<?php _html_error('Grid "'.$label.'" cannot be inside a repeater row (cms_input.md)') ?>
+<?php else: ?>
 <?php
 	$row_count = !empty($data) ? count($data) : 0;
 	$grid_height = 1 + $row_count + 2;
@@ -69,7 +72,8 @@
 		return ob_get_clean();
 	};
 ?>
-<div class="cms_input cms_grid_container" data-cms_input_height="<?= !empty($lines) ? $lines + 4 : $grid_height ?>" data-cms_input_width="2"
+<div class="cms_input cms_grid_container" data-cms_input_height="<?= $grid_height ?>" data-cms_input_width="2"
+		style="grid-row: span <?= $grid_height ?>"
 		data-cms_page_panel_id="<?= $base_id ?? 0 ?>" data-ds="<?= $ds ?? '' ?>">
 
 	<div class="cms_grid_label"><?= $label ?></div>
@@ -118,3 +122,4 @@
 	<div class="cms_grid_line cms_grid_line_bottom"></div>
 
 </div>
+<?php endif ?>

@@ -261,7 +261,8 @@ Config access – use `$GLOBALS['config']`:
 - `$GLOBALS['config']['base_path']` — CMS installation absolute root (filesystem)
 - Cache: `$GLOBALS['config']['base_path'].'cache/'` — **runtime data only; no executables** (see **`cache/` vs `grok/`** above)
 - Dev/agent scripts: `$GLOBALS['config']['base_path'].'grok/'`
-- Images/files: `$GLOBALS['config']['base_path'].'img/'` (also `upload_path`)
+- Images: `$GLOBALS['config']['upload_path']` (`img/`, public)
+- CMS files (`cms_file`: file inputs, form uploads): `$GLOBALS['config']['data_path']` (`data/<year>/<month>/`, never served). Build a path with `cms_file_model::file_path()`, which refuses a name that would leave the folder; link with `cms_file_url()` / `_lf()` / `_lfd()`: the `cms/file` API (`modules/cms/api/file.php`), the only way to them.
 
 ### Database backups (no `*_bu` tables)
 

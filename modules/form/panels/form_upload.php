@@ -11,24 +11,23 @@ class form_upload extends \Controller {
 		
 		$this->load->model('cms/cms_file_model');
 		
-		$this->load->library('upload', ['upload_path' => $GLOBALS['config']['upload_path'], ]);
-		
+		// CMS files live in the data folder, never served directly: the link is the cms/file API
+		$this->load->library('upload', ['upload_path' => $GLOBALS['config']['data_path'], ]);
+
 		$new_file = $this->upload->upload_image($input_name);
-		
-		$return = $this->cms_file_model->create_cms_file('cv/', $new_file, true);
-// _print_r($return);		
-		rename($GLOBALS['config']['upload_path'].$return['name_original'], $GLOBALS['config']['upload_path'].$return['filename']);
-				
+
+		$return = $this->cms_file_model->create_cms_file($new_file, true);
+		rename($GLOBALS['config']['data_path'].$new_file, $this->cms_file_model->file_path($return['filename']));
+
 		if(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on'){
 			$url = 'https://';
 		} else {
 			$url = 'http://';
 		}
 		$url.= $_SERVER['HTTP_HOST'];
-		
-		
+
 		return [
-				'filename' => $url.$GLOBALS['config']['upload_url'].$return['filename'],
+				'filename' => $url.cms_file_url($return['filename']),
 				'filename_clean' => $new_file,
 		];
 		

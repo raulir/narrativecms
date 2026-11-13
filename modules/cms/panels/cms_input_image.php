@@ -104,7 +104,7 @@ class cms_input_image extends \Controller {
 
 		}
 		
-		if (!empty($params['params']['meta']) && $params['params']['meta'] == 'image'){
+		if (($params['meta'] ?? '') == 'image'){
 			$params['help'] = (!empty($params['help']) ? $params['help'].'||' : '').'{Page SEO image}';
 		}
 

@@ -20,37 +20,25 @@ class cms_input_select extends \Controller {
 	
 	}
 	
+	/**
+	 * Also rendered inside other inputs (layout, repeater_select) with the same keys.
+	 */
 	function panel_params($params){
-		
-		if(!empty($params['params']['add_empty'])){
-			$params['add_empty'] = $params['params']['add_empty'];
+
+		$params['values'] = is_array($params['values'] ?? null) ? $params['values'] : [];
+
+		if (!empty($params['mandatory']) && empty($params['mandatory_class'])){
+			$params['mandatory_class'] = ' cms_input_mandatory ';
 		}
 
-		if (!empty($params['params']['mandatory'])){
-			$params['mandatory'] = $params['params']['mandatory'];
-			if (empty($params['mandatory_class'])){
-				$params['mandatory_class'] = ' cms_input_mandatory ';
-			}
-		}
-		
 		$add_empty = !empty($params['add_empty']) || !empty($params['mandatory']);
-		
+
 		if ($add_empty && empty($params['values']['']) && empty($params['values'][0])){
 			$params['values'] = ['' => '-- not specified --'] + $params['values'];
 		}
 
-		if (!empty($params['params']['groups'])){
-			
-			$params['groups'] = $params['params']['groups'];
-			
-			if(!is_array($params['groups'])){
-				$params['groups'] = [$params['groups']];
-			}
-			
-		}
-		
 		return $params;
-	
+
 	}
 	
 }
