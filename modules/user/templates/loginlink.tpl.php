@@ -1,8 +1,6 @@
 <div class="cms_input user_input_loginlink loginlink_container" data-cms_input_height="1">
 	
-	<label><?= $label ?></label>
-
-	<?php if (!empty($help)) _panel('cms/cms_help', ['help' => $help, ]) ?>
+	<?php cms_input_label($label, $help ?? '') ?>
 
 	<div class="loginlink_content">
 	

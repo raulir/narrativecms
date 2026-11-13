@@ -50,6 +50,9 @@ class image_item_ids extends \Controller {
 		$params['selected'] = $selected;
 		$params['value_text'] = implode(',', $selected);
 
+		// Form rows (3.5rem each): the label (3rem with its offset) and one 2rem line per choice, or for "No variants"
+		$params['rows'] = (int)ceil((3 + 2 * max(1, count($params['choices']))) / 3.5);
+
 		return $params;
 
 	}

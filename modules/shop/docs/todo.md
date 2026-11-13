@@ -24,9 +24,10 @@ Email fulfilment (`provides.shop_fulfilment` → `shop/fulfilment_email`) is on 
 
 ## Shop-local
 
-- [ ] **`shop/image_item_ids` input root** (review 2026-11-12). The admin field in the product `images` repeater has `.image_item_ids_container` as its root, not `.cms_input` with `data-cms_input_height` (the CMS input contract, `cms/docs/cms_input.md` § Form layout).
-  - **Effect:** the form grid gives it one 3.5 rem row, so a product with several variants would have its checkbox list cover the fields below.
-  - **Fix:** root `cms_input image_item_ids_container`, with `data-cms_input_height` from the number of choices, computed in `image_item_ids.php`.
+- [x] **`shop/image_item_ids` input root** (review 2026-11-12; CMS big plan item 3, done 2026-11-13). The admin field in the product `images` repeater had `.image_item_ids_container` as its root, not `.cms_input` with `data-cms_input_height` (the CMS input contract, `cms/docs/cms_input.md` § Form layout), and printed no label or help.
+  - **Effect:** the form grid gave it one 3.5 rem row, so a product with several variants would have its checkbox list cover the fields below.
+  - **Fix:** root `cms_input image_item_ids_container` with `data-cms_input_height` from the choices (`image_item_ids.php`: the 3 rem label plus 2 rem per choice, in 3.5 rem rows; 2 rows with no variants), and the "Variants" label and help through `cms_input_label()`.
+  - **Check:** `grok/tmp/shop_image_item_ids_check.js` with 0, 1, 2 and 8 temporary variants (`shop_variants_fixture.php`, removed again): right height, label shown, choices inside the box.
 
 Second dims + cart review (2026-11-04):
 - [ ] **Split checkout for mixed carts** (later) — the mixed-cart check was removed (2026-11-04): one cart may hold local items and Shopify (or other provider) lines. Checkout must then split by source: one checkout per provider (e.g. Shopify lines to `shopify/checkout`, local lines to the local flow), with one order per part or child orders (see Fulfilment "Child / sub-orders"). Until then a mixed cart goes to the single `shop_checkout` provider as today.

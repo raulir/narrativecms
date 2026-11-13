@@ -5,7 +5,7 @@
 
 		<div class="cms_input_subtitle_label"><?= $label ?></div>
 		
-		<?php _panel('cms/cms_help', ['help' => $help, ]); ?>
+		<?php cms_help($help ?? ''); ?>
 
 	</div>
 

@@ -338,11 +338,120 @@ if (!function_exists('print_fields')){
 				$field['base_name'] = $data['panel_name'];
 			}
 
-			$return .= _panel('cms/cms_input', $field);
+			$return .= cms_input($field);
 
 		}
 
 		return $return;
+
+	}
+
+}
+
+if (!function_exists('cms_input')){
+
+	/**
+	 * One admin input: the params every input shares, the input panel for the type, and the wrapper by the
+	 * input's "input" flags (cms_input.md § How an input is rendered). Prints it, or returns it with _return.
+	 */
+	function cms_input($params){
+
+		if (empty($_SESSION['cms_user']['cms_user_id'])){
+			return '';
+		}
+
+		$print = empty($params['_return']);
+		$type = (string)($params['type'] ?? '');
+		$panel_name = cms_input_panel_name($type);
+
+		if ($panel_name === ''){
+			ob_start();
+			_html_error('Undefined cms input: "'.$type.'"');
+			$html = ob_get_clean();
+		} else {
+
+			$flags = cms_input_flags($panel_name);
+			$params['panel_name'] = $panel_name;
+			$params['input_container'] = $flags['container'];
+
+			// Values go into html attributes as they are stored; " is the one character that would end one.
+			// Module inputs and inputs that declare value_raw get the value as it is.
+			if (empty($flags['value_raw'])){
+				if (!stristr($type, '/') && isset($params['value']) && is_string($params['value'])){
+					$params['value'] = str_replace('"', '&quot;', $params['value']);
+				}
+				if (isset($params['default']) && !is_array($params['default'])){
+					$params['default'] = str_replace('"', '&quot;', $params['default']);
+				}
+			}
+
+			$params['mandatory_class'] = !empty($params['mandatory']) ? ' cms_input_mandatory ' : '';
+			$params['label'] = (array_key_exists('label', $params) ? (string)$params['label'] : '[no label]')
+					.(!empty($params['mandatory']) ? ' *' : '');
+			$params['help'] = !empty($params['help']) ? $params['help'] : '';
+			$params['readonly'] = $params['readonly'] ?? '0';
+			$groups = $params['groups'] ?? [];
+			$params['groups'] = empty($groups) ? [] : (is_array($groups) ? $groups : [$groups]);
+
+			// The input type comes from a definition, never from the request, and panel "access" keys are visitor
+			// keys, which an admin form must not be judged by: the input panel gets the access pass.
+			$params['_access_ok'] = 1;
+			$params['_return'] = true;
+
+			add_css('cms/cms_input.scss');
+			$html = _panel($panel_name, $params);
+
+			if ($flags['container'] !== 'none'){
+				$html = '<div class="cms_input_container'.($params['groups'] ? ' cms_input_container_groups' : '').'"'
+						.($params['groups'] ? ' data-groups="'.implode(',', $params['groups']).'"' : '').'>'.$html.'</div>';
+			}
+
+		}
+
+		if ($print){
+			print($html);
+			return '';
+		}
+
+		return $html;
+
+	}
+
+	/**
+	 * A field's help icon, with its text on hover (cms_help.js). In the text, | is a line break, {…} italic
+	 * and […] bold.
+	 */
+	function cms_help($help){
+
+		if (!is_string($help) || $help === ''){
+			return;
+		}
+
+		add_css('cms/cms_help.scss');
+		add_js('modules/cms/js/cms_help.js');
+
+		print('<div class="cms_help"><div class="cms_help_icon" ');
+		_ib('cms/cms_help.png', 12);
+		print('></div><div class="cms_help_text">'
+				.str_replace(['|', '{', '}', '[', ']'], ['<br>', '<i>', '</i>', '<b>', '</b>'], $help).'</div></div>');
+
+	}
+
+	/**
+	 * The head an input prints inside its .cms_input root: the label (for $for when given), the help icon, and
+	 * for a field that translates (the template passes its data-field_type) the translate icon (cms_translate.js).
+	 */
+	function cms_input_label($label, $help = '', $for = '', $translate_type = '', $icon_size = 14){
+
+		print('<label'.($for !== '' ? ' for="'.$for.'"' : '').'>'.$label.'</label>');
+
+		cms_help($help);
+
+		if ($translate_type !== '' && !empty($GLOBALS['language'])){
+			print('<button type="button" class="cms_translate_icon" data-field_type="'.$translate_type.'" ');
+			_ib('cms/cms_translate.png', $icon_size);
+			print('></button>');
+		}
 
 	}
 

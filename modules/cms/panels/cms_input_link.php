@@ -22,13 +22,10 @@ class cms_input_link extends \Controller {
 
 	function panel_params($params){
 
-		// todo: cache data here, as there might be more link inputs on the page
-		// or move where fk data is prepared
-
-		$this->load->model('cms/cms_page_panel_model');
+		// Lists, list items, slugs and pages are read once per request (cms_page_panel_cms_model)
 		$this->load->model('cms/cms_panel_model');
-		$this->load->model('cms/cms_page_model');
-		$this->load->model('cms/cms_slug_model');
+		$this->load->model('cms/cms_page_panel_cms_model');
+		$link_targets = $this->cms_page_panel_cms_model->get_link_targets();
 
 		// check if targets are limited
 		if (!empty($params['targets'])){
@@ -61,8 +58,7 @@ class cms_input_link extends \Controller {
 			$params['value']['target'] = '_none';
 		}
 
-		// get lists
-		$lists = $this->cms_page_panel_model->get_lists();
+		$lists = $link_targets['lists'];
 
 		// possible targets
 		$params['targets'] = array();
@@ -81,36 +77,26 @@ class cms_input_link extends \Controller {
 
 		if (in_array('lists', $targets) || $special_targets){
 
-			// check definitions and leave only list ones - IMPORTANT link target has to be 1 in list definition
-			$params['cms_page_panels'] = array();
-			$block_lists = array();
+			// Normal lists only when their definition has list.link_target; special targets name their lists
+			$params['cms_page_panels'] = [];
 			foreach($lists as $list){
 
 				$block_config = $this->cms_panel_model->get_cms_panel_config($list);
 
-				if((!$special_targets && !empty($block_config['list']['link_target'])) 	// if normal lists only
-						|| ($special_targets && in_array($list, $targets))){		// if special targets
-								
-					$params['targets'][$list] = $block_config['list']['item_title'];
+				if((!$special_targets && !empty($block_config['list']['link_target']))
+						|| ($special_targets && in_array($list, $targets))){
 
-					$list_pages = $this->cms_page_panel_model->get_list($list);
-						
-					// put together list select data
-					foreach($list_pages as $list_page){
-
-						$params['lists'][$list][$list_page['cms_page_panel_id']] = mb_substr(strip_tags($list_page['title']), 0, 40);
-						
-						// slug data
-						$block_target = $list.'='.$list_page['cms_page_panel_id'];
-						$block_slug = $this->cms_slug_model->get_cms_slug_by_target($block_target);
-						$params['slugs'][$list][$list_page['cms_page_panel_id']] = !empty($block_slug) ? $block_slug.'/' : $block_target;
-								
+					$link_list = $this->cms_page_panel_cms_model->get_link_list($list);
+					$params['targets'][$list] = $link_list['item_title'];
+					if ($link_list['items']){
+						$params['lists'][$list] = $link_list['items'];
+						$params['slugs'][$list] = $link_list['slugs'];
 					}
-								
+
 				}
 
 			}
-				
+
 		}
 
 		if (empty($params['lists'])){
@@ -122,19 +108,7 @@ class cms_input_link extends \Controller {
 			}
 		}
 
-		$params['pages'] = $this->cms_page_model->get_cms_pages();
-
-		$lists_old = [];
-		foreach($lists as $list){
-			list($module, $list_name) = explode('/', $list);
-			$lists_old[] = $list_name;
-		}
-
-		foreach($params['pages'] as $key => $page){
-			if (in_array($page['slug'], $lists) || in_array($page['slug'], $lists_old) || !in_array($page['position'], ['main','']) ){
-				unset($params['pages'][$key]);
-			}
-		}
+		$params['pages'] = $link_targets['pages'];
 
 		if (stristr($params['name'], '[]')){
 			$params['name'] = str_replace('[]', '', $params['name']);

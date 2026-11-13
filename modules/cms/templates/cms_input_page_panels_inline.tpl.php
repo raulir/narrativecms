@@ -6,7 +6,7 @@
 	
 		<div class="cms_input_page_panels_inline_label">
 			<div class="cms_input_page_panels_inline_label_text"><?= $label ?></div>
-			<?php _panel('cms/cms_help', ['help' => $help, ]); ?>
+			<?php cms_help($help ?? ''); ?>
 		</div>
 
 		<?php /* existing panels */ ?>

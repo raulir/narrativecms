@@ -7,9 +7,7 @@
 		<?php endif ?>
 		data-cms_input_height="1">
 
-	<label for="select_<?= $name_clean ?>"><?= $label ?></label>
-
-	<?php _panel('cms/cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
+	<?php cms_input_label($label, $help ?? '', 'select_'.$name_clean) ?>
 
 	<select class="cms_input_select_select <?= !empty($name) ? $name : '' ?>"
 			name="<?= !empty($name) ? $name : '' ?>" id="select_<?= $name_clean ?>"

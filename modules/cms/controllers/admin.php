@@ -131,11 +131,14 @@ class admin extends \Controller {
 		$settings_a = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => $panel_name, 'cms_page_id' => 0, 'parent_id' => 0, 'sort' => 0, ]);
 		
 		if (!count($settings_a)){
-			
+
+			// A settings block is created only for a panel whose definition has settings
+			$panel_config = preg_match('#^[a-z0-9_]+/[a-z0-9_]+$#', $panel_name) ? $this->cms_panel_model->get_cms_panel_config($panel_name) : [];
+			if (empty($panel_config['settings'])){
+				_html_error('This panel has no settings', 404, ['force' => 1]);
+			}
+
 			$params = ['panel_name' => $panel_name, ];
-			
-			// load definition
-			$panel_config = $this->cms_panel_model->get_cms_panel_config($panel_name);
 
 			if (!empty($panel_config['label']) && is_array($panel_config['label'])){
 				$panel_config['label'] = array_pop($panel_config['label']);

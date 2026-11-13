@@ -6,7 +6,7 @@
 	<?php if (!empty($label)): ?>
 		<div class="admin_block_label">
 			<div class="cms_block_title"><?= $label ?></div>
-			<?php _panel('cms/cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
+			<?php cms_help($help ?? ''); ?>
 		</div>
 	<?php endif ?>
 	

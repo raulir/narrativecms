@@ -68,16 +68,9 @@
 // data-cms_input_height, and both columns when data-cms_input_width is 2. The grid's default placement fills
 // the shorter column first and puts a two-column input below both. A repeater or grid takes a full row that
 // grows with its content. Inputs keep their declared height (contain: size), as before.
+// Span rules exist up to $cms_field_height_max rows; a taller declared height gets one row (cms_input.md).
 $cms_field_row: 3.5rem;
 $cms_field_height_max: 100;
-
-@mixin cms_field_spans {
-	@for $i from 2 through $cms_field_height_max {
-		&[data-cms_input_height="#{$i}"] {
-			grid-row: span $i;
-		}
-	}
-}
 
 .cms_page_panel_fields {
 
@@ -94,16 +87,25 @@ $cms_field_height_max: 100;
 		padding: 0;
 	}
 
+	// Form fields and repeater row fields: height from the rows they span, one rule per height for both
+	> .cms_input_container > .cms_input,
+	.cms_repeater_block_content > .cms_input_container > .cms_input {
+		height: auto;
+		contain: size;
+		@for $i from 2 through $cms_field_height_max {
+			&[data-cms_input_height="#{$i}"] {
+				grid-row: span $i;
+			}
+		}
+	}
+
 	> .cms_input_container {
 		display: contents;
 	}
 
-	// Height from the rows it spans (an input's own CSS height no longer applies here)
+	// An input's own CSS height no longer applies here (rules above)
 	> .cms_input_container > .cms_input {
 		width: auto;
-		height: auto;
-		contain: size;
-		@include cms_field_spans;
 		&[data-cms_input_width="2"] {
 			grid-column: 1 / -1;
 		}
@@ -111,6 +113,7 @@ $cms_field_height_max: 100;
 
 	> .cms_repeater_container {
 		grid-column: 1 / -1;
+		// The gap the old JS layout left below a repeater
 		margin-bottom: 1.2rem;
 	}
 
@@ -120,11 +123,13 @@ $cms_field_height_max: 100;
 		grid-template-columns: minmax(0, 1fr);
 		grid-auto-rows: $cms_field_row;
 		padding-top: 0;
+		// The space the old JS layout left below a row's last field
 		padding-bottom: 0.8rem;
 	}
 
 	.cms_repeater_block_toolbar {
 		align-self: start;
+		// Puts the row toolbar where the old JS layout had it
 		margin-top: 0.5rem;
 	}
 
@@ -134,11 +139,9 @@ $cms_field_height_max: 100;
 	}
 
 	.cms_repeater_block_content > .cms_input_container > .cms_input {
+		// The old JS layout left 0.2rem at the right of a row field
 		width: calc(100% - 0.2rem);
-		height: auto;
 		justify-self: start;
-		contain: size;
-		@include cms_field_spans;
 	}
 
 }

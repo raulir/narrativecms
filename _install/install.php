@@ -646,7 +646,7 @@ function install_apply_cms_schema($root, $db_cfg, $mysqli_admin){
 			'extend_sources' => [],
 			'errors_visible' => 0,
 	];
-	require_once $root.'system/helpers/path_helper.php';
+	require_once $root.'modules/cms/helpers/cms_path_helper.php';
 	cms_path('tmp');
 	cms_ensure_runtime_dirs();
 

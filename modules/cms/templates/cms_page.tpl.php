@@ -59,7 +59,7 @@
 		<div class="cms_page_content">
 			<div class="cms_column">
 				
-				<?php _panel('cms/cms_input', ['type' => 'text', 
+				<?php cms_input(['type' => 'text', 
 						'name' => 'title',
 						'value' => $page['title'],
 						'name_clean' => 'page_title',
@@ -68,7 +68,7 @@
 						'meta_class' => 'cms_page_title',
 				]); ?>
 				
-				<?php _panel('cms/cms_input', ['type' => 'text', 
+				<?php cms_input(['type' => 'text', 
 						'name' => 'access',
 						'value' => !empty($page['access']) ? $page['access'] : '',
 						'name_clean' => 'cms_page_access',
@@ -78,7 +78,7 @@
 
 				<?php if (in_array($page['position'], ['', 'main', 'header', 'footer'])): ?>
 
-					<?php _panel('cms/cms_input', ['type' => 'text', 
+					<?php cms_input(['type' => 'text', 
 							'name' => 'cache',
 							'value' => !empty($page['cache']) ? $page['cache'] : '',
 							'name_clean' => 'cms_page_cache',
@@ -90,11 +90,11 @@
 				
 				<?php if (in_array($page['position'], ['', 'main', ])): ?>
 						
-					<?php _panel('cms/cms_input', ['type' => 'subtitle', 'label' => 'Structure', 'width' => 'narrow', 
+					<?php cms_input(['type' => 'subtitle', 'label' => 'Structure', 'width' => 'narrow', 
 							'help' => '[Structure]||These fields define general layout and static areas of page, like header and footer']) ?>
 					
 					<?php
-						_panel('cms/cms_input', ['type' => 'layout', 
+						cms_input(['type' => 'layout', 
 								'label' => 'Layout', 
 								'value' => $cms_page_layout, 
 								'name' => 'cms_page_layout', 
@@ -111,14 +111,14 @@
 						]);
 					?>
 
-					<?php _panel('cms/cms_input', ['type' => 'subtitle', 
+					<?php cms_input(['type' => 'subtitle', 
 							'label' => 'Sharing and SEO', 
 							'width' => 'narrow', 
 							'help' => '[Sharing and SEO]||These fields are very important for search engines, page sharing in social media etc']) ?>
 					
 					<?php
 						$slug_readonly = !empty($page_class) && ($page_class === 'list' || $page_class === 'system');
-						_panel('cms/cms_input', ['type' => 'text', 
+						cms_input(['type' => 'text', 
 							'name' => 'slug',
 							'value' => $page['slug'],
 							'name_clean' => 'page_slug',
@@ -134,7 +134,7 @@
 						]);
 					?>
 					
-					<?php _panel('cms/cms_input', ['type' => 'text', 
+					<?php cms_input(['type' => 'text', 
 							'name' => 'seo_title',
 							'translate' => 1,
 							'value' => (!empty($page['seo_title']) ? $page['seo_title'] : ''),
@@ -145,7 +145,7 @@
 					]) ?>
 	
 					<?php 
-						_panel('cms/cms_input', array('type' => 'textarea', 
+						cms_input(array('type' => 'textarea', 
 								'label' => 'Description',
 								'value' => (!empty($page['description']) ? $page['description'] : ''),
 								'name' => 'cms_page_description',
@@ -160,7 +160,7 @@
 					?>
 	
 					<?php 
-						_panel('cms/cms_input', array('type' => 'image', 
+						cms_input(array('type' => 'image', 
 								'label' => 'Image', 
 								'value' => !empty($page['image']) ? $page['image'] : '', 
 								'name' => 'cms_page_image', 
@@ -171,7 +171,7 @@
 					?>
 									
 					<?php 
-						_panel('cms/cms_input', array('type' => 'file', 
+						cms_input(array('type' => 'file', 
 								'label' => 'Video', 
 								'value' => !empty($page['video']) ? $page['video'] : '', 
 								'name' => 'cms_page_video', 
@@ -181,7 +181,7 @@
 						));
 					?>
 									
-					<?php _panel('cms/cms_input', ['type' => 'text', 
+					<?php cms_input(['type' => 'text', 
 							'name' => 'cms_page_video_id',
 							'translate' => 1,
 							'value' => (!empty($page['video_id']) ? $page['video_id'] : ''),
@@ -197,7 +197,7 @@
 			<div class="cms_column">
 				
 				<?php
-					_panel('cms/cms_input', ['type' => 'page_panels', 'label' => '',
+					cms_input(['type' => 'page_panels', 'label' => '',
 							'value' => $block_list,
 							'page_id' => $page['page_id'],
 							'sortable_class' => 'cms_page_sortable',

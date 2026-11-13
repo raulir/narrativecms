@@ -4,7 +4,7 @@
 	<div class="cms_input_mask_content">
 	
 		<label class="cms_input_label"><?= $label ?></label>
-		<?php _panel('cms/cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
+		<?php cms_help($help ?? ''); ?>
 		
 		<div class="cms_input_button cms_input_mask_set cms_input_mask_set_button">Edit</div>
 		<div class="cms_input_button cms_input_mask_clear">Clear</div>

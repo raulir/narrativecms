@@ -10,6 +10,8 @@ class cms_page_positions extends \Controller {
 
 		parent::__construct();
 
+		$this->load->helper('cms/cms_fields_helper');
+
 		// check if user
 		if(empty($_SESSION['cms_user']['cms_user_id'])){
 			header('Location: '.$GLOBALS['config']['base_url'].'cms_login/', true, 302);

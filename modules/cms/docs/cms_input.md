@@ -1,6 +1,6 @@
 # CMS panel inputs
 
-Panel definition fields live in `modules/<module>/definitions/<panel>.json` under `item` (per-instance panel params) or `settings` (global panel settings). The admin UI renders them via [`print_fields()`](../helpers/cms_fields_helper.php). Every field, built-in or a module's own type (such as `music/exercise_params`), goes through the input dispatcher `cms/cms_input`, which renders the `cms/cms_input_*` panel for its type (see [How an input is rendered](#how-an-input-is-rendered)).
+Panel definition fields live in `modules/<module>/definitions/<panel>.json` under `item` (per-instance panel params) or `settings` (global panel settings). The admin UI renders them via [`print_fields()`](../helpers/cms_fields_helper.php). Every field, built-in or a module's own type (such as `music/exercise_params`), goes through the input function `cms_input()`, which renders the `cms/cms_input_*` panel for its type (see [How an input is rendered](#how-an-input-is-rendered)).
 
 ## How an input is rendered
 
@@ -14,18 +14,24 @@ One path for every input (narrativecms #87):
    - `panel_structure`;
    - `base_id` (the block id) and `base_name` (the block's panel).
 
-   It then calls `_panel('cms/cms_input', $field)`. It has no branch per type.
-2. **`cms/cms_input` ([`cms_input.php`](../panels/cms_input.php))** prepares what every input shares:
+   It then calls `cms_input($field)` (with `_return`). It has no branch per type.
+2. **`cms_input($params)` ([`cms_fields_helper.php`](../helpers/cms_fields_helper.php))**, a function, not a panel, prepares what every input shares:
    - the input panel for the `type` (`cms_input_panel_name()`: `module/panel` as is, a built-in type as `cms/cms_input_<type>` when its template exists; aliases `color` → `colour`, `panels` → `cms_page_panels`);
    - `mandatory_class` and `*` on the label; `[no label]` when the field has no `label` key; `help`; `readonly` (`'0'`); `groups` as an array;
-   - `"` → `&quot;` in a string `value` and in `default`, unless the input declares `value_raw` or the type is a module's.
+   - `"` → `&quot;` in a string `value` and in `default`, unless the input declares `value_raw` or the type is a module's;
+   - the access pass for the input panel (the type comes from a definition, and panel `access` keys are visitor keys);
+   - `cms_input.scss`.
+
+   It renders only for a CMS user. It prints the input, or returns it when `_return` is set.
 3. **The input panel's own controller** prepares everything else for its type, for example:
    - select: empty option, mandatory;
    - repeater: `data`, sub-field `base_id`, JS preload;
    - grid: columns and rows from `ds_<ds>`.
 
-   Its template's root is the `.cms_input` element (or `.cms_repeater_container` / `.cms_grid_container`), without its own `.cms_input_container`.
-4. **The wrapper** comes from `cms_input.tpl.php`: one `.cms_input_container` (with `cms_input_container_groups` and `data-groups`), unless the input declares otherwise.
+   Its template's root is the `.cms_input` element (or `.cms_repeater_container` / `.cms_grid_container`), without its own `.cms_input_container`. Inside the root, it prints its head with `cms_input_label($label, $help, $for, $translate_type)`: the label, the help icon (`cms_help()`), and the translate icon when the template passes its type (only for a field that translates and is not read-only). Inputs with their own label layout (image, mask, xy, page panels, groups, subtitle) print the label themselves and call `cms_help($help)`.
+4. **The wrapper** comes from `cms_input()`: one `.cms_input_container` (with `cms_input_container_groups` and `data-groups`), unless the input declares otherwise.
+
+**Panels per field:** one, the input panel. The help icon is printed by `cms_help()` (not a panel), and a grid's `cms/cms_grid_editable` cells are printed by the grid template (the panel still serves a cell's own ajax save and reload).
 
 **Input flags,** in the input panel's definition (`modules/cms/definitions/cms_input_<type>.json`):
 
@@ -38,15 +44,16 @@ One path for every input (narrativecms #87):
 | `container` | `""` (default) one `.cms_input_container`; `"none"`, no wrapper (the input is its own row in the form) | `repeater` none |
 | `value_raw` | `"1"`: the value is passed as it is (an array, or compared with option keys) | select, cms_page_panels, repeater, grid, repeater_select |
 
-**Admin templates** use the same path for their own fields: `_panel('cms/cms_input', ['type' => 'text', 'name' => …, 'value' => …, 'label' => …])`, as in `cms_page.tpl.php` and `cms_page_panel.tpl.php`. Pass `'label' => ''` for an input without a label. Only an input that contains another input renders it directly: `layout` and `repeater_select` render `cms/cms_input_select`; `modules` and `multifk` render `cms/cms_input_multi`. The outer input gets the wrapper.
+**Admin templates** use the same path for their own fields: `cms_input(['type' => 'text', 'name' => …, 'value' => …, 'label' => …])`, as in `cms_page.tpl.php` and `cms_page_panel.tpl.php`. Their panel loads `cms/cms_fields_helper`. Pass `'label' => ''` for an input without a label. Only an input that contains another input renders it directly: `layout` and `repeater_select` render `cms/cms_input_select`; `modules` and `multifk` render `cms/cms_input_multi`. The outer input gets the wrapper.
 
-**A module's own input type** is a panel `module/panel` used as the field `type`. It gets the params above (value as it is), runs its own `panel_params`, and can declare `input` flags in its definition. Its root element is `.cms_input` with `data-cms_input_height` (rows) and, for the full width, `data-cms_input_width="2"`, so the form lays it out (see [Form layout](#form-layout)).
+**A module's own input type** is a panel `module/panel` used as the field `type`. It gets the params above (value as it is), runs its own `panel_params`, and can declare `input` flags in its definition. Its root element is `.cms_input` with `data-cms_input_height` (rows) and, for the full width, `data-cms_input_width="2"`, so the form lays it out (see [Form layout](#form-layout)). It prints its head with `cms_input_label($label, $help ?? '')`.
 
 ### Form layout
 
 The block edit form (`.cms_page_panel_fields`, `cms_page_panel.scss`) is a CSS grid of two columns and 3.5 rem rows; no JS places the fields.
 
 - **Size:** each `.cms_input` spans the rows in its `data-cms_input_height` (1 when missing) and both columns when `data-cms_input_width` is `2`. Its height comes from those rows; the input's own CSS height does not apply there.
+- **Row cap:** the span rules go up to 100 rows (`$cms_field_height_max`). An input that declares more gets one row, so its content covers the fields below. Keep declared heights at 100 or less, or raise the cap.
 - **Order:** fields are placed in definition order, each in the shorter column; a two-column field goes below both.
 - **Growing inputs:** a repeater is a full row as tall as its content. The grid input spans its rows (`style` and `data-cms_input_height`, updated when a row is added or deleted).
 - **Repeater rows:** one column of 3.5 rem rows below the toolbar, in field order. The fields of a `groups` tab are moved right after the `groups` input (`cms_input_repeater.php`), and only the open tab's fields are shown, so a row is as tall as its open tab.
@@ -374,7 +381,7 @@ Table grid tied to panel model `ds_*` data-source methods. Can be embedded in a 
 
 **Change log.** Add, set, and delete are recorded in the hidden textarea and sent with Save. Deleting a row drops every earlier line for that same id. A `tmp_` row then leaves no lines at all, not even a delete. Setting the same cell again keeps only the latest value. Save calls `cms/cms_input_grid` `apply_logs`, which runs the lines in order (`C`, then `U`, then `D`). A refused line stops the log. If that line belongs to a row created earlier in the same Save, that new row is deleted and its `add` is put back in the log under the original `tmp_` id. Save returns `ok: 0` and the reason. The textarea keeps the lines that still need to run. The log is not stored.
 
-**Editable cells:** `cms/cms_grid_editable` updates the log inside a grid. Outside a grid it still blur-saves (`update_field`), and an ajax call without `value` reads the cell's stored value. Both the write and the read go through `cms_page_panel_cms_model::get_grid_cell_target()`:
+**Editable cells:** inside a grid, the grid template prints `cms/cms_grid_editable` cells itself (its template, not a panel per cell), and they update the log. Outside a grid the panel still blur-saves (`update_field`), and an ajax call without `value` reads the cell's stored value. Both the write and the read go through `cms_page_panel_cms_model::get_grid_cell_target()`:
 - with `ds`: the base block is stored, and its definition has a grid with that `ds` (the `ds` handler checks the column);
 - without: the item is a stored block, and `name` is a plain field of its definition (not a grid, a `{name}_log`, a repeater, a block column or a `_` key).
 

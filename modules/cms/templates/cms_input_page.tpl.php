@@ -4,7 +4,7 @@
 
 		<div class="cms_input_label"><?= $label ?></div>
 		
-		<?php _panel('cms/cms_help', ['help' => $help, ]); ?>
+		<?php cms_help($help ?? ''); ?>
 		
 		<select class="cms_input_select_select" name="<?= $name ?>">
 		<option value="">-- page --</option>

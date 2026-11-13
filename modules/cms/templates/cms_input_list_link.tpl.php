@@ -1,8 +1,6 @@
 <div class="cms_input cms_input_list_link_container" data-cms_input_height="2">
 	
-	<label><?= $label ?></label>
-
-	<?php if (!empty($help)) _panel('cms/cms_help', ['help' => $help, ]) ?>
+	<?php cms_input_label($label, $help ?? '') ?>
 
 	<div class="cms_input_list_link_content">
 

@@ -9,8 +9,7 @@
 		data-sticky="<?= htmlspecialchars(implode(',', $sticky_keys), ENT_QUOTES) ?>"
 		data-cms_input_height="4">
 
-	<label><?= $label ?></label>
-	<?php if (!empty($help)) _panel('cms/cms_help', ['help' => $help, ]); ?>
+	<?php cms_input_label($label, $help ?? '') ?>
 
 	<div class="cms_input_multi_values">
 		<?php foreach($value as $key): ?>

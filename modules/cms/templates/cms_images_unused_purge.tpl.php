@@ -1,8 +1,6 @@
 <div class="cms_input cms_images_unused_purge" data-cms_input_height="2" data-cms_input_width="1">
 
-	<label><?= htmlspecialchars($label ?? 'Images older than months', ENT_QUOTES, 'UTF-8') ?></label>
-
-	<?php if (!empty($help)) _panel('cms/cms_help', ['help' => $help, ]); ?>
+	<?php cms_input_label($label ?? 'Images older than months', $help ?? '') ?>
 
 	<div class="cms_images_unused_purge_controls">
 

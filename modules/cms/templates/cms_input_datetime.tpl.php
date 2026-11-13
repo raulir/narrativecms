@@ -3,8 +3,7 @@
 		<?= !empty($default) ? ' data-default="'.$default.'" ' : '' ?>
 		<?= !empty($format) ? ' data-format="timestamp" ' : '' ?>>
 		
-	<label for="<?= $name_clean ?>"><?= $label ?></label>
-	<?php if (!empty($help)) _panel('cms/cms_help', ['help' => $help, ]); ?>
+	<?php cms_input_label($label, $help ?? '', $name_clean) ?>
 	
 	<input id="<?= $name_clean ?>" type="hidden" name="<?= $name ?>" value="<?= $value ?>" class="cms_input_datetime_value">
 	

@@ -11,6 +11,10 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
  */
 class cms_page_panel_cms_model extends \Model {
 
+	// Link input targets, kept for the request (get_link_targets(), get_link_list())
+	var $_link_targets = null;
+	var $_link_lists = [];
+
 	function __construct(){
 
 		// Base Model has no constructor — do not call parent::__construct()
@@ -245,6 +249,73 @@ class cms_page_panel_cms_model extends \Model {
 		$query = $this->db->query($sql, [(int)$block_id]);
 
 		return $query->num_rows() ? $query->row_array() : [];
+
+	}
+
+	/**
+	 * What every link input offers, built once per request: all list panel names (get_lists()) and the pages a link
+	 * can point to (main position, not a list's own page).
+	 */
+	function get_link_targets(){
+
+		if ($this->_link_targets !== null){
+			return $this->_link_targets;
+		}
+
+		$this->load->model('cms/cms_page_model');
+		$lists = $this->cms_page_panel_model->get_lists();
+
+		$list_names = [];
+		foreach ($lists as $list){
+			$list_names[] = explode('/', $list)[1] ?? $list;
+		}
+
+		$pages = $this->cms_page_model->get_cms_pages();
+		foreach ($pages as $key => $page){
+			if (in_array($page['slug'], $lists) || in_array($page['slug'], $list_names) || !in_array($page['position'], ['main', ''])){
+				unset($pages[$key]);
+			}
+		}
+
+		$this->_link_targets = ['lists' => $lists, 'pages' => $pages];
+
+		return $this->_link_targets;
+
+	}
+
+	/**
+	 * One list for link inputs, read once per request: its item title, its shown items (id => title, 40 characters)
+	 * and their URLs (id => slug/, or the list=id target when there is no slug), with one slug query.
+	 */
+	function get_link_list($list){
+
+		if (isset($this->_link_lists[$list])){
+			return $this->_link_lists[$list];
+		}
+
+		$this->load->model('cms/cms_panel_model');
+		$this->load->model('cms/cms_slug_model');
+
+		$config = $this->cms_panel_model->get_cms_panel_config($list);
+		$rows = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => $list, 'cms_page_id' => 0, 'show' => '1',
+				'sort!' => 0, '_fields' => ['cms_page_panel_id', 'title']]);
+
+		$targets = [];
+		foreach ($rows as $row){
+			$targets[(int)$row['cms_page_panel_id']] = $list.'='.$row['cms_page_panel_id'];
+		}
+		$slugs = $this->cms_slug_model->get_slugs_by_targets($targets);
+
+		$return = ['item_title' => $config['list']['item_title'] ?? '', 'items' => [], 'slugs' => []];
+		foreach ($rows as $row){
+			$id = (int)$row['cms_page_panel_id'];
+			$return['items'][$id] = mb_substr(strip_tags((string)$row['title']), 0, 40);
+			$return['slugs'][$id] = !empty($slugs[$targets[$id]]) ? $slugs[$targets[$id]].'/' : $targets[$id];
+		}
+
+		$this->_link_lists[$list] = $return;
+
+		return $return;
 
 	}
 
@@ -579,14 +650,14 @@ class cms_page_panel_cms_model extends \Model {
 				}
 			}
 
+			// Repeater rows are still posted per field here: [repeater][field][row]
 			if ($struct['type'] == 'repeater'){
 				foreach ($struct['fields'] as $r_struct){
-					if ($r_struct['type'] == 'image'){
-						if (!empty($r_struct['meta']) && $r_struct['meta'] == 'image' && !empty($data['panel_params'][$struct['name']])){
-							if (empty($data['panel_params']['_images'])){
-								$data['panel_params']['_images'] = [];
+					if ($r_struct['type'] == 'image' && ($r_struct['meta'] ?? '') == 'image'){
+						foreach ((array)($data['panel_params'][$struct['name']][$r_struct['name']] ?? []) as $image){
+							if (is_scalar($image) && (string)$image !== ''){
+								$data['panel_params']['_images'][] = (string)$image;
 							}
-							array_merge($data['panel_params']['_images'], $data['panel_params'][$struct['name']]);
 						}
 					}
 				}

@@ -13,6 +13,8 @@ class cms_rebuild_routes extends \Controller {
 
 		parent::__construct();
 
+		$this->load->helper('cms/cms_fields_helper');
+
 		if (empty($_SESSION['cms_user']['cms_user_id'])){
 			header('Location: '.$GLOBALS['config']['base_url'].'cms_login/', true, 302);
 			exit();

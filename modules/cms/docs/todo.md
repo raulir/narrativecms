@@ -39,6 +39,11 @@ Ajax input / output filter review (2026-11-05), items in priority order:
 
 ## System / page panel API
 
+- [x] **Filters on `cms_page_panel_id` loaded every block** (found 2026-11-13; fixed 2026-11-13). The base column list in `get_cms_page_panels_by()` / `count_cms_page_panels_by()` (`_cms_page_panels_query_context()`) and in `cms_page_panel_list_model` said `'cms_page_panel'`, so a `cms_page_panel_id` filter was not SQL: the query read every block (about 23,800 here) and the id was matched in PHP afterwards (and without `_fields`, every block was loaded in full first).
+  - **Effect:** `admin/page/<id>/` took 1.7 s for a page with 3 blocks: `cms_input_page_panels` looks up each block by id (about 540 ms each). Now about 70 ms.
+  - **Fix:** the list says `cms_page_panel_id`, so the filter is a bound `=` / `in (…)` / `!=` / `not in (…)`. An empty id list still matches no block, as before (an empty `!` list still filters nothing).
+  - **Check:** `grok/tmp/cms_id_filter_check.php` (one id, full row equal to `get_cms_page_panel()`; id lists; `!`; empty string, 0, null, unknown id and an empty list give no rows; counts; the list model), plus the admin regression checks.
+
 - [ ] **Control what a panel serves publicly** — one system for the page panel API. Params, settings, and other panel data should not always be sent. Default mode is a whitelist: only named fields are public. A panel can instead use a blacklist of fields that must stay private. See page panel params and settings.
 
 ## System / frontend page render
@@ -224,7 +229,7 @@ Source: [`cms_panel_js.md`](cms_panel_js.md). Per-module remaining work also tra
   See [`cms_input.md`](cms_input.md) § How an input is rendered.
 - [x] **Repeater row from the definition** (review 2026-11-11, item 2, input trust; done 2026-11-12). "Add element" posted the whole `fields` structure (`data-fields`), and `cms/cms_input_repeater_item` rendered it, so the browser chose which panels ran.
   - **Fix:** the request now sends `block_panel`, `section`, `name`, `repeater_key` and `base_id` (`ajax.input` lists only these), and the fields come from the definition (`cms_repeater_definition()`). An unknown panel, section or repeater gives an error.
-  - **Kept:** `_access_ok` is still passed to the input panel. Panel `access` keys are visitor keys, and a refused input would clear the site-user session and redirect the admin form to the site login. Input types come from definitions only. See the comment in `cms_input.php`.
+  - **Kept:** `_access_ok` is still passed to the input panel. Panel `access` keys are visitor keys, and a refused input would clear the site-user session and redirect the admin form to the site login. Input types come from definitions only. See the comment in `cms_input()` (`cms_fields_helper.php`; the `cms/cms_input` panel was replaced by it 2026-11-13).
   - **Check:** `grok/tmp/cms_repeater_rows_check.js`.
 - [x] **Repeater row keys** (review 2026-11-11, item 3; done 2026-11-12). A row added after a delete took an existing row's key (key = row count), so classes such as `.cms_image_input_<name_clean>` matched two rows and a chosen image was set in both.
   - **Fix:** the next key comes from `data-next_key` on the rows area. The repeater's call to `cms_input_image_rename()` (it never matched) and its 1 s timeout are removed; the function itself went with the legacy table editor (2026-11-13).
@@ -255,17 +260,21 @@ Source: [`cms_panel_js.md`](cms_panel_js.md). Per-module remaining work also tra
   - **Fix:** both list builders (`cms_page_panel_model::_cms_page_panels_query_context()`, `cms_page_panel_list_model`) bind their lists (`in (?, …)`, values through `sql_in_values()`), in the same order as the where parts. `_order`, put into the SQL text, is only `asc` or `desc`. The schema check (`_panel_table_sync_detail()`) binds its field names too.
   - **Legacy table editor (`cms/cms_table`, `admin/table/<table>/`):** it took the table name and column names from the request into its SQL, put ids in raw, and a save with no rows deleted every row of the posted table (`not in ('')`). Now a table needs a `cms_table_<table>` definition and must exist, columns come from that definition, and ids are bound. Its two definitions have never loaded (the lookup had no module, and the files have no `item` key), so no table was editable: every table was 404. The editor is now removed (see the Legacy table editor entry).
   - **Check:** `grok/tmp/cms_sql_lists_check.php`.
-- [ ] **Link input targets once per request** (review 2026-11-13, item 4). `cms_input_link` rebuilds every list, with one slug query per item, for each link input: 61–63 ms each, 130 ms for three. Build once in the model, with one slug query per list.
-- [ ] **Edit page leftovers** (review 2026-11-13, item 5):
-  - the repeater `meta: image` collection throws its `array_merge` result away (`cms_page_panel_cms_model.php:326`);
-  - the dead `$('#block_id')` branch in `cms_page_panel_button_save.js`;
-  - `admin/panel_settings/<panel>/` creates a settings block on GET for any panel name.
-- [ ] **Groups tabs from the server** (review 2026-11-12). Until `cms_input_groups_init()` runs, every tab's fields show. `cms_input_repeater_item` knows the row's tab value (or the `groups` default): mark the other tabs' fields, and have `cms_input.tpl.php` print `cms_input_groups_hidden` on their wrapper.
-- [ ] **Field layout CSS tidy** (review 2026-11-12). In `cms_page_panel.scss`:
-  - one selector list per row span instead of two rule sets (27 KB compiled);
-  - document the 100-row cap (`$cms_field_height_max`) in `cms_input.md`;
-  - comment the four spacing values that reproduce the old JS spacing.
-- [ ] **Fewer panels per field** (review 2026-11-11, item 5). The dispatcher as a helper function instead of a panel; help text without a `cms/cms_help` panel; grid cells printed by the grid template; label, help and translate icon printed once by the wrapper (with the CSS grid item).
+- [x] **Link input targets once per request** (review 2026-11-13, item 4; big plan item 2, done 2026-11-13). `cms_input_link` rebuilt every list, with one slug query per item, for each link input. Now `cms_page_panel_cms_model::get_link_targets()` (lists and pages) and `get_link_list()` (a list's titles and slugs: ids and titles only, one `cms_slug_model::get_slugs_by_targets()` query) keep their results for the request. Queries: 338 76 → 41, 4466 (three link inputs) 159 → 48 and 235 → 159 ms, block 1 72 → 37. Check: `grok/tmp/cms_link_targets_dump.php` (link input markup the same before and after), `cms_inputs_check.js after`.
+- [x] **Edit page leftovers** (review 2026-11-13, item 5; big plan item 1, done 2026-11-13):
+  - a repeater `meta: image` image now reaches `_images` (each row's image field; the `array_merge` result was thrown away, and it merged the whole repeater);
+  - the dead `$('#block_id')` branch in `cms_page_panel_button_save.js` is gone;
+  - `admin/panel_settings/<panel>/` creates a settings block only when the definition has `settings` (otherwise 404).
+  - **Check:** `grok/tmp/cms_edit_leftovers_check.php`.
+- [ ] **Groups tabs from the server** (review 2026-11-12; moved out of the big plan 2026-11-13). Until `cms_input_groups_init()` runs, every tab's fields show. `cms_input_repeater_item` knows the row's tab value (or the `groups` default): mark the other tabs' fields, and have `cms_input()` (`cms_fields_helper.php`) print `cms_input_groups_hidden` on their wrapper.
+- [x] **Field layout CSS tidy** (review 2026-11-12; big plan item 5, done 2026-11-13). In `cms_page_panel.scss`, the span rules are one rule per height for form and repeater row fields (compiled CSS 27.4 → 25.2 KB); the 100-row cap is in `cms_input.md` § Form layout; the four spacing values have a comment each. Check: `cms_inputs_check.js after layout`, `cms_layout_width_check.js`.
+- [x] **Fewer panels per field** (review 2026-11-11, item 5; big plan item 6, done 2026-11-13).
+  - **Dispatcher:** `cms_input()` in `cms_fields_helper.php` replaces the `cms/cms_input` panel (panel and template removed); `print_fields()` and the admin templates call it.
+  - **Help:** `cms_help()` replaces the `cms/cms_help` panel (template removed).
+  - **Grid cells:** the grid template prints `cms/cms_grid_editable` cells itself (the panel keeps the cell's own ajax save).
+  - **Label, help and translate icon:** printed by `cms_input_label()` in 22 input templates. The wrapper cannot print them: it is `display: contents`, and the label has to stay inside the `.cms_input` grid item.
+  - **Result** (`cms_form_timing.php`): block 1 184 → 71 panels, 357 → 251 ms; note_system 100 → 35 panels, 358 → 225 ms; 5123 82 → 39 panels, 272 → 148 ms.
+  - **Check:** `cms_inputs_check.js after` and `after layout` (all values, inputs and boxes match), `cms_layout_width_check.js`, `cms_help_check.js`, the grid cell, save, picker, caching and repeater row checks.
 - [ ] **Configurable input types** (#87 "later") — which input types are available, e.g. per site or per module. The `input` definition flags are where a type would declare itself.
 - [x] **Legacy table editor removed** (2026-11-13; a dead branch from early CMS development; `grok/review_small_plan.md` item 1). `admin/table/<table>/` (`cms/cms_table`) had never worked: its definitions never loaded, its template declared its own `print_fields()` with a panel that no longer exists (`admin_input_select`), and its save put request values into SQL. Removed: the route `admin::table()`, the panel, template, JS, the definitions `cms_table_cms_file.json` / `cms_table_user.json`, `cms_table_model`, the fk input's undocumented `target: table` branch (`cms_panel_model::get_cms_panel_fk_data()`), and `cms_input_image_rename()` (only `cms_table.js` called it). CMS Update deletes the files on client sites with the next core release.
 

@@ -31,7 +31,7 @@
 		<?php if (empty($independent_block) || !empty($block['parent_id'])): ?>
 			<div class="cms_page_panel_content">
 
-				<?php _panel('cms/cms_input', ['type' => 'text', 
+				<?php cms_input(['type' => 'text', 
 						'name' => 'title',
 						'value' => $block['title'],
 						'name_clean' => 'block_title',
@@ -40,7 +40,7 @@
 						'extra_class' => 'cms_page_panel_title',
 				]); ?>
 				
-				<?php _panel('cms/cms_input', ['type' => 'text', 
+				<?php cms_input(['type' => 'text', 
 						'name' => 'submenu_anchor',
 						'value' => $block['submenu_anchor'],
 						'name_clean' => 'block_submenu_anchor',
@@ -61,7 +61,7 @@
 			<?php if(!empty($list_templates)): ?>
 				<div class="cms_page_panel_template">
 					
-					<?php _panel('cms/cms_input', ['type' => 'select', 
+					<?php cms_input(['type' => 'select', 
 							'name' => 'cms_template_page_id',
 							'name_clean' => '_template_page_id',
 							'values' => $list_templates,

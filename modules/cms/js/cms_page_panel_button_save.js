@@ -53,11 +53,7 @@ function cms_page_panel_save_submit(params){
 						
 					// panel settings
 					cms_notification('Settings saved', 3);
-					
-					if ($('#block_id').val() == '0'){
-						location.reload();
-					} 
-					
+
 				} else if ($('.cms_page_panel_id').val() == '0' && (parseInt(data.result.parent_id) > 0)){
 				
 					// adding child

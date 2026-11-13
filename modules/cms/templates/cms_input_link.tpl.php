@@ -4,8 +4,7 @@
 		data-cms_input_height="<?= !empty($format) && $format == 'short' ? '1' : '2' ?>">
 	
 
-	<label for="admin_input_link_<?php print($name_clean); ?>"><?php print($label); ?></label>
-	<?php _panel('cms/cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
+	<?php cms_input_label($label, $help ?? '', 'admin_input_link_'.$name_clean) ?>
 	
 	<div class="cms_input_link_content">
 

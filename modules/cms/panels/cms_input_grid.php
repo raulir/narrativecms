@@ -83,6 +83,11 @@ class cms_input_grid extends \Controller {
 				if (!empty($field['label']) && stristr($field['label'], '{cms_language}')){
 					$params['fields'][$field_key]['label'] = str_replace('{cms_language}', $cms_language, $field['label']);
 				}
+				// The grid template prints these cells itself
+				if (($field['type'] ?? '') === 'cms/cms_grid_editable'){
+					add_css('cms/cms_grid_editable.scss');
+					add_js('modules/cms/js/cms_grid_editable.js');
+				}
 			}
 
 			usort($params['fields'], function($a, $b){

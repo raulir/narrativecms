@@ -1934,13 +1934,16 @@ class cms_page_panel_model extends \Model {
 
 		foreach ($filter as $key => $value){
 			$tkey = str_replace('!', '', $key);
-			if (in_array($tkey, ['cms_page_panel', 'cms_page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title', ])){
+			if (in_array($tkey, ['cms_page_panel_id', 'cms_page_id', 'parent_id', 'show', 'sort', 'title', 'panel_name', 'submenu_anchor', 'submenu_title', ])){
 
 				if (!is_array($value)){
 					$sql_filter[$key] = $value;
 				} else if (!empty($value) && is_array($value)){
 					$sql_arrays[] = ' a.`'.$tkey.'` '.($tkey != $key ? ' not ' : '').' in ('.implode(', ', array_fill(0, count($value), '?')).') ';
 					$sql_arrays_bind = array_merge($sql_arrays_bind, $this->sql_in_values($value));
+				} else if ($key === 'cms_page_panel_id'){
+					// An empty id list matches no block (as when ids were filtered after the query)
+					$sql_arrays[] = ' 0 ';
 				}
 
 			} else if ($use_panel_table && isset($table_fields[$tkey])){

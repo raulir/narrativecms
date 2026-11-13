@@ -384,6 +384,30 @@ class cms_slug_model extends \Model {
 
 	}
 
+	/**
+	 * Slugs of many targets in one query: target => slug, for the targets that have one.
+	 */
+	function get_slugs_by_targets($targets){
+
+		$targets = array_values(array_unique(array_filter(array_map('strval', (array)$targets), 'strlen')));
+		if (!$targets){
+			return [];
+		}
+
+		list($table, $slug_col) = $this->_route_table();
+
+		$sql = 'select target, `'.$slug_col.'` as slug from `'.$table.'` where target in ('.implode(', ', array_fill(0, count($targets), '?')).')';
+		$return = [];
+		foreach ($this->db->query($sql, $targets)->result_array() as $row){
+			if (!isset($return[$row['target']])){
+				$return[$row['target']] = (string)$row['slug'];
+			}
+		}
+
+		return $return;
+
+	}
+
 	function get_cms_slug_by_target($target){
 
 		$row = $this->get_slug_row_by_target($target);

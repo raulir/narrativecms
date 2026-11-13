@@ -5,9 +5,7 @@
 		data-cms_input_height="<?= ceil((21 * (!empty($lines) ? $lines : 3 ) + 32)/35) ?>"
 		data-cms_input_width="<?= !empty($width) && $width == 'wide' ? '2' : '1' ?>">
 
-	<label><?= $label ?></label>
-	
-	<?php _panel('cms/cms_help', ['help' => !empty($help) ? $help : '', ]); ?>
+	<?php cms_input_label($label, $help ?? '') ?>
 
 	<?php if (!empty($md) && empty($readonly)): ?>
 		<button type="button" class="cms_input_textarea_md_button">Preview</button>

@@ -17,6 +17,7 @@ class cms_page extends \Controller {
 		}
 
 		add_css('cms/cms_page_panel_toolbar.scss');
+		$this->load->helper('cms/cms_fields_helper');
 	
 	}
 

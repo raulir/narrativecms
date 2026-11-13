@@ -71,7 +71,7 @@ If something was “needed for the form”, it belonged on a **custom field pane
 
 ### Custom CMS field panels (allowed on admin)
 
-Field types such as `music/exercise_params`, `cms/cms_input_image`, `music/note_system_key` are **input widgets**. When [`print_fields()`](../helpers/cms_fields_helper.php) renders them through the input dispatcher `cms/cms_input` ([`cms_input.md`](cms_input.md) § How an input is rendered), those field panels run **their own** `panel_params` to prepare the control (`value`, labels, etc.). That is correct: the field panel owns its admin UI.
+Field types such as `music/exercise_params`, `cms/cms_input_image`, `music/note_system_key` are **input widgets**. When [`print_fields()`](../helpers/cms_fields_helper.php) renders them through the input function `cms_input()` ([`cms_input.md`](cms_input.md) § How an input is rendered), those field panels run **their own** `panel_params` to prepare the control (`value`, labels, etc.). That is correct: the field panel owns its admin UI.
 
 | Panel kind | Admin edit form | Frontend page render |
 |------------|-----------------|----------------------|

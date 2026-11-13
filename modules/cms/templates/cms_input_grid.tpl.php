@@ -44,6 +44,14 @@
 														'admin/cms_page_panel/'.$id.'/' ?>"><?= $id ?></a>
 											<?php endforeach ?>
 										</div>
+									<?php elseif($field['type'] == 'cms/cms_grid_editable'): ?>
+										<?php
+											// Printed here, not as a panel per cell (the panel serves its own ajax save)
+											$value = is_scalar($cell) ? $cell : '';
+											$item_id = $row_id;
+											$name = $field['name'];
+											include $GLOBALS['config']['base_path'].'modules/cms/templates/cms_grid_editable.tpl.php';
+										?>
 									<?php elseif(stristr($field['type'],'/')): ?>
 										<?php _panel($field['type'], $field + [
 												'base_id' => $base_id ?? 0,

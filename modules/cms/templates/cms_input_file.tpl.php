@@ -1,9 +1,7 @@
 <div class="cms_input cms_input_file cms_input_file_container_<?php print($name_clean); ?> <?php print(!empty($extra_class) ? $extra_class : ''); ?> 
 		<?= !empty($mandatory_class) ? $mandatory_class : '' ?>" data-cms_input_height="2">
 	
-	<label for="cms_input_file_<?php print($name_clean); ?>"><?php print($label); ?></label>
-
-	<?php if (!empty($help)) _panel('cms/cms_help', ['help' => $help, ]); ?>
+	<?php cms_input_label($label, $help ?? '', 'cms_input_file_'.$name_clean) ?>
 
 	<div class="cms_file_container">
 	

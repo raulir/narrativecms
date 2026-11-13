@@ -76,7 +76,7 @@ Panels with destroy in CMS module: `cms_input_image`, `cms_image`, `cms_video`, 
 
 ## Repeater integration
 
-When a repeater adds a row, [`cms_input_repeater.js`](../js/cms_input_repeater.js) preloads field panel JS and calls hooks from `data-init_hooks` on the Add button. PHP derives them from the field types with the same type→panel resolver as the input dispatcher (`cms_input_panel_name()`, `cms_fields_helper.php`). Each hook is a global `<panel>_init` function. The row itself is `cms/cms_input_repeater_item` (ajax), which renders its fields with `print_fields()`. The request names the panel, definition section and repeater, the row key (from the area's `data-next_key`) and the block id; the server takes the fields from the definition ([`cms_input.md`](cms_input.md) § repeater).
+When a repeater adds a row, [`cms_input_repeater.js`](../js/cms_input_repeater.js) preloads field panel JS and calls hooks from `data-init_hooks` on the Add button. PHP derives them from the field types with the same type→panel resolver as `cms_input()` (`cms_input_panel_name()`, `cms_fields_helper.php`). Each hook is a global `<panel>_init` function. The row itself is `cms/cms_input_repeater_item` (ajax), which renders its fields with `print_fields()`. The request names the panel, definition section and repeater, the row key (from the area's `data-next_key`) and the block id; the server takes the fields from the definition ([`cms_input.md`](cms_input.md) § repeater).
 
 ## jQuery plugins
 
