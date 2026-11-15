@@ -77,9 +77,16 @@
 }
 
 .cms_schema_latest_errors {
+	position: relative;
 	padding: 1.0rem 1.0rem 2.0rem;
 	border-top: 0.2rem solid $cms_border;
 	margin-top: 1.0rem;
+}
+
+.cms_schema_latest_errors_dismiss {
+	position: absolute;
+	top: 1.0rem;
+	right: 1.0rem;
 }
 
 .cms_schema_latest_errors_title {

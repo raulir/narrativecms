@@ -2,7 +2,8 @@
 
 // Module hooks: a module sets window.cms_hooks.<name> to a function, and the CMS calls it when set.
 // panel_take(name, params, stored, deliver, fail) answers a panel request itself (true: no server call);
-// offline_notice(); offline_block_url(url) (true: an offline position link stays); popstate() (true: handled).
+// offline_notice(); offline_link(url) (true: the module opened an offline position link itself, else the
+// notice shows); popstate() (true: handled).
 window.cms_hooks = window.cms_hooks || {}
 
 function cms_hook(name) {
@@ -11,6 +12,29 @@ function cms_hook(name) {
 
 function _cms_get_base() {
 	return (typeof _cms_base !== 'undefined' ? _cms_base : '/')
+}
+
+/**
+ * The path the app shell is served from on its own origin: '/' on the website and in the Android app,
+ * '/app/' for the web app on the website (set by the shell). In-app page URLs on the shell origin start with it.
+ */
+function cms_app_root() {
+	return (typeof window._cms_app_root === 'string' && window._cms_app_root) ? window._cms_app_root : '/'
+}
+
+function cms_app_url(path) {
+	return cms_app_root() + String(path || '').replace(/^\/+/, '')
+}
+
+/**
+ * A shell-origin path without the shell root: the page path the backend knows ('/app/unit/x/' → '/unit/x/').
+ */
+function cms_app_strip_root(path) {
+	var root = cms_app_root()
+	if (root !== '/' && typeof path === 'string' && path.indexOf(root) === 0){
+		return '/' + path.slice(root.length)
+	}
+	return path
 }
 
 function cms_ajax_app_session(params){

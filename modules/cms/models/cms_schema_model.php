@@ -475,9 +475,10 @@ class cms_schema_model extends \Model {
 			"left join `{$table}` t on t.cms_page_panel_id = a.cms_page_panel_id ".
 			"where a.panel_name = ? and t.cms_page_panel_id is null ";
 		$query = $this->db->query($sql, [$panel_name]);
-		if ((int)$query->row_array()['c'] > 0) {
+		$missing = (int)$query->row_array()['c'];
+		if ($missing > 0) {
 			$out['reasons'][] = 'missing_rows';
-			$out['reason_labels'][] = 'List items missing table rows';
+			$out['reason_labels'][] = 'List items missing table rows ('.$missing.')';
 		}
 
 		return $out;
@@ -519,9 +520,18 @@ class cms_schema_model extends \Model {
 				continue;
 			}
 
-			$sql = "select cms_page_panel_id from cms_page_panel where panel_name = ? ";
-			$query = $this->db->query($sql, [$panel_name]);
+			// Only items that need it: no table row yet, or table fields still in params
+			$field_names = array_map('strval', array_keys($table_fields));
+			$sql = "select a.cms_page_panel_id from cms_page_panel a ".
+				"left join `{$table}` t on t.cms_page_panel_id = a.cms_page_panel_id ".
+				"where a.panel_name = ? and (t.cms_page_panel_id is null or exists (".
+					"select 1 from cms_page_panel_param p where p.cms_page_panel_id = a.cms_page_panel_id ".
+					"and p.language = '' and p.name in (".implode(', ', array_fill(0, count($field_names), '?')).")".
+				")) ";
+			$query = $this->db->query($sql, array_merge([$panel_name], $field_names));
 			$rows = $query->result_array();
+			// Items that have no value for any table field: no row can be built for them
+			$unfillable = [];
 
 			foreach ($rows as $row) {
 				$cms_page_panel_id = (int)$row['cms_page_panel_id'];
@@ -554,7 +564,7 @@ class cms_schema_model extends \Model {
 
 				// Need at least one table field besides PK
 				if (count($row_data) <= 1) {
-					$stats['skipped']++;
+					$unfillable[] = $cms_page_panel_id;
 					continue;
 				}
 
@@ -573,8 +583,16 @@ class cms_schema_model extends \Model {
 					$this->cms_page_panel_model->_update_cached_params($cms_page_panel_id);
 					$stats['synced']++;
 				} else {
-					$stats['errors'][] = $table.':'.$cms_page_panel_id.': upsert failed';
+					// The database's reason is recorded by _execute
+					$stats['errors'][] = $table.':'.$cms_page_panel_id.': row not written';
 				}
+			}
+
+			// Not an OK: these items stay listed until they get values or are removed
+			if ($unfillable) {
+				$stats['errors'][] = $table.': '.count($unfillable).' item(s) have no value for any table field, so no row '.
+					'can be built (ids '.implode(', ', array_slice($unfillable, 0, 20)).(count($unfillable) > 20 ? ', …' : '').
+					'). Fill them in or delete them.';
 			}
 		}
 

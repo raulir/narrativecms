@@ -66,6 +66,24 @@ class cms_schema extends \Controller {
 
 		}
 
+		// Dismiss the latest fix errors: those of the module this view is filtered to, or all of them
+		if (!empty($params['cms_do']) && $params['cms_do'] === 'dismiss_errors'){
+			$latest = $_SESSION['cms_schema_latest_errors'] ?? [];
+			if ($filter_module !== '' && is_array($latest)){
+				$latest = array_values(array_filter($latest, function($row) use ($filter_module){
+					return ($row['module'] ?? '') !== $filter_module;
+				}));
+			} else {
+				$latest = [];
+			}
+			if ($latest){
+				$_SESSION['cms_schema_latest_errors'] = $latest;
+			} else {
+				unset($_SESSION['cms_schema_latest_errors']);
+			}
+			return ['success' => 1];
+		}
+
 		if (empty($params['cms_do']) || $params['cms_do'] !== 'fix_schema') {
 			if ($fragment || $filter_module !== '') {
 				return array_merge($params, [

@@ -36,6 +36,11 @@ function cms_position_request_url(url){
 		return ''
 	}
 
+	// A shell-origin path carries the shell root; the backend request does not
+	if (typeof cms_app_strip_root === 'function'){
+		path = cms_app_strip_root(path)
+	}
+
 	if (base.indexOf('http') === 0){
 		return base.replace(/\/$/, '') + path
 	}
@@ -44,15 +49,24 @@ function cms_position_request_url(url){
 
 }
 
+/**
+ * The URL kept in the browser history for a page: its path, under the shell root on the shell origin.
+ */
 function cms_position_history_url(url){
 
+	var root = (typeof cms_app_root === 'function') ? cms_app_root() : '/'
+	var prefix = root.replace(/\/$/, '')
+
 	if (!url || !/^https?:\/\//i.test(url)){
+		if (prefix && typeof url === 'string' && url.charAt(0) === '/' && url.indexOf(root) !== 0){
+			return prefix + url
+		}
 		return url
 	}
 
 	try {
 		var parsed = new URL(url)
-		return parsed.pathname + parsed.search
+		return prefix + parsed.pathname + parsed.search
 	} catch (e) {
 		return url
 	}
@@ -94,8 +108,30 @@ function get_ajax_positions(url, params, action_on_success) {
 		error: function() {
 			$('.cms_position_main').css({'opacity':''})
 			cms_position_nav_busy = false
+			// The network went away before the offline flag followed: say so instead of doing nothing
+			if (window._cms_offline || navigator.onLine === false){
+				cms_position_offline(params._url)
+			}
 		}
 	})
+
+}
+
+/**
+ * Offline a position request cannot be answered (the CMS keeps no copies of them). The module opens
+ * the page itself when it can (hook offline_link returns true); otherwise it shows the offline notice.
+ */
+function cms_position_offline(url){
+
+	var open = cms_hook('offline_link')
+	if (open && open(url)){
+		return
+	}
+
+	var notice = cms_hook('offline_notice')
+	if (notice){
+		notice()
+	}
 
 }
 
@@ -120,7 +156,10 @@ function cms_position_push_url(new_url) {
 		return
 	}
 
-	if (!window.location.href.endsWith(new_url) || new_url == '/') {
+	// An installed web app keeps one history entry: the back button is the app's back (shell.js)
+	if (window._cms_app_standalone) {
+		history.replaceState({cms_position: 1, app_back: 1}, '', new_url)
+	} else if (!window.location.href.endsWith(new_url) || new_url == '/') {
 		history.pushState({cms_position: 1}, '', new_url)
 	}
 
@@ -207,6 +246,16 @@ function cms_position_goto(url, opts) {
 		return Promise.resolve()
 	}
 
+	var request_url = cms_position_request_url(url)
+	if (!request_url){
+		return Promise.resolve()
+	}
+
+	if (window._cms_offline){
+		cms_position_offline(request_url)
+		return Promise.resolve()
+	}
+
 	cms_position_nav_busy = true
 
 	var before = Promise.resolve()
@@ -217,14 +266,15 @@ function cms_position_goto(url, opts) {
 		})
 	}
 
-	var request_url = cms_position_request_url(url)
-	if (!request_url){
-		cms_position_nav_busy = false
-		return Promise.resolve()
+	// The server sends the posted positions whose page differs; opts.reload posts the page's own position
+	// (main) as 0, so the page shown is loaded fresh
+	var positions = cms_position_collect()
+	if (opts.reload && positions.main !== undefined) {
+		positions.main = 0
 	}
 
 	var download = new Promise(function(resolve) {
-		get_ajax_positions(request_url, {'cms_positions': cms_position_collect()}, function(result) {
+		get_ajax_positions(request_url, {'cms_positions': positions}, function(result) {
 			resolve(result)
 		})
 	})
@@ -268,19 +318,15 @@ function cms_position_link_init($root){
 			var $this = $(this)
 			var request_url = cms_position_request_url($this.attr('href'))
 
-			var block_url = cms_hook('offline_block_url')
-			if (window._cms_offline && block_url && block_url(request_url)){
-				e.preventDefault()
-				e.stopPropagation()
-				var offline_notice = cms_hook('offline_notice')
-				if (offline_notice){
-					offline_notice()
-				}
-				return false
-			}
-
 			if (!request_url){
 				return
+			}
+
+			if (window._cms_offline){
+				e.preventDefault()
+				e.stopPropagation()
+				cms_position_offline(request_url)
+				return false
 			}
 
 			// optional custom before/after on the link (override defaults)

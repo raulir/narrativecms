@@ -7,6 +7,7 @@ AddType image/svg+xml                    .svg
 AddType application/x-font-ttf           .ttf
 AddType application/font-woff            .woff
 AddType application/font-woff2           .woff2
+AddType application/manifest+json        .webmanifest
 
 <IfModule mod_expires.c>
 ExpiresActive On

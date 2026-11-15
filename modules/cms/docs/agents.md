@@ -83,10 +83,11 @@ get_ajax('module/panel', { do: 'save' }).then(function(data) {
 - `get_ajax_panel(name, params)` does not send `no_html`. The reply includes panel HTML. A third-argument callback still runs on success, and the promise resolves too. It is not a wrapper around `get_ajax`, because that would force `no_html` and drop the HTML.
 - Both POST with jQuery. Param keys are sorted before the request. `_cache` (seconds), `_cache_offline`, and `_cache_reload` are removed before the POST and select the localStorage copy. The cache key includes `_cms_user_id`, so each account has its own copy. A stored reply is served on failure when one exists. CMS admin does not use this cache.
 - `_store` (store-only, also removed before the POST) is for a caller that keeps the reply to show later: the reply's panel css, scripts and field targets are not put on the page. In the app the html's script tags are taken out either way, and the reply lists them as `cms_html_srcs`.
+- `cms_position_goto(url, opts)` (`cms_position_link.js`) loads a page into the positions. `opts.history`: `push` (default) or `none`; `opts.animate` (default true). The server sends only the posted positions whose page differs, so going to the page already shown changes nothing. Pass `opts.reload: true` to load it fresh: it posts `main` as `0`.
 - **Module hooks:** CMS scripts never call a module function by name. A module sets `window.cms_hooks.<name>`, and the CMS calls it through `cms_hook(name)` when it is set (`cms_site_main.js`):
   - `panel_take(name, params, stored, deliver, fail)`: returns true when it answers a `get_panel` request itself, so the server is not called. The CMS does not ship a practice cache; music's `offline.js` sets this.
   - `offline_notice()`: a request or link cannot run offline.
-  - `offline_block_url(url)`: true keeps an in-app position link from opening while `_cms_offline`.
+  - `offline_link(url)`: while `_cms_offline` a position link or `cms_position_goto` sends no request (the CMS keeps no copies of position replies). The hook gets the request URL and returns true when the module opened the page itself; otherwise `offline_notice()` runs. The same happens when a position request fails while the device reports no network.
   - `popstate()`: true when the module handled a history step (`cms_position_link.js`).
 
 ## HTTP from PHP

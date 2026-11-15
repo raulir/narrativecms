@@ -182,11 +182,15 @@ class cms_page_panel_model extends \Model {
 
 	}
 
+	/**
+	 * Insert or update the panel-table row. Returns false when the write failed (e.g. a unique index refused
+	 * the values), true otherwise, also when there is no table or nothing to change.
+	 */
 	function _write_panel_table_row($cms_page_panel_id, $panel_name, $data) {
 		$fields = $this->get_panel_table_fields($panel_name);
 		// No table → caller must keep values in params (_split leaves them when table missing)
 		if (empty($fields) || !$this->panel_table_exists($panel_name)) {
-			return;
+			return true;
 		}
 
 		$row = [];
@@ -215,7 +219,7 @@ class cms_page_panel_model extends \Model {
 			$row['cms_page_panel_id'] = (int)$cms_page_panel_id;
 			$cols = array_keys($row);
 			$sql = "insert into `{$table}` (`".implode('`, `', $cols)."`) values (".implode(', ', array_fill(0, count($cols), '?')).") ";
-			$this->db->query($sql, array_values($row));
+			$written = $this->_panel_table_query($sql, array_values($row));
 		} else if (!empty($row)) {
 			$sets = [];
 			$bind = [];
@@ -225,16 +229,36 @@ class cms_page_panel_model extends \Model {
 			}
 			$bind[] = (int)$cms_page_panel_id;
 			$sql = "update `{$table}` set ".implode(', ', $sets)." where cms_page_panel_id = ? ";
-			$this->db->query($sql, $bind);
+			$written = $this->_panel_table_query($sql, $bind);
 		} else {
 			// Exists and nothing to update
-			return;
+			return true;
+		}
+
+		if ($written !== true) {
+			error_log_user('cms_page_panel: '.$table.' row for '.(int)$cms_page_panel_id.' not written: '.$written);
+			return false;
 		}
 
 		foreach (array_keys($fields) as $field_name) {
 			$sql = "delete from cms_page_panel_param where cms_page_panel_id = ? and name = ? and language = '' ";
 			$this->db->query($sql, [(int)$cms_page_panel_id, $field_name]);
 		}
+
+		return true;
+	}
+
+	/**
+	 * A panel-table write that may be refused (a unique index): true, or the database's reason as a string.
+	 * mysqli throws by default (PHP 8); the caller decides what a refusal means.
+	 */
+	function _panel_table_query($sql, $bind) {
+		try {
+			$result = $this->db->query($sql, $bind);
+		} catch (\mysqli_sql_exception $e) {
+			return $e->getMessage();
+		}
+		return $result === false ? (string)$this->db->last_error_message : true;
 	}
 
 	function _delete_panel_table_row($cms_page_panel_id, $panel_name) {
@@ -668,7 +692,10 @@ class cms_page_panel_model extends \Model {
 				return;
 			}
 
-			$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = '' , value = ? , search = 0 ";
+			// Upsert: a reader that found no cache while this row was rebuilt builds it at the same time
+			// (get_cms_page_panel_params); a plain insert of the second one hit the unique key and threw
+			$sql = "insert into cms_page_panel_param set cms_page_panel_id = ? , name = '' , value = ? , search = 0 "
+				."on duplicate key update value = values(value), search = 0 ";
 			$this->db->query($sql, [$cms_page_panel_id, $json]);
 				
 		} else {
@@ -1577,7 +1604,11 @@ class cms_page_panel_model extends \Model {
 		// (e.g. Shopify create without subcategory_id — list uses INNER JOIN)
 		if ($panel_name && !empty($this->get_panel_table_fields($panel_name))
 				&& $this->panel_table_exists($panel_name)) {
-			$this->_write_panel_table_row($cms_page_panel_id, $panel_name, $table_data);
+			// A refused row (unique index): the values stay as params, so nothing is lost and the schema
+			// check lists them ("Legacy params still present")
+			if (!$this->_write_panel_table_row($cms_page_panel_id, $panel_name, $table_data) && !empty($table_data)) {
+				$this->_insert_or_update_param($cms_page_panel_id, '', $table_data);
+			}
 			$this->_update_cached_params($cms_page_panel_id);
 		}
 
@@ -1747,18 +1778,23 @@ class cms_page_panel_model extends \Model {
 		if (!empty($data['panel_name'])) {
 			$table_data = $this->_split_panel_table_fields($data['panel_name'], $panel_params);
 		}
-		
+
+		// The panel-table row first (list queries INNER JOIN it): a refused row (a unique index, e.g. two
+		// requests creating the same item at once) removes the new item again, so no item is left without
+		// its row and its values. Returns 0 then; the reason is in the error log.
+		$use_table = !empty($data['panel_name']) && !empty($this->get_panel_table_fields($data['panel_name']))
+			&& $this->panel_table_exists($data['panel_name']);
+		if ($use_table && !$this->_write_panel_table_row($insert_id, $data['panel_name'], $table_data)) {
+			$this->db->query("delete from cms_page_panel where cms_page_panel_id = ? ", [(int)$insert_id]);
+			return 0;
+		}
+
 		if (!empty($panel_params)){
-		
+
 			// detailed data
 			$this->_insert_or_update_param($insert_id, '', $panel_params, $search_params);
 			$this->_update_cached_params($insert_id);
-		}
-
-		// Always ensure panel-table row when the panel has table:1 fields (list INNER JOIN)
-		if (!empty($data['panel_name']) && !empty($this->get_panel_table_fields($data['panel_name']))
-				&& $this->panel_table_exists($data['panel_name'])) {
-			$this->_write_panel_table_row($insert_id, $data['panel_name'], $table_data);
+		} else if ($use_table) {
 			$this->_update_cached_params($insert_id);
 		}
 

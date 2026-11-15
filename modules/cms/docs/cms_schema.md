@@ -47,6 +47,7 @@ Within a module, structure/orphan rows come first; panel-table data rows last.
 - One click handler for `.cms_schema_fix` using `data-key`
 - After **fix** (module or row): HTML is replaced with a **fresh full schema check** (all modules on the main page)
 - Status toasts use **`cms_notification`** (top edge): success or remaining-module message from the server; errors use the error style
+- **Latest fix errors** (session `cms_schema_latest_errors`, partial `cms_schema/latest_errors.tpl.php`, used by the page and the fragment): a small **dismiss** button in its upper right corner posts `do=dismiss_errors`, which clears them on the server (only the filtered module's in a module view) and removes the section
 
 ## Model integration
 
@@ -75,9 +76,18 @@ List panel fields may opt into a real SQL table `{module}_{panel}` (e.g. `shopif
 
 **fix module** (`key` = module name): structure + orphans first, then panel-table data for that module.
 
-Reasons on data rows: `Legacy params still present`, `List items missing table rows` (joined with `; ` when both).
+Reasons on data rows: `Legacy params still present`, `List items missing table rows (N)` (joined with `; ` when both). These are data checks: a line can come back with no change to any definition or table, whenever items are written that way.
 
 Integer fields with no param value sync as `0` so every list item gets a row (INNER JOIN safe).
+
+The data fix visits only the items that need it (no row, or table fields still in params). An item that has no value for any table field cannot get a row: the fix reports it as an error with its ids ("N item(s) have no value for any table field …"), not as OK, and the line stays until the item is filled in or deleted.
+
+### Writing items with a panel table
+
+- **Create** (`create_cms_page_panel`): the table row is written right after the `cms_page_panel` row. If the database refuses it (a unique index, e.g. two requests creating the same item at once), the new item is removed again, the reason goes to the error log, and the create returns `0`. So no item is left without its row. A caller that may race on a unique field checks for `0` and reads the existing item (music: `engine_model::ensure_exercise_row`, which also creates under a lock per hash).
+- **Update**: a refused row keeps the values as params, so nothing is lost; the check then lists the item as `Legacy params still present`.
+- `_write_panel_table_row` returns `false` on a refusal; mysqli throws by default (PHP 8), so the write is caught (`_panel_table_query`) instead of ending the request.
+- The params cache row (`name = ''`) is written with an upsert: a reader that finds no cache while a save rebuilds it builds it at the same time, and a plain insert of the second one hit the unique key.
 
 ### Demote / remove (reverse)
 

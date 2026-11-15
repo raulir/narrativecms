@@ -50,6 +50,7 @@ Ajax input / output filter review (2026-11-05), items in priority order:
 
 - [x] **Missing page `layout` → 500** — empty layout no longer includes `cms/layouts/.tpl.php`. HTTP 500, log to `errors_log`, render saved `internal-error` page if it has a layout, else red-frame HTML. Reserved list/system pages are not auto-inserted; admin shows grey **create** rows. First panel save creates the page from a session draft.
 - [x] **Session boot + reserved slug cost** — one `cms_session_boot()` (cookie/GC from `session_length_days`; APIs must not `session_start()` raw). CMS admin re-login after 24h (`cms_password_last_checked`). `is_reserved_slug()` does not scan all panel defs on 404.
+- [ ] **Panel scripts added more than once in the app** (found 2026-11-15). After a few in-app page changes, the web app's pricing page has 2–5 `<script>` tags for the same file (`cms_position_link.js`, `music.js`, `pricing.js`, `currency_selector.js`, …; probe `grok/tmp/pwa_watch_probe.js`), and at least `pricing.js` ran more than once: its `var` state was reset. `cms_inapp_load_scripts` / `cms_inapp_script_loaded` in `cms_site_main.js` should add and run each script once per document. Until then, module state that must outlive a re-run keeps its `window.` value (`pricing.js` `pricing_watch`).
 - [ ] **Analytics known by system code** (review 2026-11-13, horizontal). `controller_index::_record_position_pageview()` (`system/core/controller_index.php`) checks for the `analytics` module, loads `analytics/analytics_api_helper` and records the pageview of a position ajax load. It is guarded (soft), but system code should not name an optional module. Give position loads a hook (for example a `provides` entry or an after-render callback) that analytics registers.
 
 ## System / routing
@@ -91,6 +92,7 @@ Ajax input / output filter review (2026-11-05), items in priority order:
 
 ## Pages / publish (#625)
 
+- [ ] **Page editor: page link hover blinks** (reported 2026-11-13). On the page editor (`admin/page/<id>/`, `cms/cms_page`), hovering a page link makes it blink. Not investigated yet: check the hover CSS and JS of the links on that page (for example a hover style that changes size or position, or a mouseenter/mouseleave that re-renders the link).
 - [x] **Page hide + guarded delete** — remove Published status dropdown; toolbar **Hide/Show** (user + list main pages); gear **Delete** for user (enabled if no panels) and list templates (enabled if no list items, or list module/def gone, or merged `list.link_target` off after extends); system: neither. Visibility is binary visible/hidden. Empty main page FE shows red “No panels on the page” (not error_log). Hidden pages grey on Pages list (`cms_item_hidden`).
 
 ## Admin page load

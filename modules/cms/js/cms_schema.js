@@ -87,6 +87,37 @@ function cms_schema_init($root) {
 			})
 		})
 
+		// Dismiss the latest fix errors: cleared on the server, then the section goes
+		$('.cms_schema_latest_errors_dismiss', $container).on('click.cms', function(e) {
+			e.preventDefault()
+
+			var $this = $(this)
+			var ctx = cms_schema_request_context($this)
+			var data = {
+				do: 'dismiss_errors'
+			}
+			if (ctx.module){
+				data.schema_module = ctx.module
+				data.filter_module = ctx.module
+			}
+
+			$this.addClass('cms_disabled')
+
+			get_ajax('cms/cms_schema', data).then(function(result) {
+				var res = result && result.result ? result.result : {}
+				if (res.success == 1){
+					$this.closest('.cms_schema_latest_errors').remove()
+					return
+				}
+				$this.removeClass('cms_disabled')
+			}).catch(function() {
+				$this.removeClass('cms_disabled')
+				if (typeof cms_notification === 'function'){
+					cms_notification('Could not dismiss the errors', 5, 'error')
+				}
+			})
+		})
+
 		$('.cms_schema_dump_structure', $container).on('click.cms', function(e) {
 			e.preventDefault()
 
