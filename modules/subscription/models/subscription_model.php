@@ -847,6 +847,7 @@ class subscription_model extends \Model {
 				'manage_page_link',
 				'manage_payment_heading',
 				'manage_payment_cta',
+				'paid_message',
 		];
 
 		foreach ($keys as $key){
@@ -1017,6 +1018,7 @@ class subscription_model extends \Model {
 		$params['checkout_missing'] = empty($params['checkout_provider']) ? 1 : 0;
 		$params['user_logged_in'] = $this->user_model->is_logged_in() ? 1 : 0;
 		$params['login_url'] = $this->get_login_url();
+		$params['manage_url'] = $this->manage_page_url();
 		$params['auto_checkout'] = 0;
 		$params['auto_product_id'] = 0;
 		$params['auto_currency_id'] = 0;
@@ -1361,6 +1363,7 @@ class subscription_model extends \Model {
 		$params = $this->merge_subscription_pricing_settings($params);
 		$params = $this->_manage_label_defaults($params);
 		$params['login_url'] = $this->get_login_url();
+		$params['manage_url'] = $this->manage_page_url();
 		$params['user_logged_in'] = $this->user_model->is_logged_in() ? 1 : 0;
 		$params['show_settings_card'] = 0;
 		$params['show_payment'] = 0;
@@ -1776,7 +1779,7 @@ class subscription_model extends \Model {
 	/**
 	 * Manage ajax: portal payment method update.
 	 */
-	function action_update_payment_method($user_id, $return_url = ''){
+	function action_update_payment_method($user_id, $return_url = '', $app_root = ''){
 
 		$user_id = (int)$user_id;
 		if ($this->play_manages_subscription($user_id)){
@@ -1804,6 +1807,9 @@ class subscription_model extends \Model {
 					$return_url = $ml;
 				}
 			}
+		}
+		if ($app_root !== ''){
+			$return_url = $this->app_web_rebase($return_url, $app_root);
 		}
 		$this->load->model('stripe/stripe_model');
 		return $this->stripe_model->create_payment_method_update_session($user_id, $return_url);
@@ -1921,7 +1927,7 @@ class subscription_model extends \Model {
 	 * Build success/cancel URLs for provider.
 	 * Order: Stripe settings links (if set) → pricing resume intent → home defaults.
 	 */
-	function get_checkout_return_urls(){
+	function get_checkout_return_urls($app_root = ''){
 
 		$base = rtrim((string)($GLOBALS['config']['base_url'] ?? '/'), '/') . '/';
 		$success_url = $base . '?subscription_checkout=success';
@@ -1961,6 +1967,18 @@ class subscription_model extends \Model {
 			}
 		}
 
+		// The installed web app (app_web_root): come back into it, not to this backend host
+		if ($app_root !== ''){
+			$success_url = $this->app_web_rebase($success_url, $app_root);
+			$cancel_url = $this->app_web_rebase($cancel_url, $app_root);
+			// The tab Stripe returns to is not signed in: a public page on the website (the web app's origin)
+			$app_success = !empty($sub_settings['app_success_link']) ? _l($sub_settings['app_success_link'], false) : '';
+			if (is_string($app_success) && strlen($app_success) > 1 && $app_success[0] === '/' && $app_success[1] !== '/'
+					&& preg_match('#^https?://[^/]+#i', $app_root, $origin)){
+				$success_url = $origin[0].$app_success;
+			}
+		}
+
 		// Ensure absolute URLs for payment providers (Stripe rejects path-only)
 		if (!empty($GLOBALS['config']['modules']) && in_array('stripe', $GLOBALS['config']['modules'], true)){
 			$this->load->model('stripe/stripe_model');
@@ -1990,6 +2008,107 @@ class subscription_model extends \Model {
 			$host = ($https ? 'https://' : 'http://').($_SERVER['HTTP_HOST'] ?? 'localhost');
 		}
 		return rtrim($host, '/').'/'.ltrim($url, '/');
+
+	}
+
+	/**
+	 * Path of the My subscription page: the visible page with a subscription/manage block, else the
+	 * manage_page_link setting; '' when neither. The app opens it once its checkout watch sees the payment.
+	 */
+	function manage_page_url(){
+
+		$row = $this->db->query("select p.cms_page_id from cms_page_panel p join cms_page pg on pg.cms_page_id = p.cms_page_id "
+				."where p.panel_name = 'subscription/manage' and p.show = 1 and pg.position = 'main' order by p.cms_page_id limit 1")->row_array();
+		if (!empty($row['cms_page_id'])){
+			$url = _l((string)(int)$row['cms_page_id'], false);
+			if (is_string($url) && strlen($url) > 1 && $url[0] === '/' && $url[1] !== '/'){
+				return $url;
+			}
+		}
+
+		$settings = $this->merge_subscription_pricing_settings([]);
+		$url = !empty($settings['manage_page_link']) ? _l($settings['manage_page_link'], false) : '';
+
+		return (is_string($url) && $url !== '' && $url[0] === '/') ? $url : '';
+
+	}
+
+	/**
+	 * Origins (scheme + host) of the installed web app that this in-app backend serves: config
+	 * app_web_origins when set, otherwise base_site without its leading "app." / "app_" label
+	 * (https://app.scoretutor.com → https://scoretutor.com). A host without that label has none.
+	 */
+	function app_web_origins(){
+
+		$list = $GLOBALS['config']['app_web_origins'] ?? null;
+		if (is_array($list)){
+			return array_values(array_filter(array_map(function($origin){
+				return strtolower(rtrim(trim((string)$origin), '/'));
+			}, $list)));
+		}
+
+		$site = strtolower(trim((string)($GLOBALS['config']['base_site'] ?? '')));
+		if (!preg_match('#^(https?://)app[._]([a-z0-9.-]+)(:[0-9]+)?/?$#', $site, $m)){
+			return [];
+		}
+
+		return [$m[1].$m[2].($m[3] ?? '')];
+
+	}
+
+	/**
+	 * The web app's shell root posted by the page (location.origin + cms_app_root(), e.g.
+	 * https://scoretutor.com/app/), when it is one of ours; otherwise ''.
+	 */
+	function app_web_root($posted){
+
+		$posted = trim((string)$posted);
+		if (!preg_match('#^(https?://[a-z0-9.-]+(?::[0-9]+)?)(/(?:[a-z0-9_-]+/)*)$#i', $posted, $m)){
+			return '';
+		}
+
+		if (!in_array(strtolower($m[1]), $this->app_web_origins(), true)){
+			return '';
+		}
+
+		return strtolower($m[1]).$m[2];
+
+	}
+
+	/**
+	 * A return address on this site, moved into the web app: a site path, or an absolute URL on our own
+	 * base_site / base_host, becomes $root + that path. Anything else (another host) is left alone.
+	 */
+	function app_web_rebase($url, $root){
+
+		$url = trim((string)$url);
+		if ($root === '' || $url === ''){
+			return $url;
+		}
+
+		if (preg_match('#^https?://#i', $url)){
+			$own = false;
+			foreach ([$GLOBALS['config']['base_site'] ?? '', $GLOBALS['config']['base_host'] ?? ''] as $origin){
+				$origin = rtrim(trim((string)$origin), '/');
+				if ($origin !== '' && (strcasecmp($url, $origin) === 0 || stripos($url, $origin.'/') === 0 || stripos($url, $origin.'?') === 0)){
+					$url = substr($url, strlen($origin));
+					$own = true;
+					break;
+				}
+			}
+			if (!$own){
+				return $url;
+			}
+		}
+
+		if ($url === '' || $url[0] === '?'){
+			$url = '/'.$url;
+		}
+		if ($url[0] !== '/' || strpos($url, '//') === 0){
+			return $url;
+		}
+
+		return $root.ltrim($url, '/');
 
 	}
 

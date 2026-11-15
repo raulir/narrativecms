@@ -109,6 +109,44 @@ Stripe Dashboard steps: [`../stripe/docs/stripe_checklist.md`](../stripe/docs/st
 
 The Android app can also pay with Google Play. That path is the `google` module, called from the app. Shop settings still have one checkout provider, Stripe. See [`../../google/docs/google.md`](../../google/docs/google.md).
 
+### The installed web app
+
+The web app (`scoretutor.com/app/`, pages from the in-app backend `app.scoretutor.com`) has `_cms_inapp` like the Android app, but no native bridge (`window.AppSplash`). Only the bridge decides the app path (Google Play choice, or the Stripe hand-off in the browser via `browser_open`). Without it, `pricing.js` pays as the website does:
+
+- **Purchase** posts `subscription/checkout_start` with `app_root_url` = `location.origin + cms_app_root()` (e.g. `https://scoretutor.com/app/`), then goes to the Stripe Checkout address in the same window. A path answer (already subscribed) opens through `cms_position_goto`, so it stays in the web app.
+- **Return addresses:** the backend's own addresses are on `app.scoretutor.com`, outside the web app. So `subscription_model::app_web_root()` accepts the posted root, and `app_web_rebase()` moves Stripe's success and cancel URLs (`get_checkout_return_urls($app_root)`) and the card-update portal return (`manage.js` → `action_update_payment_method`) to that root, e.g. `https://scoretutor.com/app/pricing/`. The shell reopens that page there (deep link).
+- **Accepted roots:** the root is accepted only when its origin is in config `app_web_origins` (array). Without that key, the origin is `base_site` without its leading `app.` / `app_` label (`https://app.scoretutor.com` → `https://scoretutor.com`, `http://app_music.localhost` → `http://music.localhost`). The path must be plain segments ending in `/`. Any other root is ignored, and the addresses stay on the backend (e.g. `musicwrap.localhost`, unless listed).
+- Change plan and auto-renew work in place. A Play-bought subscription still answers with the Play manage link wherever it is managed.
+- **Success page:** the tab Stripe returns to is usually not the app window: a browser tab, a custom tab, or the external browser. It is not signed in, because the app's sign-in is its own (`app_session`). So with a web app root, success goes to the setting **Web app: checkout success page** (`app_success_link`) on the web app's origin, the website, e.g. `https://scoretutor.com/subscription-change/`. That is a public page (music: panel `music/subscription_change`, guest header and footer). It says the change went through, links back to the app, and offers the login CTA. Without the setting, success is the rebased manage link, as above.
+
+### The app's plans page watches the checkout
+
+In the app (`_cms_inapp`, the web app or the Android app), Purchase leaves the plans page open while Stripe runs elsewhere. `pricing.js` then watches (`pricing_watch_paid`):
+
+- **Starts:**
+  - in the web app, on the Stripe address;
+  - in the Android app, before the Play / Stripe choice or the `browser_open` hand-off.
+- **Asks:** `subscription/pricing` `cms_do=paid_status` → `{ok, paid}` (`user_has_paid_subscription`, a database read). It asks every 5 s, and at once when the page is visible again.
+  - The webhook writes the payment, so a Stripe sync would not see it sooner: it needs `stripe_subscription_id`.
+- **Paid:**
+  - the notice `.pricing_paid_notice`, text from setting **App: payment received** (`paid_message`), on `body` so the page load under it keeps it;
+  - **My subscription** opens, because it shows the new plan. Its path is `data-manage_url` on both containers (`subscription_model::manage_page_url()`): the visible page with a `subscription/manage` block, else the `manage_page_link` setting.
+  - When My subscription is already the page shown, it loads again: `cms_position_goto(…, {history: 'none', reload: true})`.
+- **Ends:**
+  - when paid;
+  - after 30 min;
+  - when the page changes. The start time is kept in `localStorage` `subscription_checkout_started`, so the plans page or My subscription (both are `.pricing_container`) picks the watch up again within the 30 min.
+- **Re-runs:** an app page can run `pricing.js` again, so `pricing_watch` keeps `window.pricing_watch` instead of resetting it.
+- **My subscription and `pricing.js`:** the manage panel loads `pricing.js` too, for Purchase and the watch.
+  - `pricing_init` leaves `.pricing_manage` to `manage.js`, which calls `pricing_purchase_click` and `pricing_watch_resume`. Before, both bound Purchase when both files were on the page, so one click started checkout twice.
+  - `pricing_init` still resumes the watch there, whichever file runs last.
+- **The success page** `/subscription-change/` makes no claim about the plan. Whoever lands on it is told to check the subscription page in the app or to log in.
+
+Check:
+- `grok/tmp/pwa_return_check.php` (CLI);
+- `grok/tmp/pwa_payment_check.js` (Playwright, `MUSIC_TEST_PASS`: checkout, returns, the watch);
+- `grok/tmp/subscription_change_check.js` (the public page, desktop and phone).
+
 Architecture follow-ups: [`stripe_vs_subscription_issues.md`](stripe_vs_subscription_issues.md).
 
 ### Storage after payment (webhook / manage)

@@ -1,5 +1,31 @@
 // Generic subscription pricing (theme via site module extend SCSS)
 
+// "Payment received" after the app's checkout watch (pricing.js pricing_paid_notice); on body, so a page
+// load under it does not remove it
+.pricing_paid_notice {
+	position: fixed;
+	z-index: 200;
+	left: 50%;
+	top: calc(1.6rem + var(--app-inset-top, 0px));
+	transform: translateX(-50%);
+	max-width: calc(100% - 3.2rem);
+	box-sizing: border-box;
+	padding: 1.0rem 2.0rem;
+	border-radius: 0.6rem;
+	font-size: 1.6rem;
+	line-height: 2.2rem;
+	text-align: center;
+	color: #fff;
+	background-color: #2e7d32;
+	box-shadow: 0 0.4rem 1.6rem rgba(0, 0, 0, 0.2);
+	opacity: 1;
+	transition: opacity 0.5s;
+}
+
+.pricing_paid_notice_hide {
+	opacity: 0;
+}
+
 .pricing_container {
 	box-sizing: border-box;
 	padding: 3.0rem 0 4.0rem 0;

@@ -22,6 +22,19 @@ class pricing extends \Controller {
 
 		}
 
+		// The app's plans page asks this every few seconds while a checkout it started is open
+		if ($do === 'paid_status'){
+
+			$this->load->model('subscription/subscription_model');
+			$user_id = (int)($_SESSION['user']['cms_page_panel_id'] ?? $_SESSION['user']['user_id'] ?? 0);
+
+			print(json_encode($user_id > 0
+					? ['ok' => 1, 'paid' => $this->subscription_model->user_has_paid_subscription($user_id) ? 1 : 0]
+					: ['ok' => 0, 'paid' => 0]));
+			exit();
+
+		}
+
 		if ($do === 'browser_open'){
 
 			$this->load->model('subscription/subscription_model');

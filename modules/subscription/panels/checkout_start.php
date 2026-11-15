@@ -85,7 +85,10 @@ class checkout_start extends \Controller {
 			exit();
 		}
 
-		$urls = $this->subscription_model->get_checkout_return_urls();
+		// The installed web app posts its shell root, so Stripe returns into it
+		$urls = $this->subscription_model->get_checkout_return_urls(
+				$this->subscription_model->app_web_root($params['app_root_url'] ?? '')
+		);
 
 		// Provider panels read cms_do; do kept for providers in modules not yet converted
 		$provider_params = [

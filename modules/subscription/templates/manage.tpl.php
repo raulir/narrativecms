@@ -21,7 +21,9 @@
 		data-auto_currency_id="0"
 		data-checkout_missing_message="<?= $checkout_missing_message ?>"
 		data-checkout_error_message="<?= $checkout_error_message ?>"
-		data-manage_updating="<?= $manage_updating_label ?>">
+		data-manage_updating="<?= $manage_updating_label ?>"
+		data-paid_message="<?= htmlspecialchars((string)($paid_message ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+		data-manage_url="<?= htmlspecialchars((string)($manage_url ?? ''), ENT_QUOTES, 'UTF-8') ?>">
 
 	<div class="pricing_content">
 

@@ -12,7 +12,9 @@
 		data-auto_product_id="<?= $auto_product_id ?>"
 		data-auto_currency_id="<?= $auto_currency_id ?>"
 		data-checkout_missing_message="<?= $checkout_missing_message ?>"
-		data-checkout_error_message="<?= $checkout_error_message ?>">
+		data-checkout_error_message="<?= $checkout_error_message ?>"
+		data-paid_message="<?= htmlspecialchars((string)($paid_message ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+		data-manage_url="<?= htmlspecialchars((string)($manage_url ?? ''), ENT_QUOTES, 'UTF-8') ?>">
 
 	<div class="pricing_content">
 

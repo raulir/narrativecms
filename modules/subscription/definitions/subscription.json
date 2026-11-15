@@ -108,6 +108,20 @@
 		},
 		{
 			"type": "text",
+			"name": "paid_message",
+			"label": "App: payment received",
+			"default": "Payment received",
+			"help": "Shown on the app's plans page when the checkout it opened has been paid",
+			"translate": "1"
+		},
+		{
+			"type": "link",
+			"name": "app_success_link",
+			"label": "Web app: checkout success page",
+			"help": "Where Stripe returns after paying from the installed web app, on the website. Use a public page (e.g. /subscription-change/): that browser tab is not signed in. Empty → My subscription page inside the web app."
+		},
+		{
+			"type": "text",
 			"name": "manage_basic_label",
 			"label": "Basic plan name",
 			"default": "Basic",

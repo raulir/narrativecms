@@ -37,7 +37,8 @@ class manage extends \Controller {
 		} else if ($do === 'update_payment_method'){
 			$result = $this->subscription_model->action_update_payment_method(
 					$user_id,
-					(string)($params['return_url'] ?? '')
+					(string)($params['return_url'] ?? ''),
+					$this->subscription_model->app_web_root($params['app_root_url'] ?? '')
 			);
 		} else {
 			$result = $this->subscription_model->action_change_plan(
@@ -55,6 +56,8 @@ class manage extends \Controller {
 	function panel_params($params){
 
 		$this->load->model('subscription/subscription_model');
+		// Purchase and the app's checkout watch live in pricing.js (manage.js calls them)
+		$GLOBALS['_panel_js'][] = 'modules/subscription/js/pricing.js';
 		$cid = (int)($params['currency_id'] ?? 0);
 		if ($cid > 0){
 			$params['active_currency_override'] = $cid;

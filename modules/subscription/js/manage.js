@@ -215,6 +215,11 @@ function manage_init($root){
 				'cms_do': 'update_payment_method',
 				'return_url': window.location.pathname + window.location.search,
 			}
+			// The installed web app: the page path the backend knows, and the shell root to come back into
+			if (window._cms_inapp && !window.AppSplash && typeof cms_app_root === 'function'){
+				data.return_url = cms_app_strip_root(window.location.pathname) + window.location.search
+				data.app_root_url = location.origin + cms_app_root()
+			}
 			var pid = manage_panel_id($container)
 			if (pid){
 				data.cms_page_panel_id = pid
@@ -244,6 +249,11 @@ function manage_init($root){
 		// Async re-check CMS vs Stripe
 		if (String($container.attr('data-user_logged_in') || '') === '1'){
 			manage_sync($container)
+		}
+
+		// A checkout started from the app: watch until it is paid (pricing.js)
+		if (typeof pricing_watch_resume === 'function'){
+			pricing_watch_resume($container)
 		}
 
 	})

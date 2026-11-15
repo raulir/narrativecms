@@ -14,7 +14,7 @@ function logout_return_to_app(){
 			email: email,
 			session_id: ''
 		}))
-		window.location.href = window.location.origin + '/'
+		window.location.href = window.location.origin + ((typeof cms_app_root === 'function') ? cms_app_root() : '/')
 	}
 
 	var job = (typeof music_offline_drop_account === 'function')

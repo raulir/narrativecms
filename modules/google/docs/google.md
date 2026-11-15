@@ -18,7 +18,7 @@ One Play subscription has a monthly base plan and an annual base plan. Each **Go
 
 ## App choice
 
-In the Play app, Purchase asks **Google Play** or **ScoreTutor (Stripe)** only when Play Billing is connected and that card has a Play product id. Otherwise it still opens Stripe in the browser. The screen is drawn by `musicapp/www/js/billing.js`. The token comes from Play’s billing-choice API, which keeps Google Play available beside the website. A Play purchase is stored only when Google says it is active, the product matches the card, and the account matches this user. It is acknowledged only after that confirm. An inactive Play token does not remove a Stripe subscription. The website and `musicwrap.localhost` still open Stripe directly.
+In the Play app (the native bridge `AppSplash` is there), Purchase asks **Google Play** or **ScoreTutor (Stripe)** only when Play Billing is connected and that card has a Play product id. Otherwise it still opens Stripe in the browser. The screen is drawn by `modules/music/app/js/billing.js`. The token comes from Play’s billing-choice API, which keeps Google Play available beside the website. A Play purchase is stored only when Google says it is active, the product matches the card, and the account matches this user. It is acknowledged only after that confirm. An inactive Play token does not remove a Stripe subscription. The website, the installed web app and `musicwrap.localhost` (in-app pages without the bridge) never offer Google Play: they open Stripe Checkout directly (`subscription.md` § The installed web app).
 
 ScoreTutor (Stripe) asks Play for an external-transaction token and saves user meta `google_transaction` as one JSON object:
 
