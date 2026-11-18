@@ -46,8 +46,12 @@
 								}
 							?>></div>
 							<div class="cart_popup_item_heading"><?= $item['heading'] ?></div>
-							<div class="cart_popup_item_number"><?= $item['number'] ?></div>
 							<div class="cart_popup_item_text"><?php if ($item['dims'] !== ''): ?><div class="cart_popup_item_dims"><?= $item['dims'] ?></div><?php endif ?><?php if ($item['attributes']): ?><div class="cart_popup_item_customisation"><?= $customisation_label ?><?php foreach ($item['attributes'] as $attribute): ?><br><?= $attribute['key'] ?>: <?= $attribute['value'] ?><?php endforeach ?></div><?php elseif ($item['description'] !== ''): ?><div class="cart_popup_item_customisation"><?= nl2br($item['description']) ?></div><?php endif ?></div>
+							<div class="cart_popup_item_quantity" data-line_id="<?= $item['line_id'] ?>" data-quantity="<?= (int)$item['number'] ?>">
+								<div class="cart_popup_item_minus"><?= $quantity_minus_label ?></div>
+								<div class="cart_popup_item_number"><?= $item['number'] ?></div>
+								<div class="cart_popup_item_plus"><?= $quantity_plus_label ?></div>
+							</div>
 							<div class="cart_popup_item_amount"><?= $item['amount'] ?></div>
 							<div class="cart_popup_item_delete" data-line_id="<?= $item['line_id'] ?>"><?= $delete_label ?></div>
 							<?php if ($item['notice'] !== ''): ?>
@@ -63,6 +67,9 @@
 					<div class="cart_popup_total_label"><?= $total_label ?></div>
 					<div class="cart_popup_total_amount"><?= $cart['total'] ?></div>
 				</div>
+				<?php if ($cart['vat'] !== ''): ?>
+					<div class="cart_popup_vat"><?= $cart['vat'] ?></div>
+				<?php endif ?>
 				<?php if ($note !== ''): ?>
 					<div class="cart_popup_note"><?= $note ?></div>
 				<?php endif ?>

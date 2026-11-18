@@ -588,54 +588,6 @@ class shop_dim_model extends \Model {
 
 	}
 
-	function cartesian_items_for_type($type){
-
-		$sets = [];
-		foreach ($this->type_dim_panels($type) as $dim){
-			$vals = [];
-			foreach (($dim['values'] ?? []) as $v){
-				$vid = (string)($v['id'] ?? '');
-				if ($vid !== ''){
-					$vals[] = $vid;
-				}
-			}
-			if (!$vals){
-				return [];
-			}
-			$sets[] = ['did' => (int)$dim['cms_page_panel_id'], 'values' => $vals];
-		}
-		if (!$sets){
-			return [];
-		}
-
-		$combos = [[]];
-		foreach ($sets as $set){
-			$next = [];
-			foreach ($combos as $combo){
-				foreach ($set['values'] as $vid){
-					$row = $combo;
-					$row[] = ['product_dim_id' => $set['did'], 'value' => $vid];
-					$next[] = $row;
-				}
-			}
-			$combos = $next;
-		}
-
-		$items = [];
-		$i = 0;
-		foreach ($combos as $dims){
-			$i++;
-			$items[] = [
-					'cms_page_panel_id' => 'local-'.$i,
-					'number' => 0,
-					'price' => '',
-					'dims' => $dims,
-			];
-		}
-		return $items;
-
-	}
-
 	function find_master_item($product_id, $dims_map){
 
 		$want = $this->normalize_dims_map($dims_map);
@@ -980,78 +932,6 @@ class shop_dim_model extends \Model {
 
 		$v = $type['allow_sale_when_not_in_stock'] ?? '0';
 		return $v === '1' || $v === 1 || $v === true || $v === 'yes';
-
-	}
-
-	/**
-	 * Legacy. Storefront is shop/product via get_product_presentation.
-	 * Kept for shop/productdims.
-	 */
-	function get_product_dim_variations($product_id, $params = []){
-
-		$this->load->model('cms/cms_page_panel_model');
-		$product = $this->cms_page_panel_model->get_cms_page_panel($product_id);
-		$type = $this->resolve_product_type($product);
-		$filter = is_array($params['dims'] ?? null) ? $params['dims'] : [];
-		$items = $this->get_master_items($product_id);
-		if (!$items && ($type['stock_control'] ?? 'none') !== 'count'){
-			$items = $this->cartesian_items_for_type($type);
-		}
-
-		$return = [];
-		foreach ($items as $item){
-			$map = $this->item_dims_map($item);
-			if ($filter){
-				$ok = true;
-				foreach ($filter as $fk => $fv){
-					$did = (int)$fk;
-					if ($did <= 0){
-						$dim = $this->get_dim_by_id_slug($fk);
-						$did = (int)($dim['cms_page_panel_id'] ?? 0);
-					}
-					if ($did <= 0 || strtolower((string)($map[$did] ?? '')) !== strtolower((string)$fv)){
-						$ok = false;
-						break;
-					}
-				}
-				if (!$ok){
-					continue;
-				}
-			}
-
-			$price = !empty($item['price']) ? $item['price'] : ($product['price'] ?? 0);
-			foreach ($map as $did => $val){
-				$dim = $this->cms_page_panel_model->get_cms_page_panel($did);
-				$slug = !empty($dim['id']) ? $dim['id'] : (string)$did;
-				if (empty($return[$slug])){
-					$return[$slug] = [];
-				}
-				if (empty($return[$slug][$val])){
-					$return[$slug][$val] = [
-							'data' => $this->get_dim_value_data($did, $val),
-							'count' => 0,
-							'items' => [],
-							'availability' => [],
-					];
-				}
-				$return[$slug][$val]['count'] += (int)($item['number'] ?? 0);
-				$return[$slug][$val]['items'][$item['cms_page_panel_id']] = $price;
-				foreach ($map as $odid => $oval){
-					if ((int)$odid === (int)$did){
-						continue;
-					}
-					$odim = $this->cms_page_panel_model->get_cms_page_panel($odid);
-					$oslug = !empty($odim['id']) ? $odim['id'] : (string)$odid;
-					$return[$slug][$val]['availability'][$oslug][$oval] = true;
-				}
-			}
-		}
-
-		foreach ($return as &$dim_data){
-			ksort($dim_data);
-		}
-
-		return $return;
 
 	}
 

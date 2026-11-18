@@ -1,5 +1,5 @@
 {
-	"ajax": {"output": ["cms","ok","quantity","changed","closed","redirect","cart_details","checkout_ready","lost_item_ids","price_changed_lines"]},
+	"ajax": {"input": ["cms","product_id","product_item_id","quantity","dims","attributes","line_id","value","cart_details"], "output": ["cms","ok","quantity","changed","closed","redirect","cart_details","checkout_ready","lost_item_ids","price_changed_lines"]},
 	"label": "Cart",
 	"description": "Basic shop cart (badge + popup). Site modules extend for design.",
 	"item": [],
@@ -53,6 +53,20 @@
 			"name": "delete_label",
 			"label": "Remove",
 			"default": "Remove"
+		},
+		{
+			"type": "text",
+			"name": "quantity_minus_label",
+			"label": "Quantity minus",
+			"default": "−",
+			"help": "Cart line control: one less. At 1 it removes the line."
+		},
+		{
+			"type": "text",
+			"name": "quantity_plus_label",
+			"label": "Quantity plus",
+			"default": "+",
+			"help": "Cart line control: one more, when stock allows."
 		},
 		{
 			"type": "text",

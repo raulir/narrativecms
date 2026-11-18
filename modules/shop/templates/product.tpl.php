@@ -14,7 +14,12 @@
 		<div class="product_copy">
 
 			<div class="product_heading"><?= $heading ?></div>
-			<div class="product_price" data-price_prefix="<?= $price_prefix ?>"><?= $price_display ?></div>
+			<div class="product_price_block">
+				<div class="product_price" data-price_prefix="<?= $price_prefix ?>"><?= $price_display ?></div>
+				<?php if ($vat_note !== ''): ?>
+					<div class="product_vat"><?= $vat_note ?></div>
+				<?php endif ?>
+			</div>
 
 			<div class="product_dims">
 				<?php foreach (($dims ?? []) as $dimension): ?>

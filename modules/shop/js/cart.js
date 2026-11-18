@@ -20,17 +20,23 @@ function cart_set_badge(quantity){
 	// Desktop and mobile badge both carry .cart_quantity
 	$container.find('.cart_quantity').html(quantity)
 
-	var $header_count = $('.header_cart_count')
-	if ($header_count.length){
-		$header_count.text(quantity > 0 ? ' (' + quantity + ')' : '')
+}
+
+// Action reply body: the panel's returned keys are under result; a panel error text arrives as cms_error.
+function cart_reply(result){
+
+	var body = (result && result.result) ? result.result : (result || {})
+	if (body.cms_error && !body.error){
+		body.error = body.cms_error
 	}
+	return body
 
 }
 
 function cart_close(){
 
 	$('.cart_container').removeClass('cart_visible')
-	get_ajax_panel(cart_panel_name(), {'cms_do': 'set_visible', 'value': '0'})
+	get_ajax(cart_panel_name(), {'cms_do': 'set_visible', 'value': '0'})
 
 }
 
@@ -116,12 +122,8 @@ function cart_add_items(items, attributes){
 	}
 
 	return new Promise(function(resolve){
-		get_ajax_panel(cart_panel_name(), data, function(result){
-			// panel_action may return raw json (ok/quantity) without full panel wrap
-			var body = result
-			if (result && result.result && result.result.ok !== undefined){
-				body = result.result
-			}
+		get_ajax(cart_panel_name(), data).then(function(result){
+			var body = cart_reply(result)
 			if (body && body.ok){
 				cart_set_badge(body.quantity || 0)
 				if (cart_is_open()){
@@ -133,7 +135,9 @@ function cart_add_items(items, attributes){
 				resolve(body)
 				return
 			}
-			resolve({'ok': 0, 'error': (body && body.error) ? body.error : $('.cart_container').data('add_error')})
+			resolve({'ok': 0, 'error': body.error || $('.cart_container').data('add_error')})
+		}).catch(function(){
+			resolve({'ok': 0, 'error': $('.cart_container').data('add_error')})
 		})
 	})
 
@@ -160,6 +164,41 @@ function cart_remove_line(line_id){
 }
 
 /**
+ * − / + on a cart line. The server checks stock (more) and re-renders the popup; a refused + shows the
+ * stock text on that line. One request at a time (cart_loading), so a double click does not count twice.
+ */
+function cart_set_quantity(line_id, quantity){
+
+	var $c = $('.cart_container')
+	if ($c.hasClass('cart_loading')){
+		return Promise.resolve(null)
+	}
+	$c.addClass('cart_loading')
+
+	return new Promise(function(resolve){
+		get_ajax_panel(cart_panel_name(), {
+			'cms_do': 'set_quantity',
+			'line_id': line_id,
+			'quantity': quantity,
+			'cart_details': 1,
+		}).then(function(result){
+			var html = result && result.result && (result.result.cms_html || result.result.html)
+			if (html){
+				cart_replace_html(html, true)
+				cart_set_badge(parseInt($('.cart_container').data('cart_quantity'), 10) || 0)
+			} else {
+				$c.removeClass('cart_loading')
+			}
+			resolve(result)
+		}).catch(function(){
+			$c.removeClass('cart_loading')
+			resolve(null)
+		})
+	})
+
+}
+
+/**
  * Status-only reconcile with checkout provider (e.g. Shopify cart gone after pay).
  * Never imports remote lines into the site cart.
  */
@@ -180,13 +219,11 @@ function cart_reconcile(){
 		return
 	}
 
-	get_ajax_panel(panel, {
+	// An action call: no panel HTML is wanted (a provider may have no template).
+	get_ajax(panel, {
 		'cms_do': 'reconcile',
-	}, function(result){
-		var body = result
-		if (result && result.result && (result.result.changed !== undefined || result.result.ok !== undefined)){
-			body = result.result
-		}
+	}).then(function(result){
+		var body = cart_reply(result)
 		if (body && body.changed){
 			cart_set_badge(body.quantity || 0)
 			if (cart_is_open()){
@@ -254,16 +291,11 @@ function cart_checkout_provider(panel){
 
 	var $c = $('.cart_container')
 
-	get_ajax_panel(panel, {
+	get_ajax(panel, {
 		'cms_do': 'shop_checkout',
-	}, function(result){
+	}).then(function(result){
 		$c.removeClass('cart_checkout_loading')
-		var body = result
-		if (result && result.result){
-			if (result.result.redirect || result.result.ok !== undefined || result.result.changed !== undefined){
-				body = result.result
-			}
-		}
+		var body = cart_reply(result)
 		// Previous remote checkout finished while user was away
 		// Previous remote checkout finished while user was away: show the emptied cart, then the provider's message.
 		if (body && body.closed && body.changed){
@@ -277,7 +309,10 @@ function cart_checkout_provider(panel){
 			window.location.href = body.redirect
 			return
 		}
-		cart_show_message((body && body.error) ? body.error : $c.data('checkout_error'))
+		cart_show_message(body.error || $c.data('checkout_error'))
+	}).catch(function(){
+		$c.removeClass('cart_checkout_loading')
+		cart_show_message($c.data('checkout_error'))
 	})
 
 }
@@ -294,10 +329,23 @@ function cart_init($root){
 		cart_remove_line($(this).data('line_id'))
 	})
 
+	// − at 1 removes the line, the same as Remove
+	$(document).on('click.cms_cart', '.cart_popup_item_minus, .cart_popup_item_plus', function(){
+		var $q = $(this).closest('.cart_popup_item_quantity')
+		var quantity = (parseInt($q.data('quantity'), 10) || 1) + ($(this).hasClass('cart_popup_item_plus') ? 1 : -1)
+		if (quantity < 1){
+			if (!$('.cart_container').hasClass('cart_loading')){
+				cart_remove_line($q.data('line_id'))
+			}
+			return
+		}
+		cart_set_quantity($q.data('line_id'), quantity)
+	})
+
 	$(document).on('click.cms_cart', '.cart_label', function(e){
 
 		var $t = $(e.target)
-		if ($t.closest('.cart_popup_item_delete,.cart_popup_checkout,.cart_popup_cancel,.cart_close').length){
+		if ($t.closest('.cart_popup_item_delete,.cart_popup_item_quantity,.cart_popup_checkout,.cart_popup_cancel,.cart_close').length){
 			return
 		}
 
@@ -305,7 +353,7 @@ function cart_init($root){
 			cart_close()
 		} else {
 			$('.cart_container').addClass('cart_visible')
-			get_ajax_panel(cart_panel_name(), {'cms_do': 'set_visible', 'value': '1'})
+			get_ajax(cart_panel_name(), {'cms_do': 'set_visible', 'value': '1'})
 			cart_load_details()
 			cart_reconcile()
 		}

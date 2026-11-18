@@ -244,52 +244,8 @@
 			
 			<div class="shop_checkout_tab shop_checkout_tab_payment">
 			
-				<?php if (!empty($topay) && !empty($delivery_meta) && empty($address_error)): ?>
-				
-				
-					<?php _panel('stripe/payment', []) ?>
-				
-				
-					<?php /*
-						if(empty($is_live)):
-							$url = 'https://secure-test.worldpay.com/wcc/purchase?instId=1410061'.
-									'&cartId=' . $order['number'] .
-									'&amount=' . $topay .
-									'&currency=GBP' .
-									'&hideCurrency=true' .
-									'&lang=en' .
-									'&noLanguageMenu=true' .
-									'&testMode=100' .
-									'&address1=' . urlencode($delivery_meta['address1']) .
-									(!empty($delivery_meta['address2']) ? ('&address2=' . urlencode($delivery_meta['address2'])) : '') .
-									(!empty($delivery_meta['address3']) ? ('&address3=' . urlencode($delivery_meta['address3'])) : '') .
-									'&postcode=' . urlencode($delivery_meta['postcode']) .
-									'&country=' . urlencode($delivery_meta['country']) .
-									'&town=' . urlencode($delivery_meta['county']) .
-									'&email=' . urlencode($delivery_meta['email']);
-						else:
-							$url = 'https://secure.worldpay.com/wcc/purchase?instId=1410061'.
-									'&cartId=' . $order['number'] .
-									'&amount=' . $topay .
-									'&currency=GBP' .
-									'&hideCurrency=true' .
-									'&lang=en' .
-									'&noLanguageMenu=true' .
-									'&testMode=0' .
-									'&address1=' . urlencode($delivery_meta['address1']) .
-									(!empty($delivery_meta['address2']) ? ('&address2=' . urlencode($delivery_meta['address2'])) : '') .
-									(!empty($delivery_meta['address3']) ? ('&address3=' . urlencode($delivery_meta['address3'])) : '') .
-									'&postcode=' . urlencode($delivery_meta['postcode']) .
-									'&country=' . urlencode($delivery_meta['country']) .
-									'&town=' . urlencode($delivery_meta['county']) .
-									'&email=' . urlencode($delivery_meta['email']);
-						endif;
-					?>
-			
-					<iframe class="shop_checkout_iframe" width="780" height="500" 
-							src="<?= $url ?>"></iframe> */ ?>
-							
-				<?php else: ?>
+				<?php // Payment is not wired here yet: see shop/docs/todo.md "On-site checkout rework". ?>
+				<?php if (empty($topay) || empty($delivery_meta) || !empty($address_error)): ?>
 				
 					<div class="shop_checkout_tab_error"><?= $nopay_label ?></div>
 				

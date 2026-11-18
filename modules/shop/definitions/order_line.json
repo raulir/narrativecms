@@ -61,6 +61,14 @@
 			"help": "Fulfilment of this line. The order status is rolled up from these."
 		},
 		{
+			"type": "datetime",
+			"name": "stock_returned_time",
+			"label": "Returned to stock",
+			"format": "timestamp",
+			"readonly": "1",
+			"help": "When this line's quantity was put back into the variant's listed stock (order page, Return to stock, finished orders only). Empty: not returned."
+		},
+		{
 			"type": "text",
 			"name": "dimension",
 			"label": "Dimension",

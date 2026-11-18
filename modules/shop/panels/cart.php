@@ -24,22 +24,20 @@ class cart extends \Controller{
 
 		if ($do == 'set_visible'){
 			$_SESSION['shop']['cart_visible'] = (($params['value'] ?? '') === '1') ? '1' : '0';
-			print(json_encode(['ok' => '1']));
-			exit();
+			return ['ok' => 1] + $params;
 		}
 
 		// Cart opened, or Checkout clicked: current prices, stock and hold, then panel_params renders.
 		// checkout_check marks the reply ready only when nothing changed (cart.js then calls the provider).
 		if ($do == 'open' || $do == 'checkout_check'){
-			$params['price_changed_lines'] = [];
-			$params['lost_item_ids'] = [];
+			$check = ['price_changed_lines' => [], 'lost_item_ids' => [], 'ready' => true];
 			$order = $this->shop_model->get_current_order_if_any($user);
 			if (!empty($order['cms_page_panel_id'])){
-				$this->load->model('shop/shop_dim_model');
-				$params['price_changed_lines'] = $this->shop_model->refresh_line_prices($order['cms_page_panel_id']);
-				$params['lost_item_ids'] = $this->shop_dim_model->cart_refresh_hold($order['cms_page_panel_id']);
+				$check = $this->shop_model->checkout_check($order['cms_page_panel_id']);
 			}
-			$params['checkout_ready'] = ($do == 'checkout_check' && !$params['price_changed_lines'] && !$params['lost_item_ids']) ? 1 : 0;
+			$params['price_changed_lines'] = $check['price_changed_lines'];
+			$params['lost_item_ids'] = $check['lost_item_ids'];
+			$params['checkout_ready'] = ($do == 'checkout_check' && $check['ready']) ? 1 : 0;
 			$params['cart_details'] = 1;
 			return $params;
 		}
@@ -52,6 +50,8 @@ class cart extends \Controller{
 			$product_id = (int)($params['product_id'] ?? 0);
 			$product_item_id = (int)($params['product_item_id'] ?? 0);
 			$qty = max(1, (int)($params['quantity'] ?? 1));
+			// The reply's quantity is always the cart total, never the posted value echoed back.
+			$params['quantity'] = $this->shop_model->get_order_quantity($order['cms_page_panel_id']);
 			$attributes = $params['attributes'] ?? [];
 			$dims = $params['dims'] ?? [];
 			if (is_string($dims)){
@@ -82,15 +82,13 @@ class cart extends \Controller{
 
 			// Every line is a storefront product item; no item means no line.
 			if ($product_item_id <= 0 || ($shopify_product && $variant_id === '')){
-				print(json_encode(['ok' => 0, 'error' => $params['missing_variant_error']]));
-				exit();
+				return ['ok' => 0, 'error' => $params['missing_variant_error']] + $params;
 			}
 
 			if ($adding_local){
 				// Same rule as cart_refresh_hold: other orders' holds vs this cart's qty plus the new qty.
 				if (!$this->shop_dim_model->cart_add_fits($item_row, $qty, (int)$order['cms_page_panel_id'])){
-					print(json_encode(['ok' => 0, 'error' => $params['stock_error']]));
-					exit();
+					return ['ok' => 0, 'error' => $params['stock_error']] + $params;
 				}
 				$this->shop_model->create_order_line($order['cms_page_panel_id'], [
 						'product_item_id' => $product_item_id,
@@ -110,11 +108,24 @@ class cart extends \Controller{
 
 			$this->shop_dim_model->cart_refresh_hold($order['cms_page_panel_id']);
 			$quantity = $this->shop_model->get_order_quantity($order['cms_page_panel_id']);
-			print(json_encode([
-					'ok' => 1,
-					'quantity' => $quantity,
-			]));
-			exit();
+			return ['ok' => 1, 'quantity' => $quantity] + $params;
+
+		}
+
+		// − / + on a cart line (only the visitor's own cart); "Not enough in stock" goes on that line.
+		if ($do == 'set_quantity'){
+
+			$order = $this->shop_model->get_current_order_if_any($user);
+			$line_id = (int)($params['line_id'] ?? 0);
+			if (!empty($order['cms_page_panel_id']) && $line_id){
+				$result = $this->shop_model->set_order_line_quantity($order['cms_page_panel_id'], $line_id, (int)($params['quantity'] ?? 0));
+				$params['lost_item_ids'] = $result['lost_item_ids'];
+				if ($result['error'] === 'stock'){
+					$params['quantity_error_line'] = $line_id;
+				}
+			}
+			$params['cart_details'] = 1;
+			return $params;
 
 		}
 
@@ -175,38 +186,25 @@ class cart extends \Controller{
 		$this->load->model('shop/shop_dim_model');
 		$params['cart_details'] = 1;
 		$params['cart']['items'] = [];
-		$total = 0.0;
-		$total_currency = null;
-		$mixed_currency = false;
 		// Set by do=open / checkout_check / remove; absent on a plain render.
 		$lost_item_ids = $params['lost_item_ids'] ?? [];
 		$price_changed_lines = $params['price_changed_lines'] ?? [];
 
+		// Amounts, quantities and dims text come from the payable order (the same data the payment provider gets).
+		$payable = $this->shop_model->get_payable_order($order_id);
+		$pay_lines = array_column($payable['lines'], null, 'line_id');
+
 		foreach ($lines as $line){
 
-			$qty = (int)$line['quantity'];
-			$line_total = (float)$line['price'] * $qty;
-			$currency_id = (int)$line['currency_id'];
-			$currency = $currency_id > 0 ? $this->shop_model->get_currency($currency_id) : $this->shop_model->get_shop_currency();
-			$currency_key = is_array($currency) ? (int)$currency['cms_page_panel_id'] : 0;
-			if ($total_currency === null){
-				$total_currency = $currency;
-				$total = $line_total;
-			} else if ((int)($total_currency['cms_page_panel_id'] ?? 0) === $currency_key){
-				$total += $line_total;
-			} else {
-				$mixed_currency = true;
-			}
-
-			$dims = '';
+			$pay = $pay_lines[(int)$line['cms_page_panel_id']];
+			$dims = $pay['dims'];
 			$warning = '';
-			$item_id = $this->shop_model->order_line_item_id($line);
-			if ($item_id > 0){
-				$item = $this->cms_page_panel_model->get_cms_page_panel($item_id);
-				$dims = $this->shop_dim_model->dims_description($item);
-				if (in_array($item_id, $lost_item_ids, true)){
-					$warning = str_replace('{{item}}', $this->shop_dim_model->item_list_title($item), $params['unavailable_item_warning']);
-				}
+			if (in_array($pay['item_id'], $lost_item_ids, true)){
+				$item = $this->cms_page_panel_model->get_cms_page_panel($pay['item_id']);
+				$warning = str_replace('{{item}}', $this->shop_dim_model->item_list_title($item), $params['unavailable_item_warning']);
+			} else if ((int)($params['quantity_error_line'] ?? 0) === (int)$line['cms_page_panel_id']){
+				// Set by do=set_quantity when + asked for more than the stock
+				$warning = $params['stock_error'];
 			}
 
 			// Stored attributes are the cleaned { key, value } list (clean_line_attributes).
@@ -228,8 +226,8 @@ class cart extends \Controller{
 					'line_id' => (int)$line['cms_page_panel_id'],
 					'heading' => $line['item'],
 					'image' => $line['image'],
-					'number' => $qty,
-					'amount' => $this->shop_model->format_amount($line_total, $currency),
+					'number' => $pay['quantity'],
+					'amount' => $this->shop_model->format_amount($pay['total'], $pay['currency_row']),
 					'dims' => $dims,
 					'attributes' => $attributes,
 					'description' => ($dims === '' && !$attributes) ? (string)$line['description'] : '',
@@ -239,7 +237,9 @@ class cart extends \Controller{
 
 		}
 
-		$params['cart']['total'] = $mixed_currency ? '' : $this->shop_model->format_amount($total, $total_currency);
+		$params['cart']['total'] = $payable['mixed_currency'] ? '' : $this->shop_model->format_amount($payable['total'], $payable['currency_row']);
+		// VAT line under the total (Shop settings → VAT); none for a mixed-currency cart
+		$params['cart']['vat'] = $payable['mixed_currency'] ? '' : $this->shop_model->vat_text('cart', $payable['total'], $payable['currency_row']);
 
 		return $params;
 

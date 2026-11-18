@@ -54,6 +54,14 @@
 		},
 		{
 			"type": "datetime",
+			"name": "cart_hold_until",
+			"label": "Cart held until",
+			"format": "timestamp",
+			"readonly": "1",
+			"help": "Set by the checkout provider while a payment page is open: the draft cart reserves its stock at least until then."
+		},
+		{
+			"type": "datetime",
 			"name": "order_created",
 			"label": "Order created",
 			"format": "timestamp",
@@ -93,6 +101,7 @@
 				"pending": "Pending",
 				"partially_paid": "Partially paid",
 				"paid": "Paid",
+				"partially_refunded": "Partially refunded",
 				"refunded": "Refunded",
 				"voided": "Voided"
 			},
@@ -107,12 +116,65 @@
 			"help": "When every payable line had a fulfilment request queued."
 		},
 		{
+			"type": "text",
+			"name": "tracking_number",
+			"label": "Tracking number",
+			"help": "Set on the order page when the order is set Fulfilled; printed in the dispatch email."
+		},
+		{
+			"type": "datetime",
+			"name": "dispatch_email_time",
+			"label": "Dispatch email sent",
+			"format": "timestamp",
+			"readonly": "1",
+			"help": "When the dispatch email to the buyer was queued. Empty: not sent."
+		},
+		{
 			"type": "datetime",
 			"name": "stock_posted_time",
 			"label": "Stock posted",
 			"format": "timestamp",
 			"readonly": "1",
 			"help": "When listed product_item.number was reduced for this finished order. Empty: not posted yet."
+		},
+		{
+			"type": "subtitle",
+			"label": "Payment"
+		},
+		{
+			"type": "text",
+			"name": "payment_provider",
+			"label": "Payment provider",
+			"readonly": "1",
+			"help": "Module that took the payment (e.g. stripe)."
+		},
+		{
+			"type": "text",
+			"name": "payment_ref",
+			"label": "Payment reference",
+			"readonly": "1",
+			"help": "Provider payment id (Stripe: payment intent pi_…)."
+		},
+		{
+			"type": "text",
+			"name": "paid_amount",
+			"label": "Paid amount",
+			"readonly": "1",
+			"help": "Total the provider charged, delivery included, in the order currency."
+		},
+		{
+			"type": "text",
+			"name": "refunded_amount",
+			"label": "Refunded amount",
+			"readonly": "1",
+			"help": "Total refunded so far, as reported by the payment provider (Stripe refund webhook). Empty: no refund."
+		},
+		{
+			"type": "textarea",
+			"name": "payment_note",
+			"label": "Payment note",
+			"readonly": "1",
+			"help": "Set when the payment did not match the cart (amount, currency, or lines changed after checkout started). Check before fulfilling."
 		},
 		{
 			"type": "subtitle",

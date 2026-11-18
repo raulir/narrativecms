@@ -114,12 +114,31 @@ $mobile_width: 900px;
 }
 
 .cart_popup_item_heading,
-.cart_popup_item_number,
+.cart_popup_item_quantity,
 .cart_popup_item_amount,
 .cart_popup_item_text {
 	display: inline-block;
 	vertical-align: top;
 	margin-left: 0.8rem;
+}
+
+// − quantity +: one less (at 1 the line goes) / one more (stock allowing)
+.cart_popup_item_minus,
+.cart_popup_item_number,
+.cart_popup_item_plus {
+	display: inline-block;
+	min-width: 2.0rem;
+	text-align: center;
+	vertical-align: top;
+}
+
+.cart_popup_item_minus,
+.cart_popup_item_plus {
+	user-select: none;
+}
+
+.cart_loading .cart_popup_item_quantity {
+	opacity: 0.5;
 }
 
 // Line notice (price updated) and warning (stock gone), set when the cart is opened or checked out.
@@ -132,6 +151,14 @@ $mobile_width: 900px;
 
 .cart_popup_total {
 	margin: 1.2rem 0;
+}
+
+// VAT line under the total (Shop settings → VAT)
+.cart_popup_vat {
+	margin-top: -0.8rem;
+	margin-bottom: 1.2rem;
+	font-size: 1.2rem;
+	line-height: 1.6rem;
 }
 
 .cart_popup_checkout,

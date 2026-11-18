@@ -169,14 +169,15 @@ function product_init(){
 			}
 
 			// No cart panel on the page (no cart.js): post the add directly.
-			get_ajax_panel('shop/cart', {
+			get_ajax('shop/cart', {
 				'cms_do': 'add',
 				'product_id': items[0].product_id,
 				'product_item_id': items[0].product_item_id,
 				'quantity': 1,
 				'dims': JSON.stringify(dims)
-			}, function(result){
-				product_show_add_result($box, result && result.result ? result.result : result)
+			}).then(function(result){
+				var body = (result && result.result) || {}
+				product_show_add_result($box, {'ok': body.ok, 'error': body.cms_error})
 			})
 
 		})

@@ -60,10 +60,20 @@
 	margin-bottom: 1.0rem;
 }
 
+// Price and the VAT line under it (Shop settings → VAT)
+.product_price_block {
+	margin-bottom: 2.0rem;
+}
+
 .product_price {
 	font-size: 2.0rem;
 	line-height: 2.4rem;
-	margin-bottom: 2.0rem;
+}
+
+.product_vat {
+	margin-top: 0.4rem;
+	font-size: 1.2rem;
+	line-height: 1.6rem;
 }
 
 .product_dim {

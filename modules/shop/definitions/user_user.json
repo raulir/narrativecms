@@ -1,0 +1,49 @@
+{
+	"item": [
+		{
+			"type": "subtitle",
+			"label": "Shop",
+			"help": "Delivery details from the user's latest paid order. Same fields as on the order."
+		},
+		{
+			"type": "text",
+			"name": "shipping_name",
+			"label": "Delivery name"
+		},
+		{
+			"type": "text",
+			"name": "shipping_address1",
+			"label": "Address"
+		},
+		{
+			"type": "text",
+			"name": "shipping_address2",
+			"label": "Address 2"
+		},
+		{
+			"type": "text",
+			"name": "shipping_city",
+			"label": "City"
+		},
+		{
+			"type": "text",
+			"name": "shipping_postcode",
+			"label": "Postcode"
+		},
+		{
+			"type": "text",
+			"name": "shipping_county",
+			"label": "County"
+		},
+		{
+			"type": "text",
+			"name": "shipping_country",
+			"label": "Country"
+		},
+		{
+			"type": "text",
+			"name": "shipping_phone",
+			"label": "Delivery phone"
+		}
+	]
+}

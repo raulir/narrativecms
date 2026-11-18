@@ -216,6 +216,8 @@ class product extends \Controller {
 
 		$currency = $this->shop_model->get_default_currency();
 		$params['price_prefix'] = is_array($currency) ? (string)($currency['sign'] ?? '') : '';
+		// VAT line under the price (Shop settings → VAT): the rate, or the N/A text
+		$params['vat_note'] = $this->shop_model->vat_text('product');
 
 		$images = [];
 		$main = trim((string)($params['image'] ?? ''));

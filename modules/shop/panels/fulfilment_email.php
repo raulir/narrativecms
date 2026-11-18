@@ -48,6 +48,7 @@ class fulfilment_email extends \Controller {
 
 		$this->load->model('cms/cms_email_model');
 		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('shop/shop_model');
 
 		$settings = $this->cms_page_panel_model->get_cms_page_panel_settings('shop/fulfilment_email');
 		if (!is_array($settings)){
@@ -73,6 +74,7 @@ class fulfilment_email extends \Controller {
 				continue;
 			}
 			$ok_emails[$email] = 1;
+			$this->shop_model->log_order((int)($order['cms_page_panel_id'] ?? 0), 'Fulfilment request email sent to '.$email);
 
 		}
 
