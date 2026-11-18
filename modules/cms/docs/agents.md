@@ -27,13 +27,13 @@ Host JSON `dir.cache` / `dir.tmp` / `dir.log` (defaults: project `cache/`, `tmp/
 
 | Need | Put it here |
 |------|-------------|
-| Agent / dev helpers (CLI, smoke) | Project **`grok/`** |
+| Agent / dev helpers (CLI, smoke) | Project **`ai/`** |
 | Public packed CSS/JS | **`cache/`** |
 | Private generated artefacts | **`tmp/`** |
 | Logs | **`log/`** |
 | Real product code | `modules/`, `system/` |
 
-**Agent one-off files** (scripts, dumps, profiles, tool output) go under project-root `grok/` (gitignored). Prefer `grok/tmp/`, `grok/agent-tools/`, `grok/backup/`, `grok/mcps/`. Do not put them in the project root, `cache/`, `modules/`, `system/`, or a general OS temp folder such as `AppData\Local\Temp`. Do not put production CMS code in `grok/`. Document non-obvious `grok/` tools in `grok/README.md`. **Do not drop a .php in public `cache/`.**
+**Agent one-off files** (scripts, dumps, profiles, tool output) go under project-root `ai/` (gitignored). Prefer `ai/tmp/`, `ai/agent-tools/`, `ai/backup/`, `ai/mcps/`. Do not put them in the project root, `cache/`, `modules/`, `system/`, or a general OS temp folder such as `AppData\Local\Temp`. Do not put production CMS code in `ai/`. Document non-obvious `ai/` tools in `ai/README.md`. **Do not drop a .php in public `cache/`.** **`grok/` is the legacy name:** when a project still has it, move its contents to `ai/`, remove `grok/` and ignore `/ai/` in `.gitignore`.
 
 ---
 
@@ -46,6 +46,25 @@ Answers should be in context of creating new panels (or other functionality) for
 **"Block" and "page panel" mean the same thing:** one `cms_page_panel` row. That is a panel placed on a page, a list item, or a panel's settings row. Code and docs use both words (`admin/cms_page_panel/<id>/` is the block editor).
 
 There were some example panels historically; as this file ships with the project, those aren’t needed — there should be enough examples in the project.
+
+## Plans: big plan and small plan
+
+Larger work is planned in two levels, kept in **one document** in project `ai/` (e.g. `ai/shop_review_2026-11-16.md`):
+
+- **Big plan:** the numbered list of improvements from a review ([`review.md`](review.md)) or a feature breakdown: per item what is wrong, why it matters, the fix, and a **status** (Open, Small plan, Done with date), plus a status table and a suggested order. Each item is one piece the user can pick.
+- **Small plan:** the plan for the one item the user picked: Context (why, what prompted it, the outcome), what the user sees, how it is built (files, functions to reuse), what is left out, Verification (how it is tested end to end). It goes **at the top of the same document, above the big plan**, so both stay together and the small plan can be read against the item it comes from.
+
+**Flow:**
+1. The review or breakdown gives the big plan.
+2. The user picks an item; the small plan is written above it.
+3. The user approves it, then it is implemented.
+4. After that:
+   - the item's status in the big plan becomes Done (date);
+   - the module's `docs/todo.md` entry is ticked;
+   - when the next small plan starts, the finished one moves to its own `ai/small_plan_<topic>.md`, so the document keeps only the current one.
+5. Open big plan items are also in the owning modules' `docs/todo.md`, so they are not only in `ai/`.
+
+The user may ask to "show the big plan": show it with the current statuses, including what changed since it was written.
 
 ## System runtime
 
@@ -151,6 +170,8 @@ The page panel picker (`cms_panel_selector`) lists only entries with **`"placeab
 List-only types live as `modules/<module>/definitions/<name>.json` and a `cms_menu` URL to `admin/cms_list/{module}__{panel}/`. Discovery for lists is the definition files, not `config.json` `panels`.
 
 ## Admin CMS menu (`config.json` → `cms_menu`)
+
+Special admin pages (a list or tool screen that is not a CMS list or a settings form) are methods of `modules/cms/controllers/admin.php`, e.g. `admin/orders/` (`admin::orders`). The page belongs to a module: the module adds the menu item, and the method shows "module not installed" when that module is missing. Its panels check `cms_access_model::cms_user_has_access()` themselves, because their ajax actions do not go through the admin controller. Layout, toolbar, filters, search and rows: [`admin_pages.md`](admin_pages.md).
 
 - Items merge from all modules by **`id`**. Duplicate ids are **merged** (later non-empty fields win; empty does not wipe). Implemented in `cms/cms_menu` (`_menu_merge_item`).
 - Nest with `parent` id; optional `order`, `url`, `access`, `ctrl` (keyboard shortcut digit/letter on top bar).
@@ -272,8 +293,8 @@ If the only need is CSS/JS, prefer definition `"js"` / panel SCSS (or `add_*` fr
 Config access – use `$GLOBALS['config']`:
 
 - `$GLOBALS['config']['base_path']` — CMS installation absolute root (filesystem)
-- Cache: `$GLOBALS['config']['base_path'].'cache/'` — **runtime data only; no executables** (see **`cache/` vs `grok/`** above)
-- Dev/agent scripts: `$GLOBALS['config']['base_path'].'grok/'`
+- Cache: `$GLOBALS['config']['base_path'].'cache/'` — **runtime data only; no executables** (see **`cache/` vs `ai/`** above)
+- Dev/agent scripts: `$GLOBALS['config']['base_path'].'ai/'`
 - Images: `$GLOBALS['config']['upload_path']` (`img/`, public)
 - CMS files (`cms_file`: file inputs, form uploads): `$GLOBALS['config']['data_path']` (`data/<year>/<month>/`, never served). Build a path with `cms_file_model::file_path()`, which refuses a name that would leave the folder; link with `cms_file_url()` / `_lf()` / `_lfd()`: the `cms/file` API (`modules/cms/api/file.php`), the only way to them.
 

@@ -172,6 +172,13 @@
 			"help": "{Single page mode} wraps layout positions and loads only changed positions via ajax on in-site links (SPA-style). Default off."
 		},
 		{
+			"type": "text",
+			"name": "timezone",
+			"label": "Timezone",
+			"default": "",
+			"help": "Site timezone for dates and times (admin, emails, logs), whatever the server runs in. PHP name, e.g. Europe/London||Empty: the server's PHP timezone"
+		},
+		{
 			"type": "select",
 			"name": "mobile_zoom",
 			"label": "Mobile zoom",

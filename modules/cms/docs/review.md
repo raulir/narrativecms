@@ -2,7 +2,7 @@
 
 Repeatable review after a **bigger slice of work** (about **4–16 hours**) or when an **older area** never had this pass. Not for one-line CSS or a single field rename.
 
-Related: [`agents.md`](agents.md), [`cms_module_extends.md`](cms_module_extends.md), [`provider_pattern.md`](provider_pattern.md), [`cms_panel_js.md`](cms_panel_js.md), [`cms_panel_params.md`](cms_panel_params.md), [`cms_input.md`](cms_input.md).
+Related: [`agents.md`](agents.md), [`admin_pages.md`](admin_pages.md) (special admin pages), [`cms_module_extends.md`](cms_module_extends.md), [`provider_pattern.md`](provider_pattern.md), [`cms_panel_js.md`](cms_panel_js.md), [`cms_panel_params.md`](cms_panel_params.md), [`cms_input.md`](cms_input.md).
 
 **Review does not mean implement.** Write findings and todos on the **owning** module. Implement only if asked, except tiny contract fixes (e.g. list-only types out of `config.json` `panels`).
 
@@ -127,5 +127,7 @@ Larger reviews (whole module, go-live) may go slightly over 5; still rank and st
 Write those suggestions into the session plan, up to 5, one numbered block each (what is wrong, why it matters, concrete fix). That plan is what gets commented on. Do not implement the suggestions in the review turn. If nothing should change, the plan says so in one line. Optional one-line “Fine as-is” if a risky area was checked and left.
 
 Then add accepted items to `modules/<owner>/docs/todo.md` (not root `AGENTS.md`) if they are not being implemented in the same turn.
+
+The list is the **big plan**; an item the user picks becomes a **small plan** written above it in the same `ai/` document. See [`agents.md`](agents.md) § Plans: big plan and small plan.
 
 Optional: a short “Architecture” note in that module’s main doc if the map helps the next person.

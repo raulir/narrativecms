@@ -187,9 +187,30 @@ class cms_access_model extends \Model {
 		}
 		
 		return false;
-		
+
 	}
-	
+
+	/**
+	 * CMS admin user (not the site user): logged in and holding $required (empty = any logged-in CMS user).
+	 * Admin-only panels check this themselves, because their actions are reachable over ajax.
+	 */
+	function cms_user_has_access($required = ''){
+
+		if (empty($_SESSION['cms_user']['cms_user_id'])){
+			return false;
+		}
+		if ((string)$required === ''){
+			return true;
+		}
+		foreach ((array)($_SESSION['cms_user']['access'] ?? []) as $key){
+			if ($this->_access_key_matches($key, $required)){
+				return true;
+			}
+		}
+		return false;
+
+	}
+
 	function get_cache_access_hash($panel_name){
 		
 		$required = $this->get_panel_required_access($panel_name);

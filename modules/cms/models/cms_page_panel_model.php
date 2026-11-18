@@ -1868,6 +1868,12 @@ class cms_page_panel_model extends \Model {
 	    }
 		
 		if (!empty($cms_page_panel['panel_name'])) {
+			// The panel's on_delete($row) cleans up what belongs to the row (other rows, tables), whoever deletes it.
+			// Shortcut rows carry a block id as panel_name: no panel to call.
+			$CI =& get_instance();
+			if (strpos($cms_page_panel['panel_name'], '/') !== false && method_exists($CI, 'run_panel_method')){
+				$CI->run_panel_method($cms_page_panel['panel_name'], 'on_delete', $cms_page_panel);
+			}
 			$this->_delete_panel_table_row($cms_page_panel_id, $cms_page_panel['panel_name']);
 		}
 

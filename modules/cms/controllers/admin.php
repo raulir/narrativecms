@@ -49,6 +49,31 @@ class admin extends \Controller {
 		$this->_output('cms/cms_welcome');
 	}
 
+	/**
+	 * Shop orders: admin/orders/ (list) and admin/orders/{id}/ (one order). The panels are in the shop
+	 * module, which also adds the menu item; without shop the page says so.
+	 */
+	function orders($order_id = ''){
+
+		if (!in_array('shop', $GLOBALS['config']['modules'] ?? [], true)){
+			_html_error('Orders: the shop module is not installed', 404);
+			return;
+		}
+
+		$this->load->model('cms/cms_access_model');
+		if (!$this->cms_access_model->cms_user_has_access('shop_orders')){
+			_html_error('Orders: no access (shop_orders)', 403);
+			return;
+		}
+
+		if ((int)$order_id > 0){
+			$this->_output('shop/order_admin', ['order_id' => (int)$order_id]);
+		} else {
+			$this->_output('shop/orders_admin');
+		}
+
+	}
+
 	function pages(){
 		$this->_output('cms/cms_pages');
 	}

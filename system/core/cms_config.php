@@ -155,6 +155,17 @@ function cms_config_load_full(){
 	}
 	unset($_single_page_mode_from_db);
 
+	// Site timezone (CMS settings): all date() output follows it, whatever the server's PHP timezone is.
+	$_timezone = trim((string)($GLOBALS['config']['timezone'] ?? ''));
+	if ($_timezone !== ''){
+		if (in_array($_timezone, timezone_identifiers_list(), true)){
+			date_default_timezone_set($_timezone);
+		} else {
+			error_log('CMS settings: unknown timezone "'.$_timezone.'", server timezone '.date_default_timezone_get().' used');
+		}
+	}
+	unset($_timezone);
+
 	// check if email exists
 	if (empty($GLOBALS['config']['email'])){
 		$GLOBALS['config']['email'] = $_SERVER['SERVER_NAME'].'@narrativecms.com';

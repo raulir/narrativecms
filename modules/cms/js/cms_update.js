@@ -350,7 +350,7 @@ function cms_update_run_pipeline(area, options){
 				var plan = (data.result && data.result.result) ? data.result.result : null
 
 				// Empty success is only a real file list. [] or a missing plan must not confirm or enable.
-				if (!plan || typeof plan !== 'object' || plan.error || !$.isArray(plan.files)){
+				if (!plan || typeof plan !== 'object' || plan.error || !Array.isArray(plan.files)){
 					var reason = (plan && plan.error) ? plan.error : 'unexpected response'
 					$files.html('')
 					cms_update_fail($popup, state, area, 'Could not get the list of files: ' + reason + ' — no files were changed')

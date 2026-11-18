@@ -326,6 +326,11 @@ ul {
 	position: relative;
 }
 
+// Selected toolbar button (current filter, open section). Icon buttons show it on their inner.
+.cms_tool_button.cms_tool_button_active {
+	background-color: #e0e0e0;
+}
+
 .cms_tool_button_inner {
 	position: absolute;
 	width: calc(100% - 0.4rem);
