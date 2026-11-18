@@ -19,12 +19,18 @@ class subscription_checkout extends \Controller {
 			return $params;
 		}
 
+		$return_result = !empty($params['return_result']);
+
+		// Accounts and plans live in the user and subscription modules; without them there is nothing to sell.
+		$this->load->model('stripe/stripe_model');
+		if (!$this->stripe_model->subscriptions_available()){
+			return $this->_respond($this->stripe_model->fail('Subscription checkout called without the user / subscription modules', '', 'Subscriptions are not available'), $return_result, $params);
+		}
+
 		$this->load->model('user/user_model');
 		$this->load->model('shop/shop_model');
-		$this->load->model('stripe/stripe_model');
+		$this->load->model('stripe/stripe_subscription_model');
 		$this->load->model('cms/cms_page_panel_model');
-
-		$return_result = !empty($params['return_result']) || !empty($params['return_result']);
 
 		$user = $this->user_model->get_current();
 		if (empty($user['user_id']) && empty($user['cms_page_panel_id'])){
@@ -91,7 +97,7 @@ class subscription_checkout extends \Controller {
 				'cms_currency_id' => (string)$currency_id,
 		];
 
-		$result = $this->stripe_model->create_subscription_checkout_session(
+		$result = $this->stripe_subscription_model->create_subscription_checkout_session(
 				$user,
 				$stripe_price_id,
 				$success_url,
@@ -111,12 +117,6 @@ class subscription_checkout extends \Controller {
 
 		print(json_encode($result, JSON_UNESCAPED_UNICODE));
 		exit();
-
-	}
-
-	function panel_params($params){
-
-		return $params;
 
 	}
 

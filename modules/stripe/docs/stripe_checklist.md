@@ -1,5 +1,7 @@
 # Stripe setup checklist (subscriptions)
 
+Cart orders (one-off payments): see [§ 8](#8-cart-checkout-one-off-payments) and [`shop_checkout.md`](shop_checkout.md).
+
 Manual Dashboard steps for ScoreTutor / `subscription_checkout`. CMS stores Price ids only; the site creates Checkout Sessions via API.
 
 ## 1. Account and keys
@@ -67,7 +69,7 @@ You do **not** create Checkout Sessions in the Dashboard. The provider creates t
 
 Without webhooks, payment can succeed on Stripe while the site never grants Premium.
 
-**Signing secret:** copy `whsec_…` into CMS Stripe settings. Outside DEV, unsigned webhook payloads are rejected.
+**Signing secret:** copy `whsec_…` into CMS Stripe settings. Unsigned webhook payloads are rejected, except in DEV with no secret set and only from the machine itself (local tests).
 
 ## 5. Customer Portal (optional later)
 
@@ -83,3 +85,14 @@ Test mode: `4242 4242 4242 4242`, any future expiry, any CVC.
 2. CMS **Shop → Stripe → Stripe settings**: webhook signing secret `whsec_…`; optional **Checkout success** / **Checkout cancel** links; **Technical email** (CMS admin) + **Extra notification emails** for all handled webhook events.
 3. Shop settings → **Subscription checkout provider** = Stripe subscription checkout.
 4. Paste all `price_…` ids on product currency rows.
+
+## 8. Cart checkout (one-off payments)
+
+No Products or Prices in Stripe: the site sends each cart line with its own price.
+
+1. Host config `stripe_secret` (test key first). Production: `composer install` (Stripe PHP SDK), schema fix for `shop` and `stripe`.
+2. **Developers → Webhooks → Add endpoint** `{base_url}stripe/webhook/` (the same endpoint as subscriptions) with `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.expired`, `charge.refunded` (refunds reach the order). Signing secret into Stripe settings.
+3. **Settings → Emails**: turn on successful payment receipts if Stripe should send the buyer a receipt (the site sends its own order confirmation too).
+4. CMS: Shop settings → **Checkout provider** = Stripe checkout; **Notification emails**; Stripe settings → **Checkout success** / **Checkout cancel** / **Delivery countries**; Shop → **Delivery methods**; CMS settings SMTP; CMS repeating tasks → **CMS email queue**.
+5. Terms: **Settings → Public details → Terms of service URL** = the site's Terms page. Then CMS Stripe settings → **Terms page** (link) and **Require terms acceptance** = Yes; check the Checkout page shows the required tickbox. (Without the Dashboard URL, Stripe refuses the session.)
+6. Test mode purchase with `4242 4242 4242 4242` on the real host (HTTPS, environment not DEV), check the order, both emails and the webhook delivery in the Dashboard. Then live key + live webhook secret.

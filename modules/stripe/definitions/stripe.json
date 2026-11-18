@@ -4,16 +4,6 @@
 	"item": [],
 	"settings": [
 		{
-			"name": "test_payments",
-			"type": "select",
-			"label": "Test payments",
-			"values": {
-				"1": "Use test payments",
-				"0": "Use live payments"
-			},
-			"default": "1"
-		},
-		{
 			"name": "webhook_secret",
 			"type": "text",
 			"label": "Webhook signing secret",
@@ -24,13 +14,56 @@
 			"name": "success_link",
 			"type": "link",
 			"label": "Checkout success",
-			"help": "Where to send the user after successful Checkout. Empty → site home with ?subscription_checkout=success (or pricing resume)."
+			"help": "Where to send the buyer after a successful Checkout (cart order or subscription), e.g. an Order received page.||Empty: cart orders go to the site home; subscriptions to home with ?subscription_checkout=success (or pricing resume)."
 		},
 		{
 			"name": "cancel_link",
 			"type": "link",
 			"label": "Checkout cancel",
-			"help": "Where to send the user if they cancel Checkout. Empty → resume pricing page or home with ?subscription_checkout=cancel."
+			"help": "Where to send the buyer who cancels Checkout. The cart stays as it was.||Empty: cart orders go to the site home; subscriptions resume the pricing page or home with ?subscription_checkout=cancel."
+		},
+		{
+			"name": "shipping_countries",
+			"type": "text",
+			"label": "Delivery countries",
+			"default": "GB",
+			"help": "Cart checkout: countries Stripe accepts for the delivery address, as comma-separated ISO codes (GB, IE, FR, …)."
+		},
+		{
+			"type": "subtitle",
+			"label": "Cart checkout page"
+		},
+		{
+			"type": "select",
+			"name": "terms_consent",
+			"label": "Require terms acceptance",
+			"values": {
+				"0": "No",
+				"1": "Yes"
+			},
+			"default": "0",
+			"help": "Yes: the buyer must tick that they agree to the terms before paying.||First set the Terms of service URL in Stripe Dashboard → Settings → Public details: without it Stripe refuses the checkout."
+		},
+		{
+			"name": "terms_link",
+			"type": "link",
+			"label": "Terms page",
+			"help": "The site's terms and conditions of sale page, linked from the tickbox text ({{terms_url}})."
+		},
+		{
+			"type": "text",
+			"name": "terms_text",
+			"label": "Terms tickbox text",
+			"default": "I agree to the [terms and conditions of sale]({{terms_url}}).",
+			"help": "Next to the tickbox when terms acceptance is required. Markdown link; {{terms_url}} = the Terms page. Max 1200 characters."
+		},
+		{
+			"type": "textarea",
+			"name": "submit_text",
+			"label": "Note under Pay",
+			"lines": "3",
+			"default": "",
+			"help": "Optional short text Stripe shows under the Pay button. Empty: none. Max 1200 characters."
 		},
 		{
 			"type": "subtitle",

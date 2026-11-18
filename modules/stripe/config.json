@@ -6,19 +6,8 @@
 			"name": "Stripe settings"
 		},
 		{
-			"id": "payment",
-			"name": "Payment",
-			"placeable": 1
-		},
-		{
-			"id": "payment_hook_success",
-			"name": "Payment hook success",
-			"placeable": 1
-		},
-		{
-			"id": "payment_success",
-			"name": "Payment success",
-			"placeable": 1
+			"id": "checkout",
+			"name": "Stripe checkout"
 		},
 		{
 			"id": "subscription_checkout",
@@ -31,6 +20,11 @@
 	],
 	"provides": [
 		{
+			"service": "shop_checkout",
+			"panel": "//checkout",
+			"label": "Stripe checkout"
+		},
+		{
 			"service": "subscription_checkout",
 			"panel": "//subscription_checkout",
 			"label": "Stripe subscription checkout"
@@ -39,6 +33,15 @@
 	"api": [
 		{
 			"id": "webhook"
+		},
+		{
+			"id": "checkout_return"
+		}
+	],
+	"extends": [
+		{
+			"target": "shop/order",
+			"source": "//shop_order"
 		}
 	],
 	"cms_menu": [
@@ -59,13 +62,6 @@
 			"parent": "stripe",
 			"url": "admin/panel_settings/stripe__stripe/",
 			"order": 5
-		},
-		{
-			"id": "payment_settings",
-			"name": "Payment settings",
-			"parent": "stripe",
-			"url": "admin/panel_settings/stripe__payment/",
-			"order": 10
 		}
 	]
 }

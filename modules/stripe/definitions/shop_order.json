@@ -1,0 +1,23 @@
+{
+	"item": [
+		{
+			"type": "subtitle",
+			"label": "Stripe"
+		},
+		{
+			"type": "text",
+			"name": "stripe_session_id",
+			"label": "Checkout session",
+			"readonly": "1",
+			"help": "Last Stripe Checkout session started for this cart (cs_…). Cleared when it expires."
+		},
+		{
+			"type": "text",
+			"name": "stripe_checkout_fingerprint",
+			"label": "Checkout lines fingerprint",
+			"readonly": "1",
+			"help": "Cart lines when the session was started. A different value at payment adds a payment note."
+		}
+	],
+	"settings": []
+}

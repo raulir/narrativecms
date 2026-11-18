@@ -1,0 +1,7 @@
+{
+	"ajax": {"input": ["cms"], "output": ["cms","ok","redirect"]},
+	"label": "Stripe checkout",
+	"description": "Cart checkout provider (provides shop_checkout): sends the cart to a Stripe Checkout page. Not placed on pages.",
+	"item": [],
+	"settings": []
+}
