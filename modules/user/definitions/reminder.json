@@ -124,6 +124,15 @@
 		},
 		{
 			"type": "textarea",
+			"name": "message_password_short",
+			"label": "New password too short",
+			"lines": "2",
+			"help": "The new password has fewer than 5 characters",
+			"default": "The new password needs at least 5 characters",
+			"translate": "1"
+		},
+		{
+			"type": "textarea",
 			"name": "message_save_success",
 			"label": "Save success",
 			"lines": "2",

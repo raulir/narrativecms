@@ -10,9 +10,10 @@ function register_init(){
 		
 		register_hide_error()
 		
+		// Not "fields": that is the block's Extra fields repeater, and a stored block value wins over a posted one
 		var data = {
 				'cms_do': 'register',
-				'fields': [],
+				'register_fields': [],
 		}
 
 		var cms_page_panel_id = $('.register_container').data('cms_page_panel_id')
@@ -26,7 +27,7 @@ function register_init(){
 			
 			var $this = $(this)
 
-			data.fields.push({
+			data.register_fields.push({
 				id: $this.data('field_id'), 
 				value: $this.val(), 
 				label: $this.data('label'),

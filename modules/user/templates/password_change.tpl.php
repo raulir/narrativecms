@@ -27,6 +27,7 @@
 
 			<div class="password_change_error password_change_error_passwords_mismatch"><?= $message_passwords_mismatch ?></div>
 			<div class="password_change_error password_change_error_bad_save"><?= $message_bad_save ?></div>
+			<div class="password_change_error password_change_error_password_short"><?= $message_password_short ?></div>
 
 			<div class="password_change_overlay">
 				<div class="password_change_popup">

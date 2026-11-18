@@ -22,7 +22,8 @@ class register extends \Controller {
 			
 			$errors = [];
 			
-			$fields = $params['fields'] ?? false;
+			// The posted form (register.js); "fields" is the block's Extra fields repeater
+			$fields = $params['register_fields'] ?? false;
 			
 			$data = [
 				'email' => '',

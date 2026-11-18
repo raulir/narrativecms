@@ -45,6 +45,15 @@ class password_change extends \Controller {
 
 		$this->load->model('user/user_model');
 
+		// Settings saved before a field existed have it empty: the definition's default stands in
+		$this->load->model('cms/cms_panel_model');
+		$config = $this->cms_panel_model->get_cms_panel_config('user/password_change');
+		foreach ($this->cms_panel_model->get_fields_defaults($config['settings'] ?? []) as $name => $default){
+			if (!isset($params[$name]) || $params[$name] === ''){
+				$params[$name] = $default;
+			}
+		}
+
 		$params['loggedin'] = $this->user_model->is_logged_in();
 
 		return $params;

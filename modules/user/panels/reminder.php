@@ -151,8 +151,9 @@ class reminder extends \Controller {
 				return $return;
 			}
 
+			// No, unknown (a newer reminder replaced it, or it was used) or expired token: the link is no longer valid
 			if ($token === ''){
-				$return['error'] = 'bad_save';
+				$return['error'] = 'timeout';
 				return $return;
 			}
 
@@ -160,7 +161,7 @@ class reminder extends \Controller {
 			$found = $this->_find_reminder_by_token($reminders, $token);
 
 			if ($found === null){
-				$return['error'] = 'bad_save';
+				$return['error'] = 'timeout';
 				return $return;
 			}
 
@@ -170,7 +171,7 @@ class reminder extends \Controller {
 			if ($age >= $ttl_seconds){
 				unset($reminders[$found['key']]);
 				$this->_save_reminders($filename, $reminders);
-				$return['error'] = 'bad_save';
+				$return['error'] = 'timeout';
 				return $return;
 			}
 
@@ -260,6 +261,15 @@ class reminder extends \Controller {
 	function panel_params($params){
 
 		$this->load->model('user/user_model');
+
+		// A block saved before a field existed has it empty: the definition's default stands in
+		$this->load->model('cms/cms_panel_model');
+		$config = $this->cms_panel_model->get_cms_panel_config('user/reminder');
+		foreach ($this->cms_panel_model->get_fields_defaults($config['item'] ?? []) as $name => $default){
+			if (!isset($params[$name]) || $params[$name] === ''){
+				$params[$name] = $default;
+			}
+		}
 
 		$params['loggedin'] = $this->user_model->is_logged_in();
 

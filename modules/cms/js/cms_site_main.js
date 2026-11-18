@@ -3,7 +3,8 @@
 // Module hooks: a module sets window.cms_hooks.<name> to a function, and the CMS calls it when set.
 // panel_take(name, params, stored, deliver, fail) answers a panel request itself (true: no server call);
 // offline_notice(); offline_link(url) (true: the module opened an offline position link itself, else the
-// notice shows); popstate() (true: handled).
+// notice shows); popstate() (true: handled); popup(options) shows a notice in the site's own popup
+// ({text, heading, buttons, close_after}) and returns a Promise with the pressed button's value.
 window.cms_hooks = window.cms_hooks || {}
 
 function cms_hook(name) {
@@ -35,6 +36,29 @@ function cms_app_strip_root(path) {
 		return '/' + path.slice(root.length)
 	}
 	return path
+}
+
+/**
+ * Where this page runs: 'site' (the website), 'android' (the native app, which has the bridge window.AppSplash)
+ * or 'web_app' (the installed web app or the browser wrapper: in-app pages without the bridge).
+ * Scripts ask this instead of reading _cms_inapp and AppSplash themselves.
+ */
+function cms_platform() {
+	if (!window._cms_inapp){
+		return 'site'
+	}
+	return window.AppSplash ? 'android' : 'web_app'
+}
+
+/**
+ * Open an address outside the app: the device browser from the native app, a new tab elsewhere.
+ */
+function cms_open_external(url) {
+	if (window.AppSplash && AppSplash.openExternal){
+		AppSplash.openExternal(url)
+		return
+	}
+	window.open(url, '_blank', 'noopener')
 }
 
 function cms_ajax_app_session(params){

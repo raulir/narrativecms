@@ -44,6 +44,8 @@
 				<div class="reminder_error reminder_error_bad_username"><?= $message_bad_username ?></div>
 				<div class="reminder_error reminder_error_bad_save"><?= $message_bad_save ?></div>
 				<div class="reminder_error reminder_error_passwords_mismatch"><?= $message_passwords_mismatch ?></div>
+				<div class="reminder_error reminder_error_password_short"><?= $message_password_short ?></div>
+				<div class="reminder_error reminder_error_timeout"><?= $message_timeout ?></div>
 				
 				<div class="reminder_success"><?= $message_success ?></div>
 				<div class="reminder_save_success">

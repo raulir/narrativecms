@@ -143,7 +143,7 @@ class user_model extends \Model {
 		}
 
 		if (strlen((string)$password) < 5){
-			return 'bad_save';
+			return 'password_short';
 		}
 
 		return '';
@@ -746,6 +746,14 @@ class user_model extends \Model {
 			return ['error' => 'expired_token'];
 		}
 		
+		// The account may have been deleted since the email was sent
+		$user = $this->get_user((int)($row['user_id'] ?? 0));
+		if (empty($user['cms_page_panel_id']) || ($user['panel_name'] ?? '') !== 'user/user'){
+			unset($tokens[$token]);
+			file_put_contents($filename, json_encode($tokens, JSON_PRETTY_PRINT));
+			return ['error' => 'invalid_token'];
+		}
+
 		$this->load->model('cms/cms_page_panel_model');
 		$this->cms_page_panel_model->update_cms_page_panel($row['user_id'], [
 				'email_verified' => 'yes',

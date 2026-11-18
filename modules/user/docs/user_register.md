@@ -9,11 +9,11 @@ Related email auth (login, reminder): [`auth_email.md`](auth_email.md)
 ## Flow
 
 1. Page render — panel block on `/register/` supplies form HTML and `data-cms_page_panel_id` + `data-success` on `.register_container`
-2. Submit — `register.js` POSTs to `ajax_api/get_panel/` with `panel_id=user/register`, `do=register`, `fields[]`, and `cms_page_panel_id`
+2. Submit — `register.js` POSTs to `ajax_api/get_panel/` with `panel_id=user/register`, `cms_do=register`, `register_fields[]`, and `cms_page_panel_id`. The form is not posted as `fields`: that is the block's **Extra fields** repeater, and a stored block value wins over a posted one when the request names the block. As `fields`, the stored repeater replaced the form, and every registration failed with "bad email / mandatory". Fixed 2026-11-16.
 3. Server — `register::panel_action` validates against **page block** settings, `create_user()`, optional `log_in_after` session, optional mailing lists
 4. Success — client redirects to **user/user_settings** → **Links** → **Link to user** (`user_link`)
 
-**Log in after** (`log_in_after` = Yes): calls `refresh_user_session` only when `login_allowed()` is true. If **User settings → Email confirmation** is Yes, new accounts stay logged out until `/verify-email/` (by design).
+**Log in after** (`log_in_after` = Yes): calls `refresh_user_session` only when `login_allowed()` is true. If **User settings → Email confirmation** is Yes, new accounts stay logged out until `/verify-email/` (by design). A confirmation link of an account deleted in the meantime answers `invalid_token`, and nothing is updated or signed in (`user_model::verify_email_token`).
 
 ## CMS configuration
 

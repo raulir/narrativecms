@@ -47,6 +47,13 @@ function password_change_show_success($container){
 
 	$container.find('.password_change_error_active').removeClass('password_change_error_active')
 	$container.find('.password_change_input_password, .password_change_input_password2').val('')
+
+	// The site's popup when a module provides one (CMS hook popup), else the panel's own overlay
+	var popup = (typeof cms_hook === 'function') ? cms_hook('popup') : null
+	if (popup){
+		popup({text: String($container.find('.password_change_popup_message').text()).trim()})
+		return
+	}
 	$container.addClass('password_change_overlay_active')
 
 }

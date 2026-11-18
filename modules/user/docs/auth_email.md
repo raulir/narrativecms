@@ -10,6 +10,8 @@ Created: 2026-06-21
 - `user/password_change` — logged-in change password (new + confirm, ajax). Embedded via `_panel()` (e.g. `music/settings`). Copy/labels: **User → Password change** (`admin/panel_settings/user__password_change/`). Theme: music extend `//user_password_change`. Shared validation/email helpers on `user_model` (also used by reminder save).
 - `user/verify_email` — email confirmation link handler
 
+New password errors (reminder save and `password_change`), each with its own text field: `passwords_mismatch`, `password_short` (under 5 characters; `validate_new_password`), and on the reminder `timeout` when the link's token is missing, replaced by a newer reminder, used or older than 30 minutes (the "Timeout" text). `bad_save` is left for a real failure. Until 2026-11-18 a short password and a stale link both showed only "Problem with update". Check: `grok/tmp/reminder_check.js`.
+
 Shared models: [`user_model.php`](../models/user_model.php) (verification tokens, auth state, `validate_new_password` / `change_user_password` / `send_password_updated_email`), [`cms_email_model.php`](../../cms/models/cms_email_model.php) (all outbound mail transport)
 
 Related: Google auth in [`auth_google.md`](auth_google.md)

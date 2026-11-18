@@ -35,7 +35,7 @@ function logout_init(){
 		
 		data.success = function(){
 
-			if (window._cms_inapp){
+			if (cms_platform() !== 'site'){
 				logout_return_to_app()
 				return
 			}
