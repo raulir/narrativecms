@@ -6,20 +6,19 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
  * App ajax. Confirms a Play purchase with Google's servers, then writes entitlement.
+ * Reply: ok, changed, and cms_error (a detail for the console; the screen shows its own text).
  */
 class purchase extends \Controller {
 
 	function panel_action($params){
 
-		$do = $params['cms_do'] ?? '';
-		if ($do !== 'confirm'){
+		if (($params['cms_do'] ?? '') !== 'confirm'){
 			return $params;
 		}
 
 		$this->load->model('user/user_model');
 		if (!$this->user_model->is_logged_in()){
-			print(json_encode(['ok' => 0, 'error' => 'Login required']));
-			exit();
+			return ['ok' => 0, 'error' => 'Login required'];
 		}
 
 		$user = $this->user_model->get_current();
@@ -33,8 +32,11 @@ class purchase extends \Controller {
 				(string)($params['google_package_id'] ?? '')
 		);
 
-		print(json_encode($result));
-		exit();
+		return [
+				'ok' => !empty($result['ok']) ? 1 : 0,
+				'changed' => !empty($result['changed']) ? 1 : 0,
+				'error' => (string)($result['error'] ?? ''),
+		];
 
 	}
 

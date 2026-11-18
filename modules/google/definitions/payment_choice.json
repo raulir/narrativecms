@@ -1,0 +1,10 @@
+{
+	"label": "Payment choice",
+	"description": "Android app: Google Play or ScoreTutor (Stripe) for one plan. Texts are in Google Play settings.",
+	"ajax": {
+		"input": ["cms", "product_id", "currency_id", "play_product_id"],
+		"output": ["cms"]
+	},
+	"item": [],
+	"settings": []
+}

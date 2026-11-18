@@ -1,6 +1,10 @@
 {
 	"label": "Google purchase",
 	"description": "App ajax: confirm a Play Billing purchase on Google's servers",
+	"ajax": {
+		"input": ["cms", "purchase_token", "google_package_id", "product_id", "currency"],
+		"output": ["cms", "ok", "changed"]
+	},
 	"item": [],
 	"settings": []
 }

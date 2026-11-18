@@ -196,6 +196,24 @@ class google_model extends \Model {
 		}
 
 		$stored_id = $want_plan === '' ? $remote_product : $this->play_id_value($remote_product, $remote_plan);
+		// A purchase sent again by the app (app_play_purchases) knows only Play's product: find the plan by it.
+		// It is taken only as the notification would take it: not over a current Stripe subscription.
+		if ((int)$product_id < 1){
+			if (!$this->notification_makes_current($user_id)){
+				return ['ok' => 0, 'error' => 'Another subscription is current'];
+			}
+			foreach ([$this->play_id_value($remote_product, $remote_plan), $remote_product] as $key){
+				$match = $this->match_play_product($key);
+				if (!empty($match['product_id'])){
+					$product_id = (int)$match['product_id'];
+					$stored_id = $key;
+					break;
+				}
+			}
+			if ((int)$product_id < 1){
+				return ['ok' => 0, 'error' => 'No plan has this Play product'];
+			}
+		}
 		$page_currency = (int)$currency_id;
 		$currency_id = $this->shop_default_currency_id();
 		if ($currency_id < 1){
@@ -211,7 +229,55 @@ class google_model extends \Model {
 		]);
 		$this->set_provider($user_id, 'google');
 
-		return $this->apply_remote($user_id, $remote, (int)$product_id, $currency_id, $stored_id, true);
+		$result = $this->apply_remote($user_id, $remote, (int)$product_id, $currency_id, $stored_id, true);
+		if (!empty($result['ok'])){
+			$this->acknowledge($purchase_token, $remote);
+		}
+		return $result;
+
+	}
+
+	/**
+	 * Tell Google the purchase is granted. An unacknowledged purchase is refunded after 3 days, so the server
+	 * does this itself once the subscription is written, not only the app. Failure is logged and tried again
+	 * by the next confirm or notification.
+	 */
+	function acknowledge($purchase_token, $remote){
+
+		if (!empty($remote['acknowledged']) || empty($remote['active'])){
+			return true;
+		}
+		$product = trim((string)($remote['play_product_id'] ?? ''));
+		if ($product === ''){
+			return false;
+		}
+
+		$path = 'applications/'.rawurlencode($this->package_name()).'/purchases/subscriptions/'
+				.rawurlencode($product).'/tokens/'.rawurlencode($purchase_token).':acknowledge';
+		$response = $this->play_request('POST', $path, (object)[], true);
+		if (empty($response['ok'])){
+			$this->log('Play acknowledge failed for '.$product);
+			return false;
+		}
+		return true;
+
+	}
+
+	/**
+	 * A notification for a purchase whose confirm from the app never arrived: it becomes the user's current
+	 * subscription unless another paid subscription (Stripe) is current. Then it stays unacknowledged, and
+	 * Google refunds it.
+	 */
+	function notification_makes_current($user_id){
+
+		if ($this->provider_for_user($user_id) === 'google'){
+			return true;
+		}
+		$this->load->model('subscription/subscription_model');
+		$current = $this->subscription_model->get_user_subscription($user_id);
+		$active = ($current['active'] ?? '0');
+		$paid = ($active === '1' || $active === 1 || $active === true);
+		return !($paid && trim((string)($current['stripe_subscription_id'] ?? '')) !== '');
 
 	}
 
@@ -233,14 +299,20 @@ class google_model extends \Model {
 			return $remote;
 		}
 
-		return $this->apply_remote(
+		$make_current = $this->provider_for_user($user_id) === 'google';
+		$result = $this->apply_remote(
 				$user_id,
 				$remote,
 				(int)($play['product_id'] ?? 0),
 				(int)($play['currency'] ?? 0),
 				trim((string)($play['google_package_id'] ?? '')),
-				$this->provider_for_user($user_id) === 'google'
+				$make_current
 		);
+		// My subscription opened: a granted purchase still unacknowledged is acknowledged now
+		if (!empty($result['ok']) && $make_current){
+			$this->acknowledge($token, $remote);
+		}
+		return $result;
 
 	}
 
@@ -334,7 +406,7 @@ class google_model extends \Model {
 			return ['ok' => 1, 'ignored' => 1];
 		}
 
-		$make_current = $this->provider_for_user($user_id) === 'google';
+		$make_current = $this->notification_makes_current($user_id);
 
 		$this->load->model('user/user_model');
 		$play = $this->user_model->get_user_meta_value_for_id($user_id, self::META_PLAY, []);
@@ -344,7 +416,7 @@ class google_model extends \Model {
 		$play['purchase_token'] = $token;
 		$this->user_model->set_user_meta_for_id($user_id, self::META_PLAY, $play);
 
-		return $this->apply_remote(
+		$result = $this->apply_remote(
 				$user_id,
 				$remote,
 				(int)($play['product_id'] ?? 0),
@@ -352,6 +424,10 @@ class google_model extends \Model {
 				trim((string)($play['google_package_id'] ?? $remote['play_product_id'] ?? '')),
 				$make_current
 		);
+		if (!empty($result['ok']) && $make_current){
+			$this->acknowledge($token, $remote);
+		}
+		return $result;
 
 	}
 
@@ -379,6 +455,21 @@ class google_model extends \Model {
 			}
 		}
 
+		// No plan known (a notification for a purchase whose confirm never arrived): find it by Play's ids
+		if ($product_id < 1){
+			$remote_product = trim((string)($remote['play_product_id'] ?? ''));
+			$remote_plan = trim((string)($remote['play_base_plan_id'] ?? ''));
+			foreach ([$this->play_id_value($remote_product, $remote_plan), $remote_product] as $key){
+				$match = $key !== '' ? $this->match_play_product($key) : [];
+				if (!empty($match['product_id'])){
+					$product_id = (int)$match['product_id'];
+					$play_product_id = $key;
+					$this->remember_play_package($user_id, $product_id, $currency_id, $play_product_id);
+					break;
+				}
+			}
+		}
+
 		$interval = '';
 		if ($product_id > 0){
 			$this->load->model('cms/cms_page_panel_model');
@@ -387,7 +478,7 @@ class google_model extends \Model {
 		}
 
 		$fields = [
-				'status' => !empty($remote['active']) ? 'active' : 'canceled',
+				'status' => !empty($remote['active']) ? 'active' : (!empty($remote['hold']) ? (string)$remote['hold'] : 'canceled'),
 				'active' => !empty($remote['active']) ? '1' : '0',
 				'interval' => $interval,
 				'ends' => (string)($remote['ends'] ?? ''),
@@ -511,6 +602,9 @@ class google_model extends \Model {
 				'play_product_id' => (string)($line['productId'] ?? ''),
 				'play_base_plan_id' => (string)($line['offerDetails']['basePlanId'] ?? ''),
 				'user_id' => $user_id,
+				'acknowledged' => ($data['acknowledgementState'] ?? '') === 'ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED' ? 1 : 0,
+				// Not active, but not over: a payment problem (on hold) or paused by the user
+				'hold' => $state === 'SUBSCRIPTION_STATE_ON_HOLD' ? 'on_hold' : ($state === 'SUBSCRIPTION_STATE_PAUSED' ? 'paused' : ''),
 		];
 
 	}

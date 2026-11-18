@@ -23,6 +23,149 @@
 			"label": "Notification audience",
 			"default": "",
 			"help": "Exact https address configured as the Pub/Sub push audience for google/notify. Empty ignores every notification."
+		},
+		{
+			"type": "subtitle",
+			"label": "App payment choice"
+		},
+		{
+			"name": "choice_offer",
+			"type": "select",
+			"label": "Offer ScoreTutor beside Google Play",
+			"values": {
+				"0": "No",
+				"1": "Yes"
+			},
+			"default": "0",
+			"help": "Yes shows the payment choice screen in the Android app. No opens the Google Play payment sheet for the plan that was clicked. Use No while Play billing choice is not active."
+		},
+		{
+			"name": "choice_heading",
+			"type": "text",
+			"label": "Heading",
+			"default": "How would you like to pay?",
+			"translate": "1"
+		},
+		{
+			"name": "choice_play",
+			"type": "text",
+			"label": "Google Play",
+			"default": "Google Play",
+			"translate": "1"
+		},
+		{
+			"name": "choice_play_note",
+			"type": "text",
+			"label": "Google Play note",
+			"default": "Pay with your Google account.",
+			"translate": "1"
+		},
+		{
+			"name": "choice_stripe",
+			"type": "text",
+			"label": "Stripe",
+			"default": "ScoreTutor (Stripe)",
+			"translate": "1"
+		},
+		{
+			"name": "choice_stripe_note",
+			"type": "text",
+			"label": "Stripe note",
+			"default": "Pay by card. Continues in your browser.",
+			"translate": "1"
+		},
+		{
+			"name": "choice_back",
+			"type": "text",
+			"label": "Back",
+			"default": "Back",
+			"translate": "1"
+		},
+		{
+			"name": "choice_continue",
+			"type": "text",
+			"label": "Continue",
+			"default": "Continue",
+			"translate": "1"
+		},
+		{
+			"name": "choice_opening",
+			"type": "text",
+			"label": "Opening",
+			"default": "Opening …",
+			"translate": "1"
+		},
+		{
+			"name": "choice_no_play_product",
+			"type": "text",
+			"label": "No Play product",
+			"default": "This plan is not available in Google Play.",
+			"translate": "1",
+			"help": "Under Google Play when the price row has no Google Play product ID"
+		},
+		{
+			"name": "choice_unavailable",
+			"type": "text",
+			"label": "Not available",
+			"default": "Not available right now. Please try again later, or subscribe on the website.",
+			"translate": "1",
+			"help": "When Google Play Billing cannot connect: no payment in the app"
+		},
+		{
+			"name": "choice_error_start",
+			"type": "text",
+			"label": "Error: not started",
+			"default": "The payment could not be started.",
+			"translate": "1"
+		},
+		{
+			"name": "choice_error_stripe",
+			"type": "text",
+			"label": "Error: Stripe not started",
+			"default": "ScoreTutor (Stripe) could not be started.",
+			"translate": "1"
+		},
+		{
+			"name": "choice_error_save",
+			"type": "text",
+			"label": "Error: choice not saved",
+			"default": "The payment choice could not be saved.",
+			"translate": "1"
+		},
+		{
+			"name": "choice_error_checkout",
+			"type": "text",
+			"label": "Error: checkout",
+			"default": "Checkout could not start. Try again.",
+			"translate": "1"
+		},
+		{
+			"name": "choice_error_open",
+			"type": "text",
+			"label": "Error: browser not opened",
+			"default": "ScoreTutor (Stripe) could not be opened.",
+			"translate": "1"
+		},
+		{
+			"name": "choice_error_play",
+			"type": "text",
+			"label": "Error: Play purchase",
+			"default": "The Google Play purchase did not finish.",
+			"translate": "1"
+		},
+		{
+			"name": "choice_error_confirm",
+			"type": "text",
+			"label": "Error: not confirmed",
+			"default": "The purchase could not be confirmed.",
+			"translate": "1"
+		},
+		{
+			"name": "choice_pending",
+			"type": "text",
+			"label": "Pending",
+			"default": "Your payment is pending. Premium starts when Google confirms it.",
+			"translate": "1"
 		}
 	]
 }

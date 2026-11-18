@@ -49,6 +49,10 @@
 		{
 			"id": "purchase",
 			"name": "Google purchase"
+		},
+		{
+			"id": "payment_choice",
+			"name": "Payment choice"
 		}
 	],
 	"extends": [
@@ -59,6 +63,14 @@
 		{
 			"target": "shop/currency",
 			"source": "//shop_currency"
+		},
+		{
+			"target": "subscription/pricing",
+			"source": "//subscription_payment"
+		},
+		{
+			"target": "subscription/manage",
+			"source": "//subscription_payment"
 		}
 	],
 	"api": [

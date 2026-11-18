@@ -1,0 +1,117 @@
+// The Android app's payment choice (payment_choice.js). Neutral look; the site module themes it.
+
+.payment_choice_hidden {
+	display: none;
+}
+
+.payment_choice_container {
+	box-sizing: border-box;
+	width: 40.0rem;
+	max-width: 100%;
+	margin: 0 auto;
+	padding: 2.0rem 1.5rem;
+	text-align: center;
+}
+
+.payment_choice_heading {
+	font-size: 1.5rem;
+	line-height: 1.8rem;
+	font-weight: bold;
+}
+
+.payment_choice_plan {
+	padding: 0.6rem 0 0 0;
+	font-size: 1.2rem;
+	line-height: 1.5rem;
+}
+
+.payment_choice_options {
+	padding: 2.0rem 0 0 0;
+	text-align: left;
+}
+
+.payment_choice_option {
+	display: flex;
+	gap: 1.0rem;
+	align-items: flex-start;
+	box-sizing: border-box;
+	margin: 0 0 1.0rem 0;
+	padding: 1.2rem;
+	border: 0.15rem solid #c0c0c0;
+	border-radius: 1.0rem;
+	background-color: #ffffff;
+	cursor: pointer;
+}
+
+.payment_choice_option_selected {
+	border-color: #000000;
+}
+
+.payment_choice_option_disabled {
+	opacity: 0.45;
+	cursor: default;
+}
+
+.payment_choice_option_mark {
+	flex: 0 0 auto;
+	box-sizing: border-box;
+	width: 1.6rem;
+	height: 1.6rem;
+	margin-top: 0.1rem;
+	border: 0.15rem solid currentColor;
+	border-radius: 50%;
+}
+
+.payment_choice_option_selected .payment_choice_option_mark {
+	box-shadow: inset 0 0 0 0.3rem #ffffff;
+	background-color: currentColor;
+}
+
+.payment_choice_option_label {
+	font-size: 1.2rem;
+	line-height: 1.5rem;
+	font-weight: bold;
+}
+
+.payment_choice_option_note,
+.payment_choice_option_reason {
+	font-size: 1.0rem;
+	line-height: 1.3rem;
+}
+
+.payment_choice_option_reason:empty {
+	display: none;
+}
+
+.payment_choice_message {
+	min-height: 1.5rem;
+	padding: 0.4rem 0 0 0;
+	font-size: 1.1rem;
+	line-height: 1.5rem;
+}
+
+.payment_choice_message_error {
+	color: #c00000;
+}
+
+.payment_choice_buttons {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 1.2rem;
+	padding: 1.6rem 0 0 0;
+}
+
+.payment_choice_back,
+.payment_choice_continue {
+	min-width: 9.0rem;
+	padding: 0.7rem 2.2rem;
+	font-family: inherit;
+	font-size: 1.2rem;
+	cursor: pointer;
+}
+
+.payment_choice_continue:disabled {
+	opacity: 0.5;
+	cursor: default;
+}

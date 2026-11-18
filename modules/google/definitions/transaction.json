@@ -1,6 +1,10 @@
 {
 	"label": "Google transaction",
 	"description": "App ajax: save the pending Play external-transaction token",
+	"ajax": {
+		"input": ["cms", "token", "google_package_id", "product_id", "currency"],
+		"output": ["cms", "ok"]
+	},
 	"item": [],
 	"settings": []
 }

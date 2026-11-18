@@ -11,15 +11,13 @@ class transaction extends \Controller {
 
 	function panel_action($params){
 
-		$do = $params['cms_do'] ?? '';
-		if ($do !== 'save'){
+		if (($params['cms_do'] ?? '') !== 'save'){
 			return $params;
 		}
 
 		$this->load->model('user/user_model');
 		if (!$this->user_model->is_logged_in()){
-			print(json_encode(['ok' => 0, 'error' => 'Login required']));
-			exit();
+			return ['ok' => 0, 'error' => 'Login required'];
 		}
 
 		$user = $this->user_model->get_current();
@@ -33,8 +31,7 @@ class transaction extends \Controller {
 				(int)($params['currency'] ?? 0)
 		);
 
-		print(json_encode(['ok' => $ok ? 1 : 0]));
-		exit();
+		return ['ok' => $ok ? 1 : 0];
 
 	}
 

@@ -1,0 +1,8 @@
+{
+	"label": "Google Play payment choice",
+	"description": "Brings the Android app payment choice (google/payment_choice) to the plans and My subscription pages",
+	"js": [
+		"google/payment_choice"
+	],
+	"item": []
+}
