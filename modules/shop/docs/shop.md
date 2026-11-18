@@ -32,6 +32,29 @@ Site modules **may** still add behaviour that checks whether `shopify` is instal
 
 ---
 
+## Orders admin
+
+Shop → **Orders** (first item under Shop; `admin/orders/`, one order `admin/orders/{id}/`; method `orders` of the CMS admin controller, which says so when shop is missing; the menu item comes from shop). The technical lists are Shop → Shop settings → **Order details** and **Order line details**. Built to [`cms/docs/admin_pages.md`](../../cms/docs/admin_pages.md). `shop/orders_admin` is the page (CMS toolbar: **Orders** = unfulfilled / in progress / fulfilled, **Archive** = finished / cancelled / abandoned, **Carts** = drafts; search from 3 characters by order number or part of the buyer email, over all of them). `shop/orders_admin_rows` prints the rows: by `_panel()` on landing, by ajax for filters, search and the next 50 (`shop_model::get_admin_orders`). The filter is in the URL (`admin/orders/?view=orders|archive|carts`): it opens that filter, and a filter click updates it without a page load. `shop/order_admin` is one order (`order_id`): a CMS toolbar with a back arrow to the order's filter and `#152 (paid) (unfulfilled)`; two columns, left **Items**, **Summary**, **History**, right **Customer**, **Delivery**, **Status**. The Status card sets both statuses by hand with one Save: **Payment** (`shop_model::set_order_payment_status`; marking paid sets `paid_time` when empty) and **Order** (`set_order_status`; payment is saved first). A finished order shows its order status as text; a draft or abandoned cart can be moved to an order status but not back. On a draft or abandoned cart the payment status is text only, and `set_order_payment_status` refuses it (`payment_editable`): a cart marked paid by hand would make `set_order_paid` skip the real payment and its emails. Choosing **Fulfilled** on an order that is not Fulfilled yet shows **Email the buyer** (a CMS tick `[v]` / `[ ]`; ticked, or unticked with "Sent …" when the dispatch email went out before) and **Tracking number**. Save stores payment, tracking, then status, then sends the dispatch email (§ Paid orders). The Delivery card shows the tracking number. Status save and comments post by ajax and the panel comes back fresh in place. All three require a logged-in CMS user with access `shop_orders`, including over ajax. Status changes go through `shop_model::set_order_status` (the same rules as the technical order form: the status goes onto the lines; Finished posts listed stock once and cannot be undone).
+
+### Order history (`shop_order_log`)
+
+Table `shop_order_log` (`modules/shop/schema/`): `order_id`, `time` (timestamp), `type` (`event` / `comment`), `cms_user_id` and `user_name` (the CMS user, empty when the system did it; the name is stored because config admins have no `cms_user` row), `line`. Written only through `shop_model::log_order()`; a failed write goes to the error log and never stops the caller (a payment must not fail on its history). Removed with the order: `shop/order` `on_delete` calls `shop_model::delete_order_parts` (lines and history), so this holds for `delete_order`, cart cleanup, a merged guest cart and a delete from the technical list alike (CMS `on_delete`, [`system.md`](../../cms/docs/system.md)).
+
+| Logged | Where |
+|--------|-------|
+| Cart created | `get_current_order` (new draft) |
+| Status change (`Status: Unfulfilled → Fulfilled`) | `log_order_state()` before each order update that changes it: `set_order_status`, `rollup_order_status`, `finish_order`, `close_cart_order`, `abandon_cart_order`, `set_order_paid` |
+| Payment change (`Payment: Unpaid → Paid, £315.00 (stripe pi_…)`), payment note | `log_order_state()`: `set_order_paid`, `abandon_cart_order`, `set_order_payment_status` (order page), the technical order form (`shop/order` `on_update`) |
+| Site user account created / order linked to a site user | `attach_order_user` |
+| Emails: New order, Order confirmation, Fulfilment request, Dispatch (sent, could not be queued, or no buyer email) | `send_order_emails`, `shop/fulfilment_email`, `send_dispatch_email` |
+| Tracking number set / removed | `set_order_tracking` (order page) |
+| Stock taken off the catalogue | `post_listed_stock` |
+| Refund (amount, total refunded of paid) and the payment change; refund email to the shop | `set_order_refund` (Stripe `charge.refunded`) |
+| Returned to stock | `return_line_to_stock` (order page) |
+| Admin comment (plain text, shown bold) | `add_order_comment`, from the order page |
+
+The order page shows the history newest first: time (`17 Nov 2026 16:47`), the line, and the CMS user's name after it. A new state change or email must call `log_order_state()` / `log_order()` where it happens. Comments replace the old admin note field (removed 2026-11-17; there were no notes to move).
+
 ## Catalogue
 
 ### Category collections
@@ -79,15 +102,14 @@ CMS-only size/frame/colour options, product types, and listed stock on product i
 - PHP session may cache `order_id` for the request; cookie is source of recovery after session dies  
 - **User module optional** — guest cart uses the cookie. Do not load `user/user_model` unless `user` is in enabled modules (`shop_model::get_front_user()`).  
 
-One-off backfill of empty headings: `php grok/_migrate_shop_order_heading.php`  
+One-off backfill of empty headings: `php ai/_migrate_shop_order_heading.php`  
 
 ### Panel
 
 | Piece | Role |
 |-------|------|
-| **`shop/cart`** | Basic cart: badge, popup, add/remove, checkout button |
+| **`shop/cart`** | Basic cart: badge, popup, add, line quantity − / +, remove, checkout button |
 | **Site extends** (e.g. Timmy `//shop_cart`) | Design SCSS + label settings — place **`shop/cart`** on pages, not a site-owned cart panel |
-| **`shop/basket` / `basketmini`** | Older full-page basket UI (local shop checkout flow) |
 
 Buy buttons call **`cart_add_items()`** from `shop/js/cart.js` (local only — no Storefront latency on add).
 
@@ -95,16 +117,17 @@ Buy buttons call **`cart_add_items()`** from `shop/js/cart.js` (local only — n
 
 - **Settings:** all labels and visitor messages are `shop/cart` settings (stored row; no serve-time defaults in `cart.php`), including the JS messages `add_error`, `checkout_error`, `checkout_missing_error`, passed as `data-*` on `.cart_container` and read with `.data()`.
 - **Markup** lives in `cart.tpl.php`; `cart.php` passes data (`dims`, `attributes` list, `description`, `notice`, `warning`).
-- **Requests:** `cart_add_items(items, attributes)` posts `product_id`, `product_item_id`, `quantity`, `dims`, `attributes`. No price is posted; the server prices every line. Remove posts `line_id`.
+- **Requests:** `cart_add_items(items, attributes)` posts `product_id`, `product_item_id`, `quantity`, `dims`, `attributes`. No price is posted; the server prices every line. Remove posts `line_id`. Only the keys in `cart.json` `ajax.input` reach the panel, so a post cannot overwrite a cart setting.
+- **Action replies:** actions that need no HTML (`add`, `set_visible`, the provider's `shop_checkout` and `reconcile`) are called with `get_ajax`. The panel returns an array; the browser gets only the keys in `ajax.output`, under `result` (`ok`, `quantity` = cart total, …), and an error text as `cms_error`. `cart.js` reads them through `cart_reply()`. `open` / `remove` / `checkout_check` use `get_ajax_panel`, because they need the popup HTML.
 - **Notices (no `window.alert`):** `cart_add_items` resolves `{ ok: 1, quantity }` or `{ ok: 0, error }` (error from the server, or the cart setting `add_error`); the caller shows it — `product.js` toggles `.product_added_visible` / `.product_add_error_visible`. Checkout messages go to the cart popup's hidden `.cart_popup_message` via `cart_show_message(text)`.
-- **Line deletes** (`cart`, `basket`, `order_operations`) go through `shop_model::delete_order_line($order_id, $line_id)`, which only deletes a line of the visitor's current order.
+- **Line deletes** go through `shop_model::delete_order_line($order_id, $line_id)`, which only deletes a line of the visitor's current order.
 - **Naming:** a row of an order or cart is a **line** (`line_id`, `shop/order_line`), never an item. "Item" is the product item (`product_item_id`).
 - **Request values** are read from panel `$params` only (ajax params already contain the post), never `$this->input->post()`.
 - **Line fields:** `quantity` only (definition field and table column; `qty` is gone). `product_item_id` is the sold item (`order_line_item_id`); `ref_id` is read only for delivery lines (`order_line_ref_id`).
 
 ### Header vs popup
 
-On a normal page the header cart reads only the quantity (`get_order_quantity`, one SQL `SUM`) and renders the badge shell. Lines, prices, dims and the popup are built only when details are wanted: `do=open` (cart opened), `do=remove`, or the popup left open in the session (`cart_visible`). Local and Shopify lines may be in the same cart; there is no mixed-cart check.
+On a normal page the header cart reads only the quantity (`get_order_quantity`, one SQL `SUM`) and renders the badge shell. Lines, prices, dims and the popup are built only when details are wanted: `do=open` (cart opened), `do=remove`, `do=set_quantity`, or the popup left open in the session (`cart_visible`). Local and Shopify lines may be in the same cart; there is no mixed-cart check.
 
 ### Line prices
 
@@ -120,7 +143,23 @@ A draft cart reserves stock-counted items for **Shop settings → Cart hold (min
 
 Activity is cart `do=add`, `do=open` (sent by `cart_load_details()` when the cart is opened), and `do=remove`. Each runs `shop_dim_model::cart_refresh_hold`: the cart's local item lines are checked against stock held by **other** orders. If all fit, the hold is refreshed. If a line no longer fits (stock taken while the cart was stale, item hidden or not offered), the hold is **not** refreshed, so a stale cart never takes stock back from a cart that now holds it, and that line shows the cart setting **Item not available** ("Item {{item}} is not available anymore.", `{{item}}` = product item title, e.g. `Poster (A3, Black)`). Removing the line refreshes the hold for the rest. Shopify lines are skipped (Shopify is the stock of record).
 
+**Payment page open:** a checkout provider calls `shop_model::hold_cart_until($order_id, $time)` when it opens a payment page (Stripe: until the session expires). The draft holds its stock at least until then (`order.cart_hold_until`), whatever the Cart hold setting is. If a payment still arrives after the stock went to another order, `set_order_paid` adds "Not enough stock at payment (oversold): …" to the order's payment note.
+
 Cart add uses the same rule before the line is saved (`shop_dim_model::cart_add_fits`): listed stock minus other orders' holds must cover this cart's qty of the item **plus** the new qty. So a stale cart that already has the last unit cannot add another.
+
+### VAT line (product page, cart total)
+
+Shop settings → **VAT**: `vat_rate` (empty = N/A, else the rate in %, prices include it), `vat_product_text` (`{{rate}}`), `vat_cart_text` (`{{amount}}`, `{{rate}}`), `vat_na_text` (shown when N/A; empty hides the line). `shop_model::get_vat()` reads the rate (a value that is not a rate 0–99 counts as N/A and is logged once); `vat_text('product')` / `vat_text('cart', $total, $currency)` give the line, the cart's VAT part being total × rate / (100 + rate), £0.00. Printed as `product_vat` under the price (in `product_price_block`, `shop/product.php` → `vat_note`) and `cart_popup_vat` under the cart total (`cart.vat`, none for a mixed-currency cart). Not in the emails, the Orders admin or Stripe. The older **Show tax** setting is the on-site checkout's only.
+
+### Line quantity (− / +)
+
+Each popup line has `cart_popup_item_quantity` (`data-line_id`, `data-quantity`) with **−** / **+** (cart settings `quantity_minus_label`, `quantity_plus_label`). `cart.js` `cart_set_quantity()` posts `do=set_quantity` (`line_id`, `quantity`) and replaces the popup with the reply; one request at a time (`cart_loading`). **−** at 1 removes the line (`do=remove`).
+
+`shop_model::set_order_line_quantity($order_id, $line_id, $quantity)`: only an item line of the visitor's own draft cart, quantity 1–99. More of a local item must pass `cart_add_fits` (the add rule, with the difference as the new qty); if not, the line keeps its quantity and shows the cart setting **Not in stock** (`stock_error`). Less is never checked. The line keeps its price; the hold is refreshed (`cart_refresh_hold`). Cart quantity changes are not written to the order history.
+
+### Abandoned carts
+
+Unpaid draft carts with no visitor activity for **Shop settings → Delete carts after (days)** (default 30, 0 = never) are deleted with their lines by the repeating task **Shop cart cleanup** (`shop/cart_cleanup`, add it daily under CMS repeating tasks; `shop_model::delete_stale_carts`). Orders that left draft are never deleted.
 
 ### Line text
 
@@ -212,10 +251,15 @@ The sale atom is the **order line**. It points at `shop/product_item` (dims, sku
 | `pending` | `PENDING`, `AUTHORIZED`, `EXPIRED` |
 | `partially_paid` | `PARTIALLY_PAID` |
 | `paid` | `PAID`, `PARTIALLY_REFUNDED` |
+| `partially_refunded` | — (local orders: a part refund reported by the payment module, `set_order_refund`) |
 | `refunded` | `REFUNDED` |
 | `voided` | `VOIDED` |
 
-**Stock (count mode):** listed `product_item.number` minus qty on unfinished holding lines (can be negative in reports). Abandoned / cancelled / refunded / **finished** do not hold. On finish, fulfilled/in_progress qty is subtracted from listed `number` once (`stock_posted_time`).
+**Stock (count mode):** listed `product_item.number` minus qty on unfinished holding lines (can be negative in reports). Abandoned / cancelled / refunded / **finished** do not hold (partially refunded still holds). On finish, fulfilled/in_progress qty is subtracted from listed `number` once (`stock_posted_time`).
+
+**Refunds** (`shop_model::set_order_refund($order_id, $refunded_total)`, the contract for any payment module): `$refunded_total` is the **cumulative** refunded amount in major units. The same total as the stored `refunded_amount` changes nothing (repeated or late events). Otherwise: `refunded_amount` stored, payment `partially_refunded` (below `paid_amount`) or `refunded`, History lines ("Refund in stripe: £15.00 (refunded £15.00 of £330.00)" and the payment change), and the **refund notice** to Shop settings → Notification emails (`send_refund_email`; Order emails → Shop refund notice; template `$mail = 'refund'`). The order status is not changed: the admin cancels or finishes the order. Stripe calls it from `charge.refunded` (orders found by `payment_ref`, `get_order_by_payment_ref`). The order page shows **Refunded −£…** in Summary, and choosing **Cancelled** on a paid order shows a note that cancelling does not refund (the refund is made in Stripe).
+
+**Return to stock** (finished orders): goods sent back after Finished. On the order page, each item line whose quantity was posted (count-mode item, line fulfilled / in progress, `shop_model::line_returnable`) has **Return to stock**: `return_line_to_stock` adds the whole line quantity back to the variant's `number` once, stamps the line `stock_returned_time` and logs "Returned to stock: …". Then the line shows "Returned to stock {date}".
 
 Child / sub-orders (when payment or delivery rules differ) and `shop/payment` rows are later.
 
@@ -223,7 +267,7 @@ Child / sub-orders (when payment or delivery rules differ) and `shop/payment` ro
 
 Shop **provides** `shop/fulfilment_email`. Each `shop/category` picks a fulfilment provider and a repeater of recipient emails.
 
-CMS emails run only when **payment is paid** and **status is unfulfilled** (Shopify webhook/cron, or `set_order_paid` for Stripe/CMS later). If Shopify is **in progress** or **fulfilled**, CMS does not send and cron does not keep checking those lines. Group unsent lines by provider → `run_action`. Email provider sends **one queued mail per recipient**, containing only that recipient’s lines. `fulfilment_sent_time` is stored on each line and the line `status` becomes `in_progress`. Empty category fulfilment = CMS does not fulfil that line (no log, no stamp); set Email fulfilment on categories that should mail. Order status rolls up from lines; paid + all fulfilable lines fulfilled/cancelled → **Finished**.
+CMS emails run only when **payment is paid** and **status is unfulfilled** (Shopify webhook/cron, or `set_order_paid` for Stripe and other payment modules). If Shopify is **in progress** or **fulfilled**, CMS does not send and cron does not keep checking those lines. Group unsent lines by provider → `run_action`. Email provider sends **one queued mail per recipient**, containing only that recipient’s lines. `fulfilment_sent_time` is stored on each line and the line `status` becomes `in_progress`. Empty category fulfilment = CMS does not fulfil that line (no log, no stamp); set Email fulfilment on categories that should mail. Order status rolls up from lines; paid + all item lines fulfilled/cancelled → **Finished**. Lines no provider fulfils count too (the shop sends them by hand), so a paid order without providers stays **Unfulfilled** until the admin sets its status. Admin status Fulfilled / In progress / Cancelled is applied to the lines; Finished on a paid order marks its open lines fulfilled first, so listed stock is posted.
 
 Print file: if `shop/product.print_file` exists, the email includes the CMS download URL (`/cms/file/…`, same as admin file download). Missing file: omit, still send.
 
@@ -239,31 +283,106 @@ Shopify is **not** cart-of-record while browsing — no Storefront on every add.
 
 ```
 Local cart (cookie → order draft)
-  → provides.shop_checkout?  shopify/checkout materialise → Shopify pay
-  → else: shop/checkout → stripe (optional)
+  → Checkout button: cart do=checkout_check, then the shop_checkout provider (Shop settings → Checkout provider)
+      shopify/checkout → Shopify checkout
+      stripe/checkout  → Stripe Checkout page (card, email, phone, delivery address, delivery method)
+  → provider marks the order paid: shop_model::set_order_paid()
 ```
 
-Payment modules hook **payable totals / order ids**, not product grids.
+Payment modules use the **payable order** contract below, not order lines or product data. Stripe cart checkout: [`stripe/docs/shop_checkout.md`](../../stripe/docs/shop_checkout.md). The on-site checkout page (`shop/checkout`) is a separate service: see § Services.
+
+### Payable order (contract for `shop_checkout` providers)
+
+A checkout provider never walks order lines itself. It uses two `shop_model` calls:
+
+**`checkout_check($order_id)`** → `['price_changed_lines', 'lost_item_ids', 'ready']`. Re-prices the lines and re-checks stock (and refreshes the cart hold). The cart runs it on open and on the Checkout click; the provider runs it again before taking payment and stops when `ready` is false (the visitor sees the updated cart on the next click).
+
+**`get_payable_order($order_id)`** → what there is to pay, amounts in major units (e.g. pounds):
+
+| Key | Content |
+|-----|---------|
+| `currency` | ISO code, lower case (`gbp`); empty when the lines have more than one currency (`mixed_currency`) |
+| `currency_row` | the `shop/currency` row, for `format_amount` |
+| `lines` | every line: `line_id`, `type` (`item` / `delivery`), `item_id`, `name`, `dims` (text), `unit_price`, `quantity`, `total`, `currency_row` |
+| `subtotal` / `delivery_total` / `total` | item lines / delivery lines / both |
+| `delivery_options` | delivery methods the provider may offer: `delivery_id`, `name`, `price` (shown `shop/delivery` rows, list order) |
+| `fingerprint` | hash of the lines; a provider stores it at checkout start and compares at payment |
+
+The cart total, the provider's line items, the paid-amount check and the order email summary all read this one array, so a pricing rule (discount, VAT) is added in one place.
+
+**Provider panel:** `cms_do=shop_checkout` → reply `{ ok, redirect }`. On payment the provider calls `set_order_paid` (below).
+### Paid orders (`set_order_paid`)
+
+`shop_model::set_order_paid($order_id, $payment)` is the one place an order becomes paid, for any payment module. It returns false (and does nothing) when the order is already paid, so a provider may call it from both its webhook and its return page.
+
+| `$payment` key | Stored as |
+|----------------|-----------|
+| `provider`, `ref`, `amount`, `note` | order `payment_provider`, `payment_ref` (e.g. Stripe `pi_…`), `paid_amount` (delivery included), `payment_note` |
+| `buyer` [`name`, `email`, `phone`] | `buyer_name`, `buyer_email` (valid address only), `shipping_phone` |
+| `shipping` [`name`, `address1`, `address2`, `city`, `postcode`, `county`, `country`] | `shipping_*` |
+| `delivery` [`delivery_id`, `price`] | one delivery line (`ref_id` = `shop/delivery` row, `line_type` delivery, no product item, price as charged) |
+
+All text is cleaned with `clean_visitor_text` (the buyer typed it on the provider's page). Then: status **Unfulfilled** + payment **Paid**, lines stamped unfulfilled, `request_fulfilment`, status rollup, and the order emails.
+
+`payment_note` is set by the provider when the payment does not match the cart (amount, currency, lines changed after checkout started). The order is still paid (the money is taken); the notification email starts with the note.
+
+### Paid order → site user (`attach_order_user`)
+
+Shop extends `user/user` (`//user_user`, `definitions/user_user.json`) with the delivery fields of the order, same names: `shipping_name`, `shipping_address1`, `shipping_address2`, `shipping_city`, `shipping_postcode`, `shipping_county`, `shipping_country`, `shipping_phone`. They show on the admin user form under **Shop**.
+
+`set_order_paid` calls `attach_order_user($order_id)` right after the buyer and address are stored. Nothing happens when the `user` module is not enabled. The buyer email is the user's identity:
+
+| Order | User |
+|-------|------|
+| already has `user_id` (cart bought while logged in) | that user, whatever email was typed at payment |
+| no user, a shown user has the buyer email (also tried in lower case) | that user |
+| no user, no such email | new `user/user`: email in lower case, first / last name from the buyer name, phone, **no password**, `email_verified` no, default access for new users |
+| no valid buyer email, or a hidden user holds the email | no user; logged with `error_log_user` |
+
+Then the order's `shipping_*` values are written onto the user (each paid order overwrites them), the user's `phone` is filled when empty, and the order gets `user_id`. The buyer is not logged in by this. A created user has no password; the buyer sets one through the password reminder, which mails that address.
+
+The payment provider does not verify the email. A guest who types somebody else's email gets the order attached to that account and replaces its saved delivery fields. Password, access and other user fields are not touched.
+
+Test: `ai/tmp/shop_order_user_test.php`.
+
+**Order emails** (`send_order_emails`, queued through `cms_email_model`, plain text):
+- notification to Shop settings → **Notification emails**, with the payment note (if any), the payment reference and the admin link;
+- confirmation to the buyer, starting with the intro.
+
+**Dispatch email** (`send_dispatch_email`, same queue and template, `$mail = 'dispatch'`): to the buyer when the admin sets the order **Fulfilled** on the order page with **Email the buyer** ticked. It has the dispatch intro, `Tracking number: …` when the order has one (`tracking_number`), then the order summary. It stamps `dispatch_email_time`. Not sent on any other status, nor from the technical form.
+
+**Terms line:** the buyer emails (confirmation, dispatch) end with Order emails → **Terms line** ("Our terms and conditions of sale are available at {{site_url}}", `{{site_url}}` = the site's front page, absolute, from `order_email_data`). Empty: no line. The New order email has none.
+
+All texts (subjects, intros, every label) are settings of **`shop/order_email`** (Shop settings → Order emails). The body is `templates/order_email.tpl.php`; the model only passes data (`order_email_data`: lines from the payable order, total, buyer, address). A site module can replace the template through an extend (`//shop_order_email`). It is a text template, so it has no container / content elements.
+
+They need **CMS email queue** on CMS repeating tasks, and SMTP (or PHP `mail()`) in CMS settings.
 
 ---
 
-## Storefront panels (basic shop)
+## Services (one panel per service)
 
-Enough for a working small shop without a site theme module:
+`shop` plus one payment module is a complete small shop. A site module extends the panels for design and customisation; it does not replace them. **Each logical service has one panel.** A second panel for a service that already has one is a duplicate: extend the existing panel instead.
 
-| Panel | Role |
-|-------|------|
-| `shop/product` | Product page (base; site/connector extend via `//shop_product`) |
-| `shop/products` | Placeable product grid + filter bar (local catalogue) |
-| `shop/products_menu` | Filter header (category ▾, subcategory pills, collection ▾) — embedded |
-| `shop/products_grid` | Ajax product list — embedded; uses `shop/product_thumb` |
-| `shop/product_thumb` | Basic product card (image, heading, price) — local only |
-| `shop/category` (+ subcategory) | Category landings; site extends with `//shop_category` |
-| `shop/cart` | Cart badge + popup (sites extend design) |
-| `shop/basket`, `shop/basketmini` | Full basket (legacy local) |
-| `shop/checkout` | Local checkout |
-| `shop/productbuy`, `shop/productdims` | Legacy pickers. The storefront is `shop/product`. |
+| Service | Panel(s) | Site extends via | State |
+|---------|----------|------------------|-------|
+| Product list (grid + filters) | `shop/products` shell → `shop/products_menu`, `shop/products_grid` (ajax) | `//shop_products*` | works |
+| Product card | `shop/product_thumb` | `//shop_product_thumb` | works |
+| Product page (images, text, price, variant picker, Add to cart) | `shop/product` | `//shop_product` | works |
+| Variants / stock (dims, types, items, reserved) | lists `product_dim`, `product_type`, `product_item`; `shop_dim_model`; admin inputs `dim_value_select`, `item_yes_no`, `image_item_ids` — [`dims.md`](dims.md) | — | works |
+| Catalogue structure | lists `category`, `subcategory`, `collection`, `collection_type`, `producttext` | `//shop_category`, `//shop_subcategory` | lists; landing pages come from the site |
+| Currency | list `currency`; `shop/currency_selector` | — | works |
+| Cart (header count, lines, quantity − / +, remove, Checkout button) | `shop/cart` | `//shop_cart` | works |
+| Checkout handoff (cart → payment) | service `shop_checkout`, chosen in Shop settings; provider panel, e.g. `stripe/checkout` | provider module | works |
+| On-site checkout page (delivery method, address, review — for payment providers that do not collect them) | `shop/checkout`, `delivery_model`, `vendor/countries.json` | `//shop_checkout` | **needs rework** (todo "On-site checkout rework"): no payment step, settings not stored |
+| Delivery | lists `delivery`, `delivery_set`; `product_type.delivery_set_id` | — | works (sets are read by the on-site checkout only) |
+| Payment | payment module (`stripe/checkout`, webhook, return URL) | — | works |
+| Paid order + order emails | `shop_model::set_order_paid`, `send_order_emails`, `send_dispatch_email`; texts and template `shop/order_email` | `//shop_order_email` | works |
+| Orders admin | `shop/orders_admin`, `shop/orders_admin_rows`, `shop/order_admin` (`admin/orders/`); history table `shop_order_log`; technical lists `order`, `order_line`; `shop/order` `on_update` | — | works |
+| Fulfilment | service `shop_fulfilment` → `shop/fulfilment_email` | provider module | works |
+| Shop settings | `shop/shop`; provider pickers use `cms/cms_input_provides` | — | works |
+| Search / user extends | extend sources `search_searchajax`, `user_user` | — | for projects with those modules |
 
+Removed as duplicates (2026-11-16): `productbuy`, `productdims` (→ `shop/product`), `basket`, `basketmini`, `order_operations` (→ `shop/cart`), `shop/cms_input_provides` (→ the CMS input). A project that still places one of them moves to the service panel first; `ai/cleanup_removed_shop_panels.php` reports placed ones and removes their stored settings.
 ### Products grid filters
 
 Place **`shop/products`** on a page. The shell renders `products_menu` + `products_grid`. Filter changes ajax-reload both (menu for pills/collection list; grid for thumbs).

@@ -2,26 +2,6 @@
 	"version": "0.0",
 	"panels": [
 		{
-			"id": "basketmini",
-			"name": "Basket (mini)",
-			"placeable": 1
-		},
-		{
-			"id": "checkout",
-			"name": "Checkout",
-			"placeable": 1
-		},
-		{
-			"id": "basket",
-			"name": "Basket",
-			"placeable": 1
-		},
-		{
-			"id": "cart",
-			"name": "Cart",
-			"placeable": 1
-		},
-		{
 			"id": "products",
 			"name": "Products",
 			"placeable": 1
@@ -44,8 +24,16 @@
 			"placeable": 1
 		},
 		{
-			"id": "image_item_ids",
-			"name": "Image variants"
+			"id": "orders_admin",
+			"name": "Orders"
+		},
+		{
+			"id": "orders_admin_rows",
+			"name": "Orders (rows)"
+		},
+		{
+			"id": "order_admin",
+			"name": "Order"
 		},
 		{
 			"id": "category",
@@ -62,6 +50,20 @@
 			"name": "Product text"
 		},
 		{
+			"id": "cart",
+			"name": "Cart",
+			"placeable": 1
+		},
+		{
+			"id": "checkout",
+			"name": "Checkout",
+			"placeable": 1
+		},
+		{
+			"id": "fulfilment_email",
+			"name": "Email fulfilment"
+		},
+		{
 			"id": "dim_value_select",
 			"name": "Dim value select"
 		},
@@ -70,12 +72,15 @@
 			"name": "Yes or no"
 		},
 		{
-			"id": "productdims",
-			"name": "Product dims"
+			"id": "image_item_ids",
+			"name": "Image variants"
 		},
 		{
-			"id": "fulfilment_email",
-			"name": "Email fulfilment"
+			"id": "cart_cleanup",
+			"name": "Shop cart cleanup",
+			"flags": [
+				"cron"
+			]
 		}
 	],
 	"provides": [
@@ -90,6 +95,14 @@
 			"id": "shop",
 			"name": "Shop",
 			"order": 200
+		},
+		{
+			"id": "shop_orders_admin",
+			"name": "Orders",
+			"parent": "shop",
+			"access": "shop_orders",
+			"url": "admin/orders/",
+			"order": 10
 		},
 		{
 			"id": "shop_products",
@@ -163,19 +176,19 @@
 		},
 		{
 			"id": "shop_orders",
-			"name": "Orders",
-			"parent": "shop",
+			"name": "Order details",
+			"parent": "shop_panel_settings",
 			"access": "shop_orders",
 			"url": "admin/cms_list/shop__order/",
-			"order": 200
+			"order": 100
 		},
 		{
 			"id": "shop_order_lines",
-			"name": "Order lines",
-			"parent": "shop",
+			"name": "Order line details",
+			"parent": "shop_panel_settings",
 			"access": "shop_order_lines",
 			"url": "admin/cms_list/shop__order_line/",
-			"order": 210
+			"order": 110
 		},
 		{
 			"id": "shop_delivery",
@@ -204,20 +217,6 @@
 			"access": "shop_settings",
 			"url": "admin/panel_settings/shop__shop/",
 			"order": 10
-		},
-		{
-			"id": "productbuy_settings",
-			"name": "Product buy",
-			"parent": "shop_panel_settings",
-			"url": "admin/panel_settings/shop__productbuy/",
-			"order": 20
-		},
-		{
-			"id": "productdims_settings",
-			"name": "Product dims",
-			"parent": "shop_panel_settings",
-			"url": "admin/panel_settings/shop__productdims/",
-			"order": 30
 		},
 		{
 			"id": "checkout_settings",
@@ -260,12 +259,23 @@
 			"parent": "shop_panel_settings",
 			"url": "admin/panel_settings/shop__fulfilment_email/",
 			"order": 90
+		},
+		{
+			"id": "order_email_settings",
+			"name": "Order emails",
+			"parent": "shop_panel_settings",
+			"url": "admin/panel_settings/shop__order_email/",
+			"order": 89
 		}
 	],
 	"extends": [
 		{
 			"target": "search/searchajax",
 			"source": "//search_searchajax"
+		},
+		{
+			"target": "user/user",
+			"source": "//user_user"
 		}
 	]
 }

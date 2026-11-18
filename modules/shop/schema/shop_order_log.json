@@ -1,0 +1,19 @@
+{
+  "table": "shop_order_log",
+  "engine": "InnoDB",
+  "charset": "utf8mb4",
+  "collation": "utf8mb4_general_ci",
+  "columns": {
+    "shop_order_log_id": { "type": "INT", "constraint": 10, "unsigned": true, "null": false, "auto_increment": true },
+    "order_id": { "type": "INT", "constraint": 10, "unsigned": true, "null": false },
+    "time": { "type": "INT", "constraint": 10, "unsigned": true, "null": false },
+    "type": { "type": "VARCHAR", "constraint": 20, "null": false },
+    "cms_user_id": { "type": "INT", "constraint": 10, "unsigned": true, "null": false },
+    "user_name": { "type": "VARCHAR", "constraint": 50, "null": false },
+    "line": { "type": "TEXT", "null": false }
+  },
+  "indexes": {
+    "PRIMARY": { "columns": ["shop_order_log_id"], "type": "primary" },
+    "order_id": { "columns": ["order_id"] }
+  }
+}

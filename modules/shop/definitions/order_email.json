@@ -1,0 +1,147 @@
+{
+	"label": "Order emails",
+	"description": "Texts of the order emails: when an order is paid, notification to the shop and confirmation to the buyer; when the admin sets it Fulfilled, the dispatch email to the buyer. The layout is templates/order_email.tpl.php (plain text).",
+	"item": [],
+	"settings": [
+		{
+			"type": "subtitle",
+			"label": "Shop notification"
+		},
+		{
+			"type": "text",
+			"name": "notify_subject",
+			"label": "Subject",
+			"default": "New order {{order_id}}",
+			"help": "Sent to Shop settings → Notification emails. {{order_id}} = order id."
+		},
+		{
+			"type": "text",
+			"name": "check_label",
+			"label": "Payment note heading",
+			"default": "CHECK BEFORE FULFILLING",
+			"help": "Printed before the payment note when the payment did not match the cart."
+		},
+		{
+			"type": "text",
+			"name": "payment_label",
+			"label": "Payment",
+			"default": "Payment"
+		},
+		{
+			"type": "text",
+			"name": "admin_label",
+			"label": "Admin link",
+			"default": "Admin"
+		},
+		{
+			"type": "subtitle",
+			"label": "Shop refund notice"
+		},
+		{
+			"type": "text",
+			"name": "refund_subject",
+			"label": "Subject",
+			"default": "Refund on order {{order_id}}",
+			"help": "Sent to Shop settings → Notification emails when the payment provider reports a refund. {{order_id}} = order id."
+		},
+		{
+			"type": "textarea",
+			"name": "refund_intro",
+			"label": "Intro",
+			"lines": "3",
+			"default": "A refund was made in Stripe for this order."
+		},
+		{
+			"type": "text",
+			"name": "refunded_label",
+			"label": "Refunded",
+			"default": "Refunded"
+		},
+		{
+			"type": "subtitle",
+			"label": "Buyer confirmation"
+		},
+		{
+			"type": "text",
+			"name": "confirm_subject",
+			"label": "Subject",
+			"default": "Your order {{order_id}}",
+			"help": "{{order_id}} = order id."
+		},
+		{
+			"type": "textarea",
+			"name": "confirm_intro",
+			"label": "Intro",
+			"lines": "4",
+			"default": "Thank you for your order. We will let you know when it is on its way.",
+			"help": "First paragraph, above the order summary."
+		},
+		{
+			"type": "text",
+			"name": "terms_line",
+			"label": "Terms line",
+			"default": "Our terms and conditions of sale are available at {{site_url}}",
+			"help": "Last line of the buyer emails (confirmation and dispatch). {{site_url}} = the site's front page. Empty: no line."
+		},
+		{
+			"type": "subtitle",
+			"label": "Buyer dispatch"
+		},
+		{
+			"type": "text",
+			"name": "dispatch_subject",
+			"label": "Subject",
+			"default": "Your order {{order_id}} is on its way",
+			"help": "Sent when the order is set Fulfilled on the order page with Email the buyer ticked. {{order_id}} = order id."
+		},
+		{
+			"type": "textarea",
+			"name": "dispatch_intro",
+			"label": "Intro",
+			"lines": "4",
+			"default": "Good news: your order is on its way.",
+			"help": "First paragraph, above the tracking number and the order summary."
+		},
+		{
+			"type": "text",
+			"name": "tracking_label",
+			"label": "Tracking number",
+			"default": "Tracking number",
+			"help": "Printed before the tracking number, when the order has one."
+		},
+		{
+			"type": "subtitle",
+			"label": "Order summary (all emails)"
+		},
+		{
+			"type": "text",
+			"name": "order_label",
+			"label": "Order",
+			"default": "Order"
+		},
+		{
+			"type": "text",
+			"name": "delivery_label",
+			"label": "Delivery",
+			"default": "Delivery"
+		},
+		{
+			"type": "text",
+			"name": "total_label",
+			"label": "Total paid",
+			"default": "Total paid"
+		},
+		{
+			"type": "text",
+			"name": "buyer_label",
+			"label": "Buyer",
+			"default": "Buyer"
+		},
+		{
+			"type": "text",
+			"name": "address_label",
+			"label": "Deliver to",
+			"default": "Deliver to"
+		}
+	]
+}

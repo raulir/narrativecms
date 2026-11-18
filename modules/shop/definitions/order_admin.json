@@ -1,0 +1,10 @@
+{
+	"version": "2",
+	"label": "Order",
+	"description": "Admin order page",
+	"item": [],
+	"settings": [],
+	"ajax": {
+		"input": ["cms", "order_id", "status", "payment_status", "tracking_number", "email_buyer", "comment", "line_id"]
+	}
+}

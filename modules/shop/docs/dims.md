@@ -2,7 +2,7 @@
 
 **Dim** = a product option axis (size, frame, colour) and its values. One system for CMS-only and Shopify-synced products. Shopify **writes** these lists on sync; shop / Timmy / imagemaker **read** shop dims only.
 
-Do **not** confuse with unrelated `dimension` fields: basketmini quantity/unit, `order_line.dimension` (minutes/kgs), shop settings `dimension_prefix` / `dimension_suffix` / `dimension_extra` / `dimension_rounding` (UOM). Imagemaker **product dimension rules** store `product_dimension` + `dimension_value` (live DB names); match is CMS dim **slug** + value id or label.
+Do **not** confuse with unrelated `dimension` fields: `order_line.dimension` (minutes/kgs). Imagemaker **product dimension rules** store `product_dimension` + `dimension_value` (live DB names); match is CMS dim **slug** + value id or label.
 
 ## Lists
 
@@ -22,7 +22,7 @@ Do **not** confuse with unrelated `dimension` fields: basketmini quantity/unit, 
 2. **Shop → Product types** — attach those dims. **No limit** or **Amount available in stock**.
 3. Set **Product type** on the product, or leave empty and set it on the subcategory or category (cascade).
 4. **Count mode:** one **Product item** per product × dim combo. Order empty (master). **Number** is remaining stock.
-5. Open the product page (`shop/product`). It uses `shop_dim_model->get_product_presentation`. `shop/productbuy` and `shop/productdims` are legacy.
+5. Open the product page (`shop/product`). It uses `shop_dim_model->get_product_presentation`.
 
 ## Shopify sync
 

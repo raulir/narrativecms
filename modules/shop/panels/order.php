@@ -5,7 +5,8 @@ namespace shop;
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
- * List-only shop/order. on_update posts listed stock when status becomes finished.
+ * List-only shop/order. on_update posts listed stock when status becomes finished, and logs state changes;
+ * on_delete removes the order's lines and history.
  */
 class order extends \Controller {
 
@@ -19,25 +20,28 @@ class order extends \Controller {
 		$this->load->model('cms/cms_page_panel_model');
 		$this->load->model('shop/shop_model');
 
-		$existing = $this->cms_page_panel_model->get_cms_page_panel($id);
-		if ($this->shop_model->order_is_finished($existing) || !empty($existing['stock_posted_time'])){
-			$params['status'] = 'finished';
-			if (!empty($existing['stock_posted_time'])){
-				$params['stock_posted_time'] = $existing['stock_posted_time'];
-			}
-			return $params;
+		// Status changes are logged by set_order_status; a hand-set payment status here.
+		if (isset($params['payment_status'])){
+			$this->shop_model->log_order_state($this->cms_page_panel_model->get_cms_page_panel($id), ['payment_status' => (string)$params['payment_status']]);
 		}
 
-		if ((string)($params['status'] ?? '') !== 'finished'){
-			return $params;
+		$result = $this->shop_model->set_order_status($id, (string)($params['status'] ?? ''));
+		$params['status'] = $result['status'];
+		if (!empty($result['stock_posted_time'])){
+			$params['stock_posted_time'] = $result['stock_posted_time'];
 		}
 
-		$this->shop_model->finish_order($id);
-		$row = $this->cms_page_panel_model->get_cms_page_panel($id);
-		if (!empty($row['stock_posted_time'])){
-			$params['stock_posted_time'] = $row['stock_posted_time'];
-		}
-		$params['status'] = 'finished';
+		return $params;
+
+	}
+
+	/**
+	 * Order row deleted (technical list, cart cleanup, merge of a guest cart): its lines and history go too.
+	 */
+	function on_delete($params){
+
+		$this->load->model('shop/shop_model');
+		$this->shop_model->delete_order_parts((int)($params['cms_page_panel_id'] ?? 0));
 
 		return $params;
 

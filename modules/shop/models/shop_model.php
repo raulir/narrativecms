@@ -23,27 +23,6 @@ class shop_model extends \Model {
 
 	}
 
-	function get_product_variations($product_id, $params = []){
-
-		$this->load->model('shop/shop_dim_model');
-		return $this->shop_dim_model->get_product_dim_variations($product_id, $params);
-
-	}
-
-	function get_dim_value_data($dimension_name, $dimension_value_id){
-
-		$this->load->model('shop/shop_dim_model');
-		return $this->shop_dim_model->get_dim_value_data($dimension_name, $dimension_value_id);
-
-	}
-
-	function get_dim_label($dimension_name){
-
-		$this->load->model('shop/shop_dim_model');
-		return $this->shop_dim_model->get_dim_label($dimension_name);
-
-	}
-
 	/**
 	 * Long-lived cookie identity for anonymous carts (not sequential order id).
 	 */
@@ -141,13 +120,14 @@ class shop_model extends \Model {
 
 	/**
 	 * Unfinished claims against listed stock. Finished orders have already posted number.
-	 * A draft cart holds only for shop setting cart_hold_minutes after its last activity.
+	 * A draft cart holds for shop setting cart_hold_minutes after its last activity, and while a
+	 * payment page is open for it (cart_hold_until, set by the checkout provider).
 	 */
 	function order_holds_stock($order){
 
 		if ($this->order_is_draft($order)){
 			$hold = (int)$this->get_shop_settings()['cart_hold_minutes'] * 60;
-			return (int)($order['cart_active_time'] ?? 0) >= time() - $hold;
+			return (int)($order['cart_active_time'] ?? 0) >= time() - $hold || (int)($order['cart_hold_until'] ?? 0) >= time();
 		}
 
 		$st = $this->order_physical_status($order);
@@ -171,6 +151,38 @@ class shop_model extends \Model {
 		if ((int)$order_id > 0){
 			$this->cms_page_panel_model->update_cms_page_panel((int)$order_id, ['cart_active_time' => time()]);
 		}
+
+	}
+
+	/**
+	 * Delete draft carts (and their lines) with no visitor activity for $days days. Returns how many.
+	 * Paid and other non-draft orders are never touched.
+	 */
+	function delete_stale_carts($days){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$before = time() - max(1, (int)$days) * 86400;
+		$deleted = 0;
+		foreach ($this->cms_page_panel_model->get_list('shop/order', ['status' => '']) as $order){
+			$last = max((int)($order['cart_active_time'] ?? 0), (int)($order['created'] ?? 0), (int)($order['cart_hold_until'] ?? 0));
+			if (!$this->order_is_draft($order) || $this->order_is_paid($order) || $last >= $before){
+				continue;
+			}
+			$this->delete_order((int)$order['cms_page_panel_id']);
+			$deleted++;
+		}
+		return $deleted;
+
+	}
+
+	/**
+	 * Checkout provider: a payment page is open until $time, so the cart holds its stock at least that long.
+	 */
+	function hold_cart_until($order_id, $time){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->cms_page_panel_model->update_cms_page_panel((int)$order_id, ['cart_hold_until' => (int)$time, 'cart_active_time' => time()]);
 
 	}
 
@@ -322,6 +334,7 @@ class shop_model extends \Model {
 		}
 
 		if ($this->order_physical_status($order) !== $next){
+			$this->log_order_state($order, ['status' => $next]);
 			$this->cms_page_panel_model->update_cms_page_panel($order_id, [
 					'status' => $next,
 			]);
@@ -343,8 +356,10 @@ class shop_model extends \Model {
 			return false;
 		}
 
+		// Every item line counts, also lines no provider fulfils (the shop sends those by hand).
+		$this->load->model('shop/shop_fulfilment_model');
 		foreach ($this->get_order_lines($order_id) as $line){
-			if (!$this->order_line_is_fulfilable($line)){
+			if ($this->shop_fulfilment_model->_is_delivery_line($line)){
 				continue;
 			}
 			$st = $this->order_line_status($line);
@@ -360,6 +375,54 @@ class shop_model extends \Model {
 
 	}
 
+	/**
+	 * Hand-set order status. Same rules as the technical order form.
+	 * Finished posts listed stock once and cannot be undone.
+	 */
+	function set_order_status($order_id, $status){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$id = (int)$order_id;
+		$status = (string)$status;
+		$existing = $this->cms_page_panel_model->get_cms_page_panel($id);
+		if (($existing['panel_name'] ?? '') !== 'shop/order'){
+			return ['status' => '', 'stock_posted_time' => ''];
+		}
+		if ($this->order_is_finished($existing) || !empty($existing['stock_posted_time'])){
+			return [
+					'status' => 'finished',
+					'stock_posted_time' => (string)($existing['stock_posted_time'] ?? ''),
+			];
+		}
+
+		if (in_array($status, ['in_progress', 'fulfilled', 'cancelled'], true) && $status !== (string)($existing['status'] ?? '')){
+			$this->apply_lines_physical_status($id, $status);
+			$this->log_order_state($existing, ['status' => $status]);
+			$this->cms_page_panel_model->update_cms_page_panel($id, ['status' => $status]);
+			return ['status' => $status, 'stock_posted_time' => ''];
+		}
+		if ($status !== 'finished'){
+			if ($status !== (string)($existing['status'] ?? '')){
+				$this->log_order_state($existing, ['status' => $status]);
+				$this->cms_page_panel_model->update_cms_page_panel($id, ['status' => $status]);
+			}
+			return ['status' => $status, 'stock_posted_time' => ''];
+		}
+
+		if ($this->order_is_paid($existing)){
+			$this->apply_lines_physical_status($id, 'fulfilled');
+		}
+		$this->finish_order($id);
+		$row = $this->cms_page_panel_model->get_cms_page_panel($id);
+
+		return [
+				'status' => 'finished',
+				'stock_posted_time' => (string)($row['stock_posted_time'] ?? ''),
+		];
+
+	}
+
 	function finish_order($order_id){
 
 		$this->load->model('cms/cms_page_panel_model');
@@ -372,6 +435,7 @@ class shop_model extends \Model {
 			return true;
 		}
 
+		$this->log_order_state($order, ['status' => 'finished']);
 		$this->cms_page_panel_model->update_cms_page_panel($order_id, [
 				'status' => 'finished',
 		]);
@@ -398,6 +462,7 @@ class shop_model extends \Model {
 			return true;
 		}
 
+		$posted = [];
 		foreach ($this->get_order_lines($order_id) as $line){
 			if ($this->shop_fulfilment_model->_is_delivery_line($line)){
 				continue;
@@ -425,11 +490,15 @@ class shop_model extends \Model {
 			$this->cms_page_panel_model->update_cms_page_panel($item_id, [
 					'number' => $listed - $qty,
 			]);
+			$posted[] = $qty.' × '.$this->shop_dim_model->item_list_title($item);
 		}
 
 		$this->cms_page_panel_model->update_cms_page_panel($order_id, [
 				'stock_posted_time' => time(),
 		]);
+		if ($posted){
+			$this->log_order($order_id, 'Stock taken off the catalogue: '.implode(', ', $posted));
+		}
 		return true;
 
 	}
@@ -475,6 +544,7 @@ class shop_model extends \Model {
 		if (empty($order['order_created'])){
 			$update['order_created'] = $now;
 		}
+		$this->log_order_state($order, $update);
 		$this->cms_page_panel_model->update_cms_page_panel($order_id, $update);
 		$this->stamp_draft_lines_unfulfilled($order_id);
 
@@ -514,11 +584,13 @@ class shop_model extends \Model {
 			return false;
 		}
 
-		$this->cms_page_panel_model->update_cms_page_panel($order_id, [
+		$update = [
 				'status' => 'abandoned',
 				'payment_status' => 'unpaid',
 				'shopify_cart_id' => '',
-		]);
+		];
+		$this->log_order_state($order, $update);
+		$this->cms_page_panel_model->update_cms_page_panel($order_id, $update);
 
 		$cookie_key = $this->get_cart_key_from_cookie();
 		if ($cookie_key !== '' && !empty($order['cart_key']) && $cookie_key === $order['cart_key']){
@@ -617,6 +689,7 @@ class shop_model extends \Model {
 		if ($cart_key === ''){
 			return null;
 		}
+		$this->load->model('cms/cms_page_panel_model');
 		$orders = $this->cms_page_panel_model->get_list('shop/order', [
 				'cart_key' => $cart_key,
 				'status' => '',
@@ -741,7 +814,8 @@ class shop_model extends \Model {
 			]);
 		
 			$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
-		
+			$this->log_order($order_id, 'Cart created');
+
 		}
 
 		return $this->ensure_order_cart_key($order);
@@ -1153,19 +1227,72 @@ class shop_model extends \Model {
 		
 	}
 	
+	/**
+	 * Delete an order. Its lines and history go with it through shop/order on_delete (delete_order_parts),
+	 * also when the order is deleted from the technical list.
+	 */
 	function delete_order($order_id){
-		
+
 		$this->load->model('cms/cms_page_panel_model');
-		
-		$this->cms_page_panel_model->delete_cms_page_panel($order_id);
-		
-		$lines = $this->cms_page_panel_model->get_list('shop/order_line', ['order_id' => $order_id]);
-		foreach($lines as $line){
+		$this->cms_page_panel_model->delete_cms_page_panel((int)$order_id);
+
+	}
+
+	/**
+	 * What belongs to an order row that is being deleted: its lines and its history (shop/order on_delete).
+	 */
+	function delete_order_parts($order_id){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$order_id = (int)$order_id;
+		foreach ($this->cms_page_panel_model->get_list('shop/order_line', ['order_id' => $order_id]) as $line){
 			$this->cms_page_panel_model->delete_cms_page_panel($line['cms_page_panel_id']);
 		}
-		
+
+		try {
+			$this->db->query('delete from shop_order_log where order_id = ?', [$order_id]);
+		} catch (\Throwable $e){
+			error_log_user('shop delete_order_parts: history of order '.$order_id.' not deleted ('.$e->getMessage().')');
+		}
+
 	}
 	
+	/**
+	 * Cart quantity of one item line of this draft cart (ids from the request: anything else is ignored).
+	 * More of a local item must fit the stock (same rule as add). Returns ok, error (stock / invalid), lost_item_ids.
+	 */
+	function set_order_line_quantity($order_id, $line_id, $quantity){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('shop/shop_dim_model');
+
+		$order_id = (int)$order_id;
+		$quantity = (int)$quantity;
+		$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
+		$line = $this->cms_page_panel_model->get_cms_page_panel((int)$line_id);
+		if (($order['panel_name'] ?? '') !== 'shop/order' || !$this->order_is_draft($order)
+				|| ($line['panel_name'] ?? '') !== 'shop/order_line' || (int)$line['order_id'] !== $order_id
+				|| $this->order_line_item_id($line) < 1 || $quantity < 1 || $quantity > 99){
+			return ['ok' => 0, 'error' => 'invalid', 'lost_item_ids' => []];
+		}
+
+		$current = (int)$line['quantity'];
+		if ($quantity > $current && !$this->shop_dim_model->cart_line_is_shopify($line)){
+			$item = $this->cms_page_panel_model->get_cms_page_panel($this->order_line_item_id($line));
+			if (($item['panel_name'] ?? '') !== 'shop/product_item' || !$this->shop_dim_model->cart_add_fits($item, $quantity - $current, $order_id)){
+				return ['ok' => 0, 'error' => 'stock', 'lost_item_ids' => []];
+			}
+		}
+
+		if ($quantity !== $current){
+			$this->cms_page_panel_model->update_cms_page_panel((int)$line['cms_page_panel_id'], ['quantity' => $quantity]);
+		}
+
+		return ['ok' => 1, 'error' => '', 'lost_item_ids' => $this->shop_dim_model->cart_refresh_hold($order_id)];
+
+	}
+
 	/**
 	 * Delete a line of this order (ids from the request: anything else is ignored), then a lone delivery line.
 	 */
@@ -1198,77 +1325,899 @@ class shop_model extends \Model {
 
 	}
 	
-	function calculate_product_item_hash($ref){
+	/**
+	 * The one place an order becomes paid (any payment module). Returns false when already paid.
+	 * $payment: provider, ref, amount, note, buyer [name, email, phone], shipping [name, address1, address2,
+	 * city, postcode, county, country], delivery [delivery_id, price]. See shop.md § Paid orders.
+	 */
+	function set_order_paid($order_id, $payment = []){
 
-		$this->load->model('shop/shop_dim_model');
-		return $this->shop_dim_model->item_dims_hash($ref);
-
-	}
-	
-	function set_order_paid($order_id, $wp_data = []){
-		
 		$this->load->model('cms/cms_page_panel_model');
 
+		$order_id = (int)$order_id;
 		$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
+		if (($order['panel_name'] ?? '') !== 'shop/order' || $this->order_is_paid($order)){
+			return false;
+		}
+
+		// Paid although the cart no longer had its stock (hold ran out and another order took it): say so.
+		$note = (string)($payment['note'] ?? '');
+		if ($this->order_is_draft($order)){
+			$this->load->model('shop/shop_dim_model');
+			$titles = [];
+			foreach ($this->shop_dim_model->cart_refresh_hold($order_id) as $item_id){
+				$titles[] = $this->shop_dim_model->item_list_title($this->cms_page_panel_model->get_cms_page_panel($item_id));
+			}
+			if ($titles){
+				$note = trim($note.' Not enough stock at payment (oversold): '.implode(', ', $titles).'.');
+			}
+		}
+
 		$now = time();
 		$update = [
 				'status' => 'unfulfilled',
 				'payment_status' => 'paid',
-				'last_result' => 'authorized',
-				'paid_time' => !empty($order['paid_time']) ? $order['paid_time'] : $now,
-				'meta' => json_encode(['worldpay' => $wp_data], JSON_PRETTY_PRINT),
+				'paid_time' => $now,
+				'payment_provider' => $this->clean_visitor_text($payment['provider'] ?? '', 50),
+				'payment_ref' => $this->clean_visitor_text($payment['ref'] ?? '', 200),
+				'paid_amount' => isset($payment['amount']) ? round((float)$payment['amount'], 2) : '',
+				'payment_note' => $this->clean_visitor_text($note, 2000, true),
 		];
 		if (empty($order['order_created'])){
 			$update['order_created'] = $now;
 		}
-		
+
+		// Buyer and address come from the payment provider (typed by the visitor there).
+		$buyer = is_array($payment['buyer'] ?? null) ? $payment['buyer'] : [];
+		$shipping = is_array($payment['shipping'] ?? null) ? $payment['shipping'] : [];
+		$update['buyer_name'] = $this->clean_visitor_text($buyer['name'] ?? '', 200);
+		$email = $this->clean_visitor_text($buyer['email'] ?? '', 200);
+		$update['buyer_email'] = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : '';
+		$update['shipping_phone'] = $this->clean_visitor_text($buyer['phone'] ?? '', 50);
+		foreach (['name', 'address1', 'address2', 'city', 'postcode', 'county', 'country'] as $field){
+			$update['shipping_'.$field] = $this->clean_visitor_text($shipping[$field] ?? '', 200);
+		}
+
+		$this->log_order_state($order, $update);
 		$this->cms_page_panel_model->update_cms_page_panel($order_id, $update);
+
+		$this->attach_order_user($order_id);
+
+		$delivery = is_array($payment['delivery'] ?? null) ? $payment['delivery'] : [];
+		if (!empty($delivery['delivery_id'])){
+			// A delivery line put on the cart before payment (shop/checkout) is replaced by the one charged.
+			$this->load->model('shop/shop_fulfilment_model');
+			foreach ($this->get_order_lines($order_id) as $line){
+				if ($this->shop_fulfilment_model->_is_delivery_line($line)){
+					$this->cms_page_panel_model->delete_cms_page_panel($line['cms_page_panel_id']);
+				}
+			}
+			$this->add_delivery_line($order_id, (int)$delivery['delivery_id'], (float)($delivery['price'] ?? 0));
+		}
+
 		$this->stamp_draft_lines_unfulfilled($order_id);
 
 		$this->load->model('shop/shop_fulfilment_model');
 		$this->shop_fulfilment_model->request_fulfilment($order_id);
 		$this->rollup_order_status($order_id);
-		
-		// recipients
-		$shop_config = $this->cms_page_panel_model->get_cms_page_panel_settings('shop/shop');
-		
-		$mailto = [];
-		foreach($shop_config['emails'] as $email){
-			$mailto[] = $email['email'];
+
+		$this->send_order_emails($order_id);
+
+		return true;
+
+	}
+
+	/**
+	 * Paid order → site user: the order's user, else the user with the buyer email, else a new one.
+	 * The order's delivery fields are copied onto the user. Returns the user id, 0 when none.
+	 */
+	function attach_order_user($order_id){
+
+		if (!in_array('user', $GLOBALS['config']['modules'] ?? [], true)){
+			return 0;
 		}
-		
-		$this->load->model('mail/mail_model');
-		$this->mail_model->send_mail([
-				'panel' => 'shop/mail_order',
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('user/user_model');
+
+		$order_id = (int)$order_id;
+		$this->cms_page_panel_model->_invalidate_panel_load_slot($order_id);
+		$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
+		if (($order['panel_name'] ?? '') !== 'shop/order'){
+			return 0;
+		}
+
+		$email = (string)($order['buyer_email'] ?? '');
+
+		// A cart bought while logged in keeps its user; the email typed at payment does not move it.
+		$user = !empty($order['user_id']) ? $this->user_model->get_user((int)$order['user_id']) : [];
+		if (($user['panel_name'] ?? '') !== 'user/user'){
+			$user = [];
+		}
+
+		if (!$user && $email !== ''){
+			$user = $this->user_model->get_user_by_email($email);
+			if (!$user && strtolower($email) !== $email){
+				$user = $this->user_model->get_user_by_email(strtolower($email));
+			}
+		}
+
+		if (!$user){
+
+			if ($email === ''){
+				error_log_user('shop attach_order_user: order '.$order_id.' has no buyer email, no user attached');
+				return 0;
+			}
+
+			// No password: the buyer sets one through the password reminder, which proves the email is theirs.
+			$name = trim((string)($order['buyer_name'] ?? ''));
+			$name_parts = $name !== '' ? explode(' ', $name, 2) : [];
+			$created = $this->user_model->create_user([
+					'email' => strtolower($email),
+					'username' => '',
+					'first_name' => $name_parts[0] ?? '',
+					'last_name' => $name_parts[1] ?? '',
+					'phone' => (string)($order['shipping_phone'] ?? ''),
+					'password' => '',
+					'email_verified' => 'no',
+			]);
+			if (empty($created['data']['user_id'])){
+				// e.g. a hidden user already has this email
+				error_log_user('shop attach_order_user: order '.$order_id.' user not created ('.implode(', ', $created['errors'] ?? []).')');
+				return 0;
+			}
+			$user = $this->user_model->get_user((int)$created['data']['user_id']);
+			$this->log_order($order_id, 'Site user account created for '.strtolower($email));
+
+		}
+
+		$user_id = (int)$user['cms_page_panel_id'];
+
+		$update = [];
+		foreach (['name', 'address1', 'address2', 'city', 'postcode', 'county', 'country', 'phone'] as $field){
+			$update['shipping_'.$field] = (string)($order['shipping_'.$field] ?? '');
+		}
+		if (trim((string)($user['phone'] ?? '')) === '' && $update['shipping_phone'] !== ''){
+			$update['phone'] = $update['shipping_phone'];
+		}
+		$this->cms_page_panel_model->update_cms_page_panel($user_id, $update);
+
+		if ((int)($order['user_id'] ?? 0) !== $user_id){
+			$this->cms_page_panel_model->update_cms_page_panel($order_id, ['user_id' => $user_id]);
+			$this->log_order($order_id, 'Order linked to site user '.(string)($user['email'] ?? $email));
+		}
+
+		return $user_id;
+
+	}
+
+	/**
+	 * Delivery line chosen at payment: ref_id = shop/delivery row, price as charged, no product item.
+	 */
+	function add_delivery_line($order_id, $delivery_id, $price){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$delivery = $this->cms_page_panel_model->get_cms_page_panel($delivery_id);
+		if (($delivery['panel_name'] ?? '') !== 'shop/delivery'){
+			error_log_user('shop set_order_paid: '.$delivery_id.' is not a delivery method, order '.$order_id);
+			return 0;
+		}
+
+		$currency = $this->get_shop_currency();
+		foreach ($this->get_order_lines($order_id) as $line){
+			if ((int)$line['product_item_id'] > 0){
+				$currency = $this->get_currency((int)$line['currency_id']) ?: $currency;
+				break;
+			}
+		}
+
+		return $this->cms_page_panel_model->create_cms_page_panel([
+				'panel_name' => 'shop/order_line',
+				'show' => 1,
+				'sort' => 'last',
+				'ref_id' => $delivery_id,
+				'product_item_id' => '',
+				'product_id' => 0,
+				'line_type' => 'delivery',
+				'quantity' => 1,
+				'price' => round($price, 2),
+				'currency_id' => (int)($currency['cms_page_panel_id'] ?? 0),
+				'item' => (string)($delivery['heading'] ?? ''),
 				'order_id' => $order_id,
-				'mail_to' => $mailto,
 		]);
 
 	}
-	
-	function is_product_in_basket($product_id, $order_id){
-		
-		$return = false;
-	
-		$this->load->model('cms/cms_page_panel_model');
-	
-		$items = [];
-		$lines = $this->cms_page_panel_model->get_list('shop/order_line', ['order_id' => $order_id]);
-		foreach($lines as $line){
-			
-			$item_id = $this->order_line_item_id($line);
-			if ($item_id <= 0){
-				continue;
-			}
-			$product_item = $this->cms_page_panel_model->get_cms_page_panel($item_id);
 
-			if(!empty($product_item['product_id']) && $product_item['product_id'] == $product_id){
-				$return = true;
+	/**
+	 * Queue the paid-order emails: notification to Shop settings → Notification emails, confirmation to the buyer.
+	 * Texts are the shop/order_email settings, the body is its template (plain text).
+	 */
+	function send_order_emails($order_id){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_email_model');
+
+		$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
+		$texts = $this->cms_page_panel_model->get_cms_page_panel_settings('shop/order_email');
+		$data = array_merge($texts, $this->order_email_data($order));
+		$template = get_instance()->get_panel_filenames('shop/order_email')['template'];
+
+		$notify_to = [];
+		foreach (($this->get_shop_settings()['emails'] ?? []) as $row){
+			$address = trim((string)($row['email'] ?? ''));
+			if (filter_var($address, FILTER_VALIDATE_EMAIL)){
+				$notify_to[] = $address;
 			}
 		}
-	
-		return $return;
-	
+		if (!$notify_to){
+			error_log_user('shop order '.$order_id.' paid: no Notification emails in Shop settings');
+			$this->log_order($order_id, 'New order email not sent: no Notification emails in Shop settings');
+		}
+
+		$subject = str_replace('{{order_id}}', $data['order_number'], $texts['notify_subject']);
+		$body = $this->load->view($template, ['mail' => 'notify'] + $data, true);
+		foreach ($notify_to as $address){
+			$ok = $this->cms_email_model->send_mail($address, $subject, $body, ['auto_submitted' => 1]);
+			$this->log_order($order_id, ($ok ? 'New order email sent to ' : 'New order email could not be sent to ').$address);
+		}
+
+		if ($order['buyer_email'] !== ''){
+			$subject = str_replace('{{order_id}}', $data['order_number'], $texts['confirm_subject']);
+			$body = $this->load->view($template, ['mail' => 'confirm'] + $data, true);
+			$ok = $this->cms_email_model->send_mail($order['buyer_email'], $subject, $body, ['auto_submitted' => 1]);
+			$this->log_order($order_id, ($ok ? 'Order confirmation email sent to ' : 'Order confirmation email could not be sent to ').$order['buyer_email']);
+		}
+
+	}
+
+	/**
+	 * Queue the dispatch email to the buyer (order set Fulfilled on the order page): intro, tracking number
+	 * when set, order summary. Stamps dispatch_email_time and logs the result.
+	 */
+	function send_dispatch_email($order_id){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_email_model');
+
+		$order_id = (int)$order_id;
+		$this->cms_page_panel_model->_invalidate_panel_load_slot($order_id);
+		$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
+		if (($order['panel_name'] ?? '') !== 'shop/order'){
+			return false;
+		}
+		$email = (string)($order['buyer_email'] ?? '');
+		if ($email === ''){
+			$this->log_order($order_id, 'Dispatch email not sent: no buyer email');
+			return false;
+		}
+
+		$texts = $this->cms_page_panel_model->get_cms_page_panel_settings('shop/order_email');
+		$data = array_merge($texts, $this->order_email_data($order));
+		$template = get_instance()->get_panel_filenames('shop/order_email')['template'];
+
+		$subject = str_replace('{{order_id}}', $data['order_number'], $texts['dispatch_subject']);
+		$body = $this->load->view($template, ['mail' => 'dispatch'] + $data, true);
+		$ok = $this->cms_email_model->send_mail($email, $subject, $body, ['auto_submitted' => 1]);
+		if ($ok){
+			$this->cms_page_panel_model->update_cms_page_panel($order_id, ['dispatch_email_time' => time()]);
+		}
+		$this->log_order($order_id, ($ok ? 'Dispatch email sent to ' : 'Dispatch email could not be sent to ').$email);
+
+		return (bool)$ok;
+
+	}
+
+	/**
+	 * Order paid through a payment module with this payment reference (e.g. Stripe pi_…), or [].
+	 */
+	function get_order_by_payment_ref($provider, $ref){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$ref = (string)$ref;
+		if ($ref === ''){
+			return [];
+		}
+		$sql = "select p.cms_page_panel_id from cms_page_panel_param p join cms_page_panel c on c.cms_page_panel_id = p.cms_page_panel_id "
+				."where c.panel_name = 'shop/order' and p.name = 'payment_ref' and p.value = ? order by p.cms_page_panel_id desc";
+		foreach ($this->db->query($sql, [$ref])->result_array() as $row){
+			$order = $this->cms_page_panel_model->get_cms_page_panel((int)$row['cms_page_panel_id']);
+			if ((string)($order['payment_provider'] ?? '') === (string)$provider){
+				return $order;
+			}
+		}
+
+		return [];
+
+	}
+
+	/**
+	 * Refund reported by a payment module: $refunded_total is the cumulative refunded amount (major units).
+	 * Same total as stored: nothing. Otherwise payment becomes refunded / partially_refunded (logged), a
+	 * History line, and the refund notice to the shop. The order status is not changed. Returns true on a change.
+	 */
+	function set_order_refund($order_id, $refunded_total){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$order_id = (int)$order_id;
+		$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
+		if (($order['panel_name'] ?? '') !== 'shop/order'){
+			return false;
+		}
+
+		$refunded_total = round(max(0, (float)$refunded_total), 2);
+		$before = round((float)($order['refunded_amount'] ?? 0), 2);
+		if ($refunded_total <= 0 || abs($refunded_total - $before) < 0.005){
+			return false;
+		}
+
+		$paid = (float)($order['paid_amount'] ?? 0);
+		$currency = $this->get_payable_order($order_id)['currency_row'] ?: $this->get_shop_currency();
+		$update = [
+				'refunded_amount' => $refunded_total,
+				'payment_status' => ($paid > 0 && $refunded_total < $paid - 0.005) ? 'partially_refunded' : 'refunded',
+		];
+
+		$this->log_order($order_id, 'Refund in '.($order['payment_provider'] ?: 'the payment provider').': '
+				.$this->format_admin_amount($refunded_total - $before, $currency)
+				.' (refunded '.$this->format_admin_amount($refunded_total, $currency).' of '.$this->format_admin_amount($paid, $currency).')');
+		$this->log_order_state($order, $update);
+		$this->cms_page_panel_model->update_cms_page_panel($order_id, $update);
+
+		$this->send_refund_email($order_id);
+
+		return true;
+
+	}
+
+	/**
+	 * Refund notice to Shop settings → Notification emails (texts: Order emails → Shop refund notice).
+	 */
+	function send_refund_email($order_id){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('cms/cms_email_model');
+
+		$order_id = (int)$order_id;
+		$this->cms_page_panel_model->_invalidate_panel_load_slot($order_id);
+		$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
+		$texts = $this->cms_page_panel_model->get_cms_page_panel_settings('shop/order_email');
+		$data = array_merge($texts, $this->order_email_data($order));
+		$template = get_instance()->get_panel_filenames('shop/order_email')['template'];
+
+		$to = [];
+		foreach (($this->get_shop_settings()['emails'] ?? []) as $row){
+			$address = trim((string)($row['email'] ?? ''));
+			if (filter_var($address, FILTER_VALIDATE_EMAIL)){
+				$to[] = $address;
+			}
+		}
+		if (!$to){
+			error_log_user('shop order '.$order_id.' refund: no Notification emails in Shop settings');
+			$this->log_order($order_id, 'Refund email not sent: no Notification emails in Shop settings');
+			return false;
+		}
+
+		$subject = str_replace('{{order_id}}', $data['order_number'], $texts['refund_subject']);
+		$body = $this->load->view($template, ['mail' => 'refund'] + $data, true);
+		foreach ($to as $address){
+			$ok = $this->cms_email_model->send_mail($address, $subject, $body, ['auto_submitted' => 1]);
+			$this->log_order($order_id, ($ok ? 'Refund email sent to ' : 'Refund email could not be sent to ').$address);
+		}
+
+		return true;
+
+	}
+
+	/**
+	 * Whether a line of a finished order can go back to stock: its quantity was posted (count-mode item,
+	 * line fulfilled / in progress) and it was not returned yet.
+	 */
+	function line_returnable($order, $line){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('shop/shop_dim_model');
+
+		if (!$this->order_is_finished($order) || empty($order['stock_posted_time']) || !empty($line['stock_returned_time'])
+				|| (int)($line['order_id'] ?? 0) !== (int)($order['cms_page_panel_id'] ?? 0)
+				|| !in_array($this->order_line_status($line), ['fulfilled', 'in_progress'], true)){
+			return false;
+		}
+		$item = $this->cms_page_panel_model->get_cms_page_panel($this->order_line_item_id($line));
+
+		return ($item['panel_name'] ?? '') === 'shop/product_item' && $this->shop_dim_model->item_stock_control($item) === 'count';
+
+	}
+
+	/**
+	 * Goods sent back after Finished: the whole line's quantity goes back to the variant's listed stock, once.
+	 */
+	function return_line_to_stock($order_id, $line_id){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('shop/shop_dim_model');
+
+		$order = $this->cms_page_panel_model->get_cms_page_panel((int)$order_id);
+		$line = $this->cms_page_panel_model->get_cms_page_panel((int)$line_id);
+		if (($order['panel_name'] ?? '') !== 'shop/order' || ($line['panel_name'] ?? '') !== 'shop/order_line'
+				|| !$this->line_returnable($order, $line)){
+			return false;
+		}
+
+		$item = $this->cms_page_panel_model->get_cms_page_panel($this->order_line_item_id($line));
+		$qty = max(1, (int)$line['quantity']);
+		$this->cms_page_panel_model->update_cms_page_panel((int)$line['cms_page_panel_id'], ['stock_returned_time' => time()]);
+		$this->cms_page_panel_model->update_cms_page_panel((int)$item['cms_page_panel_id'], ['number' => (int)($item['number'] ?? 0) + $qty]);
+		$this->log_order((int)$order_id, 'Returned to stock: '.$qty.' × '.$this->shop_dim_model->item_list_title($item));
+
+		return true;
+
+	}
+
+	/**
+	 * Tracking number of the order (order page), cleaned; logged when it changes.
+	 */
+	function set_order_tracking($order_id, $number){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$order_id = (int)$order_id;
+		$order = $this->cms_page_panel_model->get_cms_page_panel($order_id);
+		if (($order['panel_name'] ?? '') !== 'shop/order'){
+			return false;
+		}
+		$number = $this->clean_visitor_text($number, 100);
+		if ($number === (string)($order['tracking_number'] ?? '')){
+			return false;
+		}
+
+		$this->cms_page_panel_model->update_cms_page_panel($order_id, ['tracking_number' => $number]);
+		$this->log_order($order_id, $number !== '' ? 'Tracking number: '.$number : 'Tracking number removed');
+
+		return true;
+
+	}
+
+	/**
+	 * Data for the order email template: formatted lines and total, buyer, address, payment, admin link.
+	 */
+	function order_email_data($order){
+
+		$order_id = (int)$order['cms_page_panel_id'];
+		$payable = $this->get_payable_order($order_id);
+
+		$lines = [];
+		foreach ($payable['lines'] as $line){
+			$lines[] = [
+					'type' => $line['type'],
+					'quantity' => $line['quantity'],
+					'name' => $line['name'],
+					'dims' => $line['dims'],
+					'amount' => $this->format_amount($line['total'], $line['currency_row']),
+			];
+		}
+
+		$address = [];
+		foreach (['name', 'address1', 'address2', 'city', 'county', 'postcode', 'country'] as $field){
+			if (trim((string)$order['shipping_'.$field]) !== ''){
+				$address[] = $order['shipping_'.$field];
+			}
+		}
+
+		$paid = (string)$order['paid_amount'] !== '' ? (float)$order['paid_amount'] : $payable['total'];
+		$base = rtrim((string)$GLOBALS['config']['base_host'], '/').'/'.ltrim((string)$GLOBALS['config']['base_url'], '/');
+
+		return [
+				'order_number' => (string)$order['heading'],
+				'lines' => $lines,
+				'total_paid' => $this->format_amount($paid, $payable['currency_row']),
+				'buyer' => trim($order['buyer_name'].' '.$order['buyer_email'].' '.$order['shipping_phone']),
+				'address' => $address ? implode(', ', $address) : '-',
+				'payment_note' => trim((string)$order['payment_note']),
+				'payment' => trim($order['payment_provider'].' '.$order['payment_ref']),
+				'tracking_number' => (string)($order['tracking_number'] ?? ''),
+				'site_url' => $base,
+				'refunded' => (string)($order['refunded_amount'] ?? '') !== '' ? $this->format_admin_amount($order['refunded_amount'], $payable['currency_row']) : '',
+				'paid_admin' => $this->format_admin_amount($paid, $payable['currency_row']),
+				'admin_url' => $base.'admin/orders/'.$order_id.'/',
+		];
+
+	}
+	/**
+	 * Before payment: re-price the lines and re-check stock (refreshes the cart hold). Used by the cart
+	 * and by every shop_checkout provider. 'ready' is true when nothing changed.
+	 */
+	function checkout_check($order_id){
+
+		$this->load->model('shop/shop_dim_model');
+
+		$changed = $this->refresh_line_prices($order_id);
+		$lost = $this->shop_dim_model->cart_refresh_hold($order_id);
+
+		return [
+				'price_changed_lines' => $changed,
+				'lost_item_ids' => $lost,
+				'ready' => !$changed && !$lost,
+		];
+
+	}
+
+	/**
+	 * One page of orders for the admin list, newest first. $filter: view (orders / archive / carts) or
+	 * q (3+ characters: order number or part of the buyer email, all statuses). Item counts: one SUM.
+	 */
+	function get_admin_orders($filter, $offset, $limit){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$filter = is_array($filter) ? $filter : [];
+		$view = (string)($filter['view'] ?? 'orders');
+		$search = trim((string)($filter['q'] ?? ''));
+		$offset = max(0, (int)$offset);
+		$limit = max(1, min(50, (int)$limit));
+
+		// Search (3+ characters) covers every order and cart: order number or part of the buyer email.
+		$where = [];
+		$binds = [];
+		if (mb_strlen($search) >= 3){
+			$like = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search).'%';
+			$where[] = '(cast(o.cms_page_panel_id as char) like ? or o.cms_page_panel_id in '
+					."(select p.cms_page_panel_id from cms_page_panel_param p where p.name = 'buyer_email' and p.value like ?))";
+			$binds[] = $like;
+			$binds[] = $like;
+		} else if ($view === 'carts'){
+			$where[] = "o.status = ''";
+		} else if ($view === 'archive'){
+			$where[] = "o.status in ('finished', 'cancelled', 'abandoned')";
+		} else {
+			$where[] = "o.status in ('unfulfilled', 'in_progress', 'fulfilled', 'paid')";
+		}
+
+		$sql = 'select o.cms_page_panel_id from shop_order o where '.implode(' and ', $where)
+				.' order by o.cms_page_panel_id desc limit '.(int)$offset.', '.(int)$limit;
+		$ids = [];
+		foreach ($this->db->query($sql, $binds)->result_array() as $row){
+			$ids[] = (int)$row['cms_page_panel_id'];
+		}
+		if (!$ids){
+			return [];
+		}
+
+		$counts = [];
+		$count_sql = 'select order_id, sum(quantity) as qty from shop_order_line where order_id in ('
+				.implode(',', $ids).') and product_id > 0 group by order_id';
+		foreach ($this->db->query($count_sql)->result_array() as $row){
+			$counts[(int)$row['order_id']] = (int)$row['qty'];
+		}
+
+		$orders = [];
+		foreach ($ids as $id){
+			$order = $this->cms_page_panel_model->get_cms_page_panel($id);
+			if (($order['panel_name'] ?? '') !== 'shop/order'){
+				continue;
+			}
+			$payable = [];
+			$paid = (string)($order['payment_status'] ?? '') === 'paid' && (string)($order['paid_amount'] ?? '') !== '';
+			// Admin amounts always show the sign and two decimals (£0.00), also for an empty cart.
+			$currency = $this->get_shop_currency();
+			if ($paid){
+				$amount = (float)$order['paid_amount'];
+			} else {
+				$payable = $this->get_payable_order($id);
+				$amount = $payable['total'];
+				$currency = $payable['currency_row'] ?: $currency;
+			}
+			$total = ($payable['mixed_currency'] ?? false) ? '' : $this->format_admin_amount($amount, $currency);
+			$orders[] = [
+					'id' => $id,
+					'email' => (string)($order['buyer_email'] ?? ''),
+					'name' => (string)($order['buyer_name'] ?? ''),
+					'created' => (int)($order['order_created'] ?? 0) > 0 ? (int)$order['order_created'] : (int)($order['created'] ?? $order['cart_active_time'] ?? 0),
+					'items' => $counts[$id] ?? 0,
+					'total' => $total,
+					'payment_status' => (string)($order['payment_status'] ?? 'unpaid'),
+					'status' => (string)($order['status'] ?? ''),
+					'payment_note' => trim((string)($order['payment_note'] ?? '')),
+			];
+		}
+
+		return $orders;
+
+	}
+
+	/**
+	 * Admin amounts: currency sign and always two decimals (£0.00, £1,250.00).
+	 */
+	function format_admin_amount($amount, $currency){
+
+		return (string)($currency['sign'] ?? '').number_format((float)$amount, 2, '.', ',');
+
+	}
+
+	/**
+	 * VAT rate from Shop settings: ['rate' => float], or ['rate' => null] for N/A (empty setting).
+	 * A value that is not a number counts as N/A and is logged.
+	 */
+	function get_vat(){
+
+		$raw = trim(str_replace([',', '%'], ['.', ''], (string)($this->get_shop_settings()['vat_rate'] ?? '')));
+		if ($raw === ''){
+			return ['rate' => null];
+		}
+		if (!is_numeric($raw) || (float)$raw < 0 || (float)$raw >= 100){
+			if (empty($GLOBALS['shop_vat_logged'])){
+				$GLOBALS['shop_vat_logged'] = 1;
+				error_log_user('shop get_vat: Shop settings → VAT rate "'.$raw.'" is not a rate in %, treated as N/A');
+			}
+			return ['rate' => null];
+		}
+
+		return ['rate' => (float)$raw];
+
+	}
+
+	/**
+	 * VAT line for the product page ($context product) or under the cart total ($context cart, $amount the
+	 * VAT-inclusive total). N/A: the N/A text. '' when the text setting is empty.
+	 */
+	function vat_text($context, $amount = 0, $currency = null){
+
+		$settings = $this->get_shop_settings();
+		$rate = $this->get_vat()['rate'];
+		if ($rate === null){
+			return (string)($settings['vat_na_text'] ?? '');
+		}
+
+		$rate_text = rtrim(rtrim(number_format($rate, 2, '.', ''), '0'), '.');
+		if ($context === 'product'){
+			return str_replace('{{rate}}', $rate_text, (string)($settings['vat_product_text'] ?? ''));
+		}
+
+		$vat = round((float)$amount * $rate / (100 + $rate), 2);
+		$currency = $currency ?: $this->get_shop_currency();
+
+		return str_replace(['{{amount}}', '{{rate}}'], [$this->format_admin_amount($vat, $currency), $rate_text], (string)($settings['vat_cart_text'] ?? ''));
+
+	}
+
+	function order_status_label($status){
+
+		$labels = [
+				'' => 'Draft cart',
+				'abandoned' => 'Abandoned',
+				'unfulfilled' => 'Unfulfilled',
+				'in_progress' => 'In progress',
+				'fulfilled' => 'Fulfilled',
+				'finished' => 'Finished',
+				'cancelled' => 'Cancelled',
+				'paid' => 'Unfulfilled',
+		];
+
+		return $labels[(string)$status] ?? (string)$status;
+
+	}
+
+	function order_payment_label($status){
+
+		$labels = [
+				'unpaid' => 'Unpaid',
+				'pending' => 'Pending',
+				'partially_paid' => 'Partially paid',
+				'paid' => 'Paid',
+				'partially_refunded' => 'Partially refunded',
+				'refunded' => 'Refunded',
+				'voided' => 'Voided',
+		];
+
+		return $labels[(string)$status] ?? 'Unpaid';
+
+	}
+
+	/**
+	 * Add a line to the order history (shop_order_log). $type: event, or comment (admin, shown bold).
+	 * The CMS user is stored when one is logged in. A failed write is logged and never stops the caller.
+	 */
+	function log_order($order_id, $line, $type = 'event'){
+
+		$order_id = (int)$order_id;
+		$line = trim((string)$line);
+		if ($order_id < 1 || $line === ''){
+			return false;
+		}
+
+		// Name as the CMS header shows it; stored, as config admins have no cms_user row.
+		$user = $_SESSION['cms_user'] ?? [];
+		$user_name = (string)(!empty($user['name']) ? $user['name'] : ($user['username'] ?? ''));
+
+		try {
+			$this->db->query('insert into shop_order_log (order_id, time, type, cms_user_id, user_name, line) values (?, ?, ?, ?, ?, ?)', [
+					$order_id,
+					time(),
+					$type === 'comment' ? 'comment' : 'event',
+					(int)($user['cms_user_id'] ?? 0),
+					mb_substr($user_name, 0, 50),
+					mb_substr($line, 0, 4000),
+			]);
+		} catch (\Throwable $e){
+			error_log_user('shop log_order: order '.$order_id.' not logged ('.$e->getMessage().')');
+			return false;
+		}
+
+		return true;
+
+	}
+
+	/**
+	 * Order history, newest first: time, type, line, and the CMS user's name ('' when the system did it).
+	 */
+	function get_order_log($order_id){
+
+		$sql = 'select time, type, line, user_name from shop_order_log where order_id = ? order by time desc, shop_order_log_id desc';
+
+		return $this->db->query($sql, [(int)$order_id])->result_array();
+
+	}
+
+	/**
+	 * History lines for an order update that changes status, payment status or the payment note.
+	 * Call before the update with the row as it was.
+	 */
+	function log_order_state($order, $update){
+
+		$id = (int)($order['cms_page_panel_id'] ?? 0);
+
+		if (array_key_exists('status', $update) && (string)$update['status'] !== (string)($order['status'] ?? '')){
+			$this->log_order($id, 'Status: '.$this->order_status_label($order['status'] ?? '').' → '.$this->order_status_label($update['status']));
+		}
+
+		$pay = (string)($update['payment_status'] ?? '');
+		if ($pay !== '' && $pay !== $this->order_payment_status($order)){
+			$line = 'Payment: '.$this->order_payment_label($this->order_payment_status($order)).' → '.$this->order_payment_label($pay);
+			if ($pay === 'paid' && (string)($update['paid_amount'] ?? '') !== ''){
+				$line .= ', '.$this->format_admin_amount($update['paid_amount'], $this->get_payable_order($id)['currency_row'] ?: $this->get_shop_currency())
+						.' ('.trim(($update['payment_provider'] ?? '').' '.($update['payment_ref'] ?? '')).')';
+			}
+			$this->log_order($id, $line);
+		}
+
+		if (trim((string)($update['payment_note'] ?? '')) !== '' && (string)$update['payment_note'] !== (string)($order['payment_note'] ?? '')){
+			$this->log_order($id, 'Payment note: '.$update['payment_note']);
+		}
+
+	}
+
+	/**
+	 * Whether the admin may set the payment status by hand: not on a draft or abandoned cart.
+	 */
+	function payment_editable($order){
+
+		return !in_array($this->order_physical_status($order), ['', 'abandoned'], true);
+
+	}
+
+	/**
+	 * Hand-set payment status (order page). Logged; marking paid sets paid_time when there is none.
+	 */
+	function set_order_payment_status($order_id, $payment_status){
+
+		$this->load->model('cms/cms_page_panel_model');
+
+		$id = (int)$order_id;
+		$pay = (string)$payment_status;
+		$order = $this->cms_page_panel_model->get_cms_page_panel($id);
+		if (($order['panel_name'] ?? '') !== 'shop/order' || !in_array($pay, ['unpaid', 'pending', 'partially_paid', 'paid', 'partially_refunded', 'refunded', 'voided'], true)){
+			return false;
+		}
+		// A draft cart is still a visitor's live cart (and an abandoned one may still be paid at Stripe):
+		// a hand-set "paid" would make set_order_paid skip the real payment and its emails.
+		if (!$this->payment_editable($order)){
+			return false;
+		}
+		if ($pay === $this->order_payment_status($order)){
+			return false;
+		}
+
+		$update = ['payment_status' => $pay];
+		if ($pay === 'paid' && empty($order['paid_time'])){
+			$update['paid_time'] = time();
+		}
+		$this->log_order_state($order, $update);
+		$this->cms_page_panel_model->update_cms_page_panel($id, $update);
+
+		return true;
+
+	}
+
+	/**
+	 * Admin comment on the order page (plain text, no formatting).
+	 */
+	function add_order_comment($order_id, $text){
+
+		$text = $this->clean_visitor_text($text, 4000, true);
+		if ($text === ''){
+			return false;
+		}
+
+		return $this->log_order($order_id, $text, 'comment');
+
+	}
+
+	/**
+	 * What there is to pay for an order: the one source for the cart total, payment providers, the
+	 * paid-amount check and order emails. Amounts are in major units. See shop.md § Payable order.
+	 */
+	function get_payable_order($order_id){
+
+		$this->load->model('cms/cms_page_panel_model');
+		$this->load->model('shop/shop_dim_model');
+
+		$raw = $this->get_order_lines($order_id);
+		$lines = [];
+		$currency_row = null;
+		$mixed = false;
+		$subtotal = 0.0;
+		$delivery_total = 0.0;
+
+		foreach ($raw as $line){
+
+			$row = $this->get_currency((int)$line['currency_id']) ?: $this->get_shop_currency();
+			if ($currency_row === null){
+				$currency_row = $row;
+			} else if ((int)($row['cms_page_panel_id'] ?? 0) !== (int)($currency_row['cms_page_panel_id'] ?? 0)){
+				$mixed = true;
+			}
+
+			$item_id = $this->order_line_item_id($line);
+			$quantity = max(1, (int)$line['quantity']);
+			$total = round((float)$line['price'] * $quantity, 2);
+			$dims = $item_id > 0 ? $this->shop_dim_model->dims_description($this->cms_page_panel_model->get_cms_page_panel($item_id)) : '';
+			if ($item_id > 0){
+				$subtotal += $total;
+			} else {
+				$delivery_total += $total;
+			}
+
+			$lines[] = [
+					'line_id' => (int)$line['cms_page_panel_id'],
+					'type' => $item_id > 0 ? 'item' : 'delivery',
+					'item_id' => $item_id,
+					'name' => (string)($line['item'] ?? ''),
+					'dims' => $dims,
+					'unit_price' => round((float)$line['price'], 2),
+					'quantity' => $quantity,
+					'total' => $total,
+					'currency_row' => $row,
+			];
+
+		}
+
+		// Delivery methods a provider may offer: shown shop/delivery rows, list order.
+		$options = [];
+		foreach ($this->cms_page_panel_model->get_list('shop/delivery') as $delivery){
+			if (!empty($delivery['show'])){
+				$options[] = [
+						'delivery_id' => (int)$delivery['cms_page_panel_id'],
+						'name' => (string)$delivery['heading'],
+						'price' => round((float)($delivery['price'] ?? 0), 2),
+				];
+			}
+		}
+
+		return [
+				'order_id' => (int)$order_id,
+				'currency' => $mixed ? '' : strtolower((string)($currency_row['heading'] ?? '')),
+				'currency_row' => $currency_row,
+				'mixed_currency' => $mixed,
+				'lines' => $lines,
+				'subtotal' => round($subtotal, 2),
+				'delivery_total' => round($delivery_total, 2),
+				'total' => round($subtotal + $delivery_total, 2),
+				'delivery_options' => $options,
+				'fingerprint' => $this->calculate_order_lines_fingerprint($raw),
+		];
+
 	}
 
 	/**

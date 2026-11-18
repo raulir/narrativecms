@@ -1,1 +1,0 @@
-<?php _panel_id($return_id) ?>

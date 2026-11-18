@@ -35,33 +35,15 @@
 		},
 		{
 			"type": "text",
-			"name": "dimension_prefix",
-			"label": "Dimension prefix"
-		},
-		{
-			"type": "text",
-			"name": "dimension_suffix",
-			"label": "Dimension suffix"
+			"name": "cart_delete_days",
+			"label": "Delete carts after (days)",
+			"default": "30",
+			"help": "Unpaid carts with no visitor activity for this many days are deleted by the repeating task Shop cart cleanup. 0 = never. Orders are never deleted."
 		},
 		{
 			"type": "text",
 			"name": "price_prefix",
 			"label": "Price prefix"
-		},
-		{
-			"type": "text",
-			"name": "price_suffix",
-			"label": "Price suffix"
-		},
-		{
-			"type": "text",
-			"name": "dimension_extra",
-			"label": "Dimension extra"
-		},
-		{
-			"type": "text",
-			"name": "dimension_rounding",
-			"label": "Dimension rounding"
 		},
 		{
 			"type": "select",
@@ -71,7 +53,40 @@
 				"No",
 				"Yes"
 			],
-			"default": "1"
+			"default": "1",
+			"help": "On-site checkout page only (shop/checkout, delivery tax multipliers). The product page and cart use VAT below."
+		},
+		{
+			"type": "subtitle",
+			"label": "VAT"
+		},
+		{
+			"type": "text",
+			"name": "vat_rate",
+			"label": "VAT rate (%)",
+			"default": "",
+			"help": "Empty: N/A (not VAT registered), the product page and cart show the N/A text.||A number, e.g. 20: prices include VAT at this rate; the product page says so and the cart shows the VAT part of the total."
+		},
+		{
+			"type": "text",
+			"name": "vat_product_text",
+			"label": "Product page",
+			"default": "Price includes VAT ({{rate}}%)",
+			"help": "Under the price when there is a rate. {{rate}} = the rate."
+		},
+		{
+			"type": "text",
+			"name": "vat_cart_text",
+			"label": "Cart total",
+			"default": "Includes VAT {{amount}}",
+			"help": "Under the cart total when there is a rate. {{amount}} = the VAT part of the total: total × rate / (100 + rate)."
+		},
+		{
+			"type": "text",
+			"name": "vat_na_text",
+			"label": "N/A text",
+			"default": "VAT not applicable",
+			"help": "Product page and cart when the rate is empty. Empty: no line."
 		},
 		{
 			"type": "repeater",
@@ -83,7 +98,8 @@
 					"name": "email",
 					"label": "Email"
 				}
-			]
+			],
+			"help": "Get the New order email when an order is paid. Texts: Shop settings → Order emails."
 		}
 	]
 }

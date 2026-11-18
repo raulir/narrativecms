@@ -1,0 +1,358 @@
+// No padding: the admin layout frames the panel and cms_toolbar sets its own width.
+.order_admin_container {
+	position: relative;
+	color: #404040;
+	font-size: 1.5rem;
+	line-height: 2.2rem;
+}
+
+.order_admin_busy {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+.order_admin_missing {
+	padding: 1.2rem 1.0rem;
+	font-size: 1.6rem;
+}
+
+.order_admin_toolbar {
+	margin-bottom: 1.6rem;
+}
+
+.order_admin_back {
+	margin-right: 1.0rem;
+	width: 3.0rem;
+	padding: 0;
+	vertical-align: top;
+}
+
+.order_admin_back_arrow {
+	position: absolute;
+	top: 0.8rem;
+	left: 0.95rem;
+	width: 1.0rem;
+	height: 1.3rem;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+// Same width as cms_toolbar, two columns 50:50 under it.
+.order_admin_content {
+	box-sizing: border-box;
+	width: calc(100% - 2.0rem);
+	margin: 0 auto 2.0rem auto;
+	font-size: 0;
+}
+
+.order_admin_note_warn {
+	box-sizing: border-box;
+	margin-bottom: 1.6rem;
+	padding: 0.8rem 1.2rem;
+	border: 0.1rem solid #c00;
+	background: #fff5f5;
+	font-size: 1.5rem;
+}
+
+.order_admin_column {
+	display: inline-block;
+	box-sizing: border-box;
+	width: 50%;
+	vertical-align: top;
+	font-size: 1.5rem;
+}
+
+.order_admin_column_left {
+	padding-right: 0.8rem;
+}
+
+.order_admin_column_right {
+	padding-left: 0.8rem;
+}
+
+.order_admin_card {
+	position: relative;
+	box-sizing: border-box;
+	margin-bottom: 1.6rem;
+	padding: 1.2rem 1.4rem;
+	border: 0.1rem solid #c0c0c0;
+	border-radius: 0.4rem;
+	background: #fff;
+}
+
+.order_admin_card_heading {
+	margin-bottom: 0.8rem;
+	font-size: 1.6rem;
+	font-weight: bold;
+}
+
+.order_admin_text {
+	display: block;
+}
+
+.order_admin_muted {
+	color: #808080;
+}
+
+.order_admin_link {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.order_admin_delivery_method {
+	margin-bottom: 0.6rem;
+	font-weight: bold;
+}
+
+// Items
+.order_admin_line {
+	position: relative;
+	min-height: 4.8rem;
+	padding: 0.8rem 0;
+	border-top: 0.1rem solid #e0e0e0;
+	font-size: 0;
+}
+
+.order_admin_thumb {
+	display: inline-block;
+	width: 4.8rem;
+	height: 4.8rem;
+	background-color: #f0f0f0;
+	background-size: cover;
+	background-position: center;
+	vertical-align: top;
+}
+
+.order_admin_line_copy {
+	display: inline-block;
+	box-sizing: border-box;
+	width: calc(100% - 4.8rem - 32%);
+	padding: 0 1.0rem;
+	vertical-align: top;
+	font-size: 1.5rem;
+}
+
+.order_admin_line_dims {
+	color: #808080;
+	font-size: 1.3rem;
+	line-height: 1.8rem;
+}
+
+.order_admin_line_math,
+.order_admin_line_total {
+	display: inline-block;
+	width: 16%;
+	vertical-align: top;
+	text-align: right;
+	font-size: 1.5rem;
+}
+
+// Return to stock (finished orders): under the line, in the text column
+.order_admin_line_stock {
+	box-sizing: border-box;
+	padding: 0.4rem 0 0 5.8rem;
+	font-size: 1.3rem;
+}
+
+.order_admin_return {
+	height: 2.6rem;
+	margin-top: 0;
+	line-height: 2.4rem;
+}
+
+// Note under the Order select while Cancelled is chosen on a paid order
+.order_admin_cancel_note {
+	display: none;
+}
+
+.order_admin_cancel_note_on {
+	display: block;
+}
+
+.order_admin_cancel_text {
+	display: inline-block;
+	width: calc(100% - 12.0rem);
+	color: #a04000;
+	font-size: 1.3rem;
+	line-height: 1.8rem;
+	vertical-align: top;
+}
+
+// Summary
+.order_admin_sum_row {
+	font-size: 0;
+}
+
+.order_admin_sum_label,
+.order_admin_sum_value,
+.order_admin_sum_amount {
+	display: inline-block;
+	box-sizing: border-box;
+	vertical-align: top;
+	font-size: 1.5rem;
+}
+
+.order_admin_sum_label { width: 25%; }
+.order_admin_sum_value { width: 50%; padding-right: 1.0rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.order_admin_sum_amount { width: 25%; text-align: right; }
+
+.order_admin_sum_total {
+	font-weight: bold;
+}
+
+// History: comment box, then the log, newest first
+.order_admin_comment {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	height: 7.0rem;
+	padding: 0.6rem 0.8rem;
+	border: 0.1rem solid #c0c0c0;
+	border-radius: 0.4rem;
+	font-family: inherit;
+	font-size: 1.5rem;
+	line-height: 2.0rem;
+	resize: vertical;
+}
+
+.order_admin_button {
+	display: inline-block;
+	box-sizing: border-box;
+	height: 3.0rem;
+	margin-top: 0.8rem;
+	padding: 0 1.2rem;
+	border: 0.1rem solid #a0a0a0;
+	border-radius: 0.4rem;
+	line-height: 2.8rem;
+	cursor: pointer;
+	&:hover {
+		background-color: #e0e0e0;
+	}
+}
+
+.order_admin_post {
+	margin-bottom: 1.2rem;
+}
+
+.order_admin_log_row {
+	padding: 0.6rem 0;
+	border-top: 0.1rem solid #e0e0e0;
+	font-size: 0;
+}
+
+.order_admin_log_time,
+.order_admin_log_line {
+	display: inline-block;
+	box-sizing: border-box;
+	vertical-align: top;
+	font-size: 1.5rem;
+}
+
+.order_admin_log_time {
+	width: 13.5rem;
+	color: #808080;
+	white-space: nowrap;
+}
+
+.order_admin_log_line {
+	width: calc(100% - 13.5rem);
+	overflow-wrap: break-word;
+}
+
+.order_admin_log_comment .order_admin_log_line {
+	font-weight: bold;
+}
+
+.order_admin_log_user {
+	display: inline;
+	color: #808080;
+	font-weight: normal;
+	&:before {
+		content: '— ';
+	}
+}
+
+// Status: payment and order status, one Save
+.order_admin_status_row {
+	margin-bottom: 0.8rem;
+	font-size: 0;
+}
+
+.order_admin_status_label,
+.order_admin_status_fixed {
+	display: inline-block;
+	height: 3.0rem;
+	line-height: 3.0rem;
+	vertical-align: top;
+	font-size: 1.5rem;
+}
+
+.order_admin_status_label {
+	width: 12.0rem;
+}
+
+.order_admin_status,
+.order_admin_payment_status {
+	float: none;
+	width: 18.0rem;
+	margin: 0;
+	vertical-align: top;
+}
+
+.order_admin_save_status {
+	margin-top: 0;
+	margin-left: 12.0rem;
+}
+
+// Email the buyer + Tracking number, under the Order row while Fulfilled is chosen
+.order_admin_dispatch {
+	display: none;
+}
+
+.order_admin_dispatch_on {
+	display: block;
+}
+
+.order_admin_email_buyer,
+.order_admin_status_note {
+	display: inline-block;
+	height: 3.0rem;
+	line-height: 3.0rem;
+	vertical-align: top;
+	font-size: 1.5rem;
+}
+
+.order_admin_email_buyer {
+	cursor: pointer;
+	user-select: none;
+}
+
+.order_admin_email_tick {
+	display: inline-block;
+	width: 2.4rem;
+	font-size: 1.6rem;
+}
+
+.order_admin_status_note {
+	color: #808080;
+	font-size: 1.3rem;
+}
+
+.order_admin_tracking {
+	float: none;
+	box-sizing: border-box;
+	width: 18.0rem;
+	margin: 0;
+	vertical-align: top;
+	cursor: text;
+}
+
+.order_admin_tracking_line {
+	margin-top: 0.6rem;
+}
+
+.order_admin_status_help {
+	margin-top: 0.6rem;
+	font-size: 1.3rem;
+}
