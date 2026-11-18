@@ -1,0 +1,19 @@
+.cms_popup_versions .cms_popup_content {
+	height: 55.0rem;
+	width: 75.0rem;
+	font-size: 1.4rem;
+	line-height: 2.0rem;
+}
+
+// Compare opens on top of the Versions popup
+.cms_popup_version_compare {
+	z-index: 1100;
+}
+
+.cms_popup_version_compare .cms_popup_content {
+	height: 60.0rem;
+	width: 100.0rem;
+	max-width: 95vw;
+	font-size: 1.4rem;
+	line-height: 2.0rem;
+}

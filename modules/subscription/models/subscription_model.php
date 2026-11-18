@@ -1783,10 +1783,10 @@ class subscription_model extends \Model {
 					[$user_id]
 			)->result_array();
 			if ($rows){
-				$this->load->model('stripe/stripe_model');
+				$this->load->model('stripe/stripe_subscription_model');
 			}
 			foreach ($rows as $row){
-				$result = $this->stripe_model->stop_renewal_by_id($row['stripe_subscription_id']);
+				$result = $this->stripe_subscription_model->stop_renewal_by_id($row['stripe_subscription_id']);
 				if (empty($result['ok'])){
 					$failed = true;
 					$providers['stripe'] = 1;
@@ -1850,8 +1850,8 @@ class subscription_model extends \Model {
 		if (empty($GLOBALS['config']['modules']) || !in_array('stripe', $GLOBALS['config']['modules'], true)){
 			return ['ok' => 1, 'changed' => 0];
 		}
-		$this->load->model('stripe/stripe_model');
-		$result = $this->stripe_model->sync_user_subscription($user_id);
+		$this->load->model('stripe/stripe_subscription_model');
+		$result = $this->stripe_subscription_model->sync_user_subscription($user_id);
 		if (empty($result['ok'])){
 			return $result;
 		}
@@ -1899,8 +1899,8 @@ class subscription_model extends \Model {
 		if (empty($GLOBALS['config']['modules']) || !in_array('stripe', $GLOBALS['config']['modules'], true)){
 			return ['ok' => 0, 'error' => 'Stripe not available'];
 		}
-		$this->load->model('stripe/stripe_model');
-		$result = $this->stripe_model->set_auto_renew_for_user($user_id, !empty($auto_renew));
+		$this->load->model('stripe/stripe_subscription_model');
+		$result = $this->stripe_subscription_model->set_auto_renew_for_user($user_id, !empty($auto_renew));
 		if (empty($result['ok'])){
 			return $result;
 		}
@@ -1938,8 +1938,8 @@ class subscription_model extends \Model {
 		if ($app_root !== ''){
 			$return_url = $this->app_web_rebase($return_url, $app_root);
 		}
-		$this->load->model('stripe/stripe_model');
-		return $this->stripe_model->create_payment_method_update_session($user_id, $return_url);
+		$this->load->model('stripe/stripe_subscription_model');
+		return $this->stripe_subscription_model->create_payment_method_update_session($user_id, $return_url);
 
 	}
 
@@ -2004,8 +2004,8 @@ class subscription_model extends \Model {
 			return ['ok' => 0, 'error' => 'No Stripe price for this plan'];
 		}
 
-		$this->load->model('stripe/stripe_model');
-		$result = $this->stripe_model->change_subscription_price_for_user($user_id, $stripe_price_id);
+		$this->load->model('stripe/stripe_subscription_model');
+		$result = $this->stripe_subscription_model->change_subscription_price_for_user($user_id, $stripe_price_id);
 		if (empty($result['ok'])){
 			return $result;
 		}
@@ -2024,7 +2024,7 @@ class subscription_model extends \Model {
 				'plan_title' => $plan_title,
 		];
 		// Prefer live Stripe state after change
-		$sync = $this->stripe_model->sync_user_subscription($user_id);
+		$sync = $this->stripe_subscription_model->sync_user_subscription($user_id);
 		if (!empty($sync['ok'])){
 			// Ensure product_id/currency always set after change
 			$this->apply_entitlement_from_provider($user_id, array_merge($facts, [

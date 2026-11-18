@@ -262,6 +262,16 @@ class cms_page_panel_toolbar extends \Controller {
 			];
 			$params['hidden_section'] = 1;
 
+			// Earlier versions of this block (cms_versions.md)
+			if ((string)($GLOBALS['config']['page_panel_versioning'] ?? '1') !== '0'){
+				$params['buttons'][] = [
+						'name' => 'cms/cms_page_panel_button_versions',
+						'position' => 'hidden',
+						'cms_page_panel_id' => $cms_page_panel['cms_page_panel_id'],
+						'panel_name' => $cms_page_panel['panel_name'] ?? '',
+				];
+			}
+
 			if (empty($cms_page_panel['cms_page_id']) && !empty($cms_page_panel['sort'])
 					&& !empty($panel_config['list']['link_target'])){
 

@@ -612,7 +612,14 @@ function cms_update_run_pipeline(area, options){
 				}
 
 			}
-		}).catch(function(){})
+		}).catch(function(e){
+			// A request failure was handled by 'error' above; a script error in 'success' would otherwise
+			// leave the popup on "Getting list of files ..." with nothing said
+			if (e instanceof Error){
+				console.error(e)
+				cms_update_fail($popup, state, area, 'Updater script error: ' + e.message + ' — no files were changed')
+			}
+		})
 
 	})
 

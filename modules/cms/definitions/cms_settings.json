@@ -353,6 +353,24 @@
 			"default": "0"
 		},
 		{
+			"type": "select",
+			"name": "page_panel_versioning",
+			"label": "Page panel versions",
+			"values": {
+				"1": "On",
+				"0": "Off"
+			},
+			"default": "1",
+			"help": "[Page panel versions]||Each save keeps a version of what the save replaces (page panel gears menu → Versions).||Off: no versions are kept and the menu item is hidden; versions already kept stay in tmp/cms_page_panel_versions/."
+		},
+		{
+			"type": "text",
+			"name": "page_panel_versions",
+			"label": "Page panel versions kept",
+			"default": "5",
+			"help": "[Versions kept]||How many earlier versions each page panel keeps. 0 keeps the last one, at most 25."
+		},
+		{
 			"type": "subtitle",
 			"label": "Email",
 			"width": "wide",

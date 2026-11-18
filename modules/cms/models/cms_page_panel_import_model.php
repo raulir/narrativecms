@@ -119,11 +119,29 @@ class cms_page_panel_import_model extends \Model {
 		}
 
 		$token = (string)($request['token'] ?? '');
-		$this->created = [];
-		$this->importing = [];
 		$entry = $_SESSION['cms_import'][$token] ?? null;
 		$path = is_array($entry) ? (string)($entry['path'] ?? '') : '';
 		$types = is_array($entry) ? ($entry['types'] ?? []) : [];
+		if (!is_array($types)){
+			$types = [];
+		}
+
+		$mode = (($request['mode'] ?? '') === 'overwrite') ? 'overwrite' : 'new';
+
+		return $this->apply_zip($path, $types, (int)($request['zip_id'] ?? 0), $mode, $this->_fk_id_list($request['fk_ids'] ?? []));
+
+	}
+
+	/**
+	 * Import one main panel of an export zip on disk. $types: the panel types it may be ($zip_id's type must be one);
+	 * $mode 'new' or 'overwrite'; $fk_ids: missing fk targets to create. $import_settings false leaves the settings
+	 * row alone (version restore). Returns ok 1, or ok 0 and message with what this attempt created removed.
+	 */
+	function apply_zip($path, $types, $zip_id, $mode, $fk_ids = [], $import_settings = true){
+
+		$this->created = [];
+		$this->importing = [];
+		$path = (string)$path;
 		if (!is_array($types)){
 			$types = [];
 		}
@@ -140,9 +158,9 @@ class cms_page_panel_import_model extends \Model {
 		}
 		$this->zip = $zip;
 
-		$old_id = (int)($request['zip_id'] ?? 0);
-		$mode = (($request['mode'] ?? '') === 'overwrite') ? 'overwrite' : 'new';
-		$fk_ids = $this->_fk_id_list($request['fk_ids'] ?? []);
+		$old_id = (int)$zip_id;
+		$mode = ($mode === 'overwrite') ? 'overwrite' : 'new';
+		$fk_ids = $this->_fk_id_list($fk_ids);
 		$panel_name = $manifest['_panels'][$old_id]['panel_name'] ?? '';
 
 		if (!$types || empty($manifest['_panels'][$old_id]) || !in_array($old_id, $manifest['_main'], true) || !in_array($panel_name, $types, true)){
@@ -185,7 +203,7 @@ class cms_page_panel_import_model extends \Model {
 			}
 			$this->_set_child_parents($old_id, $new_id, $map);
 
-			if ($panel_name !== ''){
+			if ($panel_name !== '' && $import_settings){
 				$this->_import_settings($panel_name);
 			}
 
@@ -572,8 +590,10 @@ class cms_page_panel_import_model extends \Model {
 			$existing = [];
 		}
 
+		// A settings row (a version of panel settings) has its fields under "settings", every other block under "item"
+		$is_settings = empty($zip_panel['cms_page_id']) && empty($zip_panel['parent_id']) && empty($zip_panel['sort']);
 		$bag = $this->_content_bag($zip_panel);
-		$bag = $this->_apply_fields($bag, $existing, $overwrite, $zip_panel['panel_name'] ?? '', $map);
+		$bag = $this->_apply_fields($bag, $existing, $overwrite, $zip_panel['panel_name'] ?? '', $map, $is_settings ? 'settings' : 'item');
 
 		if ($overwrite){
 			$this->cms_page_panel_model->update_cms_page_panel($old_id, $bag);
@@ -631,9 +651,9 @@ class cms_page_panel_import_model extends \Model {
 
 	}
 
-	function _apply_fields($bag, $existing, $overwrite, $panel_name, $map){
+	function _apply_fields($bag, $existing, $overwrite, $panel_name, $map, $which = 'item'){
 
-		foreach ($this->_named_fields($panel_name, 'item') as $field){
+		foreach ($this->_named_fields($panel_name, $which) as $field){
 			$this->_apply_one_field($bag, $existing, $field, $overwrite, $map);
 		}
 

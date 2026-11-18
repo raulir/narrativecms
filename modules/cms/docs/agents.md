@@ -2,7 +2,7 @@
 
 How to develop in this CMS (PHP, JS, SCSS panels). Ships with the CMS installation so other projects can reuse the same rules.
 
-Related docs: [`system.md`](system.md) (bootstrap, Loader, Controller), [`cms_panel_js.md`](cms_panel_js.md), [`cms_module_extends.md`](cms_module_extends.md), [`access.md`](access.md), [`review.md`](review.md) (architecture review after a 4–16h slice), image/video docs under this folder.
+Related docs: [`system.md`](system.md) (bootstrap, Loader, Controller), [`cms_panel_js.md`](cms_panel_js.md), [`cms_module_extends.md`](cms_module_extends.md), [`access.md`](access.md), [`review.md`](review.md) (architecture review after a 4–16h slice), [`cms_export.md`](cms_export.md) (page panel export / import), [`cms_versions.md`](cms_versions.md) (page panel versions), image/video docs under this folder.
 
 **Do not** put long product/project rules here — those live in the site module’s docs (e.g. `modules/music/docs/agents.md`).
 

@@ -68,6 +68,8 @@ Ajax input / output filter review (2026-11-05), items in priority order:
 
 ## Panel export
 
+- [x] **Page panel versions (issue #43, 2026-11-18)** — each save keeps a version (export zip) of what it replaces when it changed something; gears menu → **Versions** with Compare (on top, Close only) and Restore (Overwrite import, a version of the current content first). CMS settings **Page panel versions** (on) and **kept** (5; 0 → 1, max 25). Files over 2 MB as metadata only. Export walk moved into `cms_page_panel_export_model`; import `apply_zip()`. See [`cms_versions.md`](cms_versions.md).
+- [ ] **Versions: real-site checks** — a panel with children (`cms_page_panels` field) and a video over 2 MB were not tried on the dev site.
 - [x] **List export** — gear **Export** posts the ticked row ids as `export_ids`. One ticked row keeps the heading **Export page panel**. More than one says **Export page panels (N)**. One zip, `_main` is that array. See [`cms_export.md`](cms_export.md).
 - [ ] **Import definition differences** — list import does not write `_panel_files` or change definitions. Later: detect when the zip’s definition differs and allow overwriting definitions and other panel source files.
 - [ ] **Settings merge on import** — list import only adds settings values, including translations, that are not already stored. Later: a proper merge when the zip and the site both have a value.

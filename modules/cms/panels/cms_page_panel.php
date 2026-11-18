@@ -228,6 +228,9 @@ class cms_page_panel extends \Controller {
 
 			$data_merged = $this->run_panel_method($data_merged['panel_name'], 'on_update', $data_merged);
 
+			// What a stored block holds before this save, kept as a version when the save changes it (cms_versions.md)
+			$version_stage = $block_id ? $this->_version_stage($block_id) : null;
+
 			try {
 				$saved = $this->cms_page_panel_cms_model->save_cms_page_panel_admin($block_id, $data_merged, [
 						'panel_config' => $panel_config,
@@ -236,11 +239,22 @@ class cms_page_panel extends \Controller {
 				]);
 				$block_id = $saved['cms_page_panel_id'];
 			} catch (\Throwable $e){
+				if ($version_stage){
+					$this->cms_page_panel_version_model->drop_staged($version_stage);
+				}
 				if ($created_page_id > 0){
 					$this->load->model('cms/cms_page_model');
 					$this->cms_page_model->delete_page($created_page_id);
 				}
 				throw $e;
+			}
+
+			if ($version_stage){
+				try {
+					$this->cms_page_panel_version_model->keep_staged($version_stage);
+				} catch (\Throwable $e){
+					error_log('cms version: keeping a version of '.$block_id.' failed: '.$e->getMessage());
+				}
 			}
 
 			if ($created_page_id > 0 && empty($block_id)){
@@ -283,6 +297,22 @@ class cms_page_panel extends \Controller {
 		}
 
 		return $params;
+
+	}
+
+	/**
+	 * Stage a version of a stored block before its save; null when versioning is off or it fails (a version
+	 * never stops a save).
+	 */
+	function _version_stage($block_id){
+
+		try {
+			$this->load->model('cms/cms_page_panel_version_model');
+			return $this->cms_page_panel_version_model->stage($block_id);
+		} catch (\Throwable $e){
+			error_log('cms version: staging '.$block_id.' failed: '.$e->getMessage());
+			return null;
+		}
 
 	}
 

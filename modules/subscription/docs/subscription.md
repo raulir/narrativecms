@@ -209,7 +209,7 @@ ScoreTutor first tries to set every paid subscription not to renew. Then it dele
 1. **The page:** `music/settings_account` (My account) shows the warning before confirming: deletion goes ahead even if the subscription can't be stopped, and the payment provider keeps its own data.
 2. **The request:** `music/account_delete` (`cms_do=delete`, signed-in user only) runs `subscription_model::stop_renewal_for_user`, then `music_user_model::delete_user_data`, then clears the session.
 3. **`stop_renewal_for_user`** returns `result` and `providers`:
-   - **Stripe:** every distinct `stripe_subscription_id` of the user's rows with `active = 1`, archived rows included (a Stripe subscription bought while Play was the provider is stored archived and still bills). Each goes through `stripe_model::stop_renewal_by_id`:
+   - **Stripe:** every distinct `stripe_subscription_id` of the user's rows with `active = 1`, archived rows included (a Stripe subscription bought while Play was the provider is stored archived and still bills). Each goes through `stripe_subscription_model::stop_renewal_by_id`:
      - already ended or gone at Stripe → nothing to stop;
      - already set to end → stopped;
      - otherwise `cancel_at_period_end` is set;

@@ -1,0 +1,7 @@
+{
+	"item": [],
+	"ajax": {
+		"input": ["cms","version_panel_id","version_file"],
+		"output": ["cms","ok","message"]
+	}
+}

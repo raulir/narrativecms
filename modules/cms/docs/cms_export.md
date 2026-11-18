@@ -1,8 +1,10 @@
 # CMS page panel export / import
 
+Page panel **versions** are export zips kept on each save, and their restore is an Overwrite import: [`cms_versions.md`](cms_versions.md).
+
 ## Export (phase 1 — implemented)
 
-Per-panel export from the CMS page panel editor toolbar (hidden dropdown → **Export**).
+Per-panel export from the CMS page panel editor toolbar (hidden dropdown → **Export**). The popup is [`cms_page_panel_export.php`](../panels/cms_page_panel_export.php). The walk and the zip are in [`cms_page_panel_export_model.php`](../models/cms_page_panel_export_model.php): `collect()` (no copying, used by versions), `preview()`, `export()`. Each `_files` entry has `size` (bytes of the copy in the zip).
 
 ### UI flow
 
