@@ -1,6 +1,10 @@
 {
 	"label": "Subscription checkout start",
 	"description": "Domain handoff for paid pricing CTA — selects provider and starts checkout",
+	"ajax": {
+		"input": ["cms", "product_id", "currency_id", "app_root_url"],
+		"output": ["cms", "ok", "login", "login_url", "already_subscribed", "redirect"]
+	},
 	"item": [],
 	"settings": []
 }

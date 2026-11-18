@@ -2,6 +2,10 @@
 	"label": "My subscription",
 	"description": "Logged-in subscription manage / purchase. Labels from Subscription settings.",
 	"image": "",
+	"ajax": {
+		"input": ["cms", "auto_renew", "product_id", "currency_id", "return_url", "app_root_url"],
+		"output": ["cms", "ok", "changed", "redirect", "auto_renew_on", "status_period_line"]
+	},
 	"js": [
 		"subscription/pricing",
 		"subscription/manage"

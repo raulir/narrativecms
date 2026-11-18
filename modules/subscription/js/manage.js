@@ -4,12 +4,9 @@
 
 function manage_notify(msg, is_error){
 
+	// pricing.js is loaded with this panel
 	if (typeof pricing_notify === 'function'){
 		pricing_notify(msg, is_error)
-		return
-	}
-	if (window.alert){
-		window.alert(msg)
 	}
 
 }
@@ -20,16 +17,35 @@ function manage_panel_id($container){
 
 }
 
+// The action's reply (definition ajax.output), under result
+function manage_body(result){
+
+	return (result && result.result) || {}
+
+}
+
+// A failed action: the server's reason when it gave one, else the page's text (Subscription settings)
+function manage_fail($container, body, text_attr){
+
+	manage_notify((body && body.cms_error) || $container.attr(text_attr), true)
+
+}
+
 function manage_reload_page(){
 
+	// A "Payment received" just shown is shown again after the reload (pricing.js)
+	if (typeof pricing_paid_carry === 'function'){
+		pricing_paid_carry()
+	}
 	window.location.reload()
 
 }
 
 function manage_open_redirect(url){
 
-	if (window._cms_inapp && window.AppSplash && AppSplash.openExternal){
-		AppSplash.openExternal(url)
+	// The Android app opens it in the device browser; the website and the web app in the same window
+	if (cms_platform() === 'android'){
+		cms_open_external(url)
 		return
 	}
 	window.location.href = url
@@ -46,8 +62,7 @@ function manage_sync($container){
 
 	data.success = function(result){
 
-		var body = result && result.result ? result.result : result
-		if (body && body.changed){
+		if (String(manage_body(result).changed) === '1'){
 			manage_reload_page()
 		}
 
@@ -60,7 +75,7 @@ function manage_sync($container){
 function manage_set_auto_renew($container, on){
 
 	var $period = $container.find('.manage_status_period')
-	var updating = $container.attr('data-manage_updating') || 'Updating …'
+	var updating = $container.attr('data-manage_updating')
 	var prev = $period.text()
 	$period.text(updating)
 	$container.find('.manage_auto_option').addClass('manage_auto_busy')
@@ -77,10 +92,10 @@ function manage_set_auto_renew($container, on){
 	data.success = function(result){
 
 		$container.find('.manage_auto_option').removeClass('manage_auto_busy')
-		var body = result && result.result ? result.result : result
-		if (!body || !body.ok){
+		var body = manage_body(result)
+		if (String(body.ok) !== '1'){
 			$period.text(prev)
-			manage_notify((body && body.error) ? body.error : 'Could not update', true)
+			manage_fail($container, body, 'data-manage_update_error')
 			return
 		}
 
@@ -105,7 +120,7 @@ function manage_set_auto_renew($container, on){
 
 		$container.find('.manage_auto_option').removeClass('manage_auto_busy')
 		$period.text(prev)
-		manage_notify('Could not update', true)
+		manage_fail($container, null, 'data-manage_update_error')
 
 	}
 
@@ -130,9 +145,9 @@ function manage_change_plan($container, product_id, currency_id){
 	data.success = function(result){
 
 		$container.removeClass('pricing_checkout_loading')
-		var body = result && result.result ? result.result : result
-		if (!body || !body.ok){
-			manage_notify((body && body.error) ? body.error : 'Could not change plan', true)
+		var body = manage_body(result)
+		if (String(body.ok) !== '1'){
+			manage_fail($container, body, 'data-manage_change_error')
 			return
 		}
 		if (body.redirect){
@@ -146,7 +161,7 @@ function manage_change_plan($container, product_id, currency_id){
 	data.error = function(){
 
 		$container.removeClass('pricing_checkout_loading')
-		manage_notify('Could not change plan', true)
+		manage_fail($container, null, 'data-manage_change_error')
 
 	}
 
@@ -208,6 +223,12 @@ function manage_init($root){
 
 		})
 
+		// Google Play's subscription page: the device browser or Play from the Android app, a new tab elsewhere
+		$container.find('.manage_play_cta').on('click.cms', function(event){
+			event.preventDefault()
+			cms_open_external($(this).attr('href'))
+		})
+
 		// Update payment method → Stripe portal (payment_method_update only)
 		$container.find('.manage_payment_cta').on('click.cms', function(){
 
@@ -216,7 +237,7 @@ function manage_init($root){
 				'return_url': window.location.pathname + window.location.search,
 			}
 			// The installed web app: the page path the backend knows, and the shell root to come back into
-			if (window._cms_inapp && !window.AppSplash && typeof cms_app_root === 'function'){
+			if (cms_platform() === 'web_app'){
 				data.return_url = cms_app_strip_root(window.location.pathname) + window.location.search
 				data.app_root_url = location.origin + cms_app_root()
 			}
@@ -227,9 +248,9 @@ function manage_init($root){
 
 			data.success = function(result){
 
-				var body = result && result.result ? result.result : result
-				if (!body || !body.ok || !body.redirect){
-					manage_notify((body && body.error) ? body.error : 'Could not open payment settings', true)
+				var body = manage_body(result)
+				if (String(body.ok) !== '1' || !body.redirect){
+					manage_fail($container, body, 'data-manage_payment_error')
 					return
 				}
 				manage_open_redirect(body.redirect)
@@ -237,7 +258,7 @@ function manage_init($root){
 			}
 
 			data.error = function(){
-				manage_notify('Could not open payment settings', true)
+				manage_fail($container, null, 'data-manage_payment_error')
 			}
 
 			get_ajax('subscription/manage', data)

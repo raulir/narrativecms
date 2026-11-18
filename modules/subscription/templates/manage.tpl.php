@@ -14,7 +14,7 @@
 		data-checkout_missing="<?= $checkout_missing ? '1' : '0' ?>"
 		data-user_logged_in="<?= $user_logged_in ? '1' : '0' ?>"
 		data-login_url="<?= $login_url ?>"
-		data-page_path="<?= htmlspecialchars($page_path ?? '/subscription/', ENT_QUOTES, 'UTF-8') ?>"
+		data-page_path="<?= htmlspecialchars($page_path ?? '', ENT_QUOTES, 'UTF-8') ?>"
 		data-manage_view="<?= $manage_view ?>"
 		data-auto_checkout="0"
 		data-auto_product_id="0"
@@ -22,6 +22,9 @@
 		data-checkout_missing_message="<?= $checkout_missing_message ?>"
 		data-checkout_error_message="<?= $checkout_error_message ?>"
 		data-manage_updating="<?= $manage_updating_label ?>"
+		data-manage_update_error="<?= $manage_update_error ?>"
+		data-manage_change_error="<?= $manage_change_error ?>"
+		data-manage_payment_error="<?= $manage_payment_error ?>"
 		data-paid_message="<?= htmlspecialchars((string)($paid_message ?? ''), ENT_QUOTES, 'UTF-8') ?>"
 		data-manage_url="<?= htmlspecialchars((string)($manage_url ?? ''), ENT_QUOTES, 'UTF-8') ?>">
 
@@ -37,7 +40,7 @@
 				<?= $manage_login_message ?>
 			</div>
 			<?php if ($login_url): ?>
-				<a class="pricing_cta pricing_cta_free" href="<?= $login_url ?>">Log in</a>
+				<a class="pricing_cta pricing_cta_free" href="<?= $login_url ?>"><?= $manage_login_cta ?></a>
 			<?php endif ?>
 
 		<?php elseif ($error): ?>
@@ -59,6 +62,12 @@
 				<?php endif ?>
 				<?php if ($status_period_line || $show_auto): ?>
 					<div class="manage_status_period"><?= $status_period_line ?></div>
+				<?php endif ?>
+				<?php if ($billed_line !== ''): ?>
+					<div class="manage_billed" data-billing="<?= $billing ?>"><?= $billed_line ?></div>
+				<?php endif ?>
+				<?php if ($play_notice !== ''): ?>
+					<div class="manage_play_notice"><?= $play_notice ?></div>
 				<?php endif ?>
 
 				<?php if ($show_auto): ?>
@@ -96,11 +105,20 @@
 					</div>
 				<?php endif ?>
 
-				<?php if ($manage_view === 'basic' && !$cards): ?>
+				<?php if ($manage_view === 'basic' && !$cards && $play_notice === ''): ?>
 					<div class="pricing_empty">No paid plans in this category yet.</div>
 				<?php endif ?>
 
 			</div>
+
+			<?php if ($play_manage_url !== ''): ?>
+				<div class="manage_play_area">
+					<?php if ($play_notice === ''): ?>
+						<div class="manage_play_help"><?= $manage_play_help ?></div>
+					<?php endif ?>
+					<a class="manage_play_cta" href="<?= htmlspecialchars($play_manage_url, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener"><?= $manage_play_cta ?></a>
+				</div>
+			<?php endif ?>
 
 			<?php if ($show_payment_area): ?>
 				<div class="manage_payment_area">

@@ -101,10 +101,41 @@
 			"translate": "1"
 		},
 		{
+			"type": "text",
+			"name": "manage_login_cta",
+			"label": "Manage: log in button",
+			"default": "Log in",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_update_error",
+			"label": "Manage: automatic extension not changed",
+			"help": "Popup when switching automatic extension on or off failed",
+			"default": "Could not update. Please try again.",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_change_error",
+			"label": "Manage: plan not changed",
+			"help": "Popup when Change plan failed",
+			"default": "Could not change plan. Please try again.",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_payment_error",
+			"label": "Manage: payment settings not opened",
+			"help": "Popup when Update payment method could not open the card page",
+			"default": "Could not open payment settings. Please try again.",
+			"translate": "1"
+		},
+		{
 			"type": "link",
 			"name": "manage_page_link",
-			"label": "My subscription page",
-			"help": "Checkout success returns here. Also used as cancel fallback when set."
+			"label": "My subscription page (fallback)",
+			"help": "Used only when no visible page has a My subscription block: that page is found by itself. Checkout success, cancel and the card update return to My subscription."
 		},
 		{
 			"type": "text",
@@ -195,6 +226,48 @@
 			"name": "manage_payment_cta",
 			"label": "Update payment method CTA",
 			"default": "Click here",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_billed_card",
+			"label": "Billed by card",
+			"default": "Billed by card (Stripe)",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_billed_play",
+			"label": "Billed through Google Play",
+			"default": "Billed through Google Play",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_play_help",
+			"label": "Google Play: where to change",
+			"default": "Change your plan or payment method in Google Play.",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_play_cta",
+			"label": "Manage in Google Play button",
+			"default": "Manage in Google Play",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_play_on_hold",
+			"label": "Google Play: on hold",
+			"default": "Your Google Play subscription is on hold because the payment did not go through. Fix the payment in Google Play to keep Premium.",
+			"translate": "1"
+		},
+		{
+			"type": "text",
+			"name": "manage_play_paused",
+			"label": "Google Play: paused",
+			"default": "Your Google Play subscription is paused. Resume it in Google Play.",
 			"translate": "1"
 		}
 	]

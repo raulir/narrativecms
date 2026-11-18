@@ -21,8 +21,7 @@ class manage extends \Controller {
 		$this->load->model('subscription/subscription_model');
 
 		if (!$this->user_model->is_logged_in()){
-			print(json_encode(['ok' => 0, 'error' => 'Login required'], JSON_UNESCAPED_UNICODE));
-			exit();
+			return ['ok' => 0, 'error' => 'Login required'];
 		}
 
 		$user = $this->user_model->get_current();
@@ -48,8 +47,14 @@ class manage extends \Controller {
 			);
 		}
 
-		print(json_encode($result, JSON_UNESCAPED_UNICODE));
-		exit();
+		// Only what manage.js reads (definition ajax.output); error comes back as cms_error
+		$reply = [];
+		foreach (['ok', 'changed', 'redirect', 'auto_renew_on', 'status_period_line', 'error'] as $key){
+			if (array_key_exists($key, $result)){
+				$reply[$key] = $result[$key];
+			}
+		}
+		return $reply;
 
 	}
 

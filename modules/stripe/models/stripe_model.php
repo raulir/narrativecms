@@ -894,6 +894,49 @@ class stripe_model extends \Model {
 	}
 
 	/**
+	 * Sets one subscription not to renew (account deletion). ok with stopped 1 when it is set to end now or
+	 * already was, stopped 0 when there is nothing billing (gone or ended); ok 0 when Stripe could not be asked.
+	 */
+	function stop_renewal_by_id($subscription_id){
+
+		$subscription_id = trim((string)$subscription_id);
+		if ($subscription_id === ''){
+			return ['ok' => 1, 'stopped' => 0];
+		}
+
+		try {
+			$subscription = \Stripe\Subscription::retrieve($subscription_id);
+		} catch (\Stripe\Exception\InvalidRequestException $e) {
+			if ((int)$e->getHttpStatus() === 404 || (string)$e->getStripeCode() === 'resource_missing'){
+				return ['ok' => 1, 'stopped' => 0];
+			}
+			$this->_log_stripe_error('Stop renewal: retrieve failed '.$subscription_id, $e->getMessage());
+			return ['ok' => 0];
+		} catch (\Exception $e) {
+			$this->_log_stripe_error('Stop renewal: retrieve failed '.$subscription_id, $e->getMessage());
+			return ['ok' => 0];
+		}
+
+		$status = strtolower(trim((string)($subscription->status ?? '')));
+		if (in_array($status, ['canceled', 'incomplete_expired'], true)){
+			return ['ok' => 1, 'stopped' => 0];
+		}
+		if (!empty($subscription->cancel_at_period_end)){
+			return ['ok' => 1, 'stopped' => 1];
+		}
+
+		try {
+			\Stripe\Subscription::update($subscription_id, ['cancel_at_period_end' => true]);
+		} catch (\Exception $e) {
+			$this->_log_stripe_error('Stop renewal: update failed '.$subscription_id, $e->getMessage());
+			return ['ok' => 0];
+		}
+
+		return ['ok' => 1, 'stopped' => 1];
+
+	}
+
+	/**
 	 * Stripe Customer Portal deep-link: payment method update only (no cancel UI).
 	 * flow_data.type = payment_method_update
 	 *

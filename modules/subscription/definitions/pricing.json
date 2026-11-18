@@ -2,6 +2,10 @@
 	"label": "Pricing",
 	"description": "Subscription plans from a shop category (type subscription). Labels from Subscription settings.",
 	"image": "",
+	"ajax": {
+		"input": ["cms", "token", "product_id", "currency_id", "resume_url", "page_path"],
+		"output": ["cms", "ok", "paid", "url", "login_url"]
+	},
 	"js": [
 		"subscription/pricing"
 	],

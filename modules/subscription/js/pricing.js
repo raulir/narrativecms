@@ -2,19 +2,17 @@
  * Pricing: filter cards; free CTA is a link; paid CTA → login intent or checkout provider.
  */
 
-function pricing_notify(msg, is_error){
+/**
+ * A notice with OK: the site's popup when a module provides one (CMS hook popup), else the notice bar.
+ */
+function pricing_notify(msg){
 
-	if (typeof cms_notification === 'function'){
-		cms_notification(msg, 3, is_error ? 'error' : 'success')
+	var popup = (typeof cms_hook === 'function') ? cms_hook('popup') : null
+	if (popup){
+		popup({text: msg})
 		return
 	}
-	if (is_error && typeof cms_error === 'function'){
-		cms_error(msg, 3)
-		return
-	}
-	if (window.alert){
-		window.alert(msg)
-	}
+	pricing_paid_notice(msg)
 
 }
 
@@ -48,39 +46,10 @@ function pricing_apply_filter($container){
 
 }
 
+// A panel action's reply (subscription/checkout_start, subscription/pricing): its keys are under result
 function pricing_checkout_body(result){
 
-	if (result && result.result && (result.result.redirect || result.result.ok !== undefined || result.result.login !== undefined)){
-		return result.result
-	}
-	return result
-
-}
-
-function pricing_open_browser($container){
-
-	var error_msg = $container.attr('data-checkout_error_message') || 'Checkout could not start. Try again.'
-
-	get_ajax('subscription/pricing', {
-		'cms_do': 'browser_open',
-		'page_path': $container.attr('data-page_path') || '/subscription/',
-		'success': function(result){
-			var body = result && result.result ? result.result : result
-			var url = body && body.url ? body.url : ''
-			if (!url){
-				pricing_notify(error_msg, true)
-				return
-			}
-			if (window.AppSplash && AppSplash.openExternal){
-				AppSplash.openExternal(url)
-				return
-			}
-			window.open(url, '_blank')
-		},
-		'error': function(){
-			pricing_notify(error_msg, true)
-		},
-	})
+	return (result && result.result) || null
 
 }
 
@@ -90,7 +59,7 @@ function pricing_open_browser($container){
  */
 function pricing_web_app_root(){
 
-	if (!window._cms_inapp || window.AppSplash || typeof cms_app_root !== 'function'){
+	if (cms_platform() !== 'web_app'){
 		return ''
 	}
 	return location.origin + cms_app_root()
@@ -115,14 +84,18 @@ function pricing_go(url){
 }
 
 /**
- * In the app, Stripe Checkout runs outside the app window (a browser tab, a custom tab, the external browser),
- * so the plans page stays open. While that checkout may be open (30 min), it asks every 5 s, and at once when
- * the page is visible again, whether the account is paid now; then it shows the page again. The start time is
- * kept, so a reload of the plans page in that time watches on.
+ * The paid-status watch. A checkout started here may be paid somewhere else: in the app, Stripe runs outside the
+ * app window; on the website, Stripe returns before its webhook has written the plan. For 30 min after the start
+ * the plans page and My subscription ask whether the account is paid now: every 5 s for the first 2 min, then
+ * every 15 s, and at once when the page shows again. Paid: "Payment received" and My subscription with the new
+ * plan. The start time is kept, so another page or a reload in that time watches on.
  */
 var PRICING_WATCH_KEY = 'subscription_checkout_started'
+var PRICING_PAID_KEY = 'subscription_paid_notice'
 var PRICING_WATCH_MS = 30 * 60 * 1000
 var PRICING_WATCH_EVERY = 5000
+var PRICING_WATCH_SLOW = 15000
+var PRICING_WATCH_SLOW_AFTER = 2 * 60 * 1000
 // Kept when this file runs again (an app page can bring its scripts more than once)
 var pricing_watch = window.pricing_watch || null
 
@@ -151,7 +124,7 @@ function pricing_watch_started(){
 function pricing_watch_stop(clear){
 
 	if (pricing_watch){
-		clearInterval(pricing_watch.timer)
+		clearTimeout(pricing_watch.timer)
 		document.removeEventListener('visibilitychange', pricing_watch.visible)
 		pricing_watch = null
 	}
@@ -163,7 +136,7 @@ function pricing_watch_stop(clear){
 
 function pricing_watch_paid($container, started){
 
-	if (!window._cms_inapp || !$container || !$container.length){
+	if (!$container || !$container.length){
 		return
 	}
 
@@ -176,9 +149,7 @@ function pricing_watch_paid($container, started){
 		started: started,
 		busy: false,
 	}
-	watch.timer = setInterval(function(){
-		pricing_watch_check(watch)
-	}, PRICING_WATCH_EVERY)
+	pricing_watch_next(watch)
 	watch.visible = function(){
 		if (document.visibilityState === 'visible'){
 			pricing_watch_check(watch)
@@ -190,19 +161,50 @@ function pricing_watch_paid($container, started){
 }
 
 /**
- * A checkout started from the app in the last 30 min: watch on from this plans or My subscription page.
+ * The next question: every 5 s for the first 2 min, then every 15 s.
+ */
+function pricing_watch_next(watch){
+
+	clearTimeout(watch.timer)
+	var every = (Date.now() - watch.started < PRICING_WATCH_SLOW_AFTER) ? PRICING_WATCH_EVERY : PRICING_WATCH_SLOW
+	watch.timer = setTimeout(function(){
+		pricing_watch_check(watch)
+		if (pricing_watch === watch){
+			pricing_watch_next(watch)
+		}
+	}, every)
+
+}
+
+/**
+ * A checkout started in the last 30 min: watch on from this plans or My subscription page, asking at once
+ * (back from Stripe on the website). A My subscription page that already shows a paid plan only says so.
  */
 function pricing_watch_resume($container){
 
-	if (!window._cms_inapp || pricing_watch || !$container || !$container.length){
+	// Back from a cancelled Stripe Checkout (its cancel address says so): nothing to wait for
+	if (/[?&]subscription_checkout=cancel(&|$)/.test(location.search)){
+		pricing_watch_stop(true)
+		return
+	}
+	if (pricing_watch || !$container || !$container.length){
 		return
 	}
 	var started = pricing_watch_started()
-	if (started && Date.now() - started < PRICING_WATCH_MS){
-		pricing_watch_paid($container, started)
-	} else if (started){
+	if (started && Date.now() - started >= PRICING_WATCH_MS){
 		pricing_watch_store(0)
+		return
 	}
+	if (!started){
+		return
+	}
+	if ($container.attr('data-manage_view') === 'premium'){
+		pricing_watch_store(0)
+		pricing_paid_say($container)
+		return
+	}
+	pricing_watch_paid($container, started)
+	pricing_watch_check(pricing_watch)
 
 }
 
@@ -244,7 +246,7 @@ function pricing_watch_check(watch){
 }
 
 /**
- * Paid: say so, and open My subscription (data-manage_url), in the app without leaving it.
+ * The notice bar of a site without a popup: shows for 5 s.
  */
 function pricing_paid_notice(text){
 
@@ -260,9 +262,65 @@ function pricing_paid_notice(text){
 
 }
 
+/**
+ * "Payment received" (setting paid_message): the site's popup when there is one, else the notice bar. On body,
+ * so an in-app page load under it does not remove it; it closes itself.
+ */
+function pricing_paid_say($container){
+
+	window.pricing_paid_said_at = Date.now()
+	var paid_text = ($container && $container.attr('data-paid_message')) || 'Payment received'
+	var popup = (typeof cms_hook === 'function') ? cms_hook('popup') : null
+	if (popup){
+		popup({text: paid_text, key: 'subscription_paid', close_after: 5000})
+	} else {
+		pricing_paid_notice(paid_text)
+	}
+
+}
+
+/**
+ * A website page is loaded again: "Payment received" said in the last 5 s is said on the new page too.
+ */
+function pricing_paid_carry(){
+
+	if (window.pricing_paid_said_at && Date.now() - window.pricing_paid_said_at < 5000){
+		try {
+			sessionStorage.setItem(PRICING_PAID_KEY, '1')
+		} catch (e) {}
+	}
+
+}
+
+/**
+ * A website page loaded after a paid watch: say "Payment received" there (the reload took the first one away).
+ */
+function pricing_paid_pending($container){
+
+	var waiting = ''
+	try {
+		waiting = sessionStorage.getItem(PRICING_PAID_KEY) || ''
+		sessionStorage.removeItem(PRICING_PAID_KEY)
+	} catch (e) {}
+	if (waiting && $container && $container.length){
+		pricing_paid_say($container)
+	}
+
+}
+
+/**
+ * Paid: say so, and open My subscription (data-manage_url), in the app without leaving it.
+ */
 function pricing_paid_refresh($container){
 
-	pricing_paid_notice($container.attr('data-paid_message') || 'Payment received')
+	// The website loads a new page: the notice is said there
+	if (cms_platform() === 'site'){
+		try {
+			sessionStorage.setItem(PRICING_PAID_KEY, '1')
+		} catch (e) {}
+	} else {
+		pricing_paid_say($container)
+	}
 
 	// My subscription shows the new plan: open it, or load it again when it is the page shown
 	var current = (typeof cms_app_strip_root === 'function') ? cms_app_strip_root(location.pathname) : location.pathname
@@ -272,7 +330,7 @@ function pricing_paid_refresh($container){
 	}
 	var same = !manage || manage === current
 
-	if (window._cms_inapp && typeof cms_position_goto === 'function'){
+	if (cms_platform() !== 'site' && typeof cms_position_goto === 'function'){
 		cms_position_goto(same ? current + location.search : manage, same ? {history: 'none', reload: true} : {})
 		return
 	}
@@ -286,21 +344,22 @@ function pricing_paid_refresh($container){
 
 function pricing_start_checkout($container, product_id, currency_id, play_product_id){
 
-	// The Android app: Google Play or ScoreTutor (Stripe) in the browser. The web app pays as the website does.
-	if (window._cms_inapp && window.AppSplash){
-		var play_id = String(play_product_id || '')
-		var play_ready = window.AppSplash && AppSplash.playReady && String(AppSplash.playReady()) === '1'
-		pricing_watch_paid($container)
-		if (play_ready && play_id !== '' && typeof app_payment_choice === 'function'){
-			app_payment_choice({
-				product_id: product_id,
-				currency_id: currency_id,
-				play_product_id: play_product_id || '',
-				page_path: $container.attr('data-page_path') || '/subscription/',
-			})
+	// The Android app: the payment choice screen of the Play module (CMS hook payment_choice), which starts
+	// the paid-status watch once a way is chosen. Without it nothing is sold in the app. The web app pays
+	// as the website does.
+	if (cms_platform() === 'android'){
+		var choice = cms_hook('payment_choice')
+		if (!choice){
+			pricing_notify($container.attr('data-checkout_error_message') || 'Checkout could not start. Try again.')
 			return
 		}
-		pricing_open_browser($container)
+		choice({
+			$container: $container,
+			product_id: product_id,
+			currency_id: currency_id,
+			play_product_id: play_product_id || '',
+			page_path: $container.attr('data-page_path') || '',
+		})
 		return
 	}
 
@@ -333,7 +392,11 @@ function pricing_start_checkout($container, product_id, currency_id, play_produc
 		data.app_root_url = app_root
 	}
 
-	get_ajax_panel('subscription/checkout_start', data, function(result){
+	data.error = function(){
+		$container.removeClass('pricing_checkout_loading')
+		pricing_notify(error_msg, true)
+	}
+	data.success = function(result){
 
 		$container.removeClass('pricing_checkout_loading')
 		var body = pricing_checkout_body(result)
@@ -355,10 +418,11 @@ function pricing_start_checkout($container, product_id, currency_id, play_produc
 			return
 		}
 
-		var err = (body && body.error) ? body.error : error_msg
-		pricing_notify(err, true)
+		pricing_notify((body && body.cms_error) || error_msg, true)
 
-	})
+	}
+
+	get_ajax('subscription/checkout_start', data).catch(function(){})
 
 }
 
@@ -408,6 +472,7 @@ function pricing_init($root){
 
 	// My subscription (.pricing_manage) is set up by manage.js, which calls the shared parts itself; the
 	// checkout watch also starts from here, whichever of the two files runs last
+	pricing_paid_pending($scope.first())
 	pricing_watch_resume($scope.filter('.pricing_manage').first())
 
 	$scope.not('.pricing_ok').not('.pricing_manage').each(function(){

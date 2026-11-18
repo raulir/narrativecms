@@ -183,7 +183,7 @@ class subscription_model extends \Model {
 	function merge_user_subscription($user_id, $fields){
 
 		$user_id = $this->_resolve_user_id($user_id);
-		if ($user_id < 1 || !is_array($fields)){
+		if ($user_id < 1 || !is_array($fields) || !$this->_user_exists($user_id)){
 			return false;
 		}
 
@@ -419,6 +419,11 @@ class subscription_model extends \Model {
 
 	function _save_identified_subscription($user_id, $existing, $fields, $make_current){
 
+		// A provider event for a deleted account writes nothing
+		if (!$this->_user_exists($user_id)){
+			return false;
+		}
+
 		if (!is_array($existing)){
 			$existing = [];
 		}
@@ -613,7 +618,7 @@ class subscription_model extends \Model {
 		$meta = $this->get_user_subscription($user_id);
 
 		if ($this->user_has_paid_subscription($user_id)){
-			$meta['source'] = 'stripe';
+			$meta['source'] = $this->subscription_billing($meta);
 			return $meta;
 		}
 
@@ -868,17 +873,17 @@ class subscription_model extends \Model {
 		$path = '/'.trim((string)$path, '/');
 
 		if ($path === '/' || strpos($path, '..') !== false || preg_match('#[^a-zA-Z0-9/_-]#', $path)){
-			return '/subscription/';
+			$manage = $this->manage_page_url();
+			return $manage !== '' ? $manage : '/';
 		}
 
 		return $path.'/';
 
 	}
 
-	function browser_enter_create($path){
+	function browser_enter_create($user_id, $path){
 
-		$user_id = (int)($_SESSION['user']['cms_page_panel_id'] ?? $_SESSION['user']['user_id'] ?? 0);
-
+		$user_id = (int)$user_id;
 		if ($user_id < 1){
 			return '';
 		}
@@ -1364,12 +1369,17 @@ class subscription_model extends \Model {
 		$params = $this->_manage_label_defaults($params);
 		$params['login_url'] = $this->get_login_url();
 		$params['manage_url'] = $this->manage_page_url();
+		$params['page_path'] = $params['manage_url'];
 		$params['user_logged_in'] = $this->user_model->is_logged_in() ? 1 : 0;
 		$params['show_settings_card'] = 0;
 		$params['show_payment'] = 0;
 		$params['show_currency_switcher'] = 0;
 		$params['currency_ids'] = [];
 		$params['subscription_source'] = '';
+		$params['billing'] = '';
+		$params['billed_line'] = '';
+		$params['play_manage_url'] = '';
+		$params['play_notice'] = '';
 		$params['action_title'] = '';
 		$params['status_plan_title'] = '';
 		$params['status_period_line'] = '';
@@ -1445,6 +1455,19 @@ class subscription_model extends \Model {
 			if ($is_elevated){
 				$params['show_elevated_banner'] = 1;
 				$params['elevated_plan_title'] = $this->resolve_subscription_plan_title($sub);
+				// The granted plan is the user's plan: no "Basic" under it
+				$params['status_plan_title'] = '';
+			}
+			// A Play subscription on hold or paused (a payment problem) is not active, but it is not over:
+			// say so and link to Google Play instead of offering a new purchase
+			$status = (string)($sub['status'] ?? '');
+			if (!$is_elevated && in_array($status, ['on_hold', 'paused'], true) && $this->subscription_billing($sub) === 'google'){
+				$params['status_plan_title'] = $this->resolve_subscription_plan_title($sub);
+				$params['play_notice'] = $status === 'on_hold' ? $params['manage_play_on_hold'] : $params['manage_play_paused'];
+				$params['play_manage_url'] = $this->play_manage_url($this->_resolve_user_id(0));
+				$params['cards'] = [];
+				$params['has_paid_cards'] = 0;
+				$params['show_currency_switcher'] = 0;
 			}
 			return $params;
 		}
@@ -1555,6 +1578,17 @@ class subscription_model extends \Model {
 		$params['show_payment'] = 1;
 		$params['manage_view'] = 'premium';
 
+		// Who bills. Google Play changes plan and payment on its own page, at its own prices: one link
+		// there instead of the change-plan cards and the card update (auto-extension Off works in place)
+		$params['billing'] = $this->subscription_billing($sub);
+		$params['billed_line'] = $params['billing'] === 'google' ? $params['manage_billed_play'] : $params['manage_billed_card'];
+		if ($params['billing'] === 'google'){
+			$params['cards'] = [];
+			$params['has_paid_cards'] = 0;
+			$params['show_payment'] = 0;
+			$params['play_manage_url'] = $this->play_manage_url($this->_resolve_user_id(0));
+		}
+
 		return $params;
 
 	}
@@ -1563,6 +1597,10 @@ class subscription_model extends \Model {
 
 		$defaults = [
 				'manage_login_message' => 'Please log in to manage your subscription.',
+				'manage_login_cta' => 'Log in',
+				'manage_update_error' => 'Could not update. Please try again.',
+				'manage_change_error' => 'Could not change plan. Please try again.',
+				'manage_payment_error' => 'Could not open payment settings. Please try again.',
 				'manage_basic_label' => 'Basic',
 				'manage_administratively_set' => 'administratively set',
 				'manage_renews_prefix' => 'renews',
@@ -1574,6 +1612,12 @@ class subscription_model extends \Model {
 				'manage_change_cta' => 'Change plan',
 				'manage_payment_heading' => 'Update payment method',
 				'manage_payment_cta' => 'Click here',
+				'manage_billed_card' => 'Billed by card (Stripe)',
+				'manage_billed_play' => 'Billed through Google Play',
+				'manage_play_help' => 'Change your plan or payment method in Google Play.',
+				'manage_play_cta' => 'Manage in Google Play',
+				'manage_play_on_hold' => 'Your Google Play subscription is on hold because the payment did not go through. Fix the payment in Google Play to keep Premium.',
+				'manage_play_paused' => 'Your Google Play subscription is paused. Resume it in Google Play.',
 		];
 		foreach ($defaults as $k => $v){
 			if (empty($params[$k])){
@@ -1685,6 +1729,95 @@ class subscription_model extends \Model {
 	function google_module_ready(){
 
 		return !empty($GLOBALS['config']['modules']) && in_array('google', $GLOBALS['config']['modules'], true);
+
+	}
+
+	/**
+	 * Who bills a subscription row: 'stripe' when it has a Stripe id, else 'google' (a Play row).
+	 */
+	function subscription_billing($sub){
+
+		if (trim((string)($sub['stripe_subscription_id'] ?? '')) !== ''){
+			return 'stripe';
+		}
+		return $this->google_module_ready() ? 'google' : 'stripe';
+
+	}
+
+	/**
+	 * Google Play's page for this user's Play subscription (change plan, payment, renewal).
+	 */
+	function play_manage_url($user_id){
+
+		$this->load->model('google/google_model');
+		return $this->google_model->subscription_manage_url($this->google_model->play_product_id_for_user($user_id));
+
+	}
+
+	function _user_exists($user_id){
+
+		$this->load->model('user/user_model');
+		$user = $this->user_model->get_user((int)$user_id);
+
+		return !empty($user['cms_page_panel_id']) && ($user['panel_name'] ?? '') === 'user/user';
+
+	}
+
+	/**
+	 * Account deletion: tries to set every paid subscription of the user not to renew, with each provider.
+	 * The account is deleted whatever this returns; the result is what the user is told.
+	 * result: none (nothing billing) | stopped | failed; providers: those that held a subscription.
+	 */
+	function stop_renewal_for_user($user_id){
+
+		$user_id = (int)$user_id;
+		$modules = $GLOBALS['config']['modules'] ?? [];
+		$stopped = false;
+		$failed = false;
+		$providers = [];
+
+		if (in_array('stripe', $modules, true) && $this->db->table_exists('subscription_subscription')){
+			$rows = $this->db->query(
+					"select distinct stripe_subscription_id from subscription_subscription "
+					."where user_id = ? and active = 1 and stripe_subscription_id <> ''",
+					[$user_id]
+			)->result_array();
+			if ($rows){
+				$this->load->model('stripe/stripe_model');
+			}
+			foreach ($rows as $row){
+				$result = $this->stripe_model->stop_renewal_by_id($row['stripe_subscription_id']);
+				if (empty($result['ok'])){
+					$failed = true;
+					$providers['stripe'] = 1;
+				} else if (!empty($result['stopped'])){
+					$stopped = true;
+					$providers['stripe'] = 1;
+				}
+			}
+		}
+
+		if ($this->google_module_ready()){
+			$this->load->model('google/google_model');
+			$this->load->model('user/user_model');
+			$play = $this->user_model->get_user_meta_value_for_id($user_id, $this->google_model::META_PLAY, []);
+			$token = is_array($play) ? trim((string)($play['purchase_token'] ?? '')) : '';
+			if ($token !== ''){
+				$providers['google'] = 1;
+				$result = $this->google_model->cancel_renewal_for_user($user_id);
+				if (empty($result['ok'])){
+					$failed = true;
+					error_log_user('Account delete: Play renewal not stopped for user '.$user_id.': '.(string)($result['error'] ?? ''));
+				} else {
+					$stopped = true;
+				}
+			}
+		}
+
+		return [
+				'result' => $failed ? 'failed' : ($stopped ? 'stopped' : 'none'),
+				'providers' => array_keys($providers),
+		];
 
 	}
 
@@ -1800,13 +1933,7 @@ class subscription_model extends \Model {
 		}
 		$return_url = trim((string)$return_url);
 		if ($return_url === ''){
-			$settings = $this->merge_subscription_pricing_settings([]);
-			if (!empty($settings['manage_page_link'])){
-				$ml = _l($settings['manage_page_link'], false);
-				if (is_string($ml) && $ml !== ''){
-					$return_url = $ml;
-				}
-			}
+			$return_url = $this->manage_page_url();
 		}
 		if ($app_root !== ''){
 			$return_url = $this->app_web_rebase($return_url, $app_root);
@@ -1941,16 +2068,14 @@ class subscription_model extends \Model {
 			$success_url = $resume . (strpos($resume, '?') !== false ? '&' : '?') . 'subscription_checkout=success';
 		}
 
-		// Prefer My subscription page for success (manage after pay)
+		// My subscription shows the new plan: success returns there (and cancel, unless the user came from a page)
 		$this->load->model('cms/cms_page_panel_model');
 		$sub_settings = $this->cms_page_panel_model->get_cms_page_panel_settings('subscription/subscription');
-		if (!empty($sub_settings['manage_page_link'])){
-			$manage_link = _l($sub_settings['manage_page_link'], false);
-			if (is_string($manage_link) && $manage_link !== ''){
-				$success_url = $manage_link;
-				if (empty($intent['resume_url'])){
-					$cancel_url = $manage_link;
-				}
+		$manage = $this->manage_page_url();
+		if ($manage !== ''){
+			$success_url = $manage;
+			if (empty($intent['resume_url'])){
+				$cancel_url = $manage;
 			}
 		}
 
@@ -1959,12 +2084,17 @@ class subscription_model extends \Model {
 			$this->load->model('stripe/stripe_model');
 			$from_settings = $this->stripe_model->get_checkout_link_urls();
 			// Only override cancel/success if manage page not preferred for success
-			if (!empty($from_settings['success_url']) && empty($sub_settings['manage_page_link'])){
+			if (!empty($from_settings['success_url']) && $manage === ''){
 				$success_url = $from_settings['success_url'];
 			}
 			if (!empty($from_settings['cancel_url']) && empty($intent['resume_url'])){
 				$cancel_url = $from_settings['cancel_url'];
 			}
+		}
+
+		// A cancelled checkout says so, so the page it returns to ends its paid-status watch (pricing.js)
+		if (strpos($cancel_url, 'subscription_checkout=') === false){
+			$cancel_url .= (strpos($cancel_url, '?') !== false ? '&' : '?').'subscription_checkout=cancel';
 		}
 
 		// The installed web app (app_web_root): come back into it, not to this backend host
@@ -2012,8 +2142,9 @@ class subscription_model extends \Model {
 	}
 
 	/**
-	 * Path of the My subscription page: the visible page with a subscription/manage block, else the
-	 * manage_page_link setting; '' when neither. The app opens it once its checkout watch sees the payment.
+	 * Path of the My subscription page, the one address every caller uses (checkout return, card update return,
+	 * browser hand-off, "already subscribed", the watch): the visible page with a subscription/manage block,
+	 * else the manage_page_link setting; '' when neither.
 	 */
 	function manage_page_url(){
 

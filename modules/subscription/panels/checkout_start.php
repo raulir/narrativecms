@@ -13,8 +13,7 @@ class checkout_start extends \Controller {
 
 	function panel_action($params){
 
-		$do = $params['cms_do'] ?? false;
-
+		$do = $params['cms_do'] ?? '';
 		if ($do !== 'subscription_checkout' && $do !== 'checkout' && $do !== 'start'){
 			return $params;
 		}
@@ -22,36 +21,28 @@ class checkout_start extends \Controller {
 		$this->load->model('user/user_model');
 		$this->load->model('subscription/subscription_model');
 
-		$user = $this->user_model->get_current();
-		if (empty($user['user_id']) && empty($user['cms_page_panel_id'])){
-			print(json_encode([
+		if (!$this->user_model->is_logged_in()){
+			return [
 					'ok' => 0,
 					'login' => 1,
 					'login_url' => $this->subscription_model->get_login_url(),
 					'error' => 'Login required',
-			], JSON_UNESCAPED_UNICODE));
-			exit();
+			];
 		}
 
 		// Already entitled — one subscription per user; do not open another Checkout
 		if ($this->subscription_model->user_has_paid_subscription()){
 			$this->subscription_model->clear_checkout_intent();
-			$this->load->model('user/user_model');
-			$redirect = $this->user_model->get_user_redirect_url();
-			$settings = $this->subscription_model->merge_subscription_pricing_settings([]);
-			if (!empty($settings['manage_page_link'])){
-				$ml = _l($settings['manage_page_link'], false);
-				if (is_string($ml) && $ml !== ''){
-					$redirect = $ml;
-				}
+			$redirect = $this->subscription_model->manage_page_url();
+			if ($redirect === ''){
+				$redirect = $this->user_model->get_user_redirect_url();
 			}
-			print(json_encode([
+			return [
 					'ok' => 0,
 					'already_subscribed' => 1,
 					'redirect' => $redirect,
 					'error' => 'You already have an active subscription',
-			], JSON_UNESCAPED_UNICODE));
-			exit();
+			];
 		}
 
 		$product_id = (int)($params['product_id'] ?? 0);
@@ -69,20 +60,12 @@ class checkout_start extends \Controller {
 
 		$valid = $this->subscription_model->validate_paid_product($product_id);
 		if (empty($valid['ok'])){
-			print(json_encode([
-					'ok' => 0,
-					'error' => $valid['error'] ?? 'Invalid product',
-			], JSON_UNESCAPED_UNICODE));
-			exit();
+			return ['ok' => 0, 'error' => $valid['error'] ?? 'Invalid product'];
 		}
 
 		$provider = $this->subscription_model->get_checkout_provider_panel();
 		if ($provider === ''){
-			print(json_encode([
-					'ok' => 0,
-					'error' => 'Select subscription checkout provider!',
-			], JSON_UNESCAPED_UNICODE));
-			exit();
+			return ['ok' => 0, 'error' => 'Select subscription checkout provider!'];
 		}
 
 		// The installed web app posts its shell root, so Stripe returns into it
@@ -91,7 +74,7 @@ class checkout_start extends \Controller {
 		);
 
 		// Provider panels read cms_do; do kept for providers in modules not yet converted
-		$provider_params = [
+		$result = $this->run_action($provider, [
 				'cms_do' => 'subscription_checkout',
 				'do' => 'subscription_checkout',
 				'product_id' => $product_id,
@@ -100,25 +83,21 @@ class checkout_start extends \Controller {
 				'cancel_url' => $urls['cancel_url'],
 				'return_result' => 1,
 				'no_html' => 1,
-		];
-
-		$result = $this->run_action($provider, $provider_params);
+		]);
 		if (!is_array($result)){
-			$result = ['ok' => 0, 'error' => 'Checkout provider failed'];
+			return ['ok' => 0, 'error' => 'Checkout provider failed'];
 		}
 
 		if (!empty($result['ok'])){
 			$this->subscription_model->clear_checkout_intent();
 		}
 
-		print(json_encode($result, JSON_UNESCAPED_UNICODE));
-		exit();
-
-	}
-
-	function panel_params($params){
-
-		return $params;
+		// The provider's address to open (Stripe Checkout); error comes back as cms_error
+		return [
+				'ok' => !empty($result['ok']) ? 1 : 0,
+				'redirect' => (string)($result['redirect'] ?? ''),
+				'error' => (string)($result['error'] ?? ''),
+		];
 
 	}
 
