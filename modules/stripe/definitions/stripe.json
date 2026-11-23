@@ -1,4 +1,5 @@
 {
+	"access": "stripe_base",
 	"label": "Stripe",
 	"description": "Stripe settings",
 	"item": [],

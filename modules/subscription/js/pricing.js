@@ -529,14 +529,7 @@ function pricing_init($root){
 
 }
 
-function pricing_resize(){
-}
-
-function pricing_scroll(){
-}
 
 $(document).ready(function(){
 	pricing_init()
-	$(window).on('resize.cms', pricing_resize)
-	$(window).on('scroll.cms', pricing_scroll)
 })

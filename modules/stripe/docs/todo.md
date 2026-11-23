@@ -2,6 +2,16 @@
 
 Provider-side work for ScoreTutor subscriptions. Domain UX lives in [`subscription/docs/todo.md`](../../subscription/docs/todo.md).
 
+## Site review 2026-11-20
+
+Items with their evidence and fixes: `ai/next_big_plan.md`.
+
+- [x] **Item 3. The checkout provider could be posted to directly** (done 2026-11-20). `stripe/subscription_checkout` runs only with `_provider_call`, which `subscription/checkout_start` sets and no request can carry; its definition has `ajax.input: ["cms"]`; it always returns an array (no print/exit). A direct post is refused and logged. "Already subscribed" and `validate_paid_product` stay in the domain, now the only way in. [`../../subscription/docs/stripe_vs_subscription_issues.md`](../../subscription/docs/stripe_vs_subscription_issues.md) § Provider contract. Check: `ai/tmp/payment_inputs_check.js`.
+- [x] **Item 8. Webhook order and repeats** (done 2026-11-20; see Other below).
+  - **Order:** subscription created / updated events re-read the subscription with `Subscription::retrieve` (`_current_subscription`), as invoices do; a failed read answers 500 and Stripe retries.
+  - **Repeats:** each `event.id` is handled once (`stripe_model::webhook_event_claim`), so operator mails no longer repeat.
+  - **Idempotency key:** a nonce per checkout start.
+
 ## User subscription management (provider)
 
 Support the **manage subscription** page actions via Stripe (not Dashboard-only):
@@ -23,7 +33,9 @@ Support the **manage subscription** page actions via Stripe (not Dashboard-only)
 - [x] Webhook 5xx when entitlement apply fails (Stripe retries)
 - [x] `error_log_user` + `cache/stripe.log` on Stripe errors; visitor JSON is generic
 - [x] Invoice paid/failed webhooks → same entitlement sync
-- [x] Checkout Session idempotency key (`sub_co_{user}_{price}_{currency}`)
+- [x] Checkout Session idempotency key: `sub_co_{user}_{price}_{currency}_{nonce}` since 2026-11-20 (the key without a nonce was kept by Stripe for 24 hours: a second start with other return addresses failed, a re-buy got the old completed session)
+- [x] **Webhook events handled once** (2026-11-20, site review item 8): event ids in `tmp/stripe_webhook_events.json` (7 days); a repeat answers 200 `duplicate`, the same event in progress 409, a failed one is released for Stripe's retry. Subscription created / updated events re-read the subscription from Stripe. Checks: `ai/tmp/stripe_webhook_check.php`, `ai/tmp/stripe_webhook_signed_check.php`.
+- [x] **`subscription_billing` provider** (2026-11-20, item 10): `stripe/subscription_billing` answers the subscription module's sync, auto-renew, stop renewal, card update, plan change, checkout links and absolute URL calls (`_provider_call` only).
 
 ## Cart checkout (one-off payments)
 

@@ -1,5 +1,9 @@
 # Subscription backlog
 
+- [ ] **Site review 2026-11-20 (`ai/next_big_plan.md`):**
+  - [x] **Item 5** (done 2026-11-20): `_sanitize_resume_url` refuses a backslash, control characters, spaces, quotes, `<>` and a leading `//` (it took `/\evil.com` and `/<TAB>/evil.com`); the Stripe card-update `return_url` goes through it (else My subscription), and `create_payment_method_update_session` no longer reads `HTTP_REFERER`. `browser_enter_consume` regenerates the session id. [`subscription.md`](subscription.md) § Return addresses. Check: `ai/tmp/signin_origin_check.js`.
+  - [x] **Item 10** (done 2026-11-20; [`stripe_vs_subscription_issues.md`](stripe_vs_subscription_issues.md) § Billing through `subscription_billing`): every stripe and google call goes through `billing_call()` (`provides` service `subscription_billing` + `run_action` with `_provider_call`); `play_manage_url` has the module guard; music's account deletion calls `subscription_model::delete_user_data()`. Probe: `ai/tmp/billing_provider_probe.php`.
+
 - [x] **Stripe Checkout** (subscription mode, no cart) via `subscription_checkout` provider + `prices[].stripe_price_id`
 - [x] **Webhook** → user meta entitlement (`/stripe/webhook/` module API)
 - [x] **User meta**: subscription fields + Stripe ids
@@ -15,7 +19,7 @@
 - [ ] **Play Console side is not finished** — products, price-row ids, and the service account are still to do. Internal functionality testing does not need them. See [`../../google/docs/todo.md`](../../google/docs/todo.md).
 - [ ] **Switch back to the other paid subscription** — Stripe and Play can both be paid at once. Only the live row provides Premium. The other is archived and is already kept up to date. When the live one ends, including a Play cancellation after its remaining period, switch Premium back to that archived subscription if it is still paid.
 - [ ] **Show the other paid subscription on My subscription** — edge case. When an archived subscription is still paid beside the live one, show it on the manage page the same way an administratively given plan is shown (plan name and a short note). It does not provide Premium while the live one does.
-- [ ] **Subscription providers** — My subscription should not name Stripe or Google. Ask each enabled module whether it manages this user, then call the same four endpoints: sync, automatic extension, change plan, and update payment method. Stripe and Google each implement those endpoints and write the subscription row. The subscription module only picks the provider and keeps the page, the month and year rules, and the table. Play already matches Stripe on the page, so leave the current branches until this list is built. The first step then is Google methods with the same names Stripe already has.
+- [ ] **Subscription providers** — the calls now go through the `subscription_billing` providers (2026-11-20, item 10), but the model still picks Stripe or Google by name and keeps a branch per provider. Still to do: one set of actions with the same names in both providers, and the choice by asking each one whether it bills the user. My subscription should not name Stripe or Google. Ask each enabled module whether it manages this user, then call the same four endpoints: sync, automatic extension, change plan, and update payment method. Stripe and Google each implement those endpoints and write the subscription row. The subscription module only picks the provider and keeps the page, the month and year rules, and the table. Play already matches Stripe on the page, so leave the current branches until this list is built. The first step then is Google methods with the same names Stripe already has.
 
 ## User subscription management page
 

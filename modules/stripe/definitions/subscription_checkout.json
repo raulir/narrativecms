@@ -1,4 +1,5 @@
 {
+	"ajax": {"input": ["cms"], "output": ["cms", "ok"]},
 	"label": "Stripe subscription checkout",
 	"description": "Creates Stripe Checkout Session (subscription mode) for pricing Purchase",
 	"item": [],

@@ -696,6 +696,12 @@ class subscription_model extends \Model {
 			return null;
 		}
 
+		// Browsers read "\" as "/" and drop tabs and newlines (/\evil.com, /<TAB>/evil.com → //evil.com);
+		// spaces, quotes and <> never belong in our addresses either
+		if (preg_match('/[\x00-\x20\x7F\\\\"\'<>]/', $url)){
+			return null;
+		}
+
 		// Protocol-relative //evil.com — never
 		if (strpos($url, '//') === 0){
 			return null;
@@ -737,7 +743,7 @@ class subscription_model extends \Model {
 			}
 		}
 
-		if ($path === '' || $path[0] !== '/'){
+		if ($path === '' || $path[0] !== '/' || strpos($path, '//') === 0){
 			return null;
 		}
 
@@ -962,6 +968,8 @@ class subscription_model extends \Model {
 		}
 
 		$this->cms_access_model->refresh_user_session($user);
+		// A new session id on sign-in, as login.php does
+		cms_session_regenerate();
 
 		return $this->browser_enter_path($data['path'] ?? '');
 
@@ -1728,7 +1736,66 @@ class subscription_model extends \Model {
 	 */
 	function google_module_ready(){
 
-		return !empty($GLOBALS['config']['modules']) && in_array('google', $GLOBALS['config']['modules'], true);
+		return $this->billing_provider('google') !== '';
+
+	}
+
+	/** Account deletion: this module's rows of the user (music_user_model::delete_user_data calls it). */
+	function delete_user_data($user_id){
+
+		$user_id = (int)$user_id;
+		if ($user_id > 0 && $this->db->table_exists('subscription_subscription')){
+			$this->db->query('DELETE FROM subscription_subscription WHERE user_id = ?', [$user_id]);
+		}
+
+		return true;
+
+	}
+
+	/**
+	 * The panel of an enabled module that provides the service "subscription_billing" for $module
+	 * (stripe/subscription_billing, google/subscription_billing), or ''. The module name is the provider
+	 * the rows and user meta record ("stripe", "google"); the calls go through billing_call().
+	 */
+	function billing_provider($module){
+
+		foreach (($GLOBALS['config']['provides']['subscription_billing'] ?? []) as $panel => $row){
+			if (($row['module'] ?? '') === $module){
+				return (string)$panel;
+			}
+		}
+
+		return '';
+
+	}
+
+	/**
+	 * One billing action of a provider (CMS provider pattern, cms provider_pattern.md): run_action with
+	 * _provider_call, which no request can carry. A provider that is not enabled answers
+	 * ok 0, unavailable 1.
+	 */
+	function billing_call($module, $do, $args = []){
+
+		$panel = $this->billing_provider($module);
+		if ($panel === ''){
+			return ['ok' => 0, 'unavailable' => 1, 'error' => ucfirst($module).' not available'];
+		}
+
+		$CI = get_instance();
+		$result = $CI->run_action($panel, array_merge(is_array($args) ? $args : [], [
+				'cms_do' => $do,
+				'_provider_call' => 1,
+				'return_result' => 1,
+				'no_html' => 1,
+		]));
+
+		return is_array($result) ? $result : ['ok' => 0, 'error' => 'Provider failed'];
+
+	}
+
+	function stripe_ready(){
+
+		return $this->billing_provider('stripe') !== '';
 
 	}
 
@@ -1749,8 +1816,9 @@ class subscription_model extends \Model {
 	 */
 	function play_manage_url($user_id){
 
-		$this->load->model('google/google_model');
-		return $this->google_model->subscription_manage_url($this->google_model->play_product_id_for_user($user_id));
+		$result = $this->billing_call('google', 'manage_url', ['user_id' => (int)$user_id]);
+
+		return (string)($result['url'] ?? '');
 
 	}
 
@@ -1771,22 +1839,18 @@ class subscription_model extends \Model {
 	function stop_renewal_for_user($user_id){
 
 		$user_id = (int)$user_id;
-		$modules = $GLOBALS['config']['modules'] ?? [];
 		$stopped = false;
 		$failed = false;
 		$providers = [];
 
-		if (in_array('stripe', $modules, true) && $this->db->table_exists('subscription_subscription')){
+		if ($this->stripe_ready() && $this->db->table_exists('subscription_subscription')){
 			$rows = $this->db->query(
 					"select distinct stripe_subscription_id from subscription_subscription "
 					."where user_id = ? and active = 1 and stripe_subscription_id <> ''",
 					[$user_id]
 			)->result_array();
-			if ($rows){
-				$this->load->model('stripe/stripe_subscription_model');
-			}
 			foreach ($rows as $row){
-				$result = $this->stripe_subscription_model->stop_renewal_by_id($row['stripe_subscription_id']);
+				$result = $this->billing_call('stripe', 'stop_renewal_by_id', ['subscription_id' => (string)$row['stripe_subscription_id']]);
 				if (empty($result['ok'])){
 					$failed = true;
 					$providers['stripe'] = 1;
@@ -1798,13 +1862,10 @@ class subscription_model extends \Model {
 		}
 
 		if ($this->google_module_ready()){
-			$this->load->model('google/google_model');
-			$this->load->model('user/user_model');
-			$play = $this->user_model->get_user_meta_value_for_id($user_id, $this->google_model::META_PLAY, []);
-			$token = is_array($play) ? trim((string)($play['purchase_token'] ?? '')) : '';
-			if ($token !== ''){
+			// held: the user has a Play purchase (google/subscription_billing stop_renewal)
+			$result = $this->billing_call('google', 'stop_renewal', ['user_id' => $user_id]);
+			if (!empty($result['held'])){
 				$providers['google'] = 1;
-				$result = $this->google_model->cancel_renewal_for_user($user_id);
 				if (empty($result['ok'])){
 					$failed = true;
 					error_log_user('Account delete: Play renewal not stopped for user '.$user_id.': '.(string)($result['error'] ?? ''));
@@ -1826,32 +1887,29 @@ class subscription_model extends \Model {
 		if (!$this->google_module_ready()){
 			return false;
 		}
-		$this->load->model('google/google_model');
-		return $this->google_model->provider_for_user($user_id) === 'google';
+		$result = $this->billing_call('google', 'bills_user', ['user_id' => (int)$user_id]);
+
+		return !empty($result['yes']);
 
 	}
 
 	function action_sync_subscription($user_id){
 
 		$user_id = (int)$user_id;
-		if ($this->google_module_ready()){
-			$this->load->model('google/google_model');
-			if ($this->google_model->provider_for_user($user_id) === 'google'){
-				$result = $this->google_model->sync_user($user_id);
-				if (empty($result['ok'])){
-					return $result;
-				}
-				$sub = $this->get_user_subscription($user_id);
-				return array_merge($result, $this->build_auto_renew_copy($sub), [
-						'is_premium' => $this->user_has_active_subscription($user_id) ? 1 : 0,
-				]);
+		if ($this->play_manages_subscription($user_id)){
+			$result = $this->billing_call('google', 'sync', ['user_id' => $user_id]);
+			if (empty($result['ok'])){
+				return $result;
 			}
+			$sub = $this->get_user_subscription($user_id);
+			return array_merge($result, $this->build_auto_renew_copy($sub), [
+					'is_premium' => $this->user_has_active_subscription($user_id) ? 1 : 0,
+			]);
 		}
-		if (empty($GLOBALS['config']['modules']) || !in_array('stripe', $GLOBALS['config']['modules'], true)){
+		if (!$this->stripe_ready()){
 			return ['ok' => 1, 'changed' => 0];
 		}
-		$this->load->model('stripe/stripe_subscription_model');
-		$result = $this->stripe_subscription_model->sync_user_subscription($user_id);
+		$result = $this->billing_call('stripe', 'sync', ['user_id' => $user_id]);
 		if (empty($result['ok'])){
 			return $result;
 		}
@@ -1882,25 +1940,23 @@ class subscription_model extends \Model {
 
 		$user_id = (int)$user_id;
 		if ($this->play_manages_subscription($user_id)){
-			$this->load->model('google/google_model');
 			if (!empty($auto_renew)){
 				return [
 						'ok' => 1,
-						'redirect' => $this->google_model->subscription_manage_url($this->google_model->play_product_id_for_user($user_id)),
+						'redirect' => $this->play_manage_url($user_id),
 						'auto_renew_on' => 0,
 				];
 			}
-			$result = $this->google_model->cancel_renewal_for_user($user_id);
+			$result = $this->billing_call('google', 'cancel_renewal', ['user_id' => $user_id]);
 			if (empty($result['ok'])){
 				return $result;
 			}
 			return array_merge(['ok' => 1], $this->build_auto_renew_copy($this->get_user_subscription($user_id)));
 		}
-		if (empty($GLOBALS['config']['modules']) || !in_array('stripe', $GLOBALS['config']['modules'], true)){
+		if (!$this->stripe_ready()){
 			return ['ok' => 0, 'error' => 'Stripe not available'];
 		}
-		$this->load->model('stripe/stripe_subscription_model');
-		$result = $this->stripe_subscription_model->set_auto_renew_for_user($user_id, !empty($auto_renew));
+		$result = $this->billing_call('stripe', 'set_auto_renew', ['user_id' => $user_id, 'auto_renew' => !empty($auto_renew) ? 1 : 0]);
 		if (empty($result['ok'])){
 			return $result;
 		}
@@ -1919,27 +1975,26 @@ class subscription_model extends \Model {
 			if (!$this->user_has_paid_subscription($user_id)){
 				return ['ok' => 0, 'error' => 'No active subscription'];
 			}
-			$this->load->model('google/google_model');
 			return [
 					'ok' => 1,
-					'redirect' => $this->google_model->subscription_manage_url($this->google_model->play_product_id_for_user($user_id)),
+					'redirect' => $this->play_manage_url($user_id),
 			];
 		}
-		if (empty($GLOBALS['config']['modules']) || !in_array('stripe', $GLOBALS['config']['modules'], true)){
+		if (!$this->stripe_ready()){
 			return ['ok' => 0, 'error' => 'Stripe not available'];
 		}
 		if (!$this->user_has_paid_subscription($user_id)){
 			return ['ok' => 0, 'error' => 'No active subscription'];
 		}
-		$return_url = trim((string)$return_url);
+		// Only an address on this site (the page manage.js was on); anything else returns to My subscription
+		$return_url = (string)($this->_sanitize_resume_url($return_url) ?? '');
 		if ($return_url === ''){
 			$return_url = $this->manage_page_url();
 		}
 		if ($app_root !== ''){
 			$return_url = $this->app_web_rebase($return_url, $app_root);
 		}
-		$this->load->model('stripe/stripe_subscription_model');
-		return $this->stripe_subscription_model->create_payment_method_update_session($user_id, $return_url);
+		return $this->billing_call('stripe', 'payment_method', ['user_id' => $user_id, 'return_url' => $return_url]);
 
 	}
 
@@ -1988,14 +2043,13 @@ class subscription_model extends \Model {
 		}
 
 		if ($this->play_manages_subscription($user_id)){
-			$this->load->model('google/google_model');
 			return [
 					'ok' => 1,
-					'redirect' => $this->google_model->subscription_manage_url($this->google_model->play_product_id_for_user($user_id)),
+					'redirect' => $this->play_manage_url($user_id),
 			];
 		}
 
-		if (empty($GLOBALS['config']['modules']) || !in_array('stripe', $GLOBALS['config']['modules'], true)){
+		if (!$this->stripe_ready()){
 			return ['ok' => 0, 'error' => 'Stripe not available'];
 		}
 
@@ -2004,8 +2058,7 @@ class subscription_model extends \Model {
 			return ['ok' => 0, 'error' => 'No Stripe price for this plan'];
 		}
 
-		$this->load->model('stripe/stripe_subscription_model');
-		$result = $this->stripe_subscription_model->change_subscription_price_for_user($user_id, $stripe_price_id);
+		$result = $this->billing_call('stripe', 'change_price', ['user_id' => $user_id, 'stripe_price_id' => $stripe_price_id]);
 		if (empty($result['ok'])){
 			return $result;
 		}
@@ -2024,7 +2077,7 @@ class subscription_model extends \Model {
 				'plan_title' => $plan_title,
 		];
 		// Prefer live Stripe state after change
-		$sync = $this->stripe_subscription_model->sync_user_subscription($user_id);
+		$sync = $this->billing_call('stripe', 'sync', ['user_id' => $user_id]);
 		if (!empty($sync['ok'])){
 			// Ensure product_id/currency always set after change
 			$this->apply_entitlement_from_provider($user_id, array_merge($facts, [
@@ -2080,9 +2133,8 @@ class subscription_model extends \Model {
 		}
 
 		// Optional CMS Stripe settings (link fields) override when set
-		if (!empty($GLOBALS['config']['modules']) && in_array('stripe', $GLOBALS['config']['modules'], true)){
-			$this->load->model('stripe/stripe_model');
-			$from_settings = $this->stripe_model->get_checkout_link_urls();
+		if ($this->stripe_ready()){
+			$from_settings = $this->billing_call('stripe', 'checkout_links');
 			// Only override cancel/success if manage page not preferred for success
 			if (!empty($from_settings['success_url']) && $manage === ''){
 				$success_url = $from_settings['success_url'];
@@ -2110,10 +2162,9 @@ class subscription_model extends \Model {
 		}
 
 		// Ensure absolute URLs for payment providers (Stripe rejects path-only)
-		if (!empty($GLOBALS['config']['modules']) && in_array('stripe', $GLOBALS['config']['modules'], true)){
-			$this->load->model('stripe/stripe_model');
-			$success_url = $this->stripe_model->absolute_url($success_url);
-			$cancel_url = $this->stripe_model->absolute_url($cancel_url);
+		if ($this->stripe_ready()){
+			$success_url = (string)($this->billing_call('stripe', 'absolute_url', ['url' => $success_url])['url'] ?? '');
+			$cancel_url = (string)($this->billing_call('stripe', 'absolute_url', ['url' => $cancel_url])['url'] ?? '');
 		} else {
 			$success_url = $this->_absolute_url_fallback($success_url);
 			$cancel_url = $this->_absolute_url_fallback($cancel_url);
@@ -2171,19 +2222,10 @@ class subscription_model extends \Model {
 	 */
 	function app_web_origins(){
 
-		$list = $GLOBALS['config']['app_web_origins'] ?? null;
-		if (is_array($list)){
-			return array_values(array_filter(array_map(function($origin){
-				return strtolower(rtrim(trim((string)$origin), '/'));
-			}, $list)));
-		}
+		// One list for the return addresses here and the sign-in origin check (user_model::own_origins)
+		$this->load->model('user/user_model');
 
-		$site = strtolower(trim((string)($GLOBALS['config']['base_site'] ?? '')));
-		if (!preg_match('#^(https?://)app[._]([a-z0-9.-]+)(:[0-9]+)?/?$#', $site, $m)){
-			return [];
-		}
-
-		return [$m[1].$m[2].($m[3] ?? '')];
+		return $this->user_model->app_web_origins();
 
 	}
 
@@ -2297,24 +2339,14 @@ class subscription_model extends \Model {
 		}
 
 		if (!empty($facts['stripe_subscription_id'])){
-			$make_current = true;
-			if ($this->google_module_ready()){
-				$this->load->model('google/google_model');
-				if ($this->google_model->provider_for_user($user_id) === 'google'){
-					$make_current = false;
-				}
-			}
+			// A Play subscription stays current; a Stripe sale is told to Play (external offers)
+			$make_current = !$this->play_manages_subscription($user_id);
 			$ok = $this->save_stripe_subscription($user_id, $fields, $make_current);
 			if ($ok && $this->google_module_ready()){
-				$this->load->model('google/google_model');
 				if ($make_current){
-					$this->google_model->set_provider($user_id, 'stripe');
+					$this->billing_call('google', 'set_provider', ['user_id' => $user_id, 'provider' => 'stripe']);
 				}
-				try {
-					$this->google_model->report_stripe_sale($user_id, $facts);
-				} catch (\Exception $e) {
-					error_log('google: report failed for user '.$user_id);
-				}
+				$this->billing_call('google', 'stripe_sale', ['user_id' => $user_id, 'facts' => $facts]);
 			}
 			return $ok;
 		}

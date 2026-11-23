@@ -20,27 +20,22 @@ Also linked from [`shop/docs/todo.md`](../../shop/docs/todo.md).
 ```
 shop (settings key + catalogue)
   → subscription (pricing, intent, checkout_start, entitlement)
-      → stripe (Checkout Session + webhook facts only)
+      → stripe, google through provides + run_action only (subscription_checkout, subscription_billing)
 user ← extended by subscription for post-auth resume only
 ```
+
+### Billing through `subscription_billing` (2026-11-20, site review item 10)
+
+`subscription_model` no longer loads a stripe or google model. Everything it asks of a provider (sync, auto-renew, stop renewal, card update, plan change, the Play manage address, checkout links, absolute URLs, telling Play of a Stripe sale) goes through `subscription_model::billing_call($module, $do, $args)`. That is `run_action` on the panel providing `subscription_billing` for that module (`stripe/subscription_billing`, `google/subscription_billing`), with `_provider_call`, so no request can reach them. A disabled provider answers `ok: 0, unavailable: 1`; `stripe_ready()` and `google_module_ready()` ask the registry. `play_manage_url` now has that guard too. Music's account deletion calls `subscription_model::delete_user_data()` instead of deleting `subscription_subscription` rows itself. Probe: `ai/tmp/billing_provider_probe.php`.
+
+### Done since (5–6)
+
+- **5. Catalogue vs checkout policy:** `validate_paid_product()` requires a month or year interval and a product under a `type=subscription` category (product → subcategory → category).
+- **6. Webhook security:** without a signing secret the webhook refuses every event; unsigned JSON is accepted only in DEV from this machine. Since 2026-11-20 each event id is handled once (`stripe_model::webhook_event_claim`, `tmp/stripe_webhook_events.json`, 7 days), subscription created / updated events use the subscription read from Stripe now (a late "created" can't undo Premium), and the Checkout idempotency key has a nonce per start. Checks: `ai/tmp/stripe_webhook_check.php`, `ai/tmp/stripe_webhook_signed_check.php`.
 
 ---
 
 ## Still open
-
-### 5. Catalogue vs checkout policy gap
-
-`checkout_start` validates `billing_interval` is `month`/`year` but does **not** prove the product sits under a `type=subscription` category.
-
-**Risk:** crafted `product_id` for a normal shop product that happens to have a Stripe price could start Checkout.
-
-**Later:** resolve product → subcategory → category; require `type=subscription` (or a product flag).
-
-### 6. Webhook security
-
-If `webhook_secret` is empty, unsigned JSON is accepted (dev convenience).
-
-**Later:** refuse unsigned events unless `environment === DEV` (or always require secret).
 
 ### 7. FE / transport surface
 
@@ -71,15 +66,16 @@ Success/cancel URLs still use query flags on resume or home; no dedicated “tha
 
 ## Provider contract (`subscription_checkout`)
 
-**Caller:** `subscription/checkout_start` (not browser → stripe).
+**Caller:** `subscription/checkout_start` only (not browser → stripe). Enforced since 2026-11-20: the provider runs only with `_provider_call`, which `checkout_start` sets and no request can carry (leading-`_` keys are dropped from posts and query strings). Its definition lets no posted key through (`ajax.input: ["cms"]`). A direct post answers `ok: 0` with "Checkout starts from subscription/checkout_start" and one error-log line. Before, a signed-in visitor could post to it and skip "already subscribed" and `validate_paid_product`, with return addresses of their choosing.
 
 | Input | Meaning |
 |-------|---------|
 | `do` | `subscription_checkout` |
+| `_provider_call` | `1`, set by `checkout_start` |
 | `product_id` | Shop product id |
 | `currency_id` | Shop currency panel id |
 | `success_url` / `cancel_url` | Optional; domain supplies resume-based URLs |
-| `return_result` | `1` when nested under checkout_start (return array, no print) |
+| `return_result` | `1` when nested under checkout_start (the result merged with the params); without it, the result alone. It never prints. |
 
 | Output | Meaning |
 |--------|---------|

@@ -16,9 +16,18 @@
 		{
 			"id": "webhook",
 			"name": "Stripe webhook"
+		},
+		{
+			"id": "subscription_billing",
+			"name": "Stripe subscription billing"
 		}
 	],
 	"provides": [
+		{
+			"service": "subscription_billing",
+			"panel": "//subscription_billing",
+			"label": "Stripe subscription billing"
+		},
 		{
 			"service": "shop_checkout",
 			"panel": "//checkout",

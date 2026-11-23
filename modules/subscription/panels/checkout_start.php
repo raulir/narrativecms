@@ -83,6 +83,8 @@ class checkout_start extends \Controller {
 				'cancel_url' => $urls['cancel_url'],
 				'return_result' => 1,
 				'no_html' => 1,
+				// Server-only marker: no request can carry a _ key, so the browser cannot start the provider itself
+				'_provider_call' => 1,
 		]);
 		if (!is_array($result)){
 			return ['ok' => 0, 'error' => 'Checkout provider failed'];

@@ -29,7 +29,7 @@ Three models, one job each. Panels and APIs load the one they need; the two doma
 - An event one of them would handle, on a site without its modules: logged as skipped, answered 200. Other event types are ignored.
 - A handler exception answers 500, so Stripe retries.
 
-`stripe/subscription_checkout` answers "Subscriptions are not available" (and logs) when `user` or `subscription` is missing.
+`stripe/subscription_checkout` answers "Subscriptions are not available" (and logs) when `user` or `subscription` is missing. It runs only when `subscription/checkout_start` calls it with `_provider_call` (a key no request can carry); a browser post is refused and logged (2026-11-20, [`../../subscription/docs/stripe_vs_subscription_issues.md`](../../subscription/docs/stripe_vs_subscription_issues.md) § Provider contract).
 
 ## Renames (2026-11-16) — callers outside this module
 

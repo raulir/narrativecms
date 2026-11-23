@@ -113,7 +113,10 @@ class stripe_subscription_model extends \Model {
 
 			$user_id = (int)($user['user_id'] ?? $user['cms_page_panel_id'] ?? 0);
 			$currency_id = (int)($meta['cms_currency_id'] ?? 0);
-			$idempotency_key = 'sub_co_'.$user_id.'_'.$stripe_price_id.'_'.$currency_id;
+			// One key per checkout start: Stripe's own retries of this call reuse it. A fixed key (user, price,
+			// currency) was kept for 24 hours, so a second start with other return addresses failed and a
+			// re-buy got the old, completed session back.
+			$idempotency_key = 'sub_co_'.$user_id.'_'.$stripe_price_id.'_'.$currency_id.'_'.bin2hex(random_bytes(8));
 
 			$session = \Stripe\Checkout\Session::create($session_params, [
 					'idempotency_key' => $idempotency_key,
@@ -736,11 +739,9 @@ class stripe_subscription_model extends \Model {
 			return ['ok' => 0, 'error' => 'No Stripe customer'];
 		}
 
-		$return_url = trim((string)$return_url);
-		if ($return_url === ''){
-			$return_url = (string)($_SERVER['HTTP_REFERER'] ?? '');
-		}
-		$return_url = $this->stripe_model->absolute_url($return_url);
+		// The caller (subscription_model::action_update_payment_method) passes a checked address; the
+		// Referer is not read, as it can name any site
+		$return_url = $this->stripe_model->absolute_url(trim((string)$return_url));
 		if ($return_url === '' || !preg_match('#^https?://#i', $return_url)){
 			// Fall back to site home
 			$return_url = $this->stripe_model->absolute_url('/');
@@ -970,6 +971,23 @@ class stripe_subscription_model extends \Model {
 	}
 
 	/**
+	 * The subscription an event names, read from Stripe now (with its prices). A failed read throws, so the
+	 * webhook answers 500 and Stripe sends the event again.
+	 */
+	function _current_subscription($obj){
+
+		$sub_id = is_object($obj) ? (string)($obj->id ?? '') : (string)($obj['id'] ?? '');
+		if ($sub_id === ''){
+			return $obj;
+		}
+
+		return \Stripe\Subscription::retrieve($sub_id, [
+				'expand' => ['items.data.price'],
+		]);
+
+	}
+
+	/**
 	 * Webhook events for subscriptions. Errors throw (Stripe retries).
 	 */
 	function handle_webhook_event($type, $obj){
@@ -977,7 +995,9 @@ class stripe_subscription_model extends \Model {
 		if ($type === 'checkout.session.completed'){
 			$this->_webhook_checkout_session($obj, $type);
 		} else if ($type === 'customer.subscription.updated' || $type === 'customer.subscription.created'){
-			$this->_webhook_subscription($obj, $type);
+			// Stripe doesn't send events in order: a late "created" (incomplete) would undo the checkout's Premium.
+			// The subscription as it is now decides, as for invoices.
+			$this->_webhook_subscription($this->_current_subscription($obj), $type);
 		} else if ($type === 'customer.subscription.deleted'){
 			$this->_webhook_subscription_deleted($obj, $type);
 		} else if ($type === 'invoice.paid' || $type === 'invoice.payment_succeeded' || $type === 'invoice.payment_failed'){

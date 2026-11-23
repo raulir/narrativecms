@@ -1,4 +1,5 @@
 {
+	"access": "subscription_base",
 	"label": "Subscription settings",
 	"description": "Shared subscription / pricing copy and defaults",
 	"item": [],

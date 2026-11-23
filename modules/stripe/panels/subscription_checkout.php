@@ -8,6 +8,8 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
  * Provides service subscription_checkout.
  * Inputs: product_id, currency_id, optional success_url / cancel_url.
  * No dependency on subscription module (domain orchestrates via checkout_start).
+ * Only the domain calls it (run_action with _provider_call, a key no request can carry): a browser post would skip
+ * checkout_start's "already subscribed" and paid-product checks and choose the return addresses itself.
  */
 class subscription_checkout extends \Controller {
 
@@ -17,6 +19,11 @@ class subscription_checkout extends \Controller {
 
 		if ($do !== 'subscription_checkout' && $do !== 'checkout'){
 			return $params;
+		}
+
+		if (empty($params['_provider_call'])){
+			error_log_user('stripe/subscription_checkout: called without _provider_call (not from subscription/checkout_start)');
+			return ['ok' => 0, 'error' => 'Checkout starts from subscription/checkout_start'];
 		}
 
 		$return_result = !empty($params['return_result']);
@@ -109,14 +116,14 @@ class subscription_checkout extends \Controller {
 
 	}
 
+	/** The result array: merged with the params for an in-process caller (return_result), as the provider pattern has it. */
 	function _respond($result, $return_result, $params){
 
-		if ($return_result){
-			return is_array($result) ? array_merge($params, $result) : $params;
+		if (!is_array($result)){
+			$result = ['ok' => 0, 'error' => 'Checkout provider failed'];
 		}
 
-		print(json_encode($result, JSON_UNESCAPED_UNICODE));
-		exit();
+		return $return_result ? array_merge($params, $result) : $result;
 
 	}
 

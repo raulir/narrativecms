@@ -249,6 +249,20 @@ class stripe_model extends \Model {
 		$is_order = (strpos($type, 'checkout.session.') === 0 && ($this->to_array($obj)['mode'] ?? '') === 'payment')
 				|| $type === 'charge.refunded';
 
+		// Stripe sends an event again until it gets a 2xx, and may send it twice: each event id is handled once
+		$event_id = is_object($event) ? (string)($event->id ?? '') : (string)($event['id'] ?? '');
+		$claim = $this->webhook_event_claim($event_id);
+		if ($claim === 'done'){
+			print(json_encode(['ok' => 1, 'duplicate' => 1]));
+			exit();
+		}
+		if ($claim === 'busy'){
+			// The same event is being handled by another request right now: Stripe tries again later
+			http_response_code(409);
+			print(json_encode(['ok' => 0, 'error' => 'Event in progress']));
+			exit();
+		}
+
 		try {
 			if ($is_order && $this->module_enabled('shop')){
 				$this->load->model('stripe/stripe_order_model');
@@ -261,14 +275,99 @@ class stripe_model extends \Model {
 				$this->log_error('Webhook event '.$type.' skipped: '.($is_order ? 'shop' : 'user / subscription').' module not installed');
 			}
 		} catch (\Exception $e){
+			$this->webhook_event_release($event_id);
 			$this->log_error('Webhook handler failed '.$type, $e->getMessage());
 			http_response_code(500);
 			print(json_encode(['ok' => 0, 'error' => 'Handler error']));
 			exit();
 		}
 
+		$this->webhook_event_done($event_id);
 		print(json_encode(['ok' => 1]));
 		exit();
+
+	}
+
+	/** Handled webhook event ids (tmp/stripe_webhook_events.json): id => [state busy|done, time]. */
+	function _webhook_events_file(){
+
+		return cms_path('tmp').'stripe_webhook_events.json';
+
+	}
+
+	/**
+	 * Change the event file under one exclusive lock: $fn gets the list (older than 7 days dropped, longer than
+	 * Stripe's 3 days of retries) and returns [list, result].
+	 */
+	function _webhook_events_update(callable $fn){
+
+		$handle = @fopen($this->_webhook_events_file(), 'c+');
+		if ($handle === false){
+			$this->log_error('Webhook event file cannot be opened');
+			list(, $result) = $fn([]);
+			return $result;
+		}
+		flock($handle, LOCK_EX);
+		$events = json_decode((string)stream_get_contents($handle), true);
+		$since = time() - 7 * 86400;
+		$events = array_filter(is_array($events) ? $events : [], function($row) use ($since){
+			return is_array($row) && (int)($row['time'] ?? 0) > $since;
+		});
+		list($events, $result) = $fn($events);
+		ftruncate($handle, 0);
+		rewind($handle);
+		fwrite($handle, json_encode($events));
+		fflush($handle);
+		flock($handle, LOCK_UN);
+		fclose($handle);
+
+		return $result;
+
+	}
+
+	/**
+	 * 'new' (this request handles it), 'done' (handled before: answer 200 again) or 'busy' (another request is
+	 * on it, for up to 5 minutes). An event without an id (a local unsigned test) is always 'new'.
+	 */
+	function webhook_event_claim($event_id){
+
+		if (!preg_match('/^evt_[A-Za-z0-9_]{1,250}$/', (string)$event_id)){
+			return 'new';
+		}
+
+		return $this->_webhook_events_update(function($events) use ($event_id){
+			$row = $events[$event_id] ?? null;
+			if (($row['state'] ?? '') === 'done'){
+				return [$events, 'done'];
+			}
+			if (($row['state'] ?? '') === 'busy' && (time() - (int)$row['time']) < 300){
+				return [$events, 'busy'];
+			}
+			$events[$event_id] = ['state' => 'busy', 'time' => time()];
+			return [$events, 'new'];
+		});
+
+	}
+
+	function webhook_event_done($event_id){
+
+		if (!preg_match('/^evt_[A-Za-z0-9_]{1,250}$/', (string)$event_id)){
+			return;
+		}
+		$this->_webhook_events_update(function($events) use ($event_id){
+			$events[$event_id] = ['state' => 'done', 'time' => time()];
+			return [$events, null];
+		});
+
+	}
+
+	/** A failed event: Stripe's retry handles it again. */
+	function webhook_event_release($event_id){
+
+		$this->_webhook_events_update(function($events) use ($event_id){
+			unset($events[(string)$event_id]);
+			return [$events, null];
+		});
 
 	}
 

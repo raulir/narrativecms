@@ -51,7 +51,7 @@ One function gives it: `subscription_model::manage_page_url()`, the visible page
 - Stripe Checkout success and cancel (`get_checkout_return_urls`; cancel goes back to the page the user came from after a login, or to the Stripe module's own **Cancel link** setting when that is set);
 - the card-update portal return (`action_update_payment_method`);
 - "already subscribed" in `checkout_start`;
-- the browser hand-off from the Android app (`browser_enter_path`: a missing or bad path goes there);
+- the browser hand-off from the Android app (`browser_enter_path`: a missing or bad path goes there; `browser_enter_consume` signs the browser in with a new session id since 2026-11-20);
 - the watch's `data-manage_url`, and `data-page_path` of My subscription.
 
 The page is found by itself, so the setting matters only on a site without such a page. (It pointed at Login on live until 2026-11-15, and every website payment then returned to the login page.)
@@ -124,7 +124,7 @@ Mirrors **shop** cart’s `shop_checkout` pattern:
 3. After auth:
    - **No active subscription** → resume path (pricing) → `data-auto_checkout` → `checkout_start`.
    - **Already subscribed** (`meta.subscription.active`) → clear intent → normal user landing (`get_user_redirect_url()`, e.g. `/start/`) — no payment.
-4. Resume URLs are sanitized: path-only or absolute same-host only; external hosts rejected (no open redirect). Full `https://…` values from older clients are normalized to path.
+4. Resume URLs are sanitized (`_sanitize_resume_url`): path-only or absolute same-host only; external hosts rejected (no open redirect). Full `https://…` values from older clients are normalized to path. Since 2026-11-20 any backslash, control character (tab, newline), space, quote or `<>`, and a path starting `//`, is refused: browsers read `/\evil.com` and `/<TAB>/evil.com` as `//evil.com`. The same check guards the Stripe card-update return (`action_update_payment_method`: anything else returns to My subscription), and `create_payment_method_update_session` no longer falls back to `HTTP_REFERER`. The user templates print `success_url` escaped (`json_encode` in JS, `htmlspecialchars` in `data-success`). Check: `ai/tmp/signin_origin_check.js` (`user_auth_helper.php sanitize`).
 5. `checkout_start` also refuses checkout when already subscribed (returns `already_subscribed` + redirect).
 
 Stripe Dashboard steps: [`../stripe/docs/stripe_checklist.md`](../stripe/docs/stripe_checklist.md).
@@ -166,9 +166,9 @@ A payment may be written after the user is back: in the app, Stripe runs outside
 - **The success page** `/subscription-change/` makes no claim about the plan. Whoever lands on it is told to check the subscription page in the app or to log in.
 
 Check:
-- `grok/tmp/pwa_return_check.php` (CLI);
-- `grok/tmp/pwa_payment_check.js` (Playwright, `MUSIC_TEST_PASS`: checkout, returns, the watch);
-- `grok/tmp/subscription_change_check.js` (the public page, desktop and phone).
+- `ai/tmp/pwa_return_check.php` (CLI);
+- `ai/tmp/pwa_payment_check.js` (Playwright, `MUSIC_TEST_PASS`: checkout, returns, the watch);
+- `ai/tmp/subscription_change_check.js` (the public page, desktop and phone).
 
 Architecture follow-ups: [`stripe_vs_subscription_issues.md`](stripe_vs_subscription_issues.md).
 
@@ -194,7 +194,7 @@ Current entitlement lives in table **`subscription_subscription`** (schema JSON 
 
 Helpers still return the same array shape: `get_user_subscription()`, `merge_user_subscription()`, `user_has_active_subscription()`.
 
-One-time migrate from old `meta.subscription`: `php grok/migrate_subscription_meta_to_table.php` (optional `--clear-meta`).
+One-time migrate from old `meta.subscription`: `php ai/migrate_subscription_meta_to_table.php` (optional `--clear-meta`).
 
 `merge_user_subscription` and `_save_identified_subscription`, the only writers of this table, write nothing for a user that no longer exists. So a Stripe or Play event that arrives after an account deletion leaves no rows behind.
 
@@ -230,8 +230,8 @@ ScoreTutor first tries to set every paid subscription not to renew. Then it dele
    - a pending email confirmation link answers `invalid_token`.
 
 **Checks** (local):
-- `grok/tmp/account_delete_check.php` (CLI): none, missing at Stripe, Stripe error, a Stripe test-mode subscription, Play unreadable, webhook after delete, confirmation link after delete;
-- `grok/tmp/account_delete_ui_check.js site|pwa|emu`: registration with the dev test email, then deletion on the website (Stripe test subscription → stopped), in the web app (no subscription) and in the Android emulator (Play → failed).
+- `ai/tmp/account_delete_check.php` (CLI): none, missing at Stripe, Stripe error, a Stripe test-mode subscription, Play unreadable, webhook after delete, confirmation link after delete;
+- `ai/tmp/account_delete_ui_check.js site|pwa|emu`: registration with the dev test email, then deletion on the website (Stripe test subscription → stopped), in the web app (no subscription) and in the Android emulator (Play → failed).
 
 ## Music theme
 
