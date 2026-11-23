@@ -55,7 +55,9 @@ function register_init(){
 		var $password = $('.register_input_password')
 		if ($password.length){
 			var min_length = parseInt($password.data('min_length'), 10)
-			if (min_length > 0 && $password.val().length < min_length){
+			// Same rule as the server (user_model::password_error): the length, a letter and a number
+			var value = $password.val()
+			if ((min_length > 0 && value.length < min_length) || !/\p{L}/u.test(value) || !/\d/.test(value)){
 				register_show_error('password_length')
 				$password.addClass('register_input_error')
 				return
@@ -160,28 +162,9 @@ function register_show_success(redirect_url){
 	
 }
 
-function register_resize(){
-	
-}
-
-function register_scroll(){
-	
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		register_resize();
-	});
-	
-	$(window).on('scroll.cms', function(){
-		register_scroll();
-	});
-	
 	register_init();
-
-	register_resize();
-	
-	register_scroll();
 
 });

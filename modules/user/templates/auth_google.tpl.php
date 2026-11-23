@@ -1,7 +1,7 @@
 <?php if (!empty($loggedin) && empty($error)): ?>
 
 	<?php if (!_is_position_ajax()): ?>
-	<script type="text/javascript">window.location.href = "<?= $success_url ?>"</script>
+	<script type="text/javascript">window.location.href = <?= json_encode((string)$success_url, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES) ?></script>
 	<?php endif ?>
 
 <?php else: ?>

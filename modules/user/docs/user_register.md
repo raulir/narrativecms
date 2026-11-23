@@ -15,6 +15,15 @@ Related email auth (login, reminder): [`auth_email.md`](auth_email.md)
 
 **Log in after** (`log_in_after` = Yes): calls `refresh_user_session` only when `login_allowed()` is true. If **User settings → Email confirmation** is Yes, new accounts stay logged out until `/verify-email/` (by design). A confirmation link of an account deleted in the meantime answers `invalid_token`, and nothing is updated or signed in (`user_model::verify_email_token`).
 
+## What the server takes (2026-11-20)
+
+- **Only the form:** `ajax.input` is `["cms", "register_fields"]`. Every other posted key is dropped, so a post can no longer set `show_email`, `show_password`, `password_min_length`, `log_in_after`, `mailinglists` or `fields`.
+- **Rules from the stored block only:** `register::_register_rules()` reads the block named by `cms_page_panel_id` itself. It must be a shown `user/register` block, and its values sit over the definition defaults. Without one the answer is `bad_form` and nothing is created (an empty post used to create a user with no email or password).
+- **Always a login name:** an email (or the username when that is the login name). With a password field, the password rule applies (`user_model::password_error()`: at least 8, or the block's higher minimum, with a letter and a number).
+- **Fields kept:** the core fields (email, username, first and last name, phone) and the names in the block's **Extra fields**; any other posted id is dropped. Each value is stripped of tags, made valid UTF-8 and capped (email 254, names 100, phone 50, extra fields 500). The email is lowercased (`normalise_email()`) and checked with `FILTER_VALIDATE_EMAIL`.
+- **Limit:** 5 new accounts an hour from one address (`too_many`).
+- **Check:** `ai/tmp/user_auth_check.js`.
+
 ## CMS configuration
 
 - **Link to user** — set in `user/user_settings` → **Links** (post-register/login destination, e.g. `/start/`)

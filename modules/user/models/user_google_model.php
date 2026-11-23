@@ -30,6 +30,37 @@ class user_google_model extends \Model {
 		unset($_SESSION['google_auth_intent']);
 
 	}
+
+	/**
+	 * The website Google button's state: one random token per session, put in the form posted to
+	 * auth_google, which signs in only when the posted value matches (so another site can't post a
+	 * Google token of its own). Kept across renders, so several tabs work; replaced after a sign-in.
+	 */
+	function web_auth_state() {
+
+		$state = (string)($_SESSION['google_auth_state'] ?? '');
+		if (!preg_match('/^[a-f0-9]{32}$/', $state)){
+			$state = bin2hex(random_bytes(16));
+			$_SESSION['google_auth_state'] = $state;
+		}
+
+		return $state;
+
+	}
+
+	function web_auth_state_ok($posted) {
+
+		$state = (string)($_SESSION['google_auth_state'] ?? '');
+
+		return $state !== '' && is_string($posted) && hash_equals($state, $posted);
+
+	}
+
+	function clear_web_auth_state() {
+
+		unset($_SESSION['google_auth_state']);
+
+	}
 	
 	function web_client_id() {
 
@@ -126,26 +157,6 @@ class user_google_model extends \Model {
 				'picture' => $payload['picture'] ?? '',
 		], 'app');
 
-	}
-
-	/**
-	 * Native app: may create account on first Google sign-in.
-	 */
-	function login_from_app_profile($profile) {
-		
-		if (empty($profile['email'])) {
-			return ['error' => 'missing_email'];
-		}
-		
-		return $this->_resolve_web_user([
-				'email' => $profile['email'],
-				'google_id' => $profile['id'] ?? '',
-				'given_name' => $profile['givenName'] ?? '',
-				'family_name' => $profile['familyName'] ?? '',
-				'name' => $profile['name'] ?? '',
-				'picture' => $profile['imageUrl'] ?? '',
-		], 'app');
-		
 	}
 	
 	/**

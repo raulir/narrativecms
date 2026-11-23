@@ -1,6 +1,6 @@
 <?php if(empty($loggedin)): ?>
 
-	<div class="login_container" data-cms_page_panel_id="<?= $cms_page_panel_id ?>" data-success="<?= $success_url ?>">
+	<div class="login_container" data-cms_page_panel_id="<?= $cms_page_panel_id ?>" data-success="<?= htmlspecialchars((string)$success_url, ENT_QUOTES) ?>">
 		<div class="login_content">
 		
 			<div class="login_heading"><?= $heading ?></div>
@@ -37,7 +37,7 @@
 		
 				<div class="login_row">
 					<label for="login_login_username" class="login_label"><?= $username_label ?></label>
-					<input id="login_login_username" class="login_input login_input_username" type="text" name="login" placeholder="<?= $username_label ?>">
+					<input id="login_login_username" class="login_input login_input_username" type="text" name="login" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="<?= $username_label ?>">
 				</div>
 				<div class="login_row">
 					<label for="login_login_password" class="login_label"><?= $password_label ?></label>
@@ -50,9 +50,9 @@
 		
 			</form>
 			
-			<div class="login_error login_error_bad_username"><?= $message_bad_username ?></div>
 			<div class="login_error login_error_bad_password"><?= $message_bad_password ?></div>
 			<div class="login_error login_error_missing_credential"><?= $message_missing_credential ?></div>
+			<div class="login_error login_error_too_many"><?= $message_too_many ?></div>
 			<div class="login_error login_error_unverified_email">
 				<?= $message_unverified_email ?>
 				<div class="login_resend_verification"><?= $resend_verification_label ?></div>
@@ -84,7 +84,7 @@
 <?php else: ?>
 
 	<?php if (!_is_position_ajax()): ?>
-	<script type="text/javascript">window.location.href = "<?= $success_url ?>"</script>
+	<script type="text/javascript">window.location.href = <?= json_encode((string)$success_url, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES) ?></script>
 	<?php endif ?>
 
 <?php endif ?>

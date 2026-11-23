@@ -10,7 +10,8 @@ function password_change_init($root){
 		$container.find('.password_change_save').on('click.cms', function(){
 
 			var data = {
-				'do': 'save',
+				'cms_do': 'save',
+				'password_current': $container.find('.password_change_input_current').val() || '',
 				'password': $container.find('.password_change_input_password').val(),
 				'password2': $container.find('.password_change_input_password2').val()
 			}

@@ -3,7 +3,8 @@
 ?>
 <div class="login_google_container"
 		data-progress_message="<?= $progress_message ?>"
-		data-login_uri="<?= $login_uri ?>">
+		data-login_uri="<?= $login_uri ?>"
+		data-state="<?= htmlspecialchars((string)($google_state ?? ''), ENT_QUOTES) ?>">
 	<div class="login_google_content">
 
 		<div class="login_google_heading"><?= $heading ?></div>

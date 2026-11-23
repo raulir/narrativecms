@@ -1,5 +1,5 @@
 {
-	"ajax": {"output": ["cms"]},
+	"ajax": {"input": ["cms","username","password","password2","token"], "output": ["cms"]},
 	"label": "Reminder",
 	"image": "",
 	"item": [
@@ -127,8 +127,17 @@
 			"name": "message_password_short",
 			"label": "New password too short",
 			"lines": "2",
-			"help": "The new password has fewer than 5 characters",
-			"default": "The new password needs at least 5 characters",
+			"help": "The new password has fewer than 8 characters, or no letter or no number",
+			"default": "The new password needs at least 8 characters, with a letter and a number",
+			"translate": "1"
+		},
+		{
+			"type": "textarea",
+			"name": "message_too_many",
+			"label": "Too many requests",
+			"lines": "2",
+			"help": "More than 3 reminders an hour for one address, or 10 from one network",
+			"default": "Too many requests. Please try again in an hour.",
 			"translate": "1"
 		},
 		{

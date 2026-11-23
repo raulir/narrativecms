@@ -29,13 +29,15 @@ function user_google_credential_response(response){
 	input.value = response.credential
 	form.appendChild(input)
 
-	if (response.g_csrf_token){
-		var csrf = document.createElement('input')
-		csrf.type = 'hidden'
-		csrf.name = 'g_csrf_token'
-		csrf.value = response.g_csrf_token
-		form.appendChild(csrf)
-	}
+	// auth_google signs in only on this action with the session's state (user_google_model::web_auth_state)
+	var fields = { cms_do: 'google', state: String($host.attr('data-state') || '') }
+	Object.keys(fields).forEach(function(name){
+		var field = document.createElement('input')
+		field.type = 'hidden'
+		field.name = name
+		field.value = fields[name]
+		form.appendChild(field)
+	})
 
 	document.body.appendChild(form)
 	form.submit()

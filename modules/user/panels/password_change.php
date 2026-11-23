@@ -23,6 +23,14 @@ class password_change extends \Controller {
 			$password = $params['password'] ?? false;
 			$password2 = $params['password2'] ?? false;
 
+			// An account that has a password proves it first (an account made with Google has none)
+			if ((string)($user['password'] ?? '') !== ''
+					&& !$this->user_model->verify_password((string)($params['password_current'] ?? ''), $user['password'])){
+				$this->user_model->auth_log('password_change_fail');
+				$return['error'] = 'bad_current';
+				return $return;
+			}
+
 			$validation_error = $this->user_model->validate_new_password($password, $password2);
 			if ($validation_error !== ''){
 				$return['error'] = $validation_error;
@@ -31,6 +39,9 @@ class password_change extends \Controller {
 
 			$user_id = (int)$user['cms_page_panel_id'];
 			$this->user_model->change_user_password($user_id, $password);
+			// This session takes the new password; the user's other sessions end (user_model::get_current)
+			$this->load->model('cms/cms_access_model');
+			$this->cms_access_model->refresh_user_session($this->user_model->get_user($user_id));
 			$this->user_model->send_password_updated_email($user);
 
 			return $params;
@@ -54,7 +65,10 @@ class password_change extends \Controller {
 			}
 		}
 
-		$params['loggedin'] = $this->user_model->is_logged_in();
+		$current = $this->user_model->get_current();
+		$params['loggedin'] = $current !== false;
+		// The current-password row only for an account that has a password
+		$params['has_password'] = $current !== false && (string)($current['password'] ?? '') !== '';
 
 		return $params;
 

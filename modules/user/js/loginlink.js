@@ -6,8 +6,7 @@ function loginlink_init(){
 		
 		var data = {
 				'cms_do': 'create',
-				'user_id': $('.cms_page_panel_id').val(),
-				'url': location.protocol + '//' + location.hostname
+				'user_id': $('.cms_page_panel_id').val()
 		}
 
 		data.success = function(data){
@@ -27,28 +26,9 @@ function loginlink_show_error(error){
 	
 }
 
-function loginlink_resize(){
-	
-}
-
-function loginlink_scroll(){
-	
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		loginlink_resize();
-	});
-	
-	$(window).on('scroll.cms', function(){
-		loginlink_scroll();
-	});
-	
 	loginlink_init();
-
-	loginlink_resize();
-	
-	loginlink_scroll();
 
 });

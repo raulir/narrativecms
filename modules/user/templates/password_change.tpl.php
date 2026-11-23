@@ -7,6 +7,14 @@
 
 			<form class="password_change_form" method="post" autocomplete="off">
 
+				<?php if (!empty($has_password)): ?>
+					<div class="password_change_row">
+						<label for="password_change_current" class="password_change_label"><?= $current_password_label ?></label>
+						<input id="password_change_current" class="password_change_input password_change_input_current"
+								type="password" autocomplete="current-password" name="password_current">
+					</div>
+				<?php endif ?>
+
 				<div class="password_change_row">
 					<label for="password_change_password" class="password_change_label"><?= $password_label ?></label>
 					<input id="password_change_password" class="password_change_input password_change_input_password"
@@ -28,6 +36,7 @@
 			<div class="password_change_error password_change_error_passwords_mismatch"><?= $message_passwords_mismatch ?></div>
 			<div class="password_change_error password_change_error_bad_save"><?= $message_bad_save ?></div>
 			<div class="password_change_error password_change_error_password_short"><?= $message_password_short ?></div>
+			<div class="password_change_error password_change_error_bad_current"><?= $message_bad_current ?></div>
 
 			<div class="password_change_overlay">
 				<div class="password_change_popup">

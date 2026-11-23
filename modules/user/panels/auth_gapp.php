@@ -6,15 +6,21 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class auth_gapp extends \Controller{
 
+	/**
+	 * Signs in only from the app's own ajax post (shell.js app_post → ajax_api/get_panel) on an in-app
+	 * backend, from one of our origins (user_model::request_from_own_site). A page render, with or
+	 * without ?credential=, never signs in.
+	 */
 	function panel_action($params){
 
-		return $this->complete_login($params);
+		if (!(get_instance() instanceof \Ajax_api) || ($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST'
+				|| empty($GLOBALS['config']['inapp']) || !isset($params['credential'])){
+			return $params;
+		}
 
-	}
-
-	function panel_params($params){
-
-		if (!empty($params['login_success']) || !empty($params['error'])){
+		$this->load->model('user/user_model');
+		if (!$this->user_model->request_from_own_site()){
+			$params['error'] = 'bad_origin';
 			return $params;
 		}
 

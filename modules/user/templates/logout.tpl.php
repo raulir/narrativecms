@@ -1,1 +1,1 @@
-<div class="user_logout_container" data-success="<?= $success_url ?>"><?php print(!empty($label) ? $label : 'Log out'); ?></div>
+<div class="user_logout_container" data-success="<?= htmlspecialchars((string)$success_url, ENT_QUOTES) ?>"><?php print(!empty($label) ? $label : 'Log out'); ?></div>

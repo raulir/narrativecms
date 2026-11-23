@@ -3,7 +3,8 @@
 ?>
 <div class="register_google_container"
 		data-progress_message="<?= $progress_message ?>"
-		data-login_uri="<?= $login_uri ?>">
+		data-login_uri="<?= $login_uri ?>"
+		data-state="<?= htmlspecialchars((string)($google_state ?? ''), ENT_QUOTES) ?>">
 	<div class="register_google_content">
 
 		<div class="register_google_heading"><?= $heading ?></div>

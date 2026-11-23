@@ -12,7 +12,7 @@
 					<div class="reminder_row">
 						<label for="reminder_reminder_username" class="reminder_label"><?= $username_label ?></label>
 						<input id="reminder_reminder_username" class="reminder_input reminder_input_username" 
-								type="text" autocomplete="off" value="<?= $autofill ?>">
+								type="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" value="<?= $autofill ?>">
 					</div>
 					
 					<?php if(!empty($success)): ?>
@@ -46,6 +46,7 @@
 				<div class="reminder_error reminder_error_passwords_mismatch"><?= $message_passwords_mismatch ?></div>
 				<div class="reminder_error reminder_error_password_short"><?= $message_password_short ?></div>
 				<div class="reminder_error reminder_error_timeout"><?= $message_timeout ?></div>
+				<div class="reminder_error reminder_error_too_many"><?= $message_too_many ?></div>
 				
 				<div class="reminder_success"><?= $message_success ?></div>
 				<div class="reminder_save_success">

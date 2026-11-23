@@ -1,4 +1,5 @@
 {
+	"access": "user_base",
 	"item": [],
-	"ajax": {"output": ["cms", "link"]}
+	"ajax": {"input": ["cms", "user_id"], "output": ["cms", "link"]}
 }

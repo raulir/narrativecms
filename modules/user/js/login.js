@@ -53,9 +53,16 @@ function login_init(){
 		if (cms_page_panel_id){
 			data.cms_page_panel_id = cms_page_panel_id
 		}
-		
+
+		// Only a limit is shown (too_many); the mail is sent or not without saying whether the account exists
+		data.success = function(result){
+			if (result && result.result && result.result.error){
+				login_show_error(result.result.error)
+			}
+		}
+
 		get_ajax('user/login', data)
-		
+
 	})
 
 }
@@ -74,28 +81,9 @@ function login_show_success(){
 	
 }
 
-function login_resize(){
-	
-}
-
-function login_scroll(){
-	
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		login_resize();
-	});
-	
-	$(window).on('scroll.cms', function(){
-		login_scroll();
-	});
-	
 	login_init();
-
-	login_resize();
-	
-	login_scroll();
 
 });

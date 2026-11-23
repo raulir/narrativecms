@@ -25,6 +25,15 @@ Default if missing: **`login`** (no accidental account create).
 
 Helpers: `set_web_auth_intent()`, `get_web_auth_intent()`, `clear_web_auth_intent()`.
 
+## Only our own button signs in (since 2026-11-20)
+
+A page render runs every panel's action, so until 2026-11-20 any render carrying `credential` signed in: a link `/auth-google/?credential=<someone's own Google token>`, or a form on another site, signed the visitor in to that account.
+
+- **State:** `login_google` / `register_google` put `user_google_model::web_auth_state()` (one random token per session, `$_SESSION['google_auth_state']`) in `data-state`. `user_google_button.js` posts `cms_do=google`, `credential` and `state`.
+- **`auth_google`** acts only on `cms_do=google` (the CMS never takes `cms_do` from a query string), with the session's state (`web_auth_state_ok`) and from our own page (`user_model::request_from_own_site()`). A failure is `google_error` plus a `google_state` line in `log/user_auth.log`, before Google is asked. The state is replaced after use. `ajax.input`: `cms`, `credential`, `state`. GSI's own `g_csrf_token` is not used (callback mode has none).
+- **`auth_gapp`** signs in only from an `ajax_api` POST on an app host (`inapp`) from our origins: the web app's origin and the Android app's `http://localhost` ([`user_auth_overview.md`](user_auth_overview.md) § Sign-in only from our own pages). Its `panel_params` no longer signs in. The app's posts were already this shape, so no app change was needed.
+- **Check:** `ai/tmp/signin_origin_check.js` (it can't make a real Google token: a real sign-in is tried by hand).
+
 ## Website journeys
 
 ### Login

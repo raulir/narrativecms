@@ -1,5 +1,5 @@
 {
-	"ajax": {"output": ["cms", "success_url", "login_success", "email", "session_id", "resent"]},
+	"ajax": {"input": ["cms", "username", "password"], "output": ["cms", "success_url", "login_success", "email", "session_id", "resent"]},
 	"label": "Login",
 	"image": "user/panel_login.png",
 	"item": [
@@ -112,18 +112,20 @@
 		},
 		{
 			"type": "textarea",
-			"name": "message_bad_username",
-			"label": "Missing username",
+			"name": "message_bad_password",
+			"label": "Wrong login",
 			"lines": "2",
-			"default": "No such username",
+			"help": "An unknown user and a wrong password get this same text, so it does not tell whether an account exists",
+			"default": "Wrong email or password",
 			"translate": "1"
 		},
 		{
 			"type": "textarea",
-			"name": "message_bad_password",
-			"label": "Bad password",
+			"name": "message_too_many",
+			"label": "Too many attempts",
 			"lines": "2",
-			"default": "Bad password for this user",
+			"help": "After 10 failed sign-ins for one login name or 20 from one network in 15 minutes; also too many confirmation mails",
+			"default": "Too many attempts. Please try again in 15 minutes.",
 			"translate": "1"
 		},
 		{

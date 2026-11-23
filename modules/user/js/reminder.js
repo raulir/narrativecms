@@ -4,8 +4,7 @@ $('.reminder_submit').on('click.cms', function(){
 		
 		var data = {
 				'cms_do': 'remind',
-				'username': $('.reminder_input_username').val(),
-				'url': window.location.href
+				'username': $('.reminder_input_username').val()
 		}
 
 		data.success = function(result){
@@ -73,28 +72,9 @@ function reminder_show_success(){
 	
 }
 
-function reminder_resize(){
-	
-}
-
-function reminder_scroll(){
-	
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		reminder_resize();
-	});
-	
-	$(window).on('scroll.cms', function(){
-		reminder_scroll();
-	});
-	
 	reminder_init();
-
-	reminder_resize();
-	
-	reminder_scroll();
 
 });

@@ -15,27 +15,43 @@ class login extends \Controller{
 
 		if ($do == 'login'){
 			 
-			$username = $params['username'] ?? false;
-			$password = $params['password'] ?? false;
-			
-			if (empty($username) || empty($password)){
+			$username = trim((string)($params['username'] ?? ''));
+			$password = (string)($params['password'] ?? '');
+
+			if ($username === '' || $password === ''){
 				$return['error'] = 'missing_credential';
 				return $return;
 			}
-			
+
+			// Only from our own pages: another site can't sign a visitor in to an account of its choosing
+			if (!$this->user_model->request_from_own_site()){
+				return ['error' => 'bad_origin'];
+			}
+
 			$config = $this->cms_page_panel_model->get_cms_page_panel_settings('user/user_settings');
+			if (empty($config['show_username'])){
+				$username = $this->user_model->normalise_email($username);
+			}
+
+			// 10 failures for one login name or 20 from one address in 15 minutes: no more tries for now
+			$name_key = 'name:'.mb_strtolower($username);
+			$ip_key = 'ip:'.$this->user_model->_client_address();
+			if ($this->user_model->attempts_over('login_fail', $name_key, 10, 900) || $this->user_model->attempts_over('login_fail', $ip_key, 20, 900)){
+				$this->user_model->auth_log('login_limited');
+				return ['error' => 'too_many'];
+			}
+
 			if (empty($config['show_username'])){
 				$user = $this->user_model->get_user_by_email($username);
 			} else {
 				$user = $this->user_model->get_user_by_username($username);
 			}
 
-			if (empty($user) || !$user['show']){
-				$return['error'] = 'bad_username';
-				return $return;
-			}
-			
-			if (!$this->user_model->verify_password($password, $user['password'])){
+			// An unknown user and a wrong password answer the same, so nobody learns which accounts exist
+			if (empty($user) || !$user['show'] || !$this->user_model->verify_password($password, $user['password'])){
+				$this->user_model->attempt_note('login_fail', $name_key, 900);
+				$this->user_model->attempt_note('login_fail', $ip_key, 900);
+				$this->user_model->auth_log('login_fail');
 				$return['error'] = 'bad_password';
 				return $return;
 			}
@@ -64,10 +80,25 @@ class login extends \Controller{
 		
 		if ($do == 'resend_verification'){
 			
-			$username = $params['username'] ?? false;
+			$username = trim((string)($params['username'] ?? ''));
 			$config = $this->cms_page_panel_model->get_cms_page_panel_settings('user/user_settings');
-			
 			if (empty($config['show_username'])){
+				$username = $this->user_model->normalise_email($username);
+			}
+
+			// A mail each time: 3 an hour per login name, 10 per client address
+			$name_key = 'name:'.mb_strtolower($username);
+			$ip_key = 'ip:'.$this->user_model->_client_address();
+			if ($this->user_model->attempts_over('resend', $name_key, 3, 3600) || $this->user_model->attempts_over('resend', $ip_key, 10, 3600)){
+				$this->user_model->auth_log('resend_limited');
+				return ['error' => 'too_many'];
+			}
+			$this->user_model->attempt_note('resend', $name_key);
+			$this->user_model->attempt_note('resend', $ip_key);
+
+			if ($username === ''){
+				$user = [];
+			} else if (empty($config['show_username'])){
 				$user = $this->user_model->get_user_by_email($username);
 			} else {
 				$user = $this->user_model->get_user_by_username($username);

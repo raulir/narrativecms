@@ -9,8 +9,9 @@ class user_model extends \Model {
 	function create_user($data){
 		
 		$return = ['errors' => []];
-		
+
 		$this->load->model('cms/cms_page_panel_model');
+		$data['email'] = $this->normalise_email($data['email'] ?? '');
 
 		if (!empty($data['email'])){
 			
@@ -112,7 +113,7 @@ class user_model extends \Model {
 		
 		$this->load->model('cms/cms_page_panel_model');
 		
-		$return = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'user/user', 'email' => $email, 'show' => 1, ]);
+		$return = $this->cms_page_panel_model->get_cms_page_panels_by(['panel_name' => 'user/user', 'email' => $this->normalise_email($email), 'show' => 1, ]);
 		
 		if (!empty($return[0])){
 			return $return[0];
@@ -138,15 +139,219 @@ class user_model extends \Model {
 	 */
 	function validate_new_password($password, $password2){
 
-		if ((string)$password !== (string)$password2){
+		return $this->password_error($password, $password2);
+
+	}
+
+	/**
+	 * The one password rule (register, reminder reset, password change): at least $min_length (never under 8)
+	 * characters with a letter and a digit. '' when ok, else passwords_mismatch or password_short.
+	 */
+	function password_error($password, $password2, $min_length = 8){
+
+		$password = (string)$password;
+		if ($password !== (string)$password2){
 			return 'passwords_mismatch';
 		}
-
-		if (strlen((string)$password) < 5){
+		if (mb_strlen($password) < max(8, (int)$min_length) || !preg_match('/\pL/u', $password) || !preg_match('/\d/', $password)){
 			return 'password_short';
 		}
 
 		return '';
+
+	}
+
+	/** Emails are kept and looked up in lowercase (phones capitalise the first letter). */
+	function normalise_email($email){
+
+		return mb_strtolower(trim((string)$email));
+
+	}
+
+	/** The client address as the 404 log has it. */
+	function _client_address(){
+
+		return preg_replace('/\s+/', '', (string)($_SERVER['REMOTE_ADDR'] ?? ''));
+
+	}
+
+	function _attempts_file($kind, $key){
+
+		return cms_path('tmp').'user_limits/'.preg_replace('/[^a-z0-9_]/', '', (string)$kind).'_'.sha1((string)$key).'.json';
+
+	}
+
+	/**
+	 * Rate limit: whether $key already has $max or more attempts of $kind in the last $seconds.
+	 * Keys are a client address ("ip:…") or a lowercased login name ("name:…"). attempt_note() records one.
+	 */
+	function attempts_over($kind, $key, $max, $seconds){
+
+		$file = $this->_attempts_file($kind, $key);
+		if (!is_file($file)){
+			return false;
+		}
+		$times = json_decode((string)@file_get_contents($file), true);
+		if (!is_array($times)){
+			return false;
+		}
+		$since = time() - (int)$seconds;
+		$recent = array_filter($times, function($t) use ($since){
+			return (int)$t > $since;
+		});
+
+		return count($recent) >= (int)$max;
+
+	}
+
+	function attempt_note($kind, $key, $keep_seconds = 3600){
+
+		$file = $this->_attempts_file($kind, $key);
+		$this->json_file_update($file, function($times) use ($keep_seconds){
+			$since = time() - (int)$keep_seconds;
+			$times = array_values(array_filter(is_array($times) ? $times : [], function($t) use ($since){
+				return (int)$t > $since;
+			}));
+			$times[] = time();
+			return $times;
+		});
+
+	}
+
+	/** One line for fail2ban in the 404 log's format: log/user_auth.log (CMS fail2ban.md § user-auth). */
+	function auth_log($what){
+
+		$line = date('Y-m-d H:i:s').' [client '.$this->_client_address().'] USER AUTH '.preg_replace('/[^a-z0-9_]/', '', (string)$what)."\n";
+		@file_put_contents(cms_path('log').'user_auth.log', $line, FILE_APPEND | LOCK_EX);
+
+	}
+
+	/**
+	 * Origins (scheme + host) of the installed web app that this in-app backend serves: config
+	 * app_web_origins when set, otherwise base_site without its leading "app." / "app_" label
+	 * (https://app.scoretutor.com → https://scoretutor.com). A host without that label has none.
+	 */
+	function app_web_origins(){
+
+		$list = $GLOBALS['config']['app_web_origins'] ?? null;
+		if (is_array($list)){
+			return array_values(array_filter(array_map(function($origin){
+				return strtolower(rtrim(trim((string)$origin), '/'));
+			}, $list)));
+		}
+
+		$site = strtolower(trim((string)($GLOBALS['config']['base_site'] ?? '')));
+		if (!preg_match('#^(https?://)app[._]([a-z0-9.-]+)(:[0-9]+)?/?$#', $site, $m)){
+			return [];
+		}
+
+		return [$m[1].$m[2].($m[3] ?? '')];
+
+	}
+
+	/** "scheme://host[:port]" of a URL in lowercase, or '' (default ports dropped). */
+	function _origin_of($url){
+
+		$parts = parse_url(trim((string)$url));
+		if (!is_array($parts) || empty($parts['scheme']) || empty($parts['host'])){
+			return '';
+		}
+		$scheme = strtolower($parts['scheme']);
+		$port = isset($parts['port']) ? (int)$parts['port'] : 0;
+		if (($scheme === 'http' && $port === 80) || ($scheme === 'https' && $port === 443)){
+			$port = 0;
+		}
+
+		return $scheme.'://'.strtolower($parts['host']).($port ? ':'.$port : '');
+
+	}
+
+	/**
+	 * Origins a sign-in may be posted from: this site (base_site, base_host, the request host), and on an
+	 * in-app backend also the web app's origins and the Android app's own (androidScheme http → http://localhost).
+	 */
+	function own_origins(){
+
+		$origins = [];
+		foreach ([$GLOBALS['config']['base_site'] ?? '', $GLOBALS['config']['base_host'] ?? ''] as $url){
+			$origin = $this->_origin_of($url);
+			if ($origin !== ''){
+				$origins[] = $origin;
+			}
+		}
+		if (!empty($_SERVER['HTTP_HOST'])){
+			$https = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+			$origins[] = $this->_origin_of(($https ? 'https://' : 'http://').$_SERVER['HTTP_HOST']);
+		}
+		if (!empty($GLOBALS['config']['inapp'])){
+			foreach ($this->app_web_origins() as $origin){
+				$origins[] = $this->_origin_of($origin);
+			}
+			$origins[] = 'http://localhost';
+			$origins[] = 'https://localhost';
+			$origins[] = 'capacitor://localhost';
+		}
+
+		return array_values(array_unique(array_filter($origins)));
+
+	}
+
+	/**
+	 * Whether this sign-in request came from one of our own pages (own_origins), so that another site
+	 * can't sign a visitor in to an account of its choosing. Origin header first, else the Referer's
+	 * origin. "null" or a foreign origin: false. Neither header (not a browser form or fetch): true.
+	 */
+	function request_from_own_site(){
+
+		$origin = trim((string)($_SERVER['HTTP_ORIGIN'] ?? ''));
+		if ($origin === ''){
+			$referer = trim((string)($_SERVER['HTTP_REFERER'] ?? ''));
+			if ($referer === ''){
+				return true;
+			}
+			$origin = $this->_origin_of($referer);
+		} else if (strtolower($origin) === 'null'){
+			return false;
+		} else {
+			$origin = $this->_origin_of($origin);
+		}
+
+		if ($origin !== '' && in_array($origin, $this->own_origins(), true)){
+			return true;
+		}
+
+		$this->auth_log('bad_origin');
+
+		return false;
+
+	}
+
+	/**
+	 * Load, change and save a JSON file under one exclusive lock: $fn gets the decoded array (or []) and returns
+	 * the new one. Returns what $fn returned. Used for the token and limit files, which parallel requests change.
+	 */
+	function json_file_update($file, callable $fn){
+
+		$dir = dirname($file);
+		if (!is_dir($dir)){
+			@mkdir($dir, 0775, true);
+		}
+		$handle = @fopen($file, 'c+');
+		if ($handle === false){
+			error_log_user('user json_file_update: cannot open '.$file);
+			return $fn([]);
+		}
+		flock($handle, LOCK_EX);
+		$data = json_decode((string)stream_get_contents($handle), true);
+		$result = $fn(is_array($data) ? $data : []);
+		ftruncate($handle, 0);
+		rewind($handle);
+		fwrite($handle, json_encode($result, JSON_PRETTY_PRINT));
+		fflush($handle);
+		flock($handle, LOCK_UN);
+		fclose($handle);
+
+		return $result;
 
 	}
 
@@ -202,7 +407,13 @@ class user_model extends \Model {
 			$this->_clear_stale_user_session();
 			return false;
 		}
-		
+
+		// The session keeps the password hash it was made with: a changed or reset password ends the other sessions
+		if (array_key_exists('password', $_SESSION['user']) && (string)$_SESSION['user']['password'] !== (string)($return['password'] ?? '')){
+			$this->_clear_stale_user_session();
+			return false;
+		}
+
 		$return['user_id'] = $return['cms_page_panel_id'];
 		
 		return $return;
@@ -413,68 +624,7 @@ class user_model extends \Model {
 		return $this->cms_page_panel_model->get_list('user/user');
 	
 	}
-	
-	function get_users_by_group($usergroup_id){
 		
-		$this->load->model('cms/cms_page_panel_model');
-		$users = $this->cms_page_panel_model->get_list('user/user');
-		
-		foreach($users as $user_id => $user){
-			
-			$delete = true;
-			foreach($user['usergroups'] as $usergroup){
-				if($usergroup['usergroup_id'] == $usergroup_id){
-					$delete = false;
-				}
-			}
-			
-			if ($delete){
-				unset($users[$user_id]);
-			}
-			
-		}
-		
-		return $users;
-		
-	}
-
-	function get_current_tempuser(){
-		
-		$user = [];
-	
-		// check if in file
-		$filename = cms_path('tmp').'user_tempuser.json';
-		if (file_exists($filename)){
-			$tempusers = json_decode(file_get_contents($filename), true);
-		} else {
-			$tempusers = [];
-		}
-			
-		$token = $_GET['token'] ?? false;
-			
-		foreach($tempusers as $key => $row){
-				
-			if ($token == $row['token'] && (time() - $row['time']) < 604800){
-					
-				$user = $this->user_model->get_user($row['user_id']);
-				if(!empty($row['topic_id'])){
-					$_SESSION['userchat_topic_id'] = $row['topic_id'];
-				}
-					
-			}
-				
-			if((time() - $row['time']) >= 1000000) {
-					
-				unset($tempusers[$key]);
-					
-			}
-				
-		}
-		
-		return $user;
-	
-	}
-	
 	function get_link_settings(){
 		
 		$settings = $this->get_user_settings();
@@ -633,6 +783,38 @@ class user_model extends \Model {
 
 	}
 
+	/** A link token: 64 hex characters from random_bytes. */
+	function new_token(){
+
+		return bin2hex(random_bytes(32));
+
+	}
+
+	/**
+	 * The password reset link mailed to the user: this site's address and the page that shows
+	 * user/reminder, never a posted value. Without such a page, <base_url>reminder/.
+	 */
+	function reminder_link($token){
+
+		$path = '';
+		$row = $this->db->query("select p.cms_page_id from cms_page_panel p join cms_page pg on pg.cms_page_id = p.cms_page_id "
+				."where p.panel_name = 'user/reminder' and p.show = 1 and pg.position = 'main' order by p.cms_page_id limit 1")->row_array();
+		if (!empty($row['cms_page_id'])){
+			$url = _l((string)(int)$row['cms_page_id'], false);
+			if (is_string($url) && strlen($url) > 1 && $url[0] === '/' && $url[1] !== '/'){
+				$path = $url;
+			}
+		}
+		if ($path === ''){
+			$path = $GLOBALS['config']['base_url'].'reminder/';
+		}
+
+		$base_site = $GLOBALS['config']['base_site'] ?? $GLOBALS['config']['base_host'] ?? '';
+
+		return $base_site.$path.'?token='.rawurlencode($token);
+
+	}
+
 	function send_email_verification($user_id){
 		
 		$user = $this->get_user($user_id);
@@ -642,23 +824,20 @@ class user_model extends \Model {
 		}
 		
 		$filename = cms_path('tmp').'user_email_verifications.json';
-		
-		if (file_exists($filename)){
-			$tokens = cms_json_decode(file_get_contents($filename), $filename);
-		} else {
-			$tokens = [];
-		}
-		
-		$token = sha1(mt_rand(0, mt_getrandmax()).$user_id.time());
-		
-		$tokens[$token] = [
-				'token' => $token,
-				'user_id' => $user_id,
-				'email' => $user['email'],
-				'time' => time(),
-		];
-		
-		file_put_contents($filename, json_encode($tokens, JSON_PRETTY_PRINT));
+		$token = $this->new_token();
+		// The link signs in only in this browser (register or resend): verify_email_signs_in()
+		$mark = $this->verify_mark();
+
+		$this->json_file_update($filename, function($tokens) use ($token, $user_id, $user, $mark){
+			$tokens[$token] = [
+					'token' => $token,
+					'user_id' => $user_id,
+					'email' => $user['email'],
+					'time' => time(),
+					'mark' => sha1($mark),
+			];
+			return $tokens;
+		});
 		
 		$base_site = $GLOBALS['config']['base_site'] ?? $GLOBALS['config']['base_host'] ?? '';
 		$verify_url = $base_site.$GLOBALS['config']['base_url'].'verify-email/?token='.$token;
@@ -727,30 +906,33 @@ class user_model extends \Model {
 	function verify_email_token($token){
 		
 		$filename = cms_path('tmp').'user_email_verifications.json';
-		
-		if (!file_exists($filename)){
+		$token = (string)$token;
+
+		if ($token === '' || !file_exists($filename)){
 			return ['error' => 'invalid_token'];
 		}
-		
-		$tokens = cms_json_decode(file_get_contents($filename), $filename);
-		
-		if (empty($tokens[$token])){
+
+		// Single use: the token leaves the file under the lock, whatever the outcome below
+		$row = null;
+		$this->json_file_update($filename, function($tokens) use ($token, &$row){
+			if (!empty($tokens[$token])){
+				$row = $tokens[$token];
+				unset($tokens[$token]);
+			}
+			return $tokens;
+		});
+
+		if (empty($row)){
 			return ['error' => 'invalid_token'];
 		}
-		
-		$row = $tokens[$token];
-		
-		if ((time() - $row['time']) >= 604800){
-			unset($tokens[$token]);
-			file_put_contents($filename, json_encode($tokens, JSON_PRETTY_PRINT));
+
+		if ((time() - (int)($row['time'] ?? 0)) >= 604800){
 			return ['error' => 'expired_token'];
 		}
-		
+
 		// The account may have been deleted since the email was sent
 		$user = $this->get_user((int)($row['user_id'] ?? 0));
 		if (empty($user['cms_page_panel_id']) || ($user['panel_name'] ?? '') !== 'user/user'){
-			unset($tokens[$token]);
-			file_put_contents($filename, json_encode($tokens, JSON_PRETTY_PRINT));
 			return ['error' => 'invalid_token'];
 		}
 
@@ -758,17 +940,39 @@ class user_model extends \Model {
 		$this->cms_page_panel_model->update_cms_page_panel($row['user_id'], [
 				'email_verified' => 'yes',
 		]);
-		
-		unset($tokens[$token]);
-		file_put_contents($filename, json_encode($tokens, JSON_PRETTY_PRINT));
 
 		// Deferred welcome when confirmation was required (not sent at form register)
 		if ($this->email_confirmation_required()){
 			$this->send_registration_welcome_email($row['user_id']);
 		}
-		
-		return ['user_id' => $row['user_id']];
-		
+
+		return ['user_id' => $row['user_id'], 'same_browser' => $this->_verify_mark_matches($row['mark'] ?? '') ? 1 : 0];
+
+	}
+
+	/**
+	 * A random mark of this browser's session, made when a confirmation mail is sent from it (register,
+	 * resend). The mail's token keeps its sha1: the link signs in only where the mark matches, so a
+	 * confirmation link of someone else's account confirms but never signs this visitor in.
+	 */
+	function verify_mark(){
+
+		$mark = (string)($_SESSION['user_verify_mark'] ?? '');
+		if (!preg_match('/^[a-f0-9]{32}$/', $mark)){
+			$mark = bin2hex(random_bytes(16));
+			$_SESSION['user_verify_mark'] = $mark;
+		}
+
+		return $mark;
+
+	}
+
+	function _verify_mark_matches($stored){
+
+		$mark = (string)($_SESSION['user_verify_mark'] ?? '');
+
+		return $mark !== '' && is_string($stored) && $stored !== '' && hash_equals((string)$stored, sha1($mark));
+
 	}
 	
 	function refresh_session_for_user_id($user_id){

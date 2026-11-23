@@ -1,5 +1,5 @@
 {
-	"ajax": {"output": ["cms","auth_intent"]},
+	"ajax": {"input": ["cms","credential","state"], "output": ["cms","auth_intent"]},
 	"label": "Login by Google",
 	"image": "",
 	"item": [

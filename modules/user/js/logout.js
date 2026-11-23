@@ -52,21 +52,9 @@ function logout_init(){
 
 }
 
-function logout_resize(){
-	
-}
-
-function logout_scroll(){
-	
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', logout_resize)
-	$(window).on('scroll.cms', logout_scroll)
-	
 	logout_init()
-	logout_resize()
-	logout_scroll()
 
 });

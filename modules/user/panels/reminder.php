@@ -45,9 +45,11 @@ class reminder extends \Controller {
 
 	}
 
-	function _save_reminders($filename, $reminders){
+	/** Change the token file under one lock: $fn gets the reminders and returns them changed. */
+	function _update_reminders($filename, callable $fn){
 
-		file_put_contents($filename, json_encode($reminders, JSON_PRETTY_PRINT));
+		$this->load->model('user/user_model');
+		$this->user_model->json_file_update($filename, $fn);
 
 	}
 
@@ -82,47 +84,54 @@ class reminder extends \Controller {
 		if ($do == 'remind'){
 
 			$username = trim((string)($params['username'] ?? ''));
-			$url = $params['url'] ?? false;
+			if ($this->_login_by_email()){
+				$username = $this->user_model->normalise_email($username);
+			}
 
 			if ($username === ''){
 				$return['error'] = 'bad_username';
 				return $return;
 			}
 
+			// 3 an hour per typed name, 10 per client address; counted whether or not the account exists
+			$name_key = 'name:'.mb_strtolower($username);
+			$ip_key = 'ip:'.$this->user_model->_client_address();
+			if ($this->user_model->attempts_over('remind', $name_key, 3, 3600) || $this->user_model->attempts_over('remind', $ip_key, 10, 3600)){
+				$this->user_model->auth_log('remind_limited');
+				return ['error' => 'too_many'];
+			}
+			$this->user_model->attempt_note('remind', $name_key);
+			$this->user_model->attempt_note('remind', $ip_key);
+
 			$user = $this->_resolve_user_for_login_name($username);
 
 			// No error if unknown user (do not leak accounts); still show generic success in UI
 			if (!(empty($user) || !$user['show'])){
 
-				$token = sha1(mt_rand(0, mt_getrandmax()).$username.time());
-				$reminders = $this->_load_reminders($filename);
+				$token = $this->user_model->new_token();
 
-				// Drop older open tokens for this login name (only the newest link stays valid)
-				$login_key = strtolower($username);
-				foreach ($reminders as $key => $row){
-					$stored = strtolower(trim((string)($row['username'] ?? '')));
-					if ($stored !== '' && $stored === $login_key){
-						unset($reminders[$key]);
+				$this->_update_reminders($filename, function($reminders) use ($token, $username){
+					// Drop older open tokens for this login name (only the newest link stays valid)
+					$login_key = mb_strtolower($username);
+					foreach ($reminders as $key => $row){
+						$stored = mb_strtolower(trim((string)($row['username'] ?? '')));
+						if ($stored !== '' && $stored === $login_key){
+							unset($reminders[$key]);
+						}
 					}
-				}
-
-				// Store canonical login id used for lookup (email or username string as typed)
-				$reminders[$token] = [
-						'token' => $token,
-						'username' => $username,
-						'time' => time(),
-				];
-
-				$this->_save_reminders($filename, $reminders);
+					// Store canonical login id used for lookup (the lowercased email, or the username)
+					$reminders[$token] = [
+							'token' => $token,
+							'username' => $username,
+							'time' => time(),
+					];
+					return $reminders;
+				});
 
 				$title = trim(str_replace('#page#', '', $GLOBALS['config']['site_title']), $GLOBALS['config']['site_title_delimiter'].' ');
 				$title = (!empty($GLOBALS['config']['environment']) ? '['.$GLOBALS['config']['environment'].'] ' : '').$title;
 
-				$base = preg_replace('/[?#].*$/', '', (string)$url);
-				if ($base === ''){
-					$base = $GLOBALS['config']['base_url'].'reminder/';
-				}
-				$link = rtrim($base, '?&').'?token='.$token;
+				$link = $this->user_model->reminder_link($token);
 
 				$this->cms_email_model->send_mail(
 						$user['email'],
@@ -169,8 +178,11 @@ class reminder extends \Controller {
 			$age = time() - (int)($row['time'] ?? 0);
 
 			if ($age >= $ttl_seconds){
-				unset($reminders[$found['key']]);
-				$this->_save_reminders($filename, $reminders);
+				$found_key = $found['key'];
+				$this->_update_reminders($filename, function($reminders) use ($found_key){
+					unset($reminders[$found_key]);
+					return $reminders;
+				});
 				$return['error'] = 'timeout';
 				return $return;
 			}
@@ -209,16 +221,17 @@ class reminder extends \Controller {
 
 			$this->user_model->change_user_password($user['cms_page_panel_id'], $password);
 
-			unset($reminders[$found['key']]);
-
-			// Drop other expired tokens
-			foreach ($reminders as $key => $r){
-				if ((time() - (int)($r['time'] ?? 0)) >= $ttl_seconds){
-					unset($reminders[$key]);
+			// This token is used; other expired ones go too
+			$found_key = $found['key'];
+			$this->_update_reminders($filename, function($reminders) use ($found_key, $ttl_seconds){
+				unset($reminders[$found_key]);
+				foreach ($reminders as $key => $r){
+					if ((time() - (int)($r['time'] ?? 0)) >= $ttl_seconds){
+						unset($reminders[$key]);
+					}
 				}
-			}
-
-			$this->_save_reminders($filename, $reminders);
+				return $reminders;
+			});
 
 			$this->user_model->send_password_updated_email($user);
 

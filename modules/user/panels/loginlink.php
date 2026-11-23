@@ -33,18 +33,7 @@ class loginlink extends \Controller {
 			$user_id = $params['user_id'] ?? false;
 			$user = $this->user_model->get_user($user_id);
 
-			$url = $params['url'] ?? false;
-
-			$token = sha1(mt_rand(0, mt_getrandmax()).$user_id.time());
-
-			if (file_exists($filename)){
-				$reminders = json_decode(file_get_contents($filename), true);
-			} else {
-				$reminders = [];
-			}
-			if (!is_array($reminders)){
-				$reminders = [];
-			}
+			$token = $this->user_model->new_token();
 
 			// Login name must match user/user_settings (email vs username) so reset form works
 			$config = $this->cms_page_panel_model->get_cms_page_panel_settings('user/user_settings');
@@ -54,29 +43,29 @@ class loginlink extends \Controller {
 				$login_name = trim((string)($user['username'] ?? ''));
 			}
 
-			// Drop older tokens for this account (email or username keys)
+			// Drop older tokens for this account (email or username keys) and add this one, under the file lock
 			$drop_keys = array_filter([
-					strtolower($login_name),
-					strtolower(trim((string)($user['email'] ?? ''))),
-					strtolower(trim((string)($user['username'] ?? ''))),
+					mb_strtolower($login_name),
+					mb_strtolower(trim((string)($user['email'] ?? ''))),
+					mb_strtolower(trim((string)($user['username'] ?? ''))),
 			]);
-			foreach ($reminders as $key => $row){
-				$stored = strtolower(trim((string)($row['username'] ?? '')));
-				if ($stored !== '' && in_array($stored, $drop_keys, true)){
-					unset($reminders[$key]);
+			$this->user_model->json_file_update($filename, function($reminders) use ($drop_keys, $token, $login_name){
+				foreach ($reminders as $key => $row){
+					$stored = mb_strtolower(trim((string)($row['username'] ?? '')));
+					if ($stored !== '' && in_array($stored, $drop_keys, true)){
+						unset($reminders[$key]);
+					}
 				}
-			}
+				$reminders[$token] = [
+						'token' => $token,
+						'username' => $login_name,
+						'time' => time(),
+						'autofill' => 1,
+				];
+				return $reminders;
+			});
 
-			$url = $url.$GLOBALS['config']['base_url'].'reminder/?token='.$token;
-
-			$reminders[$token] = [
-					'token' => $token,
-					'username' => $login_name,
-					'time' => time(),
-					'autofill' => 1,
-			];
-
-			file_put_contents($filename, json_encode($reminders, JSON_PRETTY_PRINT));
+			$url = $this->user_model->reminder_link($token);
 
 			return ['link' => $url];
 

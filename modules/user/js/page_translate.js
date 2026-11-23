@@ -404,12 +404,16 @@ $(document).ready(function(){
 		page_translate_on_position_change()
 	})
 
-	// SPA: footer (and Translate control) stay mounted; main position swaps
-	if (!window.cms_position_link_after){
-		window.cms_position_link_after = []
+	// SPA: footer (and Translate control) stay mounted; main position swaps. Once per window: this runs again
+	// when a page is installed into the same window (the music app's Homepage); the hook calls the current function
+	if (!window.page_translate_position_hook_ok){
+		window.page_translate_position_hook_ok = true
+		if (!window.cms_position_link_after){
+			window.cms_position_link_after = []
+		}
+		window.cms_position_link_after.push(function(){
+			page_translate_on_position_change()
+		})
 	}
-	window.cms_position_link_after.push(function(){
-		page_translate_on_position_change()
-	})
 
 })

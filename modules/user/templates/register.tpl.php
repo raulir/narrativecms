@@ -1,6 +1,6 @@
 <?php if(empty($loggedin)): ?>
 
-	<div class="register_container" data-cms_page_panel_id="<?= $cms_page_panel_id ?>" data-success="<?= $success_url ?>"
+	<div class="register_container" data-cms_page_panel_id="<?= $cms_page_panel_id ?>" data-success="<?= htmlspecialchars((string)$success_url, ENT_QUOTES) ?>"
 			data-progress_message="<?= $progress_message ?>">
 		<div class="register_content">
 		
@@ -28,7 +28,7 @@
 								<?php endif ?>
 							</label>
 							<input id="register_email" class="register_input register_email <?= (int)$show_email === 2 ? 'register_field_mandatory' : '' ?>" 
-									type="text" name="register_email" autocomplete="nope" value="<?= $register_data_email ?? '' ?>" 
+									type="text" name="register_email" autocomplete="nope" autocapitalize="none" autocorrect="off" spellcheck="false" value="<?= $register_data_email ?? '' ?>" 
 									data-label="<?= $register_email ?>" data-field_id="email">
 							<?php if(!empty($email_info)): ?>
 								<div class="register_help">?<div class="register_help_text"><?= $email_info ?></div></div>
@@ -161,6 +161,8 @@
 					<div class="register_error register_error_password_mismatch"><?= $message_password_mismatch ?></div>
 					<div class="register_error register_error_password_length"><?= str_replace('{{min_length}}', (string)(int)($password_min_length ?? 8), $message_password_length) ?></div>
 					<div class="register_error register_error_loggedin"><?= $message_loggedin ?></div>
+					<div class="register_error register_error_too_many"><?= $message_too_many ?></div>
+					<div class="register_error register_error_bad_form"><?= $message_bad_form ?></div>
 				
 				</div>
 				
@@ -179,7 +181,7 @@
 <?php else: ?>
 
 	<?php if (!_is_position_ajax()): ?>
-	<script type="text/javascript">window.location.href = "<?= $success_url ?>"</script>
+	<script type="text/javascript">window.location.href = <?= json_encode((string)$success_url, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES) ?></script>
 	<?php endif ?>
 
 <?php endif ?>

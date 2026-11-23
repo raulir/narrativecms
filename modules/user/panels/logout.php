@@ -10,8 +10,11 @@ class logout extends \Controller{
 		
 		$do = $params['cms_do'] ?? false;
 
+		// The user, its access keys, and a new session id (the old id is worth nothing after logout)
 		if ($do == 'logout' && isset($_SESSION['user'])){
-			unset($_SESSION['user']);
+			$this->load->model('cms/cms_access_model');
+			$this->cms_access_model->_clear_user_session();
+			cms_session_regenerate();
 		}
 
 		return $params;

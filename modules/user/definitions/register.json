@@ -1,5 +1,5 @@
 {
-	"ajax": {"output": ["cms","success","redirect_url","success_url","errors"]},
+	"ajax": {"input": ["cms","register_fields"], "output": ["cms","success","redirect_url","success_url","errors"]},
 	"label": "Register",
 	"image": "user/panel_register.png",
 	"item": [
@@ -339,8 +339,26 @@
 			"name": "message_password_length",
 			"label": "Password too short",
 			"lines": "2",
-			"default": "Password must be at least {{min_length}} characters",
-			"help": "{{min_length}} is replaced with the minimum length setting",
+			"default": "Password must be at least {{min_length}} characters, with a letter and a number",
+			"help": "{{min_length}} is replaced with the minimum length setting (never under 8); a letter and a number are always needed",
+			"translate": "1"
+		},
+		{
+			"type": "textarea",
+			"name": "message_too_many",
+			"label": "Too many registrations",
+			"lines": "2",
+			"help": "More than 5 new accounts an hour from one network",
+			"default": "Too many new accounts from this network. Please try again in an hour.",
+			"translate": "1"
+		},
+		{
+			"type": "textarea",
+			"name": "message_bad_form",
+			"label": "Form not found",
+			"lines": "2",
+			"help": "The post did not come from a shown register block (an old page, or not this form)",
+			"default": "This form could not be sent. Please reload the page and try again.",
 			"translate": "1"
 		},
 		{

@@ -7,14 +7,29 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 class auth_google extends \Controller {
 	
 	function panel_action($params){
-		
+
+		// Only the form our Google button posts (user_google_button.js). cms_do never comes from a link,
+		// so a page render with ?credential= signs nobody in.
+		if (($params['do'] ?? $params['cms_do'] ?? '') !== 'google'){
+			return $params;
+		}
+
 		$id_token = $params['credential'] ?? false;
-		
+
 		$this->load->model('user/user_google_model');
-		
+		$this->load->model('user/user_model');
+
 		// Capture before clear so template can show journey-specific CTAs
 		$params['auth_intent'] = $this->user_google_model->get_web_auth_intent();
-		
+
+		// The session's state and our own page: another site can't post a Google token of its own
+		if (!$this->user_google_model->web_auth_state_ok($params['state'] ?? '') || !$this->user_model->request_from_own_site()){
+			$this->user_model->auth_log('google_state');
+			$params['error'] = 'google_error';
+			return $params;
+		}
+		$this->user_google_model->clear_web_auth_state();
+
 		$payload = $this->user_google_model->verify_web_credential($id_token, $this->user_google_model->web_client_id());
 
 		if (empty($payload)) {
