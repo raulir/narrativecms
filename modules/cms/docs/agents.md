@@ -33,7 +33,7 @@ Host JSON `dir.cache` / `dir.tmp` / `dir.log` (defaults: project `cache/`, `tmp/
 | Logs | **`log/`** |
 | Real product code | `modules/`, `system/` |
 
-**Agent one-off files** (scripts, dumps, profiles, tool output) go under project-root `ai/` (gitignored). Prefer `ai/tmp/`, `ai/agent-tools/`, `ai/backup/`, `ai/mcps/`. Do not put them in the project root, `cache/`, `modules/`, `system/`, or a general OS temp folder such as `AppData\Local\Temp`. Do not put production CMS code in `ai/`. Document non-obvious `ai/` tools in `ai/README.md`. **Do not drop a .php in public `cache/`.** **`grok/` is the legacy name:** when a project still has it, move its contents to `ai/`, remove `grok/` and ignore `/ai/` in `.gitignore`.
+**Agent one-off files** (scripts, dumps, profiles, tool output) go under project-root `ai/` (gitignored). Prefer `ai/tmp/`, `ai/agent-tools/`, `ai/backup/`, `ai/mcps/`. Do not put them in the project root, `cache/`, `modules/`, `system/`, or a general OS temp folder such as `AppData\Local\Temp`. Do not put production CMS code in `ai/`. Document non-obvious `ai/` tools in `ai/README.md`. **Do not drop a .php in public `cache/`.** **`ai/` is the legacy name:** when a project still has it, move its contents to `ai/`, remove `ai/` and ignore `/ai/` in `.gitignore`.
 
 ---
 
@@ -216,7 +216,7 @@ The prefix says who owns the name. A review fails a variable, function, or other
 - `<module>_*` and `_<module>_*` are names that module uses across more than one panel (`music_offline_take`).
 - A name used by one panel is `<panel>_*` or, preferred, `<module>_<panel>_*` (`music_footer_refresh_shell`). A shared file that is not a panel uses `<module>_<library>_*` (`music_offline_*` in `offline.js`).
 
-Panel entry points stay `<panel>_init`, `<panel>_destroy`, `<panel>_resize`, `<panel>_scroll`, and the `<panel>_ok` guard. The CMS calls those by panel name.
+Panel entry points stay `<panel>_init`, `<panel>_destroy`, `<panel>_resize`, `<panel>_scroll`, and the `<panel>_ok` guard, by those names when a panel has them. Only `<panel>_init` is always there; resize, scroll and destroy only with real work in them.
 
 A short global helper may keep a leading underscore and a short name. Templates use these often: `_ib()`, `_lh()`, `_print_r()`, `_panel()`. New helpers of that kind are rare. Do not use that form for module or panel logic.
 
@@ -492,6 +492,8 @@ If no `$params` modification is needed (e.g. they come directly from db or ajax)
 
 If the panel needs to update system state, use `panel_action($params)`, which works similarly to `panel_params()`, but all `panel_action` calls run before any `panel_params()` on the page.
 
+**CMS-side panels carry `<module>_base`.** A panel meant only for the CMS admin (an admin page, editor input, toolbar button or popup, settings form, dashboard, purge button, cron job) has `"access": "<module>_base"` in its definition (`cms_base`, `analytics_base`, `music_base`, …); a panel without a definition gets one with just that key. It then runs only for a signed-in CMS user and is skipped quietly anywhere else, including `ajax_api/get_panel`. Without an `access` key a panel is public. See [`access.md`](access.md) § CMS-side panels.
+
 **Ajax reply keys are allowlisted.** A panel reply through `ajax_api/get_panel` contains only the `cms_*` keys (`cms_html`, `cms_js`, `cms_css`, `cms_panel_*`, `cms_error`). Every other key an action returns (`ok`, `result`, `message`, ids, …) must be listed in the panel definition: `"ajax": {"output": ["cms", "ok", "result"]}`. `"cms"` stands for the fixed `cms_*` set. `error` / `html` / `_html` are renamed to `cms_error` / `cms_html`, so they need no entry. If the panel has no definition yet, create one with just the `ajax` entry. A key that is not listed is silently dropped. That is on purpose: nothing is echoed back by accident, such as posted values, settings, block fields or secrets. When you add a returned key, add it to the list in the same change. Keys of an extend source's action belong to the target panel's list. Panels that `print` JSON and `exit` bypass the filter, so prefer returning an array. Calls that `fetch` the endpoint directly (not `get_ajax`) read the `cms_*` names themselves.
 
 **Request values come from `$params` only.** Panels never read `$_POST` or `$_GET`. There is no `$this->input` (the old CI `Input` class is gone). Where request values reach `$params`:
@@ -536,7 +538,7 @@ Site module extends base panels via **`config.json` `"extends"`** (`target` / `s
 
 ## Panel JavaScript
 
-Each panel JS file exposes `<panel>_init($root)` and optionally `<panel>_destroy($root)`. Init guards use a `<panel>_ok` CSS class on the panel root — not `.data()` flags. Without `$root`, init scans the whole document; with `$root`, only that subtree. Repeater fields auto-call `{panel}_init` via `data-init_hooks`. **Frontend** (public site) panel JS also includes `<panel>_resize` and `<panel>_scroll` (empty stubs are fine), bound on `window` as `resize.cms` / `scroll.cms` and called once after init. Full contract: [`cms_panel_js.md`](cms_panel_js.md).
+Each panel JS file exposes `<panel>_init($root)` and optionally `<panel>_destroy($root)`. Init guards use a `<panel>_ok` CSS class on the panel root — not `.data()` flags. Without `$root`, init scans the whole document; with `$root`, only that subtree. Repeater fields auto-call `{panel}_init` via `data-init_hooks`. A panel with layout work on resize or scroll has `<panel>_resize` / `<panel>_scroll`, bound on `window` as `resize.<file>` / `scroll.<file>` (the script's file name, `resize.cms_list`) with `.off()` first and called once after init. A panel without such work has neither: no empty stubs. A script may run again in the same window (the music app's Homepage), so `window` / `document` bindings and `cms_position_link_after` hooks must not add a second copy. Full contract: [`cms_panel_js.md`](cms_panel_js.md) § A script that runs again in the same window.
 
 ## Images
 

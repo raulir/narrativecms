@@ -116,8 +116,8 @@ function cms_init($root){
 
 $(document).ready(function() {
 	
-	$(window).on('resize.cms', cms_resize)
-	$(window).on('scroll.cms', cms_scroll)
+	$(window).off('resize.cms').on('resize.cms', cms_resize)
+	$(window).off('scroll.cms').on('scroll.cms', cms_scroll)
 	
 	cms_init()
 	cms_resize()

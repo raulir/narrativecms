@@ -1,3 +1,4 @@
 {
+	"access": "cms_base",
 	"ajax": {"input": ["cms", "md_preview", "text", "md_filter"], "output": ["cms"]}
 }

@@ -1,10 +1,4 @@
-function cms_cssjs_settings_resize(){
 	
-}
-
-function cms_cssjs_settings_scroll(){
-	
-}
 
 function cms_cssjs_settings_init($root){
 
@@ -81,19 +75,7 @@ function cms_cssjs_settings_item_init($root){
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		cms_cssjs_settings_resize();
-	});
-	
-	$(window).on('scroll.cms', function(){
-		cms_cssjs_settings_scroll();
-	});
-	
 	cms_cssjs_settings_init();
-
-	cms_cssjs_settings_resize();
-	
-	cms_cssjs_settings_scroll();
 
 });
 

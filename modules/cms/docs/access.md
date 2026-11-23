@@ -81,6 +81,7 @@ On the panel definition JSON (top-level):
 | Condition | Result |
 |-----------|--------|
 | No required access / `*` | Allow |
+| `<module>_base` (CMS-side panel) | Allow for a signed-in CMS user, otherwise **always skip** (see below) |
 | User has matching key | Allow |
 | Denied + **user module absent** | **Always skip** (even if `access_blocked` is `login`) |
 | Denied + user module + `access_blocked` empty/`login` | **Login** — soft 302 / JSON to login link |
@@ -110,7 +111,19 @@ On the panel definition JSON (top-level):
 | `get_panel_access_skipped_html($panel_name)` | Skip comment HTML |
 | `get_cache_access_hash($panel_name)` | Panel HTML cache key fragment by session keys when access required |
 
-Pass `$params['_access_ok'] = 1` after a successful enforce to avoid a second check in nested `panel()` (used by `ajax_panel` / `_panel`).
+Pass `$params['_access_ok'] = 1` after a successful enforce to avoid a second check in nested `panel()` (used by `ajax_panel` / `_panel`). It can't come from a request: keys with a leading `_` are removed from the post (`_request_drop_internal_keys`) and, since 2026-11-20, from the query string of a page render too (before that, `?_access_ok=1` skipped the panel gate).
+
+### CMS-side panels: `<module>_base`
+
+Every panel meant only for the CMS admin carries its module's base key in its definition: `"access": "cms_base"`, `"analytics_base"`, `"music_base"`, `"shop_base"`, and so on. This covers admin pages, editor inputs, toolbar buttons and popups, settings forms, dashboards, purge buttons and cron jobs. A panel without a definition gets one that holds only this key.
+
+- **The rule:** a single key `^[a-z0-9]+_base$` asks for a signed-in CMS user (`cms_user_has_access()`, any CMS user). Site-user keys never match it, so a visitor with `music_*` or `*` doesn't pass `music_base`. Finer CMS keys (`shop_orders`, …) are still checked inside the panels that need them.
+- **Not a CMS user:** always **skip**, whatever `access_blocked` says and whether or not the user module is there. Placed on a public page, the panel leaves only the skip comment. Over ajax, it gives an empty result and runs no action.
+- **Cron** runs panels through `run_panel_method`, which doesn't check access, so cron panels keep working with the key (and are closed to `ajax_api/get_panel`).
+- **Panel HTML cache:** the key fragment is `cms` or `guest`.
+- **Stay public (no key):** `cms_access_denied`, `cms_panel_css` (the app worker posts without cookies), `cms_cache`, `cms_page_empty`, `cms_preview_site`, `cms_popup_yes_no`, `cms_user_login`, `cms_login`, and every panel the site or app calls.
+- **Before 2026-11-20** a panel with no `access` was public, so admin panels without their own `cms_user` check (the analytics dashboard's `delete_visitor`, form grid delete, editor inputs, cron actions) could be run by anyone through `ajax_api/get_panel`.
+- **Page access** (`cms_page` access field) doesn't know `_base`; the rule is for panels.
 
 ---
 

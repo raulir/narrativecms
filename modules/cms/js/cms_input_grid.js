@@ -209,21 +209,9 @@ function cms_input_grid_init($root){
 
 }
 
-function cms_input_grid_resize(){
-
-}
-
-function cms_input_grid_scroll(){
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', cms_input_grid_resize)
-	$(window).on('scroll.cms', cms_input_grid_scroll)
-
 	cms_input_grid_init()
-	cms_input_grid_resize()
-	cms_input_grid_scroll()
 
 })

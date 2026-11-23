@@ -294,21 +294,9 @@ function cms_translation_init($root){
 
 }
 
-function cms_translation_resize(){
-
-}
-
-function cms_translation_scroll(){
-
-}
 
 $(document).ready(function(){
 
-	$(window).on('resize.cms', cms_translation_resize)
-	$(window).on('scroll.cms', cms_translation_scroll)
-
 	cms_translation_init()
-	cms_translation_resize()
-	cms_translation_scroll()
 
 })

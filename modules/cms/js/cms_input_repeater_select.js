@@ -88,28 +88,9 @@ function cms_input_repeater_select_init($root){
 	
 }
 
-function cms_input_repeater_select_resize(){
-	
-}
-
-function cms_input_repeater_select_scroll(){
-	
-}
 
 $(document).ready(function() {
 	
-	$(window).on('resize.cms', function(){
-		cms_input_repeater_select_resize();
-	});
-	
-	$(window).on('scroll.cms', function(){
-		cms_input_repeater_select_scroll();
-	});
-	
 	cms_input_repeater_select_init();
 
-	cms_input_repeater_select_resize();
-	
-	cms_input_repeater_select_scroll();
-	
 });

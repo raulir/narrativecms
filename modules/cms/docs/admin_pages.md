@@ -94,7 +94,7 @@ Labels of an admin tool page (column headings, button texts) may be fixed Englis
 - [ ] Rows from a helper panel: `_panel()` on landing, ajax after; `ajax.input`; access check in the helper.
 - [ ] Rows in the CMS list look: ticks, one link per row, bold headings row; absolute links.
 - [ ] SQL in the model; search and filters in SQL.
-- [ ] Panel JS: `<panel>_init` with the `<panel>_ok` guard, `_resize` / `_scroll` stubs.
+- [ ] Panel JS: `<panel>_init` with the `<panel>_ok` guard (`_resize` / `_scroll` only if the page needs them).
 
 ## Not yet in line
 

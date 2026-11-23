@@ -13,16 +13,7 @@ function cms_popup_yes_no_init($root){
 
 }
 
-function cms_popup_yes_no_resize(){
-	
-}
 
 $(document).ready(function() {
 	
-	$(window).on('resize.cms', function(){
-		cms_popup_yes_no_resize();
-	});
-
-	cms_popup_yes_no_resize();
-
 });

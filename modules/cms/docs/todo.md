@@ -8,6 +8,10 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 ---
 
+## Security
+
+- [ ] **A general origin check for ajax posts** (site review 2026-11-20, item 5). `ajax_api/get_panel` answers a form post from any site, and a page render runs every panel's action on a POST. The user module now refuses a sign-in from another site (`user_model::request_from_own_site()`, user [`user_auth_overview.md`](../../user/docs/user_auth_overview.md) § Sign-in only from our own pages), but other state-changing actions still rely on the Lax session cookie. Option: refuse a foreign `Origin` for every POST with `cms_do` in `Ajax_api` and on page renders, with an allow list from the host config (the app hosts' origins).
+
 ## System / Composer
 
 - [ ] **Composer packages before SCSS** — a fresh install needs `vendor/` from `composer install` before stylesheets can compile. `scssphp/scssphp` 2.1 lives there, with `league/uri`, `scssphp/source-span`, and `symfony/filesystem`. Longer term, most of `system/vendor` should move into that same Composer directory.
@@ -24,6 +28,14 @@ Related design notes also live in topic docs (`cms_email.md`, `cms_schema.md`, `
 
 ## System / panel ajax
 
+- [x] **Admin-only panels behind `<module>_base`** (2026-11-20, site review item 2 in `ai/next_big_plan.md`).
+  - **The rule:** a panel key `<module>_base` asks for a signed-in CMS user and skips quietly otherwise (`cms_access_model::_access_is_base()` in `check_panel_access()`; cache key `cms`/`guest`).
+  - **Applied:** 139 admin panels across cms, music, shop, analytics, basic, form, user, google, stripe, subscription, gdpr and xai have the key; 78 of them got a new definition file holding only the key. One-off script: `ai/tmp/base_access_apply.php`.
+  - **Was open to anyone through `ajax_api/get_panel`:** the analytics dashboard (`delete_visitor`, usernames), form grid delete, form export, the cron actions, `basic/console_log`, and editor inputs without their own guard (`cms_input_mask` / `cms_input_xy` read any block, `cms_input_page` listed every page).
+  - **Same change, the `_access_ok` bypass:** a page render's query string now drops leading-`_` keys (`controller_index.php`, `_request_render_params()`), so `?_access_ok=1` no longer skips the panel gate.
+  - [`access.md`](access.md) § CMS-side panels.
+  - **Checks:** `ai/tmp/base_access_check.php` (no public code calls a `_base` panel), `ai/tmp/access_ok_get_check.php`, `ai/tmp/base_access_admin_check.js` (admin pages and toolbar popups signed in).
+
 Ajax input / output filter review (2026-11-05), items in priority order:
 
 - [x] **1. Block merge vetted** — `get_panel()` / `get_panel_anchor()` merge the saved block only when it belongs to the requested panel and the caller may see it (shown, CMS user, translator); handed to `ajax_panel()` as internal `_cms_block` (set after the `_*` strip). `ajax_panel()` no longer loads a block from a posted `cms_page_panel_id`. Closes the anonymous read of hidden blocks (e.g. `cms/cms_settings` fields through another panel's `ajax.output`) and stops the admin save from being overwritten by the stored block
@@ -34,7 +46,7 @@ Ajax input / output filter review (2026-11-05), items in priority order:
 
 - [ ] **Panel localStorage eviction** — `get_ajax_panel` `_cache` keeps replies in localStorage. When storage is full, drop older panel cache entries. The `_cache`, `_cache_offline`, and `_cache_reload` flags do not do this.
 - [x] **CI `Input` class removed (2026-11-06)** — `system/core/Input.php` deleted, no `$this->input`. Boot cleaning moved to `cms_clean_request()` (`cms_bootstrap.php`, called from `CodeIgniter.php`): control characters out, `\r\n` / `\r` → `\n`; the broken key check is gone. All 300+ panel reads moved to `$params` (`ai/tmp/input_migrate_apply.php`); helpers take `$params` (`cms_page_panel::_post_panel_form_input`, `cms_page_panel_export::_parse_options` / `_export_main_ids`, `cms_dump::_post_array`). `render()` now puts the query string and a full-page form POST (filtered by `ajax.input`) under each panel's block / page config (`_request_render_params()`), so admin forms keep working. `cms_do` / `do` are dropped from the query string (no action from a link). `ajax_panel()` no longer overwrites `$_POST`, so system readers see the raw request again (analytics `_cms_inapp`). Fixed on the way: list-item **Template** select posted `_template_page_id`, which the `_*` strip dropped (now `cms_template_page_id`); `productbuy` missing-dimension check (`FALSE` vs `null`). System code reads `$_POST` / `$_GET`; models take request values from their panel
-- [ ] **Add `ajax.input` to panels that take ajax input** — without one every posted key passes and can overwrite a settings value of the same name. Start with the public action panels (user, form, shop, subscription, basic/pageshare, music). Done 2026-11-17: `subscription/pricing`, `subscription/manage`, `subscription/checkout_start`, `google/purchase`, `google/transaction`, `google/payment_choice`, `music/settings`, `music/footer` (they also return arrays now instead of printing JSON).
+- [ ] **Add `ajax.input` to panels that take ajax input** — without one every posted key passes and can overwrite a settings value of the same name. Start with the public action panels (user, form, shop, subscription, basic/pageshare, music). Done 2026-11-17: `subscription/pricing`, `subscription/manage`, `subscription/checkout_start`, `google/purchase`, `google/transaction`, `google/payment_choice`, `music/settings`, `music/footer` (they also return arrays now instead of printing JSON). Done 2026-11-21, music: `cms_purge`, `e15_seed`, `engine_purge`, `exercise_params`, `material`, `material_button_purge`, `material_mark_seen`, `material_purge`, `note_system_key`, `prepare` (found by a script over every music panel's `panel_action` against its definition; check `ai/tmp/music_ajax_filters_check.php`). `cms_purge` takes only `E1`–`E99`; `note_system_key` writes only through `get_grid_cell_target` (as `cms_grid_editable`) and casts the ids it prints. The other modules are not swept yet.
 - [ ] **Convert full-page form posts to `get_ajax` (low priority)** — these still post the whole page and get their values through the render request layer: admin `cms_dump` (generate, upload, restore, delete row forms), `cms_images` (new / replace image upload forms), `cms_main_menu` (`.admin_main_menu_form`), `cms_user` (`.cms_user_form`), the page-panels add form (`cms_input_page_panels.js` builds `.cms_params_form` → `admin/cms_page_panel/0/`), `user/profile` (`.register_form`, no JS), and the admin login (`cms_user_login` → `cms_login` controller, reads `$_POST` as system code). When all are converted, `_request_render_params()` can drop POST so panels get POST only through ajax
 
 ## System / page panel API
@@ -216,6 +228,7 @@ Source: [`cms_panel_js.md`](cms_panel_js.md). Per-module remaining work also tra
 - [ ] **Repeater `$root` scoping** — pass new repeater row as `$root` to `*_init` instead of global scan
 - [ ] **Repeater row delete → `*_destroy`** — call destroy hooks when repeater blocks are removed
 - [ ] Ticket #24 (panel JS to jQuery objects) — closed; `*_init` + `*_ok` class guards instead
+- [x] **Empty `*_resize` / `*_scroll` stubs dropped (2026-11-19)** — no longer required; 191 empty hooks with their bindings and calls removed across all modules of the music project (`cms`, `music`, `basic`, `user`, `shop`, `form`, `gdpr`, `subscription`). Hooks with a body stay, bound as `resize.<file>` (file name, no `.cms.` in the middle) with `.off()` first; `cms_loader.js` triggers plain `resize`.
 
 ---
 

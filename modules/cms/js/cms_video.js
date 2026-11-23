@@ -1227,17 +1227,12 @@ function cms_video_resize(){
 
 }
 
-function cms_video_scroll(){
-	
-}
 
 $(document).ready(function() {
 	
-	$(window).on('resize.cms', cms_video_resize)
-	$(window).on('scroll.cms', cms_video_scroll)
+	$(window).off('resize.cms_video').on('resize.cms_video', cms_video_resize)
 	cms_video_bind_visibility()
 	
 	cms_video_init_when_ready()
-	cms_video_scroll()
 
 })

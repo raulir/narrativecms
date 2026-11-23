@@ -106,6 +106,7 @@ Only **enabled site modules** (site `modules` list) are scanned. Enable the prov
 | `shop_fulfilment` | shop (paid order lines) | shop/fulfilment_email |
 | `image_compose` | shop (product artwork onto a print background) | imagemaker/compose |
 | `subscription_checkout` | subscription | stripe/subscription_checkout |
+| `subscription_billing` | subscription (sync, renewal, card, plan, Play manage address; `subscription_model::billing_call`) | stripe/subscription_billing, google/subscription_billing |
 | `ai` | cms (translations, etc.) | xai/ai |
 
 **Name services by capability, not vendor** (`weather_forecast`, not `metoffice_api`).
@@ -158,6 +159,7 @@ $result = $CI->run_action('metoffice/forecast', [
 
 - `run_action($panel, $params)` → `run_panel_method($panel, 'panel_action', $params)` ([`system/core/controller.php`](../../../system/core/controller.php)).
 - With **`return_result => 1`**, the provider **returns** an array (merged with params). Without it, many providers `print` JSON and `exit` (HTTP-style).
+- **A provider only a domain may call** (a checkout that must not skip the domain's checks) runs only when the domain passes **`'_provider_call' => 1`**. No request can carry a leading-`_` key (posts and page query strings drop them), so a browser post to the provider panel is refused. Give its definition `"ajax": {"input": ["cms"]}` too. Example: `stripe/subscription_checkout`, called by `subscription/checkout_start`.
 
 ### Domain helper pattern (recommended)
 

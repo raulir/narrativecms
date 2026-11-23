@@ -81,13 +81,6 @@ function order_admin_init(){
 
 }
 
-function order_admin_resize(){
-
-}
-
-function order_admin_scroll(){
-
-}
 
 $(document).ready(function(){
 	order_admin_init()

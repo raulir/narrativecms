@@ -1,4 +1,5 @@
 {
+	"access": "cms_base",
 	"item": [],
 	"ajax": {
 		"input": ["cms", "language", "panel_name", "title", "submenu_anchor", "parent_id", "sort", "panel_params",

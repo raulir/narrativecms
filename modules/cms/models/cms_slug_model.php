@@ -290,8 +290,10 @@ class cms_slug_model extends \Model {
 	}
 
 	/**
-	 * Ensure project-root robots.txt exists and points Sitemap: at this site’s /sitemap.xml.
-	 * Preserves custom User-agent / Allow / Disallow rules; only fixes Sitemap line(s).
+	 * Ensure project-root robots.txt exists, has a User-agent group, and points Sitemap: at this site’s /sitemap.xml.
+	 * Preserves custom User-agent / Allow / Disallow rules. A file without any User-agent line gets the default
+	 * "User-agent: *" / "Allow: /" group in front (a file of only a Sitemap line has no group; the music app's
+	 * reachability probe also looks for that line). Fixes the Sitemap line(s). Writes only when something changed.
 	 * Called when the sitemap file cache is rebuilt (same host context as <loc> URLs).
 	 */
 	function ensure_robots_txt(){
@@ -310,23 +312,28 @@ class cms_slug_model extends \Model {
 			return;
 		}
 
-		// Already correct: exactly one Sitemap line matching this host
-		if (preg_match_all('/^Sitemap:\s*(\S+)\s*$/mi', $content, $matches)){
-			if (count($matches[0]) === 1 && trim($matches[0][0]) === $sitemap_line){
-				return;
+		$body = $content;
+
+		// No User-agent group at all: the default one goes first, the rest of the file stays
+		if (!preg_match('/^\s*User-agent:/mi', $body)){
+			$body = 'User-agent: *'."\n".'Allow: /'."\n\n".ltrim($body);
+		}
+
+		if (preg_match_all('/^Sitemap:\s*(\S+)\s*$/mi', $body, $matches)){
+			// Wrong or multiple Sitemap lines: strip all, append the correct one (exactly one matching line stays)
+			if (!(count($matches[0]) === 1 && trim($matches[0][0]) === $sitemap_line)){
+				$body = preg_replace('/^Sitemap:\s*\S+\s*$/mi', '', $body);
+				$body = preg_replace("/\n{3,}/", "\n\n", $body);
+				$body = rtrim($body)."\n\n".$sitemap_line."\n";
 			}
 		} else {
 			// No Sitemap directive — append
-			$body = rtrim($content)."\n\n".$sitemap_line."\n";
-			@file_put_contents($path, $body);
-			return;
+			$body = rtrim($body)."\n\n".$sitemap_line."\n";
 		}
 
-		// Wrong or multiple Sitemap lines: strip all, append the correct one
-		$body = preg_replace('/^Sitemap:\s*\S+\s*$/mi', '', $content);
-		$body = preg_replace("/\n{3,}/", "\n\n", $body);
-		$body = rtrim($body)."\n\n".$sitemap_line."\n";
-		@file_put_contents($path, $body);
+		if ($body !== $content){
+			@file_put_contents($path, $body);
+		}
 
 	}
 

@@ -246,21 +246,9 @@ function cms_page_panel_button_export_init($root){
 
 }
 
-function cms_page_panel_button_export_resize(){
-
-}
-
-function cms_page_panel_button_export_scroll(){
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', cms_page_panel_button_export_resize)
-	$(window).on('scroll.cms', cms_page_panel_button_export_scroll)
-
 	cms_page_panel_button_export_init()
-	cms_page_panel_button_export_resize()
-	cms_page_panel_button_export_scroll()
 
 })

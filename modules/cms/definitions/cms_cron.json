@@ -1,4 +1,5 @@
 {
+	"access": "cms_base",
 	"label": "CMS repeating tasks",
 	"settings": [
 		{

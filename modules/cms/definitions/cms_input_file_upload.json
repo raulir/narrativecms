@@ -1,3 +1,4 @@
 {
+	"access": "cms_base",
 	"ajax": {"output": ["cms","cms_file_id","filename","name","date_posted"]}
 }

@@ -92,21 +92,9 @@ function cms_input_xy_picker($input){
 
 }
 
-function cms_input_xy_resize(){
-
-}
-
-function cms_input_xy_scroll(){
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', cms_input_xy_resize)
-	$(window).on('scroll.cms', cms_input_xy_scroll)
-
 	cms_input_xy_init()
-	cms_input_xy_resize()
-	cms_input_xy_scroll()
 
 })

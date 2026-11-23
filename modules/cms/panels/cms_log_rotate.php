@@ -50,15 +50,26 @@ class cms_log_rotate extends \Controller {
 		$explode_str = '] ';
 		$trim_str = '[';
 
-		if (!is_string($filename) || $filename === '' || !is_file($filename)){
-			return;
+		// PHP writes the log only on the first error, so a quiet site may not have it yet. A missing log is an
+		// empty one: create it, and still report (a missing file used to stop the report, daily OK included).
+		// The CMS error handler reports warnings even under @, so check before writing.
+		$log_problem = '';
+		if (!is_file($filename)){
+			$dir = dirname($filename);
+			if (!is_dir($dir) && !file_exists($dir) && is_writable($this->_existing_parent($dir))){
+				mkdir($dir, 0775, true);
+			}
+			if (!is_dir($dir) || !is_writable($dir) || file_put_contents($filename, '') === false){
+				$log_problem = 'Error log '.$filename.' is missing and could not be created (is '.$dir.' writable by the web server?).';
+			}
 		}
-		
-		$lines = file($filename);
+
+		$lines = is_file($filename) ? file($filename) : [];
 		if ($lines === false){
-			return;
+			$lines = [];
+			$log_problem = 'Error log '.$filename.' could not be read.';
 		}
-		
+
 		$errors = [];
 		$errors_404 = [];
 		$skipped = [];
@@ -87,8 +98,9 @@ class cms_log_rotate extends \Controller {
 		$has_404s = !empty($errors_404);
 		$has_errors = $has_php_errors || $has_404s;
 
-		// Empty report: email at most once per ~day (23h 45m since last real send)
-		if (!$has_errors){
+		// Empty report: email at most once per ~day (23h 45m since last real send). A log that cannot be
+		// written or read is reported every run.
+		if (!$has_errors && $log_problem === ''){
 			$last_sent = $this->_get_last_email_time();
 			$elapsed = $last_sent > 0 ? (time() - $last_sent) : PHP_INT_MAX;
 			if ($elapsed < $this->_empty_email_min_interval()){
@@ -112,6 +124,10 @@ class cms_log_rotate extends \Controller {
 		$text .= 'Server name: '.strtolower($_SERVER['SERVER_NAME'] ?? '')."\n";
 		$text .= 'Errors from: '.$email_filename."\n\n";
 
+		if ($log_problem !== ''){
+			$text .= '<b>'.$log_problem.'</b>'."\n\n";
+		}
+
 		if ($has_php_errors){
 			$text .= $this->_error_table($errors);
 		} else if ($has_404s){
@@ -132,10 +148,14 @@ class cms_log_rotate extends \Controller {
 		}
 
 		// add stats to archive too
-		file_put_contents(cms_path('log').'php_errors_'.date('Y-m-d_H-i-s').'.log', $text);
+		if (is_writable(cms_path('log'))){
+			file_put_contents(cms_path('log').'php_errors_'.date('Y-m-d_H-i-s').'.log', $text);
+		}
 
 		// empty logfile
-		file_put_contents($filename, '');
+		if (is_file($filename) && is_writable($filename)){
+			file_put_contents($filename, '');
+		}
 		
 		if (!empty($GLOBALS['config']['admin_email'])){
 
@@ -147,7 +167,9 @@ class cms_log_rotate extends \Controller {
 			$site = str_replace(['#page#',' - '], '', $GLOBALS['config']['site_title']);
 			$host = strtolower($_SERVER['SERVER_NAME'] ?? '');
 
-			if ($has_errors){
+			if ($log_problem !== ''){
+				$subject = 'PHP error log problem '.$env.' '.$site.' ('.$host.')';
+			} else if ($has_errors){
 				$subject = 'PHP errors '.$env.' '.$site.' ('.$host.')';
 			} else {
 				$subject = 'PHP errors OK '.$env.' '.$site.' ('.$host.')';
@@ -170,11 +192,29 @@ class cms_log_rotate extends \Controller {
 
 		$unique = count($errors) + count($errors_404);
 		return [
-				'message' => $has_errors
+				'message' => ($log_problem !== '' ? $log_problem.' ' : '').($has_errors
 						? 'PHP errors report emailed ('.$unique.' unique)'
-						: 'Empty PHP errors report emailed (daily OK)',
+						: 'Empty PHP errors report emailed (daily OK)'),
 		];
 	
+	}
+
+	/**
+	 * The nearest folder of $dir that exists ('' when none does).
+	 */
+	function _existing_parent($dir){
+
+		$dir = rtrim(str_replace('\\', '/', (string)$dir), '/');
+		while ($dir !== '' && !is_dir($dir)){
+			$up = dirname($dir);
+			if ($up === $dir){
+				return '';
+			}
+			$dir = $up;
+		}
+
+		return $dir;
+
 	}
 
 	function _is_cms_404_line($error_text){

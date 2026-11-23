@@ -68,26 +68,9 @@ function cms_page_panel_button_targets_init($root){
 
 }
 
-function cms_page_panel_button_targets_resize(){
-
-}
-
-function cms_page_panel_button_targets_scroll(){
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		cms_page_panel_button_targets_resize()
-	})
-
-	$(window).on('scroll.cms', function(){
-		cms_page_panel_button_targets_scroll()
-	})
-
 	cms_page_panel_button_targets_init()
-	cms_page_panel_button_targets_resize()
-	cms_page_panel_button_targets_scroll()
 
 })

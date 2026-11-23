@@ -86,17 +86,8 @@ function cms_page_panel_caching_save(after){
 	
 }
 
-function cms_page_panel_caching_resize(){
-
-}
 
 $(document).ready(function() {
-	
-	$(window).on('resize.cms', function(){
-		cms_page_panel_caching_resize();
-	});
-	
-	cms_page_panel_caching_resize();
 	
 	cms_page_panel_caching_init();
 

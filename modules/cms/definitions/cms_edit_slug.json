@@ -1,3 +1,4 @@
 {
+	"access": "cms_base",
 	"ajax": {"output": ["cms","ok","slug","current_slug","check_status","check_message","cms_page_panel_id","target"]}
 }

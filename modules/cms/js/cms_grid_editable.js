@@ -74,21 +74,9 @@ function cms_grid_editable_init($root){
 
 }
 
-function cms_grid_editable_resize(){
-
-}
-
-function cms_grid_editable_scroll(){
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', cms_grid_editable_resize)
-	$(window).on('scroll.cms', cms_grid_editable_scroll)
-
 	cms_grid_editable_init()
-	cms_grid_editable_resize()
-	cms_grid_editable_scroll()
 
 })

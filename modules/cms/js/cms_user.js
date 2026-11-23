@@ -18,18 +18,9 @@ function cms_user_init($root){
 
 }
 
-function cms_user_resize(){
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		cms_user_resize();
-	});
-
 	cms_user_init();
-
-	cms_user_resize();
 
 });

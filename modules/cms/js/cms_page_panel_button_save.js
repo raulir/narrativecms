@@ -150,28 +150,9 @@ function cms_page_panel_button_save_init($root){
 
 }
 
-function cms_page_panel_button_save_resize(){
-		
-}
-
-function cms_page_panel_button_save_scroll(){
-	
-}
 
 $(document).ready(function() {
 	
-	$(window).on('resize.cms', function(){
-		cms_page_panel_button_save_resize();
-	});
-
-	$(window).on('scroll.cms', function(){
-		cms_page_panel_button_save_scroll();
-	});
-	
 	cms_page_panel_button_save_init();
 
-	cms_page_panel_button_save_resize();
-	
-	cms_page_panel_button_save_scroll();
-	
 });

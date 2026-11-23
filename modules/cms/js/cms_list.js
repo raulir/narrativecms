@@ -373,9 +373,6 @@ function cms_list_resize(){
 	
 }
 
-function cms_list_scroll(){
-	
-}
 
 function cms_list_init_limit(){
 	
@@ -569,12 +566,10 @@ function cms_list_load(start, limit, after){
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', cms_list_resize)
-	$(window).on('scroll.cms', cms_list_scroll)
+	$(window).off('resize.cms_list').on('resize.cms_list', cms_list_resize)
 	
 	cms_list_init()
 	cms_list_resize()
-	cms_list_scroll()
 
 })
 

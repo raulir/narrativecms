@@ -312,9 +312,6 @@ function cms_input_textarea_init($root){
 
 }
 
-function cms_input_textarea_resize(){
-		
-}
 
 function cms_input_textarea_media_browser(field_name, url, type, win){
 	
@@ -346,16 +343,8 @@ function cms_input_textarea_media_browser(field_name, url, type, win){
 
 $(document).ready(function() {
 	
-	$(window).on('resize.cms', function(){
-		cms_input_textarea_resize();
-	});
-
 	cms_input_textarea_init();
 
-	cms_input_textarea_resize();
-	
 });
-
-
 
 

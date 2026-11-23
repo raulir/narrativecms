@@ -28,9 +28,6 @@ function cms_input_link_init($root){
 		
 }
 
-function cms_input_link_resize(){
-		
-}
 
 // if link input changes
 function cms_input_link_target($container){
@@ -111,16 +108,8 @@ function cms_input_link_update_list($select){
 
 $(document).ready(function() {
 	
-	$(window).on('resize.cms', function(){
-		cms_input_link_resize();
-	});
-
 	cms_input_link_init();
 
-	cms_input_link_resize();
-	
 });
-
-
 
 

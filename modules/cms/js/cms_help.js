@@ -27,21 +27,9 @@ function cms_help_init($root){
 
 }
 
-function cms_help_resize(){
-	
-}
-
-function cms_help_scroll(){
-	
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', cms_help_resize)
-	$(window).on('scroll.cms', cms_help_scroll)
-	
 	cms_help_init()
-	cms_help_resize()
-	cms_help_scroll()
 
 })

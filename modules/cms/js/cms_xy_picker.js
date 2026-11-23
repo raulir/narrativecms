@@ -67,18 +67,9 @@ function cms_xy_picker_pointer_update(){
 	$('.cms_xy_picker_pointer').css({'left':$('.cms_xy_picker_container').data('x') + '%', 'top':$('.cms_xy_picker_container').data('y') + '%', 'opacity':'1'})
 }
 
-function cms_xy_picker_resize(){
-
-}
 
 $(document).ready(function() {
 		
-	$(window).on('resize.cms', function(){
-		cms_xy_picker_resize();
-	});
-	
 	cms_xy_picker_init();
 	
-	cms_xy_picker_resize();
-
 });

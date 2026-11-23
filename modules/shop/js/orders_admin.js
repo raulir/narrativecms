@@ -105,13 +105,6 @@ function orders_admin_init(){
 
 }
 
-function orders_admin_resize(){
-
-}
-
-function orders_admin_scroll(){
-
-}
 
 $(document).ready(function(){
 	orders_admin_init()

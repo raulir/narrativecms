@@ -92,16 +92,25 @@ Some panels delegate to `$.fn.*` plugins (`cms_images_lazy`, `cms_images_hq`). T
 
 Panel files call `<panel>_init()` from `$(document).ready()` (or `$(() => ...)`). Re-init is triggered by repeaters, `cms_input_repeater_select_reinit`, or other CMS code calling the same init function again — safe because of `*_ok`.
 
-## Frontend resize / scroll
+## Resize / scroll
 
-Public site panel JS also exposes **`<panel>_resize`** and **`<panel>_scroll`**, even when the bodies are empty.
+Only a panel with layout work on window resize or scroll has **`<panel>_resize`** / **`<panel>_scroll`**, each with a body. A panel without such work has neither: no empty stubs, no bindings, no calls. Empty stubs were the rule until 2026-11-19 and were removed from every module then.
 
-On `$(document).ready()`:
+When a panel has one, on `$(document).ready()`:
 
-- bind `$(window).on('resize.cms', <panel>_resize)` and `$(window).on('scroll.cms', <panel>_scroll)`
-- call `<panel>_init()`, then `<panel>_resize()`, then `<panel>_scroll()` once
+- bind `$(window).off('resize.<file>').on('resize.<file>', <panel>_resize)` (and the same for `scroll`), `<file>` being the script's file name (`resize.cms_list`, `resize.cms_video`)
+- call `<panel>_init()`, then `<panel>_resize()` (and `<panel>_scroll()`) once
 
-Admin / CMS input field panels (`cms_input_*`) do not need these. Do not skip the stubs on frontend panels just because they are empty — they are the hook for later layout work and a consistent place to look.
+Nothing in the CMS calls these by name; a caller that does checks first (`typeof window[type + '_resize'] === 'function'` in the music engine).
+
+## A script that runs again in the same window
+
+A script can run more than once in one window. The music app installs a start page into the same window (footer Homepage, `app_install_html`), and its page scripts run again. A panel script loaded through `cms_inapp_load_scripts` also runs again when its panel comes back after that, because its `<script>` tag left with the old page. jQuery and jQuery UI do not run again: the app shell keeps the window's first jQuery (`app_script_loaded_library`). So whatever a script binds to `window` or `document`, or adds to a window list, must not add a second copy:
+
+- **`window` / `document` handlers:** `.off()` and `.on()` with the same namespace, the script's file name (`resize.cms_list`, `click.userheader`). A namespace shared by several files would let one file's `.off()` remove another's handler. `.off('resize', fn)` does not work here: the script defines a new `fn` each time it runs. `cms_loader.js` triggers plain `resize` after it loads a panel, which reaches every resize handler, as a real resize does.
+- **Native `addEventListener` on `window`, `document` or a media query:** add it once per window behind a `window` flag. Make the listener call the current function by name (`function(){ cms_mobile_update() }`), not a reference kept from the first run. The `rem` layout's inline script does this (`window._cms_mobile_bound`).
+- **`window.cms_position_link_after`:** push once per window behind a flag (`window.<file>_position_hook_ok`), with a hook that calls the current function by name (`cms_cache.js`, `units.js`, `beacon.js`).
+- **Check:** `ai/tmp/homepage_listeners_check.js` (music project) counts the native listeners, jQuery's handlers and the hooks around three Homepage taps.
 
 ## Exceptions
 

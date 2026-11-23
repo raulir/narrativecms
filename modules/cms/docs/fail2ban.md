@@ -127,3 +127,37 @@ fail2ban-client reload
 ```
 
 IPv6 cluster lines are not written (v1). Review UAs in this log and add stable bot strings to `analytics_is_bot_user_agent()` so those hits are skipped at record time and not firewall-banned.
+
+## Optional: user sign-in failures (`log/user_auth.log`)
+
+The user module (since 2026-11-20) writes one line per failed sign-in, wrong current password and refused limited request (login, reminder, resend, register), in the same format:
+
+```
+2026-11-20 17:03:12 [client 157.180.101.229] USER AUTH login_fail
+```
+
+The PHP side already limits these (user [`user_auth_overview.md`](../../user/docs/user_auth_overview.md) § Limits and sessions). A jail only adds a firewall ban for an address that keeps going. It is not enabled on the server; to add it:
+
+`/etc/fail2ban/filter.d/user-auth.conf`:
+
+```
+[Definition]
+failregex = \[client <HOST>\] USER AUTH (login_fail|login_limited|remind_limited|resend_limited|register_limited)
+ignoreregex =
+datepattern = ^%%Y-%%m-%%d %%H:%%M:%%S
+```
+
+`/etc/fail2ban/jail.d/user-auth.conf`:
+
+```
+[user-auth]
+enabled   = true
+filter    = user-auth
+logpath   = /var/www/html/scoretutor.com/log/user_auth.log
+banaction = firewallcmd-rich-allports
+maxretry  = 30
+findtime  = 1h
+bantime   = 4h
+```
+
+Several people behind one network address (a school) share the PHP limits, so keep `maxretry` well above them.

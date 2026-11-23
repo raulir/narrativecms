@@ -48,16 +48,9 @@ function currency_selector_init($root){
 
 }
 
-function currency_selector_resize(){
-}
-
-function currency_selector_scroll(){
-}
 
 $(document).ready(function(){
 
 	currency_selector_init()
-	$(window).on('resize.cms', currency_selector_resize)
-	$(window).on('scroll.cms', currency_selector_scroll)
 
 })

@@ -223,18 +223,9 @@ function cms_page_init($root){
 
 }
 
-function cms_page_resize(){
-	
-}
 
 $(document).ready(function() {
 	
-	$(window).on('resize.cms', function(){
-		cms_page_resize();
-	});
-
 	cms_page_init();
-
-	cms_page_resize();
 
 });

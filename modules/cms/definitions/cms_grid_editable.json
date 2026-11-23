@@ -1,3 +1,4 @@
 {
+	"access": "cms_base",
 	"ajax": {"input": ["cms", "item_id", "name", "value", "base_id", "ds"], "output": ["cms"]}
 }

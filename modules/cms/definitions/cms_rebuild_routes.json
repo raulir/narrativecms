@@ -1,3 +1,4 @@
 {
+	"access": "cms_base",
 	"ajax": {"output": ["cms","result"]}
 }

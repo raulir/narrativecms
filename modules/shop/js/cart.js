@@ -388,18 +388,9 @@ function cart_init($root){
 
 }
 
-function cart_resize(){
-}
-
-function cart_scroll(){
-}
 
 $(document).ready(function(){
 
-	$(window).on('resize.cms', cart_resize)
-	$(window).on('scroll.cms', cart_scroll)
 	cart_init()
-	cart_resize()
-	cart_scroll()
 
 })

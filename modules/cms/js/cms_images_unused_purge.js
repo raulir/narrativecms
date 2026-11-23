@@ -211,15 +211,9 @@ function cms_images_unused_purge_init($root){
 
 }
 
-function cms_images_unused_purge_resize(){
-
-}
 
 $(document).ready(function(){
 
-	$(window).on('resize.cms', cms_images_unused_purge_resize)
-
 	cms_images_unused_purge_init()
-	cms_images_unused_purge_resize()
 
 })

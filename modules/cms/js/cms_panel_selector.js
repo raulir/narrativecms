@@ -86,18 +86,9 @@ function cms_panel_selector_init_filter(show_all){
 	
 }
 
-function cms_panel_selector_resize(){
-
-}
 
 $(document).ready(function() {
 		
-	$(window).on('resize.cms', function(){
-		cms_panel_selector_resize();
-	});
-	
 	cms_panel_selector_init();
 	
-	cms_panel_selector_resize();
-
 });

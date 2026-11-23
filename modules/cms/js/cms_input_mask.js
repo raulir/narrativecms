@@ -140,21 +140,9 @@ function cms_input_mask_display($this){
 
 }
 
-function cms_input_mask_resize(){
-
-}
-
-function cms_input_mask_scroll(){
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', cms_input_mask_resize)
-	$(window).on('scroll.cms', cms_input_mask_scroll)
-
 	cms_input_mask_init()
-	cms_input_mask_resize()
-	cms_input_mask_scroll()
 
 })

@@ -26,18 +26,9 @@ function image_item_ids_init($root){
 
 }
 
-function image_item_ids_resize(){
-
-}
-
-function image_item_ids_scroll(){
-
-}
 
 $(document).ready(function(){
 
 	image_item_ids_init()
-	image_item_ids_resize()
-	image_item_ids_scroll()
 
 })

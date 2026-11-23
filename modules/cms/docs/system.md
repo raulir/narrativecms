@@ -61,6 +61,8 @@ App code uses `error_log_user($message)` (not raw `error_log()`). Call site is a
 
 Log file is `{dir.log}/error.log` (helpers `cms_path('log')`, `cms_error_log_path()`). 404 has no file (path + query only; `#fragment` is not sent to the server). Daily cron `cms/cms_log_rotate` splits on `] ` (timestamp prefix). The email keeps PHP/other CMS errors in the first table and lists `CMS 404` rows in a second section (**CMS 404 Page Not Found:**). 404 log lines include the visitor IP. Probe URIs insert `(probe)` between `Page Not Found` and the IP.
 
+PHP writes `error.log` only on the first logged error. `cms_log_rotate` therefore creates a missing log, folder too, and treats it as empty, so the daily "PHP errors OK" email still goes. Until 2026-11-19, a missing file stopped the job with no email at all: a quiet live site had never logged an error, so it sent nothing. When the log cannot be created or read, every run sends **PHP error log problem** with the path and the reason. Check: `ai/tmp/log_rotate_missing_check.php`.
+
 Every CMS 404 also appends `{dir.log}/cms_404_probe.log` (scanner paths) or `{dir.log}/cms_404.log` (other 404s) for fail2ban — see [`fail2ban.md`](fail2ban.md). Probe URIs get a plain-text 404 (no CMS `/not-found/` page). 404 / system error pages are not analytics pageviews.
 
 ### Directories (`dir`)

@@ -211,14 +211,14 @@ function analytics_dashboard_init() {
 		analytics_dashboard_open_detail($(this))
 	})
 
-	$(document).off('click.cms.analytics_dashboard_detail').on('click.cms.analytics_dashboard_detail', function(e) {
+	$(document).off('click.analytics_dashboard_detail').on('click.analytics_dashboard_detail', function(e) {
 		if ($(e.target).closest('.analytics_dashboard_detail_panel, .analytics_dashboard_details_button').length) {
 			return
 		}
 		analytics_dashboard_close_detail()
 	})
 
-	$(window).off('resize.cms.analytics_dashboard_detail').on('resize.cms.analytics_dashboard_detail', function() {
+	$(window).off('resize.analytics_dashboard_detail').on('resize.analytics_dashboard_detail', function() {
 		if (!analytics_dashboard_detail_open_id) {
 			return
 		}

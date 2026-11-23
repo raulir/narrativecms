@@ -79,21 +79,9 @@ function cms_input_colour_update($input){
 	
 }
 
-function cms_input_colour_resize(){
-	
-}
-
-function cms_input_colour_scroll(){
-	
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', cms_input_colour_resize)
-	$(window).on('scroll.cms', cms_input_colour_scroll)
-	
 	cms_input_colour_init()
-	cms_input_colour_resize()
-	cms_input_colour_scroll()
 
 })

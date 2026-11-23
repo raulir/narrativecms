@@ -107,17 +107,9 @@ function cms_popup_init($root){
 
 }
 
-function cms_popup_resize(){
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		cms_popup_resize()
-	})
-
 	cms_popup_init()
-	cms_popup_resize()
 
 })

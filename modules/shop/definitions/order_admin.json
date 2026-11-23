@@ -1,4 +1,5 @@
 {
+	"access": "shop_base",
 	"version": "2",
 	"label": "Order",
 	"description": "Admin order page",

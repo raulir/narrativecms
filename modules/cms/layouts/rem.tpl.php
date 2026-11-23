@@ -34,13 +34,17 @@ $rem_m_px = (int)($GLOBALS['config']['rem_m_px'] ?? 0);
 		_cms_mobile = _cms_mobile_query.matches
 		_cms_rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
 	}
-	if (_cms_mobile_query.addEventListener){
-		_cms_mobile_query.addEventListener('change', cms_mobile_update)
-	} else if (_cms_mobile_query.addListener){
-		_cms_mobile_query.addListener(cms_mobile_update)
+	if (!window._cms_mobile_bound){
+		window._cms_mobile_bound = 1
+		var cms_mobile_listener = function(){ cms_mobile_update() }
+		if (_cms_mobile_query.addEventListener){
+			_cms_mobile_query.addEventListener('change', cms_mobile_listener)
+		} else if (_cms_mobile_query.addListener){
+			_cms_mobile_query.addListener(cms_mobile_listener)
+		}
+		window.addEventListener('resize', cms_mobile_listener)
+		window.addEventListener('orientationchange', cms_mobile_listener)
 	}
-	window.addEventListener('resize', cms_mobile_update)
-	window.addEventListener('orientationchange', cms_mobile_update)
 </script>
 </head>
 

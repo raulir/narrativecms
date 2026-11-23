@@ -22,19 +22,8 @@ function form_grid_operations_init(){
 
 }
 
-function form_grid_operations_resize(){
-
-
-
-}
 
 $(document).ready(function() {
-	
-	$(window).on('resize.r', function(){
-		form_grid_operations_resize();
-	});
-
-	form_grid_operations_resize();
 	
 	form_grid_operations_init();
 	

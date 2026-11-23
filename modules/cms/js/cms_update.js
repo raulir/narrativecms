@@ -767,9 +767,6 @@ function cms_update_init($root){
 
 }
 
-function cms_update_resize(){
-
-}
 
 function cms_update_destroy($root){
 
@@ -783,12 +780,6 @@ function cms_update_destroy($root){
 
 $(document).ready(function(){
 
-	$(window).on('resize.cms', function(){
-		cms_update_resize()
-	})
-
 	cms_update_init()
-
-	cms_update_resize()
 
 })

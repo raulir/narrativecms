@@ -274,7 +274,6 @@ function cms_input_page_panels_init($root){
 			}
 			
 			
-			
 		} else if (cms_page_id && cms_page_id != 0){
 				
 			cms_input_page_panel_selector('page', cms_page_id)
@@ -392,18 +391,9 @@ function cms_input_page_panel_selector(target_type, target_id, target_name, filt
 	
 }
 
-function cms_input_page_panels_resize(){
-		
-}
 
 $(document).ready(function() {
 	
-	$(window).on('resize.cms', function(){
-		cms_input_page_panels_resize();
-	});
-
 	cms_input_page_panels_init();
 
-	cms_input_page_panels_resize();
-	
 });

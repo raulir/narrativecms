@@ -211,14 +211,25 @@ class cms_access_model extends \Model {
 
 	}
 
+	/** A CMS-side panel key (cms_base, analytics_base, …): needs a signed-in CMS user, never a site-user key. */
+	function _access_is_base($required){
+
+		return (bool)preg_match('/^[a-z0-9]+_base$/', trim((string)$required));
+
+	}
+
 	function get_cache_access_hash($panel_name){
-		
+
 		$required = $this->get_panel_required_access($panel_name);
-		
+
 		if ($required === ''){
 			return '';
 		}
-		
+
+		if ($this->_access_is_base($required)){
+			return $this->cms_user_has_access() ? 'cms' : 'guest';
+		}
+
 		$keys = $this->get_session_access_keys();
 		
 		if (empty($keys)){
@@ -576,6 +587,7 @@ class cms_access_model extends \Model {
 	/**
 	 * Panel access decision: allow | login | skip
 	 * - No required key → allow
+	 * - <module>_base (CMS-side panel) → allow for a signed-in CMS user, otherwise skip
 	 * - Has key → allow
 	 * - Denied without user module → always skip
 	 * - Denied with user module → login (default) or skip per access_blocked
@@ -587,6 +599,10 @@ class cms_access_model extends \Model {
 
 		if ($required === ''){
 			return 'allow';
+		}
+
+		if ($this->_access_is_base($required)){
+			return $this->cms_user_has_access() ? 'allow' : 'skip';
 		}
 
 		if ($this->user_has_access($required, $user_keys)){

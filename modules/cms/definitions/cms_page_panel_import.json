@@ -1,4 +1,5 @@
 {
+	"access": "cms_base",
 	"item": [],
 	"ajax": {"output": ["cms","ok","message","files","images","panels","time","new_images_count","new_images_size","blocks","list_label","token","view"]}
 }

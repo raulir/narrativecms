@@ -58,7 +58,7 @@ Dynamic XML sitemap from visible `cms_route` rows (`status = 0`). No static XML 
 | File cache | `cache/sitemap.xml` — **TTL 300s** (or until invalidate) |
 | HTTP cache | `Cache-Control: public, max-age=300` |
 | Invalidate (not rebuild) | Slug insert / delete / status / rename calls `invalidate_sitemap_cache()` (unlink cache file only). Next `/sitemap.xml` or `/cms/sitemap` rebuilds. |
-| robots.txt | On each **sitemap cache rebuild** (API only), `ensure_robots_txt()` checks/fixes the `Sitemap:` line. Custom crawl rules kept; missing file gets default Allow-all. |
+| robots.txt | On each **sitemap cache rebuild** (API only), `ensure_robots_txt()` checks/fixes the `Sitemap:` line. Custom crawl rules kept; missing file gets default Allow-all. A file with no `User-agent:` line (for example only a `Sitemap:` line) gets the default `User-agent: *` / `Allow: /` group in front; the music app's reachability probe reads that line. The file is written only when something changed. |
 
 Do **not** call build/regenerate from panels or product sync. Route writes only drop the cache; crawlers trigger rebuild via the fake XML / API path.
 

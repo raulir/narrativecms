@@ -143,28 +143,9 @@ function cms_user_settings_user_delete($this, after){
 
 }
 
-function cms_user_settings_resize(){
-	
-}
-
-function cms_user_settings_scroll(){
-	
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		cms_user_settings_resize();
-	});
-	
-	$(window).on('scroll.cms', function(){
-		cms_user_settings_scroll();
-	});
-	
 	cms_user_settings_init();
-
-	cms_user_settings_resize();
-	
-	cms_user_settings_scroll();
 
 });

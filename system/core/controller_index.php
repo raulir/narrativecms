@@ -127,7 +127,8 @@ class Index extends Controller {
     	
     	$page_config = [];
     	
-    	$get_params = is_array($_GET) ? $_GET : [];
+    	// Leading-underscore keys are internal (_access_ok …), never from a link
+    	$get_params = $this->_request_drop_internal_keys(is_array($_GET) ? $_GET : []);
     	// cms_do / do: an action starts only from a POST, never from a link
     	$bad_params = ['module', 'cms_page_panel_id', 'show', 'panel_name', 'cms_do', 'do', ];
     	foreach($bad_params as $bad_param){

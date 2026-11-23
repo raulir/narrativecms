@@ -21,18 +21,9 @@ function cms_input_list_link_init($root){
 
 }
 
-function cms_input_list_link_resize(){
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		cms_input_list_link_resize()
-	})
-
 	cms_input_list_link_init()
-
-	cms_input_list_link_resize()
 
 });

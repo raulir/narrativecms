@@ -1,4 +1,5 @@
 {
+	"access": "shop_base",
 	"label": "Orders (rows)",
 	"description": "Admin orders table rows; embedded in shop/orders_admin and loaded by ajax for filters, search and more rows",
 	"item": [],

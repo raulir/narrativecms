@@ -36,24 +36,9 @@ function popup_init(){
 
 }
 
-function popup_resize(){
-	
-}
-
-function popup_scroll(){
-	
-}
 
 $(document).ready(function() {
 	
-	$(window).on('resize.cms', popup_resize);
-
-	$(window).on('scroll.cms', popup_scroll);
-
 	popup_init();
-	
-	popup_resize();
-	
-	popup_scroll();
 	
 });

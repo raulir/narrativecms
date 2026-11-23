@@ -30,28 +30,9 @@ function cms_page_panel_button_delete_init($root){
 
 }
 
-function cms_page_panel_button_delete_resize(){
-		
-}
-
-function cms_page_panel_button_delete_scroll(){
-	
-}
 
 $(document).ready(function() {
 	
-	$(window).on('resize.cms', function(){
-		cms_page_panel_button_delete_resize();
-	});
-
-	$(window).on('scroll.cms', function(){
-		cms_page_panel_button_delete_scroll();
-	});
-	
 	cms_page_panel_button_delete_init();
 
-	cms_page_panel_button_delete_resize();
-	
-	cms_page_panel_button_delete_scroll();
-	
 });

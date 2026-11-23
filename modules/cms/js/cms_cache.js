@@ -38,28 +38,14 @@ function cms_cache_init($root) {
 		}
 		window.cms_position_link_after.push(function() {
 			cms_cache_init()
-			cms_cache_resize()
-			cms_cache_scroll()
 		})
 	}
 
 }
 
-function cms_cache_resize() {
-
-}
-
-function cms_cache_scroll() {
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', cms_cache_resize)
-	$(window).on('scroll.cms', cms_cache_scroll)
-
 	cms_cache_init()
-	cms_cache_resize()
-	cms_cache_scroll()
 
 })

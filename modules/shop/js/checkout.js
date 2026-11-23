@@ -125,13 +125,6 @@ function shop_checkout_init(){
 
 }
 
-function shop_checkout_resize(){
-
-}
-
-function shop_checkout_scroll(){
-
-}
 
 function shop_checkout_payment_check(){
 	
@@ -181,10 +174,6 @@ function shop_checkout_payment_check(){
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', shop_checkout_resize)
-	$(window).on('scroll.cms', shop_checkout_scroll)
 	shop_checkout_init()
-	shop_checkout_resize()
-	shop_checkout_scroll()
 
 })

@@ -1,4 +1,5 @@
 {
+	"access": "shop_base",
 	"version": "3",
 	"label": "Orders",
 	"description": "Admin orders page (admin/orders/): toolbar and table. Rows: shop/orders_admin_rows",

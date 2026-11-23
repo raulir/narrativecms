@@ -161,19 +161,9 @@ function products_reload($el){
 
 }
 
-function products_resize(){
-}
-
-function products_scroll(){
-}
 
 $(document).ready(function(){
 
 	products_init()
-	products_resize()
-	products_scroll()
-
-	$(window).on('resize.cms', products_resize)
-	$(window).on('scroll.cms', products_scroll)
 
 })

@@ -1003,7 +1003,7 @@ class Controller {
 			return [];
 		}
 
-		$get = is_array($_GET) ? $_GET : [];
+		$get = $this->_request_drop_internal_keys(is_array($_GET) ? $_GET : []);
 		// Same list as controller_index; cms_do / do: an action starts only from a POST
 		foreach (['module', 'cms_page_panel_id', 'show', 'panel_name', 'cms_do', 'do'] as $bad){
 			unset($get[$bad]);

@@ -18,9 +18,6 @@ function cms_image_open(filename){
 		if (typeof cms_image_resize === 'function'){
 			cms_image_resize()
 		}
-		if (typeof cms_image_scroll === 'function'){
-			cms_image_scroll()
-		}
 	})
 
 }

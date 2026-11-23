@@ -26,28 +26,9 @@ function cms_language_select_init($root){
 
 }
 
-function cms_language_select_resize(){
-
-}
-
-function cms_language_select_scroll(){
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		cms_language_select_resize();
-	});
-
-	$(window).on('scroll.cms', function(){
-		cms_language_select_scroll();
-	});
-
 	cms_language_select_init();
-
-	cms_language_select_resize();
-
-	cms_language_select_scroll();
 
 });

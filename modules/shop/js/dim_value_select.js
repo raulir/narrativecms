@@ -18,21 +18,9 @@ function dim_value_select_init(){
 
 }
 
-function dim_value_select_resize(){
-
-}
-
-function dim_value_select_scroll(){
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', dim_value_select_resize)
-	$(window).on('scroll.cms', dim_value_select_scroll)
-
 	dim_value_select_init()
-	dim_value_select_resize()
-	dim_value_select_scroll()
 
 })

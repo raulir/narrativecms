@@ -1,4 +1,5 @@
 {
+	"access": "xai_base",
 	"label": "xAI",
 	"description": "xAI Grok API provider settings",
 	"item": [],

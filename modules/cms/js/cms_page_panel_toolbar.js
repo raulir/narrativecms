@@ -8,9 +8,6 @@ function cms_page_panel_toolbar_init($root){
 
 }
 
-function cms_page_panel_toolbar_resize(){
-	
-}
 
 function cms_page_panel_toolbar_scroll(){
 	
@@ -24,13 +21,10 @@ function cms_page_panel_toolbar_scroll(){
 
 $(function() {
 
-	$(window).on('resize.cms', cms_page_panel_toolbar_resize);
-	
-	$(window).on('scroll.cms', cms_page_panel_toolbar_scroll);
+	$(window).off('scroll.cms_page_panel_toolbar').on('scroll.cms_page_panel_toolbar', cms_page_panel_toolbar_scroll);
 	
 	cms_page_panel_toolbar_init();
 
-	cms_page_panel_toolbar_resize();
 	
 	cms_page_panel_toolbar_scroll();
 

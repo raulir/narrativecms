@@ -1,3 +1,4 @@
 {
+	"access": "cms_base",
 	"ajax": {"input": ["cms", "block_panel", "section", "name", "repeater_key", "base_id"], "output": ["cms"]}
 }

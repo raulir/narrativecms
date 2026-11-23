@@ -32,28 +32,9 @@ function cms_page_panel_button_caching_init($root){
 
 }
 
-function cms_page_panel_button_caching_resize(){
-		
-}
-
-function cms_page_panel_button_caching_scroll(){
-	
-}
 
 $(document).ready(function() {
 	
-	$(window).on('resize.cms', function(){
-		cms_page_panel_button_caching_resize();
-	});
-
-	$(window).on('scroll.cms', function(){
-		cms_page_panel_button_caching_scroll();
-	});
-	
 	cms_page_panel_button_caching_init();
 
-	cms_page_panel_button_caching_resize();
-	
-	cms_page_panel_button_caching_scroll();
-	
 });

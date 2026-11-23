@@ -186,18 +186,9 @@ function product_init(){
 
 }
 
-function product_resize(){
-
-}
-
-function product_scroll(){
-
-}
 
 $(document).ready(function(){
 
 	product_init()
-	product_resize()
-	product_scroll()
 
 })

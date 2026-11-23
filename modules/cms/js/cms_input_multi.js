@@ -98,28 +98,9 @@ function cms_input_multi_item_init($input){
 
 }
 
-function cms_input_multi_resize(){
-
-}
-
-function cms_input_multi_scroll(){
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		cms_input_multi_resize();
-	});
-
-	$(window).on('scroll.cms', function(){
-		cms_input_multi_scroll();
-	});
-
 	cms_input_multi_init();
-
-	cms_input_multi_resize();
-
-	cms_input_multi_scroll();
 
 });

@@ -344,7 +344,7 @@ $(document).ready(function(){
 
 	cms_preview_init()
 
-	$(window).on('resize.cms_preview', function(){
+	$(window).off('resize.cms_preview').on('resize.cms_preview', function(){
 		cms_preview_resize()
 	})
 

@@ -28,28 +28,9 @@ function cms_input_text_init($root){
 
 }
 
-function cms_input_text_resize(){
-	
-}
-
-function cms_input_text_scroll(){
-	
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		cms_input_text_resize();
-	});
-	
-	$(window).on('scroll.cms', function(){
-		cms_input_text_scroll();
-	});
-	
 	cms_input_text_init();
-
-	cms_input_text_resize();
-	
-	cms_input_text_scroll();
 
 });

@@ -409,9 +409,6 @@ function cms_position_link_init($root){
 
 }
 
-function cms_position_link_resize(){
-
-}
 
 function cms_position_on_popstate() {
 
@@ -438,13 +435,9 @@ $(document).ready(function() {
 
 	cms_position_last_url = window.location.href
 
-	$(window).on('resize.cms', function(){
-		cms_position_link_resize()
-	})
 
 	$(window).off('popstate.cms_position').on('popstate.cms_position', cms_position_on_popstate)
 
 	cms_position_link_init()
-	cms_position_link_resize()
 
 })

@@ -62,28 +62,9 @@ function cms_input_date_init($root){
 
 }
 
-function cms_input_date_resize(){
-
-}
-
-function cms_input_date_scroll(){
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		cms_input_date_resize();
-	});
-
-	$(window).on('scroll.cms', function(){
-		cms_input_date_scroll();
-	});
-
 	cms_input_date_init();
-
-	cms_input_date_resize();
-
-	cms_input_date_scroll();
 
 });

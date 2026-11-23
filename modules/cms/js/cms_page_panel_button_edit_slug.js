@@ -162,21 +162,9 @@ function cms_page_panel_button_edit_slug_init($root){
 
 }
 
-function cms_page_panel_button_edit_slug_resize(){
-
-}
-
-function cms_page_panel_button_edit_slug_scroll(){
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', cms_page_panel_button_edit_slug_resize)
-	$(window).on('scroll.cms', cms_page_panel_button_edit_slug_scroll)
-
 	cms_page_panel_button_edit_slug_init()
-	cms_page_panel_button_edit_slug_resize()
-	cms_page_panel_button_edit_slug_scroll()
 
 })

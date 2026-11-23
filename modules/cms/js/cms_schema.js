@@ -158,19 +158,8 @@ function cms_schema_init($root) {
 
 }
 
-function cms_schema_resize() {
-	
-}
-
-function cms_schema_scroll() {
-	
-}
 
 $(document).ready(function() {
-	$(window).on('resize.cms', cms_schema_resize)
-	$(window).on('scroll.cms', cms_schema_scroll)
 	
 	cms_schema_init()
-	cms_schema_resize()
-	cms_schema_scroll()
 })

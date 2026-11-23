@@ -23,18 +23,9 @@ function item_yes_no_init(){
 
 }
 
-function item_yes_no_resize(){
-
-}
-
-function item_yes_no_scroll(){
-
-}
 
 $(document).ready(function(){
 
 	item_yes_no_init()
-	item_yes_no_resize()
-	item_yes_no_scroll()
 
 })

@@ -1052,7 +1052,6 @@ function cms_image_init($root){
 
 	if ($containers.filter('.cms_image_ok').length){
 		$(window).off('resize.cms_image').on('resize.cms_image', cms_image_resize)
-		$(window).off('scroll.cms_image').on('scroll.cms_image', cms_image_scroll)
 	}
 
 }
@@ -1129,9 +1128,6 @@ function cms_image_resize(){
 
 }
 
-function cms_image_scroll(){
-
-}
 
 $(document).ready(function() {
 
@@ -1139,7 +1135,6 @@ $(document).ready(function() {
 
 	if ($('.cms_image_container').length){
 		cms_image_resize()
-		cms_image_scroll()
 	}
 
 })

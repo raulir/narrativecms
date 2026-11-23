@@ -71,10 +71,10 @@ function _cms_load_panel(anchor, target, panel_params){
 				$(target).html(data.result.html)
 			}
 			setTimeout(() => {
-				$(window).trigger('resize.cms')
+				$(window).trigger('resize')
 				$(target).get(0).removeAttribute('style')
 				setTimeout(() => {
-					$(window).trigger('resize.cms')
+					$(window).trigger('resize')
 				}, 500)
 			}, 150)
 			

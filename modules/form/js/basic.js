@@ -278,17 +278,8 @@ function form_basic_file_transfer(data, success, $info){
 	
 }
 
-function form_basic_resize(){
-
-}
 
 $(document).ready(function() {
-	
-	$(window).on('resize.r', function(){
-		form_basic_resize();
-	});
-
-	form_basic_resize();
 	
 	form_basic_init();
 	

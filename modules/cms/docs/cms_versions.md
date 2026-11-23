@@ -60,6 +60,6 @@ Every image, video and CMS file of the panel and its children is copied, except 
 | [`cms_page_panel.php`](../panels/cms_page_panel.php) | the save hook (`_version_stage`) |
 | [`cms_page_panel_versions.php`](../panels/cms_page_panel_versions.php), [`cms_page_panel_button_versions.js`](../js/cms_page_panel_button_versions.js) | popup actions `cms_page_panel_versions_list` / `_compare` / `_restore` (`version_panel_id`, `version_file`) |
 
-Checks (local): `grok/tmp/cms_versions_check.js` (editor saves, popups, restore, limits, off), `grok/tmp/cms_versions_max.php` (0 / 25 limits), `grok/tmp/cms_import_new_check.js` (Import As new after the `apply_zip` split).
+Checks (local): `ai/tmp/cms_versions_check.js` (editor saves, popups, restore, limits, off), `ai/tmp/cms_versions_max.php` (0 / 25 limits), `ai/tmp/cms_import_new_check.js` (Import As new after the `apply_zip` split).
 
 Not checked on a real site: children (no definition on the dev site has a `cms_page_panels` field), and a video over 2 MB.

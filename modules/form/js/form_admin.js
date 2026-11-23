@@ -8,17 +8,9 @@ function admin_form_init(){
 
 }
 
-function admin_form_resize(){
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.r', function(){
-		admin_form_resize();
-	});
-
 	admin_form_init();
-	admin_form_resize();
 
 });

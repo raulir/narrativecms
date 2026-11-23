@@ -148,28 +148,9 @@ function cms_input_datetime_init($root){
 
 }
 
-function cms_input_datetime_resize(){
-
-}
-
-function cms_input_datetime_scroll(){
-
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		cms_input_datetime_resize();
-	});
-
-	$(window).on('scroll.cms', function(){
-		cms_input_datetime_scroll();
-	});
-
 	cms_input_datetime_init();
-
-	cms_input_datetime_resize();
-
-	cms_input_datetime_scroll();
 
 });
