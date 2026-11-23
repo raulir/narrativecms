@@ -53,6 +53,17 @@
 		{
 			"id": "payment_choice",
 			"name": "Payment choice"
+		},
+		{
+			"id": "subscription_billing",
+			"name": "Google Play subscription billing"
+		}
+	],
+	"provides": [
+		{
+			"service": "subscription_billing",
+			"panel": "//subscription_billing",
+			"label": "Google Play subscription billing"
 		}
 	],
 	"extends": [

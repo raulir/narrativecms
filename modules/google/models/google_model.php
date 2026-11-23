@@ -44,6 +44,28 @@ class google_model extends \Model {
 			return false;
 		}
 
+		// Checked on the way in: the token and the Play id are reported to Google with the sale, the plan with them
+		$play_product_id = trim((string)$play_product_id);
+		$product_id = (int)$product_id;
+		$refused = '';
+		if (!$this->play_token_ok($token)){
+			$refused = 'a malformed token';
+		} else if ($play_product_id !== ''){
+			if (!$this->play_id_ok($play_product_id) || $this->play_product_for($play_product_id) !== $product_id){
+				$refused = 'plan '.$product_id.' that does not match Play product "'.substr($play_product_id, 0, 160).'"';
+			}
+		} else {
+			$this->load->model('cms/cms_page_panel_model');
+			$product = $product_id > 0 ? $this->cms_page_panel_model->get_cms_page_panel($product_id) : [];
+			if (!is_array($product) || ($product['panel_name'] ?? '') !== 'shop/product'){
+				$refused = 'plan '.$product_id.' that is not a shop product';
+			}
+		}
+		if ($refused !== ''){
+			error_log_user('google save_transaction: refused '.$refused.' for user '.$user_id);
+			return false;
+		}
+
 		$this->load->model('user/user_model');
 		$current = $this->transaction_for_user($user_id);
 		if (!empty($current['active'])){
@@ -170,6 +192,18 @@ class google_model extends \Model {
 		$purchase_token = trim((string)$purchase_token);
 		if ($user_id < 1 || $purchase_token === ''){
 			return ['ok' => 0, 'error' => 'Missing purchase'];
+		}
+		if (!$this->play_token_ok($purchase_token)){
+			error_log_user('google confirm_purchase: refused a malformed purchase token for user '.$user_id);
+			return ['ok' => 0, 'error' => 'Bad purchase token'];
+		}
+		// A posted plan must be the one whose price row has this Play product; Google then confirms the product
+		if ((int)$product_id > 0){
+			$play_id = trim((string)$play_product_id);
+			if (!$this->play_id_ok($play_id) || $this->play_product_for($play_id) !== (int)$product_id){
+				error_log_user('google confirm_purchase: plan '.(int)$product_id.' does not match Play product "'.substr($play_id, 0, 160).'" for user '.$user_id);
+				return ['ok' => 0, 'error' => 'This Play purchase is for a different plan'];
+			}
 		}
 
 		$remote = $this->fetch_subscription($purchase_token);
@@ -352,53 +386,82 @@ class google_model extends \Model {
 
 	}
 
-	function notification_is_from_play(){
+	/**
+	 * Whether the push request carries a Google-signed token for our audience from our push service account.
+	 * Returns '' when it does, else the reason (not_configured, no_token, tokeninfo, audience, issuer, email, expired).
+	 * The sender email is required: any Google account can sign an id token for any audience.
+	 */
+	function notification_refusal(){
 
-		$audience = trim((string)($this->get_settings()['notify_audience'] ?? ''));
-		if ($audience === ''){
-			return false;
+		$settings = $this->get_settings();
+		$audience = trim((string)($settings['notify_audience'] ?? ''));
+		$sender = strtolower(trim((string)($settings['notify_email'] ?? '')));
+		if ($audience === '' || $sender === ''){
+			return 'not_configured';
 		}
 		$token = $this->bearer_token();
 		if ($token === ''){
-			return false;
+			return 'no_token';
 		}
 
 		$url = 'https://oauth2.googleapis.com/tokeninfo?id_token='.rawurlencode($token);
 		$raw = @file_get_contents($url);
 		$claims = json_decode((string)$raw, true);
 		if (!is_array($claims) || !empty($claims['error'])){
-			return false;
+			return 'tokeninfo';
 		}
 		if (($claims['aud'] ?? '') !== $audience){
-			return false;
+			return 'audience';
 		}
 		$iss = (string)($claims['iss'] ?? '');
 		if ($iss !== 'accounts.google.com' && $iss !== 'https://accounts.google.com'){
-			return false;
+			return 'issuer';
 		}
-		if (empty($claims['email_verified']) || $claims['email_verified'] === 'false'){
-			return false;
+		if (empty($claims['email_verified']) || $claims['email_verified'] === 'false'
+				|| strtolower(trim((string)($claims['email'] ?? ''))) !== $sender){
+			return 'email';
 		}
-		$exp = (int)($claims['exp'] ?? 0);
-		return $exp > time();
+		if ((int)($claims['exp'] ?? 0) <= time()){
+			return 'expired';
+		}
+		return '';
 
 	}
 
+	function notification_is_from_play(){
+
+		return $this->notification_refusal() === '';
+
+	}
+
+	/**
+	 * A Play notification. The answer's 'status' is the HTTP status for google/notify: 403 for a request that is
+	 * not from our push subscription (logged, at most once in 10 minutes), 500 when Play could not be read or the
+	 * change not saved (Pub/Sub then retries), 200 otherwise. The purchase is read from Google again.
+	 */
 	function handle_notification($body){
 
-		if (!$this->notification_is_from_play()){
-			return ['ok' => 1, 'ignored' => 1];
+		$refusal = $this->notification_refusal();
+		if ($refusal !== ''){
+			$this->log_limited('notify_refused', 'Play notification refused: '.$refusal);
+			return ['ok' => 0, 'error' => 'Not from Play', 'status' => 403];
 		}
 
 		$notice = $this->notification_payload($body);
 		$token = trim((string)($notice['purchaseToken'] ?? ''));
 		if ($token === ''){
+			// A test notification or another kind (one-time products): nothing to read
+			return ['ok' => 1, 'ignored' => 1];
+		}
+		if (!$this->play_token_ok($token)){
+			$this->log('Play notification with a malformed purchase token');
 			return ['ok' => 1, 'ignored' => 1];
 		}
 
 		$remote = $this->fetch_subscription($token);
 		if (empty($remote['ok'])){
-			return $remote;
+			$this->log('Play notification: the purchase could not be read, Pub/Sub retries');
+			return array_merge($remote, ['status' => 500]);
 		}
 
 		$user_id = (int)($remote['user_id'] ?? 0);
@@ -424,7 +487,11 @@ class google_model extends \Model {
 				trim((string)($play['google_package_id'] ?? $remote['play_product_id'] ?? '')),
 				$make_current
 		);
-		if (!empty($result['ok']) && $make_current){
+		if (empty($result['ok'])){
+			$this->log('Play notification: user '.$user_id.' not updated, Pub/Sub retries');
+			return array_merge($result, ['status' => 500]);
+		}
+		if ($make_current){
 			$this->acknowledge($token, $remote);
 		}
 		return $result;
@@ -545,6 +612,39 @@ class google_model extends \Model {
 		}
 
 		return [];
+
+	}
+
+	/** A Play token (purchase or external transaction) as Google issues it: visible ASCII, at most 1,000 characters. */
+	function play_token_ok($token){
+
+		return (bool)preg_match('/^[\x21-\x7e]{1,1000}$/', (string)$token);
+
+	}
+
+	/** A Play id as the price rows hold it: product, or product,plan. */
+	function play_id_ok($value){
+
+		return (bool)preg_match('/^[A-Za-z0-9._-]{1,150}(,[A-Za-z0-9._-]{1,150})?$/', (string)$value);
+
+	}
+
+	/**
+	 * The shop product whose price row has this Play id: the full value first, then its product part
+	 * (as a purchase sent again is matched). 0 when no product uses it.
+	 */
+	function play_product_for($play_product_id){
+
+		$play_product_id = trim((string)$play_product_id);
+		list($product) = $this->play_id_parts($play_product_id);
+		foreach (array_unique([$play_product_id, $product]) as $key){
+			$match = $this->match_play_product($key);
+			if (!empty($match['product_id'])){
+				return (int)$match['product_id'];
+			}
+		}
+
+		return 0;
 
 	}
 
@@ -914,6 +1014,12 @@ class google_model extends \Model {
 		if ($allow_empty && $status >= 200 && $status < 300 && !is_array($data)){
 			return ['ok' => 1, 'data' => []];
 		}
+		if ($status === 401){
+			// The kept access token was refused (revoked or rotated key): the next call gets a new one
+			if (is_file(cms_path('tmp').'google_play_token.json')){
+				unlink(cms_path('tmp').'google_play_token.json');
+			}
+		}
 		if ($status < 200 || $status >= 300 || !is_array($data)){
 			$this->log('Play '.$method.' '.$status);
 			return ['ok' => 0, 'error' => 'Google Play request failed'];
@@ -922,6 +1028,10 @@ class google_model extends \Model {
 
 	}
 
+	/**
+	 * The Play API access token. Google's tokens last an hour; one is kept in tmp/ for 55 minutes (keyed by
+	 * the service account), so a Play call doesn't cost an OAuth round trip each time.
+	 */
 	function access_token(){
 
 		$file = trim((string)($this->get_settings()['service_account_file'] ?? ''));
@@ -932,6 +1042,28 @@ class google_model extends \Model {
 		if (!is_array($json) || empty($json['client_email']) || empty($json['private_key'])){
 			return '';
 		}
+
+		$cache_file = cms_path('tmp').'google_play_token.json';
+		$cached = is_file($cache_file) ? json_decode((string)file_get_contents($cache_file), true) : null;
+		if (is_array($cached) && ($cached['account'] ?? '') === $json['client_email']
+				&& (int)($cached['until'] ?? 0) > time() && !empty($cached['token'])){
+			return (string)$cached['token'];
+		}
+
+		$token = $this->fetch_access_token($json);
+		if ($token !== ''){
+			@file_put_contents($cache_file, json_encode([
+					'account' => $json['client_email'],
+					'token' => $token,
+					'until' => time() + 3300,
+			]), LOCK_EX);
+			@chmod($cache_file, 0600);
+		}
+		return $token;
+
+	}
+
+	function fetch_access_token($json){
 
 		$now = time();
 		$header = $this->base64url(json_encode(['alg' => 'RS256', 'typ' => 'JWT']));
@@ -995,6 +1127,18 @@ class google_model extends \Model {
 	function log($message){
 
 		error_log('google: '.$message);
+
+	}
+
+	/** log(), at most once in $seconds per $kind (a flood of refused requests writes one line). */
+	function log_limited($kind, $message, $seconds = 600){
+
+		$file = cms_path('tmp').'google_log_'.preg_replace('/[^a-z0-9_]/', '', (string)$kind);
+		if (is_file($file) && (time() - (int)@filemtime($file)) < $seconds){
+			return;
+		}
+		@touch($file);
+		$this->log($message);
 
 	}
 

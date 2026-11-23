@@ -10,7 +10,14 @@ Then set **Google Play settings**:
 
 - Package name `com.scoretutor.app`
 - Service account JSON file path (Play Console API access). The file stays off the site.
-- Notification audience: the exact push URL Play’s Pub/Sub subscription uses. Empty means `{base}google/notify/` ignores every call. A call is handled only when its Google-signed bearer token names that audience.
+- Notification audience: the exact push URL Play’s Pub/Sub subscription uses. Empty means `{base}google/notify/` refuses every call. A call is handled only when its Google-signed bearer token names that audience.
+- Notification sender (`notify_email`, since 2026-11-20): the service account the Pub/Sub push subscription authenticates as. Its token's `email` must be this. Any Google account can sign a token for any audience, so the audience alone proves nothing. Empty refuses every call: **set it before Play notifications go live.**
+
+### Play notifications (`google/notify`)
+
+- **Answers:** 403 when the request is not from our push subscription (`google_model::notification_refusal()`: not_configured, no_token, tokeninfo, audience, issuer, email, expired; logged at most once in 10 minutes, `log_limited`), 500 when the purchase can't be read from Play or the user can't be updated (Pub/Sub then retries), 200 otherwise, including a test notification without a purchase token. Until 2026-11-20 every answer was 200, so a failed Play read was never retried, and a refused request left no log line.
+- **Access token:** Play's OAuth token is kept in `tmp/google_play_token.json` for 55 minutes (keyed by the service account) and dropped when Play answers 401, instead of one OAuth round trip per Play call.
+- **Check:** `ai/tmp/play_recover_check.php` (cases 11–14).
 
 ## Play subscription
 
@@ -61,6 +68,8 @@ Google refunds a purchase that is not acknowledged within 3 days. The app's conf
 - **The Play notification:** an active purchase becomes the user's current subscription when Play already bills this user, or when no Stripe subscription is current. The plan is found from Play's product and base plan (`match_play_product`) when the confirm never brought it.
 - **The app resends it:** when the plans page or My subscription opens in the Android app, `payment_choice.js` asks the app for this Google account's purchases (`AppSplash.queryPlayPurchases` → `app_play_purchases`). Each one that is bought but not acknowledged goes to `google/purchase` with Play's product only; the server finds the plan. When that changes the subscription, "Payment received" shows and My subscription opens.
 - **My subscription** (`sync_user`) also acknowledges a granted purchase that is still unacknowledged.
+
+**The plan comes from Google's product.** A confirm that names a plan (`product_id`) must name the one whose price row has the posted Play id (`google_model::play_product_for()`: the full `product,plan` value, then the product part). Otherwise it is refused with "This Play purchase is for a different plan" before Google is asked, and Google's answer must then show that same Play product. The purchase token is 1–1,000 visible ASCII characters and the Play id is `product` or `product,plan` (`play_token_ok()`, `play_id_ok()`). The external-transaction save (`google/transaction`, `save_transaction()`) checks the same: with a Play id, its plan must match it; without one, the plan must be a `shop/product`. Each refusal writes one error-log line without the token. Until 2026-11-20 a posted plan was kept as sent, so a monthly buyer could store the yearly plan.
 
 A Play purchase made while a Stripe subscription is current is not taken (the notification keeps it aside, and a resend is refused with "Another subscription is current"). It stays unacknowledged, and Google refunds it. A failed acknowledge is logged and tried again by the next confirm, notification or sync.
 

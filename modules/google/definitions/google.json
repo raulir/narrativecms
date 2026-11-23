@@ -1,4 +1,5 @@
 {
+	"access": "google_base",
 	"label": "Google Play",
 	"description": "Play Billing for the Android app. The website checkout provider stays Stripe.",
 	"item": [],
@@ -23,6 +24,13 @@
 			"label": "Notification audience",
 			"default": "",
 			"help": "Exact https address configured as the Pub/Sub push audience for google/notify. Empty ignores every notification."
+		},
+		{
+			"name": "notify_email",
+			"type": "text",
+			"label": "Notification sender",
+			"default": "",
+			"help": "The service account the Pub/Sub push subscription authenticates as (its email, e.g. play-notify@project.iam.gserviceaccount.com). Any Google account can sign a token for any audience, so a notification from another account is refused. Empty refuses every notification."
 		},
 		{
 			"type": "subtitle",

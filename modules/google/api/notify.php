@@ -23,5 +23,9 @@ $ci = new Controller();
 $ci->load->model('google/google_model');
 $result = $ci->google_model->handle_notification(is_array($body) ? $body : []);
 
+// 403: not from our push subscription. 500: Play not read or not saved, so Pub/Sub retries. Else 200.
+$status = (int)($result['status'] ?? 200);
+unset($result['status']);
+http_response_code($status >= 400 ? $status : 200);
 print(json_encode($result));
 exit();

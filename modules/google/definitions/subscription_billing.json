@@ -1,0 +1,8 @@
+{
+	"access": "google_base",
+	"ajax": {"input": ["cms"], "output": ["cms", "ok"]},
+	"label": "Google Play subscription billing",
+	"description": "Provider of subscription_billing: the subscription module's sync, renewal, payment and plan calls (run_action only)",
+	"item": [],
+	"settings": []
+}
