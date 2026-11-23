@@ -76,28 +76,9 @@ function language_clear_cookies(){
 
 }
 
-function language_resize(){
-
-}
-
-function language_scroll(){
-	
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		language_resize();
-	});
-	
-	$(window).on('scroll.cms', function(){
-		language_scroll();
-	});
-	
 	language_init();
-
-	language_resize();
-	
-	language_scroll();
 
 });

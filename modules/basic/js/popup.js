@@ -28,9 +28,6 @@ function basic_popup_init(){
 
 }
 
-function basic_popup_resize(){
-
-}
 
 function basic_popup_run(popup_id, wrapper_class = false){
 	
@@ -78,12 +75,6 @@ function basic_popup_run(popup_id, wrapper_class = false){
 
 $(document).ready(function() {
 	
-	$(window).on('resize.cms', function(){
-		basic_popup_resize();
-	});
-	
 	basic_popup_init();
 
-	basic_popup_resize();
-	
 });

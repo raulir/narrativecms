@@ -60,21 +60,9 @@ function analytics_init(){
 
 }
 
-function analytics_resize(){
-
-}
-
-function analytics_scroll(){
-	
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', analytics_resize)
-	$(window).on('scroll.cms', analytics_scroll)
-	
 	analytics_init()
-	analytics_resize()
-	analytics_scroll()
 
 });

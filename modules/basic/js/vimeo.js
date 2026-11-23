@@ -329,25 +329,8 @@ function basic_vimeo_toolbar_idle_clear($vimeo){
 
 }
 
-function basic_vimeo_resize(){
-	
-//	$('.basic_vimeo_iframe').css({'height': $(window).innerWidth() * 360 / 640 + 'px'})
-
-}
-
-function basic_vimeo_scroll(){
-	
-}
 
 $(document).ready(function() {
-	
-	$(window).on('resize.cms', function(){
-		basic_vimeo_resize();
-	});
-	
-	$(window).on('scroll.cms', function(){
-		basic_vimeo_scroll();
-	});
 	
 	$(document).on('mousemove.cms mousedown.cms mouseup.cms wheel.cms touchstart.cms keydown.cms', function(){
 		$('.basic_vimeo_fullscreen').each(function(){
@@ -356,9 +339,5 @@ $(document).ready(function() {
 	})
 
 	basic_vimeo_init();
-
-	basic_vimeo_resize();
-	
-	basic_vimeo_scroll();
 
 });

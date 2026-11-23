@@ -1,5 +1,17 @@
 window.dataLayer = window.dataLayer || []
 
+/**
+ * Tracking only with consent where the gdpr module asks for it (data-consent="1"): the visitor closed its popup
+ * (cookie gdpr) and did not choose "no tracking" (gdpr_notrack). Same in gtag.js, gtm.js and pixel.js.
+ */
+window.basic_tracking_allowed = window.basic_tracking_allowed || function($container){
+	if (String($container.attr('data-consent')) !== '1'){
+		return true
+	}
+	var read = typeof cms_cookie_read === 'function' ? cms_cookie_read : function(){ return null }
+	return !!read('gdpr') && !read('gdpr_notrack')
+}
+
 function injectScript(src, id) {
 
 	return new Promise((resolve, reject) => {
@@ -36,7 +48,7 @@ function gtag_init(){
 	gtag('js', new Date());
 	
 	var $gtag_container = $('.basic_gtag_container');
-	if ($gtag_container.length){
+	if ($gtag_container.length && basic_tracking_allowed($gtag_container)){
 	
 		var $items = $('.basic_gtag_item');
 

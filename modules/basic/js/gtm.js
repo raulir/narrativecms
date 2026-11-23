@@ -1,8 +1,20 @@
+/**
+ * Tracking only with consent where the gdpr module asks for it (data-consent="1"): the visitor closed its popup
+ * (cookie gdpr) and did not choose "no tracking" (gdpr_notrack). Same in gtag.js, gtm.js and pixel.js.
+ */
+window.basic_tracking_allowed = window.basic_tracking_allowed || function($container){
+	if (String($container.attr('data-consent')) !== '1'){
+		return true
+	}
+	var read = typeof cms_cookie_read === 'function' ? cms_cookie_read : function(){ return null }
+	return !!read('gdpr') && !read('gdpr_notrack')
+}
+
 function gtm_init(){
 	
 	var $gtm_container = $('.gtm_container');
 	
-	if ($gtm_container.length){
+	if ($gtm_container.length && basic_tracking_allowed($gtm_container)){
 		
 		setTimeout(() => {
 	
@@ -18,28 +30,9 @@ function gtm_init(){
 
 }
 
-function gtm_resize(){
-
-}
-
-function gtm_scroll(){
-	
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		gtm_resize();
-	});
-	
-	$(window).on('scroll.cms', function(){
-		gtm_scroll();
-	});
-	
 	gtm_init();
-
-	gtm_resize();
-	
-	gtm_scroll();
 
 });

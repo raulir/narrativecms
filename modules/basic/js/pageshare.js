@@ -109,27 +109,8 @@ function pageshare_init(){
 
 }
 
-function pageshare_resize(){
-
-}
-
-function pageshare_scroll(){
-
-}
 
 $(document).ready(function() {
-	
-	$(window).on('scroll.cms', function(){
-		pageshare_scroll();
-	});
-
-	$(window).on('resize.cms', function(){
-		pageshare_resize();
-	});
-	
-	pageshare_scroll();
-	
-	pageshare_resize();
 	
 	pageshare_init();
 	

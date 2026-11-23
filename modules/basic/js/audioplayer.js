@@ -143,17 +143,10 @@ function audioplayer_init(){
 
 }
 
-function audioplayer_resize(){
-	
-}
 
 $(document).ready(function(){
 	
-	$(window).on('resize.cms', audioplayer_resize);
-
 	audioplayer_init();
 	
-	audioplayer_resize();
-
 })
 

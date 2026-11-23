@@ -195,28 +195,9 @@ function basic_lightbox_init(){
 	
 }
 
-function basic_lightbox_resize(){
-
-}
-
-function basic_lightbox_scroll(){
-	
-}
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		basic_lightbox_resize();
-	});
-	
-	$(window).on('scroll.cms', function(){
-		basic_lightbox_scroll();
-	});
-	
 	basic_lightbox_init();
-
-	basic_lightbox_resize();
-	
-	basic_lightbox_scroll();
 
 });

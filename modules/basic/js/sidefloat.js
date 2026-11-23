@@ -5,25 +5,6 @@ function sidefloat_init(){
 	
 }
 
-function sidefloat_resize(){
-
-}
-
-function sidefloat_scroll(){
-	
-	/*
-	var doc = window.document.documentElement;
-	var window_top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
-	var top = $service_container.offset().top + $service_container.height() - 4 * _cms_rem - service_special_height;
-	
-	if (top < window_top + $('.header_container').height() ){
-		$service_special.addClass('service_special_fixed');
-	} else {
-		$service_special.removeClass('service_special_fixed');
-	}
-	*/
-
-}
 
 function sidefloat_add(element_id, $element, params){
 	
@@ -62,18 +43,6 @@ function sidefloat_add(element_id, $element, params){
 
 $(document).ready(function() {
 
-	$(window).on('resize.cms', function(){
-		sidefloat_resize();
-	});
-	
-	$(window).on('scroll.cms', function(){
-		sidefloat_scroll();
-	});
-	
 	sidefloat_init();
-
-	sidefloat_resize();
-	
-	sidefloat_scroll();
 
 });
